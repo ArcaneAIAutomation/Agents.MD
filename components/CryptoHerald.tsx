@@ -178,8 +178,8 @@ const CryptoHerald: React.FC = () => {
 
   if (!data) {
     return (
-      <div className="w-full bg-white border-8 border-black shadow-2xl mx-auto">
-        <div className="p-6 md:p-8 bg-gray-100" style={{
+      <div className="w-full bg-white border-4 md:border-8 border-black shadow-2xl mx-auto">
+        <div className="p-4 md:p-6 lg:p-8 bg-gray-100" style={{
           backgroundImage: `
             linear-gradient(0deg, transparent 24%, rgba(0,0,0,0.05) 25%, rgba(0,0,0,0.05) 26%, transparent 27%, transparent 74%, rgba(0,0,0,0.05) 75%, rgba(0,0,0,0.05) 76%, transparent 77%, transparent),
             linear-gradient(90deg, transparent 24%, rgba(0,0,0,0.05) 25%, rgba(0,0,0,0.05) 26%, transparent 27%, transparent 74%, rgba(0,0,0,0.05) 75%, rgba(0,0,0,0.05) 76%, transparent 77%, transparent)
@@ -187,10 +187,10 @@ const CryptoHerald: React.FC = () => {
           backgroundSize: '50px 50px'
         }}>
           {/* Classic Newspaper Header */}
-          <div className="border-b-8 border-double border-black pb-4 md:pb-6 mb-6 md:mb-8 bg-white">
+          <div className="border-b-4 md:border-b-8 border-double border-black pb-3 md:pb-4 lg:pb-6 mb-4 md:mb-6 lg:mb-8 bg-white">
             <div className="text-center">
               {/* Date and Edition Info */}
-              <div className="text-xs md:text-sm font-bold mb-2 md:mb-4 border-b-2 border-black pb-2">
+              <div className="text-xs md:text-sm font-bold mb-2 md:mb-4 border-b border-black md:border-b-2 pb-2">
                 {formatDate(new Date().toISOString())} • SPECIAL EDITION • VOL. 1, NO. 1
               </div>
               
@@ -205,7 +205,7 @@ const CryptoHerald: React.FC = () => {
               </div>
               
               {/* Status and Sources */}
-              <div className="flex flex-col sm:flex-row justify-center items-center space-y-1 sm:space-y-0 sm:space-x-8 text-xs md:text-sm font-bold border-t-2 border-black pt-2">
+              <div className="flex flex-col sm:flex-row justify-center items-center space-y-1 sm:space-y-0 sm:space-x-8 text-xs md:text-sm font-bold border-t border-black md:border-t-2 pt-2">
                 <div className="flex items-center space-x-1">
                   <Radio className="h-3 w-3 text-red-600" />
                   <span>READY TO FETCH LIVE DATA</span>
@@ -215,9 +215,9 @@ const CryptoHerald: React.FC = () => {
           </div>
 
           {/* Static Market Ticker - Shows Before Data Load */}
-          <div className="mb-8 border-y-4 border-black bg-gradient-to-r from-black via-gray-900 to-black">
+          <div className="mb-6 md:mb-8 border-y-2 md:border-y-4 border-black bg-gradient-to-r from-black via-gray-900 to-black">
             {/* Ticker Header Bar */}
-            <div className="bg-white border-b-2 border-black p-2">
+            <div className="bg-white border-b border-black md:border-b-2 p-2">
               <div className="flex items-center justify-center space-x-4">
                 <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
                 <span className="font-black text-black text-sm" style={{ fontFamily: 'Times, serif' }}>
@@ -304,8 +304,8 @@ const CryptoHerald: React.FC = () => {
   }
 
   return (
-    <div className="w-full bg-white border-8 border-black shadow-2xl mx-auto">
-      <div className="p-6 md:p-8 bg-gray-100" style={{
+    <div className="w-full bg-white border-4 md:border-8 border-black shadow-2xl mx-auto">
+      <div className="p-4 md:p-6 lg:p-8 bg-gray-100" style={{
         backgroundImage: `
           linear-gradient(0deg, transparent 24%, rgba(0,0,0,0.05) 25%, rgba(0,0,0,0.05) 26%, transparent 27%, transparent 74%, rgba(0,0,0,0.05) 75%, rgba(0,0,0,0.05) 76%, transparent 77%, transparent),
           linear-gradient(90deg, transparent 24%, rgba(0,0,0,0.05) 25%, rgba(0,0,0,0.05) 26%, transparent 27%, transparent 74%, rgba(0,0,0,0.05) 75%, rgba(0,0,0,0.05) 76%, transparent 77%, transparent)

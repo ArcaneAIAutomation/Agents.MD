@@ -30,9 +30,11 @@ export default function Home() {
       </section>
 
       {/* Crypto Herald Newspaper - Featured at Top */}
-      <section className="w-full bg-gray-50 py-8 md:py-12 border-y-4 border-black">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <CryptoHerald />
+      <section className="w-full bg-gray-50 py-4 md:py-8 lg:py-12">
+        <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12">
+          <div className="max-w-6xl mx-auto">
+            <CryptoHerald />
+          </div>
         </div>
       </section>
 
