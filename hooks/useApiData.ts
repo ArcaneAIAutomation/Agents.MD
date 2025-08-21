@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 export function useNexoRegulatory() {
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchData = async () => {
@@ -25,13 +25,14 @@ export function useNexoRegulatory() {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-    
-    // Auto-refresh every 5 minutes
-    const interval = setInterval(fetchData, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
+  // Remove auto-loading - only manual loading now
+  // useEffect(() => {
+  //   fetchData();
+  //   
+  //   // Auto-refresh every 5 minutes
+  //   const interval = setInterval(fetchData, 5 * 60 * 1000);
+  //   return () => clearInterval(interval);
+  // }, []);
 
   return { data, loading, error, refetch: fetchData };
 }

@@ -247,7 +247,7 @@ export default function BTCMarketAnalysis() {
               onClick={fetchBTCAnalysis}
               className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
             >
-              Load Analysis
+              Load AI Analysis
             </button>
           </div>
         </div>

@@ -44,4 +44,18 @@
   .article-content a {
     @apply text-primary-600 hover:text-primary-800 underline;
   }
+
+  /* Crypto Herald Ticker Animation */
+  .animate-scroll {
+    animation: scroll-ticker 45s linear infinite;
+  }
+}
+
+@keyframes scroll-ticker {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
 }

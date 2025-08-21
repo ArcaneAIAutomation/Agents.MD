@@ -237,56 +237,65 @@ const ETHMarketAnalysis: React.FC = () => {
 
   if (!data) {
     return (
-      <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center justify-center">
-            <Zap className="h-7 w-7 mr-2 text-blue-600" />
-            Ethereum (ETH) Market Analysis
-          </h2>
-          <button
-            onClick={fetchETHAnalysis}
-            disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center mx-auto"
-          >
-            {loading ? (
-              <RefreshCw className="animate-spin h-4 w-4 mr-2" />
-            ) : (
-              <Target className="h-4 w-4 mr-2" />
-            )}
-            {loading ? 'Loading...' : 'Load ETH Analysis'}
-          </button>
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <Zap className="h-12 w-12 mx-auto text-blue-600 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Ethereum Market Analysis</h3>
+            <p className="text-gray-600 mb-4">Click to load current Ethereum market data</p>
+            <button
+              onClick={fetchETHAnalysis}
+              disabled={loading}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Load AI Analysis
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+    <div className="bg-white rounded-lg shadow-lg p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-          <Zap className="h-7 w-7 mr-2 text-blue-600" />
-          Ethereum (ETH) Market Analysis
-        </h2>
-        <div className="flex items-center space-x-4">
-          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-            data.isLiveData ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
-          }`}>
-            {data.isLiveData ? '🟢 LIVE DATA' : '📊 ENHANCED ANALYSIS'}
-          </span>
-          <button
-            onClick={fetchETHAnalysis}
-            disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
-          >
-            {loading ? (
-              <RefreshCw className="animate-spin h-4 w-4 mr-2" />
-            ) : (
-              <RefreshCw className="h-4 w-4 mr-2" />
-            )}
-            Manual Update
-          </button>
+        <div>
+          <h2 className="text-xl font-bold text-gray-900">Ethereum Market Analysis</h2>
+          <div className="flex items-center mt-1 space-x-2">
+            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+              data.isLiveData ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+            }`}>
+              <span className="w-2 h-2 bg-current rounded-full mr-1"></span>
+              {data.isLiveData ? 'LIVE DATA' : 'DEMO DATA'}
+            </span>
+            {/* Data Source Indicators */}
+            <div className="flex items-center space-x-1">
+              <span className={`px-1 py-0.5 rounded text-xs ${
+                data.isLiveData ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'
+              }`}>
+                AI
+              </span>
+              <span className={`px-1 py-0.5 rounded text-xs ${
+                data.currentPrice && data.currentPrice > 3000 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+              }`}>
+                Price
+              </span>
+              <span className={`px-1 py-0.5 rounded text-xs ${
+                data.newsImpact && data.newsImpact.length > 3 ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'
+              }`}>
+                News
+              </span>
+            </div>
+          </div>
         </div>
+        <button
+          onClick={fetchETHAnalysis}
+          disabled={loading}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+        >
+          Refresh
+        </button>
       </div>
 
       {/* Price Overview */}

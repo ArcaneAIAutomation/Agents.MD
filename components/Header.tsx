@@ -1,76 +1,26 @@
 import Link from 'next/link'
-import { Search, Menu, X } from 'lucide-react'
-import { useState } from 'react'
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-
-  const navigation = [
-    { name: 'Home', href: '/' },
-    { name: 'World', href: '/category/world' },
-    { name: 'Technology', href: '/category/technology' },
-    { name: 'Business', href: '/category/business' },
-    { name: 'Sports', href: '/category/sports' },
-    { name: 'Entertainment', href: '/category/entertainment' },
-  ]
-
   return (
-    <header className="bg-white shadow-sm border-b">
+    <header className="bg-white border-b-8 border-black" style={{
+      backgroundImage: `
+        linear-gradient(0deg, transparent 24%, rgba(0,0,0,0.05) 25%, rgba(0,0,0,0.05) 26%, transparent 27%, transparent 74%, rgba(0,0,0,0.05) 75%, rgba(0,0,0,0.05) 76%, transparent 77%, transparent),
+        linear-gradient(90deg, transparent 24%, rgba(0,0,0,0.05) 25%, rgba(0,0,0,0.05) 26%, transparent 27%, transparent 74%, rgba(0,0,0,0.05) 75%, rgba(0,0,0,0.05) 76%, transparent 77%, transparent)
+      `,
+      backgroundSize: '50px 50px'
+    }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div className="flex-shrink-0">
-            <Link href="/" className="text-2xl font-bold text-primary-600">
-              Agents.MD News
+        <div className="flex justify-center items-center h-16 md:h-20 py-4">
+          {/* Centered Logo */}
+          <div className="text-center">
+            <Link href="/" className="text-xl sm:text-2xl md:text-4xl font-black text-black leading-tight" style={{ fontFamily: 'Times, serif' }}>
+              TRADING INTELLIGENCE HUB
             </Link>
-          </div>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors"
-              >
-                {item.name}
-              </Link>
-            ))}
-          </nav>
-
-          {/* Search and Mobile menu button */}
-          <div className="flex items-center space-x-4">
-            <button className="text-gray-700 hover:text-primary-600">
-              <Search className="h-5 w-5" />
-            </button>
-            
-            {/* Mobile menu button */}
-            <button
-              className="md:hidden text-gray-700 hover:text-primary-600"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
+            <p className="text-xs md:text-sm text-gray-700 font-bold mt-1">
+              CRYPTOCURRENCY • REGULATORY • MARKET ANALYSIS
+            </p>
           </div>
         </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-white border-t">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </header>
   )
