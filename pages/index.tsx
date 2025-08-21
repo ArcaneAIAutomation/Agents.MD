@@ -24,7 +24,7 @@ export default function Home() {
             </h1>
             <p className="text-lg md:text-xl text-gray-700 mb-6 md:mb-8 max-w-3xl mx-auto font-medium leading-relaxed">
               Real-time regulatory updates for Nexo.com, AI-powered cryptocurrency market analysis for Bitcoin & Ethereum, 
-              advanced Trade Generation Engine with GPT-4 powered signals, plus The Crypto Herald - your vintage newspaper for top market cap crypto news.
+              advanced Trade Generation Engine with GPT-4o reasoning capabilities, plus The Crypto Herald - your vintage newspaper for top market cap crypto news.
             </p>
           </div>
         </div>

@@ -36,6 +36,10 @@ export interface TradeSignal {
 export default function TradeGenerationEngine() {
   const { data, loading, error, refetch } = useTradeGeneration()
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('4h')
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [showPasswordInput, setShowPasswordInput] = useState(false)
+  const [password, setPassword] = useState('')
+  const [passwordError, setPasswordError] = useState('')
   
   const tradeSignal: TradeSignal | null = data as TradeSignal | null
   
@@ -74,6 +78,39 @@ export default function TradeGenerationEngine() {
     }
   }
 
+  const handlePasswordSubmit = () => {
+    if (password === '123qwe') {
+      setIsAuthenticated(true)
+      setShowPasswordInput(false)
+      setPassword('')
+      setPasswordError('')
+      refetch() // Proceed with trade generation
+    } else {
+      setPasswordError('Incorrect password. Please try again.')
+      setPassword('')
+    }
+  }
+
+  const handleGenerateClick = () => {
+    if (isAuthenticated) {
+      refetch()
+    } else {
+      setShowPasswordInput(true)
+      setPasswordError('')
+    }
+  }
+
+  const handlePasswordKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handlePasswordSubmit()
+    }
+  }
+
+  const handleUnlock = () => {
+    setShowPasswordInput(true)
+    setPasswordError('')
+  }
+
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow-lg p-3 sm:p-6 border-2 md:border-4 border-black">
@@ -82,7 +119,7 @@ export default function TradeGenerationEngine() {
           <div className="text-center">
             <RefreshCw className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-black mx-auto mb-2" />
             <span className="text-gray-600 font-bold text-sm sm:text-base">Analyzing Bitcoin markets...</span>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1">Processing multi-timeframe analysis & generating trade signal</p>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">Processing with o1-preview step-by-step reasoning</p>
           </div>
         </div>
       </div>
@@ -102,16 +139,65 @@ export default function TradeGenerationEngine() {
             TRADE GENERATION ENGINE
           </h2>
           <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">
-            AI-powered Bitcoin analysis across multiple timeframes to generate high-probability trade signals
+            Latest o1-preview reasoning model with step-by-step Bitcoin analysis across multiple timeframes
           </p>
-          <button 
-            onClick={refetch}
-            className="bg-black text-white font-bold py-2 sm:py-3 px-4 sm:px-6 border-2 sm:border-4 border-black hover:bg-gray-800 transition-colors flex items-center mx-auto text-sm sm:text-base"
-            style={{ fontFamily: 'Times, serif' }}
-          >
-            <Brain className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-            GENERATE TRADE SIGNAL
-          </button>
+          
+          {!isAuthenticated ? (
+            <div className="max-w-md mx-auto">
+              {!showPasswordInput ? (
+                <button 
+                  onClick={handleUnlock}
+                  className="bg-black text-white font-bold py-2 sm:py-3 px-4 sm:px-6 border-2 sm:border-4 border-black hover:bg-gray-800 transition-colors flex items-center mx-auto text-sm sm:text-base"
+                  style={{ fontFamily: 'Times, serif' }}
+                >
+                  <Shield className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                  UNLOCK TRADE ENGINE
+                </button>
+              ) : (
+                <div className="bg-gray-50 p-4 rounded-lg border-2 border-black transition-all duration-300">
+                  <div className="mb-3">
+                    <Shield className="h-6 w-6 mx-auto mb-2 text-black" />
+                    <p className="text-sm font-bold text-black mb-2">Enter Access Password</p>
+                  </div>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onKeyPress={handlePasswordKeyPress}
+                    placeholder="Password"
+                    className="w-full p-2 border-2 border-black rounded mb-3 focus:outline-none focus:ring-2 focus:ring-gray-300 text-center"
+                    autoFocus
+                  />
+                  {passwordError && (
+                    <p className="text-red-600 mb-3 text-sm">{passwordError}</p>
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handlePasswordSubmit}
+                      className="flex-1 py-2 bg-black text-white hover:bg-gray-800 rounded border-2 border-black font-bold text-sm"
+                    >
+                      Access
+                    </button>
+                    <button
+                      onClick={() => setShowPasswordInput(false)}
+                      className="flex-1 py-2 bg-white text-black hover:bg-gray-100 rounded border-2 border-black font-bold text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button 
+              onClick={handleGenerateClick}
+              className="bg-black text-white font-bold py-2 sm:py-3 px-4 sm:px-6 border-2 sm:border-4 border-black hover:bg-gray-800 transition-colors flex items-center mx-auto text-sm sm:text-base"
+              style={{ fontFamily: 'Times, serif' }}
+            >
+              <Brain className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+              GENERATE TRADE SIGNAL
+            </button>
+          )}
         </div>
       </div>
     )
@@ -126,7 +212,7 @@ export default function TradeGenerationEngine() {
             <p className="font-bold text-black text-sm sm:text-base">Error generating trade signal</p>
             <p className="text-xs sm:text-sm text-gray-500 mt-1">{error}</p>
             <button 
-              onClick={refetch}
+              onClick={handleGenerateClick}
               className="mt-3 px-3 sm:px-4 py-2 bg-black text-white rounded border border-black sm:border-2 hover:bg-gray-800 transition-colors font-bold text-sm sm:text-base"
             >
               Retry Analysis
@@ -151,14 +237,14 @@ export default function TradeGenerationEngine() {
             <h2 className="text-lg sm:text-xl font-black text-black" style={{ fontFamily: 'Times, serif' }}>
               Trade Generation Engine
             </h2>
-            <p className="text-xs sm:text-sm text-gray-600">AI-powered Bitcoin trading signals</p>
+            <p className="text-xs sm:text-sm text-gray-600">Latest o1-preview reasoning model for Bitcoin signals</p>
           </div>
         </div>
         <div className="text-right">
           <div className="text-xs sm:text-sm text-gray-500">Generated</div>
           <div className="font-bold text-xs sm:text-sm">{formatDate(tradeSignal.timestamp)}</div>
           <button
-            onClick={refetch}
+            onClick={handleGenerateClick}
             className="mt-1 p-1 bg-black text-white hover:bg-gray-800 rounded border border-black sm:border-2"
             title="Generate new signal"
           >

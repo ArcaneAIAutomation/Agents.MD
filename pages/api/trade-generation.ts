@@ -101,80 +101,105 @@ async function fetchBitcoinMarketData() {
   }
 }
 
-// Generate trade signal using advanced AI analysis
+// Generate trade signal using advanced AI analysis with reasoning
 async function generateTradeSignal(marketData: any) {
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4", // Using GPT-4 for advanced analysis
+      model: "o1-preview", // Latest reasoning model with chain-of-thought capabilities
       messages: [
         {
-          role: "system",
-          content: `You are an elite cryptocurrency trading algorithm with expertise in technical analysis, market structure, and risk management. 
+          role: "user",
+          content: `You are an elite cryptocurrency trading algorithm with deep expertise in technical analysis, market structure, quantitative finance, and risk management. 
 
-          You have access to real Bitcoin market data and must generate a single, high-probability trade signal.
+You must analyze Bitcoin market data across multiple timeframes and generate a single, high-probability trade signal using advanced step-by-step reasoning.
 
-          MARKET DATA CONTEXT:
-          - Current BTC Price: $${marketData.currentPrice}
-          - SMA 20: $${marketData.sma20}
-          - SMA 50: $${marketData.sma50}
-          - RSI: ${marketData.rsi.toFixed(1)}
-          - Support Level: $${marketData.support}
-          - Resistance Level: $${marketData.resistance}
-          - 24h Change: ${marketData.priceChange24h.toFixed(2)}%
-          - 7d Change: ${marketData.priceChange7d.toFixed(2)}%
-          - Volume (24h): $${(marketData.volume24h / 1e9).toFixed(2)}B
+CRITICAL MARKET DATA:
+- Current BTC Price: $${marketData.currentPrice}
+- SMA 20: $${marketData.sma20} | SMA 50: $${marketData.sma50}
+- RSI: ${marketData.rsi.toFixed(1)} | Volume 24h: $${(marketData.volume24h / 1e9).toFixed(2)}B
+- Support: $${marketData.support} | Resistance: $${marketData.resistance}
+- 24h Change: ${marketData.priceChange24h.toFixed(2)}% | 7d Change: ${marketData.priceChange7d.toFixed(2)}%
+- Market Cap: $${(marketData.marketCap / 1e9).toFixed(0)}B
 
-          ANALYSIS REQUIREMENTS:
-          1. Analyze multiple timeframes (1H, 4H, 1D) conceptually
-          2. Consider support/resistance levels, moving averages, RSI, volume
-          3. Assess market momentum and trend direction
-          4. Calculate optimal entry, stop loss, and take profit levels
-          5. Determine risk/reward ratio (minimum 1:2)
-          6. Provide confidence level (50-95%)
+REASONING FRAMEWORK - Think through each step:
 
-          RESPONSE FORMAT (JSON):
-          {
-            "id": "unique_signal_id",
-            "symbol": "BTC/USD",
-            "direction": "LONG" or "SHORT",
-            "entryPrice": number,
-            "stopLoss": number,
-            "takeProfit": number,
-            "riskRewardRatio": number,
-            "confidence": number (50-95),
-            "timeframe": "4H",
-            "analysis": "detailed multi-timeframe analysis explaining market structure and trends",
-            "reasoning": "specific reasoning for this trade setup including entry triggers and risk management",
-            "technicalIndicators": {
-              "rsi": ${marketData.rsi.toFixed(1)},
-              "macd": "BULLISH/BEARISH/NEUTRAL",
-              "sma20": ${marketData.sma20},
-              "sma50": ${marketData.sma50},
-              "support": ${marketData.support},
-              "resistance": ${marketData.resistance},
-              "bollinger": {
-                "upper": ${marketData.resistance * 1.02},
-                "lower": ${marketData.support * 0.98},
-                "middle": ${marketData.currentPrice}
-              }
-            },
-            "marketConditions": "description of current market conditions",
-            "riskLevel": "LOW/MEDIUM/HIGH",
-            "expectedDuration": "time expectation for trade",
-            "timestamp": "${new Date().toISOString()}"
-          }
+1. MARKET REGIME ANALYSIS:
+   - What is the current trend direction across timeframes?
+   - Is the market in accumulation, distribution, or trending phase?
+   - How does volume confirm or contradict price action?
 
-          TRADING RULES:
-          - Only suggest trades with 1:2+ risk/reward ratio
-          - Stop loss must be logical (support/resistance levels)
-          - Entry price should be within 2% of current price
-          - Consider market volatility in position sizing
-          - Confidence should reflect actual probability of success
-          - No trade recommendations during extreme uncertainty`
+2. TECHNICAL CONFLUENCE:
+   - What story do the moving averages tell us?
+   - How does RSI context affect entry timing?
+   - Where are the most significant support/resistance zones?
+
+3. RISK ASSESSMENT:
+   - What is the maximum reasonable risk for this setup?
+   - Where would this trade idea be invalidated?
+   - What external factors could impact this trade?
+
+4. ENTRY OPTIMIZATION:
+   - What is the optimal entry strategy?
+   - Should we wait for confirmation or enter at market?
+   - How does current volatility affect position sizing?
+
+5. EXIT STRATEGY:
+   - Where are logical profit-taking levels?
+   - What risk/reward ratio justifies this trade?
+   - How long should this trade be held?
+
+ADVANCED CONSIDERATIONS:
+- Market microstructure and liquidity
+- Institutional vs retail sentiment indicators
+- Correlation with traditional markets (SPY, DXY, Gold)
+- Bitcoin-specific factors (network activity, on-chain metrics)
+- Seasonal patterns and time-of-day effects
+- Options/futures expiry influences
+- Regulatory news impact potential
+
+STRICT TRADING RULES:
+- Minimum 1:2.5 risk/reward ratio
+- Stop loss must be at logical technical levels
+- Entry within 1.5% of current price for immediate execution
+- Confidence level must reflect genuine probability assessment
+- Account for realistic slippage and trading fees
+- No trade recommendations during extreme market uncertainty
+
+Please think through this systematically, then provide your final trade recommendation in JSON format:
+
+{
+  "id": "unique_trade_id",
+  "symbol": "BTC/USD",
+  "direction": "LONG" or "SHORT",
+  "entryPrice": number,
+  "stopLoss": number,
+  "takeProfit": number,
+  "riskRewardRatio": number,
+  "confidence": number (65-95),
+  "timeframe": "4H",
+  "analysis": "comprehensive step-by-step market analysis with reasoning",
+  "reasoning": "detailed trade logic, entry triggers, risk management rationale",
+  "technicalIndicators": {
+    "rsi": ${marketData.rsi.toFixed(1)},
+    "macd": "BULLISH/BEARISH/NEUTRAL",
+    "sma20": ${marketData.sma20},
+    "sma50": ${marketData.sma50},
+    "support": ${marketData.support},
+    "resistance": ${marketData.resistance},
+    "bollinger": {
+      "upper": ${marketData.resistance * 1.025},
+      "lower": ${marketData.support * 0.975},
+      "middle": ${(marketData.resistance + marketData.support) / 2}
+    }
+  },
+  "marketConditions": "detailed current market regime and structure assessment",
+  "riskLevel": "LOW/MEDIUM/HIGH",
+  "expectedDuration": "time horizon with supporting reasoning",
+  "timestamp": "${new Date().toISOString()}"
+}`
         }
       ],
-      temperature: 0.3,
-      max_tokens: 2000
+      // Note: o1 models don't use temperature or max_tokens parameters
     });
 
     const tradeSignal = JSON.parse(completion.choices[0].message.content || '{}');
@@ -195,34 +220,55 @@ async function generateTradeSignal(marketData: any) {
     throw new Error('Invalid trade signal generated');
 
   } catch (error) {
-    console.error('Error generating trade signal:', error);
+    console.error('Error generating trade signal with o1-preview:', error);
     
-    // Fallback signal based on simple analysis
+    // Enhanced fallback signal with reasoning-inspired analysis
     const isRSIOverBought = marketData.rsi > 70;
     const isRSIOverSold = marketData.rsi < 30;
     const isPriceAboveSMA20 = marketData.currentPrice > marketData.sma20;
+    const isPriceAboveSMA50 = marketData.currentPrice > marketData.sma50;
+    const isUpTrend = marketData.sma20 > marketData.sma50;
+    const isStrongVolume = marketData.volume24h > 20000000000; // > $20B
     
-    const direction = isRSIOverSold || (isPriceAboveSMA20 && marketData.rsi < 60) ? 'LONG' : 'SHORT';
+    // Multi-factor analysis (inspired by o1 reasoning)
+    let bullishSignals = 0;
+    let bearishSignals = 0;
+    
+    if (isRSIOverSold) bullishSignals += 2;
+    if (isPriceAboveSMA20) bullishSignals += 1;
+    if (isPriceAboveSMA50) bullishSignals += 1;
+    if (isUpTrend) bullishSignals += 1;
+    if (marketData.priceChange24h > 2) bullishSignals += 1;
+    
+    if (isRSIOverBought) bearishSignals += 2;
+    if (!isPriceAboveSMA20) bearishSignals += 1;
+    if (!isPriceAboveSMA50) bearishSignals += 1;
+    if (!isUpTrend) bearishSignals += 1;
+    if (marketData.priceChange24h < -2) bearishSignals += 1;
+    
+    const direction = bullishSignals > bearishSignals ? 'LONG' : 'SHORT';
+    const confidence = 60 + Math.min(25, Math.abs(bullishSignals - bearishSignals) * 5);
+    
     const entryPrice = marketData.currentPrice;
     const stopLoss = direction === 'LONG' 
-      ? entryPrice * 0.97  // 3% stop loss for long
-      : entryPrice * 1.03; // 3% stop loss for short
+      ? Math.max(marketData.support, entryPrice * 0.975)  // 2.5% or support level
+      : Math.min(marketData.resistance, entryPrice * 1.025); // 2.5% or resistance level
     const takeProfit = direction === 'LONG'
-      ? entryPrice * 1.06  // 6% take profit for long (1:2 ratio)
-      : entryPrice * 0.94; // 6% take profit for short
+      ? entryPrice + (entryPrice - stopLoss) * 2.5  // 1:2.5 ratio
+      : entryPrice - (stopLoss - entryPrice) * 2.5; // 1:2.5 ratio
 
     return {
-      id: `fallback_${Date.now()}`,
+      id: `o1_fallback_${Date.now()}`,
       symbol: "BTC/USD",
       direction,
       entryPrice,
       stopLoss,
       takeProfit,
-      riskRewardRatio: 2.0,
-      confidence: 65,
+      riskRewardRatio: 2.5,
+      confidence,
       timeframe: "4H",
-      analysis: `Technical analysis indicates ${direction === 'LONG' ? 'bullish' : 'bearish'} momentum based on RSI (${marketData.rsi.toFixed(1)}) and price position relative to moving averages. Current price $${entryPrice} is ${isPriceAboveSMA20 ? 'above' : 'below'} the 20-period SMA.`,
-      reasoning: `${direction} position recommended due to ${direction === 'LONG' ? 'oversold conditions and upward momentum' : 'overbought conditions and downward pressure'}. Risk management with ${Math.abs(((stopLoss - entryPrice) / entryPrice) * 100).toFixed(1)}% stop loss and ${Math.abs(((takeProfit - entryPrice) / entryPrice) * 100).toFixed(1)}% take profit target.`,
+      analysis: `Multi-factor technical analysis indicates ${direction === 'LONG' ? 'bullish' : 'bearish'} bias. RSI at ${marketData.rsi.toFixed(1)} ${isRSIOverSold ? '(oversold)' : isRSIOverBought ? '(overbought)' : '(neutral)'}. Price ${isPriceAboveSMA20 ? 'above' : 'below'} SMA20 and ${isPriceAboveSMA50 ? 'above' : 'below'} SMA50. Trend is ${isUpTrend ? 'bullish' : 'bearish'} with ${isStrongVolume ? 'strong' : 'moderate'} volume participation.`,
+      reasoning: `${direction} signal generated through systematic multi-factor analysis. Bullish factors: ${bullishSignals}, Bearish factors: ${bearishSignals}. Entry at current market price with stop loss ${direction === 'LONG' ? 'below' : 'above'} key technical level (${direction === 'LONG' ? 'support' : 'resistance'}). Take profit targets 1:2.5 risk/reward ratio. Market conditions support ${confidence}% confidence level.`,
       technicalIndicators: {
         rsi: marketData.rsi,
         macd: direction === 'LONG' ? 'BULLISH' : 'BEARISH',
@@ -233,14 +279,15 @@ async function generateTradeSignal(marketData: any) {
         bollinger: {
           upper: marketData.resistance,
           lower: marketData.support,
-          middle: marketData.currentPrice
+          middle: (marketData.resistance + marketData.support) / 2
         }
       },
-      marketConditions: `Current market showing ${direction === 'LONG' ? 'bullish' : 'bearish'} signals with moderate volatility`,
-      riskLevel: "MEDIUM",
-      expectedDuration: "4-12 hours",
+      marketConditions: `${isUpTrend ? 'Bullish' : 'Bearish'} trend structure with ${isStrongVolume ? 'elevated' : 'normal'} volume. RSI showing ${isRSIOverSold ? 'oversold' : isRSIOverBought ? 'overbought' : 'neutral'} conditions.`,
+      riskLevel: confidence > 75 ? "LOW" : confidence > 65 ? "MEDIUM" : "HIGH",
+      expectedDuration: "4-12 hours based on 4H timeframe analysis",
       timestamp: new Date().toISOString(),
-      isFallback: true
+      isFallback: true,
+      model: "fallback_with_o1_reasoning"
     };
   }
 }
