@@ -1,5 +1,15 @@
 import { useState } from 'react'
-import { PlayCircle, TrendingUp, TrendingDown, AlertTriangle, Target, Clock, BarChart3, Activity } from 'lucide-react'
+import { TrendingUp, TrendingDown, AlertTriangle, Target, Clock, BarChart3, Activity } from 'lucide-react'
+
+// Bitcoin Logo Component
+const BitcoinIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 2000 2000" className={className} fill="currentColor">
+    <g>
+      <circle cx="1000" cy="1000" r="1000" fill="#f7931a"/>
+      <path d="M1375.9 967.2c20.8-139.1-85.1-213.8-229.7-263.8l46.9-188.1-114.6-28.6-45.7 183.1c-30.1-7.5-61-14.6-91.5-21.6l46-184.5-114.6-28.6-46.9 188.1c-24.9-5.7-49.3-11.3-73.1-17.2l0.1-0.5-158.1-39.5-30.5 122.4s85.1 19.5 83.4 20.7c46.4 11.6 54.8 42.4 53.4 66.8l-53.4 214.3c3.2 0.8 7.3 2 11.9 3.8-3.8-0.9-7.9-2-12.1-3l-74.9 300.1c-5.7 14.1-20.1 35.2-52.5 27.2 1.1 1.6-83.4-20.8-83.4-20.8l-56.9 131.1 149.2 37.2c27.8 7 55 14.2 81.8 21.1l-47.4 190.4 114.6 28.6 46.9-188.1c31.2 8.5 61.4 16.3 91 23.4l-46.7 187.2 114.6 28.6 47.4-190.1c195.1 36.9 341.9 22 403.9-154.6 50-142.5-2.5-224.6-105.4-278.2 75-17.3 131.5-66.7 146.5-168.7zm-262.1 367.5c-35.4 142.1-274.9 65.3-352.5 46l62.8-251.9c77.6 19.4 327.1 57.8 289.7 205.9zm35.4-370.1c-32.2 129.3-231.2 63.5-295.8 47.4l56.9-228.4c64.6 16.1 272.8 46.2 238.9 181z" fill="white"/>
+    </g>
+  </svg>
+);
 
 interface BTCAnalysisData {
   currentPrice?: number
@@ -240,7 +250,7 @@ export default function BTCMarketAnalysis() {
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <PlayCircle className="h-12 w-12 mx-auto text-orange-500 mb-4" />
+            <BitcoinIcon className="h-12 w-12 mx-auto text-orange-500 mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Bitcoin Market Analysis</h3>
             <p className="text-gray-600 mb-4">Click to load current Bitcoin market data</p>
             <button
@@ -329,7 +339,7 @@ export default function BTCMarketAnalysis() {
           <BarChart3 className="h-5 w-5 mr-2 text-blue-600" />
           Technical Indicators
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-gray-600">RSI (14)</span>

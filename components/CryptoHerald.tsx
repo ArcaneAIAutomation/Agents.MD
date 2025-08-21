@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Newspaper, 
   RefreshCw, 
   Radio,
   Sparkles
 } from 'lucide-react';
+import TypewriterText, { 
+  AnimatedHeadline, 
+  NewspaperLoading, 
+  PressEffectWrapper,
+  TelegraphNotification 
+} from './TypewriterText';
 
 interface CryptoArticle {
   id: string;
@@ -46,6 +52,17 @@ interface CryptoHeraldData {
 const CryptoHerald: React.FC = () => {
   const [data, setData] = useState<CryptoHeraldData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [articlesLoaded, setArticlesLoaded] = useState(false);
+  
+  // Show notification when new data loads
+  useEffect(() => {
+    if (data && !loading && articlesLoaded) {
+      setNotificationMessage(`📰 ${data.articles.length} new articles loaded!`);
+      setShowNotification(true);
+    }
+  }, [data, loading, articlesLoaded]);
 
   // Generate AI-powered quick summaries for articles
   const generateAISummary = (article: CryptoArticle): string => {
@@ -86,6 +103,8 @@ const CryptoHerald: React.FC = () => {
 
   const fetchCryptoNews = async () => {
     setLoading(true);
+    // playPaperRustle(); // Play paper rustle when starting to load - DISABLED
+    
     try {
       const response = await fetch('/api/crypto-herald');
       const result = await response.json();
@@ -105,6 +124,7 @@ const CryptoHerald: React.FC = () => {
           ...result.data,
           articles: articlesWithAI
         });
+        setArticlesLoaded(true);
       } else {
         console.error('API returned error:', result.error || result.message);
         alert('Failed to fetch crypto news. Please check the console and try again.');
@@ -151,7 +171,7 @@ const CryptoHerald: React.FC = () => {
     }
   };
 
-  // Group articles by category with intelligent fallback
+  // Group articles by category
   const articlesByCategory = data?.articles.reduce((acc, article) => {
     const category = article.category || 'Market News';
     if (!acc[category]) acc[category] = [];
@@ -159,26 +179,14 @@ const CryptoHerald: React.FC = () => {
     return acc;
   }, {} as Record<string, CryptoArticle[]>) || {};
 
-  // Ensure each category has ~20 articles by duplicating and varying if needed
-  const ensureArticleCount = (articles: CryptoArticle[], targetCount: number = 20) => {
-    if (articles.length >= targetCount) return articles.slice(0, targetCount);
-    
-    const result = [...articles];
-    while (result.length < targetCount) {
-      const baseArticle = articles[result.length % articles.length];
-      result.push({
-        ...baseArticle,
-        id: `${baseArticle.id}-variant-${result.length}`,
-        headline: `${baseArticle.headline} - ${Math.random() > 0.5 ? 'Market Update' : 'Latest Analysis'}`,
-        aiSummary: generateAISummary(baseArticle)
-      });
-    }
-    return result;
+  // Use actual articles without artificial duplication
+  const getArticlesForCategory = (articles: CryptoArticle[], maxCount: number = 8) => {
+    return articles.slice(0, maxCount); // Just return the actual unique articles
   };
 
   if (!data) {
     return (
-      <div className="w-full bg-white border-4 md:border-8 border-black shadow-2xl mx-auto">
+      <div className="w-full bg-white border-4 md:border-8 border-black shadow-2xl mx-auto paper-texture">
         <div className="p-4 md:p-6 lg:p-8 bg-gray-100" style={{
           backgroundImage: `
             linear-gradient(0deg, transparent 24%, rgba(0,0,0,0.05) 25%, rgba(0,0,0,0.05) 26%, transparent 27%, transparent 74%, rgba(0,0,0,0.05) 75%, rgba(0,0,0,0.05) 76%, transparent 77%, transparent),
@@ -190,27 +198,38 @@ const CryptoHerald: React.FC = () => {
           <div className="border-b-4 md:border-b-8 border-double border-black pb-3 md:pb-4 lg:pb-6 mb-4 md:mb-6 lg:mb-8 bg-white">
             <div className="text-center">
               {/* Date and Edition Info */}
-              <div className="text-xs md:text-sm font-bold mb-2 md:mb-4 border-b border-black md:border-b-2 pb-2">
+              <AnimatedHeadline delay={0} className="text-xs md:text-sm font-bold mb-2 md:mb-4 border-b border-black md:border-b-2 pb-2">
                 {formatDate(new Date().toISOString())} • SPECIAL EDITION • VOL. 1, NO. 1
-              </div>
+              </AnimatedHeadline>
               
-              {/* Main Title */}
-              <h1 className="text-4xl sm:text-5xl md:text-7xl font-black mb-2 md:mb-4 leading-tight" style={{ fontFamily: 'Times, serif' }}>
-                THE CRYPTO HERALD
-              </h1>
+              {/* Main Title with Typewriter Effect */}
+              <AnimatedHeadline delay={500} className="text-4xl sm:text-5xl md:text-7xl font-black mb-2 md:mb-4 leading-tight" style={{ fontFamily: 'Times, serif' }}>
+                <TypewriterText 
+                  text="THE CRYPTO HERALD" 
+                  speed={120} 
+                  delay={0}
+                  className="text-4xl sm:text-5xl md:text-7xl font-black"
+                  showCursor={false}
+                />
+              </AnimatedHeadline>
               
               {/* Subtitle */}
-              <div className="text-base md:text-xl font-bold mb-4 md:mb-6 tracking-wider">
-                CRYPTOCURRENCY MARKET INTELLIGENCE & ANALYSIS
-              </div>
+              <AnimatedHeadline delay={1500} className="text-base md:text-xl font-bold mb-4 md:mb-6 tracking-wider">
+                <TypewriterText 
+                  text="CRYPTOCURRENCY MARKET INTELLIGENCE & ANALYSIS" 
+                  speed={80} 
+                  delay={0}
+                  showCursor={false}
+                />
+              </AnimatedHeadline>
               
               {/* Status and Sources */}
-              <div className="flex flex-col sm:flex-row justify-center items-center space-y-1 sm:space-y-0 sm:space-x-8 text-xs md:text-sm font-bold border-t border-black md:border-t-2 pt-2">
+              <AnimatedHeadline delay={2500} className="flex flex-col sm:flex-row justify-center items-center space-y-1 sm:space-y-0 sm:space-x-8 text-xs md:text-sm font-bold border-t border-black md:border-t-2 pt-2">
                 <div className="flex items-center space-x-1">
-                  <Radio className="h-3 w-3 text-red-600" />
+                  <Radio className="h-3 w-3 text-red-600 animate-pulse" />
                   <span>READY TO FETCH LIVE DATA</span>
                 </div>
-              </div>
+              </AnimatedHeadline>
             </div>
           </div>
 
@@ -275,29 +294,38 @@ const CryptoHerald: React.FC = () => {
           </div>
 
           {/* Call to Action */}
-          <div className="text-center bg-white border-4 border-black p-6 md:p-8">
-            <h2 className="text-xl md:text-2xl font-black mb-4 md:mb-6" style={{ fontFamily: 'Times, serif' }}>
-              🗞️ FETCH LATEST CRYPTO NEWS 🗞️
-            </h2>
-            <button
-              onClick={fetchCryptoNews}
-              disabled={loading}
-              className="bg-black text-white font-bold py-3 md:py-4 px-6 md:px-8 border-4 border-black hover:bg-gray-800 transition-colors text-base md:text-lg flex items-center mx-auto"
+          <AnimatedHeadline delay={3000} className="text-center bg-white border-4 border-black p-6 md:p-8">
+            <TypewriterText 
+              text="🗞️ FETCH LATEST CRYPTO NEWS 🗞️"
+              speed={150}
+              delay={0}
+              className="text-xl md:text-2xl font-black mb-4 md:mb-6 block"
               style={{ fontFamily: 'Times, serif' }}
+              showCursor={false}
+            />
+            <PressEffectWrapper
+              onClick={fetchCryptoNews}
+              className="inline-block"
             >
-              {loading ? (
-                <>
-                  <RefreshCw className="animate-spin h-5 w-5 mr-2" />
-                  PRINTING LATEST EDITION...
-                </>
-              ) : (
-                <>
-                  <Newspaper className="h-5 w-5 mr-2" />
-                  FETCH TODAY'S HERALD
-                </>
-              )}
-            </button>
-          </div>
+              <button
+                disabled={loading}
+                className="bg-black text-white font-bold py-3 md:py-4 px-6 md:px-8 border-4 border-black hover:bg-gray-800 transition-colors text-base md:text-lg flex items-center mx-auto disabled:opacity-50 newspaper-hover"
+                style={{ fontFamily: 'Times, serif' }}
+              >
+                {loading ? (
+                  <>
+                    <RefreshCw className="animate-spin h-5 w-5 mr-2" />
+                    <NewspaperLoading text="PRINTING LATEST EDITION..." className="text-white" />
+                  </>
+                ) : (
+                  <>
+                    <Newspaper className="h-5 w-5 mr-2" />
+                    FETCH TODAY'S HERALD
+                  </>
+                )}
+              </button>
+            </PressEffectWrapper>
+          </AnimatedHeadline>
         </div>
       </div>
     );
@@ -399,7 +427,7 @@ const CryptoHerald: React.FC = () => {
 
         {/* News Sections */}
         {Object.entries(articlesByCategory).map(([category, articles], categoryIndex) => {
-          const categoryArticles = ensureArticleCount(articles);
+          const categoryArticles = getArticlesForCategory(articles, 8);
           
           return (
             <div key={category} className="mb-8 bg-white border-4 border-black">
@@ -465,11 +493,20 @@ const CryptoHerald: React.FC = () => {
 
                 {/* Other Articles */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {categoryArticles.slice(1, 21).map((article) => (
-                    <div key={article.id} className="border-2 border-black p-4 bg-white">
-                      <h4 className="font-black text-lg mb-2 leading-tight" style={{ fontFamily: 'Times, serif' }}>
-                        {article.headline}
-                      </h4>
+                  {categoryArticles.slice(1).map((article: CryptoArticle, index: number) => (
+                    <AnimatedHeadline 
+                      key={article.id} 
+                      delay={index * 100} 
+                      className={`border-2 border-black p-4 bg-white newspaper-hover stagger-${Math.min(index, 5)}`}
+                    >
+                      <TypewriterText 
+                        text={article.headline}
+                        speed={50}
+                        delay={0}
+                        className="font-black text-lg mb-2 leading-tight block"
+                        style={{ fontFamily: 'Times, serif' }}
+                        showCursor={false}
+                      />
                       <div className="flex flex-wrap items-center gap-2 mb-3">
                         <span className={`px-2 py-1 border rounded text-xs font-bold ${getSentimentColor(article.sentiment)}`}>
                           {article.sentiment}
@@ -509,7 +546,7 @@ const CryptoHerald: React.FC = () => {
                           </a>
                         )}
                       </div>
-                    </div>
+                    </AnimatedHeadline>
                   ))}
                 </div>
               </div>
@@ -532,6 +569,14 @@ const CryptoHerald: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Telegraph Notification */}
+      {showNotification && (
+        <TelegraphNotification 
+          message={notificationMessage}
+          onComplete={() => setShowNotification(false)}
+        />
+      )}
     </div>
   );
 };

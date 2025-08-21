@@ -209,8 +209,8 @@ export default async function handler(
     
     let analysis;
     
-    // Always use enhanced fallback to ensure proper data structure and live news integration
-    let useStructuredFallback = true; // Force structured response for proper frontend compatibility
+    // Enable AI-powered analysis for unique content generation
+    let useStructuredFallback = false; // Enable AI generation for unique content
     
     if (!useStructuredFallback) {
       try {
@@ -220,30 +220,41 @@ export default async function handler(
           messages: [
             {
               role: "system",
-              content: `You are an expert cryptocurrency trader and technical analyst specializing in Bitcoin (BTC).
+              content: `You are an expert cryptocurrency trader and technical analyst specializing EXCLUSIVELY in Bitcoin (BTC).
+              
+              IMPORTANT: Generate content ONLY about Bitcoin. Do not mention other cryptocurrencies.
               
               Current Market Data: ${realBTCData ? JSON.stringify(realBTCData) : 'Price data unavailable'}
               Recent News: ${cryptoNews ? JSON.stringify(cryptoNews.slice(0, 3)) : 'News unavailable'}
               Search Context: ${searchResults ? JSON.stringify(searchResults.slice(0, 5)) : 'Search unavailable'}
               Alpha Vantage Data: ${alphaVantageData ? JSON.stringify(alphaVantageData.newsData?.feed?.slice(0, 2)) : 'Alpha Vantage unavailable'}
               
-              Generate comprehensive BTC market analysis including:
-              1. Technical indicators (RSI, MACD, Moving Averages) based on current price levels
-              2. Trading signals and setups with realistic entry/exit points
-              3. Support/resistance levels relative to current price
-              4. Market sentiment analysis incorporating recent news and search data
-              5. Price predictions with confidence levels
+              Generate comprehensive BITCOIN-SPECIFIC market analysis including:
+              1. Bitcoin technical indicators (RSI, MACD, Moving Averages) based on current BTC price levels
+              2. Bitcoin trading signals and setups with realistic BTC entry/exit points
+              3. Bitcoin support/resistance levels relative to current BTC price
+              4. Bitcoin market sentiment analysis incorporating recent BTC news and search data
+              5. Bitcoin price predictions with confidence levels
+              6. Bitcoin-specific news impact analysis
+              
+              Focus on:
+              - Bitcoin's role as digital gold
+              - Bitcoin institutional adoption
+              - Bitcoin mining difficulty and hash rate
+              - Bitcoin halving cycles and their impact
+              - Bitcoin vs traditional markets correlation
+              - Bitcoin regulatory developments specifically
               
               Format as JSON with sections: technicalIndicators, tradingSignals, marketSentiment, priceAnalysis, newsImpact.
-              Use the CURRENT price context and professional trading terminology.
-              Include specific price levels, timeframes, and risk assessments based on real market data.`
+              Use the CURRENT Bitcoin price context and professional Bitcoin trading terminology.
+              Include specific Bitcoin price levels, timeframes, and risk assessments based on real Bitcoin market data.`
             },
             {
               role: "user",
-              content: `Provide current BTC technical analysis with trading signals and market outlook. Current price: $${realBTCData?.price || 'Unknown'}`
+              content: `Provide current BITCOIN technical analysis with Bitcoin trading signals and Bitcoin market outlook. Current Bitcoin price: $${realBTCData?.price || 'Unknown'}. Focus exclusively on Bitcoin analysis.`
             }
           ],
-          temperature: 0.6,
+          temperature: 0.7,
           max_tokens: 2500
         });
 

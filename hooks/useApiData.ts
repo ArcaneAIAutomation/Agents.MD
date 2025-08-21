@@ -73,7 +73,7 @@ export function useBTCAnalysis() {
   return { data, loading, error, refetch: fetchData };
 }
 
-export function useTradeGeneration() {
+export function useTradeGeneration(crypto: 'BTC' | 'ETH' = 'BTC') {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,7 +82,7 @@ export function useTradeGeneration() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('/api/trade-generation');
+      const response = await fetch(`/api/trade-generation?crypto=${crypto}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

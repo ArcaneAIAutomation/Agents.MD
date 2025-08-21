@@ -34,7 +34,8 @@ export interface TradeSignal {
 }
 
 export default function TradeGenerationEngine() {
-  const { data, loading, error, refetch } = useTradeGeneration()
+  const [selectedCrypto, setSelectedCrypto] = useState<'BTC' | 'ETH'>('BTC')
+  const { data, loading, error, refetch } = useTradeGeneration(selectedCrypto)
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('4h')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [showPasswordInput, setShowPasswordInput] = useState(false)
@@ -100,6 +101,15 @@ export default function TradeGenerationEngine() {
     }
   }
 
+  const handleCryptoChange = (crypto: 'BTC' | 'ETH') => {
+    setSelectedCrypto(crypto)
+    // Auto-generate new signal if authenticated
+    if (isAuthenticated && data) {
+      // Slight delay to allow state update
+      setTimeout(() => refetch(), 100)
+    }
+  }
+
   const handlePasswordKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handlePasswordSubmit()
@@ -118,7 +128,9 @@ export default function TradeGenerationEngine() {
           <Brain className="h-8 w-8 sm:h-12 sm:w-12 animate-pulse text-black mr-3" />
           <div className="text-center">
             <RefreshCw className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-black mx-auto mb-2" />
-            <span className="text-gray-600 font-bold text-sm sm:text-base">Analyzing Bitcoin markets...</span>
+            <span className="text-gray-600 font-bold text-sm sm:text-base">
+              Analyzing {selectedCrypto === 'BTC' ? 'Bitcoin' : 'Ethereum'} markets...
+            </span>
             <p className="text-xs sm:text-sm text-gray-500 mt-1">Processing with o1-preview step-by-step reasoning</p>
           </div>
         </div>
@@ -139,8 +151,34 @@ export default function TradeGenerationEngine() {
             TRADE GENERATION ENGINE
           </h2>
           <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">
-            Latest o1-preview reasoning model with step-by-step Bitcoin analysis across multiple timeframes
+            Latest o1-preview reasoning model with step-by-step analysis across multiple timeframes
           </p>
+          
+          {/* Cryptocurrency Selection */}
+          <div className="flex justify-center mb-4 sm:mb-6">
+            <div className="flex bg-gray-100 p-1 rounded-lg border-2 border-black">
+              <button
+                onClick={() => handleCryptoChange('BTC')}
+                className={`px-3 sm:px-4 py-2 rounded-md text-sm font-bold transition-colors border-2 ${
+                  selectedCrypto === 'BTC'
+                    ? 'bg-black text-white border-black'
+                    : 'bg-white text-black border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                🟠 Bitcoin
+              </button>
+              <button
+                onClick={() => handleCryptoChange('ETH')}
+                className={`px-3 sm:px-4 py-2 rounded-md text-sm font-bold transition-colors border-2 ml-1 ${
+                  selectedCrypto === 'ETH'
+                    ? 'bg-black text-white border-black'
+                    : 'bg-white text-black border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                🔵 Ethereum
+              </button>
+            </div>
+          </div>
           
           {!isAuthenticated ? (
             <div className="max-w-md mx-auto">
@@ -237,7 +275,9 @@ export default function TradeGenerationEngine() {
             <h2 className="text-lg sm:text-xl font-black text-black" style={{ fontFamily: 'Times, serif' }}>
               Trade Generation Engine
             </h2>
-            <p className="text-xs sm:text-sm text-gray-600">Latest o1-preview reasoning model for Bitcoin signals</p>
+            <p className="text-xs sm:text-sm text-gray-600">
+              Latest o1-preview reasoning model for {selectedCrypto === 'BTC' ? 'Bitcoin' : 'Ethereum'} signals
+            </p>
           </div>
         </div>
         <div className="text-right">
@@ -388,6 +428,27 @@ export default function TradeGenerationEngine() {
         <div className="bg-blue-50 p-3 sm:p-4 rounded border border-black sm:border-2">
           <h5 className="text-xs sm:text-sm font-bold text-black mb-2">Trade Reasoning:</h5>
           <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">{tradeSignal.reasoning}</p>
+        </div>
+      </div>
+
+      {/* Live Data Status */}
+      <div className="mt-4 sm:mt-6 p-2 sm:p-3 bg-gray-100 rounded border border-black sm:border-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 gap-1 sm:gap-0">
+            <span className="px-2 py-1 rounded border border-black sm:border-2 font-bold self-start text-green-600 bg-green-50">
+              🔴 LIVE DATA + AI
+            </span>
+            <span className="text-gray-600 font-medium">
+              Real-time {selectedCrypto === 'BTC' ? 'Bitcoin' : 'Ethereum'} data with o1-preview AI analysis
+            </span>
+          </div>
+          <span className="text-gray-600 font-bold">
+            Generated: {tradeSignal?.timestamp ? formatDate(tradeSignal.timestamp) : 'N/A'}
+          </span>
+        </div>
+        <div className="mt-2 text-xs text-black bg-green-100 p-2 rounded border border-black sm:border-2">
+          <strong>Live Integration:</strong> This signal uses real-time market data from CoinGecko & Coinbase, 
+          processed through OpenAI's latest o1-preview reasoning model for comprehensive technical analysis.
         </div>
       </div>
 

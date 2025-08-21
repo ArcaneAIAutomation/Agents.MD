@@ -8,9 +8,22 @@ import {
   Clock, 
   Users, 
   AlertTriangle,
-  RefreshCw,
-  Zap
+  RefreshCw
 } from 'lucide-react';
+
+// Ethereum Logo Component
+const EthereumIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 256 417" className={className} fill="currentColor">
+    <g>
+      <polygon fill="#343434" points="127.9611,0 125.1661,9.5 125.1661,285.168 127.9611,287.958 255.9231,212.32"/>
+      <polygon fill="#8C8C8C" points="127.962,0 0,212.32 127.962,287.959 127.962,154.158"/>
+      <polygon fill="#3C3C3B" points="127.9611,312.1866 126.3861,314.1066 126.3861,412.3056 127.9611,416.9996 255.9991,236.5866"/>
+      <polygon fill="#8C8C8C" points="127.962,416.9996 127.962,312.1866 0,236.5866"/>
+      <polygon fill="#141414" points="127.9611,287.9586 255.9211,212.3206 127.9611,154.1586"/>
+      <polygon fill="#393939" points="0,212.32 127.962,287.959 127.962,154.158"/>
+    </g>
+  </svg>
+);
 
 interface ETHAnalysisData {
   technicalIndicators?: {
@@ -235,12 +248,23 @@ const ETHMarketAnalysis: React.FC = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-2 text-gray-600">Loading ETH analysis...</span>
+        </div>
+      </div>
+    );
+  }
+
   if (!data) {
     return (
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <Zap className="h-12 w-12 mx-auto text-blue-600 mb-4" />
+            <EthereumIcon className="h-12 w-12 mx-auto text-blue-600 mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Ethereum Market Analysis</h3>
             <p className="text-gray-600 mb-4">Click to load current Ethereum market data</p>
             <button
@@ -491,6 +515,43 @@ const ETHMarketAnalysis: React.FC = () => {
             </div>
             <p className="text-lg font-bold text-gray-900">
                 ${Math.round(data.predictions?.weekly?.target || 0).toLocaleString()}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Market Sentiment */}
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <AlertTriangle className="h-5 w-5 mr-2 text-yellow-600" />
+          Market Sentiment
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="text-center p-3 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-600">Overall</p>
+            <p className={`font-semibold ${
+              data.marketSentiment?.overall === 'Bullish' ? 'text-green-600' :
+              data.marketSentiment?.overall === 'Bearish' ? 'text-red-600' : 'text-yellow-600'
+            }`}>
+              {data.marketSentiment?.overall || 'Neutral'}
+            </p>
+          </div>
+          <div className="text-center p-3 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-600">Fear & Greed</p>
+            <p className="font-semibold text-blue-600">
+              {data.marketSentiment?.fearGreedIndex || 50}/100
+            </p>
+          </div>
+          <div className="text-center p-3 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-600">Social Media</p>
+            <p className="font-semibold text-purple-600">
+              {data.marketSentiment?.socialMedia || 'Neutral'}
+            </p>
+          </div>
+          <div className="text-center p-3 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-600">Institutional</p>
+            <p className="font-semibold text-orange-600">
+              {data.marketSentiment?.institutionalFlow || 'Neutral'}
             </p>
           </div>
         </div>

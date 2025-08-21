@@ -140,14 +140,73 @@ export default async function handler(
     
     let analysis;
     
-    // Use structured fallback to ensure proper data structure and live news integration
-    const basePrice = realETHData?.price || 3800; // Use real price or current realistic fallback for ETH
-    const currentPrice = Math.round(basePrice);
-    const rsiValue = 40 + Math.random() * 35; // RSI between 40-75
-    const fearGreedIndex = 55 + Math.random() * 30; // Fear & Greed 55-85
-    
-    // Use live news data if available
-    let newsImpactData = [];
+    // Enable AI-powered analysis for unique Ethereum content generation
+    try {
+      // AI-powered ETH market analysis with real data and news context
+      const completion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: `You are an expert cryptocurrency trader and technical analyst specializing EXCLUSIVELY in Ethereum (ETH).
+            
+            IMPORTANT: Generate content ONLY about Ethereum. Do not mention Bitcoin or other cryptocurrencies unless directly comparing ETH.
+            
+            Current Market Data: ${realETHData ? JSON.stringify(realETHData) : 'Price data unavailable'}
+            Recent News: ${ethereumNews ? JSON.stringify(ethereumNews.slice(0, 3)) : 'News unavailable'}
+            Alpha Vantage Data: ${alphaVantageData ? JSON.stringify(alphaVantageData.newsData?.feed?.slice(0, 2)) : 'Alpha Vantage unavailable'}
+            
+            Generate comprehensive ETHEREUM-SPECIFIC market analysis including:
+            1. Ethereum technical indicators (RSI, MACD, Moving Averages) based on current ETH price levels
+            2. Ethereum trading signals and setups with realistic ETH entry/exit points
+            3. Ethereum support/resistance levels relative to current ETH price
+            4. Ethereum market sentiment analysis incorporating recent ETH news and search data
+            5. Ethereum price predictions with confidence levels
+            6. Ethereum-specific news impact analysis
+            
+            Focus on:
+            - Ethereum's role as the world computer and smart contract platform
+            - Ethereum DeFi ecosystem and TVL impact
+            - Ethereum 2.0 staking and proof-of-stake transition
+            - Ethereum gas fees and network utilization
+            - Ethereum Layer 2 solutions impact
+            - Ethereum NFT market influence
+            - Ethereum developer activity and ecosystem growth
+            - Ethereum institutional adoption
+            - Ethereum regulatory developments specifically
+            
+            Format as JSON with sections: technicalIndicators, tradingSignals, marketSentiment, priceAnalysis, newsImpact.
+            Use the CURRENT Ethereum price context and professional Ethereum trading terminology.
+            Include specific Ethereum price levels, timeframes, and risk assessments based on real Ethereum market data.`
+          },
+          {
+            role: "user",
+            content: `Provide current ETHEREUM technical analysis with Ethereum trading signals and Ethereum market outlook. Current Ethereum price: $${realETHData?.price || 'Unknown'}. Focus exclusively on Ethereum analysis.`
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 2500
+      });
+
+      const content = completion.choices[0]?.message?.content;
+      if (content) {
+        analysis = JSON.parse(content);
+        analysis.isLiveData = true;
+        analysis.currentPrice = realETHData?.price;
+        analysis.dataSource = 'Live APIs + AI Analysis';
+      } else {
+        throw new Error('No content received from OpenAI');
+      }
+    } catch (apiError) {
+      console.log('AI generation failed, using enhanced Ethereum fallback');
+      // Fallback with Ethereum-specific data
+      const basePrice = realETHData?.price || 3800; // Use real price or current realistic fallback for ETH
+      const currentPrice = Math.round(basePrice);
+      const rsiValue = 40 + Math.random() * 35; // RSI between 40-75
+      const fearGreedIndex = 55 + Math.random() * 30; // Fear & Greed 55-85
+      
+      // Use live news data if available
+      let newsImpactData = [];
     
     if (ethereumNews && ethereumNews.length > 0) {
       newsImpactData = ethereumNews.slice(0, 3).map((article: any, index: number) => ({
@@ -270,6 +329,7 @@ export default async function handler(
       dataSource: `Live APIs: ${[realETHData?.source, ethereumNews ? 'News' : null, alphaVantageData?.source].filter(Boolean).join(', ') || 'Enhanced Simulation'}`,
       lastUpdated: new Date().toISOString()
     };
+    } // Close the catch block for AI generation
 
     // Return the analysis with metadata
     res.status(200).json({

@@ -89,19 +89,35 @@ export default async function handler(
         messages: [
           {
             role: "system",
-            content: `You are a financial regulatory analyst specializing in Nexo.com and UK financial regulations. 
+            content: `You are a financial regulatory analyst specializing EXCLUSIVELY in Nexo.com and UK financial regulations. 
+            
+            IMPORTANT: Generate content ONLY about Nexo regulatory compliance and UK financial regulations affecting Nexo specifically.
             
             ${nexoNews ? `Nexo News Context: ${JSON.stringify(nexoNews.slice(0, 5))}` : ''}
             ${regulatoryUpdates ? `Regulatory Context: ${JSON.stringify(regulatoryUpdates.slice(0, 5))}` : ''}
             
-            Analyze the provided news and generate 3-5 realistic regulatory updates for Nexo in the UK market.
-            Include severity levels (Critical, High, Medium, Low), impact assessments, and compliance deadlines.
+            Focus specifically on:
+            - Nexo's UK FCA registration and compliance requirements
+            - Nexo's crypto lending platform regulatory obligations
+            - Nexo's customer fund protection measures
+            - Nexo's Anti-Money Laundering (AML) compliance
+            - Nexo's Know Your Customer (KYC) procedures
+            - Nexo's stablecoin and crypto asset custody regulations
+            - Nexo's consumer protection compliance
+            - Nexo's cross-border regulatory coordination
+            - UK-specific regulatory changes affecting Nexo operations
+            - FCA guidance on crypto lending platforms like Nexo
+            
+            Analyze the provided news and generate 3-5 realistic Nexo-specific regulatory updates for the UK market.
+            Include severity levels (Critical, High, Medium, Low), impact assessments on Nexo specifically, and compliance deadlines.
             Format as JSON array with: id, title, summary, severity, impact, source, date, complianceDeadline, tags.
-            Base analysis on real news when available, otherwise use current regulatory trends.`
+            Base analysis on real news when available, otherwise use current UK regulatory trends affecting Nexo.
+            
+            Make each update clearly about Nexo's regulatory compliance in the UK market.`
           },
           {
             role: "user",
-            content: "Generate current Nexo UK regulatory updates with detailed analysis based on latest news"
+            content: "Generate current NEXO-SPECIFIC UK regulatory updates with detailed analysis of how regulations affect Nexo's crypto lending platform operations in the UK market. Focus exclusively on Nexo compliance requirements."
           }
         ],
         temperature: 0.7,
