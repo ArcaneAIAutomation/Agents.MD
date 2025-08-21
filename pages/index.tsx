@@ -16,7 +16,7 @@ export default function Home() {
         `,
         backgroundSize: '50px 50px'
       }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-3xl sm:text-4xl md:text-6xl font-black text-black mb-4 md:mb-6 leading-tight" style={{ fontFamily: 'Times, serif' }}>
               TRADING INTELLIGENCE HUB
@@ -39,15 +39,15 @@ export default function Home() {
       </section>
 
       {/* Main Content */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        <div className="grid grid-cols-1 gap-6 md:gap-8">
+      <section className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-12">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8">
           {/* Nexo Regulatory Panel - Full Width */}
           <div>
             <NexoRegulatoryPanel />
           </div>
 
           {/* Crypto Market Analysis - Responsive Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
             {/* BTC Market Analysis */}
             <div>
               <BTCMarketAnalysis />
@@ -62,9 +62,9 @@ export default function Home() {
       </section>
 
       {/* Real-time Status Bar */}
-      <section className="bg-black text-white py-6 md:py-8 border-t-8 border-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 text-center">
+      <section className="bg-black text-white py-4 sm:py-6 md:py-8 border-t-4 sm:border-t-8 border-black">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 md:gap-6 text-center">
             <div>
               <div className="text-lg md:text-2xl font-black text-green-400" style={{ fontFamily: 'Times, serif' }}>
                 <span className="animate-pulse">●</span> LIVE
