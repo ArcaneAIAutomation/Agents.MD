@@ -72,3 +72,32 @@ export function useBTCAnalysis() {
 
   return { data, loading, error, refetch: fetchData };
 }
+
+export function useTradeGeneration() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch('/api/trade-generation');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      setData(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch trade signal');
+      console.error('Error fetching trade generation data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Manual loading only - generates new signal on demand
+  return { data, loading, error, refetch: fetchData };
+}

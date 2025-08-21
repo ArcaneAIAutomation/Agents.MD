@@ -3,6 +3,7 @@ import NexoRegulatoryPanel from '@/components/NexoRegulatoryPanel'
 import BTCMarketAnalysis from '@/components/BTCMarketAnalysis'
 import ETHMarketAnalysis from '@/components/ETHMarketAnalysis'
 import CryptoHerald from '@/components/CryptoHerald'
+import TradeGenerationEngine from '@/components/TradeGenerationEngine'
 import { TrendingUp, AlertTriangle, BarChart3, Zap } from 'lucide-react'
 
 export default function Home() {
@@ -23,7 +24,7 @@ export default function Home() {
             </h1>
             <p className="text-lg md:text-xl text-gray-700 mb-6 md:mb-8 max-w-3xl mx-auto font-medium leading-relaxed">
               Real-time regulatory updates for Nexo.com, AI-powered cryptocurrency market analysis for Bitcoin & Ethereum, 
-              plus The Crypto Herald - your vintage newspaper for top market cap crypto news.
+              advanced Trade Generation Engine with GPT-4 powered signals, plus The Crypto Herald - your vintage newspaper for top market cap crypto news.
             </p>
           </div>
         </div>
@@ -57,6 +58,11 @@ export default function Home() {
             <div>
               <ETHMarketAnalysis />
             </div>
+          </div>
+
+          {/* Trade Generation Engine - Full Width */}
+          <div>
+            <TradeGenerationEngine />
           </div>
         </div>
       </section>
