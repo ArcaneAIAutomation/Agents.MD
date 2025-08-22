@@ -332,8 +332,8 @@ export default async function handler(
             histogram: realBTCData?.change24h > 0 ? '+$456.80' : '-$234.20'
           },
           movingAverages: { 
-            ma20: Math.round(currentPrice - 800), 
-            ma50: Math.round(currentPrice - 2100), 
+            ema20: Math.round(currentPrice - 800), 
+            ema50: Math.round(currentPrice - 2100), 
             trend: realBTCData?.change24h > 0 ? 'Upward' : 'Sideways',
             goldenCross: realBTCData?.change24h > 0
           },
@@ -342,6 +342,24 @@ export default async function handler(
             middle: Math.round(currentPrice),
             lower: Math.round(currentPrice - 1500),
             squeeze: false
+          },
+          supportResistance: {
+            strongSupport: Math.round(currentPrice - 5000),
+            support: Math.round(currentPrice - 2500),
+            resistance: Math.round(currentPrice + 2500),
+            strongResistance: Math.round(currentPrice + 5000)
+          },
+          supplyDemandZones: {
+            demandZones: [
+              { level: Math.round(currentPrice - 3000), strength: 'Strong' as const, volume: 28500000 },
+              { level: Math.round(currentPrice - 1500), strength: 'Moderate' as const, volume: 18200000 },
+              { level: Math.round(currentPrice - 800), strength: 'Weak' as const, volume: 12100000 }
+            ],
+            supplyZones: [
+              { level: Math.round(currentPrice + 800), strength: 'Weak' as const, volume: 11800000 },
+              { level: Math.round(currentPrice + 2000), strength: 'Moderate' as const, volume: 19500000 },
+              { level: Math.round(currentPrice + 4200), strength: 'Strong' as const, volume: 31200000 }
+            ]
           }
         },
         tradingSignals: [

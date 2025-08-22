@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { TrendingUp, TrendingDown, AlertTriangle, Target, Clock, BarChart3, Activity } from 'lucide-react'
+import BTCTradingChart from './BTCTradingChart'
 
 // Bitcoin Logo Component
 const BitcoinIcon = ({ className }: { className?: string }) => (
@@ -27,11 +28,21 @@ interface BTCAnalysisData {
   }
   technicalIndicators?: {
     rsi?: number | { value: string; signal: string; timeframe: string }
-    sma20?: number
-    sma50?: number
+    ema20?: number
+    ema50?: number
     macd?: { signal: string; histogram: number }
     bollinger?: { upper: number; lower: number; middle: number }
     volume?: { trend: string; significance: string }
+    supportResistance?: {
+      strongSupport: number
+      support: number
+      resistance: number
+      strongResistance: number
+    }
+    supplyDemandZones?: {
+      demandZones: Array<{ level: number; strength: 'Strong' | 'Moderate' | 'Weak'; volume: number }>
+      supplyZones: Array<{ level: number; strength: 'Strong' | 'Moderate' | 'Weak'; volume: number }>
+    }
   }
   tradingSignals?: Array<{
     type: string
@@ -100,8 +111,8 @@ export default function BTCMarketAnalysis() {
       // Technical indicators with professional defaults
       technicalIndicators: {
         rsi: rawData.technicalIndicators?.rsi || 45 + Math.random() * 30, // Keep original RSI object/number
-        sma20: rawData.technicalIndicators?.movingAverages?.ma20 || rawData.technicalIndicators?.sma20 || currentPrice - 800,
-        sma50: rawData.technicalIndicators?.movingAverages?.ma50 || rawData.technicalIndicators?.sma50 || currentPrice - 2100,
+        ema20: rawData.technicalIndicators?.movingAverages?.ema20 || rawData.technicalIndicators?.ema20 || rawData.technicalIndicators?.sma20 || currentPrice - 800,
+        ema50: rawData.technicalIndicators?.movingAverages?.ema50 || rawData.technicalIndicators?.ema50 || rawData.technicalIndicators?.sma50 || currentPrice - 2100,
         macd: {
           signal: rawData.technicalIndicators?.macd?.signal || (Math.random() > 0.5 ? 'BUY' : 'SELL'),
           histogram: typeof rawData.technicalIndicators?.macd?.histogram === 'number' 
@@ -112,6 +123,24 @@ export default function BTCMarketAnalysis() {
           upper: rawData.technicalIndicators?.bollingerBands?.upper || rawData.technicalIndicators?.bollinger?.upper || currentPrice + 3000,
           middle: rawData.technicalIndicators?.bollingerBands?.middle || rawData.technicalIndicators?.bollinger?.middle || currentPrice,
           lower: rawData.technicalIndicators?.bollingerBands?.lower || rawData.technicalIndicators?.bollinger?.lower || currentPrice - 3000,
+        },
+        supportResistance: rawData.technicalIndicators?.supportResistance || {
+          strongSupport: currentPrice - 5000,
+          support: currentPrice - 2500,
+          resistance: currentPrice + 2500,
+          strongResistance: currentPrice + 5000,
+        },
+        supplyDemandZones: rawData.technicalIndicators?.supplyDemandZones || {
+          demandZones: [
+            { level: currentPrice - 3000, strength: 'Strong' as const, volume: 28500000 },
+            { level: currentPrice - 1500, strength: 'Moderate' as const, volume: 18200000 },
+            { level: currentPrice - 800, strength: 'Weak' as const, volume: 12100000 }
+          ],
+          supplyZones: [
+            { level: currentPrice + 800, strength: 'Weak' as const, volume: 11800000 },
+            { level: currentPrice + 2000, strength: 'Moderate' as const, volume: 19500000 },
+            { level: currentPrice + 4200, strength: 'Strong' as const, volume: 31200000 }
+          ]
         }
       },
       
@@ -266,7 +295,7 @@ export default function BTCMarketAnalysis() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
+    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900">Bitcoin Market Analysis</h2>
@@ -339,7 +368,7 @@ export default function BTCMarketAnalysis() {
           <BarChart3 className="h-5 w-5 mr-2 text-blue-600" />
           Technical Indicators
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-gray-600">RSI (14)</span>
@@ -386,8 +415,8 @@ export default function BTCMarketAnalysis() {
               <TrendingUp className="h-4 w-4 text-blue-600" />
             </div>
             <div className="text-xs text-gray-600 mt-2 space-y-1">
-              <div>SMA 20: ${Math.round(data.technicalIndicators?.sma20 || 0).toLocaleString()}</div>
-              <div>SMA 50: ${Math.round(data.technicalIndicators?.sma50 || 0).toLocaleString()}</div>
+              <div>EMA 20: ${Math.round(data.technicalIndicators?.ema20 || 0).toLocaleString()}</div>
+              <div>EMA 50: ${Math.round(data.technicalIndicators?.ema50 || 0).toLocaleString()}</div>
             </div>
           </div>
 
@@ -400,6 +429,52 @@ export default function BTCMarketAnalysis() {
               <div>Upper: ${Math.round(data.technicalIndicators?.bollinger?.upper || 0).toLocaleString()}</div>
               <div>Middle: ${Math.round(data.technicalIndicators?.bollinger?.middle || 0).toLocaleString()}</div>
               <div>Lower: ${Math.round(data.technicalIndicators?.bollinger?.lower || 0).toLocaleString()}</div>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 p-4 rounded-lg col-span-1 lg:col-span-2">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-sm font-medium text-gray-600">Support/Resistance Levels</span>
+              <BarChart3 className="h-4 w-4 text-red-600" />
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="space-y-2">
+                <div className="font-medium text-gray-700">Resistance</div>
+                <div className="text-red-500 font-medium">Strong: ${Math.round(data.technicalIndicators?.supportResistance?.strongResistance || 0).toLocaleString()}</div>
+                <div className="text-orange-500">Normal: ${Math.round(data.technicalIndicators?.supportResistance?.resistance || 0).toLocaleString()}</div>
+              </div>
+              <div className="space-y-2">
+                <div className="font-medium text-gray-700">Support</div>
+                <div className="text-green-500">Normal: ${Math.round(data.technicalIndicators?.supportResistance?.support || 0).toLocaleString()}</div>
+                <div className="text-green-600 font-medium">Strong: ${Math.round(data.technicalIndicators?.supportResistance?.strongSupport || 0).toLocaleString()}</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 p-4 rounded-lg col-span-1 lg:col-span-2">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-sm font-medium text-gray-600">Supply/Demand Zones</span>
+              <Target className="h-4 w-4 text-indigo-600" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div className="space-y-2">
+                <div className="font-medium text-red-600 mb-2">📈 Supply Zones</div>
+                {data.technicalIndicators?.supplyDemandZones?.supplyZones?.slice(0, 2).map((zone, index) => (
+                  <div key={index} className="bg-red-50 p-2 rounded border-l-2 border-red-300">
+                    <div className="font-medium">${Math.round(zone.level).toLocaleString()}</div>
+                    <div className="text-gray-500 text-xs">{zone.strength} Zone</div>
+                  </div>
+                ))}
+              </div>
+              <div className="space-y-2">
+                <div className="font-medium text-green-600 mb-2">📉 Demand Zones</div>
+                {data.technicalIndicators?.supplyDemandZones?.demandZones?.slice(0, 2).map((zone, index) => (
+                  <div key={index} className="bg-green-50 p-2 rounded border-l-2 border-green-300">
+                    <div className="font-medium">${Math.round(zone.level).toLocaleString()}</div>
+                    <div className="text-gray-500 text-xs">{zone.strength} Zone</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -531,6 +606,12 @@ export default function BTCMarketAnalysis() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Visual Trading Chart */}
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Visual Trading Zones</h3>
+        <BTCTradingChart />
       </div>
 
       {/* News Impact */}

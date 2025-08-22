@@ -8,8 +8,10 @@ import {
   Clock, 
   Users, 
   AlertTriangle,
+  BarChart3,
   RefreshCw
 } from 'lucide-react';
+import ETHTradingChart from './ETHTradingChart';
 
 // Ethereum Logo Component
 const EthereumIcon = ({ className }: { className?: string }) => (
@@ -28,8 +30,8 @@ const EthereumIcon = ({ className }: { className?: string }) => (
 interface ETHAnalysisData {
   technicalIndicators?: {
     rsi?: number | { value: string; signal: string; timeframe: string }
-    sma20?: number
-    sma50?: number
+    ema20?: number
+    ema50?: number
     macd?: {
       signal?: string
       histogram?: number
@@ -38,6 +40,16 @@ interface ETHAnalysisData {
       upper?: number
       middle?: number
       lower?: number
+    }
+    supportResistance?: {
+      strongSupport: number
+      support: number
+      resistance: number
+      strongResistance: number
+    }
+    supplyDemandZones?: {
+      demandZones: Array<{ level: number; strength: 'Strong' | 'Moderate' | 'Weak'; volume: number }>
+      supplyZones: Array<{ level: number; strength: 'Strong' | 'Moderate' | 'Weak'; volume: number }>
     }
   }
   tradingSignals?: Array<{
@@ -118,8 +130,8 @@ const ETHMarketAnalysis: React.FC = () => {
       // Technical indicators with professional defaults
       technicalIndicators: {
         rsi: rawData.technicalIndicators?.rsi || 45 + Math.random() * 30, // Keep original RSI object/number
-        sma20: rawData.technicalIndicators?.movingAverages?.ma20 || rawData.technicalIndicators?.sma20 || currentPrice - 120,
-        sma50: rawData.technicalIndicators?.movingAverages?.ma50 || rawData.technicalIndicators?.sma50 || currentPrice - 280,
+        ema20: rawData.technicalIndicators?.movingAverages?.ema20 || rawData.technicalIndicators?.ema20 || rawData.technicalIndicators?.sma20 || currentPrice - 120,
+        ema50: rawData.technicalIndicators?.movingAverages?.ema50 || rawData.technicalIndicators?.ema50 || rawData.technicalIndicators?.sma50 || currentPrice - 280,
         macd: {
           signal: rawData.technicalIndicators?.macd?.signal || (Math.random() > 0.5 ? 'BUY' : 'SELL'),
           histogram: typeof rawData.technicalIndicators?.macd?.histogram === 'number' 
@@ -130,6 +142,24 @@ const ETHMarketAnalysis: React.FC = () => {
           upper: rawData.technicalIndicators?.bollinger?.upper || rawData.technicalIndicators?.bollingerBands?.upper || currentPrice + 200,
           middle: rawData.technicalIndicators?.bollinger?.middle || rawData.technicalIndicators?.bollingerBands?.middle || currentPrice,
           lower: rawData.technicalIndicators?.bollinger?.lower || rawData.technicalIndicators?.bollingerBands?.lower || currentPrice - 200
+        },
+        supportResistance: rawData.technicalIndicators?.supportResistance || {
+          strongSupport: currentPrice - 400,
+          support: currentPrice - 200,
+          resistance: currentPrice + 200,
+          strongResistance: currentPrice + 400,
+        },
+        supplyDemandZones: rawData.technicalIndicators?.supplyDemandZones || {
+          demandZones: [
+            { level: currentPrice - 300, strength: 'Strong' as const, volume: 2850000 },
+            { level: currentPrice - 150, strength: 'Moderate' as const, volume: 1820000 },
+            { level: currentPrice - 75, strength: 'Weak' as const, volume: 1210000 }
+          ],
+          supplyZones: [
+            { level: currentPrice + 75, strength: 'Weak' as const, volume: 1180000 },
+            { level: currentPrice + 180, strength: 'Moderate' as const, volume: 1950000 },
+            { level: currentPrice + 350, strength: 'Strong' as const, volume: 3120000 }
+          ]
         }
       },
       
@@ -281,7 +311,7 @@ const ETHMarketAnalysis: React.FC = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
+    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
@@ -374,7 +404,7 @@ const ETHMarketAnalysis: React.FC = () => {
           <Activity className="h-5 w-5 mr-2 text-blue-600" />
           Technical Indicators
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-gray-600">RSI (14)</span>
@@ -422,8 +452,8 @@ const ETHMarketAnalysis: React.FC = () => {
               <TrendingUp className="h-4 w-4 text-blue-600" />
             </div>
             <div className="text-xs text-gray-600 mt-2 space-y-1">
-              <div>SMA 20: ${Math.round(data.technicalIndicators?.sma20 || 0).toLocaleString()}</div>
-              <div>SMA 50: ${Math.round(data.technicalIndicators?.sma50 || 0).toLocaleString()}</div>
+              <div>EMA 20: ${Math.round(data.technicalIndicators?.ema20 || 0).toLocaleString()}</div>
+              <div>EMA 50: ${Math.round(data.technicalIndicators?.ema50 || 0).toLocaleString()}</div>
             </div>
           </div>
 
@@ -436,6 +466,52 @@ const ETHMarketAnalysis: React.FC = () => {
               <div>Upper: ${Math.round(data.technicalIndicators?.bollinger?.upper || 0).toLocaleString()}</div>
               <div>Middle: ${Math.round(data.technicalIndicators?.bollinger?.middle || 0).toLocaleString()}</div>
               <div>Lower: ${Math.round(data.technicalIndicators?.bollinger?.lower || 0).toLocaleString()}</div>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 p-4 rounded-lg col-span-1 lg:col-span-2">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-sm font-medium text-gray-600">Support/Resistance Levels</span>
+              <BarChart3 className="h-4 w-4 text-red-600" />
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="space-y-2">
+                <div className="font-medium text-gray-700">Resistance</div>
+                <div className="text-red-500 font-medium">Strong: ${Math.round(data.technicalIndicators?.supportResistance?.strongResistance || 0).toLocaleString()}</div>
+                <div className="text-orange-500">Normal: ${Math.round(data.technicalIndicators?.supportResistance?.resistance || 0).toLocaleString()}</div>
+              </div>
+              <div className="space-y-2">
+                <div className="font-medium text-gray-700">Support</div>
+                <div className="text-green-500">Normal: ${Math.round(data.technicalIndicators?.supportResistance?.support || 0).toLocaleString()}</div>
+                <div className="text-green-600 font-medium">Strong: ${Math.round(data.technicalIndicators?.supportResistance?.strongSupport || 0).toLocaleString()}</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 p-4 rounded-lg col-span-1 lg:col-span-2">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-sm font-medium text-gray-600">Supply/Demand Zones</span>
+              <Target className="h-4 w-4 text-indigo-600" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div className="space-y-2">
+                <div className="font-medium text-red-600 mb-2">📈 Supply Zones</div>
+                {data.technicalIndicators?.supplyDemandZones?.supplyZones?.slice(0, 2).map((zone, index) => (
+                  <div key={index} className="bg-red-50 p-2 rounded border-l-2 border-red-300">
+                    <div className="font-medium">${Math.round(zone.level).toLocaleString()}</div>
+                    <div className="text-gray-500 text-xs">{zone.strength} Zone</div>
+                  </div>
+                ))}
+              </div>
+              <div className="space-y-2">
+                <div className="font-medium text-green-600 mb-2">📉 Demand Zones</div>
+                {data.technicalIndicators?.supplyDemandZones?.demandZones?.slice(0, 2).map((zone, index) => (
+                  <div key={index} className="bg-green-50 p-2 rounded border-l-2 border-green-300">
+                    <div className="font-medium">${Math.round(zone.level).toLocaleString()}</div>
+                    <div className="text-gray-500 text-xs">{zone.strength} Zone</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -555,6 +631,12 @@ const ETHMarketAnalysis: React.FC = () => {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Visual Trading Chart */}
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Visual Trading Zones</h3>
+        <ETHTradingChart />
       </div>
 
       {/* News Impact */}

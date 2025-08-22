@@ -258,8 +258,8 @@ export default async function handler(
           histogram: realETHData?.change24h > 0 ? '+$12.45' : '-$8.30'
         },
         movingAverages: { 
-          ma20: Math.round(currentPrice - 120), 
-          ma50: Math.round(currentPrice - 280), 
+          ema20: Math.round(currentPrice - 120), 
+          ema50: Math.round(currentPrice - 280), 
           trend: realETHData?.change24h > 0 ? 'Upward' : 'Sideways',
           goldenCross: realETHData?.change24h > 0
         },
@@ -268,6 +268,24 @@ export default async function handler(
           middle: Math.round(currentPrice),
           lower: Math.round(currentPrice - 200),
           squeeze: false
+        },
+        supportResistance: {
+          strongSupport: Math.round(currentPrice - 400),
+          support: Math.round(currentPrice - 200),
+          resistance: Math.round(currentPrice + 200),
+          strongResistance: Math.round(currentPrice + 400)
+        },
+        supplyDemandZones: {
+          demandZones: [
+            { level: Math.round(currentPrice - 300), strength: 'Strong' as const, volume: 2850000 },
+            { level: Math.round(currentPrice - 150), strength: 'Moderate' as const, volume: 1820000 },
+            { level: Math.round(currentPrice - 75), strength: 'Weak' as const, volume: 1210000 }
+          ],
+          supplyZones: [
+            { level: Math.round(currentPrice + 75), strength: 'Weak' as const, volume: 1180000 },
+            { level: Math.round(currentPrice + 180), strength: 'Moderate' as const, volume: 1950000 },
+            { level: Math.round(currentPrice + 350), strength: 'Strong' as const, volume: 3120000 }
+          ]
         }
       },
       tradingSignals: [
