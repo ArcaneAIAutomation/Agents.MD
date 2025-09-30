@@ -278,8 +278,8 @@ class RealMarketDataAnalyzer {
       };
 
       console.log('📊 Order book fetched successfully');
-      console.log('📊 Top 3 bids:', orderBook.bids.slice(0, 3).map(b => `${b.price}: ${b.quantity} BTC`));
-      console.log('📊 Top 3 asks:', orderBook.asks.slice(0, 3).map(a => `${a.price}: ${a.quantity} BTC`));
+      console.log('📊 Top 3 bids:', orderBook.bids.slice(0, 3).map((b: any) => `${b.price}: ${b.quantity} BTC`));
+      console.log('📊 Top 3 asks:', orderBook.asks.slice(0, 3).map((a: any) => `${a.price}: ${a.quantity} BTC`));
 
       return orderBook;
     } catch (error) {
@@ -776,7 +776,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           Support Levels: ${enhancedAnalysis.historicalLevels.support.map((s: any) => `$${s.price.toLocaleString()} (${s.volume.toFixed(0)} vol, ${s.touches} touches)`).join(', ')}
           Resistance Levels: ${enhancedAnalysis.historicalLevels.resistance.map((r: any) => `$${r.price.toLocaleString()} (${r.volume.toFixed(0)} vol, ${r.touches} touches)`).join(', ')}
           
-          Recent News Context: ${btcNews ? JSON.stringify(btcNews.map(n => ({ title: n.title, source: n.source?.name }))) : 'No recent news available'}
+          Recent News Context: ${btcNews ? JSON.stringify(btcNews.map((n: any) => ({ title: n.title, source: n.source?.name }))) : 'No recent news available'}
           
           Based on this REAL market data and ADVANCED TECHNICAL ANALYSIS, generate comprehensive Bitcoin analysis.
           
@@ -915,7 +915,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             multiTimeframe: true
           } : null
         },
-        newsContext: btcNews?.map(n => ({
+        newsContext: btcNews?.map((n: any) => ({
           title: n.title,
           source: n.source?.name,
           publishedAt: n.publishedAt

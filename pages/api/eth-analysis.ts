@@ -278,8 +278,8 @@ class RealMarketDataAnalyzer {
       };
 
       console.log('📊 ETH Order book fetched successfully');
-      console.log('📊 Top 3 bids:', orderBook.bids.slice(0, 3).map(b => `${b.price}: ${b.quantity} ETH`));
-      console.log('📊 Top 3 asks:', orderBook.asks.slice(0, 3).map(a => `${a.price}: ${a.quantity} ETH`));
+      console.log('📊 Top 3 bids:', orderBook.bids.slice(0, 3).map((b: any) => `${b.price}: ${b.quantity} ETH`));
+      console.log('📊 Top 3 asks:', orderBook.asks.slice(0, 3).map((a: any) => `${a.price}: ${a.quantity} ETH`));
 
       return orderBook;
     } catch (error) {
@@ -773,7 +773,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           Support Levels: ${enhancedAnalysis.historicalLevels.support.map((s: any) => `${s.price.toLocaleString()} (${s.volume.toFixed(0)} vol, ${s.touches} touches)`).join(', ')}
           Resistance Levels: ${enhancedAnalysis.historicalLevels.resistance.map((r: any) => `${r.price.toLocaleString()} (${r.volume.toFixed(0)} vol, ${r.touches} touches)`).join(', ')}
           
-          Recent News Context: ${ethNews ? JSON.stringify(ethNews.map(n => ({ title: n.title, source: n.source?.name }))) : 'No recent news available'}
+          Recent News Context: ${ethNews ? JSON.stringify(ethNews.map((n: any) => ({ title: n.title, source: n.source?.name }))) : 'No recent news available'}
           
           Based on this REAL market data and ADVANCED TECHNICAL ANALYSIS, generate comprehensive Ethereum analysis focusing on:
           - DeFi ecosystem impact and Layer 2 scaling solutions
@@ -887,7 +887,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           ...aiAnalysis.enhancedMarketData,
           ...enhancedAnalysis
         },
-        newsContext: ethNews?.map(n => ({
+        newsContext: ethNews?.map((n: any) => ({
           title: n.title,
           source: n.source?.name,
           publishedAt: n.publishedAt
