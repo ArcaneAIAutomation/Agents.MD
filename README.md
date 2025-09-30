@@ -1,21 +1,30 @@
-# 🚀 Crypto News Hub
+# 🚀 Agents.MD - Crypto Trading Intelligence Platform
 
-A real-time cryptocurrency news and market analysis website powered by AI agents, built with Next.js, TypeScript, and Tailwind CSS.
+**Version 1.0** - Advanced cryptocurrency trading intelligence platform powered by AI agents and real-time market data analysis.
 
-## 🎯 Features
+🌐 **Live Demo**: [news.arcane.group](https://news.arcane.group)
+
+## 🎯 Core Features
+
+### 📊 Enhanced Visual Trading Zones
+- **Real-time order book analysis** from Binance with live bid/ask walls
+- **Multi-timeframe trading zones** (1H Scalping, 4H Swing, 1D Position)
+- **Whale movement detection** for transactions >5 BTC
+- **Market sentiment integration** with Fear & Greed Index
+- **Timeframe-specific volatility calculations** for optimal zone placement
+
+### 🤖 Advanced Price Prediction Engine
+- **Multi-timeframe technical analysis** (15m, 1h, 4h intervals)
+- **Real-time indicator calculations**: RSI, MACD, EMA20/50, Bollinger Bands
+- **Order book imbalance detection** for market bias analysis
+- **Confidence scoring system** for prediction reliability
+- **Live market data** from Binance, Coinbase, and CoinGecko APIs
 
 ### 📰 Nexo.com UK Regulatory Updates
 - **Real-time monitoring** of regulatory changes affecting Nexo
 - **Relevance scoring** for news articles (0-100 scale)
 - **Official sources** including FCA, EBA, and Nexo communications
 - **Automated updates** every 5 minutes
-
-### 📊 Bitcoin Market Analysis
-- **Live market data** including price, volume, and market cap
-- **Multi-timeframe technical analysis** (1H, 4H, 1D, 1W)
-- **Popular indicators**: RSI, MACD, Bollinger Bands, Moving Averages
-- **Trading recommendations** with entry/exit points
-- **Risk/reward calculations** for each setup
 
 ## 🏗️ Project Structure
 
@@ -284,3 +293,44 @@ MIT License - see [LICENSE](LICENSE) file for details.
 **Built with ❤️ for the crypto community**
 
 *This project demonstrates how AI agents can be used to create powerful, real-time financial information systems without requiring extensive manual content curation.*
+
+## 🚀 Version 1.0 Release Highlights
+
+### ✅ Production-Ready Features
+- **100% Real Market Data** - No demo or fallback data used
+- **Enhanced User Interface** - Intuitive timeframe selection and analysis
+- **Advanced Error Handling** - Robust API error management and recovery
+- **CORS Resolution** - Seamless frontend-backend communication
+- **Comprehensive Documentation** - Complete setup and usage guides
+
+### 🎯 Trading Intelligence
+- **Scalping Zones (1H)** - Quick entry/exit points with 0.3x volatility
+- **Swing Trading Zones (4H)** - Intraday positions with 1.0x volatility  
+- **Position Trading Zones (1D)** - Long-term holds with 2.2x volatility
+- **Real Order Book Analysis** - Live market maker positioning
+- **Historical Volume Levels** - Support/resistance from actual trading data
+
+## 🏗️ Technical Architecture
+
+Built with modern web technologies for optimal performance and scalability:
+
+- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
+- **Backend**: Node.js API routes with real-time data fetching
+- **Data Sources**: Binance, Coinbase, CoinGecko, NewsAPI
+- **AI Integration**: OpenAI GPT-4 for market analysis
+- **Deployment**: Vercel with automatic CI/CD
+
+## 📈 Live Market Data Sources
+
+### Real-Time APIs
+- **Binance API** - Order book, kline data, funding rates
+- **Coinbase API** - Price feeds and market data
+- **CoinGecko API** - Market cap, volume, price changes
+- **Alternative.me** - Fear & Greed Index
+- **NewsAPI** - Cryptocurrency news aggregation
+
+### Technical Indicators
+- **RSI (Relative Strength Index)** - Momentum oscillator
+- **MACD (Moving Average Convergence Divergence)** - Trend following
+- **EMA (Exponential Moving Averages)** - 20 and 50 period
+- **Bollinger Bands** - Volatility and price envelope analysis
