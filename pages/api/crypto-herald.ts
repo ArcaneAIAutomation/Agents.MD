@@ -363,12 +363,15 @@ function extractSourceName(sourceName: string): string {
     .trim() || 'Crypto News';
 }
 
-// Live market ticker data only
+// Enhanced market ticker with Binance API authentication
 async function getMarketTicker() {
-  console.log('🎯 Starting market ticker fetch...');
+  console.log('🎯 Starting enhanced market ticker fetch with Binance API...');
   
   try {
-    // Get live data from Binance API - using a more reliable approach
+    // Check if we have Binance API credentials
+    const hasApiKey = process.env.BINANCE_API_KEY && process.env.BINANCE_SECRET_KEY;
+    console.log('🔑 Binance API credentials available:', hasApiKey ? 'Yes' : 'No');
+    
     const symbols = [
       { symbol: 'BTCUSDT', name: 'Bitcoin', displaySymbol: 'BTC' },
       { symbol: 'ETHUSDT', name: 'Ethereum', displaySymbol: 'ETH' },
@@ -380,22 +383,66 @@ async function getMarketTicker() {
       { symbol: 'DOTUSDT', name: 'Polkadot', displaySymbol: 'DOT' }
     ];
     
-    // Try batch request first (more efficient)
+    // Use authenticated API if available for better reliability
+    if (hasApiKey) {
+      console.log('🔐 Using authenticated Binance API for enhanced data...');
+      try {
+        // Use our enhanced Binance API for better data
+        const enhancedPromises = symbols.slice(0, 6).map(async (coin) => {
+          try {
+            const response = await fetch(`/api/binance-enhanced?symbol=${coin.symbol}&action=comprehensive`);
+            if (response.ok) {
+              const result = await response.json();
+              if (result.success && result.data) {
+                return {
+                  symbol: coin.displaySymbol,
+                  name: coin.name,
+                  price: result.data.price.current,
+                  change: result.data.price.change24h,
+                  volume: result.data.price.volume24h,
+                  volatility: result.data.technicals.volatility,
+                  enhanced: true
+                };
+              }
+            }
+            return null;
+          } catch (error) {
+            console.log(`❌ Enhanced API failed for ${coin.symbol}:`, error.message);
+            return null;
+          }
+        });
+        
+        const enhancedResults = await Promise.all(enhancedPromises);
+        const validEnhanced = enhancedResults.filter(result => result !== null);
+        
+        if (validEnhanced.length > 0) {
+          console.log('🎉 Enhanced ticker data ready:', validEnhanced.length, 'symbols');
+          return validEnhanced;
+        }
+      } catch (enhancedError) {
+        console.log('⚠️ Enhanced API failed, falling back to public API...');
+      }
+    }
+    
+    // Fallback to public API (original implementation)
+    console.log('🔄 Using public Binance API...');
+    
+    // Try batch request first
     try {
       const symbolsString = symbols.map(s => `"${s.symbol}"`).join(',');
       const batchUrl = `https://api.binance.com/api/v3/ticker/24hr?symbols=[${symbolsString}]`;
       
-      console.log('🔄 Trying batch ticker request...');
       const batchResponse = await fetch(batchUrl, {
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(8000),
         headers: {
           'Accept': 'application/json',
+          'User-Agent': 'AgentsMD/2.0'
         }
       });
       
       if (batchResponse.ok) {
         const batchData = await batchResponse.json();
-        console.log('✅ Batch ticker success:', batchData.length, 'symbols');
+        console.log('✅ Public batch ticker success:', batchData.length, 'symbols');
         
         const tickerData = batchData.map((item: any) => {
           const symbolInfo = symbols.find(s => s.symbol === item.symbol);
@@ -403,27 +450,32 @@ async function getMarketTicker() {
             symbol: symbolInfo?.displaySymbol || item.symbol.replace('USDT', ''),
             name: symbolInfo?.name || item.symbol.replace('USDT', ''),
             price: parseFloat(item.lastPrice),
-            change: parseFloat(item.priceChangePercent)
+            change: parseFloat(item.priceChangePercent),
+            volume: parseFloat(item.volume),
+            enhanced: false
           };
         });
         
-        console.log('📊 Ticker data prepared:', tickerData.length, 'items');
+        console.log('📊 Public ticker data prepared:', tickerData.length, 'items');
         return tickerData;
+      } else {
+        console.log('❌ Batch request failed with status:', batchResponse.status);
       }
     } catch (batchError) {
-      console.log('⚠️ Batch request failed, trying individual requests...');
+      console.log('⚠️ Batch request failed:', batchError.message);
     }
     
-    // Fallback to individual requests
-    console.log('🔄 Trying individual ticker requests...');
-    const promises = symbols.slice(0, 6).map(async (coin, index) => { // Limit to 6 for reliability
+    // Final fallback: individual requests
+    console.log('🔄 Trying individual requests as final fallback...');
+    const promises = symbols.slice(0, 4).map(async (coin, index) => {
       try {
-        await new Promise(resolve => setTimeout(resolve, index * 100)); // Stagger requests
+        await new Promise(resolve => setTimeout(resolve, index * 200));
         
         const response = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${coin.symbol}`, {
-          signal: AbortSignal.timeout(4000),
+          signal: AbortSignal.timeout(5000),
           headers: {
             'Accept': 'application/json',
+            'User-Agent': 'AgentsMD/2.0'
           }
         });
         
@@ -439,7 +491,8 @@ async function getMarketTicker() {
           symbol: coin.displaySymbol,
           name: coin.name,
           price: parseFloat(data.lastPrice),
-          change: parseFloat(data.priceChangePercent)
+          change: parseFloat(data.priceChangePercent),
+          enhanced: false
         };
       } catch (error) {
         console.log(`❌ Error fetching ${coin.symbol}:`, error.message);
@@ -450,18 +503,11 @@ async function getMarketTicker() {
     const results = await Promise.all(promises);
     const validResults = results.filter(result => result !== null);
     
-    console.log('📈 Final ticker results:', validResults.length, 'valid items');
-    
-    if (validResults.length > 0) {
-      console.log('🎉 Ticker data ready:', validResults.map(r => `${r.symbol}: $${r.price}`));
-      return validResults;
-    } else {
-      console.log('❌ No valid ticker data obtained');
-      return [];
-    }
+    console.log('📈 Final fallback results:', validResults.length, 'valid items');
+    return validResults;
     
   } catch (error) {
-    console.error('💥 Market ticker fetch failed:', error);
+    console.error('💥 Market ticker fetch completely failed:', error);
     return [];
   }
 }

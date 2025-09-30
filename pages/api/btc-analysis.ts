@@ -253,9 +253,46 @@ class RealMarketDataAnalyzer {
     coingecko: 'https://api.coingecko.com/api/v3'
   };
 
-  // Get real order book data to identify actual supply/demand levels
+  // Enhanced order book data with Binance API authentication
   async getOrderBookData(symbol = 'BTCUSDT') {
     try {
+      // Try enhanced Binance API first if credentials are available
+      if (process.env.BINANCE_API_KEY && process.env.BINANCE_SECRET_KEY) {
+        console.log('🔐 Using authenticated Binance API for enhanced BTC order book...');
+        try {
+          const enhancedResponse = await fetch(`/api/binance-enhanced?symbol=${symbol}&action=orderbook`);
+          if (enhancedResponse.ok) {
+            const enhancedData = await enhancedResponse.json();
+            if (enhancedData.success && enhancedData.data) {
+              console.log('✅ Enhanced BTC order book data obtained with analysis');
+              
+              const orderBook = {
+                bids: enhancedData.data.bids.slice(0, 50).map(([price, quantity]: [string, string]) => ({
+                  price: parseFloat(price),
+                  quantity: parseFloat(quantity),
+                  total: parseFloat(price) * parseFloat(quantity)
+                })),
+                asks: enhancedData.data.asks.slice(0, 50).map(([price, quantity]: [string, string]) => ({
+                  price: parseFloat(price),
+                  quantity: parseFloat(quantity),
+                  total: parseFloat(price) * parseFloat(quantity)
+                })),
+                analysis: enhancedData.data.analysis // Enhanced analysis data
+              };
+              
+              console.log('📊 Enhanced order book analysis available:', !!orderBook.analysis);
+              console.log('📊 Spread:', orderBook.analysis?.spread?.percentage?.toFixed(4) + '%');
+              console.log('📊 Volume imbalance:', (orderBook.analysis?.volume?.imbalance * 100)?.toFixed(2) + '%');
+              
+              return orderBook;
+            }
+          }
+        } catch (enhancedError) {
+          console.log('⚠️ Enhanced BTC API failed, using public API...');
+        }
+      }
+      
+      // Fallback to public API
       const response = await fetch(`${this.apis.binance}/depth?symbol=${symbol}&limit=1000`, {
         signal: AbortSignal.timeout(5000)
       });
@@ -277,13 +314,13 @@ class RealMarketDataAnalyzer {
         }))
       };
 
-      console.log('📊 Order book fetched successfully');
+      console.log('📊 Public BTC order book fetched successfully');
       console.log('📊 Top 3 bids:', orderBook.bids.slice(0, 3).map((b: any) => `${b.price}: ${b.quantity} BTC`));
       console.log('📊 Top 3 asks:', orderBook.asks.slice(0, 3).map((a: any) => `${a.price}: ${a.quantity} BTC`));
 
       return orderBook;
     } catch (error) {
-      console.error('Error fetching order book:', error);
+      console.error('Error fetching BTC order book:', error);
       return null;
     }
   }
