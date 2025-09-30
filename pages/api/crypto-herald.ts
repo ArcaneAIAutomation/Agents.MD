@@ -363,30 +363,49 @@ function extractSourceName(sourceName: string): string {
     .trim() || 'Crypto News';
 }
 
-// Optimized market ticker data
+// Live market ticker data only
 async function getMarketTicker() {
   try {
-    const apiKey = process.env.COINGECKO_API_KEY;
-    const keyParam = apiKey ? `&x_cg_demo_api_key=${apiKey}` : '';
+    // Get live data from Binance API
+    const symbols = [
+      { symbol: 'BTCUSDT', name: 'Bitcoin', displaySymbol: 'BTC' },
+      { symbol: 'ETHUSDT', name: 'Ethereum', displaySymbol: 'ETH' },
+      { symbol: 'BNBUSDT', name: 'BNB', displaySymbol: 'BNB' },
+      { symbol: 'SOLUSDT', name: 'Solana', displaySymbol: 'SOL' },
+      { symbol: 'XRPUSDT', name: 'XRP', displaySymbol: 'XRP' },
+      { symbol: 'ADAUSDT', name: 'Cardano', displaySymbol: 'ADA' },
+      { symbol: 'AVAXUSDT', name: 'Avalanche', displaySymbol: 'AVAX' },
+      { symbol: 'DOTUSDT', name: 'Polkadot', displaySymbol: 'DOT' }
+    ];
     
-    const response = await fetch(
-      `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=8&page=1&sparkline=false${keyParam}`,
-      { signal: AbortSignal.timeout(3000) }
-    );
+    const promises = symbols.map(async (coin) => {
+      try {
+        const response = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${coin.symbol}`, {
+          signal: AbortSignal.timeout(3000)
+        });
+        
+        if (!response.ok) return null;
+        
+        const data = await response.json();
+        return {
+          symbol: coin.displaySymbol,
+          name: coin.name,
+          price: parseFloat(data.lastPrice),
+          change: parseFloat(data.priceChangePercent)
+        };
+      } catch (error) {
+        return null;
+      }
+    });
     
-    if (!response.ok) {
-      return []; // No fallback ticker data
-    }
+    const results = await Promise.all(promises);
     
-    const data = await response.json();
-    return data.map((coin: any) => ({
-      symbol: coin.symbol.toUpperCase(),
-      name: coin.name,
-      price: coin.current_price,
-      change: coin.price_change_percentage_24h
-    }));
+    // Filter out failed requests and return only successful ones
+    return results.filter(result => result !== null);
+    
   } catch (error) {
-    return []; // No fallback ticker data
+    console.error('Market ticker fetch failed:', error);
+    return []; // Return empty array if all requests fail
   }
 }
 
@@ -517,21 +536,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch (error) {
     console.error('Enhanced Crypto Herald Error:', error);
     
-    // Return market ticker even if news fails
-    const fallbackTicker = [
-      { symbol: 'BTC', name: 'Bitcoin', price: 43250, change: 2.5 },
-      { symbol: 'ETH', name: 'Ethereum', price: 2650, change: -1.2 },
-      { symbol: 'BNB', name: 'BNB', price: 315, change: 0.8 },
-      { symbol: 'XRP', name: 'XRP', price: 0.62, change: 3.1 },
-      { symbol: 'ADA', name: 'Cardano', price: 0.48, change: -0.5 },
-      { symbol: 'SOL', name: 'Solana', price: 98, change: 4.2 }
-    ];
+    // Try to get live ticker data even if news fails
+    let liveTickerData = [];
+    try {
+      liveTickerData = await getMarketTicker();
+    } catch (tickerError) {
+      console.error('Ticker fetch also failed:', tickerError);
+    }
     
     const errorResponse = {
       success: false,
       data: {
         articles: [],
-        marketTicker: fallbackTicker,
+        marketTicker: liveTickerData,
         apiStatus: {
           source: 'Error Handler',
           status: 'Error',

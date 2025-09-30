@@ -13,9 +13,7 @@ export default function Home() {
         <title>The Crypto Herald - Real-Time Market Intelligence</title>
         <meta name="description" content="Professional cryptocurrency market analysis and trading intelligence in classic newspaper format" />
         <link rel="icon" href="/favicon.ico" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+
       </Head>
 
       <div className="min-h-screen bg-gray-50">
