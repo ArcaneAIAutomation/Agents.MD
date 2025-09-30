@@ -533,7 +533,7 @@ export default function ETHTradingChart() {
         supportResistance={supportResistance}
         tradingZones={tradingZones}
 
-        marketConditions={realTimeData.marketConditions}
+
       />
 
       {/* Detailed Zone Analysis */}
