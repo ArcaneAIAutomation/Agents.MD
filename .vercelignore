@@ -2,13 +2,34 @@
 backups/
 *.md
 !README.md
+!VERCEL-DEPLOYMENT-GUIDE.md
 
 # Ignore development files
+.env.local
 .env.local.example
 test-*.js
+test-*.html
+verify-*.js
+quick-fix.js
+final-layout-verification.js
 .vscode/
 
 # Ignore build artifacts
 .next
 node_modules
 *.log
+dist/
+out/
+
+# Ignore documentation (except deployment guide)
+TECHNICAL-ANALYSIS-MATH-BREAKDOWN.md
+SOCIAL-INSTITUTIONAL-INDICATORS-EXPLAINED.md
+ETH-ENHANCEMENT-SUMMARY.md
+NEWSPAPER-THEME-SUMMARY.md
+WEBSOCKET-FIX-GUIDE.md
+DEVELOPMENT.md
+VERSION-*.md
+DUAL-DATA-SOURCE-IMPLEMENTATION.md
+HIDDEN-PIVOT-ANALYSIS.md
+AI-SETUP-GUIDE.md
+COINMARKETCAP-INTEGRATION-FIX.md

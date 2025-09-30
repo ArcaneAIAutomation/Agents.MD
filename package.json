@@ -1,6 +1,6 @@
 {
   "name": "agents-md",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "Advanced cryptocurrency trading intelligence platform powered by AI agents and real-time market data analysis",
   "main": "next.config.js",
   "private": false,
