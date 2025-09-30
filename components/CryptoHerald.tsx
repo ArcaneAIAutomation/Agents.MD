@@ -70,7 +70,8 @@ const CryptoHerald: React.FC = () => {
     meta: {
       lastUpdated: new Date().toISOString(),
       sources: ['Initializing'],
-      isLiveData: true
+      isLiveData: true,
+      totalArticles: 0
     }
   });
   const [loading, setLoading] = useState(false);
@@ -93,7 +94,8 @@ const CryptoHerald: React.FC = () => {
       meta: {
         lastUpdated: new Date().toISOString(),
         sources: ['Ready'],
-        isLiveData: true
+        isLiveData: true,
+        totalArticles: 0
       }
     });
   }, []);
