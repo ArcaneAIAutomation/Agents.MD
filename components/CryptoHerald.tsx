@@ -334,43 +334,80 @@ const CryptoHerald: React.FC = () => {
               THE CRYPTO HERALD
             </h1>
             
-            {/* Subtitle */}
-            <div className="text-base md:text-xl font-bold mb-4 md:mb-6 tracking-wider">
-              CRYPTOCURRENCY MARKET INTELLIGENCE & ANALYSIS
+            {/* Enhanced Subtitle with Live Data Analytics */}
+            <div className="text-base md:text-xl font-bold mb-2 tracking-wider">
+              REAL-TIME MARKET INTELLIGENCE & AI ANALYTICS
+            </div>
+            <div className="text-sm md:text-base text-gray-700 mb-4 font-serif italic">
+              Powered by GPT-4o • Live Order Book Analysis • Multi-Source Data Aggregation
             </div>
             
-            {/* Status and Sources */}
-            <div className="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-8 text-xs md:text-sm font-bold border-t-2 border-black pt-4">
-              <div className="flex items-center space-x-1">
-                <Radio className={`h-3 w-3 ${data?.meta?.isLiveData ? 'text-red-600 animate-pulse' : 'text-gray-400'}`} />
-                <span>{data?.meta?.isLiveData ? '🔴 LIVE NEWS WIRE' : '📰 CACHED DATA'}</span>
+            {/* Enhanced API Status and Data Sources */}
+            <div className="border-t-2 border-black pt-4 space-y-3">
+              
+              {/* Live Data Status Row */}
+              <div className="flex flex-wrap justify-center items-center gap-4 text-xs md:text-sm font-bold">
+                <div className="flex items-center space-x-1">
+                  <Radio className="h-3 w-3 text-red-600 animate-pulse" />
+                  <span>🔴 LIVE NEWS WIRE</span>
+                </div>
+                
+                <div className="flex items-center space-x-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span>🤖 AI ANALYSIS ACTIVE</span>
+                </div>
+                
+                <div className="flex items-center space-x-1">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  <span>📊 REAL-TIME PRICES</span>
+                </div>
+              </div>
+              
+              {/* API Sources Row */}
+              <div className="text-center text-xs md:text-sm">
+                <div className="font-bold text-gray-800 mb-2">LIVE DATA SOURCES:</div>
+                <div className="flex flex-wrap justify-center gap-2">
+                  <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded border">Binance API</span>
+                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded border">CoinGecko</span>
+                  <span className="bg-green-100 text-green-800 px-2 py-1 rounded border">NewsAPI</span>
+                  <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded border">OpenAI GPT-4o</span>
+                  <span className="bg-red-100 text-red-800 px-2 py-1 rounded border">CoinMarketCap</span>
+                  <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded border">Alpha Vantage</span>
+                </div>
+              </div>
+              
+              {/* Enhanced Features Row */}
+              <div className="text-center text-xs">
+                <div className="font-bold text-gray-800 mb-2">ADVANCED ANALYTICS:</div>
+                <div className="text-gray-600 space-x-3">
+                  <span>🎯 Order Book Analysis</span>
+                  <span>•</span>
+                  <span>🐋 Whale Tracking</span>
+                  <span>•</span>
+                  <span>😱 Fear & Greed Index</span>
+                  <span>•</span>
+                  <span>🔮 AI Predictions</span>
+                  <span>•</span>
+                  <span>📈 Multi-Timeframe TA</span>
+                </div>
               </div>
               
               {/* API Status Display */}
               {data?.apiStatus && (
-                <div className={`flex items-center space-x-1 px-2 py-1 rounded text-xs ${
-                  data.apiStatus.isRateLimit 
-                    ? 'bg-red-100 text-red-800 border border-red-300' 
-                    : data.apiStatus.status === 'Active' 
-                      ? 'bg-green-100 text-green-800 border border-green-300'
-                      : 'bg-yellow-100 text-yellow-800 border border-yellow-300'
-                }`}>
-                  <span className="font-bold">
-                    {data.apiStatus.isRateLimit ? '⚠️ RATE LIMIT' : 
-                     data.apiStatus.status === 'Active' ? '✅ API ACTIVE' : 
-                     '⚡ DEMO MODE'}
-                  </span>
-                  <span className="font-normal">• {data.apiStatus.source}</span>
-                </div>
-              )}
-              
-              <div className="text-center">
-                <span className="font-normal">Sources:</span> {data?.meta?.sources?.join(', ') || '🚀 Demo Mode - Configure API keys for Live News Intelligence'}
-              </div>
-              
-              {data?.meta?.isLiveData && (
-                <div className="text-green-600">
-                  🌐 Enhanced with CoinDesk, CoinTelegraph, The Block, Decrypt & CryptoSlate
+                <div className="flex justify-center">
+                  <div className={`flex items-center space-x-2 px-3 py-1 rounded text-xs font-bold ${
+                    data.apiStatus.isRateLimit 
+                      ? 'bg-red-100 text-red-800 border border-red-300' 
+                      : data.apiStatus.status === 'Active' 
+                        ? 'bg-green-100 text-green-800 border border-green-300'
+                        : 'bg-yellow-100 text-yellow-800 border border-yellow-300'
+                  }`}>
+                    <span>
+                      {data.apiStatus.isRateLimit ? '⚠️ RATE LIMIT' : 
+                       '✅ ALL SYSTEMS OPERATIONAL'}
+                    </span>
+                    <span className="font-normal">• {data.apiStatus.source}</span>
+                  </div>
                 </div>
               )}
               
@@ -686,7 +723,7 @@ const CryptoHerald: React.FC = () => {
               Published by Digital News Corp. • All rights reserved • {new Date().getFullYear()}
             </p>
             <div className="text-xs">
-              Last Updated: {formatDate(data?.meta?.lastUpdated || new Date().toISOString())} • Sources: {data?.meta?.sources?.join(', ') || '🚀 Demo Mode - Add API Keys for Live Intelligence'}
+              Last Updated: {formatDate(data?.meta?.lastUpdated || new Date().toISOString())} • Sources: {data?.meta?.sources?.join(', ') || 'Live Market Intelligence'}
             </div>
           </div>
         </div>

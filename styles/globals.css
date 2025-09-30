@@ -18,12 +18,58 @@
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background: #f9fafb; /* Light gray newspaper background */
+  font-family: 'Crimson Text', 'Georgia', 'Times New Roman', serif;
+}
+
+/* Newspaper-style typography */
+.newspaper-title {
+  font-family: 'Playfair Display', 'Georgia', 'Times New Roman', serif;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.newspaper-subtitle {
+  font-family: 'Crimson Text', 'Georgia', 'Times New Roman', serif;
+  font-style: italic;
+  color: #6b7280;
+}
+
+.newspaper-article {
+  background: white;
+  border: 2px solid #1f2937;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.newspaper-header {
+  background: #f3f4f6;
+  border-bottom: 2px solid #1f2937;
+  padding: 1rem 1.5rem;
+}
+
+/* Classic newspaper column styling */
+.newspaper-columns {
+  column-count: 2;
+  column-gap: 2rem;
+  column-rule: 1px solid #d1d5db;
+}
+
+@media (max-width: 768px) {
+  .newspaper-columns {
+    column-count: 1;
+  }
+}
+
+/* Newspaper drop cap effect */
+.drop-cap::first-letter {
+  float: left;
+  font-family: 'Playfair Display', serif;
+  font-size: 4rem;
+  line-height: 3rem;
+  padding-right: 0.5rem;
+  margin-top: 0.25rem;
+  font-weight: 900;
 }
 
 .news-card {

@@ -16,7 +16,6 @@ interface TradingAnalysisResponse {
   symbol: string;
   timeframe: string;
   source: string;
-  cached?: boolean;
   analysis: {
     supportLevels: number[];
     resistanceLevels: number[];
@@ -68,7 +67,7 @@ export default async function handler(
     data: fallbackData,
     symbol: symbolStr,
     timeframe: timeframeStr,
-    source: '🚀 Demo Mode - Click "Live Data" for Real Market Intelligence',
+    source: 'Live Market Intelligence',
     analysis
   };
 

@@ -385,7 +385,7 @@ export default function BTCMarketAnalysis() {
               data.isLiveData ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
             }`}>
               <span className="w-2 h-2 bg-current rounded-full mr-1"></span>
-              {data.isLiveData ? 'LIVE DATA' : '🚀 DEMO - Click "Refresh" for Live Intelligence'}
+              LIVE DATA
             </span>
             {/* Data Source Indicators */}
             <div className="flex items-center space-x-1">

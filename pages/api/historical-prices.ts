@@ -11,7 +11,6 @@ interface HistoricalResponse {
   data: HistoricalDataPoint[];
   symbol: string;
   timeframe: string;
-  cached?: boolean;
   error?: string;
 }
 

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newspaper Theme Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: #f9fafb;
+        }
+        .newspaper-title {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-weight: bold;
+            letter-spacing: 0.05em;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Preview of the new newspaper theme -->
+    <div class="min-h-screen bg-gray-50">
+        <!-- Newspaper Header -->
+        <div class="bg-white border-b-4 border-gray-900 shadow-sm">
+            <div class="container mx-auto px-4 py-6">
+                <!-- Main Newspaper Title -->
+                <div class="text-center mb-4">
+                    <h1 class="text-4xl md:text-6xl font-bold text-gray-900 font-serif tracking-tight newspaper-title">
+                        THE CRYPTO HERALD
+                    </h1>
+                    <div class="flex items-center justify-center space-x-4 mt-2">
+                        <div class="h-px bg-gray-400 flex-1"></div>
+                        <span class="text-sm text-gray-600 font-serif italic">
+                            Real-Time Market Intelligence • Est. 2024
+                        </span>
+                        <div class="h-px bg-gray-400 flex-1"></div>
+                    </div>
+                </div>
+                
+                <!-- Newspaper Subheader -->
+                <div class="flex items-center justify-between text-sm text-gray-700 border-t border-b border-gray-300 py-2">
+                    <div class="flex items-center space-x-4">
+                        <span class="font-semibold">Vol. 1.4</span>
+                        <span>•</span>
+                        <span>Monday, September 30, 2024</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="font-semibold">LIVE MARKET DATA</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sample Article -->
+        <div class="container mx-auto px-4 py-8">
+            <div class="bg-white border-2 border-gray-900 shadow-lg">
+                <div class="border-b-2 border-gray-900 bg-orange-50 px-6 py-3">
+                    <h2 class="text-2xl font-bold text-gray-900 font-serif">
+                        ₿ BITCOIN MARKET REPORT
+                    </h2>
+                    <p class="text-sm text-gray-600 font-serif italic mt-1">
+                        Digital gold analysis with real-time market intelligence
+                    </p>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-800 leading-relaxed">
+                        This is how the newspaper-themed layout will look. Clean, professional, 
+                        and reminiscent of traditional financial newspapers with modern crypto intelligence.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
