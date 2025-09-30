@@ -57,7 +57,7 @@ export default function ETHTradingChart() {
       console.log(`🔬 Generating 100% real ${timeframe} ETH analysis...`);
       
       // Fetch base enhanced analysis - use relative API calls to avoid CORS
-      const baseResponse = await fetch('/api/eth-analysis');
+      const baseResponse = await fetch('/api/eth-analysis-simple');
       const baseResult = await baseResponse.json();
       
       if (!baseResult.success || !baseResult.data.isLiveData) {
