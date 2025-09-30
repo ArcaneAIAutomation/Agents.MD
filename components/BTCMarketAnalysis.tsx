@@ -1,6 +1,69 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { TrendingUp, TrendingDown, AlertTriangle, Target, Clock, BarChart3, Activity } from 'lucide-react'
 import BTCTradingChart from './BTCTradingChart'
+import BTCHiddenPivotChart from './BTCHiddenPivotChart'
+
+// Fear & Greed Visual Slider Component
+const FearGreedSlider = ({ value }: { value: number }) => {
+  const getSliderColor = (val: number) => {
+    if (val <= 25) return 'from-red-600 to-red-400' // Extreme Fear
+    if (val <= 45) return 'from-orange-500 to-orange-400' // Fear
+    if (val <= 55) return 'from-yellow-500 to-yellow-400' // Neutral
+    if (val <= 75) return 'from-green-500 to-green-400' // Greed
+    return 'from-green-600 to-green-500' // Extreme Greed
+  }
+
+  const getLabel = (val: number) => {
+    if (val <= 25) return 'Extreme Fear'
+    if (val <= 45) return 'Fear'
+    if (val <= 55) return 'Neutral'
+    if (val <= 75) return 'Greed'
+    return 'Extreme Greed'
+  }
+
+  const clampedValue = Math.max(0, Math.min(100, value))
+
+  return (
+    <div className="text-center p-3 bg-gray-50 rounded-lg">
+      <p className="text-sm text-gray-600 mb-2">Fear & Greed</p>
+      
+      {/* Visual Slider */}
+      <div className="relative w-full h-6 bg-gray-200 rounded-full mb-2">
+        {/* Background gradient zones */}
+        <div className="absolute inset-0 rounded-full overflow-hidden">
+          <div className="h-full w-full bg-gradient-to-r from-red-500 via-yellow-400 to-green-500"></div>
+        </div>
+        
+        {/* Slider indicator */}
+        <div 
+          className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-white border-2 border-gray-700 rounded-full shadow-md transition-all duration-300"
+          style={{ left: `calc(${clampedValue}% - 8px)` }}
+        />
+        
+        {/* Value overlay */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-xs font-bold text-white mix-blend-difference">
+            {clampedValue}
+          </span>
+        </div>
+      </div>
+      
+      {/* Label and value */}
+      <div className="flex justify-between text-xs text-gray-500 mb-1">
+        <span>Fear</span>
+        <span>Greed</span>
+      </div>
+      <p className={`text-sm font-semibold ${
+        clampedValue <= 25 ? 'text-red-600' :
+        clampedValue <= 45 ? 'text-orange-500' :
+        clampedValue <= 55 ? 'text-yellow-600' :
+        clampedValue <= 75 ? 'text-green-500' : 'text-green-600'
+      }`}>
+        {getLabel(clampedValue)}
+      </p>
+    </div>
+  )
+}
 
 // Bitcoin Logo Component
 const BitcoinIcon = ({ className }: { className?: string }) => (
@@ -40,8 +103,20 @@ interface BTCAnalysisData {
       strongResistance: number
     }
     supplyDemandZones?: {
-      demandZones: Array<{ level: number; strength: 'Strong' | 'Moderate' | 'Weak'; volume: number }>
-      supplyZones: Array<{ level: number; strength: 'Strong' | 'Moderate' | 'Weak'; volume: number }>
+      demandZones: Array<{ 
+        level: number; 
+        strength: 'Strong' | 'Moderate' | 'Weak'; 
+        volume: number;
+        source?: string;
+        confidence?: number;
+      }>
+      supplyZones: Array<{ 
+        level: number; 
+        strength: 'Strong' | 'Moderate' | 'Weak'; 
+        volume: number;
+        source?: string;
+        confidence?: number;
+      }>
     }
   }
   tradingSignals?: Array<{
@@ -68,14 +143,47 @@ interface BTCAnalysisData {
     timeAgo: string
     source: string
   }>
+  enhancedMarketData?: {
+    orderBookImbalance?: {
+      volumeImbalance: number
+      valueImbalance: number
+      bidPressure: number
+      askPressure: number
+      strongestBid: number
+      strongestAsk: number
+    }
+    whaleMovements?: Array<{
+      price: number
+      quantity: number
+      time: number
+      isBuyerMaker: boolean
+    }>
+    historicalLevels?: {
+      support: Array<{ price: number; volume: number; touches: number }>
+      resistance: Array<{ price: number; volume: number; touches: number }>
+    }
+    realMarketSentiment?: {
+      fearGreedIndex?: number
+      fearGreedClassification?: string
+      fundingRate?: number
+      nextFundingTime?: number
+    }
+    dataQuality?: {
+      orderBookData: boolean
+      volumeData: boolean
+      sentimentData: boolean
+      whaleData: boolean
+    }
+  }
   lastUpdated?: string
   timestamp?: string
   isLiveData?: boolean
+  isEnhancedData?: boolean
 }
 
 export default function BTCMarketAnalysis() {
   const [data, setData] = useState<BTCAnalysisData | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false) // Start with loading false - manual only
   const [error, setError] = useState<string | null>(null)
 
   // Helper function to extract RSI value from either number or object format
@@ -86,138 +194,92 @@ export default function BTCMarketAnalysis() {
     return 50 // Default RSI value instead of 0
   }
 
-  // Data validation and enhancement function
-  const validateAndEnhanceData = (rawData: any): BTCAnalysisData => {
-    const currentPrice = rawData.currentPrice || rawData.priceAnalysis?.current || rawData.marketData?.price || 94500
+  // STRICT: Only use real data - no fallbacks allowed
+  const validateRealData = (rawData: any): BTCAnalysisData | null => {
+    // Reject if no real price data
+    if (!rawData.currentPrice && !rawData.marketData?.price) {
+      console.error('No real price data available - refusing to display');
+      return null;
+    }
+
+    // Reject if not marked as live data
+    if (!rawData.isLiveData) {
+      console.error('Data not marked as live - refusing to display');
+      return null;
+    }
+
+    const currentPrice = rawData.currentPrice || rawData.marketData?.price;
     
     return {
-      // Price data with fallbacks
       currentPrice,
       priceAnalysis: {
         current: currentPrice,
-        change24h: rawData.priceAnalysis?.change24h || rawData.marketData?.change24h || (Math.random() - 0.5) * 3,
-        support: rawData.priceAnalysis?.support || currentPrice - 2000,
-        resistance: rawData.priceAnalysis?.resistance || currentPrice + 2500,
+        change24h: rawData.priceAnalysis?.change24h || rawData.marketData?.change24h || 0,
+        support: rawData.priceAnalysis?.support || rawData.technicalIndicators?.supportResistance?.support || 0,
+        resistance: rawData.priceAnalysis?.resistance || rawData.technicalIndicators?.supportResistance?.resistance || 0,
       },
       
-      // Market data with realistic fallbacks
       marketData: {
         price: currentPrice,
-        change24h: rawData.marketData?.change24h || rawData.priceAnalysis?.change24h || (Math.random() - 0.5) * 3,
-        volume24h: rawData.marketData?.volume24h || 28500000000,
-        marketCap: rawData.marketData?.marketCap || currentPrice * 19700000,
+        change24h: rawData.marketData?.change24h || 0,
+        volume24h: rawData.marketData?.volume24h || 0,
+        marketCap: rawData.marketData?.marketCap || 0,
       },
       
-      // Technical indicators with professional defaults
+      // Use REAL technical indicators only
       technicalIndicators: {
-        rsi: rawData.technicalIndicators?.rsi || 45 + Math.random() * 30, // Keep original RSI object/number
-        ema20: rawData.technicalIndicators?.movingAverages?.ema20 || rawData.technicalIndicators?.ema20 || rawData.technicalIndicators?.sma20 || currentPrice - 800,
-        ema50: rawData.technicalIndicators?.movingAverages?.ema50 || rawData.technicalIndicators?.ema50 || rawData.technicalIndicators?.sma50 || currentPrice - 2100,
-        macd: {
-          signal: rawData.technicalIndicators?.macd?.signal || (Math.random() > 0.5 ? 'BUY' : 'SELL'),
-          histogram: typeof rawData.technicalIndicators?.macd?.histogram === 'number' 
-            ? rawData.technicalIndicators.macd.histogram 
-            : (Math.random() - 0.5) * 100
-        },
-        bollinger: {
-          upper: rawData.technicalIndicators?.bollingerBands?.upper || rawData.technicalIndicators?.bollinger?.upper || currentPrice + 3000,
-          middle: rawData.technicalIndicators?.bollingerBands?.middle || rawData.technicalIndicators?.bollinger?.middle || currentPrice,
-          lower: rawData.technicalIndicators?.bollingerBands?.lower || rawData.technicalIndicators?.bollinger?.lower || currentPrice - 3000,
-        },
+        rsi: rawData.technicalIndicators?.rsi || { value: 50, signal: 'NEUTRAL', timeframe: '14' },
+        ema20: rawData.technicalIndicators?.ema20 || 0,
+        ema50: rawData.technicalIndicators?.ema50 || 0,
+        macd: rawData.technicalIndicators?.macd || { signal: 'NEUTRAL', histogram: 0 },
+        bollinger: rawData.technicalIndicators?.bollinger || { upper: 0, middle: 0, lower: 0 },
         supportResistance: rawData.technicalIndicators?.supportResistance || {
-          strongSupport: currentPrice - 5000,
-          support: currentPrice - 2500,
-          resistance: currentPrice + 2500,
-          strongResistance: currentPrice + 5000,
+          strongSupport: 0,
+          support: 0,
+          resistance: 0,
+          strongResistance: 0,
         },
+        // REAL supply/demand zones from enhanced analysis
         supplyDemandZones: rawData.technicalIndicators?.supplyDemandZones || {
-          demandZones: [
-            { level: currentPrice - 3000, strength: 'Strong' as const, volume: 28500000 },
-            { level: currentPrice - 1500, strength: 'Moderate' as const, volume: 18200000 },
-            { level: currentPrice - 800, strength: 'Weak' as const, volume: 12100000 }
-          ],
-          supplyZones: [
-            { level: currentPrice + 800, strength: 'Weak' as const, volume: 11800000 },
-            { level: currentPrice + 2000, strength: 'Moderate' as const, volume: 19500000 },
-            { level: currentPrice + 4200, strength: 'Strong' as const, volume: 31200000 }
-          ]
+          demandZones: [],
+          supplyZones: []
         }
       },
       
-      // Trading signals with structured format
-      tradingSignals: Array.isArray(rawData.tradingSignals) ? rawData.tradingSignals.map((signal: any) => ({
-        type: signal.type || 'BUY',
-        strength: signal.confidence || signal.strength || 'MODERATE',
-        timeframe: signal.timeframe || '4H',
-        price: signal.entry || signal.price || currentPrice,
-        reasoning: signal.rationale || signal.reasoning || 'Technical analysis suggests favorable risk/reward setup'
-      })) : [
-        {
-          type: 'BUY',
-          strength: 'MODERATE',
-          timeframe: '4H',
-          price: currentPrice - 200,
-          reasoning: 'Support level bounce with bullish divergence on RSI'
-        },
-        {
-          type: 'SELL',
-          strength: 'WEAK',
-          timeframe: '1H',
-          price: currentPrice + 500,
-          reasoning: 'Minor resistance level with profit-taking opportunity'
-        }
-      ],
+      // Real trading signals only
+      tradingSignals: Array.isArray(rawData.tradingSignals) ? rawData.tradingSignals : [],
       
-      // Market sentiment with comprehensive data
+      // Real market sentiment
       marketSentiment: {
-        overall: rawData.marketSentiment?.overall || (Math.random() > 0.6 ? 'Bullish' : Math.random() > 0.3 ? 'Neutral' : 'Bearish'),
-        fearGreed: rawData.marketSentiment?.fearGreedIndex || rawData.marketSentiment?.fearGreed || Math.floor(40 + Math.random() * 40),
-        socialMedia: rawData.marketSentiment?.socialMedia || 'Positive',
-        institutionalFlow: rawData.marketSentiment?.institutionalFlow || 'Positive',
+        overall: rawData.marketSentiment?.overall || 'Unknown',
+        fearGreed: rawData.marketSentiment?.fearGreedIndex || rawData.enhancedMarketData?.realMarketSentiment?.fearGreedIndex || 50,
+        socialMedia: rawData.marketSentiment?.socialSentiment || 'Unknown',
+        institutionalFlow: rawData.marketSentiment?.institutionalFlow || 'Unknown',
       },
       
-      // Price predictions with confidence levels
-      predictions: {
-        hourly: {
-          target: rawData.predictions?.hourly?.target || rawData.priceAnalysis?.prediction1h?.target || currentPrice + (Math.random() - 0.5) * 1000,
-          confidence: rawData.predictions?.hourly?.confidence || rawData.priceAnalysis?.prediction1h?.confidence || Math.floor(60 + Math.random() * 25)
-        },
-        daily: {
-          target: rawData.predictions?.daily?.target || rawData.priceAnalysis?.prediction24h?.target || currentPrice + (Math.random() - 0.5) * 3000,
-          confidence: rawData.predictions?.daily?.confidence || rawData.priceAnalysis?.prediction24h?.confidence || Math.floor(65 + Math.random() * 20)
-        },
-        weekly: {
-          target: rawData.predictions?.weekly?.target || rawData.priceAnalysis?.weeklyOutlook?.target || currentPrice + (Math.random() - 0.5) * 7000,
-          confidence: rawData.predictions?.weekly?.confidence || Math.floor(55 + Math.random() * 20)
-        }
+      // Real predictions only
+      predictions: rawData.predictions || {
+        hourly: { target: 0, confidence: 0 },
+        daily: { target: 0, confidence: 0 },
+        weekly: { target: 0, confidence: 0 }
       },
       
-      // News impact with fallbacks
-      newsImpact: Array.isArray(rawData.newsImpact) && rawData.newsImpact.length > 0 ? rawData.newsImpact : [
-        {
-          headline: `Bitcoin ${currentPrice > 95000 ? 'Maintains' : 'Approaches'} Key Psychological Level`,
-          impact: currentPrice > 95000 ? 'Bullish' : 'Neutral',
-          timeAgo: '2 hours',
-          source: 'Market Analysis'
-        },
-        {
-          headline: 'Institutional Bitcoin ETF Flows Show Continued Interest',
-          impact: 'Bullish',
-          timeAgo: '4 hours',
-          source: 'Bloomberg'
-        },
-        {
-          headline: 'Federal Reserve Policy Meeting Next Week',
-          impact: 'Neutral',
-          timeAgo: '6 hours',
-          source: 'Reuters'
-        }
-      ],
+      // Real news impact
+      newsImpact: Array.isArray(rawData.newsContext) ? rawData.newsContext.map((news: any) => ({
+        headline: news.title,
+        impact: 'Neutral',
+        timeAgo: 'Recent',
+        source: news.source || 'Unknown'
+      })) : [],
+      
+      // Enhanced market data
+      enhancedMarketData: rawData.enhancedMarketData,
       
       // Metadata
-      lastUpdated: rawData.lastUpdated || rawData.timestamp || new Date().toISOString(),
+      lastUpdated: rawData.lastUpdated || new Date().toISOString(),
       timestamp: rawData.timestamp || new Date().toISOString(),
-      isLiveData: rawData.isLiveData || false
+      isLiveData: rawData.isLiveData,
+      isEnhancedData: rawData.isEnhancedData
     }
   }
 
@@ -227,22 +289,41 @@ export default function BTCMarketAnalysis() {
     
     try {
       const response = await fetch('/api/btc-analysis')
-      if (!response.ok) {
-        throw new Error('Failed to fetch BTC analysis')
-      }
-      const rawData = await response.json()
-      const enhancedData = validateAndEnhanceData(rawData)
-      setData(enhancedData)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error occurred')
       
-      // Even on error, provide fallback data for demonstration
-      const fallbackData = validateAndEnhanceData({})
-      setData(fallbackData)
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status} - ${response.statusText}`)
+      }
+      
+      const rawData = await response.json()
+      
+      // Check if API returned success
+      if (!rawData.success) {
+        throw new Error(rawData.error || 'API returned unsuccessful response')
+      }
+      
+      // STRICT: Only accept real data
+      const validatedData = validateRealData(rawData.data)
+      
+      if (!validatedData) {
+        throw new Error('No valid real market data available')
+      }
+      
+      setData(validatedData)
+      console.log('✅ Real market data loaded successfully')
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+      setError(errorMessage)
+      console.error('❌ Failed to load real market data:', errorMessage)
+      
+      // STRICT: No fallback data - leave data as null to show error state
+      setData(null)
     } finally {
       setLoading(false)
     }
   }
+
+  // Manual loading only - no auto-fetch on mount
 
   if (loading) {
     return (
@@ -304,7 +385,7 @@ export default function BTCMarketAnalysis() {
               data.isLiveData ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
             }`}>
               <span className="w-2 h-2 bg-current rounded-full mr-1"></span>
-              {data.isLiveData ? 'LIVE DATA' : 'DEMO DATA'}
+              {data.isLiveData ? 'LIVE DATA' : '🚀 DEMO - Click "Refresh" for Live Intelligence'}
             </span>
             {/* Data Source Indicators */}
             <div className="flex items-center space-x-1">
@@ -453,25 +534,54 @@ export default function BTCMarketAnalysis() {
 
           <div className="bg-gray-50 p-4 rounded-lg col-span-1 lg:col-span-2">
             <div className="flex justify-between items-center mb-3">
-              <span className="text-sm font-medium text-gray-600">Supply/Demand Zones</span>
-              <Target className="h-4 w-4 text-indigo-600" />
+              <span className="text-sm font-medium text-gray-600">
+                {data.isEnhancedData ? 'REAL Supply/Demand Zones' : 'Supply/Demand Zones'}
+              </span>
+              <div className="flex items-center space-x-2">
+                <Target className="h-4 w-4 text-indigo-600" />
+                {data.isEnhancedData && (
+                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded font-medium">
+                    LIVE DATA
+                  </span>
+                )}
+              </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div className="space-y-2">
                 <div className="font-medium text-red-600 mb-2">📈 Supply Zones</div>
-                {data.technicalIndicators?.supplyDemandZones?.supplyZones?.slice(0, 2).map((zone, index) => (
+                {data.technicalIndicators?.supplyDemandZones?.supplyZones?.slice(0, 3).map((zone, index) => (
                   <div key={index} className="bg-red-50 p-2 rounded border-l-2 border-red-300">
                     <div className="font-medium">${Math.round(zone.level).toLocaleString()}</div>
-                    <div className="text-gray-500 text-xs">{zone.strength} Zone</div>
+                    <div className="text-gray-500 text-xs flex justify-between">
+                      <span>{zone.strength} Zone</span>
+                      {zone.source && (
+                        <span className="text-blue-500">
+                          {zone.source === 'orderbook' ? '📊 OrderBook' : '📈 Historical'}
+                        </span>
+                      )}
+                    </div>
+                    {zone.volume && (
+                      <div className="text-gray-400 text-xs">Vol: {zone.volume.toFixed(1)} BTC</div>
+                    )}
                   </div>
                 ))}
               </div>
               <div className="space-y-2">
                 <div className="font-medium text-green-600 mb-2">📉 Demand Zones</div>
-                {data.technicalIndicators?.supplyDemandZones?.demandZones?.slice(0, 2).map((zone, index) => (
+                {data.technicalIndicators?.supplyDemandZones?.demandZones?.slice(0, 3).map((zone, index) => (
                   <div key={index} className="bg-green-50 p-2 rounded border-l-2 border-green-300">
                     <div className="font-medium">${Math.round(zone.level).toLocaleString()}</div>
-                    <div className="text-gray-500 text-xs">{zone.strength} Zone</div>
+                    <div className="text-gray-500 text-xs flex justify-between">
+                      <span>{zone.strength} Zone</span>
+                      {zone.source && (
+                        <span className="text-blue-500">
+                          {zone.source === 'orderbook' ? '📊 OrderBook' : '📈 Historical'}
+                        </span>
+                      )}
+                    </div>
+                    {zone.volume && (
+                      <div className="text-gray-400 text-xs">Vol: {zone.volume.toFixed(1)} BTC</div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -527,6 +637,141 @@ export default function BTCMarketAnalysis() {
           )}
         </div>
       </div>
+
+      {/* Enhanced Market Data Section */}
+      {data.isEnhancedData && data.enhancedMarketData && (
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <Activity className="h-5 w-5 mr-2 text-blue-600" />
+            Real-Time Market Analysis
+            <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded font-medium">
+              LIVE DATA
+            </span>
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {/* Order Book Imbalance */}
+            {data.enhancedMarketData.orderBookImbalance && (
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-blue-800">Order Book Imbalance</span>
+                  <BarChart3 className="h-4 w-4 text-blue-600" />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Volume Bias:</span>
+                    <span className={`font-semibold ${
+                      data.enhancedMarketData.orderBookImbalance.volumeImbalance > 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {(data.enhancedMarketData.orderBookImbalance.volumeImbalance * 100).toFixed(2)}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Bid Pressure:</span>
+                    <span className="text-green-600 font-medium">
+                      {(data.enhancedMarketData.orderBookImbalance.bidPressure * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Ask Pressure:</span>
+                    <span className="text-red-600 font-medium">
+                      {(data.enhancedMarketData.orderBookImbalance.askPressure * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Market Sentiment */}
+            {data.enhancedMarketData.realMarketSentiment && (
+              <div className="bg-purple-50 p-4 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-purple-800">Market Sentiment</span>
+                  <AlertTriangle className="h-4 w-4 text-purple-600" />
+                </div>
+                <div className="space-y-2">
+                  {data.enhancedMarketData.realMarketSentiment.fearGreedIndex && (
+                    <div className="flex justify-between text-sm">
+                      <span>Fear & Greed:</span>
+                      <span className={`font-semibold ${
+                        data.enhancedMarketData.realMarketSentiment.fearGreedIndex > 50 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {data.enhancedMarketData.realMarketSentiment.fearGreedIndex}/100
+                      </span>
+                    </div>
+                  )}
+                  {data.enhancedMarketData.realMarketSentiment.fundingRate && (
+                    <div className="flex justify-between text-sm">
+                      <span>Funding Rate:</span>
+                      <span className={`font-medium ${
+                        data.enhancedMarketData.realMarketSentiment.fundingRate > 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {(data.enhancedMarketData.realMarketSentiment.fundingRate * 100).toFixed(4)}%
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Whale Movements */}
+            {data.enhancedMarketData.whaleMovements && data.enhancedMarketData.whaleMovements.length > 0 && (
+              <div className="bg-orange-50 p-4 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-orange-800">Whale Activity</span>
+                  <TrendingUp className="h-4 w-4 text-orange-600" />
+                </div>
+                <div className="space-y-1">
+                  {data.enhancedMarketData.whaleMovements.slice(0, 3).map((whale: any, index: number) => (
+                    <div key={index} className="text-xs">
+                      <span className={`font-medium ${whale.isBuyerMaker ? 'text-red-600' : 'text-green-600'}`}>
+                        {whale.isBuyerMaker ? 'SELL' : 'BUY'}
+                      </span>
+                      <span className="text-gray-600 ml-1">
+                        {whale.quantity.toFixed(1)} BTC @ ${whale.price.toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Data Quality Indicators */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium text-gray-800">Data Quality</span>
+                <Activity className="h-4 w-4 text-gray-600" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span>Order Book:</span>
+                  <span className={`font-medium ${
+                    data.enhancedMarketData.dataQuality?.orderBookData ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {data.enhancedMarketData.dataQuality?.orderBookData ? '✓ Live' : '✗ Unavailable'}
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span>Volume Data:</span>
+                  <span className={`font-medium ${
+                    data.enhancedMarketData.dataQuality?.volumeData ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {data.enhancedMarketData.dataQuality?.volumeData ? '✓ Live' : '✗ Unavailable'}
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span>Sentiment:</span>
+                  <span className={`font-medium ${
+                    data.enhancedMarketData.dataQuality?.sentimentData ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {data.enhancedMarketData.dataQuality?.sentimentData ? '✓ Live' : '✗ Unavailable'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Market Predictions */}
       <div className="mb-6">
@@ -587,12 +832,7 @@ export default function BTCMarketAnalysis() {
               {data.marketSentiment?.overall || 'Neutral'}
             </p>
           </div>
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600">Fear & Greed</p>
-            <p className="font-semibold text-blue-600">
-              {data.marketSentiment?.fearGreed || 50}/100
-            </p>
-          </div>
+          <FearGreedSlider value={data.marketSentiment?.fearGreed || 50} />
           <div className="text-center p-3 bg-gray-50 rounded-lg">
             <p className="text-sm text-gray-600">Social Media</p>
             <p className="font-semibold text-purple-600">
@@ -612,6 +852,11 @@ export default function BTCMarketAnalysis() {
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Visual Trading Zones</h3>
         <BTCTradingChart />
+      </div>
+
+      {/* Hidden Pivot Analysis */}
+      <div className="mb-6">
+        <BTCHiddenPivotChart />
       </div>
 
       {/* News Impact */}

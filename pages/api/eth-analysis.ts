@@ -58,9 +58,13 @@ async function fetchRealETHPrice() {
 async function fetchEthereumNews() {
   try {
     console.log('Fetching Ethereum news...');
+    
+    // Get articles from last 10 days including today
+    const lastTenDays = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString();
+    
     // Try multiple news sources
     const newsApis = [
-      `https://newsapi.org/v2/everything?q=ethereum+ETH+price+analysis&sortBy=publishedAt&pageSize=10&apiKey=${process.env.NEWS_API_KEY}`,
+      `https://newsapi.org/v2/everything?q=ethereum+ETH+price+analysis&from=${lastTenDays}&sortBy=publishedAt&pageSize=10&language=en&apiKey=${process.env.NEWS_API_KEY}`,
     ];
     
     for (const apiUrl of newsApis) {

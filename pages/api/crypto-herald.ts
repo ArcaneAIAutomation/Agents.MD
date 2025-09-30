@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
-// Enhanced crypto news fetch with rate limit detection
+// Enhanced crypto news fetch with rate limit detection and deduplication
 async function fetchCryptoNews() {
   const apiStatus = {
     source: 'Unknown',
@@ -9,28 +9,33 @@ async function fetchCryptoNews() {
     isRateLimit: false
   };
 
+  let allArticles: any[] = [];
+  let workingSources: string[] = [];
+
   try {
     // Try Alpha Vantage first (usually more reliable)
     if (process.env.ALPHA_VANTAGE_API_KEY && process.env.ALPHA_VANTAGE_API_KEY !== 'undefined') {
+      console.log('Trying Alpha Vantage API...');
       const alphaResult = await fetchAlphaVantageNews();
       if (alphaResult.success) {
-        return { 
-          articles: alphaResult.articles, 
-          apiStatus: { source: 'Alpha Vantage', status: 'Active', message: 'Live news feed active' } 
-        };
-      }
-      apiStatus.source = 'Alpha Vantage';
-      apiStatus.message = alphaResult.error || 'API Error';
-      if (alphaResult.error?.includes('rate limit') || alphaResult.error?.includes('limit exceeded')) {
-        apiStatus.isRateLimit = true;
-        apiStatus.message = 'Alpha Vantage rate limit exceeded';
+        console.log('Alpha Vantage success:', alphaResult.articles.length, 'articles');
+        allArticles = allArticles.concat(alphaResult.articles);
+        workingSources.push('Alpha Vantage');
+      } else {
+        console.log('Alpha Vantage failed:', alphaResult.error);
+        if (alphaResult.error?.includes('rate limit') || alphaResult.error?.includes('limit exceeded')) {
+          console.log('Alpha Vantage rate limited - will try NewsAPI');
+        }
       }
     }
 
-    // Fallback to NewsAPI
+    // Try NewsAPI (either as primary or fallback)
     if (process.env.NEWS_API_KEY && process.env.NEWS_API_KEY !== 'undefined') {
-      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const newsUrl = `https://newsapi.org/v2/everything?q=bitcoin+OR+ethereum+OR+cryptocurrency&from=${yesterday}&sortBy=publishedAt&pageSize=15&apiKey=${process.env.NEWS_API_KEY}`;
+      console.log('Trying NewsAPI...');
+      
+      // Try broader search (last 10 days for better results) - English only
+      const lastTenDays = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString();
+      const newsUrl = `https://newsapi.org/v2/everything?q=bitcoin+OR+cryptocurrency+OR+crypto&from=${lastTenDays}&sortBy=publishedAt&pageSize=20&language=en&apiKey=${process.env.NEWS_API_KEY}`;
       
       const response = await fetch(newsUrl, { 
         signal: AbortSignal.timeout(8000)
@@ -39,18 +44,21 @@ async function fetchCryptoNews() {
       const data = await response.json();
       
       if (data.status === 'error') {
-        apiStatus.source = 'NewsAPI';
+        console.log('NewsAPI error:', data.code, data.message);
         if (data.code === 'rateLimited') {
-          apiStatus.isRateLimit = true;
-          apiStatus.message = 'NewsAPI rate limit exceeded (100 requests/24hrs on free tier)';
-        } else {
-          apiStatus.message = data.message || 'NewsAPI error';
+          console.log('NewsAPI rate limited');
         }
-        return { articles: null, apiStatus };
-      }
-      
-      if (response.ok && data.articles && data.articles.length > 0) {
-        const processedArticles = data.articles.slice(0, 12).map((article: any, index: number) => ({
+      } else if (response.ok && data.articles && data.articles.length > 0) {
+        console.log('NewsAPI success:', data.articles.length, 'articles');
+        
+        // Filter for English articles only and process
+        const englishArticles = data.articles.filter((article: any) => 
+          isEnglishArticle(article.title, article.description)
+        );
+        
+        console.log('English articles filtered:', englishArticles.length, 'of', data.articles.length);
+        
+        const processedArticles = englishArticles.slice(0, 15).map((article: any, index: number) => ({
           id: `news-${Date.now()}-${index}`,
           headline: article.title || 'Breaking Crypto News',
           summary: article.description || 'Latest developments in cryptocurrency markets.',
@@ -63,23 +71,115 @@ async function fetchCryptoNews() {
           isLive: true
         }));
         
-        return { 
-          articles: processedArticles, 
-          apiStatus: { source: 'NewsAPI', status: 'Active', message: 'Live news feed active' } 
-        };
+        allArticles = allArticles.concat(processedArticles);
+        workingSources.push('NewsAPI');
       }
     }
 
-    // No valid API keys
-    apiStatus.source = 'Configuration';
-    apiStatus.message = 'No valid API keys configured';
+    // If we have articles from any source, deduplicate and return
+    if (allArticles.length > 0) {
+      const deduplicatedArticles = deduplicateArticles(allArticles);
+      const finalArticles = deduplicatedArticles.slice(0, 12); // Limit to 12 total
+      
+      return { 
+        articles: finalArticles, 
+        apiStatus: { 
+          source: workingSources.join(' + '), 
+          status: 'Active', 
+          message: `Live news feed active from ${workingSources.join(' and ')}`, 
+          isRateLimit: false 
+        } 
+      };
+    }
+
+    // If we get here, either no API keys or all APIs failed (not rate limited)
+    console.log('No valid API keys configured or all APIs failed');
+    apiStatus.source = 'System';
+    apiStatus.status = 'Fallback';
+    apiStatus.message = 'APIs not available - using demo data for demonstration';
+    apiStatus.isRateLimit = false;
     return { articles: null, apiStatus };
 
   } catch (error: any) {
     console.log('News fetch error:', error);
-    apiStatus.message = `Network error: ${error?.message || 'Unknown error'}`;
+    apiStatus.source = 'System';
+    apiStatus.status = 'Error';
+    apiStatus.message = `Network error: ${error?.message || 'Unknown error'} - using fallback data`;
+    apiStatus.isRateLimit = false;
     return { articles: null, apiStatus };
   }
+}
+
+// Deduplicate articles based on title similarity and URL
+function deduplicateArticles(articles: any[]): any[] {
+  const seen = new Set<string>();
+  const deduplicated: any[] = [];
+  
+  for (const article of articles) {
+    // Create a signature based on cleaned title and URL
+    const titleWords = article.headline.toLowerCase()
+      .replace(/[^\w\s]/g, '')
+      .split(/\s+/)
+      .filter((word: string) => word.length > 3)
+      .slice(0, 5) // First 5 significant words
+      .sort()
+      .join(' ');
+    
+    const urlHost = article.url ? new URL(article.url).hostname : '';
+    const signature = `${titleWords}-${urlHost}`;
+    
+    if (!seen.has(signature)) {
+      seen.add(signature);
+      deduplicated.push(article);
+    }
+  }
+  
+  return deduplicated;
+}
+
+// Check if article text is in English
+function isEnglishArticle(title: string, description: string): boolean {
+  const text = `${title} ${description || ''}`.toLowerCase();
+  
+  // Common English words that are good indicators
+  const englishIndicators = [
+    'the', 'and', 'or', 'to', 'in', 'is', 'it', 'you', 'that', 'he', 'was', 'for', 'on', 'are', 'as',
+    'with', 'his', 'they', 'i', 'at', 'be', 'this', 'have', 'from', 'not', 'had', 'by', 'but', 'what',
+    'bitcoin', 'crypto', 'cryptocurrency', 'ethereum', 'trading', 'market', 'price', 'analysis'
+  ];
+  
+  // Non-English character patterns
+  const nonEnglishPatterns = [
+    /[\u4e00-\u9fff]/, // Chinese characters
+    /[\u3040-\u309f\u30a0-\u30ff]/, // Japanese hiragana/katakana
+    /[\u0400-\u04ff]/, // Cyrillic
+    /[\u0590-\u05ff]/, // Hebrew
+    /[\u0600-\u06ff]/, // Arabic
+    /[\u0370-\u03ff]/, // Greek
+    /[\u0900-\u097f]/, // Devanagari
+  ];
+  
+  // Check for non-English characters
+  for (const pattern of nonEnglishPatterns) {
+    if (pattern.test(text)) {
+      return false;
+    }
+  }
+  
+  // Count English indicator words
+  const words = text.split(/\s+/);
+  const englishWordCount = words.filter(word => 
+    englishIndicators.includes(word.replace(/[^a-z]/g, ''))
+  ).length;
+  
+  // If we have enough words and a reasonable percentage are English indicators
+  if (words.length >= 5) {
+    const englishRatio = englishWordCount / words.length;
+    return englishRatio >= 0.1; // At least 10% recognizable English words
+  }
+  
+  // For shorter text, be more lenient but still check for obvious non-English
+  return words.length < 5 || englishWordCount > 0;
 }
 
 // Alpha Vantage news fetcher
@@ -93,8 +193,12 @@ async function fetchAlphaVantageNews() {
     
     const data = await response.json();
     
-    if (data.Information && data.Information.includes('rate limit')) {
-      return { success: false, error: 'Alpha Vantage rate limit exceeded' };
+    // Check for rate limit or API limit messages
+    if (data.Information) {
+      if (data.Information.includes('rate limit') || data.Information.includes('daily rate limit') || data.Information.includes('25 requests per day')) {
+        return { success: false, error: 'Alpha Vantage daily rate limit exceeded (25 requests/day)' };
+      }
+      return { success: false, error: data.Information };
     }
     
     if (data.Error) {
@@ -102,7 +206,7 @@ async function fetchAlphaVantageNews() {
     }
     
     if (!data.feed || data.feed.length === 0) {
-      return { success: false, error: 'No articles returned' };
+      return { success: false, error: 'No articles returned from Alpha Vantage' };
     }
     
     const articles = data.feed.slice(0, 15).map((item: any, index: number) => ({
@@ -337,17 +441,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let isLive = false;
 
     if (newsData && newsData.articles) {
+      // We got live articles from an API
       articles = newsData.articles;
       apiStatus = newsData.apiStatus;
       isLive = true;
+      console.log('Using live articles from:', apiStatus.source);
     } else {
+      // Using fallback articles
       articles = generateFallbackNews();
       apiStatus = newsData?.apiStatus || {
         source: 'System',
         status: 'Fallback',
-        message: 'Using demo data - Configure API keys for live feeds',
+        message: 'Using demo data - API keys not configured',
         isRateLimit: false
       };
+      console.log('Using fallback articles. Reason:', apiStatus.message);
     }
 
     const response = {
@@ -355,11 +463,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       data: {
         articles: articles,
         marketTicker: tickerData,
-        apiStatus: apiStatus, // Include API status in response
+        apiStatus: apiStatus, // Include detailed API status
         meta: {
           totalArticles: articles.length,
           isLiveData: isLive,
-          sources: isLive ? [apiStatus.source, 'CoinGecko'] : ['Demo Data'],
+          sources: isLive ? [apiStatus.source, 'CoinGecko'] : ['Demo Data', 'CoinGecko'],
           lastUpdated: new Date().toISOString(),
           processingTime: 'Enhanced with API monitoring',
           note: isLive ? `Live feed via ${apiStatus.source}` : apiStatus.message
@@ -380,7 +488,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         apiStatus: {
           source: 'Error Handler',
           status: 'Error',
-          message: 'System error - Using fallback data',
+          message: 'System error - using fallback data',
           isRateLimit: false
         },
         meta: {
@@ -388,7 +496,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           isLiveData: false,
           sources: ['Fallback System'],
           lastUpdated: new Date().toISOString(),
-          note: 'System error - Using demo articles'
+          note: 'System error - using demo articles'
         }
       }
     };

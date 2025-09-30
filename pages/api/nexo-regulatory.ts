@@ -8,10 +8,13 @@ const openai = new OpenAI({
 // Real news fetching functions
 async function fetchNexoNews() {
   try {
+    // Get articles from last 10 days including today
+    const lastTenDays = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString();
+    
     // Try multiple news sources for Nexo-related content
     const newsApis = [
-      `https://newsapi.org/v2/everything?q=Nexo+UK+regulatory+FCA&sortBy=publishedAt&apiKey=${process.env.NEWS_API_KEY}`,
-      `https://newsapi.org/v2/everything?q=Nexo+cryptocurrency+regulation&sortBy=publishedAt&apiKey=${process.env.NEWS_API_KEY}`,
+      `https://newsapi.org/v2/everything?q=Nexo+UK+regulatory+FCA&from=${lastTenDays}&sortBy=publishedAt&language=en&apiKey=${process.env.NEWS_API_KEY}`,
+      `https://newsapi.org/v2/everything?q=Nexo+cryptocurrency+regulation&from=${lastTenDays}&sortBy=publishedAt&language=en&apiKey=${process.env.NEWS_API_KEY}`,
       `https://cryptonews-api.com/api/v1?tickers=NEXO&items=10&token=${process.env.CRYPTO_NEWS_API_KEY}`
     ];
     
@@ -39,10 +42,13 @@ async function fetchNexoNews() {
 
 async function fetchRegulatoryUpdates() {
   try {
+    // Get articles from last 10 days including today
+    const lastTenDays = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString();
+    
     // Try to fetch from regulatory sources
     const regulatoryApis = [
-      `https://newsapi.org/v2/everything?q=FCA+cryptocurrency+regulation+UK&sortBy=publishedAt&apiKey=${process.env.NEWS_API_KEY}`,
-      `https://newsapi.org/v2/everything?q="Financial+Conduct+Authority"+crypto&sortBy=publishedAt&apiKey=${process.env.NEWS_API_KEY}`
+      `https://newsapi.org/v2/everything?q=FCA+cryptocurrency+regulation+UK&from=${lastTenDays}&sortBy=publishedAt&language=en&apiKey=${process.env.NEWS_API_KEY}`,
+      `https://newsapi.org/v2/everything?q="Financial+Conduct+Authority"+crypto&from=${lastTenDays}&sortBy=publishedAt&language=en&apiKey=${process.env.NEWS_API_KEY}`
     ];
     
     for (const apiUrl of regulatoryApis) {
