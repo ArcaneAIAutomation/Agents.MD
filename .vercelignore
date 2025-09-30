@@ -1,0 +1,14 @@
+# Ignore backup directories during deployment
+backups/
+*.md
+!README.md
+
+# Ignore development files
+.env.local.example
+test-*.js
+.vscode/
+
+# Ignore build artifacts
+.next
+node_modules
+*.log

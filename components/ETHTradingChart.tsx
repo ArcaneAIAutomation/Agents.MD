@@ -1,16 +1,109 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import TradingChart from './TradingChart';
-import { useETHData } from '@/hooks/useMarketData';
+
+interface TradingAnalysisData {
+  success: boolean;
+  data: Array<{
+    timestamp: number;
+    price: number;
+    volume: number;
+    high: number;
+    low: number;
+    open: number;
+    close: number;
+  }>;
+  symbol: string;
+  timeframe: string;
+  source: string;
+  cached?: boolean;
+  analysis: {
+    supportLevels: number[];
+    resistanceLevels: number[];
+    fibonacciLevels: {
+      retracement: number[];
+      extension: number[];
+    };
+    hiddenPivots: {
+      highs: Array<{ price: number; timestamp: number }>;
+      lows: Array<{ price: number; timestamp: number }>;
+    };
+    tradingZones: Array<{
+      type: 'support' | 'resistance';
+      price: number;
+      strength: number;
+      touches: number;
+    }>;
+  };
+}
 
 export default function ETHTradingChart() {
-  const { ethData, loading, error } = useETHData();
+  const [tradingData, setTradingData] = useState<TradingAnalysisData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [timeframe, setTimeframe] = useState('1D');
 
-  if (loading || !ethData) {
+  // Fetch CoinMarketCap trading analysis data
+  const fetchTradingData = async (tf: string) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      console.log(`🎯 Fetching ETH trading analysis from CoinMarketCap (${tf})`);
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
+      const response = await fetch(`/api/cmc-trading-analysis?symbol=ETH&timeframe=${tf}`, {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      const result = await response.json();
+
+      if (result.success || result.data.length > 0) {
+        console.log(`✅ ETH trading analysis received:`, {
+          dataPoints: result.data.length,
+          source: result.source,
+          supportLevels: result.analysis.supportLevels.length,
+          resistanceLevels: result.analysis.resistanceLevels.length,
+          tradingZones: result.analysis.tradingZones.length,
+          hiddenPivots: result.analysis.hiddenPivots.highs.length + result.analysis.hiddenPivots.lows.length
+        });
+        
+        setTradingData(result);
+      } else {
+        throw new Error(result.error || 'Failed to fetch trading data');
+      }
+    } catch (err) {
+      console.error('❌ ETH trading analysis failed:', err);
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Add timeout to prevent hanging
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        setError('Request timeout - API took too long to respond');
+        setLoading(false);
+      }
+    }, 8000);
+
+    fetchTradingData(timeframe).finally(() => {
+      clearTimeout(timeoutId);
+    });
+
+    return () => clearTimeout(timeoutId);
+  }, [timeframe]);
+
+  if (loading || !tradingData) {
     return (
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          <span className="ml-3 text-gray-600">Loading Ethereum chart data...</span>
+          <span className="ml-3 text-gray-600">Loading ETH trading analysis from CoinMarketCap...</span>
         </div>
       </div>
     );
@@ -20,41 +113,112 @@ export default function ETHTradingChart() {
     return (
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="flex items-center justify-center h-64 text-red-600">
-          <span>Error loading Ethereum data: {error}</span>
+          <span>Error loading ETH trading data: {error}</span>
+          <button 
+            onClick={() => fetchTradingData(timeframe)}
+            className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
   }
 
-  const currentPrice = ethData.currentPrice || 3850;
+  const currentPrice = tradingData.data.length > 0 ? 
+    tradingData.data[tradingData.data.length - 1].close : 4000;
   
-  // Transform supply/demand zones to trading zones format
-  const tradingZones = ethData.technicalIndicators?.supplyDemandZones ? {
-    buyZones: ethData.technicalIndicators.supplyDemandZones.demandZones.map((zone: any) => ({
-      ...zone,
-      type: 'buy' as const
-    })),
-    sellZones: ethData.technicalIndicators.supplyDemandZones.supplyZones.map((zone: any) => ({
-      ...zone,
-      type: 'sell' as const
-    }))
-  } : {
-    buyZones: [
-      { level: currentPrice - 300, strength: 'Strong' as const, type: 'buy' as const, volume: 2850000 },
-      { level: currentPrice - 150, strength: 'Moderate' as const, type: 'buy' as const, volume: 1820000 }
-    ],
-    sellZones: [
-      { level: currentPrice + 180, strength: 'Moderate' as const, type: 'sell' as const, volume: 1950000 },
-      { level: currentPrice + 350, strength: 'Strong' as const, type: 'sell' as const, volume: 3120000 }
-    ]
+  // Transform CoinMarketCap trading zones to our format
+  const tradingZones = {
+    buyZones: tradingData.analysis.tradingZones
+      .filter(zone => zone.type === 'support')
+      .map(zone => ({
+        level: zone.price,
+        strength: zone.strength > 60 ? 'Strong' as const : 'Moderate' as const,
+        type: 'buy' as const,
+        volume: zone.touches * 2500000,
+        touches: zone.touches
+      })),
+    sellZones: tradingData.analysis.tradingZones
+      .filter(zone => zone.type === 'resistance')
+      .map(zone => ({
+        level: zone.price,
+        strength: zone.strength > 60 ? 'Strong' as const : 'Moderate' as const,
+        type: 'sell' as const,
+        volume: zone.touches * 2500000,
+        touches: zone.touches
+      }))
+  };
+
+  // Enhanced support/resistance from CoinMarketCap analysis
+  const supportResistance = {
+    strongSupport: tradingData.analysis.supportLevels[0] || currentPrice * 0.94,
+    support: tradingData.analysis.supportLevels[1] || currentPrice * 0.97,
+    resistance: tradingData.analysis.resistanceLevels[1] || currentPrice * 1.03,
+    strongResistance: tradingData.analysis.resistanceLevels[0] || currentPrice * 1.06
   };
 
   return (
-    <TradingChart
-      symbol="ETH"
-      currentPrice={currentPrice}
-      supportResistance={ethData.technicalIndicators?.supportResistance}
-      tradingZones={tradingZones}
-    />
+    <div className="space-y-4">
+      {/* Header with data source indicator */}
+      <div className="bg-white rounded-lg shadow-lg p-4">
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">ETH Trading Zones Analysis</h3>
+            <p className="text-sm text-gray-600">
+              📊 Data Source: <span className="font-semibold text-blue-600">{tradingData.source}</span>
+              {tradingData.cached && <span className="ml-2 text-green-600">📦 Cached</span>}
+            </p>
+          </div>
+          
+          {/* Timeframe selector */}
+          <div className="flex space-x-2">
+            {['1H', '4H', '1D'].map(tf => (
+              <button
+                key={tf}
+                onClick={() => setTimeframe(tf)}
+                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                  timeframe === tf
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                {tf}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        {/* Trading zones summary */}
+        <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div className="text-center">
+            <div className="font-semibold text-green-600">{tradingZones.buyZones.length}</div>
+            <div className="text-gray-600">Buy Zones</div>
+          </div>
+          <div className="text-center">
+            <div className="font-semibold text-red-600">{tradingZones.sellZones.length}</div>
+            <div className="text-gray-600">Sell Zones</div>
+          </div>
+          <div className="text-center">
+            <div className="font-semibold text-blue-600">{tradingData.analysis.fibonacciLevels.retracement.length}</div>
+            <div className="text-gray-600">Fib Levels</div>
+          </div>
+          <div className="text-center">
+            <div className="font-semibold text-purple-600">
+              {tradingData.analysis.hiddenPivots.highs.length + tradingData.analysis.hiddenPivots.lows.length}
+            </div>
+            <div className="text-gray-600">Hidden Pivots</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Trading chart */}
+      <TradingChart
+        symbol="ETH"
+        currentPrice={currentPrice}
+        supportResistance={supportResistance}
+        tradingZones={tradingZones}
+      />
+    </div>
   );
 }

@@ -105,22 +105,6 @@ This guide provides comprehensive information for working with AI agents in soft
 - User guides
 - Change logs
 
-### 🎨 UI/UX Agents
-**Purpose**: Assist with user interface and experience design
-**Capabilities**:
-- Component design and styling
-- Accessibility compliance
-- User interaction optimization
-- Design system implementation
-
-### 🧠 AI/ML Agents
-**Purpose**: Implement and optimize machine learning solutions
-**Capabilities**:
-- Model training and evaluation
-- Data preprocessing
-- Feature engineering
-- Model deployment and monitoring
-
 ## Best Practices
 
 ### ✅ Effective Agent Communication
@@ -140,18 +124,6 @@ This guide provides comprehensive information for working with AI agents in soft
 2. **Access Control**: Limit agent permissions appropriately
 3. **Audit Trail**: Maintain logs of agent activities
 4. **Regular Updates**: Keep agent systems up to date
-
-### ✅ Code Quality Standards
-1. **Consistent Formatting**: Use automated code formatters
-2. **Naming Conventions**: Follow established naming patterns
-3. **Error Handling**: Implement comprehensive error management
-4. **Performance**: Optimize for speed and efficiency
-
-### ✅ Collaboration Guidelines
-1. **Version Control**: Use clear commit messages and branching strategies
-2. **Code Comments**: Document complex logic and decisions
-3. **Pull Requests**: Use structured review processes
-4. **Knowledge Sharing**: Maintain team documentation and standards
 
 ## Workflow Templates
 
@@ -190,30 +162,6 @@ This guide provides comprehensive information for working with AI agents in soft
 8. Post-Release Monitoring
 ```
 
-### 🔄 Code Review Workflow
-```
-1. Create Pull Request
-2. Automated Checks (CI/CD)
-3. Peer Review
-4. Address Feedback
-5. Final Approval
-6. Merge to Main Branch
-7. Deploy to Staging
-8. Production Release
-```
-
-### 🔄 Issue Resolution Workflow
-```
-1. Issue Triage
-2. Priority Assignment
-3. Investigation
-4. Solution Planning
-5. Implementation
-6. Testing & Validation
-7. Documentation Update
-8. Issue Closure
-```
-
 ## Common Use Cases
 
 ### 💻 Web Development
@@ -239,24 +187,6 @@ This guide provides comprehensive information for working with AI agents in soft
 - Cloud infrastructure setup
 - Continuous integration/deployment
 - Monitoring and logging
-
-### 🔐 Security & Compliance
-- Security vulnerability assessments
-- Authentication and authorization
-- Data encryption and protection
-- Compliance auditing (GDPR, SOC2, etc.)
-
-### 📱 Mobile Development
-- React Native app development
-- Cross-platform compatibility
-- Mobile-specific optimizations
-- App store deployment
-
-### 🌐 API Development
-- RESTful API design
-- GraphQL implementation
-- API documentation (OpenAPI/Swagger)
-- Rate limiting and authentication
 
 ## Troubleshooting
 
@@ -296,36 +226,6 @@ npm doctor
 
 # View detailed npm logs
 npm config list
-
-# Check for outdated packages
-npm outdated
-
-# Security audit
-npm audit
-
-# Clean install (recommended for troubleshooting)
-rm -rf node_modules package-lock.json && npm install
-```
-
-### 🚨 Emergency Procedures
-
-#### Production Hotfix
-1. **Immediate Assessment**: Identify severity and impact
-2. **Hotfix Branch**: Create emergency fix branch
-3. **Minimal Changes**: Implement only critical fixes
-4. **Fast-Track Testing**: Essential tests only
-5. **Emergency Deployment**: Deploy with monitoring
-6. **Post-Incident Review**: Document and improve processes
-
-#### Rollback Procedure
-```bash
-# Quick rollback to previous version
-git revert <commit-hash>
-npm run build
-npm run deploy
-
-# Or use deployment platform rollback
-# (AWS, Vercel, Netlify, etc.)
 ```
 
 ## Resources
@@ -348,23 +248,6 @@ npm run deploy
 - [JavaScript.info](https://javascript.info/)
 - [React Documentation](https://react.dev/)
 - [CSS-Tricks](https://css-tricks.com/)
-
-### 🔗 Agent Integration APIs
-- **OpenAI GPT API**: For natural language processing
-- **GitHub Copilot**: Code completion and suggestions
-- **Anthropic Claude**: Advanced reasoning and analysis
-- **Google Gemini**: Multimodal AI capabilities
-
-### 📊 Monitoring & Analytics Tools
-- **Application Performance**: New Relic, DataDog, AppDynamics
-- **Error Tracking**: Sentry, Rollbar, Bugsnag
-- **User Analytics**: Google Analytics, Mixpanel, Amplitude
-- **Uptime Monitoring**: Pingdom, UptimeRobot, StatusPage
-
-### 🔒 Security Tools
-- **Vulnerability Scanning**: Snyk, OWASP ZAP, Nessus
-- **Code Security**: SonarQube, CodeQL, Semgrep
-- **Dependency Scanning**: npm audit, Dependabot, WhiteSource
 
 ---
 
@@ -393,41 +276,6 @@ npm start
 
 # Run linting
 npm run lint
-
-# Additional useful commands
-npm run type-check    # TypeScript type checking
-npm run test         # Run test suite
-npm run test:watch   # Run tests in watch mode
-npm run analyze      # Bundle size analysis
-```
-
-## Agent Interaction Examples
-
-### 💬 Effective Prompts
-```
-❌ Poor: "Fix this code"
-✅ Good: "Optimize this React component for performance by implementing React.memo and reducing re-renders"
-
-❌ Poor: "Make it look better"
-✅ Good: "Improve the UI by adding consistent spacing, better color contrast for accessibility, and responsive design for mobile devices"
-
-❌ Poor: "Debug this"
-✅ Good: "Debug this TypeScript compilation error in the authentication module, focusing on type definitions and interface compatibility"
-```
-
-### 🎯 Task Delegation Templates
-```markdown
-## Code Review Request
-- **File(s)**: [List specific files]
-- **Focus Areas**: [Security, Performance, Best Practices]
-- **Deadline**: [Specific date/time]
-- **Context**: [Background information]
-
-## Feature Implementation
-- **Feature**: [Clear description]
-- **Requirements**: [Detailed specifications]
-- **Acceptance Criteria**: [Definition of done]
-- **Dependencies**: [Related components/APIs]
 ```
 
 ---

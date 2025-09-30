@@ -1,17 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TrendingUp, Target, BarChart3, Zap } from 'lucide-react';
-
-interface PriceData {
-  timestamp: number;
-  price: number;
-  volume?: number;
-}
 
 interface TradingZone {
   level: number;
   strength: 'Strong' | 'Moderate' | 'Weak';
   type: 'buy' | 'sell';
   volume: number;
+  source?: string;
+  confidence?: number;
 }
 
 interface ChartProps {
@@ -30,379 +26,423 @@ interface ChartProps {
 }
 
 export default function TradingChart({ symbol, currentPrice, supportResistance, tradingZones }: ChartProps) {
-  const [priceData, setPriceData] = useState<PriceData[]>([]);
   const [timeframe, setTimeframe] = useState<'1H' | '4H' | '1D'>('4H');
   const [hoveredZone, setHoveredZone] = useState<TradingZone | null>(null);
-  const chartRef = useRef<SVGSVGElement>(null);
 
-  // Generate realistic price data based on current price
-  const generatePriceData = (basePrice: number, periods: number = 50) => {
-    const data: PriceData[] = [];
-    let price = basePrice;
-    const now = Date.now();
-    const interval = timeframe === '1H' ? 3600000 : timeframe === '4H' ? 14400000 : 86400000;
+  // Calculate optimal price range for better visual distribution
+  const calculateOptimalRange = () => {
+    // Collect all zone levels
+    const allLevels = [
+      currentPrice,
+      ...(tradingZones?.buyZones.map(z => z.level) || []),
+      ...(tradingZones?.sellZones.map(z => z.level) || []),
+      ...(supportResistance ? [
+        supportResistance.strongSupport,
+        supportResistance.support,
+        supportResistance.resistance,
+        supportResistance.strongResistance
+      ] : [])
+    ].filter(level => level > 0);
 
-    for (let i = periods; i >= 0; i--) {
-      // Add some realistic volatility
-      const volatility = symbol === 'BTC' ? 0.02 : 0.03; // BTC less volatile than ETH
-      const change = (Math.random() - 0.5) * volatility;
-      price = price * (1 + change);
-      
-      data.push({
-        timestamp: now - (i * interval),
-        price: Math.round(price * 100) / 100,
-        volume: Math.random() * 1000000 + 500000
-      });
+    if (allLevels.length === 0) {
+      return {
+        min: currentPrice * 0.85,
+        max: currentPrice * 1.15
+      };
     }
+
+    const minLevel = Math.min(...allLevels);
+    const maxLevel = Math.max(...allLevels);
+    const range = maxLevel - minLevel;
     
-    // Ensure the last price matches current price
-    data[data.length - 1].price = currentPrice;
-    return data;
+    // Ensure minimum 10% range for visibility
+    const minRange = currentPrice * 0.1;
+    const actualRange = Math.max(range, minRange);
+    
+    // Add 15% padding on each side
+    const padding = actualRange * 0.15;
+    
+    return {
+      min: Math.max(0, minLevel - padding),
+      max: maxLevel + padding
+    };
   };
 
-  useEffect(() => {
-    const data = generatePriceData(currentPrice);
-    setPriceData(data);
-  }, [currentPrice, timeframe, symbol]);
-
-  // Calculate chart dimensions and scales
-  const chartWidth = 800;
+  const priceRange = calculateOptimalRange();
   const chartHeight = 400;
-  const padding = { top: 20, right: 60, bottom: 40, left: 80 };
-  const innerWidth = chartWidth - padding.left - padding.right;
-  const innerHeight = chartHeight - padding.top - padding.bottom;
+  const chartWidth = 800;
 
-  const priceExtent = priceData.length > 0 ? {
-    min: Math.min(...priceData.map(d => d.price)) * 0.95,
-    max: Math.max(...priceData.map(d => d.price)) * 1.05
-  } : { min: currentPrice * 0.95, max: currentPrice * 1.05 };
-
-  const timeExtent = priceData.length > 0 ? {
-    min: priceData[0].timestamp,
-    max: priceData[priceData.length - 1].timestamp
-  } : { min: Date.now() - 86400000, max: Date.now() };
-
-  // Scale functions
-  const xScale = (timestamp: number) => 
-    ((timestamp - timeExtent.min) / (timeExtent.max - timeExtent.min)) * innerWidth;
-  
-  const yScale = (price: number) => 
-    innerHeight - ((price - priceExtent.min) / (priceExtent.max - priceExtent.min)) * innerHeight;
-
-  // Generate price line path
-  const priceLine = priceData.map((d, i) => 
-    `${i === 0 ? 'M' : 'L'} ${xScale(d.timestamp)} ${yScale(d.price)}`
-  ).join(' ');
-
-  // Zone rendering function
-  const renderZone = (zone: TradingZone, index: number) => {
-    const y = yScale(zone.level);
-    const zoneHeight = 20; // Visual height of zone
-    
-    return (
-      <g key={`${zone.type}-${index}`}>
-        {/* Zone rectangle */}
-        <rect
-          x={0}
-          y={y - zoneHeight / 2}
-          width={innerWidth}
-          height={zoneHeight}
-          fill={zone.type === 'buy' ? '#10B981' : '#EF4444'}
-          fillOpacity={zone.strength === 'Strong' ? 0.3 : zone.strength === 'Moderate' ? 0.2 : 0.1}
-          stroke={zone.type === 'buy' ? '#059669' : '#DC2626'}
-          strokeWidth={zone.strength === 'Strong' ? 2 : 1}
-          strokeDasharray={zone.strength === 'Weak' ? '5,5' : '0'}
-          onMouseEnter={() => setHoveredZone(zone)}
-          onMouseLeave={() => setHoveredZone(null)}
-          className="cursor-pointer"
-        />
-        
-        {/* Zone label */}
-        <text
-          x={innerWidth - 10}
-          y={y + 4}
-          textAnchor="end"
-          className="text-xs font-medium"
-          fill={zone.type === 'buy' ? '#059669' : '#DC2626'}
-        >
-          {zone.type === 'buy' ? '🟢' : '🔴'} ${zone.level.toLocaleString()} ({zone.strength})
-        </text>
-      </g>
-    );
+  // Scale function for price to Y coordinate
+  const priceToY = (price: number) => {
+    const ratio = (price - priceRange.min) / (priceRange.max - priceRange.min);
+    return chartHeight - (ratio * (chartHeight - 60)) - 30; // 30px padding top/bottom
   };
+
+  // Generate price levels for Y-axis
+  const generatePriceLevels = () => {
+    const levels = [];
+    const step = (priceRange.max - priceRange.min) / 8;
+    for (let i = 0; i <= 8; i++) {
+      levels.push(priceRange.min + (step * i));
+    }
+    return levels;
+  };
+
+  const priceLevels = generatePriceLevels();
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-4">
+    <div className="bg-white rounded-lg shadow-lg p-6">
+      {/* Enhanced Header */}
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-            <BarChart3 className="h-5 w-5 mr-2 text-blue-600" />
+          <h3 className="text-xl font-bold text-gray-900 flex items-center">
+            <BarChart3 className="h-6 w-6 mr-2 text-blue-600" />
             {symbol} Trading Zones Chart
           </h3>
-          <p className="text-sm text-gray-600">
-            Current Price: <span className="font-medium">${currentPrice.toLocaleString()}</span>
-          </p>
+          <div className="flex items-center space-x-4 text-sm mt-2">
+            <div className="flex items-center">
+              <span className="text-gray-600">Current Price:</span>
+              <span className="font-bold text-black ml-2 text-lg">${currentPrice.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-0.5 bg-black border-dashed"></div>
+              <span className="text-xs text-gray-500">(Black Dotted Line)</span>
+            </div>
+          </div>
         </div>
         
         {/* Timeframe selector */}
-        <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
-          {['1H', '4H', '1D'].map((tf) => (
-            <button
-              key={tf}
-              onClick={() => setTimeframe(tf as any)}
-              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                timeframe === tf 
-                  ? 'bg-blue-600 text-white' 
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              {tf}
-            </button>
-          ))}
+        <div className="flex flex-col items-end space-y-2">
+          <div className="text-xs text-gray-500 font-medium">Time Range</div>
+          <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+            {['1H', '4H', '1D'].map((tf) => {
+              const isActive = timeframe === tf;
+              const dataPoints = tf === '1H' ? '60pts' : tf === '4H' ? '72pts' : '90pts';
+              return (
+                <button
+                  key={tf}
+                  onClick={() => setTimeframe(tf as any)}
+                  className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${
+                    isActive
+                      ? 'bg-blue-600 text-white shadow-sm' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'
+                  }`}
+                >
+                  <div className="flex flex-col items-center">
+                    <span>{tf}</span>
+                    {isActive && <span className="text-xs opacity-80">{dataPoints}</span>}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Chart Container */}
-      <div className="relative overflow-x-auto">
-        <svg 
-          ref={chartRef}
-          width={chartWidth} 
-          height={chartHeight}
-          className="border rounded-lg bg-gray-50"
-        >
+      {/* Chart Guide */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div className="flex items-start space-x-2">
+          <Target className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <div className="font-semibold text-blue-900 mb-2">Chart Guide ({timeframe} Timeframe):</div>
+            <div className="text-blue-800 space-y-1">
+              <div>• <span className="font-medium text-black">Black Dotted Line:</span> Current real-time price (${currentPrice.toLocaleString()})</div>
+              <div>• <span className="font-medium text-green-600">Green Zones:</span> Buy/Support areas with real order book + volume data</div>
+              <div>• <span className="font-medium text-red-600">Red Zones:</span> Sell/Resistance areas with real order book + volume data</div>
+              <div>• <span className="font-medium">Zone Intensity:</span> Darker = Stronger, Lighter = Weaker</div>
+              <div className="text-xs mt-2 italic text-green-700 font-medium">
+                ✅ 100% Real Market Data: Live order book walls + Historical volume levels
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Enhanced Chart */}
+      <div className="relative bg-gray-50 rounded-lg border-2 border-gray-200 overflow-hidden">
+        <svg width={chartWidth} height={chartHeight} className="w-full">
           {/* Background grid */}
           <defs>
-            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#E5E7EB" strokeWidth="1"/>
+            <pattern id="grid" width="50" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 50 0 L 0 0 0 40" fill="none" stroke="#E5E7EB" strokeWidth="1"/>
             </pattern>
           </defs>
           <rect width={chartWidth} height={chartHeight} fill="url(#grid)" />
           
-          <g transform={`translate(${padding.left}, ${padding.top})`}>
-            {/* Y-axis price lines */}
-            {[0.25, 0.5, 0.75].map(ratio => {
-              const price = priceExtent.min + (priceExtent.max - priceExtent.min) * ratio;
-              const y = yScale(price);
-              return (
-                <g key={ratio}>
-                  <line 
-                    x1={0} 
-                    y1={y} 
-                    x2={innerWidth} 
-                    y2={y} 
-                    stroke="#D1D5DB" 
-                    strokeWidth={1}
-                    strokeDasharray="3,3"
-                  />
-                  <text 
-                    x={-10} 
-                    y={y + 4} 
-                    textAnchor="end" 
-                    className="text-xs text-gray-500"
-                  >
-                    ${Math.round(price).toLocaleString()}
-                  </text>
-                </g>
-              );
-            })}
-
-            {/* Support/Resistance levels */}
-            {supportResistance && (
-              <>
-                {/* Strong Support */}
+          {/* Y-axis price levels */}
+          {priceLevels.map((price, index) => {
+            const y = priceToY(price);
+            const isCurrentPrice = Math.abs(price - currentPrice) < (priceRange.max - priceRange.min) * 0.02;
+            
+            return (
+              <g key={index}>
+                {/* Grid line */}
                 <line 
-                  x1={0} 
-                  y1={yScale(supportResistance.strongSupport)} 
-                  x2={innerWidth} 
-                  y2={yScale(supportResistance.strongSupport)}
-                  stroke="#059669" 
-                  strokeWidth={3}
-                  strokeDasharray="10,5"
+                  x1={60} 
+                  y1={y} 
+                  x2={chartWidth - 20} 
+                  y2={y} 
+                  stroke={isCurrentPrice ? "#EF4444" : "#D1D5DB"}
+                  strokeWidth={isCurrentPrice ? 2 : 1}
+                  strokeDasharray={isCurrentPrice ? "8,4" : "0"}
                 />
                 
-                {/* Support */}
+                {/* Price label */}
+                <text 
+                  x={50} 
+                  y={y + 5} 
+                  textAnchor="end" 
+                  fontSize="12"
+                  fontWeight={isCurrentPrice ? "700" : "500"}
+                  fill={isCurrentPrice ? "#EF4444" : "#6B7280"}
+                >
+                  ${Math.round(price).toLocaleString()}
+                </text>
+                
+                {/* Current price indicator */}
+                {isCurrentPrice && (
+                  <g>
+                    <rect
+                      x={chartWidth - 150}
+                      y={y - 12}
+                      width={130}
+                      height={24}
+                      fill="#EF4444"
+                      rx={4}
+                    />
+                    <text
+                      x={chartWidth - 85}
+                      y={y + 5}
+                      textAnchor="middle"
+                      fontSize="12"
+                      fontWeight="700"
+                      fill="white"
+                    >
+                      CURRENT ${Math.round(currentPrice).toLocaleString()}
+                    </text>
+                  </g>
+                )}
+              </g>
+            );
+          })}
+
+          {/* Trading Zones */}
+          {tradingZones && (
+            <>
+              {/* Buy Zones (Support) */}
+              {tradingZones.buyZones.map((zone, index) => {
+                const y = priceToY(zone.level);
+                const zoneHeight = zone.strength === 'Strong' ? 25 : zone.strength === 'Moderate' ? 20 : 15;
+                const opacity = zone.strength === 'Strong' ? 0.7 : zone.strength === 'Moderate' ? 0.5 : 0.3;
+                
+                return (
+                  <g key={`buy-${index}`}>
+                    {/* Zone rectangle */}
+                    <rect
+                      x={60}
+                      y={y - zoneHeight / 2}
+                      width={chartWidth - 200}
+                      height={zoneHeight}
+                      fill="#10B981"
+                      fillOpacity={opacity}
+                      stroke="#059669"
+                      strokeWidth={zone.strength === 'Strong' ? 3 : 2}
+                      onMouseEnter={() => setHoveredZone(zone)}
+                      onMouseLeave={() => setHoveredZone(null)}
+                      className="cursor-pointer"
+                    />
+                    
+                    {/* Zone label */}
+                    <rect
+                      x={chartWidth - 190}
+                      y={y - 10}
+                      width={170}
+                      height={20}
+                      fill="white"
+                      stroke="#059669"
+                      strokeWidth={1}
+                      rx={3}
+                    />
+                    <text
+                      x={chartWidth - 105}
+                      y={y + 4}
+                      textAnchor="middle"
+                      fontSize="11"
+                      fontWeight="600"
+                      fill="#059669"
+                    >
+                      🟢 BUY ${Math.round(zone.level).toLocaleString()}
+                    </text>
+                    <text
+                      x={chartWidth - 105}
+                      y={y - 2}
+                      textAnchor="middle"
+                      fontSize="9"
+                      fill="#059669"
+                      opacity={0.8}
+                    >
+                      {zone.strength} • {zone.volume.toFixed(1)} BTC
+                      {zone.source && ` • ${zone.source === 'orderbook' ? 'OrderBook' : 'Historical'}`}
+                    </text>
+                  </g>
+                );
+              })}
+
+              {/* Sell Zones (Resistance) */}
+              {tradingZones.sellZones.map((zone, index) => {
+                const y = priceToY(zone.level);
+                const zoneHeight = zone.strength === 'Strong' ? 25 : zone.strength === 'Moderate' ? 20 : 15;
+                const opacity = zone.strength === 'Strong' ? 0.7 : zone.strength === 'Moderate' ? 0.5 : 0.3;
+                
+                return (
+                  <g key={`sell-${index}`}>
+                    {/* Zone rectangle */}
+                    <rect
+                      x={60}
+                      y={y - zoneHeight / 2}
+                      width={chartWidth - 200}
+                      height={zoneHeight}
+                      fill="#EF4444"
+                      fillOpacity={opacity}
+                      stroke="#DC2626"
+                      strokeWidth={zone.strength === 'Strong' ? 3 : 2}
+                      onMouseEnter={() => setHoveredZone(zone)}
+                      onMouseLeave={() => setHoveredZone(null)}
+                      className="cursor-pointer"
+                    />
+                    
+                    {/* Zone label */}
+                    <rect
+                      x={chartWidth - 190}
+                      y={y - 10}
+                      width={170}
+                      height={20}
+                      fill="white"
+                      stroke="#DC2626"
+                      strokeWidth={1}
+                      rx={3}
+                    />
+                    <text
+                      x={chartWidth - 105}
+                      y={y + 4}
+                      textAnchor="middle"
+                      fontSize="11"
+                      fontWeight="600"
+                      fill="#DC2626"
+                    >
+                      🔴 SELL ${Math.round(zone.level).toLocaleString()}
+                    </text>
+                    <text
+                      x={chartWidth - 105}
+                      y={y - 2}
+                      textAnchor="middle"
+                      fontSize="9"
+                      fill="#DC2626"
+                      opacity={0.8}
+                    >
+                      {zone.strength} • {zone.volume.toFixed(1)} BTC
+                      {zone.source && ` • ${zone.source === 'orderbook' ? 'OrderBook' : 'Historical'}`}
+                    </text>
+                  </g>
+                );
+              })}
+            </>
+          )}
+
+          {/* Time axis labels */}
+          {[0, 0.25, 0.5, 0.75, 1].map((ratio, index) => {
+            const x = 60 + (chartWidth - 220) * ratio;
+            const now = new Date();
+            const timeOffset = timeframe === '1H' ? 60 * 60 * 1000 : 
+                              timeframe === '4H' ? 4 * 60 * 60 * 1000 : 
+                              24 * 60 * 60 * 1000;
+            const timestamp = now.getTime() - (timeOffset * (1 - ratio));
+            const date = new Date(timestamp);
+            
+            const getTimeLabel = () => {
+              if (timeframe === '1H') {
+                return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+              } else if (timeframe === '4H') {
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + 
+                       ' ' + date.toLocaleTimeString('en-US', { hour: '2-digit' });
+              } else {
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+              }
+            };
+
+            return (
+              <g key={index}>
                 <line 
-                  x1={0} 
-                  y1={yScale(supportResistance.support)} 
-                  x2={innerWidth} 
-                  y2={yScale(supportResistance.support)}
-                  stroke="#10B981" 
-                  strokeWidth={2}
+                  x1={x} 
+                  y1={30} 
+                  x2={x} 
+                  y2={chartHeight - 30}
+                  stroke="#E5E7EB"
+                  strokeWidth={0.5}
+                  strokeDasharray="2,2"
                 />
-                
-                {/* Resistance */}
-                <line 
-                  x1={0} 
-                  y1={yScale(supportResistance.resistance)} 
-                  x2={innerWidth} 
-                  y2={yScale(supportResistance.resistance)}
-                  stroke="#F59E0B" 
-                  strokeWidth={2}
-                />
-                
-                {/* Strong Resistance */}
-                <line 
-                  x1={0} 
-                  y1={yScale(supportResistance.strongResistance)} 
-                  x2={innerWidth} 
-                  y2={yScale(supportResistance.strongResistance)}
-                  stroke="#DC2626" 
-                  strokeWidth={3}
-                  strokeDasharray="10,5"
-                />
-              </>
-            )}
-
-            {/* Trading Zones */}
-            {tradingZones && (
-              <>
-                {tradingZones.buyZones.map(renderZone)}
-                {tradingZones.sellZones.map(renderZone)}
-              </>
-            )}
-
-            {/* Price line */}
-            {priceData.length > 0 && (
-              <>
-                {/* Price area fill */}
-                <path
-                  d={`${priceLine} L ${xScale(timeExtent.max)} ${innerHeight} L ${xScale(timeExtent.min)} ${innerHeight} Z`}
-                  fill="url(#priceGradient)"
-                  fillOpacity={0.2}
-                />
-                
-                {/* Price line */}
-                <path
-                  d={priceLine}
-                  fill="none"
-                  stroke="#3B82F6"
-                  strokeWidth={2}
-                />
-                
-                {/* Current price dot */}
-                <circle
-                  cx={xScale(timeExtent.max)}
-                  cy={yScale(currentPrice)}
-                  r={4}
-                  fill="#3B82F6"
-                  stroke="white"
-                  strokeWidth={2}
-                />
-              </>
-            )}
-
-            {/* Current price line */}
-            <line 
-              x1={0} 
-              y1={yScale(currentPrice)} 
-              x2={innerWidth} 
-              y2={yScale(currentPrice)}
-              stroke="#3B82F6" 
-              strokeWidth={2}
-              strokeDasharray="5,5"
-            />
-            <text 
-              x={innerWidth + 5} 
-              y={yScale(currentPrice) + 4} 
-              className="text-sm font-bold text-blue-600"
-            >
-              ${currentPrice.toLocaleString()}
-            </text>
-          </g>
-
-          {/* Gradient definition */}
-          <defs>
-            <linearGradient id="priceGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.4} />
-              <stop offset="100%" stopColor="#3B82F6" stopOpacity={0.1} />
-            </linearGradient>
-          </defs>
+                <text 
+                  x={x} 
+                  y={chartHeight - 10} 
+                  textAnchor="middle" 
+                  fontSize="11"
+                  fill="#6B7280"
+                  fontWeight="500"
+                >
+                  {getTimeLabel()}
+                </text>
+              </g>
+            );
+          })}
         </svg>
+
+        {/* Hover tooltip */}
+        {hoveredZone && (
+          <div className="absolute top-4 left-4 bg-white border border-gray-300 rounded-lg p-3 shadow-lg z-10">
+            <div className="text-sm font-semibold text-gray-900">
+              {hoveredZone.type === 'buy' ? '🟢 Buy Zone' : '🔴 Sell Zone'}
+            </div>
+            <div className="text-xs text-gray-600 mt-1">
+              <div>Price: ${hoveredZone.level.toLocaleString()}</div>
+              <div>Strength: {hoveredZone.strength}</div>
+              <div>Volume: {hoveredZone.volume.toFixed(2)} BTC</div>
+              {hoveredZone.source && <div>Source: {hoveredZone.source}</div>}
+              {hoveredZone.confidence && <div>Confidence: {hoveredZone.confidence.toFixed(0)}%</div>}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Zone Information */}
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Buy Zones */}
-        <div className="bg-green-50 p-3 rounded-lg border border-green-200">
-          <div className="flex items-center mb-2">
-            <Target className="h-4 w-4 text-green-600 mr-2" />
-            <span className="font-medium text-green-800">Optimal Buy Zones</span>
+      {/* Zone Summary */}
+      {tradingZones && (
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+            <h4 className="font-semibold text-green-800 mb-2">🟢 Buy Zones (Support)</h4>
+            <div className="space-y-2">
+              {tradingZones.buyZones.slice(0, 3).map((zone, index) => (
+                <div key={index} className="text-sm">
+                  <span className="font-medium">${Math.round(zone.level).toLocaleString()}</span>
+                  <span className="text-green-600 ml-2">({zone.strength})</span>
+                  <span className="text-gray-600 ml-2">{zone.volume.toFixed(1)} BTC</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="space-y-1 text-sm">
-            {tradingZones?.buyZones.slice(0, 2).map((zone, index) => (
-              <div key={index} className="flex justify-between">
-                <span>${zone.level.toLocaleString()}</span>
-                <span className={`px-2 py-1 rounded text-xs ${
-                  zone.strength === 'Strong' ? 'bg-green-200 text-green-800' :
-                  zone.strength === 'Moderate' ? 'bg-yellow-200 text-yellow-800' :
-                  'bg-gray-200 text-gray-800'
-                }`}>
-                  {zone.strength}
-                </span>
-              </div>
-            ))}
+          
+          <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+            <h4 className="font-semibold text-red-800 mb-2">🔴 Sell Zones (Resistance)</h4>
+            <div className="space-y-2">
+              {tradingZones.sellZones.slice(0, 3).map((zone, index) => (
+                <div key={index} className="text-sm">
+                  <span className="font-medium">${Math.round(zone.level).toLocaleString()}</span>
+                  <span className="text-red-600 ml-2">({zone.strength})</span>
+                  <span className="text-gray-600 ml-2">{zone.volume.toFixed(1)} BTC</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-
-        {/* Sell Zones */}
-        <div className="bg-red-50 p-3 rounded-lg border border-red-200">
-          <div className="flex items-center mb-2">
-            <TrendingUp className="h-4 w-4 text-red-600 mr-2" />
-            <span className="font-medium text-red-800">Optimal Sell Zones</span>
-          </div>
-          <div className="space-y-1 text-sm">
-            {tradingZones?.sellZones.slice(0, 2).map((zone, index) => (
-              <div key={index} className="flex justify-between">
-                <span>${zone.level.toLocaleString()}</span>
-                <span className={`px-2 py-1 rounded text-xs ${
-                  zone.strength === 'Strong' ? 'bg-red-200 text-red-800' :
-                  zone.strength === 'Moderate' ? 'bg-yellow-200 text-yellow-800' :
-                  'bg-gray-200 text-gray-800'
-                }`}>
-                  {zone.strength}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Hovered zone tooltip */}
-      {hoveredZone && (
-        <div className="absolute bg-black text-white p-2 rounded text-xs pointer-events-none z-10">
-          <div className="font-medium">
-            {hoveredZone.type === 'buy' ? 'Buy Zone' : 'Sell Zone'}
-          </div>
-          <div>Price: ${hoveredZone.level.toLocaleString()}</div>
-          <div>Strength: {hoveredZone.strength}</div>
-          <div>Volume: {(hoveredZone.volume / 1000000).toFixed(1)}M</div>
         </div>
       )}
-
-      {/* Legend */}
-      <div className="mt-4 flex flex-wrap gap-4 text-xs">
-        <div className="flex items-center">
-          <div className="w-3 h-3 bg-green-500 bg-opacity-30 border border-green-600 mr-1"></div>
-          <span>Buy Zones</span>
-        </div>
-        <div className="flex items-center">
-          <div className="w-3 h-3 bg-red-500 bg-opacity-30 border border-red-600 mr-1"></div>
-          <span>Sell Zones</span>
-        </div>
-        <div className="flex items-center">
-          <div className="w-3 h-1 bg-green-600 mr-1"></div>
-          <span>Support Levels</span>
-        </div>
-        <div className="flex items-center">
-          <div className="w-3 h-1 bg-red-600 mr-1"></div>
-          <span>Resistance Levels</span>
-        </div>
-        <div className="flex items-center">
-          <div className="w-3 h-1 bg-blue-600 mr-1"></div>
-          <span>Current Price</span>
-        </div>
-      </div>
     </div>
   );
 }

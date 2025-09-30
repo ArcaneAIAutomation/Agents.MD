@@ -15,9 +15,9 @@ async function fetchCryptoMarketData(crypto: 'BTC' | 'ETH' = 'BTC') {
       // Current price and basic info
       `https://api.coinbase.com/v2/exchange-rates?currency=${symbol}`,
       // Historical data (simplified)
-      `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=30&interval=daily`,
+      `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=30&interval=daily${process.env.COINGECKO_API_KEY ? `&x_cg_demo_api_key=${process.env.COINGECKO_API_KEY}` : ''}`,
       // Technical indicators (we'll simulate this with coingecko data)
-      `https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=true`
+      `https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=true${process.env.COINGECKO_API_KEY ? `&x_cg_demo_api_key=${process.env.COINGECKO_API_KEY}` : ''}`
     ];
 
     const promises = endpoints.map(url => 
@@ -113,7 +113,7 @@ async function generateTradeSignal(marketData: any) {
     const symbol = `${marketData.crypto}/USD`;
     
     const completion = await openai.chat.completions.create({
-      model: "o1-preview", // Latest reasoning model with chain-of-thought capabilities
+      model: process.env.OPENAI_MODEL || "gpt-4o-2024-08-06", // Use configured model
       messages: [
         {
           role: "user",
@@ -228,7 +228,7 @@ Please think through this systematically, then provide your final trade recommen
     throw new Error('Invalid trade signal generated');
 
   } catch (error) {
-    console.error('Error generating trade signal with o1-preview:', error);
+    console.error('Error generating trade signal:', error);
     
     // Enhanced fallback signal with reasoning-inspired analysis
     const isRSIOverBought = marketData.rsi > 70;

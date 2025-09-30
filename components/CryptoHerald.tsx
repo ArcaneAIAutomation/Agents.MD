@@ -58,16 +58,40 @@ interface CryptoHeraldData {
 }
 
 const CryptoHerald: React.FC = () => {
-  const [data, setData] = useState<CryptoHeraldData | null>(null);
+  const [data, setData] = useState<CryptoHeraldData | null>({
+    articles: [],
+    marketTicker: [],
+    apiStatus: {
+      source: 'Loading',
+      status: 'Initializing',
+      message: 'Loading market data...',
+      isRateLimit: false
+    }
+  });
   const [loading, setLoading] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
   const [articlesLoaded, setArticlesLoaded] = useState(false);
   
+  // Initialize with empty state - NO auto-fetching
+  useEffect(() => {
+    // Set initial state with no data - user must click to fetch
+    setData({
+      articles: [],
+      marketTicker: [],
+      apiStatus: {
+        source: 'Ready',
+        status: 'Waiting',
+        message: 'Click "Fetch News" to load latest crypto news and market data',
+        isRateLimit: false
+      }
+    });
+  }, []);
+
   // Show notification when new data loads
   useEffect(() => {
     if (data && !loading && articlesLoaded) {
-      setNotificationMessage(`📰 ${data.articles.length} new articles loaded!`);
+      setNotificationMessage(`📰 ${data.articles?.length || 0} new articles loaded!`);
       setShowNotification(true);
     }
   }, [data, loading, articlesLoaded]);
@@ -129,8 +153,8 @@ const CryptoHerald: React.FC = () => {
       
       const result = await response.json();
       
-      if (result.success && result.data) {
-        // Quick processing without heavy AI summaries for speed
+      if (result.success && result.data && result.data.articles && result.data.articles.length > 0) {
+        // Only proceed if we have real live articles
         const articlesWithAI = result.data.articles.map((article: CryptoArticle) => ({
           ...article,
           aiSummary: generateAISummary(article)
@@ -142,68 +166,13 @@ const CryptoHerald: React.FC = () => {
         });
         setArticlesLoaded(true);
       } else {
-        console.error('API returned error:', result.error || result.message);
-        
-        // Set fallback data instead of alert
-        setData({
-          articles: [
-            {
-              id: 'fallback-1',
-              headline: 'Fast Loading Demo: Bitcoin Trading Intelligence Active',
-              summary: 'Your Trading Intelligence Hub is running in fast mode. Add API keys for live news feeds.',
-              source: 'Herald System',
-              publishedAt: new Date().toISOString(),
-              category: 'System',
-              sentiment: 'Neutral',
-              url: 'https://coindesk.com/markets/', // Generic crypto market link
-              aiSummary: 'System notification about demo mode operation.'
-            }
-          ],
-          marketTicker: [
-            { symbol: 'BTC', name: 'Bitcoin', price: 110500, change: 2.1 },
-            { symbol: 'ETH', name: 'Ethereum', price: 3850, change: -0.8 },
-            { symbol: 'SOL', name: 'Solana', price: 245, change: 1.5 }
-          ],
-          meta: {
-            totalArticles: 1,
-            isLiveData: false,
-            sources: ['Demo Data'],
-            lastUpdated: new Date().toISOString(),
-            note: 'Fast demo mode - Add API keys for live data'
-          }
-        });
-        setArticlesLoaded(true);
+        console.error('No live articles available:', result.error || result.message);
+        throw new Error('No live data available - API keys may be missing or rate limited');
       }
     } catch (error) {
       console.error('Herald loading error:', error);
-      
-      // Always provide data, even on error
-      setData({
-        articles: [
-          {
-            id: 'error-1',
-            headline: 'Trading Intelligence Hub - Connection Issue',
-            summary: 'Unable to connect to news services. The platform is running in offline mode with demo data.',
-            source: 'System Status',
-            publishedAt: new Date().toISOString(),
-            category: 'System',
-            sentiment: 'Neutral',
-            aiSummary: 'System operating in offline mode due to connectivity issues.'
-          }
-        ],
-        marketTicker: [
-          { symbol: 'BTC', name: 'Bitcoin', price: 110500, change: 2.1 },
-          { symbol: 'ETH', name: 'Ethereum', price: 3850, change: -0.8 }
-        ],
-        meta: {
-          totalArticles: 1,
-          isLiveData: false,
-          sources: ['Offline Mode'],
-          lastUpdated: new Date().toISOString(),
-          note: 'Offline mode - Check internet connection'
-        }
-      });
-      setArticlesLoaded(true);
+      // Show user-friendly error message instead of fallback data
+      alert('Unable to load live crypto news. Please check your internet connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -305,66 +274,6 @@ const CryptoHerald: React.FC = () => {
             </div>
           </div>
 
-          {/* Static Market Ticker - Shows Before Data Load */}
-          <div className="mb-6 md:mb-8 border-y-2 md:border-y-4 border-black bg-gradient-to-r from-black via-gray-900 to-black">
-            {/* Ticker Header Bar */}
-            <div className="bg-white border-b border-black md:border-b-2 p-2">
-              <div className="flex items-center justify-center space-x-4">
-                <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
-                <span className="font-black text-black text-sm" style={{ fontFamily: 'Times, serif' }}>
-                  MARKET DATA - AWAITING LIVE FEED
-                </span>
-                <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
-              </div>
-            </div>
-            
-            {/* Static Ticker Content */}
-            <div className="bg-black text-white py-3 overflow-hidden relative">
-              <div className="flex animate-scroll space-x-12 text-lg font-bold">
-                {/* Sample crypto data */}
-                {[
-                  { symbol: 'BTC', price: '$65,420', change: '+2.3%', color: 'text-green-400' },
-                  { symbol: 'ETH', price: '$3,250', change: '+1.8%', color: 'text-green-400' },
-                  { symbol: 'SOL', price: '$165', change: '-0.5%', color: 'text-red-400' },
-                  { symbol: 'ADA', price: '$0.45', change: '+3.2%', color: 'text-green-400' },
-                  { symbol: 'XRP', price: '$0.58', change: '+1.1%', color: 'text-green-400' },
-                  { symbol: 'DOT', price: '$7.25', change: '-1.2%', color: 'text-red-400' },
-                  { symbol: 'AVAX', price: '$28.50', change: '+4.5%', color: 'text-green-400' },
-                  { symbol: 'LINK', price: '$14.80', change: '+2.7%', color: 'text-green-400' }
-                ].concat([
-                  { symbol: 'BTC', price: '$65,420', change: '+2.3%', color: 'text-green-400' },
-                  { symbol: 'ETH', price: '$3,250', change: '+1.8%', color: 'text-green-400' },
-                  { symbol: 'SOL', price: '$165', change: '-0.5%', color: 'text-red-400' },
-                  { symbol: 'ADA', price: '$0.45', change: '+3.2%', color: 'text-green-400' },
-                  { symbol: 'XRP', price: '$0.58', change: '+1.1%', color: 'text-green-400' },
-                  { symbol: 'DOT', price: '$7.25', change: '-1.2%', color: 'text-red-400' },
-                  { symbol: 'AVAX', price: '$28.50', change: '+4.5%', color: 'text-green-400' },
-                  { symbol: 'LINK', price: '$14.80', change: '+2.7%', color: 'text-green-400' }
-                ]).map((coin, index) => (
-                  <div key={`static-${index}`} className="flex items-center space-x-3 whitespace-nowrap">
-                    <span className="text-yellow-400">●</span>
-                    <span className="font-black">{coin.symbol}</span>
-                    <span className="text-white">{coin.price}</span>
-                    <span className={`font-bold ${coin.color}`}>
-                      {coin.change.startsWith('+') ? '↗' : '↘'} {coin.change}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              
-              {/* Fade edges for professional look */}
-              <div className="absolute left-0 top-0 w-16 h-full bg-gradient-to-r from-black to-transparent pointer-events-none"></div>
-              <div className="absolute right-0 top-0 w-16 h-full bg-gradient-to-l from-black to-transparent pointer-events-none"></div>
-            </div>
-            
-            {/* Bottom Border with Classic Pattern */}
-            <div className="bg-white border-t-2 border-black h-1">
-              <div className="h-full bg-black opacity-20" style={{
-                backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(0,0,0,0.3) 4px, rgba(0,0,0,0.3) 8px)'
-              }}></div>
-            </div>
-          </div>
-
           {/* Call to Action */}
           <AnimatedHeadline delay={3000} className="text-center bg-white border-4 border-black p-6 md:p-8">
             <TypewriterText 
@@ -417,7 +326,7 @@ const CryptoHerald: React.FC = () => {
           <div className="text-center">
             {/* Date and Edition Info */}
             <div className="text-xs md:text-sm font-bold mb-2 md:mb-4 border-b-2 border-black pb-2">
-              {formatDate(data.meta.lastUpdated)} • SPECIAL EDITION • VOL. 1, NO. 1
+              {formatDate(data?.meta?.lastUpdated || new Date().toISOString())} • SPECIAL EDITION • VOL. 1, NO. 1
             </div>
             
             {/* Main Title */}
@@ -433,12 +342,12 @@ const CryptoHerald: React.FC = () => {
             {/* Status and Sources */}
             <div className="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-8 text-xs md:text-sm font-bold border-t-2 border-black pt-4">
               <div className="flex items-center space-x-1">
-                <Radio className={`h-3 w-3 ${data.meta.isLiveData ? 'text-red-600 animate-pulse' : 'text-gray-400'}`} />
-                <span>{data.meta.isLiveData ? '🔴 LIVE NEWS WIRE' : '📰 CACHED DATA'}</span>
+                <Radio className={`h-3 w-3 ${data?.meta?.isLiveData ? 'text-red-600 animate-pulse' : 'text-gray-400'}`} />
+                <span>{data?.meta?.isLiveData ? '🔴 LIVE NEWS WIRE' : '📰 CACHED DATA'}</span>
               </div>
               
               {/* API Status Display */}
-              {data.apiStatus && (
+              {data?.apiStatus && (
                 <div className={`flex items-center space-x-1 px-2 py-1 rounded text-xs ${
                   data.apiStatus.isRateLimit 
                     ? 'bg-red-100 text-red-800 border border-red-300' 
@@ -456,10 +365,10 @@ const CryptoHerald: React.FC = () => {
               )}
               
               <div className="text-center">
-                <span className="font-normal">Sources:</span> {data.meta.sources.join(', ')}
+                <span className="font-normal">Sources:</span> {data?.meta?.sources?.join(', ') || '🚀 Demo Mode - Configure API keys for Live News Intelligence'}
               </div>
               
-              {data.meta.isLiveData && (
+              {data?.meta?.isLiveData && (
                 <div className="text-green-600">
                   🌐 Enhanced with CoinDesk, CoinTelegraph, The Block, Decrypt & CryptoSlate
                 </div>
@@ -468,7 +377,7 @@ const CryptoHerald: React.FC = () => {
               {/* Rate Limit Warning */}
               {data.apiStatus?.isRateLimit && (
                 <div className="text-red-600 text-xs text-center mt-2 p-2 bg-red-50 border border-red-200 rounded">
-                  📊 {data.apiStatus.message} - Consider upgrading to premium API subscription for unlimited access
+                  📊 {data.apiStatus?.message} - Consider upgrading to premium API subscription for unlimited access
                 </div>
               )}
             </div>
@@ -477,11 +386,11 @@ const CryptoHerald: React.FC = () => {
 
         {/* Market Ticker - Classic News Tape Style */}
         {(() => {
-          if (data?.marketData?.topCoins) {
-            console.log('Ticker check - topCoins:', data.marketData.topCoins);
-            console.log('Ticker check - length:', data.marketData.topCoins.length);
-            console.log('Ticker check - condition result:', data.marketData.topCoins.length > 0);
-            return data.marketData.topCoins.length > 0;
+          if (data?.marketTicker) {
+            console.log('Ticker check - marketTicker:', data.marketTicker);
+            console.log('Ticker check - length:', data.marketTicker.length);
+            console.log('Ticker check - condition result:', data.marketTicker.length > 0);
+            return data.marketTicker.length > 0;
           }
           return false;
         })() && (
@@ -489,25 +398,35 @@ const CryptoHerald: React.FC = () => {
             {/* Ticker Header Bar */}
             <div className="bg-white border-b-2 border-black p-2">
               <div className="flex items-center justify-center space-x-4">
-                <div className="w-3 h-3 bg-red-600 rounded-full animate-pulse"></div>
+                <div className="w-3 h-3 bg-red-600 rounded-full animate-live-pulse"></div>
                 <span className="font-black text-black text-sm" style={{ fontFamily: 'Times, serif' }}>
-                  LIVE MARKET DATA
+                  LIVE MARKET DATA - COINGECKO API
                 </span>
-                <div className="w-3 h-3 bg-red-600 rounded-full animate-pulse"></div>
+                <div className="w-3 h-3 bg-red-600 rounded-full animate-live-pulse"></div>
               </div>
             </div>
             
             {/* Scrolling Ticker Content */}
-            <div className="bg-black text-white py-3 overflow-hidden relative">
+            <div 
+              className="bg-black text-white py-3 overflow-hidden relative cursor-pointer ticker-container"
+              onMouseEnter={(e) => {
+                const ticker = e.currentTarget.querySelector('.animate-scroll');
+                ticker?.classList.add('ticker-paused');
+              }}
+              onMouseLeave={(e) => {
+                const ticker = e.currentTarget.querySelector('.animate-scroll');
+                ticker?.classList.remove('ticker-paused');
+              }}
+            >
               <div className="flex animate-scroll space-x-12 text-lg font-bold">
                 {/* Duplicate the data to create seamless loop */}
-                {data?.marketData?.topCoins && [...data.marketData.topCoins.slice(0, 8), ...data.marketData.topCoins.slice(0, 8)].map((coin, index) => (
-                  <div key={`${coin.id}-${index}`} className="flex items-center space-x-3 whitespace-nowrap">
-                    <span className="text-yellow-400">●</span>
+                {data?.marketTicker && [...data.marketTicker.slice(0, 8), ...data.marketTicker.slice(0, 8)].map((coin, index) => (
+                  <div key={`${coin.symbol}-${index}`} className="flex items-center space-x-3 whitespace-nowrap ticker-item">
+                    <span className="text-yellow-400 animate-pulse">●</span>
                     <span className="font-black">{coin.symbol}</span>
                     <span className="text-white">{formatPrice(coin.price)}</span>
-                    <span className={`font-bold ${coin.change24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {coin.change24h >= 0 ? '↗' : '↘'} {Math.abs(coin.change24h).toFixed(2)}%
+                    <span className={`font-bold ${coin.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {coin.change >= 0 ? '↗' : '↘'} {Math.abs(coin.change).toFixed(2)}%
                     </span>
                   </div>
                 ))}
@@ -524,6 +443,40 @@ const CryptoHerald: React.FC = () => {
                 backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(0,0,0,0.3) 4px, rgba(0,0,0,0.3) 8px)'
               }}></div>
             </div>
+          </div>
+        )}
+
+        {/* Fetch News Button - Always show when no articles are loaded */}
+        {(!data?.articles || data.articles.length === 0) && (
+          <div className="mb-8 bg-white border-4 border-black p-6 md:p-8 text-center">
+            <h3 className="text-2xl md:text-3xl font-black mb-4" style={{ fontFamily: 'Times, serif' }}>
+              📰 CRYPTO NEWS WIRE
+            </h3>
+            <p className="text-lg mb-6 font-bold text-gray-700">
+              Click below to fetch live cryptocurrency news with AI analysis and real-time market data
+            </p>
+            <PressEffectWrapper
+              onClick={fetchCryptoNews}
+              className="inline-block"
+            >
+              <button
+                disabled={loading}
+                className="bg-black text-white font-bold py-4 px-8 border-4 border-black hover:bg-gray-800 transition-colors text-lg flex items-center mx-auto disabled:opacity-50 newspaper-hover"
+                style={{ fontFamily: 'Times, serif' }}
+              >
+                {loading ? (
+                  <>
+                    <RefreshCw className="animate-spin h-5 w-5 mr-2" />
+                    <NewspaperLoading text="FETCHING LATEST NEWS..." className="text-white" />
+                  </>
+                ) : (
+                  <>
+                    <Newspaper className="h-5 w-5 mr-2" />
+                    FETCH TODAY'S CRYPTO NEWS
+                  </>
+                )}
+              </button>
+            </PressEffectWrapper>
           </div>
         )}
 
@@ -689,6 +642,40 @@ const CryptoHerald: React.FC = () => {
           );
         })}
 
+        {/* Refresh News Button - Show when articles are already loaded */}
+        {data?.articles && data.articles.length > 0 && (
+          <div className="mb-8 bg-gray-100 border-4 border-black p-6 text-center">
+            <h3 className="text-xl font-black mb-3" style={{ fontFamily: 'Times, serif' }}>
+              📰 REFRESH NEWS FEED
+            </h3>
+            <p className="text-sm mb-4 font-bold text-gray-600">
+              Get the latest breaking crypto news and market updates
+            </p>
+            <PressEffectWrapper
+              onClick={fetchCryptoNews}
+              className="inline-block"
+            >
+              <button
+                disabled={loading}
+                className="bg-blue-600 text-white font-bold py-3 px-6 border-2 border-blue-600 hover:bg-blue-700 transition-colors text-base flex items-center mx-auto disabled:opacity-50"
+                style={{ fontFamily: 'Times, serif' }}
+              >
+                {loading ? (
+                  <>
+                    <RefreshCw className="animate-spin h-4 w-4 mr-2" />
+                    UPDATING...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    REFRESH NEWS
+                  </>
+                )}
+              </button>
+            </PressEffectWrapper>
+          </div>
+        )}
+
         {/* Footer */}
         <div className="mt-8 bg-black text-white p-6 border-4 border-black">
           <div className="text-center">
@@ -699,7 +686,7 @@ const CryptoHerald: React.FC = () => {
               Published by Digital News Corp. • All rights reserved • {new Date().getFullYear()}
             </p>
             <div className="text-xs">
-              Last Updated: {formatDate(data.meta.lastUpdated)} • Sources: {data.meta.sources.join(', ')}
+              Last Updated: {formatDate(data?.meta?.lastUpdated || new Date().toISOString())} • Sources: {data?.meta?.sources?.join(', ') || '🚀 Demo Mode - Add API Keys for Live Intelligence'}
             </div>
           </div>
         </div>

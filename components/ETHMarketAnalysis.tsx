@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -12,6 +12,61 @@ import {
   RefreshCw
 } from 'lucide-react';
 import ETHTradingChart from './ETHTradingChart';
+import ETHHiddenPivotChart from './ETHHiddenPivotChart';
+
+// Fear & Greed Visual Slider Component
+const FearGreedSlider = ({ value }: { value: number }) => {
+  const getLabel = (val: number) => {
+    if (val <= 25) return 'Extreme Fear'
+    if (val <= 45) return 'Fear'
+    if (val <= 55) return 'Neutral'
+    if (val <= 75) return 'Greed'
+    return 'Extreme Greed'
+  }
+
+  const clampedValue = Math.max(0, Math.min(100, value))
+
+  return (
+    <div className="text-center p-3 bg-gray-50 rounded-lg">
+      <p className="text-sm text-gray-600 mb-2">Fear & Greed</p>
+      
+      {/* Visual Slider */}
+      <div className="relative w-full h-6 bg-gray-200 rounded-full mb-2">
+        {/* Background gradient zones */}
+        <div className="absolute inset-0 rounded-full overflow-hidden">
+          <div className="h-full w-full bg-gradient-to-r from-red-500 via-yellow-400 to-green-500"></div>
+        </div>
+        
+        {/* Slider indicator */}
+        <div 
+          className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-white border-2 border-gray-700 rounded-full shadow-md transition-all duration-300"
+          style={{ left: `calc(${clampedValue}% - 8px)` }}
+        />
+        
+        {/* Value overlay */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-xs font-bold text-white mix-blend-difference">
+            {clampedValue}
+          </span>
+        </div>
+      </div>
+      
+      {/* Label and value */}
+      <div className="flex justify-between text-xs text-gray-500 mb-1">
+        <span>Fear</span>
+        <span>Greed</span>
+      </div>
+      <p className={`text-sm font-semibold ${
+        clampedValue <= 25 ? 'text-red-600' :
+        clampedValue <= 45 ? 'text-orange-500' :
+        clampedValue <= 55 ? 'text-yellow-600' :
+        clampedValue <= 75 ? 'text-green-500' : 'text-green-600'
+      }`}>
+        {getLabel(clampedValue)}
+      </p>
+    </div>
+  )
+}
 
 // Ethereum Logo Component
 const EthereumIcon = ({ className }: { className?: string }) => (
@@ -102,7 +157,7 @@ interface ETHAnalysisData {
 
 const ETHMarketAnalysis: React.FC = () => {
   const [data, setData] = useState<ETHAnalysisData | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // Start with loading false - manual only
   const [lastUpdated, setLastUpdated] = useState<string>('');
 
   // Helper function to extract RSI value from either number or object format
@@ -246,7 +301,7 @@ const ETHMarketAnalysis: React.FC = () => {
           ],
       
       // Meta information
-      isLiveData: rawData.isLiveData || false,
+      isLiveData: rawData.isLiveData !== undefined ? rawData.isLiveData : false,
       dataSource: rawData.dataSource || 'Enhanced Analysis',
       lastUpdated: rawData.lastUpdated || new Date().toISOString()
     };
@@ -262,7 +317,9 @@ const ETHMarketAnalysis: React.FC = () => {
       const rawData = await response.json();
       console.log('Raw ETH API Response:', rawData);
       
-      const validatedData = validateAndEnhanceData(rawData);
+      const validatedData = validateAndEnhanceData(rawData.data || rawData); // Handle both response formats
+      // Preserve the isLiveData flag from the API response
+      validatedData.isLiveData = rawData.isLiveData || rawData.data?.isLiveData || false
       console.log('Validated ETH Data:', validatedData);
       
       setData(validatedData);
@@ -277,6 +334,8 @@ const ETHMarketAnalysis: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Manual loading only - no auto-fetch on mount
 
   if (loading) {
     return (
@@ -321,7 +380,7 @@ const ETHMarketAnalysis: React.FC = () => {
               data.isLiveData ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
             }`}>
               <span className="w-2 h-2 bg-current rounded-full mr-1"></span>
-              {data.isLiveData ? 'LIVE DATA' : 'DEMO DATA'}
+              {data.isLiveData ? 'LIVE DATA' : '🚀 DEMO - Click "Refresh" for Live Intelligence'}
             </span>
             {/* Data Source Indicators */}
             <div className="flex items-center space-x-1">
@@ -612,12 +671,7 @@ const ETHMarketAnalysis: React.FC = () => {
               {data.marketSentiment?.overall || 'Neutral'}
             </p>
           </div>
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600">Fear & Greed</p>
-            <p className="font-semibold text-blue-600">
-              {data.marketSentiment?.fearGreedIndex || 50}/100
-            </p>
-          </div>
+          <FearGreedSlider value={data.marketSentiment?.fearGreedIndex || 50} />
           <div className="text-center p-3 bg-gray-50 rounded-lg">
             <p className="text-sm text-gray-600">Social Media</p>
             <p className="font-semibold text-purple-600">
@@ -637,6 +691,11 @@ const ETHMarketAnalysis: React.FC = () => {
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Visual Trading Zones</h3>
         <ETHTradingChart />
+      </div>
+
+      {/* Hidden Pivot Analysis */}
+      <div className="mb-6">
+        <ETHHiddenPivotChart />
       </div>
 
       {/* News Impact */}

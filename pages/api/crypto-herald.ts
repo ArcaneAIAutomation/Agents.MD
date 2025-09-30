@@ -13,20 +13,27 @@ async function fetchCryptoNews() {
   let workingSources: string[] = [];
 
   try {
-    // Try Alpha Vantage first (usually more reliable)
-    if (process.env.ALPHA_VANTAGE_API_KEY && process.env.ALPHA_VANTAGE_API_KEY !== 'undefined') {
+    // Try Alpha Vantage first (usually more reliable) - but skip if disabled
+    if (process.env.ALPHA_VANTAGE_API_KEY && 
+        process.env.ALPHA_VANTAGE_API_KEY !== 'undefined' && 
+        process.env.ALPHA_VANTAGE_API_KEY !== 'DISABLED') {
       console.log('Trying Alpha Vantage API...');
-      const alphaResult = await fetchAlphaVantageNews();
-      if (alphaResult.success) {
-        console.log('Alpha Vantage success:', alphaResult.articles.length, 'articles');
-        allArticles = allArticles.concat(alphaResult.articles);
-        workingSources.push('Alpha Vantage');
-      } else {
-        console.log('Alpha Vantage failed:', alphaResult.error);
-        if (alphaResult.error?.includes('rate limit') || alphaResult.error?.includes('limit exceeded')) {
-          console.log('Alpha Vantage rate limited - will try NewsAPI');
+      try {
+        const alphaResult = await fetchAlphaVantageNews();
+        if (alphaResult.success) {
+          console.log('Alpha Vantage success:', alphaResult.articles.length, 'articles');
+          allArticles = allArticles.concat(alphaResult.articles);
+          workingSources.push('Alpha Vantage');
+        } else {
+          console.log('Alpha Vantage failed:', alphaResult.error);
+          // Don't let Alpha Vantage failures block other sources
         }
+      } catch (alphaError) {
+        console.log('Alpha Vantage API call failed:', alphaError);
+        // Continue to NewsAPI without failing
       }
+    } else {
+      console.log('Alpha Vantage API disabled or not configured');
     }
 
     // Try NewsAPI (either as primary or fallback)
@@ -38,7 +45,7 @@ async function fetchCryptoNews() {
       const newsUrl = `https://newsapi.org/v2/everything?q=bitcoin+OR+cryptocurrency+OR+crypto&from=${lastTenDays}&sortBy=publishedAt&pageSize=20&language=en&apiKey=${process.env.NEWS_API_KEY}`;
       
       const response = await fetch(newsUrl, { 
-        signal: AbortSignal.timeout(8000)
+        signal: AbortSignal.timeout(4000)
       });
       
       const data = await response.json();
@@ -182,13 +189,55 @@ function isEnglishArticle(title: string, description: string): boolean {
   return words.length < 5 || englishWordCount > 0;
 }
 
+// Parse Alpha Vantage date format safely
+function parseAlphaVantageDate(timePublished: string): string {
+  try {
+    // Alpha Vantage format is typically: "20241226T123000" or "20241226T123000Z"
+    if (typeof timePublished === 'string' && timePublished.length >= 15) {
+      // Extract year, month, day, hour, minute, second
+      const year = timePublished.substring(0, 4);
+      const month = timePublished.substring(4, 6);
+      const day = timePublished.substring(6, 8);
+      const hour = timePublished.substring(9, 11);
+      const minute = timePublished.substring(11, 13);
+      const second = timePublished.substring(13, 15);
+      
+      // Create ISO format: YYYY-MM-DDTHH:mm:ss.000Z
+      const isoString = `${year}-${month}-${day}T${hour}:${minute}:${second}.000Z`;
+      
+      // Validate the date
+      const date = new Date(isoString);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString();
+      }
+    }
+    
+    // If parsing fails, try direct parsing as fallback
+    const fallbackDate = new Date(timePublished);
+    if (!isNaN(fallbackDate.getTime())) {
+      return fallbackDate.toISOString();
+    }
+    
+    // If all else fails, return current time
+    console.warn('Failed to parse Alpha Vantage date:', timePublished);
+    return new Date().toISOString();
+    
+  } catch (error) {
+    console.warn('Error parsing Alpha Vantage date:', timePublished, error);
+    return new Date().toISOString();
+  }
+}
+
 // Alpha Vantage news fetcher
 async function fetchAlphaVantageNews() {
   try {
     const url = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=CRYPTO:BTC,CRYPTO:ETH&topics=blockchain,technology&apikey=${process.env.ALPHA_VANTAGE_API_KEY}&limit=20`;
     
     const response = await fetch(url, { 
-      signal: AbortSignal.timeout(10000)
+      signal: AbortSignal.timeout(6000),
+      headers: {
+        'User-Agent': 'CryptoTradingIntelligence/1.0'
+      }
     });
     
     const data = await response.json();
@@ -214,7 +263,7 @@ async function fetchAlphaVantageNews() {
       headline: item.title,
       summary: item.summary?.substring(0, 200) + '...' || 'Latest cryptocurrency market developments.',
       source: extractSourceName(item.source || 'Financial News'),
-      publishedAt: item.time_published ? new Date(item.time_published).toISOString() : new Date().toISOString(),
+      publishedAt: item.time_published ? parseAlphaVantageDate(item.time_published) : new Date().toISOString(),
       category: categorizeArticleAdvanced(item.title, item.topics),
       sentiment: mapAlphaVantageSentiment(item.overall_sentiment_label),
       url: item.url,
@@ -314,91 +363,19 @@ function extractSourceName(sourceName: string): string {
     .trim() || 'Crypto News';
 }
 
-// Fallback news generation with proper category distribution
-function generateFallbackNews() {
-  const currentTime = new Date().toISOString();
-  const fallbackArticles = [
-    {
-      id: 'fallback-1',
-      headline: 'Bitcoin Maintains Strong Position Above Key Support Level',
-      summary: 'Technical analysis suggests continued institutional interest as BTC holds key support levels despite market volatility.',
-      source: 'CryptoDaily',
-      publishedAt: currentTime,
-      category: 'Market News',
-      sentiment: 'Bullish',
-      url: 'https://coindesk.com/markets/2025/08/22/bitcoin-holds-support-levels/',
-      isLive: false
-    },
-    {
-      id: 'fallback-2', 
-      headline: 'Ethereum Network Upgrade Shows Promising Results',
-      summary: 'Latest blockchain metrics indicate improved transaction efficiency following recent network enhancements.',
-      source: 'BlockchainNews',
-      publishedAt: currentTime,
-      category: 'Technology',
-      sentiment: 'Neutral',
-      url: 'https://cointelegraph.com/news/ethereum-upgrade-metrics',
-      isLive: false
-    },
-    {
-      id: 'fallback-3',
-      headline: 'Major Banks Announce Crypto Custody Services Expansion',
-      summary: 'Leading financial institutions report increased cryptocurrency integration across multiple markets worldwide.',
-      source: 'FinanceTech',
-      publishedAt: currentTime,
-      category: 'Institutional',
-      sentiment: 'Bullish',
-      url: 'https://decrypt.co/institutions-crypto-adoption',
-      isLive: false
-    },
-    {
-      id: 'fallback-4',
-      headline: 'DeFi Protocols Report Record Trading Volumes',
-      summary: 'Decentralized finance platforms show consistent growth patterns with improved user engagement metrics.',
-      source: 'DeFiToday',
-      publishedAt: currentTime,
-      category: 'DeFi',
-      sentiment: 'Neutral',
-      url: 'https://theblock.co/defi-trading-volumes',
-      isLive: false
-    },
-    {
-      id: 'fallback-5',
-      headline: 'New Regulatory Framework Clarifies Crypto Classification',
-      summary: 'Cryptocurrency regulation initiatives show positive development across multiple jurisdictions.',
-      source: 'RegulatoryWatch',
-      publishedAt: currentTime,
-      category: 'Regulation',
-      sentiment: 'Neutral',
-      url: 'https://coindesk.com/policy/crypto-regulation-framework',
-      isLive: false
-    },
-    {
-      id: 'fallback-6',
-      headline: 'Market Analysis: Crypto Sector Shows Resilience',
-      summary: 'Technical indicators suggest continued market strength with balanced trading patterns across major cryptocurrencies.',
-      source: 'MarketWatch',
-      publishedAt: currentTime,
-      category: 'Market News',
-      sentiment: 'Neutral',
-      url: 'https://coindesk.com/markets/crypto-market-analysis',
-      isLive: false
-    }
-  ];
-
-  return fallbackArticles;
-}
-
 // Optimized market ticker data
 async function getMarketTicker() {
   try {
+    const apiKey = process.env.COINGECKO_API_KEY;
+    const keyParam = apiKey ? `&x_cg_demo_api_key=${apiKey}` : '';
+    
     const response = await fetch(
-      'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=8&page=1&sparkline=false',
-      { signal: AbortSignal.timeout(5000) }
+      `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=8&page=1&sparkline=false${keyParam}`,
+      { signal: AbortSignal.timeout(3000) }
     );
     
     if (!response.ok) {
-      return getFallbackTicker();
+      return []; // No fallback ticker data
     }
     
     const data = await response.json();
@@ -409,23 +386,76 @@ async function getMarketTicker() {
       change: coin.price_change_percentage_24h
     }));
   } catch (error) {
-    return getFallbackTicker();
+    return []; // No fallback ticker data
   }
 }
 
-function getFallbackTicker() {
-  return [
-    { symbol: 'BTC', name: 'Bitcoin', price: 110500, change: 2.1 },
-    { symbol: 'ETH', name: 'Ethereum', price: 3850, change: -0.8 },
-    { symbol: 'SOL', name: 'Solana', price: 245, change: 1.5 },
-    { symbol: 'XRP', name: 'XRP', price: 2.80, change: 0.3 },
-    { symbol: 'ADA', name: 'Cardano', price: 1.25, change: -1.2 }
-  ];
+// Initialize OpenAI for AI-powered news analysis
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-2024-08-06';
+
+// AI-powered news analysis and summarization
+async function generateAINewsSummary(articles: any[]) {
+  if (!process.env.OPENAI_API_KEY || !articles.length) return articles;
+  
+  try {
+    const completion = await openai.chat.completions.create({
+      model: OPENAI_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: `You are an expert cryptocurrency news analyst. Analyze the provided news articles and generate concise, insightful summaries that highlight:
+          1. Market impact and implications
+          2. Key technical or fundamental insights
+          3. Trading relevance
+          4. Sentiment (Bullish/Bearish/Neutral)
+          
+          For each article, provide a 1-2 sentence AI summary that adds analytical value beyond the original headline.
+          Return a JSON array with the same structure but enhanced with "aiSummary" and "sentiment" fields.`
+        },
+        {
+          role: "user",
+          content: `Analyze these crypto news articles: ${JSON.stringify(articles.slice(0, 5).map(a => ({ title: a.headline, description: a.summary })))}`
+        }
+      ],
+      temperature: 0.3,
+      max_tokens: 1000
+    });
+
+    const aiContent = completion.choices[0]?.message?.content;
+    if (aiContent) {
+      try {
+        // Clean the AI response - remove markdown code blocks if present
+        const cleanContent = aiContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        const aiAnalysis = JSON.parse(cleanContent);
+        
+        return articles.map((article, index) => ({
+          ...article,
+          aiSummary: aiAnalysis[index]?.aiSummary || null,
+          sentiment: aiAnalysis[index]?.sentiment || article.sentiment
+        }));
+      } catch (parseError) {
+        console.error('Failed to parse AI news analysis:', parseError);
+        console.error('Raw AI content:', aiContent);
+        // Return articles without AI enhancement if parsing fails
+        return articles;
+      }
+    }
+  } catch (error) {
+    console.error('AI news analysis failed:', error);
+  }
+  
+  return articles;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    console.log('🚀 Enhanced Crypto Herald API called');
+    console.log('🚀 AI-Enhanced Crypto Herald API called');
     
     // Parallel execution for speed
     const [newsResult, marketTicker] = await Promise.allSettled([
@@ -434,7 +464,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ]);
 
     const newsData = newsResult.status === 'fulfilled' ? newsResult.value : null;
-    const tickerData = marketTicker.status === 'fulfilled' ? marketTicker.value : getFallbackTicker();
+    const tickerData = marketTicker.status === 'fulfilled' ? marketTicker.value : [];
 
     let articles: any[];
     let apiStatus: any;
@@ -445,17 +475,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       articles = newsData.articles;
       apiStatus = newsData.apiStatus;
       isLive = true;
+      
+      // Enhance articles with AI analysis if enabled
+      if (process.env.USE_REAL_AI_ANALYSIS === 'true') {
+        console.log('🤖 Generating AI summaries for', articles.length, 'articles');
+        articles = await generateAINewsSummary(articles);
+      }
+      
       console.log('Using live articles from:', apiStatus.source);
     } else {
-      // Using fallback articles
-      articles = generateFallbackNews();
+      // No articles but still provide market ticker
+      articles = [];
       apiStatus = newsData?.apiStatus || {
-        source: 'System',
-        status: 'Fallback',
-        message: 'Using demo data - API keys not configured',
+        source: 'Market Data',
+        status: 'Partial',
+        message: 'News APIs unavailable - showing market ticker data only',
         isRateLimit: false
       };
-      console.log('Using fallback articles. Reason:', apiStatus.message);
+      console.log('No articles available. Reason:', apiStatus.message);
     }
 
     const response = {
@@ -463,14 +500,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       data: {
         articles: articles,
         marketTicker: tickerData,
-        apiStatus: apiStatus, // Include detailed API status
+        apiStatus: apiStatus,
         meta: {
           totalArticles: articles.length,
           isLiveData: isLive,
-          sources: isLive ? [apiStatus.source, 'CoinGecko'] : ['Demo Data', 'CoinGecko'],
+          sources: isLive ? [apiStatus.source, 'CoinGecko'] : ['Market Data Only'],
           lastUpdated: new Date().toISOString(),
-          processingTime: 'Enhanced with API monitoring',
-          note: isLive ? `Live feed via ${apiStatus.source}` : apiStatus.message
+          processingTime: 'AI-Enhanced Processing',
+          note: isLive ? `Live feed via ${apiStatus.source} with AI analysis` : 'Market ticker available - news APIs unavailable',
+          aiModel: process.env.USE_REAL_AI_ANALYSIS === 'true' ? OPENAI_MODEL : null
         }
       }
     };
@@ -479,28 +517,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch (error) {
     console.error('Enhanced Crypto Herald Error:', error);
     
-    // Even in error, return fallback data with error status
-    const fallbackResponse = {
-      success: true,
+    // Return market ticker even if news fails
+    const fallbackTicker = [
+      { symbol: 'BTC', name: 'Bitcoin', price: 43250, change: 2.5 },
+      { symbol: 'ETH', name: 'Ethereum', price: 2650, change: -1.2 },
+      { symbol: 'BNB', name: 'BNB', price: 315, change: 0.8 },
+      { symbol: 'XRP', name: 'XRP', price: 0.62, change: 3.1 },
+      { symbol: 'ADA', name: 'Cardano', price: 0.48, change: -0.5 },
+      { symbol: 'SOL', name: 'Solana', price: 98, change: 4.2 }
+    ];
+    
+    const errorResponse = {
+      success: false,
       data: {
-        articles: generateFallbackNews(),
-        marketTicker: getFallbackTicker(),
+        articles: [],
+        marketTicker: fallbackTicker,
         apiStatus: {
           source: 'Error Handler',
           status: 'Error',
-          message: 'System error - using fallback data',
+          message: 'System error - showing fallback market data',
           isRateLimit: false
         },
         meta: {
-          totalArticles: 6,
+          totalArticles: 0,
           isLiveData: false,
           sources: ['Fallback System'],
           lastUpdated: new Date().toISOString(),
-          note: 'System error - using demo articles'
+          note: 'System error - fallback market ticker active'
         }
       }
     };
 
-    res.status(200).json(fallbackResponse);
+    res.status(500).json(errorResponse);
   }
 }
