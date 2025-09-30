@@ -532,7 +532,7 @@ export default function ETHTradingChart() {
         currentPrice={realTimeData.currentPrice}
         supportResistance={supportResistance}
         tradingZones={tradingZones}
-        timeframe={realTimeData.timeframe}
+
         marketConditions={realTimeData.marketConditions}
       />
 
