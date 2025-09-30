@@ -1,10 +1,19 @@
 # 🚀 Agents.MD - Crypto Trading Intelligence Platform
 
-**Version 1.0** - Advanced cryptocurrency trading intelligence platform powered by AI agents and real-time market data analysis.
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/ArcaneAIAutomation/Agents.MD/releases)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black.svg)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
 
-🌐 **Live Demo**: [news.arcane.group](https://news.arcane.group)
+Advanced cryptocurrency trading intelligence platform powered by AI agents and real-time market data analysis. Built with Next.js, TypeScript, and modern web technologies.
 
-## 🎯 Core Features
+🌐 **Live Demo**: [news.arcane.group](https://news.arcane.group)  
+📚 **Documentation**: [View Docs](docs/)  
+🐛 **Issues**: [Report Bug](https://github.com/ArcaneAIAutomation/Agents.MD/issues)  
+💡 **Feature Requests**: [Request Feature](https://github.com/ArcaneAIAutomation/Agents.MD/issues/new?template=feature_request.md)
+
+## ✨ Key Features
 
 ### 📊 Enhanced Visual Trading Zones
 - **Real-time order book analysis** from Binance with live bid/ask walls
@@ -20,11 +29,76 @@
 - **Confidence scoring system** for prediction reliability
 - **Live market data** from Binance, Coinbase, and CoinGecko APIs
 
-### 📰 Nexo.com UK Regulatory Updates
-- **Real-time monitoring** of regulatory changes affecting Nexo
+### 📰 Regulatory Intelligence
+- **Real-time monitoring** of regulatory changes affecting crypto
 - **Relevance scoring** for news articles (0-100 scale)
-- **Official sources** including FCA, EBA, and Nexo communications
+- **Official sources** including FCA, EBA, and regulatory bodies
 - **Automated updates** every 5 minutes
+
+## 🚀 Quick Start
+
+### Prerequisites
+- **Node.js** 18.0.0 or higher
+- **npm** or **yarn** package manager
+- **Git** for version control
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/ArcaneAIAutomation/Agents.MD.git
+   cd Agents.MD
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env.local
+   ```
+   
+   Edit `.env.local` and add your API keys:
+   ```env
+   OPENAI_API_KEY=your_openai_api_key_here
+   COINMARKETCAP_API_KEY=your_cmc_api_key_here
+   NEWS_API_KEY=your_news_api_key_here
+   ```
+
+4. **Start the development server**
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
+
+5. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## 📖 Usage
+
+### Trading Zone Analysis
+
+1. **Select Timeframe**: Choose between 1H (Scalping), 4H (Swing), or 1D (Position)
+2. **View Real-Time Zones**: See live supply/demand zones based on order book data
+3. **Analyze Confidence**: Each zone shows confidence percentage and volume data
+4. **Monitor Whale Activity**: Track large transactions affecting price levels
+
+### Price Predictions
+
+- **Hourly Predictions**: Short-term price targets with 85%+ confidence
+- **Daily Predictions**: 24-hour price forecasts with technical analysis
+- **Weekly Predictions**: Long-term trend analysis for position trading
+
+### Market Intelligence
+
+- **Live News Feed**: Real-time cryptocurrency news and regulatory updates
+- **Sentiment Analysis**: Market sentiment scoring and Fear & Greed Index
+- **Technical Indicators**: RSI, MACD, Bollinger Bands, and moving averages
 
 ## 🏗️ Project Structure
 
@@ -294,43 +368,246 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 *This project demonstrates how AI agents can be used to create powerful, real-time financial information systems without requiring extensive manual content curation.*
 
-## 🚀 Version 1.0 Release Highlights
+## 🏗️ Project Structure
 
-### ✅ Production-Ready Features
-- **100% Real Market Data** - No demo or fallback data used
-- **Enhanced User Interface** - Intuitive timeframe selection and analysis
-- **Advanced Error Handling** - Robust API error management and recovery
-- **CORS Resolution** - Seamless frontend-backend communication
-- **Comprehensive Documentation** - Complete setup and usage guides
+```
+Agents.MD/
+├── 📁 components/           # React components
+│   ├── BTCTradingChart.tsx  # Main trading chart component
+│   ├── BTCMarketAnalysis.tsx # Market analysis dashboard
+│   └── TradingChart.tsx     # Base chart component
+├── 📁 pages/               # Next.js pages and API routes
+│   ├── api/                # Backend API endpoints
+│   │   ├── btc-analysis.ts # Bitcoin analysis API
+│   │   ├── crypto-herald.ts # News aggregation API
+│   │   └── historical-prices.ts # Price history API
+│   └── index.tsx           # Main dashboard page
+├── 📁 styles/              # CSS and styling
+├── 📁 docs/                # Documentation
+├── 📁 .github/             # GitHub templates and workflows
+├── .env.example            # Environment variables template
+├── README.md               # This file
+└── package.json            # Dependencies and scripts
+```
 
-### 🎯 Trading Intelligence
-- **Scalping Zones (1H)** - Quick entry/exit points with 0.3x volatility
-- **Swing Trading Zones (4H)** - Intraday positions with 1.0x volatility  
-- **Position Trading Zones (1D)** - Long-term holds with 2.2x volatility
-- **Real Order Book Analysis** - Live market maker positioning
-- **Historical Volume Levels** - Support/resistance from actual trading data
+## 🔧 Configuration
 
-## 🏗️ Technical Architecture
+### Environment Variables
 
-Built with modern web technologies for optimal performance and scalability:
+Required API keys (add to `.env.local`):
 
-- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
-- **Backend**: Node.js API routes with real-time data fetching
-- **Data Sources**: Binance, Coinbase, CoinGecko, NewsAPI
-- **AI Integration**: OpenAI GPT-4 for market analysis
-- **Deployment**: Vercel with automatic CI/CD
+| Variable | Description | Required | Get From |
+|----------|-------------|----------|----------|
+| `OPENAI_API_KEY` | OpenAI API for AI analysis | ✅ | [OpenAI Platform](https://platform.openai.com/api-keys) |
+| `COINMARKETCAP_API_KEY` | Market data | ✅ | [CoinMarketCap Pro](https://pro.coinmarketcap.com/account) |
+| `NEWS_API_KEY` | News aggregation | ✅ | [NewsAPI](https://newsapi.org/account) |
+| `COINGECKO_API_KEY` | Alternative market data | ⚪ | [CoinGecko](https://www.coingecko.com/en/api/pricing) |
 
-## 📈 Live Market Data Sources
+### Feature Flags
 
-### Real-Time APIs
-- **Binance API** - Order book, kline data, funding rates
-- **Coinbase API** - Price feeds and market data
-- **CoinGecko API** - Market cap, volume, price changes
-- **Alternative.me** - Fear & Greed Index
-- **NewsAPI** - Cryptocurrency news aggregation
+Control features via environment variables:
 
-### Technical Indicators
-- **RSI (Relative Strength Index)** - Momentum oscillator
-- **MACD (Moving Average Convergence Divergence)** - Trend following
-- **EMA (Exponential Moving Averages)** - 20 and 50 period
-- **Bollinger Bands** - Volatility and price envelope analysis
+```env
+ENABLE_LIVE_DATA=true              # Enable real-time data fetching
+ENABLE_AI_NEWS_ANALYSIS=true       # Enable AI-powered news analysis
+ENABLE_ADVANCED_TA=true            # Enable advanced technical analysis
+USE_REAL_AI_ANALYSIS=true          # Use real OpenAI instead of demo data
+```
+
+## 🧪 Development
+
+### Available Scripts
+
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run ESLint
+npm run type-check   # Run TypeScript checks
+```
+
+### Development Workflow
+
+1. **Create a feature branch**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+2. **Make your changes**
+   - Follow TypeScript best practices
+   - Add tests for new functionality
+   - Update documentation as needed
+
+3. **Test your changes**
+   ```bash
+   npm run build
+   npm run lint
+   npm run type-check
+   ```
+
+4. **Submit a pull request**
+   - Use the provided PR template
+   - Include screenshots for UI changes
+   - Reference related issues
+
+## 📊 Technical Architecture
+
+### Frontend Stack
+- **Next.js 14** - React framework with SSR/SSG
+- **TypeScript** - Type-safe JavaScript
+- **Tailwind CSS** - Utility-first CSS framework
+- **Lucide React** - Modern icon library
+
+### Backend & APIs
+- **Next.js API Routes** - Serverless API endpoints
+- **Real-time Data Sources**:
+  - Binance API (Order book, klines, funding)
+  - Coinbase API (Price feeds)
+  - CoinGecko API (Market data)
+  - NewsAPI (Cryptocurrency news)
+  - Alternative.me (Fear & Greed Index)
+
+### AI & Analysis
+- **OpenAI GPT-4** - Market analysis and predictions
+- **Custom Algorithms** - Technical indicator calculations
+- **Real-time Processing** - Live data analysis and zone generation
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+
+1. **Connect to Vercel**
+   ```bash
+   npm i -g vercel
+   vercel
+   ```
+
+2. **Set environment variables** in Vercel dashboard
+
+3. **Deploy**
+   ```bash
+   vercel --prod
+   ```
+
+### Manual Deployment
+
+1. **Build the application**
+   ```bash
+   npm run build
+   ```
+
+2. **Start production server**
+   ```bash
+   npm start
+   ```
+
+## 📈 Performance
+
+### Optimization Features
+- **API Caching** - 5-minute cache for market data
+- **Rate Limiting** - Prevents API quota exhaustion
+- **Error Handling** - Graceful fallbacks for API failures
+- **Responsive Design** - Optimized for all device sizes
+
+### Monitoring
+- Real-time API status monitoring
+- Error logging and reporting
+- Performance metrics tracking
+
+## 🤝 Contributing
+
+We welcome contributions from the community! Please read our [Contributing Guidelines](CONTRIBUTING.md) before getting started.
+
+### Ways to Contribute
+- 🐛 **Report bugs** using our [bug report template](.github/ISSUE_TEMPLATE/bug_report.md)
+- 💡 **Suggest features** using our [feature request template](.github/ISSUE_TEMPLATE/feature_request.md)
+- 📝 **Improve documentation** by submitting PRs
+- 🔧 **Fix issues** by browsing our [open issues](https://github.com/ArcaneAIAutomation/Agents.MD/issues)
+- ⭐ **Star the repository** to show your support
+
+### Development Setup
+1. Fork the repository
+2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/Agents.MD.git`
+3. Follow the [installation steps](#installation) above
+4. Create a feature branch: `git checkout -b feature/amazing-feature`
+5. Make your changes and commit: `git commit -m 'Add amazing feature'`
+6. Push to your branch: `git push origin feature/amazing-feature`
+7. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🔒 Security
+
+Security is a top priority. Please review our [Security Policy](SECURITY.md) for:
+- Reporting vulnerabilities
+- Security best practices
+- Supported versions
+
+**Never commit API keys or sensitive data to the repository.**
+
+## 📞 Support & Community
+
+### Getting Help
+- 📖 **Documentation**: Check our [docs](docs/) directory
+- 🐛 **Bug Reports**: Use our [issue tracker](https://github.com/ArcaneAIAutomation/Agents.MD/issues)
+- 💬 **Discussions**: Join our [GitHub Discussions](https://github.com/ArcaneAIAutomation/Agents.MD/discussions)
+- 📧 **Email**: Contact us at support@arcane.group
+
+### Community Guidelines
+Please read our [Code of Conduct](CODE_OF_CONDUCT.md) to understand our community standards.
+
+## 🗺️ Roadmap
+
+### Version 1.2.0 (Q4 2025)
+- [ ] Additional cryptocurrency support (ETH, ADA, SOL)
+- [ ] Advanced portfolio tracking
+- [ ] Custom alert system
+- [ ] Enhanced mobile experience
+- [ ] API rate optimization
+
+### Version 1.3.0 (Q1 2026)
+- [ ] Machine learning price predictions
+- [ ] Social sentiment analysis from Twitter/Reddit
+- [ ] Advanced charting tools (TradingView integration)
+- [ ] User authentication system
+- [ ] Personalized dashboards
+
+### Version 2.0.0 (Q2 2026)
+- [ ] Multi-exchange support
+- [ ] Real-time trading execution
+- [ ] Advanced risk management tools
+- [ ] Professional trader features
+- [ ] API for third-party integrations
+
+## 📊 Statistics
+
+![GitHub stars](https://img.shields.io/github/stars/ArcaneAIAutomation/Agents.MD?style=social)
+![GitHub forks](https://img.shields.io/github/forks/ArcaneAIAutomation/Agents.MD?style=social)
+![GitHub issues](https://img.shields.io/github/issues/ArcaneAIAutomation/Agents.MD)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/ArcaneAIAutomation/Agents.MD)
+
+## 🙏 Acknowledgments
+
+- **OpenAI** for GPT-4 API enabling intelligent market analysis
+- **Binance** for comprehensive cryptocurrency market data
+- **CoinGecko** for reliable price feeds and market information
+- **Next.js Team** for the excellent React framework
+- **Tailwind CSS** for the utility-first CSS framework
+- **Vercel** for seamless deployment and hosting
+- **Contributors** who help improve this project
+
+## 📈 Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes and releases.
+
+---
+
+<div align="center">
+
+**Built with ❤️ by [Arcane AI Automation](https://github.com/ArcaneAIAutomation)**
+
+[⭐ Star this repository](https://github.com/ArcaneAIAutomation/Agents.MD) if you find it helpful!
+
+</div>
