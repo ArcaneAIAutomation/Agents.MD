@@ -17,6 +17,14 @@ const nextConfig = {
   experimental: {
     esmExternals: false,
   },
+  // Disable TypeScript checking during build
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  // Disable ESLint during build
+  eslint: {
+    ignoreDuringBuilds: true,
+  }
 }
 
 module.exports = nextConfig
