@@ -386,8 +386,10 @@ async function getMarketTicker() {
     });
     
     if (!response.ok) {
+      const errorText = await response.text();
       console.log(`❌ CoinGecko API failed: ${response.status} ${response.statusText}`);
-      throw new Error(`CoinGecko API failed: ${response.status}`);
+      console.log(`❌ Error response: ${errorText}`);
+      throw new Error(`CoinGecko API failed: ${response.status} - ${errorText}`);
     }
     
     const data = await response.json();
@@ -422,6 +424,7 @@ async function getMarketTicker() {
     
     if (tickerData.length > 0) {
       console.log('🎉 CoinGecko ticker data ready:', tickerData.map(r => `${r.symbol}: $${r.price.toLocaleString()}`));
+      console.log('📊 Sample ticker item:', JSON.stringify(tickerData[0], null, 2));
       return tickerData;
     } else {
       console.log('❌ No valid ticker data from CoinGecko');
