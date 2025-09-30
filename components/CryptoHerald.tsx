@@ -66,6 +66,11 @@ const CryptoHerald: React.FC = () => {
       status: 'Initializing',
       message: 'Loading market data...',
       isRateLimit: false
+    },
+    meta: {
+      lastUpdated: new Date().toISOString(),
+      sources: ['Initializing'],
+      isLiveData: true
     }
   });
   const [loading, setLoading] = useState(false);
@@ -84,6 +89,11 @@ const CryptoHerald: React.FC = () => {
         status: 'Waiting',
         message: 'Click "Fetch News" to load latest crypto news and market data',
         isRateLimit: false
+      },
+      meta: {
+        lastUpdated: new Date().toISOString(),
+        sources: ['Ready'],
+        isLiveData: true
       }
     });
   }, []);

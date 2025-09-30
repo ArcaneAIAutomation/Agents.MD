@@ -161,8 +161,8 @@ export default function BTCTradingChart() {
         macd: baseResult.data.technicalIndicators?.macd?.signal || 'NEUTRAL',
         ema20: baseResult.data.technicalIndicators?.ema20 || currentPrice * 0.98,
         ema50: baseResult.data.technicalIndicators?.ema50 || currentPrice * 0.95,
-        trend: orderBookImbalance?.volumeImbalance > 0.1 ? 'bullish' : 
-               orderBookImbalance?.volumeImbalance < -0.1 ? 'bearish' : 'neutral'
+        trend: (orderBookImbalance?.volumeImbalance > 0.1 ? 'bullish' : 
+               orderBookImbalance?.volumeImbalance < -0.1 ? 'bearish' : 'neutral') as "bullish" | "bearish" | "neutral"
       };
 
       const realTimeData: RealTimeframeBTCData = {
@@ -301,7 +301,7 @@ export default function BTCTradingChart() {
                     </div>
                     <div className="flex items-center">
                       <span className="text-green-600 mr-2">✅</span>
-                      <span>Whale movement tracking (>5 BTC)</span>
+                      <span>Whale movement tracking (&gt;5 BTC)</span>
                     </div>
                     <div className="flex items-center">
                       <span className="text-green-600 mr-2">✅</span>
