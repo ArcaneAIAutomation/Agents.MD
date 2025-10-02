@@ -128,7 +128,7 @@ export default function ETHTradingChart() {
       const params = timeframeParams[timeframe];
       
       // Calculate timeframe-adjusted supply zones
-      const adjustedSupplyZones = baseResult.data.technicalIndicators?.supplyDemandZones?.supplyZones?.map((zone: any, index: number) => {
+      const adjustedSupplyZones = supplyDemandZones.supplyZones?.map((zone: any, index: number) => {
         // Adjust zone level based on timeframe volatility
         const distanceFromPrice = zone.level - currentPrice;
         const adjustedDistance = distanceFromPrice * params.volatilityMultiplier;
@@ -151,7 +151,7 @@ export default function ETHTradingChart() {
       }) || [];
 
       // Calculate timeframe-adjusted demand zones
-      const adjustedDemandZones = baseResult.data.technicalIndicators?.supplyDemandZones?.demandZones?.map((zone: any, index: number) => {
+      const adjustedDemandZones = supplyDemandZones.demandZones?.map((zone: any, index: number) => {
         // Adjust zone level based on timeframe volatility
         const distanceFromPrice = zone.level - currentPrice;
         const adjustedDistance = distanceFromPrice * params.volatilityMultiplier;
@@ -210,19 +210,23 @@ export default function ETHTradingChart() {
 
       setRealTimeData(realTimeData);
       
-      console.log(`✅ ${timeframe} analysis complete:`, {
+      console.log(`✅ ${timeframe} ETH analysis complete:`, {
         supplyZones: adjustedSupplyZones.length,
         demandZones: adjustedDemandZones.length,
         volatilityMultiplier: params.volatilityMultiplier,
         whaleActivity: whaleMovements.length,
-        orderBookImbalance: (marketConditions.orderBookImbalance * 100).toFixed(2) + '%'
+        orderBookImbalance: (marketConditions.orderBookImbalance * 100).toFixed(2) + '%',
+        currentPrice: currentPrice
       });
 
     } catch (err) {
-      console.error(`❌ ${timeframe} analysis failed:`, err);
-      setError(err instanceof Error ? err.message : 'Failed to generate real timeframe data');
+      console.error(`❌ ${timeframe} ETH analysis failed:`, err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to generate real timeframe data';
+      console.error('Full ETH error details:', err);
+      setError(errorMessage);
     } finally {
       setLoading(false);
+      console.log(`🏁 ${timeframe} ETH analysis process completed`);
     }
   };
 
