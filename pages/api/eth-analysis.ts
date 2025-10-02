@@ -605,7 +605,7 @@ async function fetchRealETHPrice() {
     const apis = [
       'https://api.coinbase.com/v2/exchange-rates?currency=ETH',
       'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd&include_24hr_change=true&include_market_cap=true',
-      'https://api.kraken.com/0/public/Ticker?pair=ETHUSD'
+      'https://api.kraken.com/0/public/Ticker?pair=XETHZUSD'
     ];
     
     for (const apiUrl of apis) {
@@ -641,7 +641,7 @@ async function fetchRealETHPrice() {
               timestamp: new Date().toISOString()
             };
           } else if (apiUrl.includes('kraken')) {
-            const krakenData = data.result.ETHUSD;
+            const krakenData = data.result.XETHZUSD;
             return {
               price: parseFloat(krakenData.c[0]), // Last trade price
               change24h: ((parseFloat(krakenData.c[0]) - parseFloat(krakenData.o)) / parseFloat(krakenData.o)) * 100,

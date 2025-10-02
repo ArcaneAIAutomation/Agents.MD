@@ -24,13 +24,13 @@ async function fetchRealEthereumData() {
 
   try {
     // 1. Get real-time price and 24h data from Kraken
-    const krakenResponse = await fetch('https://api.kraken.com/0/public/Ticker?pair=ETHUSD', {
+    const krakenResponse = await fetch('https://api.kraken.com/0/public/Ticker?pair=XETHZUSD', {
       signal: AbortSignal.timeout(5000)
     });
     
     if (krakenResponse.ok) {
       const krakenData = await krakenResponse.json();
-      const ethData = krakenData.result.ETHUSD;
+      const ethData = krakenData.result.XETHZUSD;
       results.price = {
         current: parseFloat(ethData.c[0]), // Last trade price
         change24h: ((parseFloat(ethData.c[0]) - parseFloat(ethData.o)) / parseFloat(ethData.o)) * 100,
@@ -92,13 +92,13 @@ async function fetchRealEthereumData() {
 
   try {
     // 4. Get order book data from Kraken for supply/demand analysis
-    const orderBookResponse = await fetch('https://api.kraken.com/0/public/Depth?pair=ETHUSD&count=100', {
+    const orderBookResponse = await fetch('https://api.kraken.com/0/public/Depth?pair=XETHZUSD&count=100', {
       signal: AbortSignal.timeout(5000)
     });
     
     if (orderBookResponse.ok) {
       const orderBookData = await orderBookResponse.json();
-      const ethOrderBook = orderBookData.result.ETHUSD;
+      const ethOrderBook = orderBookData.result.XETHZUSD;
       
       // Analyze order book for supply/demand zones
       const bids = ethOrderBook.bids.slice(0, 20).map(([price, quantity]: [string, string]) => ({

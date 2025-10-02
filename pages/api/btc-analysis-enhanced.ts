@@ -555,10 +555,169 @@ function analyzeIntelligentMarketSentiment(realData: any, technicalIndicators: a
   };
 }
 
-// Advanced Supply/Demand Zone Analysis using Real Order Book Data
-function analyzeSupplyDemandZones(orderBookData: any, currentPrice: number) {
+// Enhanced Pivot Point Analysis
+function calculatePivotPoints(currentPrice: number, high24h: number, low24h: number) {
+  // Standard Pivot Points
+  const pivot = (high24h + low24h + currentPrice) / 3;
+  const r1 = (2 * pivot) - low24h;
+  const s1 = (2 * pivot) - high24h;
+  const r2 = pivot + (high24h - low24h);
+  const s2 = pivot - (high24h - low24h);
+  const r3 = high24h + 2 * (pivot - low24h);
+  const s3 = low24h - 2 * (high24h - pivot);
+
+  // Fibonacci Retracements
+  const range = high24h - low24h;
+  const fib236 = high24h - (range * 0.236);
+  const fib382 = high24h - (range * 0.382);
+  const fib500 = high24h - (range * 0.500);
+  const fib618 = high24h - (range * 0.618);
+  const fib786 = high24h - (range * 0.786);
+
+  return {
+    pivot: { level: pivot, type: 'pivot', strength: 'Medium' },
+    resistance: [
+      { level: r1, type: 'resistance', strength: 'Medium', name: 'R1' },
+      { level: r2, type: 'resistance', strength: 'Strong', name: 'R2' },
+      { level: r3, type: 'resistance', strength: 'Very Strong', name: 'R3' }
+    ],
+    support: [
+      { level: s1, type: 'support', strength: 'Medium', name: 'S1' },
+      { level: s2, type: 'support', strength: 'Strong', name: 'S2' },
+      { level: s3, type: 'support', strength: 'Very Strong', name: 'S3' }
+    ],
+    fibonacci: [
+      { level: fib236, type: 'fibonacci', strength: 'Weak', name: '23.6%' },
+      { level: fib382, type: 'fibonacci', strength: 'Medium', name: '38.2%' },
+      { level: fib500, type: 'fibonacci', strength: 'Strong', name: '50%' },
+      { level: fib618, type: 'fibonacci', strength: 'Very Strong', name: '61.8%' },
+      { level: fib786, type: 'fibonacci', strength: 'Strong', name: '78.6%' }
+    ]
+  };
+}
+
+// Advanced Supply/Demand Zone Analysis using Real Order Book Data + Historical Levels
+function analyzeSupplyDemandZones(orderBookData: any, currentPrice: number, high24h: number, low24h: number) {
+  const supplyZones = [];
+  const demandZones = [];
+  
+  // Add historical pivot levels as supply/demand zones
+  const pivotPoints = calculatePivotPoints(currentPrice, high24h, low24h);
+  
+  // Add pivot-based resistance levels as supply zones
+  pivotPoints.resistance.forEach(level => {
+    if (level.level > currentPrice) {
+      supplyZones.push({
+        level: level.level,
+        volume: 0,
+        volumePercentage: 0,
+        strength: level.strength,
+        confidence: level.strength === 'Very Strong' ? 85 : level.strength === 'Strong' ? 75 : 65,
+        distanceFromPrice: ((level.level - currentPrice) / currentPrice) * 100,
+        orderCount: 0,
+        source: 'pivot_analysis',
+        type: 'supply',
+        description: `${level.name} Pivot Resistance`
+      });
+    }
+  });
+
+  // Add pivot-based support levels as demand zones
+  pivotPoints.support.forEach(level => {
+    if (level.level < currentPrice) {
+      demandZones.push({
+        level: level.level,
+        volume: 0,
+        volumePercentage: 0,
+        strength: level.strength,
+        confidence: level.strength === 'Very Strong' ? 85 : level.strength === 'Strong' ? 75 : 65,
+        distanceFromPrice: ((currentPrice - level.level) / currentPrice) * 100,
+        orderCount: 0,
+        source: 'pivot_analysis',
+        type: 'demand',
+        description: `${level.name} Pivot Support`
+      });
+    }
+  });
+
+  // Add Fibonacci levels
+  pivotPoints.fibonacci.forEach(level => {
+    if (level.level > currentPrice) {
+      supplyZones.push({
+        level: level.level,
+        volume: 0,
+        volumePercentage: 0,
+        strength: level.strength,
+        confidence: level.strength === 'Very Strong' ? 80 : level.strength === 'Strong' ? 70 : 60,
+        distanceFromPrice: ((level.level - currentPrice) / currentPrice) * 100,
+        orderCount: 0,
+        source: 'fibonacci',
+        type: 'supply',
+        description: `Fibonacci ${level.name} Retracement`
+      });
+    } else {
+      demandZones.push({
+        level: level.level,
+        volume: 0,
+        volumePercentage: 0,
+        strength: level.strength,
+        confidence: level.strength === 'Very Strong' ? 80 : level.strength === 'Strong' ? 70 : 60,
+        distanceFromPrice: ((currentPrice - level.level) / currentPrice) * 100,
+        orderCount: 0,
+        source: 'fibonacci',
+        type: 'demand',
+        description: `Fibonacci ${level.name} Support`
+      });
+    }
+  });
+
+  // Add psychological levels (round numbers)
+  const roundLevels = [];
+  const baseLevel = Math.floor(currentPrice / 1000) * 1000;
+  for (let i = -2; i <= 3; i++) {
+    const level = baseLevel + (i * 1000);
+    if (level > 0 && Math.abs(level - currentPrice) / currentPrice < 0.1) { // Within 10%
+      roundLevels.push(level);
+    }
+  }
+
+  roundLevels.forEach(level => {
+    if (level > currentPrice) {
+      supplyZones.push({
+        level: level,
+        volume: 0,
+        volumePercentage: 0,
+        strength: 'Medium',
+        confidence: 60,
+        distanceFromPrice: ((level - currentPrice) / currentPrice) * 100,
+        orderCount: 0,
+        source: 'psychological',
+        type: 'supply',
+        description: `Psychological Resistance $${level.toLocaleString()}`
+      });
+    } else if (level < currentPrice) {
+      demandZones.push({
+        level: level,
+        volume: 0,
+        volumePercentage: 0,
+        strength: 'Medium',
+        confidence: 60,
+        distanceFromPrice: ((currentPrice - level) / currentPrice) * 100,
+        orderCount: 0,
+        source: 'psychological',
+        type: 'demand',
+        description: `Psychological Support $${level.toLocaleString()}`
+      });
+    }
+  });
+
   if (!orderBookData || !orderBookData.bids || !orderBookData.asks) {
-    return { supplyZones: [], demandZones: [], analysis: 'No order book data available' };
+    return { 
+      supplyZones: supplyZones.slice(0, 8), 
+      demandZones: demandZones.slice(0, 8), 
+      analysis: 'Using pivot points, Fibonacci, and psychological levels (no order book data)',
+      pivotPoints
+    };
   }
 
   const bids = orderBookData.bids;
@@ -568,8 +727,7 @@ function analyzeSupplyDemandZones(orderBookData: any, currentPrice: number) {
   const totalBidVolume = bids.reduce((sum: number, bid: any) => sum + bid.quantity, 0);
   const totalAskVolume = asks.reduce((sum: number, ask: any) => sum + ask.quantity, 0);
   
-  // Find volume clusters for demand zones (bids)
-  const demandZones = [];
+  // Find volume clusters for demand zones (bids) - add to existing array
   const bidClusters = findVolumeClusters(bids, 'bid', currentPrice);
   
   for (const cluster of bidClusters) {
@@ -593,8 +751,7 @@ function analyzeSupplyDemandZones(orderBookData: any, currentPrice: number) {
     }
   }
   
-  // Find volume clusters for supply zones (asks)
-  const supplyZones = [];
+  // Find volume clusters for supply zones (asks) - add to existing array
   const askClusters = findVolumeClusters(asks, 'ask', currentPrice);
   
   for (const cluster of askClusters) {
@@ -735,8 +892,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       realData.orderBookData
     );
     
-    // Generate supply/demand zones from order book data
-    const supplyDemandZones = analyzeSupplyDemandZones(realData.orderBookData, currentPrice);
+    // Generate supply/demand zones from order book data + technical analysis
+    const supplyDemandZones = analyzeSupplyDemandZones(realData.orderBookData, currentPrice, realData.price.high24h, realData.price.low24h);
     
     // Generate intelligent trading signals and predictions using news data
     const newsData = realData.newsData || [];

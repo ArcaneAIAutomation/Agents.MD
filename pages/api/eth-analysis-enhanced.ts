@@ -133,13 +133,13 @@ async function fetchRealEthereumData() {
 
   try {
     // 4. Get order book data from Kraken for supply/demand analysis
-    const orderBookResponse = await fetch('https://api.kraken.com/0/public/Depth?pair=ETHUSD&count=100', {
+    const orderBookResponse = await fetch('https://api.kraken.com/0/public/Depth?pair=XETHZUSD&count=100', {
       signal: AbortSignal.timeout(20000)
     });
     
     if (orderBookResponse.ok) {
       const orderBookData = await orderBookResponse.json();
-      const ethOrderBook = orderBookData.result.ETHUSD;
+      const ethOrderBook = orderBookData.result.XETHZUSD;
       
       // Analyze order book for supply/demand zones
       const bids = ethOrderBook.bids.slice(0, 20).map(([price, quantity]: [string, string]) => ({
@@ -418,10 +418,169 @@ function analyzeIntelligentMarketSentiment(realData: any, technicalIndicators: a
   };
 }
 
-// Advanced Supply/Demand Zone Analysis for Ethereum
-function analyzeEthSupplyDemandZones(orderBookData: any, currentPrice: number) {
+// Enhanced ETH Pivot Point Analysis
+function calculateEthPivotPoints(currentPrice: number, high24h: number, low24h: number) {
+  // Standard Pivot Points for ETH
+  const pivot = (high24h + low24h + currentPrice) / 3;
+  const r1 = (2 * pivot) - low24h;
+  const s1 = (2 * pivot) - high24h;
+  const r2 = pivot + (high24h - low24h);
+  const s2 = pivot - (high24h - low24h);
+  const r3 = high24h + 2 * (pivot - low24h);
+  const s3 = low24h - 2 * (high24h - pivot);
+
+  // Fibonacci Retracements for ETH
+  const range = high24h - low24h;
+  const fib236 = high24h - (range * 0.236);
+  const fib382 = high24h - (range * 0.382);
+  const fib500 = high24h - (range * 0.500);
+  const fib618 = high24h - (range * 0.618);
+  const fib786 = high24h - (range * 0.786);
+
+  return {
+    pivot: { level: pivot, type: 'pivot', strength: 'Medium' },
+    resistance: [
+      { level: r1, type: 'resistance', strength: 'Medium', name: 'R1' },
+      { level: r2, type: 'resistance', strength: 'Strong', name: 'R2' },
+      { level: r3, type: 'resistance', strength: 'Very Strong', name: 'R3' }
+    ],
+    support: [
+      { level: s1, type: 'support', strength: 'Medium', name: 'S1' },
+      { level: s2, type: 'support', strength: 'Strong', name: 'S2' },
+      { level: s3, type: 'support', strength: 'Very Strong', name: 'S3' }
+    ],
+    fibonacci: [
+      { level: fib236, type: 'fibonacci', strength: 'Weak', name: '23.6%' },
+      { level: fib382, type: 'fibonacci', strength: 'Medium', name: '38.2%' },
+      { level: fib500, type: 'fibonacci', strength: 'Strong', name: '50%' },
+      { level: fib618, type: 'fibonacci', strength: 'Very Strong', name: '61.8%' },
+      { level: fib786, type: 'fibonacci', strength: 'Strong', name: '78.6%' }
+    ]
+  };
+}
+
+// Advanced Supply/Demand Zone Analysis for Ethereum + Technical Levels
+function analyzeEthSupplyDemandZones(orderBookData: any, currentPrice: number, high24h: number, low24h: number) {
+  const supplyZones = [];
+  const demandZones = [];
+  
+  // Add ETH-specific pivot levels
+  const pivotPoints = calculateEthPivotPoints(currentPrice, high24h, low24h);
+  
+  // Add pivot-based resistance levels as supply zones
+  pivotPoints.resistance.forEach(level => {
+    if (level.level > currentPrice) {
+      supplyZones.push({
+        level: level.level,
+        volume: 0,
+        volumePercentage: 0,
+        strength: level.strength,
+        confidence: level.strength === 'Very Strong' ? 85 : level.strength === 'Strong' ? 75 : 65,
+        distanceFromPrice: ((level.level - currentPrice) / currentPrice) * 100,
+        orderCount: 0,
+        source: 'pivot_analysis',
+        type: 'supply',
+        description: `${level.name} Pivot Resistance`
+      });
+    }
+  });
+
+  // Add pivot-based support levels as demand zones
+  pivotPoints.support.forEach(level => {
+    if (level.level < currentPrice) {
+      demandZones.push({
+        level: level.level,
+        volume: 0,
+        volumePercentage: 0,
+        strength: level.strength,
+        confidence: level.strength === 'Very Strong' ? 85 : level.strength === 'Strong' ? 75 : 65,
+        distanceFromPrice: ((currentPrice - level.level) / currentPrice) * 100,
+        orderCount: 0,
+        source: 'pivot_analysis',
+        type: 'demand',
+        description: `${level.name} Pivot Support`
+      });
+    }
+  });
+
+  // Add Fibonacci levels for ETH
+  pivotPoints.fibonacci.forEach(level => {
+    if (level.level > currentPrice) {
+      supplyZones.push({
+        level: level.level,
+        volume: 0,
+        volumePercentage: 0,
+        strength: level.strength,
+        confidence: level.strength === 'Very Strong' ? 80 : level.strength === 'Strong' ? 70 : 60,
+        distanceFromPrice: ((level.level - currentPrice) / currentPrice) * 100,
+        orderCount: 0,
+        source: 'fibonacci',
+        type: 'supply',
+        description: `Fibonacci ${level.name} Retracement`
+      });
+    } else {
+      demandZones.push({
+        level: level.level,
+        volume: 0,
+        volumePercentage: 0,
+        strength: level.strength,
+        confidence: level.strength === 'Very Strong' ? 80 : level.strength === 'Strong' ? 70 : 60,
+        distanceFromPrice: ((currentPrice - level.level) / currentPrice) * 100,
+        orderCount: 0,
+        source: 'fibonacci',
+        type: 'demand',
+        description: `Fibonacci ${level.name} Support`
+      });
+    }
+  });
+
+  // Add ETH psychological levels (round hundreds)
+  const roundLevels = [];
+  const baseLevel = Math.floor(currentPrice / 100) * 100;
+  for (let i = -5; i <= 5; i++) {
+    const level = baseLevel + (i * 100);
+    if (level > 0 && Math.abs(level - currentPrice) / currentPrice < 0.15) { // Within 15% for ETH
+      roundLevels.push(level);
+    }
+  }
+
+  roundLevels.forEach(level => {
+    if (level > currentPrice) {
+      supplyZones.push({
+        level: level,
+        volume: 0,
+        volumePercentage: 0,
+        strength: 'Medium',
+        confidence: 60,
+        distanceFromPrice: ((level - currentPrice) / currentPrice) * 100,
+        orderCount: 0,
+        source: 'psychological',
+        type: 'supply',
+        description: `Psychological Resistance $${level.toLocaleString()}`
+      });
+    } else if (level < currentPrice) {
+      demandZones.push({
+        level: level,
+        volume: 0,
+        volumePercentage: 0,
+        strength: 'Medium',
+        confidence: 60,
+        distanceFromPrice: ((currentPrice - level) / currentPrice) * 100,
+        orderCount: 0,
+        source: 'psychological',
+        type: 'demand',
+        description: `Psychological Support $${level.toLocaleString()}`
+      });
+    }
+  });
+
   if (!orderBookData || !orderBookData.bids || !orderBookData.asks) {
-    return { supplyZones: [], demandZones: [], analysis: 'No order book data available' };
+    return { 
+      supplyZones: supplyZones.slice(0, 8), 
+      demandZones: demandZones.slice(0, 8), 
+      analysis: 'Using ETH pivot points, Fibonacci, and psychological levels (no order book data)',
+      pivotPoints
+    };
   }
 
   const bids = orderBookData.bids;
@@ -432,7 +591,6 @@ function analyzeEthSupplyDemandZones(orderBookData: any, currentPrice: number) {
   const totalAskVolume = asks.reduce((sum: number, ask: any) => sum + ask.quantity, 0);
   
   // Find volume clusters for demand zones (bids) - ETH specific thresholds
-  const demandZones = [];
   const bidClusters = findEthVolumeClusters(bids, 'bid', currentPrice);
   
   for (const cluster of bidClusters) {
@@ -457,7 +615,6 @@ function analyzeEthSupplyDemandZones(orderBookData: any, currentPrice: number) {
   }
   
   // Find volume clusters for supply zones (asks)
-  const supplyZones = [];
   const askClusters = findEthVolumeClusters(asks, 'ask', currentPrice);
   
   for (const cluster of askClusters) {
@@ -599,8 +756,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       realData.orderBookData
     );
     
-    // Generate supply/demand zones from order book data
-    const supplyDemandZones = analyzeEthSupplyDemandZones(realData.orderBookData, currentPrice);
+    // Generate supply/demand zones from order book data + technical analysis
+    const supplyDemandZones = analyzeEthSupplyDemandZones(realData.orderBookData, currentPrice, realData.price.high24h, realData.price.low24h);
     
     // Generate intelligent trading signals and predictions using news data
     const newsData = realData.newsData || [];
