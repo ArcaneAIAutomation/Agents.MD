@@ -26,16 +26,19 @@ export function useBTCData() {
     setError(null);
     
     try {
-      const response = await fetch('/api/btc-analysis');
+      const response = await fetch('/api/btc-analysis-enhanced');
       if (!response.ok) {
         throw new Error('Failed to fetch BTC analysis');
       }
       const rawData = await response.json();
       
-      // Transform API response to our format
+      // Transform enhanced API response to our format
       const transformedData: MarketData = {
-        currentPrice: rawData.currentPrice || rawData.priceAnalysis?.current || rawData.marketData?.price || 110500,
-        technicalIndicators: rawData.technicalIndicators
+        currentPrice: rawData.data?.currentPrice || rawData.data?.marketData?.price || 110500,
+        technicalIndicators: {
+          supportResistance: rawData.data?.technicalIndicators?.supportResistance,
+          supplyDemandZones: rawData.data?.technicalIndicators?.supplyDemandZones
+        }
       };
       
       setBTCData(transformedData);
@@ -89,32 +92,18 @@ export function useETHData() {
     setError(null);
     
     try {
-      const response = await fetch('/api/eth-analysis');
+      const response = await fetch('/api/eth-analysis-enhanced');
       if (!response.ok) {
         throw new Error('Failed to fetch ETH analysis');
       }
       const rawData = await response.json();
       
-      // Transform API response to our format
+      // Transform enhanced API response to our format
       const transformedData: MarketData = {
-        currentPrice: rawData.currentPrice || rawData.priceAnalysis?.current || rawData.marketData?.price || 3850,
-        technicalIndicators: rawData.technicalIndicators || {
-          supportResistance: rawData.priceAnalysis ? {
-            strongSupport: parseFloat(rawData.priceAnalysis.supportLevels?.support2?.replace('$', '') || '3450'),
-            support: parseFloat(rawData.priceAnalysis.supportLevels?.support1?.replace('$', '') || '3650'),
-            resistance: parseFloat(rawData.priceAnalysis.resistanceLevels?.resistance1?.replace('$', '') || '4050'),
-            strongResistance: parseFloat(rawData.priceAnalysis.resistanceLevels?.resistance2?.replace('$', '') || '4250')
-          } : undefined,
-          supplyDemandZones: {
-            demandZones: [
-              { level: (rawData.currentPrice || 3850) - 300, strength: 'Strong', volume: 2850000 },
-              { level: (rawData.currentPrice || 3850) - 150, strength: 'Moderate', volume: 1820000 }
-            ],
-            supplyZones: [
-              { level: (rawData.currentPrice || 3850) + 180, strength: 'Moderate', volume: 1950000 },
-              { level: (rawData.currentPrice || 3850) + 350, strength: 'Strong', volume: 3120000 }
-            ]
-          }
+        currentPrice: rawData.data?.currentPrice || rawData.data?.marketData?.price || 3850,
+        technicalIndicators: {
+          supportResistance: rawData.data?.technicalIndicators?.supportResistance,
+          supplyDemandZones: rawData.data?.technicalIndicators?.supplyDemandZones
         }
       };
       
