@@ -395,7 +395,7 @@ const CryptoHerald: React.FC = () => {
               <div className="text-center text-xs md:text-sm">
                 <div className="font-bold text-gray-800 mb-2">LIVE DATA SOURCES:</div>
                 <div className="flex flex-wrap justify-center gap-2">
-                  <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded border">Binance API</span>
+                  <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded border">Kraken API</span>
                   <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded border">CoinGecko</span>
                   <span className="bg-green-100 text-green-800 px-2 py-1 rounded border">NewsAPI</span>
                   <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded border">OpenAI GPT-4o</span>

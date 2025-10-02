@@ -332,7 +332,7 @@ export default function BTCTradingChart() {
                   <div className="space-y-1 text-xs">
                     <div className="flex items-center">
                       <span className="text-green-600 mr-2">✅</span>
-                      <span>Binance real-time bid/ask walls</span>
+                      <span>Kraken real-time bid/ask walls</span>
                     </div>
                     <div className="flex items-center">
                       <span className="text-green-600 mr-2">✅</span>

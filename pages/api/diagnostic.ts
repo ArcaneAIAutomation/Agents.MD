@@ -6,7 +6,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     environment: 'production',
     envVars: {
       OPENAI_API_KEY: process.env.OPENAI_API_KEY ? '✅ Set' : '❌ Missing',
-      BINANCE_API_KEY: process.env.BINANCE_API_KEY ? '✅ Set' : '❌ Missing',
+
       COINMARKETCAP_API_KEY: process.env.COINMARKETCAP_API_KEY ? '✅ Set' : '❌ Missing',
       NEWS_API_KEY: process.env.NEWS_API_KEY ? '✅ Set' : '❌ Missing',
       ALPHA_VANTAGE_API_KEY: process.env.ALPHA_VANTAGE_API_KEY ? '✅ Set' : '❌ Missing',
@@ -16,17 +16,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     apiTests: {}
   };
 
-  // Test Binance API
+  // Test Kraken API
   try {
-    const binanceResponse = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT', {
+    const krakenResponse = await fetch('https://api.kraken.com/0/public/Ticker?pair=XBTUSD', {
       signal: AbortSignal.timeout(5000)
     });
-    diagnostics.apiTests.binance = {
-      status: binanceResponse.ok ? '✅ Working' : `❌ Error ${binanceResponse.status}`,
-      response: binanceResponse.ok ? 'Connected' : await binanceResponse.text()
+    diagnostics.apiTests.kraken = {
+      status: krakenResponse.ok ? '✅ Working' : `❌ Error ${krakenResponse.status}`,
+      response: krakenResponse.ok ? 'Connected' : await krakenResponse.text()
     };
   } catch (error: any) {
-    diagnostics.apiTests.binance = {
+    diagnostics.apiTests.kraken = {
       status: '❌ Failed',
       error: error.message
     };

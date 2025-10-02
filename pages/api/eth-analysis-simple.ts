@@ -23,25 +23,26 @@ async function fetchRealEthereumData() {
   };
 
   try {
-    // 1. Get real-time price and 24h data from Binance
-    const binanceResponse = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT', {
+    // 1. Get real-time price and 24h data from Kraken
+    const krakenResponse = await fetch('https://api.kraken.com/0/public/Ticker?pair=ETHUSD', {
       signal: AbortSignal.timeout(5000)
     });
     
-    if (binanceResponse.ok) {
-      const binanceData = await binanceResponse.json();
+    if (krakenResponse.ok) {
+      const krakenData = await krakenResponse.json();
+      const ethData = krakenData.result.ETHUSD;
       results.price = {
-        current: parseFloat(binanceData.lastPrice),
-        change24h: parseFloat(binanceData.priceChangePercent),
-        volume24h: parseFloat(binanceData.volume),
-        high24h: parseFloat(binanceData.highPrice),
-        low24h: parseFloat(binanceData.lowPrice),
-        source: 'Binance'
+        current: parseFloat(ethData.c[0]), // Last trade price
+        change24h: ((parseFloat(ethData.c[0]) - parseFloat(ethData.o)) / parseFloat(ethData.o)) * 100,
+        volume24h: parseFloat(ethData.v[1]), // 24h volume
+        high24h: parseFloat(ethData.h[1]), // 24h high
+        low24h: parseFloat(ethData.l[1]), // 24h low
+        source: 'Kraken'
       };
-      console.log('✅ Binance ETH price data:', results.price.current);
+      console.log('✅ Kraken ETH price data:', results.price.current);
     }
   } catch (error) {
-    console.error('❌ Binance ETH API failed:', error);
+    console.error('❌ Kraken ETH API failed:', error);
   }
 
   try {
@@ -90,22 +91,23 @@ async function fetchRealEthereumData() {
   }
 
   try {
-    // 4. Get order book data from Binance for supply/demand analysis
-    const orderBookResponse = await fetch('https://api.binance.com/api/v3/depth?symbol=ETHUSDT&limit=100', {
+    // 4. Get order book data from Kraken for supply/demand analysis
+    const orderBookResponse = await fetch('https://api.kraken.com/0/public/Depth?pair=ETHUSD&count=100', {
       signal: AbortSignal.timeout(5000)
     });
     
     if (orderBookResponse.ok) {
       const orderBookData = await orderBookResponse.json();
+      const ethOrderBook = orderBookData.result.ETHUSD;
       
       // Analyze order book for supply/demand zones
-      const bids = orderBookData.bids.slice(0, 20).map(([price, quantity]: [string, string]) => ({
+      const bids = ethOrderBook.bids.slice(0, 20).map(([price, quantity]: [string, string]) => ({
         price: parseFloat(price),
         quantity: parseFloat(quantity),
         total: parseFloat(price) * parseFloat(quantity)
       }));
       
-      const asks = orderBookData.asks.slice(0, 20).map(([price, quantity]: [string, string]) => ({
+      const asks = ethOrderBook.asks.slice(0, 20).map(([price, quantity]: [string, string]) => ({
         price: parseFloat(price),
         quantity: parseFloat(quantity),
         total: parseFloat(price) * parseFloat(quantity)
@@ -116,7 +118,7 @@ async function fetchRealEthereumData() {
         asks,
         bidVolume: bids.reduce((sum, bid) => sum + bid.quantity, 0),
         askVolume: asks.reduce((sum, ask) => sum + ask.quantity, 0),
-        source: 'Binance OrderBook'
+        source: 'Kraken OrderBook'
       };
       console.log('✅ ETH Order book data: Bids:', results.orderBookData.bidVolume.toFixed(2), 'Asks:', results.orderBookData.askVolume.toFixed(2));
     }

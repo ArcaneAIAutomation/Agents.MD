@@ -22,22 +22,23 @@ async function fetchRealBitcoinData() {
   };
 
   try {
-    // 1. Get real-time price and 24h data from Binance
-    const binanceResponse = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT', {
+    // 1. Get real-time price and 24h data from Kraken
+    const krakenResponse = await fetch('https://api.kraken.com/0/public/Ticker?pair=XBTUSD', {
       signal: AbortSignal.timeout(5000)
     });
     
-    if (binanceResponse.ok) {
-      const binanceData = await binanceResponse.json();
+    if (krakenResponse.ok) {
+      const krakenData = await krakenResponse.json();
+      const btcData = krakenData.result.XXBTZUSD;
       results.price = {
-        current: parseFloat(binanceData.lastPrice),
-        change24h: parseFloat(binanceData.priceChangePercent),
-        volume24h: parseFloat(binanceData.volume),
-        high24h: parseFloat(binanceData.highPrice),
-        low24h: parseFloat(binanceData.lowPrice),
-        source: 'Binance'
+        current: parseFloat(btcData.c[0]), // Last trade price
+        change24h: ((parseFloat(btcData.c[0]) - parseFloat(btcData.o)) / parseFloat(btcData.o)) * 100,
+        volume24h: parseFloat(btcData.v[1]), // 24h volume
+        high24h: parseFloat(btcData.h[1]), // 24h high
+        low24h: parseFloat(btcData.l[1]), // 24h low
+        source: 'Kraken'
       };
-      console.log('✅ Binance price data:', results.price.current);
+      console.log('✅ Kraken BTC price data:', results.price.current);
     }
   } catch (error) {
     console.error('❌ Binance API failed:', error);
@@ -89,22 +90,23 @@ async function fetchRealBitcoinData() {
   }
 
   try {
-    // 4. Get order book data from Binance for supply/demand analysis
-    const orderBookResponse = await fetch('https://api.binance.com/api/v3/depth?symbol=BTCUSDT&limit=100', {
+    // 4. Get order book data from Kraken for supply/demand analysis
+    const orderBookResponse = await fetch('https://api.kraken.com/0/public/Depth?pair=XBTUSD&count=100', {
       signal: AbortSignal.timeout(5000)
     });
     
     if (orderBookResponse.ok) {
       const orderBookData = await orderBookResponse.json();
+      const btcOrderBook = orderBookData.result.XXBTZUSD;
       
       // Analyze order book for supply/demand zones
-      const bids = orderBookData.bids.slice(0, 20).map(([price, quantity]: [string, string]) => ({
+      const bids = btcOrderBook.bids.slice(0, 20).map(([price, quantity]: [string, string]) => ({
         price: parseFloat(price),
         quantity: parseFloat(quantity),
         total: parseFloat(price) * parseFloat(quantity)
       }));
       
-      const asks = orderBookData.asks.slice(0, 20).map(([price, quantity]: [string, string]) => ({
+      const asks = btcOrderBook.asks.slice(0, 20).map(([price, quantity]: [string, string]) => ({
         price: parseFloat(price),
         quantity: parseFloat(quantity),
         total: parseFloat(price) * parseFloat(quantity)
@@ -115,7 +117,7 @@ async function fetchRealBitcoinData() {
         asks,
         bidVolume: bids.reduce((sum, bid) => sum + bid.quantity, 0),
         askVolume: asks.reduce((sum, ask) => sum + ask.quantity, 0),
-        source: 'Binance OrderBook'
+        source: 'Kraken OrderBook'
       };
       console.log('✅ Order book data: Bids:', results.orderBookData.bidVolume.toFixed(2), 'Asks:', results.orderBookData.askVolume.toFixed(2));
     }

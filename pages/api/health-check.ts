@@ -5,22 +5,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Check environment variables
     const envCheck = {
       OPENAI_API_KEY: !!process.env.OPENAI_API_KEY,
-      BINANCE_API_KEY: !!process.env.BINANCE_API_KEY,
+
       ALPHA_VANTAGE_API_KEY: !!process.env.ALPHA_VANTAGE_API_KEY,
       NEWSAPI_KEY: !!process.env.NEWSAPI_KEY,
       COINMARKETCAP_API_KEY: !!process.env.COINMARKETCAP_API_KEY,
       ENABLE_LIVE_DATA: process.env.ENABLE_LIVE_DATA
     };
 
-    // Test Binance API connectivity
-    let binanceStatus = 'unknown';
+    // Test Kraken API connectivity
+    let krakenStatus = 'unknown';
     try {
-      const response = await fetch('https://api.binance.com/api/v3/ping', {
+      const response = await fetch('https://api.kraken.com/0/public/SystemStatus', {
         signal: AbortSignal.timeout(3000)
       });
-      binanceStatus = response.ok ? 'connected' : 'error';
+      krakenStatus = response.ok ? 'connected' : 'error';
     } catch (error) {
-      binanceStatus = 'timeout';
+      krakenStatus = 'timeout';
     }
 
     res.status(200).json({
@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV,
       apis: {
-        binance: binanceStatus
+        kraken: krakenStatus
       },
       envVars: envCheck
     });

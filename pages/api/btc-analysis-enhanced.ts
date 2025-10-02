@@ -131,22 +131,23 @@ async function fetchRealBitcoinData() {
   }
 
   try {
-    // 4. Get order book data from Binance for supply/demand analysis
-    const orderBookResponse = await fetch('https://api.binance.com/api/v3/depth?symbol=BTCUSDT&limit=100', {
+    // 4. Get order book data from Kraken for supply/demand analysis
+    const orderBookResponse = await fetch('https://api.kraken.com/0/public/Depth?pair=XBTUSD&count=100', {
       signal: AbortSignal.timeout(20000)
     });
     
     if (orderBookResponse.ok) {
       const orderBookData = await orderBookResponse.json();
+      const btcOrderBook = orderBookData.result.XXBTZUSD;
       
       // Analyze order book for supply/demand zones
-      const bids = orderBookData.bids.slice(0, 20).map(([price, quantity]: [string, string]) => ({
+      const bids = btcOrderBook.bids.slice(0, 20).map(([price, quantity]: [string, string]) => ({
         price: parseFloat(price),
         quantity: parseFloat(quantity),
         total: parseFloat(price) * parseFloat(quantity)
       }));
       
-      const asks = orderBookData.asks.slice(0, 20).map(([price, quantity]: [string, string]) => ({
+      const asks = btcOrderBook.asks.slice(0, 20).map(([price, quantity]: [string, string]) => ({
         price: parseFloat(price),
         quantity: parseFloat(quantity),
         total: parseFloat(price) * parseFloat(quantity)
@@ -157,7 +158,7 @@ async function fetchRealBitcoinData() {
         asks,
         bidVolume: bids.reduce((sum, bid) => sum + bid.quantity, 0),
         askVolume: asks.reduce((sum, ask) => sum + ask.quantity, 0),
-        source: 'Binance OrderBook'
+        source: 'Kraken OrderBook'
       };
       console.log('✅ Order book data: Bids:', results.orderBookData.bidVolume.toFixed(2), 'Asks:', results.orderBookData.askVolume.toFixed(2));
     }

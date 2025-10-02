@@ -12,7 +12,7 @@ const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-2024-08-06';
 // Advanced Price Prediction Engine using multi-timeframe technical analysis
 class AdvancedPricePredictionEngine {
   private apis = {
-    binance: 'https://api.binance.com/api/v3'
+    kraken: 'https://api.kraken.com/0/public'
   };
 
   // Get candlestick data for specific timeframe
@@ -247,9 +247,8 @@ class AdvancedPricePredictionEngine {
 // Enhanced Supply/Demand Calculator using ONLY real market data
 class RealMarketDataAnalyzer {
   private apis = {
-    binance: 'https://api.binance.com/api/v3',
-    coinbase: 'https://api.exchange.coinbase.com',
     kraken: 'https://api.kraken.com/0/public',
+    coinbase: 'https://api.exchange.coinbase.com',
     coingecko: 'https://api.coingecko.com/api/v3'
   };
 
@@ -646,7 +645,7 @@ async function fetchRealBTCPrice() {
     const apis = [
       'https://api.coinbase.com/v2/exchange-rates?currency=BTC',
       'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true&include_market_cap=true',
-      'https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT'
+      'https://api.kraken.com/0/public/Ticker?pair=XBTUSD'
     ];
     
     for (const apiUrl of apis) {
@@ -681,12 +680,13 @@ async function fetchRealBTCPrice() {
               source: 'CoinGecko',
               timestamp: new Date().toISOString()
             };
-          } else if (apiUrl.includes('binance')) {
+          } else if (apiUrl.includes('kraken')) {
+            const krakenData = data.result.XXBTZUSD;
             return {
-              price: parseFloat(data.lastPrice),
-              change24h: parseFloat(data.priceChangePercent),
-              volume24h: parseFloat(data.volume),
-              source: 'Binance',
+              price: parseFloat(krakenData.c[0]), // Last trade price
+              change24h: ((parseFloat(krakenData.c[0]) - parseFloat(krakenData.o)) / parseFloat(krakenData.o)) * 100,
+              volume24h: parseFloat(krakenData.v[1]), // 24h volume
+              source: 'Kraken',
               timestamp: new Date().toISOString()
             };
           }
