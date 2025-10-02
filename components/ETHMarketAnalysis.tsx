@@ -292,7 +292,7 @@ export default function ETHMarketAnalysis() {
     setError(null)
     
     try {
-      const response = await fetch('/api/eth-analysis-simple')
+      const response = await fetch('/api/eth-analysis-enhanced')
       
       if (!response.ok) {
         throw new Error(`API Error: ${response.status} - ${response.statusText}`)

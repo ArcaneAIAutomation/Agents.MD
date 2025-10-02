@@ -288,7 +288,7 @@ export default function BTCMarketAnalysis() {
     setError(null)
     
     try {
-      const response = await fetch('/api/btc-analysis-simple')
+      const response = await fetch('/api/btc-analysis-enhanced')
       
       if (!response.ok) {
         throw new Error(`API Error: ${response.status} - ${response.statusText}`)

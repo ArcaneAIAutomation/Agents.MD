@@ -57,7 +57,7 @@ export default function BTCTradingChart() {
       console.log(`🔬 Generating 100% real ${timeframe} analysis...`);
       
       // Fetch base enhanced analysis - use relative API calls to avoid CORS
-      const baseResponse = await fetch('/api/btc-analysis-simple');
+      const baseResponse = await fetch('/api/btc-analysis-enhanced');
       const baseResult = await baseResponse.json();
       
       if (!baseResult.success || !baseResult.data.isLiveData) {

@@ -153,7 +153,7 @@ const CryptoHerald: React.FC = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
       
-      const response = await fetch('/api/crypto-herald', {
+      const response = await fetch('/api/crypto-herald-15-stories', {
         signal: controller.signal
       });
       
@@ -183,8 +183,24 @@ const CryptoHerald: React.FC = () => {
       }
     } catch (error) {
       console.error('Herald loading error:', error);
-      // Show user-friendly error message instead of fallback data
-      alert('Unable to load live crypto news. Please check your internet connection and try again.');
+      // Set error state instead of showing alert
+      setData({
+        articles: [],
+        marketTicker: [],
+        apiStatus: {
+          source: 'Error',
+          status: 'Failed',
+          message: 'Unable to load live crypto news from external APIs',
+          isRateLimit: true
+        },
+        meta: {
+          lastUpdated: new Date().toISOString(),
+          sources: ['Error'],
+          isLiveData: false,
+          totalArticles: 0,
+          error: 'API connection failed - check internet connection and API keys'
+        }
+      });
     } finally {
       setLoading(false);
     }
@@ -529,8 +545,54 @@ const CryptoHerald: React.FC = () => {
           </div>
         )}
 
-        {/* News Sections */}
-        {Object.entries(articlesByCategory).map(([category, articles], categoryIndex) => {
+        {/* Error State - No Live Articles Available */}
+        {data?.meta?.error && (
+          <div className="mb-8 bg-white border-4 border-red-600">
+            <div className="bg-red-600 text-white p-4 border-b-4 border-red-600">
+              <h2 className="text-2xl font-black text-center" style={{ fontFamily: 'Times, serif' }}>
+                ⚠️ LIVE NEWS UNAVAILABLE
+              </h2>
+            </div>
+            <div className="p-6 text-center">
+              <div className="text-xl font-bold mb-4 text-red-700">
+                Unable to Load Live Crypto News
+              </div>
+              <div className="text-gray-700 mb-4">
+                {data.meta.error}
+              </div>
+              <div className="text-sm text-gray-600 mb-6">
+                • Check your internet connection<br/>
+                • Verify API keys are configured in .env.local<br/>
+                • External news APIs may be temporarily unavailable
+              </div>
+              <PressEffectWrapper
+                onClick={fetchCryptoNews}
+                className="inline-block"
+              >
+                <button
+                  disabled={loading}
+                  className="bg-red-600 text-white font-bold py-3 px-6 border-2 border-red-600 hover:bg-red-700 transition-colors"
+                  style={{ fontFamily: 'Times, serif' }}
+                >
+                  {loading ? (
+                    <>
+                      <RefreshCw className="animate-spin h-5 w-5 mr-2 inline" />
+                      RETRYING...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-5 w-5 mr-2 inline" />
+                      TRY AGAIN
+                    </>
+                  )}
+                </button>
+              </PressEffectWrapper>
+            </div>
+          </div>
+        )}
+
+        {/* News Sections - Only show if we have articles */}
+        {!data?.meta?.error && Object.entries(articlesByCategory).map(([category, articles], categoryIndex) => {
           const categoryArticles = getArticlesForCategory(articles, 8);
           
           return (

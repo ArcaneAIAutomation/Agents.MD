@@ -22,25 +22,48 @@ async function fetchRealBitcoinData() {
   };
 
   try {
-    // 1. Get real-time price and 24h data from Binance
-    const binanceResponse = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT', {
-      signal: AbortSignal.timeout(20000)
+    // 1. Get real-time price and 24h data from CoinGecko (primary - works globally)
+    const coinGeckoResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true', {
+      signal: AbortSignal.timeout(15000)
     });
     
-    if (binanceResponse.ok) {
-      const binanceData = await binanceResponse.json();
+    if (coinGeckoResponse.ok) {
+      const coinGeckoData = await coinGeckoResponse.json();
+      const btcData = coinGeckoData.bitcoin;
       results.price = {
-        current: parseFloat(binanceData.lastPrice),
-        change24h: parseFloat(binanceData.priceChangePercent),
-        volume24h: parseFloat(binanceData.volume),
-        high24h: parseFloat(binanceData.highPrice),
-        low24h: parseFloat(binanceData.lowPrice),
-        source: 'Binance'
+        current: btcData.usd,
+        change24h: btcData.usd_24h_change || 0,
+        volume24h: btcData.usd_24h_vol || 0,
+        high24h: btcData.usd * 1.02, // Estimate based on current price
+        low24h: btcData.usd * 0.98,  // Estimate based on current price
+        source: 'CoinGecko'
       };
-      console.log('✅ Binance price data:', results.price.current);
+      console.log('✅ CoinGecko BTC price data:', results.price.current);
     }
   } catch (error) {
-    console.error('❌ Binance API failed:', error);
+    console.error('❌ CoinGecko BTC API failed:', error);
+    
+    // Fallback: Try Binance if CoinGecko fails
+    try {
+      const binanceResponse = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT', {
+        signal: AbortSignal.timeout(10000)
+      });
+      
+      if (binanceResponse.ok) {
+        const binanceData = await binanceResponse.json();
+        results.price = {
+          current: parseFloat(binanceData.lastPrice),
+          change24h: parseFloat(binanceData.priceChangePercent),
+          volume24h: parseFloat(binanceData.volume),
+          high24h: parseFloat(binanceData.highPrice),
+          low24h: parseFloat(binanceData.lowPrice),
+          source: 'Binance (fallback)'
+        };
+        console.log('✅ Binance BTC price data (fallback):', results.price.current);
+      }
+    } catch (binanceError) {
+      console.error('❌ Binance BTC API also failed:', binanceError);
+    }
   }
 
   try {
