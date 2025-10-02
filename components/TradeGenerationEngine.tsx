@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { TrendingUp, TrendingDown, Target, Shield, Brain, RefreshCw, AlertTriangle, DollarSign } from 'lucide-react'
-import { useTradeGeneration } from '../hooks/useApiData'
+import { useUltimateTradeGeneration } from '../hooks/useApiData'
 
 export interface TradeSignal {
   id: string
@@ -35,7 +35,7 @@ export interface TradeSignal {
 
 export default function TradeGenerationEngine() {
   const [selectedCrypto, setSelectedCrypto] = useState<'BTC' | 'ETH'>('BTC')
-  const { data, loading, error, refetch } = useTradeGeneration(selectedCrypto)
+  const { data, loading, error, refetch } = useUltimateTradeGeneration(selectedCrypto)
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('4h')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [showPasswordInput, setShowPasswordInput] = useState(false)
@@ -129,9 +129,15 @@ export default function TradeGenerationEngine() {
           <div className="text-center">
             <RefreshCw className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-black mx-auto mb-2" />
             <span className="text-gray-600 font-bold text-sm sm:text-base">
-              Analyzing {selectedCrypto === 'BTC' ? 'Bitcoin' : 'Ethereum'} markets...
+              Analyzing {selectedCrypto === 'BTC' ? 'Bitcoin' : 'Ethereum'} across multiple exchanges...
             </span>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1">Processing with o1-preview step-by-step reasoning</p>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">Processing enhanced multi-API data with AI reasoning</p>
+            <div className="mt-2 text-xs text-gray-400">
+              • Fetching from CoinMarketCap API (primary source)<br/>
+              • Fallback to CoinGecko if needed<br/>
+              • Calculating technical indicators from live price data<br/>
+              • Generating AI-powered trade signal with real market data
+            </div>
           </div>
         </div>
       </div>
@@ -377,28 +383,46 @@ export default function TradeGenerationEngine() {
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div className="bg-white p-2 rounded border border-black">
                 <div className="font-bold text-gray-600">RSI</div>
-                <div className="font-black text-black">{tradeSignal.technicalIndicators.rsi}</div>
+                <div className={`font-black ${tradeSignal.technicalIndicators.rsi > 70 ? 'text-red-600' : tradeSignal.technicalIndicators.rsi < 30 ? 'text-green-600' : 'text-black'}`}>
+                  {tradeSignal.technicalIndicators.rsi?.toFixed(1) || 'N/A'}
+                </div>
               </div>
               <div className="bg-white p-2 rounded border border-black">
                 <div className="font-bold text-gray-600">MACD</div>
-                <div className="font-black text-black">{tradeSignal.technicalIndicators.macd}</div>
+                <div className={`font-black ${tradeSignal.technicalIndicators.macd === 'BULLISH' ? 'text-green-600' : tradeSignal.technicalIndicators.macd === 'BEARISH' ? 'text-red-600' : 'text-black'}`}>
+                  {tradeSignal.technicalIndicators.macd || 'N/A'}
+                </div>
               </div>
               <div className="bg-white p-2 rounded border border-black">
-                <div className="font-bold text-gray-600">SMA 20</div>
-                <div className="font-black text-black">{formatPrice(tradeSignal.technicalIndicators.sma20)}</div>
+                <div className="font-bold text-gray-600">EMA 20</div>
+                <div className="font-black text-black">{tradeSignal.technicalIndicators.ema20 ? formatPrice(tradeSignal.technicalIndicators.ema20) : 'N/A'}</div>
               </div>
               <div className="bg-white p-2 rounded border border-black">
-                <div className="font-bold text-gray-600">SMA 50</div>
-                <div className="font-black text-black">{formatPrice(tradeSignal.technicalIndicators.sma50)}</div>
+                <div className="font-bold text-gray-600">EMA 50</div>
+                <div className="font-black text-black">{tradeSignal.technicalIndicators.ema50 ? formatPrice(tradeSignal.technicalIndicators.ema50) : 'N/A'}</div>
               </div>
               <div className="bg-white p-2 rounded border border-black">
                 <div className="font-bold text-gray-600">Support</div>
-                <div className="font-black text-green-600">{formatPrice(tradeSignal.technicalIndicators.support)}</div>
+                <div className="font-black text-green-600">{tradeSignal.technicalIndicators.support ? formatPrice(tradeSignal.technicalIndicators.support) : 'N/A'}</div>
               </div>
               <div className="bg-white p-2 rounded border border-black">
                 <div className="font-bold text-gray-600">Resistance</div>
-                <div className="font-black text-red-600">{formatPrice(tradeSignal.technicalIndicators.resistance)}</div>
+                <div className="font-black text-red-600">{tradeSignal.technicalIndicators.resistance ? formatPrice(tradeSignal.technicalIndicators.resistance) : 'N/A'}</div>
               </div>
+              {tradeSignal.technicalIndicators.atr && (
+                <div className="bg-white p-2 rounded border border-black">
+                  <div className="font-bold text-gray-600">ATR</div>
+                  <div className="font-black text-purple-600">{formatPrice(tradeSignal.technicalIndicators.atr)}</div>
+                </div>
+              )}
+              {tradeSignal.technicalIndicators.stochastic && (
+                <div className="bg-white p-2 rounded border border-black">
+                  <div className="font-bold text-gray-600">Stochastic</div>
+                  <div className={`font-black ${tradeSignal.technicalIndicators.stochastic === 'OVERBOUGHT' ? 'text-red-600' : tradeSignal.technicalIndicators.stochastic === 'OVERSOLD' ? 'text-green-600' : 'text-black'}`}>
+                    {tradeSignal.technicalIndicators.stochastic}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="bg-white p-2 sm:p-3 rounded border border-black">
@@ -429,27 +453,101 @@ export default function TradeGenerationEngine() {
           <h5 className="text-xs sm:text-sm font-bold text-black mb-2">Trade Reasoning:</h5>
           <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">{tradeSignal.reasoning}</p>
         </div>
+
+        {/* Sentiment Analysis */}
+        {tradeSignal.sentimentAnalysis && (
+          <div className="bg-purple-50 p-3 sm:p-4 rounded border border-black sm:border-2">
+            <h5 className="text-xs sm:text-sm font-bold text-black mb-2">Market Sentiment Analysis:</h5>
+            <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">{tradeSignal.sentimentAnalysis}</p>
+          </div>
+        )}
+
+        {/* News Impact Analysis */}
+        {tradeSignal.newsImpact && (
+          <div className="bg-orange-50 p-3 sm:p-4 rounded border border-black sm:border-2">
+            <h5 className="text-xs sm:text-sm font-bold text-black mb-2">Live News Impact:</h5>
+            <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">{tradeSignal.newsImpact}</p>
+          </div>
+        )}
       </div>
 
-      {/* Live Data Status */}
+      {/* Enhanced Data Quality Status */}
       <div className="mt-4 sm:mt-6 p-2 sm:p-3 bg-gray-100 rounded border border-black sm:border-2">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs gap-2">
           <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 gap-1 sm:gap-0">
-            <span className="px-2 py-1 rounded border border-black sm:border-2 font-bold self-start text-green-600 bg-green-50">
-              🔴 LIVE DATA + AI
+            <span className="px-2 py-1 rounded border border-black sm:border-2 font-bold self-start text-blue-600 bg-blue-50">
+              🔴 RELIABLE LIVE DATA
             </span>
             <span className="text-gray-600 font-medium">
-              Real-time {selectedCrypto === 'BTC' ? 'Bitcoin' : 'Ethereum'} data with o1-preview AI analysis
+              Real-time {selectedCrypto === 'BTC' ? 'Bitcoin' : 'Ethereum'} data from CoinMarketCap/CoinGecko APIs
             </span>
           </div>
           <span className="text-gray-600 font-bold">
             Generated: {tradeSignal?.timestamp ? formatDate(tradeSignal.timestamp) : 'N/A'}
           </span>
         </div>
-        <div className="mt-2 text-xs text-black bg-green-100 p-2 rounded border border-black sm:border-2">
-          <strong>Live Integration:</strong> This signal uses real-time market data from CoinGecko & Coinbase, 
-          processed through OpenAI's latest o1-preview reasoning model for comprehensive technical analysis.
+        
+        {/* Live Data Quality Metrics */}
+        {tradeSignal?.liveDataValidation && (
+          <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <div className="bg-blue-50 p-2 rounded border border-black">
+              <div className="font-bold text-blue-800">Data Source</div>
+              <div className="text-blue-600">{tradeSignal.liveDataValidation.primarySource}</div>
+            </div>
+            <div className="bg-green-50 p-2 rounded border border-black">
+              <div className="font-bold text-green-800">Confidence</div>
+              <div className="text-green-600">{tradeSignal.confidence}%</div>
+            </div>
+            <div className="bg-purple-50 p-2 rounded border border-black">
+              <div className="font-bold text-purple-800">News</div>
+              <div className="text-purple-600">{tradeSignal.liveDataValidation.newsAvailable ? 'LIVE' : 'N/A'}</div>
+            </div>
+            <div className="bg-orange-50 p-2 rounded border border-black">
+              <div className="font-bold text-orange-800">Freshness</div>
+              <div className="text-orange-600">REAL-TIME</div>
+            </div>
+          </div>
+        )}
+        
+        {/* Fallback for older data format */}
+        {tradeSignal?.dataQuality && !tradeSignal?.liveDataValidation && (
+          <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <div className="bg-blue-50 p-2 rounded border border-black">
+              <div className="font-bold text-blue-800">Exchanges</div>
+              <div className="text-blue-600">{tradeSignal.dataQuality.exchangesCovered || 'N/A'}</div>
+            </div>
+            <div className="bg-purple-50 p-2 rounded border border-black">
+              <div className="font-bold text-purple-800">Indicators</div>
+              <div className="text-purple-600">{tradeSignal.dataQuality.technicalIndicators || 'N/A'}</div>
+            </div>
+            <div className="bg-orange-50 p-2 rounded border border-black">
+              <div className="font-bold text-orange-800">Sentiment</div>
+              <div className="text-orange-600">{tradeSignal.dataQuality.sentimentSources || 'N/A'}</div>
+            </div>
+            <div className="bg-green-50 p-2 rounded border border-black">
+              <div className="font-bold text-green-800">Spread</div>
+              <div className="text-green-600">{tradeSignal.dataQuality.priceSpread?.toFixed(3) || 'N/A'}%</div>
+            </div>
+          </div>
+        )}
+        
+        <div className="mt-2 text-xs text-black bg-blue-100 p-2 rounded border border-black sm:border-2">
+          <strong>Reliable Live Integration:</strong> This signal uses real-time data from CoinMarketCap (primary) or CoinGecko (fallback). 
+          All data is validated for accuracy and freshness before analysis.
         </div>
+        
+        {/* Arbitrage & Liquidity Analysis */}
+        {tradeSignal?.arbitrageOpportunity && (
+          <div className="mt-2 text-xs text-blue-900 bg-blue-100 p-2 rounded border border-black sm:border-2">
+            <strong>Cross-Exchange Analysis:</strong> {tradeSignal.arbitrageOpportunity}
+          </div>
+        )}
+        
+        {tradeSignal?.liquidityAnalysis && (
+          <div className="mt-2 text-xs text-purple-900 bg-purple-100 p-2 rounded border border-black sm:border-2">
+            <strong>Liquidity Assessment:</strong> {tradeSignal.liquidityAnalysis}
+          </div>
+        )}
       </div>
 
       {/* Disclaimer */}

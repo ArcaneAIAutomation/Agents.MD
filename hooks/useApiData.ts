@@ -101,3 +101,39 @@ export function useTradeGeneration(crypto: 'BTC' | 'ETH' = 'BTC') {
   // Manual loading only - generates new signal on demand
   return { data, loading, error, refetch: fetchData };
 }
+
+export function useUltimateTradeGeneration(crypto: 'BTC' | 'ETH' = 'BTC') {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Use reliable API with CoinMarketCap primary, CoinGecko fallback
+      console.log('🔴 Fetching RELIABLE LIVE API data - CoinMarketCap Primary');
+      const response = await fetch(`/api/reliable-trade-generation?symbol=${crypto}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      console.log('✅ RELIABLE data received from:', result.dataQuality?.source || result.liveDataValidation?.primarySource || 'API source');
+      setData(result);
+      
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch reliable trade signal');
+      console.error('Error fetching reliable trade generation data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Manual loading only - generates new signal on demand
+  return { data, loading, error, refetch: fetchData };
+}
