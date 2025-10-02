@@ -35,6 +35,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // Test CoinGecko API
   try {
     const coinGeckoResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd', {
+      headers: {
+        'x-cg-pro-api-key': process.env.COINGECKO_API_KEY || ''
+      },
       signal: AbortSignal.timeout(5000)
     });
     diagnostics.apiTests.coingecko = {

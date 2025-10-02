@@ -197,6 +197,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let tickerData = [];
     try {
       const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,solana,cardano,polkadot,chainlink,litecoin&vs_currencies=usd&include_24hr_change=true', {
+        headers: {
+          'x-cg-pro-api-key': process.env.COINGECKO_API_KEY || ''
+        },
         signal: AbortSignal.timeout(15000) // Increased to 15 seconds for market data
       });
       

@@ -440,72 +440,70 @@ function extractSourceName(sourceName: string): string {
     .trim() || 'Crypto News';
 }
 
-// Market ticker using CoinGecko API (more reliable for global access)
+// Market ticker using CoinMarketCap API (professional grade data)
 async function getMarketTicker() {
   console.log('🎯 Starting fast market ticker fetch...');
   
   try {
-    // Use fewer coins for faster response
-    const coinIds = 'bitcoin,ethereum,binancecoin,solana';
-    const apiKey = process.env.COINGECKO_API_KEY;
-    const keyParam = (apiKey && apiKey !== 'CG-YourActualAPIKeyHere') ? `&x_cg_demo_api_key=${apiKey}` : '';
+    // Use CoinMarketCap Pro API for top coins
+    const symbols = 'BTC,ETH,BNB,SOL';
+    const url = `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=${symbols}&convert=USD`;
     
-    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${coinIds}&vs_currencies=usd&include_24hr_change=true${keyParam}`;
-    
-    console.log('🔄 Fetching from CoinGecko API with fast timeout...');
+    console.log('🔄 Fetching from CoinMarketCap Pro API with fast timeout...');
     
     const response = await fetch(url, {
-      signal: AbortSignal.timeout(3000), // Reduced to 3 seconds
+      signal: AbortSignal.timeout(5000), // 5 seconds for CoinMarketCap
       headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (compatible; AgentsMD/2.0)'
+        'X-CMC_PRO_API_KEY': process.env.COINMARKETCAP_API_KEY || '',
+        'Accept': 'application/json'
       }
     });
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.log(`❌ CoinGecko API failed: ${response.status} ${response.statusText}`);
+      console.log(`❌ CoinMarketCap API failed: ${response.status} ${response.statusText}`);
       console.log(`❌ Error response: ${errorText}`);
-      throw new Error(`CoinGecko API failed: ${response.status} - ${errorText}`);
+      throw new Error(`CoinMarketCap API failed: ${response.status} - ${errorText}`);
     }
     
     const data = await response.json();
-    console.log('✅ CoinGecko API response received');
+    console.log('✅ CoinMarketCap API response received');
     
-    // Map CoinGecko data to our ticker format (reduced set for speed)
+    // Map CoinMarketCap data to our ticker format
     const coinMapping = {
-      'bitcoin': { symbol: 'BTC', name: 'Bitcoin' },
-      'ethereum': { symbol: 'ETH', name: 'Ethereum' },
-      'binancecoin': { symbol: 'BNB', name: 'BNB' },
-      'solana': { symbol: 'SOL', name: 'Solana' }
+      'BTC': { symbol: 'BTC', name: 'Bitcoin' },
+      'ETH': { symbol: 'ETH', name: 'Ethereum' },
+      'BNB': { symbol: 'BNB', name: 'BNB' },
+      'SOL': { symbol: 'SOL', name: 'Solana' }
     };
     
-    const tickerData = Object.entries(data).map(([coinId, coinData]: [string, any]) => {
-      const mapping = coinMapping[coinId as keyof typeof coinMapping];
-      if (!mapping) return null;
+    const tickerData = Object.entries(data.data || {}).map(([symbol, coinData]: [string, any]) => {
+      const mapping = coinMapping[symbol as keyof typeof coinMapping];
+      if (!mapping || !coinData.quote?.USD) return null;
       
+      const usdQuote = coinData.quote.USD;
       return {
         symbol: mapping.symbol,
         name: mapping.name,
-        price: coinData.usd || 0,
-        change: coinData.usd_24h_change || 0,
-        volume: coinData.usd_24h_vol || 0
+        price: usdQuote.price || 0,
+        change: usdQuote.percent_change_24h || 0,
+        volume: usdQuote.volume_24h || 0
       };
     }).filter(item => item !== null);
     
-    console.log(`📊 Processed ${tickerData.length} ticker items from CoinGecko`);
+    console.log(`📊 Processed ${tickerData.length} ticker items from CoinMarketCap Pro`);
     
     if (tickerData.length > 0) {
-      console.log('🎉 CoinGecko ticker data ready:', tickerData.map(r => `${r.symbol}: $${r.price.toLocaleString()}`));
+      console.log('🎉 CoinMarketCap ticker data ready:', tickerData.map(r => `${r.symbol}: $${r.price.toLocaleString()}`));
       console.log('📊 Sample ticker item:', JSON.stringify(tickerData[0], null, 2));
       return tickerData;
     } else {
-      console.log('❌ No valid ticker data from CoinGecko');
+      console.log('❌ No valid ticker data from CoinMarketCap');
       return [];
     }
     
   } catch (error) {
-    console.error('💥 CoinGecko ticker fetch failed:', error);
+    console.error('💥 CoinMarketCap ticker fetch failed:', error);
     
     // Fallback: Try a simple price API as last resort
     try {

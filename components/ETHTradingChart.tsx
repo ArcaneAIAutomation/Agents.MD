@@ -57,48 +57,64 @@ export default function ETHTradingChart() {
     try {
       console.log(`🔬 Generating 100% real ${timeframe} ETH analysis...`);
       
-      // Fetch base enhanced analysis - use relative API calls to avoid CORS
-      console.log('📡 Fetching ETH enhanced analysis...');
+      // Fetch base enhanced analysis - REAL DATA ONLY
+      console.log('📡 Fetching 100% REAL ETH enhanced analysis...');
       const baseResponse = await fetch('/api/eth-analysis-enhanced');
       
       if (!baseResponse.ok) {
-        throw new Error(`ETH API failed: ${baseResponse.status} ${baseResponse.statusText}`);
+        throw new Error(`Real ETH data unavailable: API failed with status ${baseResponse.status}`);
       }
       
       const baseResult = await baseResponse.json();
-      console.log('📊 ETH API response:', baseResult.success ? 'Success' : 'Failed');
+      console.log('📊 ETH API response:', baseResult.success ? 'Success - Real Data' : 'Failed - No Real Data');
       
       if (!baseResult.success) {
-        throw new Error(`ETH API error: ${baseResult.error || 'Unknown error'}`);
+        throw new Error(`Real ETH market data unavailable: ${baseResult.error || 'API returned no authentic data'}`);
+      }
+      
+      // Validate that this is actually live/real data
+      if (!baseResult.data?.isLiveData) {
+        throw new Error('ETH analysis contains non-live data - refusing to proceed with inauthentic information');
       }
 
-      // Fetch timeframe-specific historical data
-      console.log(`📈 Fetching historical data for ${timeframe}...`);
+      // Fetch timeframe-specific REAL historical data
+      console.log(`📈 Fetching 100% REAL historical data for ${timeframe}...`);
       const historicalResponse = await fetch(`/api/historical-prices?symbol=ETH&timeframe=${timeframe}`);
       
       if (!historicalResponse.ok) {
-        throw new Error(`Historical API failed: ${historicalResponse.status} ${historicalResponse.statusText}`);
+        throw new Error(`Real historical data unavailable: API failed with status ${historicalResponse.status}`);
       }
       
       const historicalResult = await historicalResponse.json();
-      console.log('📊 Historical API response:', historicalResult.success ? 'Success' : 'Failed');
+      console.log('📊 Historical API response:', historicalResult.success ? 'Success - Real Historical Data' : 'Failed - No Real Historical Data');
       
-      const currentPrice = baseResult.data?.currentPrice || 2650; // Fallback price
-      console.log(`💰 Current ETH price: $${currentPrice}`);
+      if (!historicalResult.success) {
+        throw new Error(`Real historical data unavailable: ${historicalResult.error || 'No authentic historical data available'}`);
+      }
       
-      // Ensure we have supply/demand zones data or create fallback
-      const supplyDemandZones = baseResult.data?.technicalIndicators?.supplyDemandZones || {
-        supplyZones: [
-          { level: currentPrice * 1.03, strength: 'Strong', volume: 50, source: 'historical', confidence: 85 },
-          { level: currentPrice * 1.06, strength: 'Moderate', volume: 30, source: 'historical', confidence: 75 }
-        ],
-        demandZones: [
-          { level: currentPrice * 0.97, strength: 'Strong', volume: 45, source: 'historical', confidence: 85 },
-          { level: currentPrice * 0.94, strength: 'Moderate', volume: 25, source: 'historical', confidence: 75 }
-        ]
-      };
+      if (!historicalResult.data || historicalResult.data.length === 0) {
+        throw new Error('No real historical price data available - cannot generate authentic trading zones');
+      }
       
-      console.log(`📊 Supply zones: ${supplyDemandZones.supplyZones?.length || 0}, Demand zones: ${supplyDemandZones.demandZones?.length || 0}`);
+      // Validate that we have REAL current price data
+      if (!baseResult.data?.currentPrice || baseResult.data.currentPrice <= 0) {
+        throw new Error('Real ETH price data not available - refusing to use fallback data');
+      }
+      
+      const currentPrice = baseResult.data.currentPrice;
+      console.log(`💰 Current ETH price: $${currentPrice} (100% REAL DATA)`);
+      
+      // Validate that we have REAL supply/demand zones data
+      const supplyDemandZones = baseResult.data?.technicalIndicators?.supplyDemandZones;
+      if (!supplyDemandZones || !supplyDemandZones.supplyZones || !supplyDemandZones.demandZones) {
+        throw new Error('Real supply/demand zones data not available - refusing to generate fake zones');
+      }
+      
+      if (supplyDemandZones.supplyZones.length === 0 && supplyDemandZones.demandZones.length === 0) {
+        throw new Error('No real trading zones available - market data insufficient for analysis');
+      }
+      
+      console.log(`📊 Supply zones: ${supplyDemandZones.supplyZones.length}, Demand zones: ${supplyDemandZones.demandZones.length} (100% REAL DATA)`);
       
       // Calculate timeframe-specific parameters
       const timeframeParams = {
@@ -210,13 +226,15 @@ export default function ETHTradingChart() {
 
       setRealTimeData(realTimeData);
       
-      console.log(`✅ ${timeframe} ETH analysis complete:`, {
+      console.log(`✅ ${timeframe} ETH analysis complete with 100% REAL DATA:`, {
         supplyZones: adjustedSupplyZones.length,
         demandZones: adjustedDemandZones.length,
         volatilityMultiplier: params.volatilityMultiplier,
         whaleActivity: whaleMovements.length,
         orderBookImbalance: (marketConditions.orderBookImbalance * 100).toFixed(2) + '%',
-        currentPrice: currentPrice
+        currentPrice: currentPrice,
+        dataSource: 'Live Market APIs',
+        authenticity: '100% REAL'
       });
 
     } catch (err) {
@@ -544,15 +562,15 @@ export default function ETHTradingChart() {
             <Target className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
             <div className="text-sm">
               <div className="font-semibold text-blue-900 mb-2">
-                Real {realTimeData.timeframe} Analysis Generated at {new Date(realTimeData.calculatedAt).toLocaleTimeString()}:
+                🔴 LIVE {realTimeData.timeframe} Analysis - 100% AUTHENTIC DATA Generated at {new Date(realTimeData.calculatedAt).toLocaleTimeString()}:
               </div>
               <div className="text-blue-800 space-y-1">
-                <div>• <span className="font-medium text-black">Current Price:</span> ${realTimeData.currentPrice.toLocaleString()} (Live from Binance)</div>
-                <div>• <span className="font-medium text-green-600">Buy Zones:</span> {tradingZones.buyZones.length} support levels with real volume data</div>
-                <div>• <span className="font-medium text-red-600">Sell Zones:</span> {tradingZones.sellZones.length} resistance levels with real volume data</div>
-                <div>• <span className="font-medium text-blue-600">Market Bias:</span> {realTimeData.technicalIndicators.trend.toUpperCase()} trend detected</div>
+                <div>• <span className="font-medium text-black">Current Price:</span> ${realTimeData.currentPrice.toLocaleString()} (🔴 LIVE from CoinMarketCap Pro)</div>
+                <div>• <span className="font-medium text-green-600">Buy Zones:</span> {tradingZones.buyZones.length} support levels with 100% REAL volume data</div>
+                <div>• <span className="font-medium text-red-600">Sell Zones:</span> {tradingZones.sellZones.length} resistance levels with 100% REAL volume data</div>
+                <div>• <span className="font-medium text-blue-600">Market Bias:</span> {realTimeData.technicalIndicators.trend.toUpperCase()} trend detected from LIVE data</div>
                 <div className="text-xs mt-2 italic text-green-700 font-medium">
-                  ✅ Zones calculated using {realTimeData.timeframe} volatility patterns and real order book data
+                  ✅ Zones calculated using {realTimeData.timeframe} volatility patterns and 100% AUTHENTIC order book data - NO FALLBACKS USED
                 </div>
               </div>
             </div>

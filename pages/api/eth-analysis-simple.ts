@@ -47,6 +47,9 @@ async function fetchRealEthereumData() {
   try {
     // 2. Get market cap and additional data from CoinGecko
     const coinGeckoResponse = await fetch('https://api.coingecko.com/api/v3/coins/ethereum?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false', {
+      headers: {
+        'x-cg-pro-api-key': process.env.COINGECKO_API_KEY || ''
+      },
       signal: AbortSignal.timeout(5000)
     });
     

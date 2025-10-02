@@ -305,6 +305,9 @@ function generateFallbackNews(count: number) {
 async function getQuickTicker() {
   try {
     const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,solana&vs_currencies=usd&include_24hr_change=true', {
+      headers: {
+        'x-cg-pro-api-key': process.env.COINGECKO_API_KEY || ''
+      },
       signal: AbortSignal.timeout(2000)
     });
     

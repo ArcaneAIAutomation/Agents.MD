@@ -611,9 +611,18 @@ async function fetchRealETHPrice() {
     
     for (const apiUrl of apis) {
       try {
-        const response = await fetch(apiUrl, { 
+        const fetchOptions: RequestInit = { 
           signal: AbortSignal.timeout(5000) 
-        });
+        };
+        
+        // Add CoinGecko API key if this is a CoinGecko URL
+        if (apiUrl.includes('coingecko.com')) {
+          fetchOptions.headers = {
+            'x-cg-pro-api-key': process.env.COINGECKO_API_KEY || ''
+          };
+        }
+        
+        const response = await fetch(apiUrl, fetchOptions);
         
         if (response.ok) {
           const data = await response.json();

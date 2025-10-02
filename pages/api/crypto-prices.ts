@@ -158,36 +158,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   try {
     console.log('🚀 Crypto Prices API called');
     
-    // Try to fetch live data from CoinGecko first
-    const coinGeckoResult = await fetchCoinGeckoPrices();
-    
-    if (coinGeckoResult.success && coinGeckoResult.data) {
-      const prices = convertCoinGeckoData(coinGeckoResult.data);
-      
-      if (prices.length > 0) {
-        console.log('✅ Live prices fetched from CoinGecko:', prices.length, 'coins');
-        return res.status(200).json({
-          prices,
-          success: true,
-          source: 'CoinGecko Live API',
-          lastUpdated: new Date().toISOString()
-        });
-      }
-    }
-    
-    // If CoinGecko fails, try CoinMarketCap
-    console.log('🔄 CoinGecko failed, trying CoinMarketCap...');
+    // Try to fetch live data from CoinMarketCap first (primary)
     const cmcResult = await fetchCoinMarketCapPrices();
     
     if (cmcResult.success && cmcResult.data) {
       const prices = convertCoinMarketCapData(cmcResult.data);
       
       if (prices.length > 0) {
-        console.log('✅ Live prices fetched from CoinMarketCap:', prices.length, 'coins');
+        console.log('✅ Live prices fetched from CoinMarketCap Pro:', prices.length, 'coins');
         return res.status(200).json({
           prices,
           success: true,
-          source: 'CoinMarketCap Live API',
+          source: 'CoinMarketCap Pro API',
+          lastUpdated: new Date().toISOString()
+        });
+      }
+    }
+    
+    // If CoinMarketCap fails, try CoinGecko as fallback
+    console.log('🔄 CoinMarketCap failed, trying CoinGecko fallback...');
+    const coinGeckoResult = await fetchCoinGeckoPrices();
+    
+    if (coinGeckoResult.success && coinGeckoResult.data) {
+      const prices = convertCoinGeckoData(coinGeckoResult.data);
+      
+      if (prices.length > 0) {
+        console.log('✅ Live prices fetched from CoinGecko (fallback):', prices.length, 'coins');
+        return res.status(200).json({
+          prices,
+          success: true,
+          source: 'CoinGecko Fallback API',
           lastUpdated: new Date().toISOString()
         });
       }
@@ -202,7 +202,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       success: true,
       source: 'Fallback Data',
       lastUpdated: new Date().toISOString(),
-      error: `CoinGecko: ${coinGeckoResult.error}, CMC: ${cmcResult.error}`
+      error: `CoinMarketCap: ${cmcResult.error}, CoinGecko: ${coinGeckoResult.error}`
     });
     
   } catch (error: any) {

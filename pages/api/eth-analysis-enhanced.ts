@@ -23,70 +23,92 @@ async function fetchRealEthereumData() {
   };
 
   try {
-    // 1. Get real-time price and 24h data from CoinGecko (primary - works globally)
-    const coinGeckoResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true', {
-      signal: AbortSignal.timeout(15000)
+    // 1. Get real-time price and 24h data from CoinMarketCap (primary - professional grade data)
+    const cmcResponse = await fetch('https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=ETH&convert=USD', {
+      signal: AbortSignal.timeout(15000),
+      headers: {
+        'X-CMC_PRO_API_KEY': process.env.COINMARKETCAP_API_KEY || '',
+        'Accept': 'application/json'
+      }
     });
     
-    if (coinGeckoResponse.ok) {
-      const coinGeckoData = await coinGeckoResponse.json();
-      const ethData = coinGeckoData.ethereum;
-      results.price = {
-        current: ethData.usd,
-        change24h: ethData.usd_24h_change || 0,
-        volume24h: ethData.usd_24h_vol || 0,
-        high24h: ethData.usd * 1.02, // Estimate based on current price
-        low24h: ethData.usd * 0.98,  // Estimate based on current price
-        source: 'CoinGecko'
-      };
-      console.log('✅ CoinGecko ETH price data:', results.price.current);
+    if (cmcResponse.ok) {
+      const cmcData = await cmcResponse.json();
+      const ethData = cmcData.data?.ETH;
+      if (ethData && ethData.quote?.USD) {
+        const usdQuote = ethData.quote.USD;
+        results.price = {
+          current: usdQuote.price,
+          change24h: usdQuote.percent_change_24h || 0,
+          volume24h: usdQuote.volume_24h || 0,
+          high24h: usdQuote.price * (1 + Math.abs(usdQuote.percent_change_24h || 0) / 100),
+          low24h: usdQuote.price * (1 - Math.abs(usdQuote.percent_change_24h || 0) / 100),
+          source: 'CoinMarketCap Pro'
+        };
+        console.log('✅ CoinMarketCap ETH price data:', results.price.current);
+      }
     }
   } catch (error) {
-    console.error('❌ CoinGecko ETH API failed:', error);
+    console.error('❌ CoinMarketCap ETH API failed:', error);
     
-    // Fallback: Try Binance if CoinGecko fails
+    // Fallback: Try CoinGecko if CoinMarketCap fails
     try {
-      const binanceResponse = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT', {
+      const coinGeckoResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true', {
+        headers: {
+          'x-cg-pro-api-key': process.env.COINGECKO_API_KEY || ''
+        },
         signal: AbortSignal.timeout(10000)
       });
       
-      if (binanceResponse.ok) {
-        const binanceData = await binanceResponse.json();
+      if (coinGeckoResponse.ok) {
+        const coinGeckoData = await coinGeckoResponse.json();
+        const ethData = coinGeckoData.ethereum;
         results.price = {
-          current: parseFloat(binanceData.lastPrice),
-          change24h: parseFloat(binanceData.priceChangePercent),
-          volume24h: parseFloat(binanceData.volume),
-          high24h: parseFloat(binanceData.highPrice),
-          low24h: parseFloat(binanceData.lowPrice),
-          source: 'Binance (fallback)'
+          current: ethData.usd,
+          change24h: ethData.usd_24h_change || 0,
+          volume24h: ethData.usd_24h_vol || 0,
+          high24h: ethData.usd * 1.02,
+          low24h: ethData.usd * 0.98,
+          source: 'CoinGecko (fallback)'
         };
-        console.log('✅ Binance ETH price data (fallback):', results.price.current);
+        console.log('✅ CoinGecko ETH price data (fallback):', results.price.current);
       }
-    } catch (binanceError) {
-      console.error('❌ Binance ETH API also failed:', binanceError);
+    } catch (coinGeckoError) {
+      console.error('❌ CoinGecko ETH API also failed:', coinGeckoError);
     }
   }
 
   try {
-    // 2. Get market cap and additional data from CoinGecko
-    const coinGeckoResponse = await fetch('https://api.coingecko.com/api/v3/coins/ethereum?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false', {
-      signal: AbortSignal.timeout(20000)
-    });
-    
-    if (coinGeckoResponse.ok) {
-      const coinGeckoData = await coinGeckoResponse.json();
-      results.marketData = {
-        marketCap: coinGeckoData.market_data.market_cap.usd,
-        totalVolume: coinGeckoData.market_data.total_volume.usd,
-        circulatingSupply: coinGeckoData.market_data.circulating_supply,
-        maxSupply: coinGeckoData.market_data.max_supply,
-        marketCapRank: coinGeckoData.market_cap_rank,
-        source: 'CoinGecko'
-      };
-      console.log('✅ CoinGecko ETH market data:', results.marketData.marketCap.toLocaleString());
+    // 2. Get market cap and additional data from CoinMarketCap (already fetched above, reuse data)
+    if (results.price && results.price.source === 'CoinMarketCap Pro') {
+      // Market data is already included in the CoinMarketCap response
+      const cmcResponse = await fetch('https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=ETH&convert=USD', {
+        signal: AbortSignal.timeout(15000),
+        headers: {
+          'X-CMC_PRO_API_KEY': process.env.COINMARKETCAP_API_KEY || '',
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (cmcResponse.ok) {
+        const cmcData = await cmcResponse.json();
+        const ethData = cmcData.data?.ETH;
+        if (ethData && ethData.quote?.USD) {
+          const usdQuote = ethData.quote.USD;
+          results.marketData = {
+            marketCap: usdQuote.market_cap,
+            totalVolume: usdQuote.volume_24h,
+            circulatingSupply: ethData.circulating_supply,
+            maxSupply: ethData.max_supply,
+            marketCapRank: ethData.cmc_rank,
+            source: 'CoinMarketCap Pro'
+          };
+          console.log('✅ CoinMarketCap ETH market data:', results.marketData.marketCap.toLocaleString());
+        }
+      }
     }
   } catch (error) {
-    console.error('❌ CoinGecko ETH API failed:', error);
+    console.error('❌ CoinMarketCap ETH market data API failed:', error);
   }
 
   try {
