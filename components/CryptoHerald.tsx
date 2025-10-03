@@ -395,12 +395,36 @@ const CryptoHerald: React.FC = () => {
               <div className="text-center text-xs md:text-sm">
                 <div className="font-bold mobile-text-primary mb-2">LIVE DATA SOURCES:</div>
                 <div className="flex flex-wrap justify-center gap-2 md:gap-3">
-                  <span className="mobile-bg-warning px-3 py-2 rounded border text-xs md:text-sm font-medium">Kraken API</span>
-                  <span className="mobile-bg-info px-3 py-2 rounded border text-xs md:text-sm font-medium">CoinGecko</span>
-                  <span className="mobile-bg-success px-3 py-2 rounded border text-xs md:text-sm font-medium">NewsAPI</span>
-                  <span className="mobile-bg-info px-3 py-2 rounded border text-xs md:text-sm font-medium">OpenAI GPT-4o</span>
-                  <span className="mobile-bg-error px-3 py-2 rounded border text-xs md:text-sm font-medium">CoinMarketCap</span>
-                  <span className="mobile-bg-warning px-3 py-2 rounded border text-xs md:text-sm font-medium">Alpha Vantage</span>
+                  <span className="mobile-bg-warning px-3 py-2 rounded border text-xs md:text-sm font-medium api-badge">Kraken API</span>
+                  <span className="mobile-bg-info px-3 py-2 rounded border text-xs md:text-sm font-medium api-badge">CoinGecko</span>
+                  <span className="mobile-bg-success px-3 py-2 rounded border text-xs md:text-sm font-medium api-badge">NewsAPI</span>
+                  <span className="mobile-bg-info px-3 py-2 rounded border text-xs md:text-sm font-medium api-badge">OpenAI GPT-4o</span>
+                  <span className="mobile-bg-error px-3 py-2 rounded border text-xs md:text-sm font-medium api-badge">CoinMarketCap</span>
+                  <span className="mobile-bg-warning px-3 py-2 rounded border text-xs md:text-sm font-medium api-badge">Alpha Vantage</span>
+                  <span className="mobile-bg-accent px-3 py-2 rounded border text-xs md:text-sm font-medium api-badge api-badge-coming-soon animate-coming-soon relative">
+                    <span className="flex items-center space-x-2">
+                      <div className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center">
+                        {/* Caesar API Icon - Replace this with your actual Caesar API icon */}
+                        <img 
+                          src="/icons/caesar-api-placeholder.svg" 
+                          alt="Caesar API" 
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            // Fallback to text if icon fails to load
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling.style.display = 'flex';
+                          }}
+                        />
+                        <div className="w-full h-full bg-gradient-to-br from-purple-600 to-purple-800 rounded-full items-center justify-center hidden">
+                          <span className="text-white text-xs font-bold">C</span>
+                        </div>
+                      </div>
+                      <span className="font-semibold">Caesar API</span>
+                      <span className="text-xs bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 px-2 py-0.5 rounded-full font-bold animate-pulse">
+                        Coming Soon
+                      </span>
+                    </span>
+                  </span>
                 </div>
               </div>
               
