@@ -3,8 +3,17 @@ import { TrendingUp, TrendingDown, AlertTriangle, Target, Clock, BarChart3, Acti
 import ETHTradingChart from './ETHTradingChart'
 import ETHHiddenPivotChart from './ETHHiddenPivotChart'
 
-// Fear & Greed Visual Slider Component
+// Fear & Greed Visual Slider Component - Mobile Optimized
 const FearGreedSlider = ({ value }: { value: number }) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const getSliderColor = (val: number) => {
     if (val <= 25) return 'from-red-600 to-red-400' // Extreme Fear
     if (val <= 45) return 'from-orange-500 to-orange-400' // Fear
@@ -14,46 +23,48 @@ const FearGreedSlider = ({ value }: { value: number }) => {
   }
 
   const getLabel = (val: number) => {
-    if (val <= 25) return 'Extreme Fear'
+    if (val <= 25) return isMobile ? 'Ext Fear' : 'Extreme Fear'
     if (val <= 45) return 'Fear'
     if (val <= 55) return 'Neutral'
     if (val <= 75) return 'Greed'
-    return 'Extreme Greed'
+    return isMobile ? 'Ext Greed' : 'Extreme Greed'
   }
 
   const clampedValue = Math.max(0, Math.min(100, value))
 
   return (
-    <div className="text-center p-3 bg-gray-50 rounded-lg">
-      <p className="text-sm text-gray-600 mb-2">Fear & Greed</p>
+    <div className={`text-center p-2 md:p-3 bg-gray-50 rounded-lg mobile-bg-secondary min-h-[60px] md:min-h-[70px] flex flex-col justify-center min-w-[44px]`}>
+      <p className={`text-xs md:text-sm mobile-text-secondary mb-2`}>
+        {isMobile ? 'F&G' : 'Fear & Greed'}
+      </p>
       
-      {/* Visual Slider */}
-      <div className="relative w-full h-6 bg-gray-200 rounded-full mb-2">
+      {/* Visual Slider - Enhanced Mobile Optimized */}
+      <div className={`relative w-full h-8 md:h-6 bg-gray-200 rounded-full mb-2 touch-manipulation`}>
         {/* Background gradient zones */}
         <div className="absolute inset-0 rounded-full overflow-hidden">
           <div className="h-full w-full bg-gradient-to-r from-red-500 via-yellow-400 to-green-500"></div>
         </div>
         
-        {/* Slider indicator */}
+        {/* Slider indicator - Touch-friendly size */}
         <div 
-          className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-white border-2 border-gray-700 rounded-full shadow-md transition-all duration-300"
-          style={{ left: `calc(${clampedValue}% - 8px)` }}
+          className={`absolute top-1/2 transform -translate-y-1/2 w-6 h-6 md:w-4 md:h-4 bg-white border-2 border-gray-700 rounded-full shadow-md transition-all duration-300 cursor-pointer`}
+          style={{ left: `calc(${clampedValue}% - 12px)` }}
         />
         
         {/* Value overlay */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-xs font-bold text-white mix-blend-difference">
+          <span className={`text-sm md:text-xs font-bold text-white mix-blend-difference mobile-text-primary`}>
             {clampedValue}
           </span>
         </div>
       </div>
       
-      {/* Label and value */}
-      <div className="flex justify-between text-xs text-gray-500 mb-1">
+      {/* Label and value - Mobile Optimized */}
+      <div className={`flex justify-between text-xs mobile-text-secondary mb-1`}>
         <span>Fear</span>
         <span>Greed</span>
       </div>
-      <p className={`text-sm font-semibold ${
+      <p className={`text-xs md:text-sm font-semibold mobile-text-primary ${
         clampedValue <= 25 ? 'text-red-600' :
         clampedValue <= 45 ? 'text-orange-500' :
         clampedValue <= 55 ? 'text-yellow-600' :
@@ -331,10 +342,10 @@ export default function ETHMarketAnalysis() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="flex items-center justify-center h-64">
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mobile-bg-primary">
+        <div className="flex items-center justify-center h-48 sm:h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          <span className="ml-2 text-gray-600">Loading ETH analysis...</span>
+          <span className="ml-2 mobile-text-secondary">Loading ETH analysis...</span>
         </div>
       </div>
     )
@@ -342,14 +353,14 @@ export default function ETHMarketAnalysis() {
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="flex items-center justify-center h-64 text-red-600">
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mobile-bg-primary">
+        <div className="flex items-center justify-center h-48 sm:h-64">
           <div className="text-center">
-            <p className="font-medium">Error loading ETH analysis</p>
-            <p className="text-sm text-gray-500 mt-1">{error}</p>
+            <p className="font-medium mobile-text-primary">Error loading ETH analysis</p>
+            <p className="text-sm mobile-text-secondary mt-1">{error}</p>
             <button
               onClick={fetchETHAnalysis}
-              className="mt-3 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              className="mt-3 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors min-h-[44px] min-w-[44px] mobile-bg-primary mobile-text-primary touch-manipulation"
             >
               Retry
             </button>
@@ -361,15 +372,15 @@ export default function ETHMarketAnalysis() {
 
   if (!data) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="flex items-center justify-center h-64">
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mobile-bg-primary">
+        <div className="flex items-center justify-center h-48 sm:h-64">
           <div className="text-center">
             <EthereumIcon className="h-12 w-12 mx-auto text-blue-500 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Ethereum Market Analysis</h3>
-            <p className="text-gray-600 mb-4">Click to load current Ethereum market data</p>
+            <h3 className="text-lg font-semibold mobile-text-primary mb-2">Ethereum Market Analysis</h3>
+            <p className="mobile-text-secondary mb-4">Click to load current Ethereum market data</p>
             <button
               onClick={fetchETHAnalysis}
-              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors min-h-[44px] min-w-[44px] mobile-bg-primary mobile-text-primary touch-manipulation"
             >
               Load AI Analysis
             </button>
@@ -380,31 +391,31 @@ export default function ETHMarketAnalysis() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mobile-bg-primary">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0 mb-6">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Ethereum Market Analysis</h2>
+          <h2 className="text-lg md:text-xl font-bold mobile-text-primary">Ethereum Market Analysis</h2>
           <div className="flex items-center mt-1 space-x-2">
-            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-              data.isLiveData ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium min-h-[32px] ${
+              data.isLiveData ? 'mobile-bg-success mobile-text-success' : 'mobile-bg-info mobile-text-info'
             }`}>
               <span className="w-2 h-2 bg-current rounded-full mr-1"></span>
               LIVE DATA
             </span>
             {/* Data Source Indicators */}
             <div className="flex items-center space-x-1">
-              <span className={`px-1 py-0.5 rounded text-xs ${
-                data.isLiveData ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'
+              <span className={`px-2 py-1 rounded text-xs min-h-[32px] flex items-center ${
+                data.isLiveData ? 'mobile-bg-info mobile-text-info' : 'mobile-bg-muted mobile-text-muted'
               }`}>
                 AI
               </span>
-              <span className={`px-1 py-0.5 rounded text-xs ${
-                data.currentPrice && data.currentPrice > 3000 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+              <span className={`px-2 py-1 rounded text-xs min-h-[32px] flex items-center ${
+                data.currentPrice && data.currentPrice > 3000 ? 'mobile-bg-success mobile-text-success' : 'mobile-bg-muted mobile-text-muted'
               }`}>
                 Price
               </span>
-              <span className={`px-1 py-0.5 rounded text-xs ${
-                data.newsImpact && data.newsImpact.length > 3 ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'
+              <span className={`px-2 py-1 rounded text-xs min-h-[32px] flex items-center ${
+                data.newsImpact && data.newsImpact.length > 3 ? 'mobile-bg-info mobile-text-info' : 'mobile-bg-muted mobile-text-muted'
               }`}>
                 News
               </span>
@@ -413,50 +424,50 @@ export default function ETHMarketAnalysis() {
         </div>
         <button
           onClick={fetchETHAnalysis}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          className="px-4 py-3 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors min-h-[44px] min-w-[44px] mobile-bg-primary mobile-text-primary touch-manipulation"
         >
           Refresh
         </button>
       </div>
 
-      {/* Price Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="text-center p-4 bg-gray-50 rounded-lg">
-          <p className="text-sm text-gray-600">Current Price</p>
-          <p className="text-2xl font-bold text-gray-900">
-            ${Math.round(data.currentPrice || data.priceAnalysis?.current || data.marketData?.price || 0).toLocaleString()}
+      {/* Price Overview - Mobile Optimized */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+        <div className="text-center p-3 md:p-4 bg-gray-50 rounded-lg mobile-bg-secondary">
+          <p className="text-xs md:text-sm mobile-text-secondary">Price</p>
+          <p className="text-base md:text-2xl font-bold mobile-text-primary">
+            ${Math.round((data.currentPrice || data.priceAnalysis?.current || data.marketData?.price || 0)).toLocaleString()}
           </p>
         </div>
-        <div className="text-center p-4 bg-gray-50 rounded-lg">
-          <p className="text-sm text-gray-600">24h Change</p>
-          <p className={`text-lg font-semibold ${(data.priceAnalysis?.change24h || data.marketData?.change24h || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {(data.priceAnalysis?.change24h || data.marketData?.change24h || 0) >= 0 ? '+' : ''}{(data.priceAnalysis?.change24h || data.marketData?.change24h || 0).toFixed(2)}%
+        <div className="text-center p-3 md:p-4 bg-gray-50 rounded-lg mobile-bg-secondary">
+          <p className="text-xs md:text-sm mobile-text-secondary">24h Change</p>
+          <p className={`text-sm md:text-lg font-semibold ${(data.priceAnalysis?.change24h || data.marketData?.change24h || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {(data.priceAnalysis?.change24h || data.marketData?.change24h || 0) >= 0 ? '+' : ''}{(data.priceAnalysis?.change24h || data.marketData?.change24h || 0).toFixed(1)}%
           </p>
         </div>
-        <div className="text-center p-4 bg-gray-50 rounded-lg">
-          <p className="text-sm text-gray-600">Support</p>
-          <p className="text-lg font-semibold text-blue-600">
+        <div className="text-center p-3 md:p-4 bg-gray-50 rounded-lg mobile-bg-secondary">
+          <p className="text-xs md:text-sm mobile-text-secondary">Support</p>
+          <p className="text-sm md:text-lg font-semibold text-blue-600">
             ${Math.round(data.priceAnalysis?.support || 0).toLocaleString()}
           </p>
         </div>
-        <div className="text-center p-4 bg-gray-50 rounded-lg">
-          <p className="text-sm text-gray-600">Resistance</p>
-          <p className="text-lg font-semibold text-red-600">
+        <div className="text-center p-3 md:p-4 bg-gray-50 rounded-lg mobile-bg-secondary">
+          <p className="text-xs md:text-sm mobile-text-secondary">Resistance</p>
+          <p className="text-sm md:text-lg font-semibold text-red-600">
             ${Math.round(data.priceAnalysis?.resistance || 0).toLocaleString()}
           </p>
         </div>
       </div>
 
-      {/* Technical Indicators */}
+      {/* Technical Indicators - Mobile Optimized */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <BarChart3 className="h-5 w-5 mr-2 text-blue-600" />
+        <h3 className="text-base md:text-lg font-semibold mobile-text-primary mb-4 flex items-center">
+          <BarChart3 className="h-4 w-4 md:h-5 md:w-5 mr-2 text-blue-600" />
           Technical Indicators
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          <div className="bg-gray-50 p-4 rounded-lg">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
+          <div className="bg-gray-50 p-3 md:p-4 rounded-lg mobile-bg-secondary">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-600">RSI (14)</span>
+              <span className="text-xs md:text-sm font-medium mobile-text-secondary">RSI (14)</span>
               <span className={`text-lg font-bold ${
                 getRSIValue(data.technicalIndicators?.rsi) > 70 ? 'text-red-600' : 
                 getRSIValue(data.technicalIndicators?.rsi) < 30 ? 'text-green-600' : 'text-yellow-600'
@@ -479,9 +490,9 @@ export default function ETHMarketAnalysis() {
             </p>
           </div>
 
-          <div className="bg-gray-50 p-4 rounded-lg">
+          <div className="bg-gray-50 p-3 md:p-4 rounded-lg mobile-bg-secondary">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-600">MACD</span>
+              <span className="text-xs md:text-sm font-medium mobile-text-secondary">MACD</span>
               <span className={`text-sm font-semibold ${
                 data.technicalIndicators?.macd?.signal === 'BUY' ? 'text-green-600' : 
                 data.technicalIndicators?.macd?.signal === 'SELL' ? 'text-red-600' : 'text-gray-600'
@@ -494,9 +505,9 @@ export default function ETHMarketAnalysis() {
             </p>
           </div>
 
-          <div className="bg-gray-50 p-4 rounded-lg">
+          <div className="bg-gray-50 p-3 md:p-4 rounded-lg mobile-bg-secondary">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-600">Moving Averages</span>
+              <span className="text-xs md:text-sm font-medium mobile-text-secondary">Moving Averages</span>
               <TrendingUp className="h-4 w-4 text-blue-600" />
             </div>
             <div className="text-xs text-gray-600 mt-2 space-y-1">
@@ -505,9 +516,9 @@ export default function ETHMarketAnalysis() {
             </div>
           </div>
 
-          <div className="bg-gray-50 p-4 rounded-lg">
+          <div className="bg-gray-50 p-3 md:p-4 rounded-lg mobile-bg-secondary">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-600">Bollinger Bands</span>
+              <span className="text-xs md:text-sm font-medium mobile-text-secondary">Bollinger Bands</span>
               <Activity className="h-4 w-4 text-purple-600" />
             </div>
             <div className="text-xs text-gray-600 mt-2 space-y-1">
@@ -517,126 +528,245 @@ export default function ETHMarketAnalysis() {
             </div>
           </div>
 
-          <div className="bg-gray-50 p-4 rounded-lg col-span-1 lg:col-span-2">
+          <div className="bg-gray-50 p-3 md:p-4 rounded-lg col-span-1 lg:col-span-2 mobile-bg-secondary">
             <div className="flex justify-between items-center mb-3">
-              <span className="text-sm font-medium text-gray-600">Support/Resistance Levels</span>
+              <span className="text-xs md:text-sm font-medium mobile-text-secondary">Support/Resistance Levels</span>
               <BarChart3 className="h-4 w-4 text-red-600" />
             </div>
-            <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
               <div className="space-y-2">
-                <div className="font-medium text-gray-700">Resistance</div>
+                <div className="font-medium mobile-text-primary">Resistance</div>
                 <div className="text-red-500 font-medium">Strong: ${Math.round(data.technicalIndicators?.supportResistance?.strongResistance || 0).toLocaleString()}</div>
                 <div className="text-orange-500">Normal: ${Math.round(data.technicalIndicators?.supportResistance?.resistance || 0).toLocaleString()}</div>
               </div>
               <div className="space-y-2">
-                <div className="font-medium text-gray-700">Support</div>
+                <div className="font-medium mobile-text-primary">Support</div>
                 <div className="text-green-500">Normal: ${Math.round(data.technicalIndicators?.supportResistance?.support || 0).toLocaleString()}</div>
                 <div className="text-green-600 font-medium">Strong: ${Math.round(data.technicalIndicators?.supportResistance?.strongSupport || 0).toLocaleString()}</div>
               </div>
             </div>
           </div>
 
-          <div className="bg-gray-50 p-4 rounded-lg col-span-1 lg:col-span-2">
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-sm font-medium text-gray-600">
-                {data.isEnhancedData ? 'REAL Supply/Demand Zones' : 'Supply/Demand Zones'}
-              </span>
+          <div className="bg-gray-50 p-3 md:p-4 rounded-lg col-span-1 lg:col-span-2 mobile-bg-secondary">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-3 space-y-2 md:space-y-0">
               <div className="flex items-center space-x-2">
-                <Target className="h-4 w-4 text-indigo-600" />
+                <span className="text-xs md:text-sm font-medium mobile-text-secondary">
+                  {data.isEnhancedData ? '🎯 LIVE Supply/Demand Zones' : 'Supply/Demand Zones'}
+                </span>
                 {data.isEnhancedData && (
-                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded font-medium">
-                    LIVE DATA
+                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded font-medium animate-pulse">
+                    REAL-TIME
                   </span>
                 )}
               </div>
+              <div className="flex items-center space-x-2">
+                <Target className="h-4 w-4 text-indigo-600" />
+                <span className="text-xs mobile-text-muted">
+                  {data.technicalIndicators?.supplyDemandZones?.supplyZones?.length || 0}S / 
+                  {data.technicalIndicators?.supplyDemandZones?.demandZones?.length || 0}D
+                </span>
+              </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+
+            {/* Enhanced Supply/Demand Zones Display */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 text-xs">
+              {/* Supply Zones */}
               <div className="space-y-2">
-                <div className="font-medium text-red-600 mb-2">📈 Supply Zones</div>
-                {data.technicalIndicators?.supplyDemandZones?.supplyZones?.slice(0, 3).map((zone, index) => (
-                  <div key={index} className="bg-red-50 p-2 rounded border-l-2 border-red-300">
-                    <div className="font-medium">${Math.round(zone.level).toLocaleString()}</div>
-                    <div className="text-gray-500 text-xs flex justify-between">
-                      <span>{zone.strength} Zone</span>
-                      {zone.source && (
-                        <span className="text-blue-500">
-                          {zone.source === 'orderbook' ? '📊 OrderBook' : '📈 Historical'}
-                        </span>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="font-medium text-red-600 mobile-text-primary">📈 Supply Zones</div>
+                  <div className="text-xs mobile-text-muted">Resistance Levels</div>
+                </div>
+                {data.technicalIndicators?.supplyDemandZones?.supplyZones?.slice(0, 4).map((zone, index) => (
+                  <div key={index} className="bg-red-50 p-3 rounded-lg border-l-4 border-red-400 mobile-bg-secondary hover:bg-red-100 transition-colors">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="font-bold mobile-text-primary text-sm">
+                        ${Math.round(zone.level).toLocaleString()}
+                      </div>
+                      <div className={`px-2 py-1 rounded text-xs font-medium ${
+                        zone.strength === 'Strong' || zone.strength === 'Very Strong' 
+                          ? 'bg-red-200 text-red-800' 
+                          : 'bg-red-100 text-red-600'
+                      }`}>
+                        {zone.strength}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="mobile-text-secondary">
+                        {zone.source === 'live_orderbook' && '📊 Live OrderBook'}
+                        {zone.source === 'pivot_analysis' && '📈 Pivot Analysis'}
+                        {zone.source === 'fibonacci' && '🔢 Fibonacci'}
+                        {zone.source === 'psychological' && '🧠 Psychological'}
+                        {zone.source === 'orderbook' && '📊 OrderBook'}
+                        {!zone.source && '📊 Technical'}
+                      </span>
+                      {zone.confidence && (
+                        <span className="text-blue-600 font-medium">{zone.confidence}%</span>
                       )}
                     </div>
-                    {zone.volume && (
-                      <div className="text-gray-400 text-xs">Vol: {zone.volume.toFixed(1)} ETH</div>
+                    
+                    {zone.volume && zone.volume > 0 && (
+                      <div className="text-xs mobile-text-muted mt-1">
+                        Volume: {zone.volume.toFixed(2)} ETH
+                        {zone.volumePercentage && ` (${zone.volumePercentage.toFixed(1)}%)`}
+                      </div>
+                    )}
+                    
+                    {zone.description && (
+                      <div className="text-xs mobile-text-muted mt-1 italic">
+                        {zone.description}
+                      </div>
+                    )}
+                    
+                    {zone.distanceFromPrice && (
+                      <div className="text-xs text-orange-600 mt-1">
+                        +{zone.distanceFromPrice.toFixed(1)}% from current
+                      </div>
                     )}
                   </div>
                 ))}
               </div>
+
+              {/* Demand Zones */}
               <div className="space-y-2">
-                <div className="font-medium text-green-600 mb-2">📉 Demand Zones</div>
-                {data.technicalIndicators?.supplyDemandZones?.demandZones?.slice(0, 3).map((zone, index) => (
-                  <div key={index} className="bg-green-50 p-2 rounded border-l-2 border-green-300">
-                    <div className="font-medium">${Math.round(zone.level).toLocaleString()}</div>
-                    <div className="text-gray-500 text-xs flex justify-between">
-                      <span>{zone.strength} Zone</span>
-                      {zone.source && (
-                        <span className="text-blue-500">
-                          {zone.source === 'orderbook' ? '📊 OrderBook' : '📈 Historical'}
-                        </span>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="font-medium text-green-600 mobile-text-primary">📉 Demand Zones</div>
+                  <div className="text-xs mobile-text-muted">Support Levels</div>
+                </div>
+                {data.technicalIndicators?.supplyDemandZones?.demandZones?.slice(0, 4).map((zone, index) => (
+                  <div key={index} className="bg-green-50 p-3 rounded-lg border-l-4 border-green-400 mobile-bg-secondary hover:bg-green-100 transition-colors">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="font-bold mobile-text-primary text-sm">
+                        ${Math.round(zone.level).toLocaleString()}
+                      </div>
+                      <div className={`px-2 py-1 rounded text-xs font-medium ${
+                        zone.strength === 'Strong' || zone.strength === 'Very Strong' 
+                          ? 'bg-green-200 text-green-800' 
+                          : 'bg-green-100 text-green-600'
+                      }`}>
+                        {zone.strength}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="mobile-text-secondary">
+                        {zone.source === 'live_orderbook' && '📊 Live OrderBook'}
+                        {zone.source === 'pivot_analysis' && '📈 Pivot Analysis'}
+                        {zone.source === 'fibonacci' && '🔢 Fibonacci'}
+                        {zone.source === 'psychological' && '🧠 Psychological'}
+                        {zone.source === 'orderbook' && '📊 OrderBook'}
+                        {!zone.source && '📊 Technical'}
+                      </span>
+                      {zone.confidence && (
+                        <span className="text-blue-600 font-medium">{zone.confidence}%</span>
                       )}
                     </div>
-                    {zone.volume && (
-                      <div className="text-gray-400 text-xs">Vol: {zone.volume.toFixed(1)} ETH</div>
+                    
+                    {zone.volume && zone.volume > 0 && (
+                      <div className="text-xs mobile-text-muted mt-1">
+                        Volume: {zone.volume.toFixed(2)} ETH
+                        {zone.volumePercentage && ` (${zone.volumePercentage.toFixed(1)}%)`}
+                      </div>
+                    )}
+                    
+                    {zone.description && (
+                      <div className="text-xs mobile-text-muted mt-1 italic">
+                        {zone.description}
+                      </div>
+                    )}
+                    
+                    {zone.distanceFromPrice && (
+                      <div className="text-xs text-blue-600 mt-1">
+                        -{zone.distanceFromPrice.toFixed(1)}% from current
+                      </div>
                     )}
                   </div>
                 ))}
               </div>
             </div>
+
+            {/* Market Analysis Summary */}
+            {data.technicalIndicators?.supplyDemandZones?.analysis && (
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="text-xs font-medium mobile-text-primary mb-2">📊 Market Analysis</div>
+                {typeof data.technicalIndicators.supplyDemandZones.analysis === 'object' ? (
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <span className="mobile-text-secondary">Bid Volume: </span>
+                      <span className="font-medium">{data.technicalIndicators.supplyDemandZones.analysis.totalBidVolume} ETH</span>
+                    </div>
+                    <div>
+                      <span className="mobile-text-secondary">Ask Volume: </span>
+                      <span className="font-medium">{data.technicalIndicators.supplyDemandZones.analysis.totalAskVolume} ETH</span>
+                    </div>
+                    <div>
+                      <span className="mobile-text-secondary">Bid/Ask Ratio: </span>
+                      <span className="font-medium">{data.technicalIndicators.supplyDemandZones.analysis.bidAskRatio}</span>
+                    </div>
+                    <div>
+                      <span className="mobile-text-secondary">Pressure: </span>
+                      <span className={`font-medium ${
+                        data.technicalIndicators.supplyDemandZones.analysis.marketPressure === 'Bullish' 
+                          ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {data.technicalIndicators.supplyDemandZones.analysis.marketPressure}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-xs mobile-text-secondary">
+                    {data.technicalIndicators.supplyDemandZones.analysis}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Trading Signals */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <Target className="h-5 w-5 mr-2 text-green-600" />
+        <h3 className="text-base md:text-lg font-semibold mobile-text-primary mb-4 flex items-center">
+          <Target className="h-4 w-4 md:h-5 md:w-5 mr-2 text-green-600" />
           Trading Signals
         </h3>
         <div className="space-y-3">
           {Array.isArray(data.tradingSignals) && data.tradingSignals.length > 0 ? (
             data.tradingSignals.slice(0, 3).map((signal, index) => (
-              <div key={index} className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
+              <div key={index} className="border border-gray-200 rounded-lg p-3 md:p-4 mobile-bg-card">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 mb-2">
                   <div className="flex items-center space-x-2">
                     {signal.type === 'BUY' ? (
-                      <TrendingUp className="h-4 w-4 text-green-600" />
+                      <TrendingUp className="h-4 w-4 mobile-text-success" />
                     ) : (
-                      <TrendingDown className="h-4 w-4 text-red-600" />
+                      <TrendingDown className="h-4 w-4 mobile-text-error" />
                     )}
                     <span className={`font-semibold ${
-                      signal.type === 'BUY' ? 'text-green-600' : 'text-red-600'
+                      signal.type === 'BUY' ? 'mobile-text-success' : 'mobile-text-error'
                     }`}>
                       {signal.type}
                     </span>
-                    <span className="text-sm text-gray-500">@${Math.round(signal.price || 0).toLocaleString()}</span>
+                    <span className="text-sm mobile-text-secondary">@${Math.round(signal.price || 0).toLocaleString()}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      signal.strength === 'STRONG' ? 'bg-green-100 text-green-800' :
-                      signal.strength === 'MODERATE' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
+                    <span className={`px-2 py-1 rounded text-xs font-medium min-h-[32px] flex items-center ${
+                      signal.strength === 'STRONG' ? 'mobile-bg-success mobile-text-success' :
+                      signal.strength === 'MODERATE' ? 'mobile-bg-warning mobile-text-warning' :
+                      'mobile-bg-muted mobile-text-muted'
                     }`}>
                       {signal.strength}
                     </span>
-                    <span className="text-xs text-gray-500">{signal.timeframe}</span>
+                    <span className="text-xs mobile-text-secondary">{signal.timeframe}</span>
                   </div>
                 </div>
-                <p className="text-sm text-gray-600">{signal.reasoning}</p>
+                <p className="text-sm mobile-text-secondary leading-relaxed">{signal.reasoning}</p>
               </div>
             ))
           ) : (
-            <div className="text-center p-6 text-gray-500">
-              <Target className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-              <p>No trading signals available</p>
-              <p className="text-sm">Signals will appear when market conditions generate actionable insights</p>
+            <div className="text-center p-6 mobile-bg-secondary rounded-lg">
+              <Target className="h-8 w-8 mx-auto mb-2 mobile-text-muted" />
+              <p className="mobile-text-primary font-medium">No trading signals available</p>
+              <p className="text-sm mobile-text-secondary mt-1">Signals will appear when market conditions generate actionable insights</p>
             </div>
           )}
         </div>
@@ -645,20 +775,21 @@ export default function ETHMarketAnalysis() {
       {/* Enhanced Market Data Section */}
       {data.isEnhancedData && data.enhancedMarketData && (
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <Activity className="h-5 w-5 mr-2 text-blue-600" />
+          <h3 className="text-base md:text-lg font-semibold mobile-text-primary mb-4 flex items-center">
+            <Activity className="h-4 w-4 md:h-5 md:w-5 mr-2 text-blue-600" />
             Real-Time Market Analysis
-            <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded font-medium">
+            <span className="ml-2 px-2 py-1 mobile-bg-info mobile-text-info text-xs rounded font-medium min-h-[32px] flex items-center">
               LIVE DATA
             </span>
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {/* Mobile-optimized market data grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             {/* Order Book Imbalance */}
             {data.enhancedMarketData.orderBookImbalance && (
-              <div className="bg-blue-50 p-4 rounded-lg">
+              <div className="mobile-bg-info p-3 md:p-4 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-blue-800">Order Book Imbalance</span>
+                  <span className="text-sm font-medium mobile-text-info">Order Book Imbalance</span>
                   <BarChart3 className="h-4 w-4 text-blue-600" />
                 </div>
                 <div className="space-y-2">
@@ -783,7 +914,8 @@ export default function ETHMarketAnalysis() {
           <Clock className="h-5 w-5 mr-2 text-purple-600" />
           Price Predictions
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Mobile-optimized predictions grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
           <div className="bg-blue-50 p-4 rounded-lg">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-blue-800">1 Hour</span>
@@ -826,10 +958,11 @@ export default function ETHMarketAnalysis() {
           <AlertTriangle className="h-5 w-5 mr-2 text-yellow-600" />
           Market Sentiment
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600">Overall</p>
-            <p className={`font-semibold ${
+        {/* Enhanced mobile-optimized sentiment grid with touch-friendly indicators */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          <div className="text-center p-2 md:p-3 bg-gray-50 rounded-lg mobile-bg-secondary min-h-[60px] md:min-h-[70px] flex flex-col justify-center min-w-[44px]">
+            <p className="text-xs md:text-sm mobile-text-secondary mb-1">Overall</p>
+            <p className={`text-sm md:text-base font-semibold mobile-text-primary ${
               data.marketSentiment?.overall === 'Bullish' ? 'text-green-600' :
               data.marketSentiment?.overall === 'Bearish' ? 'text-red-600' : 'text-yellow-600'
             }`}>
@@ -837,15 +970,15 @@ export default function ETHMarketAnalysis() {
             </p>
           </div>
           <FearGreedSlider value={data.marketSentiment?.fearGreed || 50} />
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600">Social Media</p>
-            <p className="font-semibold text-purple-600">
+          <div className="text-center p-2 md:p-3 bg-gray-50 rounded-lg mobile-bg-secondary min-h-[60px] md:min-h-[70px] flex flex-col justify-center min-w-[44px]">
+            <p className="text-xs md:text-sm mobile-text-secondary mb-1">Social</p>
+            <p className="text-sm md:text-base font-semibold text-purple-600 mobile-text-primary">
               {data.marketSentiment?.socialMedia || 'Neutral'}
             </p>
           </div>
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600">Institutional</p>
-            <p className="font-semibold text-orange-600">
+          <div className="text-center p-2 md:p-3 bg-gray-50 rounded-lg mobile-bg-secondary min-h-[60px] md:min-h-[70px] flex flex-col justify-center min-w-[44px]">
+            <p className="text-xs md:text-sm mobile-text-secondary mb-1">Institutional</p>
+            <p className="text-sm md:text-base font-semibold text-orange-600 mobile-text-primary">
               {data.marketSentiment?.institutionalFlow || 'Neutral'}
             </p>
           </div>
