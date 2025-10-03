@@ -318,13 +318,13 @@ const CryptoHerald: React.FC = () => {
             >
               <button
                 disabled={loading}
-                className="bg-black text-white font-bold py-3 md:py-4 px-6 md:px-8 border-4 border-black hover:bg-gray-800 transition-colors text-base md:text-lg flex items-center mx-auto disabled:opacity-50 newspaper-hover"
-                style={{ fontFamily: 'Times, serif' }}
+                className="bg-black font-bold py-4 px-6 md:px-8 border-4 border-black hover:bg-gray-800 transition-colors text-base md:text-lg flex items-center mx-auto disabled:opacity-50 newspaper-hover min-h-[44px] mobile-text-primary"
+                style={{ fontFamily: 'Times, serif', backgroundColor: '#000000', color: '#ffffff' }}
               >
                 {loading ? (
                   <>
                     <RefreshCw className="animate-spin h-5 w-5 mr-2" />
-                    <NewspaperLoading text="PRINTING LATEST EDITION..." className="text-white" />
+                    <NewspaperLoading text="PRINTING LATEST EDITION..." className="mobile-text-primary" style={{ color: '#ffffff' }} />
                   </>
                 ) : (
                   <>
@@ -350,23 +350,23 @@ const CryptoHerald: React.FC = () => {
         backgroundSize: '50px 50px'
       }}>
         {/* Classic Newspaper Header */}
-        <div className="border-b-8 border-double border-black pb-4 md:pb-6 mb-6 md:mb-8 bg-white">
+        <div className="border-b-8 border-double border-black pb-4 md:pb-6 mb-6 md:mb-8 mobile-bg-primary">
           <div className="text-center">
             {/* Date and Edition Info */}
-            <div className="text-xs md:text-sm font-bold mb-2 md:mb-4 border-b-2 border-black pb-2">
+            <div className="text-xs md:text-sm font-bold mb-2 md:mb-4 border-b-2 border-black pb-2 mobile-text-primary">
               {formatDate(data?.meta?.lastUpdated || new Date().toISOString())} • SPECIAL EDITION • VOL. 1, NO. 1
             </div>
             
             {/* Main Title */}
-            <h1 className="text-4xl sm:text-5xl md:text-7xl font-black mb-2 md:mb-4 leading-tight" style={{ fontFamily: 'Times, serif' }}>
+            <h1 className="text-3xl sm:text-4xl md:text-7xl font-black mb-2 md:mb-4 leading-tight mobile-text-primary" style={{ fontFamily: 'Times, serif' }}>
               THE CRYPTO HERALD
             </h1>
             
             {/* Enhanced Subtitle with Live Data Analytics */}
-            <div className="text-base md:text-xl font-bold mb-2 tracking-wider">
+            <div className="text-sm md:text-base lg:text-xl font-bold mb-2 tracking-wider mobile-text-primary">
               REAL-TIME MARKET INTELLIGENCE & AI ANALYTICS
             </div>
-            <div className="text-sm md:text-base text-gray-700 mb-4 font-serif italic">
+            <div className="text-xs md:text-sm lg:text-base mobile-text-secondary mb-4 font-serif italic">
               Powered by GPT-4o • Live Order Book Analysis • Multi-Source Data Aggregation
             </div>
             
@@ -393,30 +393,30 @@ const CryptoHerald: React.FC = () => {
               
               {/* API Sources Row */}
               <div className="text-center text-xs md:text-sm">
-                <div className="font-bold text-gray-800 mb-2">LIVE DATA SOURCES:</div>
-                <div className="flex flex-wrap justify-center gap-2">
-                  <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded border">Kraken API</span>
-                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded border">CoinGecko</span>
-                  <span className="bg-green-100 text-green-800 px-2 py-1 rounded border">NewsAPI</span>
-                  <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded border">OpenAI GPT-4o</span>
-                  <span className="bg-red-100 text-red-800 px-2 py-1 rounded border">CoinMarketCap</span>
-                  <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded border">Alpha Vantage</span>
+                <div className="font-bold mobile-text-primary mb-2">LIVE DATA SOURCES:</div>
+                <div className="flex flex-wrap justify-center gap-2 md:gap-3">
+                  <span className="mobile-bg-warning px-3 py-2 rounded border text-xs md:text-sm font-medium">Kraken API</span>
+                  <span className="mobile-bg-info px-3 py-2 rounded border text-xs md:text-sm font-medium">CoinGecko</span>
+                  <span className="mobile-bg-success px-3 py-2 rounded border text-xs md:text-sm font-medium">NewsAPI</span>
+                  <span className="mobile-bg-info px-3 py-2 rounded border text-xs md:text-sm font-medium">OpenAI GPT-4o</span>
+                  <span className="mobile-bg-error px-3 py-2 rounded border text-xs md:text-sm font-medium">CoinMarketCap</span>
+                  <span className="mobile-bg-warning px-3 py-2 rounded border text-xs md:text-sm font-medium">Alpha Vantage</span>
                 </div>
               </div>
               
               {/* Enhanced Features Row */}
               <div className="text-center text-xs">
-                <div className="font-bold text-gray-800 mb-2">ADVANCED ANALYTICS:</div>
-                <div className="text-gray-600 space-x-3">
-                  <span>🎯 Order Book Analysis</span>
-                  <span>•</span>
-                  <span>🐋 Whale Tracking</span>
-                  <span>•</span>
-                  <span>😱 Fear & Greed Index</span>
-                  <span>•</span>
-                  <span>🔮 AI Predictions</span>
-                  <span>•</span>
-                  <span>📈 Multi-Timeframe TA</span>
+                <div className="font-bold mobile-text-primary mb-2">ADVANCED ANALYTICS:</div>
+                <div className="mobile-text-secondary flex flex-wrap justify-center gap-2 md:gap-3">
+                  <span className="whitespace-nowrap">🎯 Order Book Analysis</span>
+                  <span className="hidden md:inline">•</span>
+                  <span className="whitespace-nowrap">🐋 Whale Tracking</span>
+                  <span className="hidden md:inline">•</span>
+                  <span className="whitespace-nowrap">😱 Fear & Greed Index</span>
+                  <span className="hidden md:inline">•</span>
+                  <span className="whitespace-nowrap">🔮 AI Predictions</span>
+                  <span className="hidden md:inline">•</span>
+                  <span className="whitespace-nowrap">📈 Multi-Timeframe TA</span>
                 </div>
               </div>
               
@@ -459,21 +459,22 @@ const CryptoHerald: React.FC = () => {
           }
           return false;
         })() && (
-          <div className="mb-8 border-y-4 border-black bg-gradient-to-r from-black via-gray-900 to-black">
+          <div className="mb-6 md:mb-8 border-y-4 border-black bg-gradient-to-r from-black via-gray-900 to-black">
             {/* Ticker Header Bar */}
-            <div className="bg-white border-b-2 border-black p-2">
-              <div className="flex items-center justify-center space-x-4">
-                <div className="w-3 h-3 bg-red-600 rounded-full animate-live-pulse"></div>
-                <span className="font-black text-black text-sm" style={{ fontFamily: 'Times, serif' }}>
+            <div className="mobile-bg-primary border-b-2 border-black p-2 md:p-3">
+              <div className="flex items-center justify-center space-x-2 md:space-x-4">
+                <div className="w-2 h-2 md:w-3 md:h-3 bg-red-600 rounded-full animate-live-pulse"></div>
+                <span className="font-black mobile-text-primary text-xs md:text-sm" style={{ fontFamily: 'Times, serif' }}>
                   LIVE MARKET DATA - COINGECKO API
                 </span>
-                <div className="w-3 h-3 bg-red-600 rounded-full animate-live-pulse"></div>
+                <div className="w-2 h-2 md:w-3 md:h-3 bg-red-600 rounded-full animate-live-pulse"></div>
               </div>
             </div>
             
             {/* Scrolling Ticker Content */}
             <div 
-              className="bg-black text-white py-3 overflow-hidden relative cursor-pointer ticker-container"
+              className="bg-black py-4 md:py-3 overflow-hidden relative cursor-pointer ticker-container"
+              style={{ backgroundColor: '#000000' }}
               onMouseEnter={(e) => {
                 const ticker = e.currentTarget.querySelector('.animate-scroll');
                 ticker?.classList.add('ticker-paused');
@@ -483,14 +484,15 @@ const CryptoHerald: React.FC = () => {
                 ticker?.classList.remove('ticker-paused');
               }}
             >
-              <div className="flex animate-scroll space-x-12 text-lg font-bold">
+              <div className="flex animate-scroll space-x-8 md:space-x-12 text-base md:text-lg font-bold">
                 {/* Duplicate the data to create seamless loop */}
                 {data?.marketTicker && [...data.marketTicker.slice(0, 8), ...data.marketTicker.slice(0, 8)].map((coin, index) => (
-                  <div key={`${coin.symbol}-${index}`} className="flex items-center space-x-3 whitespace-nowrap ticker-item">
-                    <span className="text-yellow-400 animate-pulse">●</span>
-                    <span className="font-black">{coin.symbol}</span>
-                    <span className="text-white">{formatPrice(coin.price)}</span>
-                    <span className={`font-bold ${coin.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  <div key={`${coin.symbol}-${index}`} className="flex items-center space-x-2 md:space-x-3 whitespace-nowrap ticker-item">
+                    <span className="mobile-text-warning animate-pulse" style={{ color: '#fbbf24' }}>●</span>
+                    <span className="font-black mobile-text-primary" style={{ color: '#ffffff' }}>{coin.symbol}</span>
+                    <span className="mobile-text-primary" style={{ color: '#ffffff' }}>{formatPrice(coin.price)}</span>
+                    <span className={`font-bold ${coin.change >= 0 ? 'mobile-text-crypto-green' : 'mobile-text-crypto-red'}`} 
+                          style={{ color: coin.change >= 0 ? '#10b981' : '#ef4444' }}>
                       {coin.change >= 0 ? '↗' : '↘'} {Math.abs(coin.change).toFixed(2)}%
                     </span>
                   </div>
@@ -498,14 +500,14 @@ const CryptoHerald: React.FC = () => {
               </div>
               
               {/* Fade edges for professional look */}
-              <div className="absolute left-0 top-0 w-16 h-full bg-gradient-to-r from-black to-transparent pointer-events-none"></div>
-              <div className="absolute right-0 top-0 w-16 h-full bg-gradient-to-l from-black to-transparent pointer-events-none"></div>
+              <div className="absolute left-0 top-0 w-8 md:w-16 h-full bg-gradient-to-r from-black to-transparent pointer-events-none"></div>
+              <div className="absolute right-0 top-0 w-8 md:w-16 h-full bg-gradient-to-l from-black to-transparent pointer-events-none"></div>
             </div>
             
             {/* Bottom Border with Classic Pattern */}
-            <div className="bg-white border-t-2 border-black h-1">
+            <div className="mobile-bg-primary border-t-2 border-black h-1">
               <div className="h-full bg-black opacity-20" style={{
-                backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(0,0,0,0.3) 4px, rgba(0,0,0,0.3) 8px)'
+                backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px)'
               }}></div>
             </div>
           </div>
@@ -526,13 +528,13 @@ const CryptoHerald: React.FC = () => {
             >
               <button
                 disabled={loading}
-                className="bg-black text-white font-bold py-4 px-8 border-4 border-black hover:bg-gray-800 transition-colors text-lg flex items-center mx-auto disabled:opacity-50 newspaper-hover"
-                style={{ fontFamily: 'Times, serif' }}
+                className="bg-black font-bold py-4 px-6 md:px-8 border-4 border-black hover:bg-gray-800 transition-colors text-base md:text-lg flex items-center mx-auto disabled:opacity-50 newspaper-hover min-h-[44px] mobile-text-primary"
+                style={{ fontFamily: 'Times, serif', backgroundColor: '#000000', color: '#ffffff' }}
               >
                 {loading ? (
                   <>
                     <RefreshCw className="animate-spin h-5 w-5 mr-2" />
-                    <NewspaperLoading text="FETCHING LATEST NEWS..." className="text-white" />
+                    <NewspaperLoading text="FETCHING LATEST NEWS..." className="mobile-text-primary" style={{ color: '#ffffff' }} />
                   </>
                 ) : (
                   <>
@@ -571,8 +573,8 @@ const CryptoHerald: React.FC = () => {
               >
                 <button
                   disabled={loading}
-                  className="bg-red-600 text-white font-bold py-3 px-6 border-2 border-red-600 hover:bg-red-700 transition-colors"
-                  style={{ fontFamily: 'Times, serif' }}
+                  className="bg-red-600 font-bold py-4 px-6 border-2 border-red-600 hover:bg-red-700 transition-colors min-h-[44px] mobile-text-primary"
+                  style={{ fontFamily: 'Times, serif', backgroundColor: '#dc2626', color: '#ffffff' }}
                 >
                   {loading ? (
                     <>
@@ -596,64 +598,64 @@ const CryptoHerald: React.FC = () => {
           const categoryArticles = getArticlesForCategory(articles, 8);
           
           return (
-            <div key={category} className="mb-8 bg-white border-4 border-black">
+            <div key={category} className="mb-8 mobile-bg-card border-4 border-black">
               {/* Category Header */}
-              <div className="bg-black text-white p-4 border-b-4 border-black">
-                <h2 className="text-2xl font-black text-center" style={{ fontFamily: 'Times, serif' }}>
+              <div className="bg-black mobile-text-primary p-4 border-b-4 border-black" style={{ backgroundColor: '#000000', color: '#ffffff' }}>
+                <h2 className="text-2xl font-black text-center mobile-text-primary" style={{ fontFamily: 'Times, serif', color: '#ffffff' }}>
                   {category.toUpperCase()}
                 </h2>
-                <div className="text-center text-sm mt-1">
+                <div className="text-center text-sm mt-1 mobile-text-primary" style={{ color: '#ffffff' }}>
                   {categoryArticles.length} STORIES
                 </div>
               </div>
 
-              {/* Articles Grid */}
-              <div className="p-6 space-y-6">
+              {/* Articles Grid - Single column on mobile */}
+              <div className="p-4 md:p-6 space-y-6">
                 {categoryIndex === 0 && categoryArticles.length > 0 && (
-                  /* Featured Article */
-                  <div className="border-4 border-black p-6 bg-gray-50">
+                  /* Featured Article - Only for first category */
+                  <div className="border-4 border-black p-4 md:p-6 mobile-bg-secondary">
                     {/* Clickable Headline */}
                     {categoryArticles[0].url ? (
                       <a 
                         href={categoryArticles[0].url} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="hover:text-blue-800 transition-colors block"
+                        className="mobile-text-link hover:text-blue-800 transition-colors block"
                       >
-                        <h3 className="text-2xl md:text-3xl font-black mb-4 hover:underline cursor-pointer" style={{ fontFamily: 'Times, serif' }}>
+                        <h3 className="text-xl md:text-2xl lg:text-3xl font-black mb-4 hover:underline cursor-pointer mobile-text-primary" style={{ fontFamily: 'Times, serif' }}>
                           {categoryArticles[0].headline}
                         </h3>
                       </a>
                     ) : (
-                      <h3 className="text-2xl md:text-3xl font-black mb-4" style={{ fontFamily: 'Times, serif' }}>
+                      <h3 className="text-xl md:text-2xl lg:text-3xl font-black mb-4 mobile-text-primary" style={{ fontFamily: 'Times, serif' }}>
                         {categoryArticles[0].headline}
                       </h3>
                     )}
-                    <div className="flex flex-wrap items-center gap-4 mb-4">
-                      <span className={`px-3 py-1 border-2 rounded font-bold text-sm ${getSentimentColor(categoryArticles[0].sentiment)}`}>
+                    <div className="flex flex-wrap items-center gap-3 md:gap-4 mb-4">
+                      <span className={`px-3 py-2 border-2 rounded font-bold text-sm min-h-[44px] flex items-center ${getSentimentColor(categoryArticles[0].sentiment)}`}>
                         {categoryArticles[0].sentiment.toUpperCase()}
                       </span>
-                      <span className="text-sm font-bold">BY {categoryArticles[0].source.toUpperCase()}</span>
+                      <span className="text-sm font-bold mobile-text-secondary">BY {categoryArticles[0].source.toUpperCase()}</span>
                       {categoryArticles[0].aiSummary && (
-                        <div className="flex items-center space-x-2 bg-purple-100 border-2 border-purple-300 rounded px-3 py-1">
-                          <Sparkles className="h-4 w-4 text-purple-600" />
-                          <span className="text-sm font-bold text-purple-700">AI INSIGHT</span>
+                        <div className="flex items-center space-x-2 mobile-bg-info border-2 border-blue-300 rounded px-3 py-2 min-h-[44px]">
+                          <Sparkles className="h-4 w-4 mobile-text-info" />
+                          <span className="text-sm font-bold mobile-text-info">AI INSIGHT</span>
                         </div>
                       )}
                     </div>
                     {categoryArticles[0].aiSummary && (
-                      <div className="bg-purple-50 border-l-4 border-purple-400 p-4 mb-4">
-                        <p className="text-purple-800 font-medium italic">
+                      <div className="mobile-bg-info border-l-4 border-blue-400 p-4 mb-4">
+                        <p className="mobile-text-info font-medium italic">
                           "{categoryArticles[0].aiSummary}"
                         </p>
                       </div>
                     )}
-                    <p className="text-lg leading-relaxed mb-4" style={{ fontFamily: 'Times, serif' }}>
+                    <p className="text-base md:text-lg leading-relaxed mb-4 mobile-text-primary" style={{ fontFamily: 'Times, serif' }}>
                       {categoryArticles[0].summary}
                     </p>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                       <div className="flex items-center space-x-4 text-sm">
-                        <span className="font-bold">
+                        <span className="font-bold mobile-text-secondary">
                           {formatDate(categoryArticles[0].publishedAt)}
                         </span>
                       </div>
@@ -662,7 +664,8 @@ const CryptoHerald: React.FC = () => {
                           href={categoryArticles[0].url} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="bg-black text-white px-4 py-2 border-2 border-black hover:bg-gray-800 transition-colors font-bold text-sm"
+                          className="bg-black px-4 py-3 border-2 border-black hover:bg-gray-800 transition-colors font-bold text-sm min-h-[44px] flex items-center justify-center mobile-text-primary"
+                          style={{ backgroundColor: '#000000', color: '#ffffff' }}
                         >
                           READ MORE
                         </a>
@@ -671,13 +674,15 @@ const CryptoHerald: React.FC = () => {
                   </div>
                 )}
 
-                {/* Other Articles */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {categoryArticles.slice(1).map((article: CryptoArticle, index: number) => (
+                {/* Other Articles - Single column on mobile */}
+                <div className="grid grid-cols-1 gap-6">
+                  {/* For first category, show articles starting from index 1 (skip featured article) */}
+                  {/* For other categories, show all articles starting from index 0 */}
+                  {(categoryIndex === 0 ? categoryArticles.slice(1) : categoryArticles).map((article: CryptoArticle, index: number) => (
                     <AnimatedHeadline 
                       key={article.id} 
                       delay={index * 100} 
-                      className={`border-2 border-black p-4 bg-white newspaper-hover stagger-${Math.min(index, 5)}`}
+                      className={`border-2 border-black p-4 mobile-bg-card newspaper-hover stagger-${Math.min(index, 5)}`}
                     >
                       {/* Clickable Headline */}
                       {article.url ? (
@@ -685,13 +690,13 @@ const CryptoHerald: React.FC = () => {
                           href={article.url} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="hover:text-blue-800 transition-colors block mb-2"
+                          className="mobile-text-link hover:text-blue-800 transition-colors block mb-2"
                         >
                           <TypewriterText 
                             text={article.headline}
                             speed={50}
                             delay={0}
-                            className="font-black text-lg leading-tight hover:underline cursor-pointer"
+                            className="font-black text-base md:text-lg leading-tight hover:underline cursor-pointer mobile-text-primary"
                             style={{ fontFamily: 'Times, serif' }}
                             showCursor={false}
                           />
@@ -701,37 +706,37 @@ const CryptoHerald: React.FC = () => {
                           text={article.headline}
                           speed={50}
                           delay={0}
-                          className="font-black text-lg mb-2 leading-tight block"
+                          className="font-black text-base md:text-lg mb-2 leading-tight block mobile-text-primary"
                           style={{ fontFamily: 'Times, serif' }}
                           showCursor={false}
                         />
                       )}
                       <div className="flex flex-wrap items-center gap-2 mb-3">
-                        <span className={`px-2 py-1 border rounded text-xs font-bold ${getSentimentColor(article.sentiment)}`}>
+                        <span className={`px-3 py-2 border rounded text-sm font-bold min-h-[44px] flex items-center ${getSentimentColor(article.sentiment)}`}>
                           {article.sentiment}
                         </span>
-                        <span className="text-xs font-bold text-gray-600">
+                        <span className="text-sm font-bold mobile-text-secondary">
                           {article.source.toUpperCase()}
                         </span>
                         {article.aiSummary && (
-                          <div className="flex items-center space-x-1 bg-purple-100 border border-purple-300 rounded px-2 py-1">
-                            <Sparkles className="h-3 w-3 text-purple-600" />
-                            <span className="text-xs font-bold text-purple-700">AI</span>
+                          <div className="flex items-center space-x-1 mobile-bg-info border border-blue-300 rounded px-3 py-2 min-h-[44px]">
+                            <Sparkles className="h-4 w-4 mobile-text-info" />
+                            <span className="text-sm font-bold mobile-text-info">AI</span>
                           </div>
                         )}
                       </div>
                       {article.aiSummary && (
-                        <div className="bg-purple-50 border-l-2 border-purple-400 p-2 mb-3">
-                          <p className="text-xs text-purple-800 font-medium italic">
+                        <div className="mobile-bg-info border-l-4 border-blue-400 p-3 mb-3">
+                          <p className="text-sm mobile-text-info font-medium italic">
                             {article.aiSummary}
                           </p>
                         </div>
                       )}
-                      <p className="text-sm mb-3 text-gray-700">
+                      <p className="text-sm md:text-base mb-3 mobile-text-primary leading-relaxed">
                         {article.summary.substring(0, 150)}...
                       </p>
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-gray-500">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                        <span className="text-sm mobile-text-secondary font-medium">
                           {formatDate(article.publishedAt)}
                         </span>
                         {article.url && (
@@ -739,7 +744,8 @@ const CryptoHerald: React.FC = () => {
                             href={article.url} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="bg-black text-white px-3 py-1 border border-black hover:bg-gray-800 transition-colors font-bold text-xs rounded"
+                            className="bg-black px-4 py-3 border border-black hover:bg-gray-800 transition-colors font-bold text-sm rounded min-h-[44px] flex items-center justify-center mobile-text-primary"
+                            style={{ backgroundColor: '#000000', color: '#ffffff' }}
                           >
                             📖 READ ORIGINAL
                           </a>
@@ -755,11 +761,11 @@ const CryptoHerald: React.FC = () => {
 
         {/* Refresh News Button - Show when articles are already loaded */}
         {data?.articles && data.articles.length > 0 && (
-          <div className="mb-8 bg-gray-100 border-4 border-black p-6 text-center">
-            <h3 className="text-xl font-black mb-3" style={{ fontFamily: 'Times, serif' }}>
+          <div className="mb-8 mobile-bg-secondary border-4 border-black p-4 md:p-6 text-center">
+            <h3 className="text-lg md:text-xl font-black mb-3 mobile-text-primary" style={{ fontFamily: 'Times, serif' }}>
               📰 REFRESH NEWS FEED
             </h3>
-            <p className="text-sm mb-4 font-bold text-gray-600">
+            <p className="text-sm mb-4 font-bold mobile-text-secondary">
               Get the latest breaking crypto news and market updates
             </p>
             <PressEffectWrapper
@@ -768,8 +774,8 @@ const CryptoHerald: React.FC = () => {
             >
               <button
                 disabled={loading}
-                className="bg-blue-600 text-white font-bold py-3 px-6 border-2 border-blue-600 hover:bg-blue-700 transition-colors text-base flex items-center mx-auto disabled:opacity-50"
-                style={{ fontFamily: 'Times, serif' }}
+                className="bg-blue-600 px-6 py-4 border-2 border-blue-600 hover:bg-blue-700 transition-colors text-base font-bold flex items-center mx-auto disabled:opacity-50 min-h-[44px] mobile-text-primary"
+                style={{ fontFamily: 'Times, serif', backgroundColor: '#1d4ed8', color: '#ffffff' }}
               >
                 {loading ? (
                   <>
@@ -788,12 +794,12 @@ const CryptoHerald: React.FC = () => {
         )}
 
         {/* Footer */}
-        <div className="mt-8 bg-black text-white p-6 border-4 border-black">
+        <div className="mt-8 bg-black p-4 md:p-6 border-4 border-black" style={{ backgroundColor: '#000000', color: '#ffffff' }}>
           <div className="text-center">
-            <h3 className="text-lg font-black mb-2" style={{ fontFamily: 'Times, serif' }}>
+            <h3 className="text-base md:text-lg font-black mb-2 mobile-text-primary" style={{ fontFamily: 'Times, serif', color: '#ffffff' }}>
               THE CRYPTO HERALD
             </h3>
-            <p className="text-sm mb-2">
+            <p className="text-sm mb-2 mobile-text-primary" style={{ color: '#ffffff' }}>
               Published by Digital News Corp. • All rights reserved • {new Date().getFullYear()}
             </p>
             <div className="text-xs">
