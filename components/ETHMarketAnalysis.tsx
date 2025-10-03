@@ -605,16 +605,31 @@ export default function ETHMarketAnalysis() {
                       )}
                     </div>
                     
-                    {zone.volume && zone.volume > 0 && (
-                      <div className="text-xs mobile-text-muted mt-1">
-                        Volume: {zone.volume.toFixed(2)} ETH
-                        {zone.volumePercentage && ` (${zone.volumePercentage.toFixed(1)}%)`}
-                      </div>
-                    )}
+                    {/* Enhanced Zone Information Display */}
+                    <div className="text-xs mobile-text-muted mt-1">
+                      {zone.volume && zone.volume > 0 ? (
+                        <div className="flex items-center justify-between">
+                          <span>Volume: {zone.volume.toFixed(2)} ETH</span>
+                          {zone.volumePercentage && (
+                            <span className="text-blue-600">({zone.volumePercentage.toFixed(1)}%)</span>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="italic">
+                          {zone.source === 'pivot_analysis' && 'Mathematical pivot level'}
+                          {zone.source === 'fibonacci' && 'Fibonacci retracement level'}
+                          {zone.source === 'psychological' && 'Psychological round number'}
+                          {zone.source === 'live_orderbook' && 'Live order book level'}
+                          {zone.source === 'orderbook' && 'Order book level'}
+                          {!zone.source && 'Technical analysis level'}
+                        </div>
+                      )}
+                    </div>
                     
-                    {zone.description && (
-                      <div className="text-xs mobile-text-muted mt-1 italic">
-                        {zone.description}
+                    {/* Order Count for Live OrderBook zones */}
+                    {zone.orderCount && zone.orderCount > 0 && (
+                      <div className="text-xs text-purple-600 mt-1">
+                        {zone.orderCount} active orders
                       </div>
                     )}
                     
@@ -662,16 +677,31 @@ export default function ETHMarketAnalysis() {
                       )}
                     </div>
                     
-                    {zone.volume && zone.volume > 0 && (
-                      <div className="text-xs mobile-text-muted mt-1">
-                        Volume: {zone.volume.toFixed(2)} ETH
-                        {zone.volumePercentage && ` (${zone.volumePercentage.toFixed(1)}%)`}
-                      </div>
-                    )}
+                    {/* Enhanced Zone Information Display */}
+                    <div className="text-xs mobile-text-muted mt-1">
+                      {zone.volume && zone.volume > 0 ? (
+                        <div className="flex items-center justify-between">
+                          <span>Volume: {zone.volume.toFixed(2)} ETH</span>
+                          {zone.volumePercentage && (
+                            <span className="text-blue-600">({zone.volumePercentage.toFixed(1)}%)</span>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="italic">
+                          {zone.source === 'pivot_analysis' && 'Mathematical pivot level'}
+                          {zone.source === 'fibonacci' && 'Fibonacci retracement level'}
+                          {zone.source === 'psychological' && 'Psychological round number'}
+                          {zone.source === 'live_orderbook' && 'Live order book level'}
+                          {zone.source === 'orderbook' && 'Order book level'}
+                          {!zone.source && 'Technical analysis level'}
+                        </div>
+                      )}
+                    </div>
                     
-                    {zone.description && (
-                      <div className="text-xs mobile-text-muted mt-1 italic">
-                        {zone.description}
+                    {/* Order Count for Live OrderBook zones */}
+                    {zone.orderCount && zone.orderCount > 0 && (
+                      <div className="text-xs text-purple-600 mt-1">
+                        {zone.orderCount} active orders
                       </div>
                     )}
                     
