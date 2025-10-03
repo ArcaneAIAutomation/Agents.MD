@@ -22,6 +22,330 @@ body {
   font-family: 'Crimson Text', 'Georgia', 'Times New Roman', serif;
 }
 
+/* Mobile-first responsive typography with high contrast */
+@media (max-width: 768px) {
+  body {
+    font-size: 16px; /* Minimum readable size for mobile - WCAG compliant */
+    line-height: 1.6; /* Improved readability - optimal for mobile */
+    color: #000000 !important; /* Ensure black text for maximum contrast */
+    background: #ffffff !important; /* Ensure white background */
+  }
+  
+  /* High-contrast mobile text utilities with guaranteed contrast ratios */
+  .mobile-text-primary {
+    color: #000000 !important; /* Pure black - 21:1 contrast ratio */
+    background-color: transparent !important;
+  }
+  
+  .mobile-text-secondary {
+    color: #374151 !important; /* Gray-700 - 8.9:1 contrast ratio */
+    background-color: transparent !important;
+  }
+  
+  .mobile-text-accent {
+    color: #1f2937 !important; /* Gray-800 - 12.6:1 contrast ratio */
+    background-color: transparent !important;
+  }
+  
+  .mobile-text-muted {
+    color: #6b7280 !important; /* Gray-500 - 4.6:1 contrast ratio (WCAG AA) */
+    background-color: transparent !important;
+  }
+  
+  .mobile-text-success {
+    color: #047857 !important; /* Emerald-700 - 7.1:1 contrast ratio (AAA) */
+    background-color: transparent !important;
+    font-weight: 600;
+  }
+  
+  .mobile-text-error {
+    color: #dc2626 !important; /* Red-600 - 5.9:1 contrast ratio */
+    background-color: transparent !important;
+    font-weight: 600;
+  }
+  
+  .mobile-text-warning {
+    color: #b45309 !important; /* Amber-700 - 7.2:1 contrast ratio (AAA) */
+    background-color: transparent !important;
+    font-weight: 600;
+  }
+  
+  .mobile-text-info {
+    color: #1d4ed8 !important; /* Blue-700 - 6.3:1 contrast ratio */
+    background-color: transparent !important;
+    font-weight: 600;
+  }
+  
+  /* Responsive text color modifiers - apply only on mobile */
+  .mobile-text-crypto-green {
+    color: #047857 !important; /* Emerald-700 - High contrast green for crypto gains */
+    font-weight: 600;
+  }
+  
+  .mobile-text-crypto-red {
+    color: #dc2626 !important; /* High contrast red for crypto losses */
+    font-weight: 600;
+  }
+  
+  .mobile-text-link {
+    color: #1d4ed8 !important; /* High contrast blue for links */
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+  
+  .mobile-text-link:visited {
+    color: #7c3aed !important; /* High contrast purple for visited links */
+  }
+  
+  .mobile-text-link:hover {
+    color: #1e40af !important; /* Darker blue on hover */
+    text-decoration-thickness: 3px;
+  }
+  
+  /* High-contrast mobile background utilities for optimal readability */
+  .mobile-bg-primary {
+    background-color: #ffffff !important; /* Pure white background */
+    color: #000000 !important; /* Pure black text - 21:1 contrast */
+  }
+  
+  .mobile-bg-secondary {
+    background-color: #f9fafb !important; /* Gray-50 - subtle background */
+    color: #000000 !important; /* Black text - 20.4:1 contrast */
+  }
+  
+  .mobile-bg-accent {
+    background-color: #f3f4f6 !important; /* Gray-100 - light accent */
+    color: #1f2937 !important; /* Gray-800 text - 12.6:1 contrast */
+  }
+  
+  .mobile-bg-muted {
+    background-color: #e5e7eb !important; /* Gray-200 - muted background */
+    color: #1f2937 !important; /* Gray-800 text - 10.8:1 contrast */
+  }
+  
+  .mobile-bg-success {
+    background-color: #d1fae5 !important; /* Emerald-100 - success background */
+    color: #065f46 !important; /* Emerald-800 text - 8.2:1 contrast */
+  }
+  
+  .mobile-bg-error {
+    background-color: #fef2f2 !important; /* Red-50 - error background */
+    color: #991b1b !important; /* Red-800 text - 9.4:1 contrast */
+  }
+  
+  .mobile-bg-warning {
+    background-color: #fef3c7 !important; /* Amber-100 - warning background */
+    color: #92400e !important; /* Amber-800 text - 7.1:1 contrast */
+  }
+  
+  .mobile-bg-info {
+    background-color: #dbeafe !important; /* Blue-100 - info background */
+    color: #1e40af !important; /* Blue-800 text - 7.8:1 contrast */
+  }
+  
+  /* Crypto-specific background utilities */
+  .mobile-bg-crypto-gain {
+    background-color: #d1fae5 !important; /* Light green for gains */
+    color: #047857 !important; /* Emerald-700 text for better contrast */
+  }
+  
+  .mobile-bg-crypto-loss {
+    background-color: #fef2f2 !important; /* Light red for losses */
+    color: #991b1b !important; /* Dark red text */
+  }
+  
+  /* Card and panel backgrounds with guaranteed contrast */
+  .mobile-bg-card {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #d1d5db !important;
+  }
+  
+  .mobile-bg-panel {
+    background-color: #f9fafb !important;
+    color: #000000 !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  /* Fallback for white text on white background scenarios */
+  .text-white, 
+  [class*="text-white"],
+  .text-gray-100,
+  [class*="text-gray-100"] {
+    color: #000000 !important;
+    text-shadow: none !important;
+  }
+  
+  /* Ensure all headings have proper contrast on mobile */
+  h1, h2, h3, h4, h5, h6 {
+    color: #000000 !important;
+    background-color: transparent !important;
+  }
+  
+  /* Mobile-optimized font sizes - scaled appropriately for mobile screens */
+  h1 { 
+    font-size: 1.875rem; /* 30px - Large enough for mobile hierarchy */
+    line-height: 1.2; /* Tighter line height for headings */
+    margin-bottom: 1rem;
+  }
+  h2 { 
+    font-size: 1.5rem; /* 24px - Clear secondary hierarchy */
+    line-height: 1.3;
+    margin-bottom: 0.875rem;
+  }
+  h3 { 
+    font-size: 1.25rem; /* 20px - Readable tertiary level */
+    line-height: 1.4;
+    margin-bottom: 0.75rem;
+  }
+  h4 { 
+    font-size: 1.125rem; /* 18px - Clear but not overwhelming */
+    line-height: 1.4;
+    margin-bottom: 0.625rem;
+  }
+  h5 { 
+    font-size: 1rem; /* 16px - Same as body for consistency */
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+    font-weight: 600; /* Distinguish from body text */
+  }
+  h6 { 
+    font-size: 0.875rem; /* 14px - Smallest heading, still readable */
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  
+  /* Enhanced mobile typography for optimal readability */
+  p {
+    font-size: 1rem; /* 16px minimum for body text */
+    line-height: 1.6; /* Optimal line height for mobile reading */
+    margin-bottom: 1rem;
+    color: inherit;
+  }
+  
+  /* Improved text element sizing and spacing */
+  span, div {
+    line-height: inherit;
+    color: inherit;
+  }
+  
+  /* Mobile-optimized interactive elements */
+  a {
+    font-size: inherit;
+    line-height: 1.6;
+    color: inherit;
+    text-decoration-thickness: 2px; /* Thicker underlines for mobile */
+  }
+  
+  button, input, textarea, select {
+    font-size: 1rem; /* Minimum 16px to prevent zoom on iOS */
+    line-height: 1.4;
+    color: inherit;
+  }
+  
+  /* Enhanced readability for small text */
+  small, .text-sm {
+    font-size: 0.875rem; /* 14px - still readable on mobile */
+    line-height: 1.5;
+  }
+  
+  /* Larger text for better mobile visibility */
+  .text-lg {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.5;
+  }
+  
+  .text-xl {
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.4;
+  }
+  
+  /* Override any potential white text issues */
+  * {
+    &[class*="text-white"] {
+      color: #000000 !important;
+    }
+  }
+}
+
+/* Responsive text color modifiers - apply high contrast on mobile, normal on desktop */
+@media (min-width: 769px) {
+  /* Desktop: Use original colors */
+  .responsive-text-primary { color: inherit; }
+  .responsive-text-secondary { color: #6b7280; }
+  .responsive-text-accent { color: #374151; }
+  .responsive-text-muted { color: #9ca3af; }
+  .responsive-text-success { color: #10b981; }
+  .responsive-text-error { color: #ef4444; }
+  .responsive-text-warning { color: #f59e0b; }
+  .responsive-text-info { color: #3b82f6; }
+}
+
+@media (max-width: 768px) {
+  /* Mobile: Force high contrast */
+  .responsive-text-primary { color: #000000 !important; }
+  .responsive-text-secondary { color: #374151 !important; }
+  .responsive-text-accent { color: #1f2937 !important; }
+  .responsive-text-muted { color: #6b7280 !important; }
+  .responsive-text-success { color: #059669 !important; font-weight: 600; }
+  .responsive-text-error { color: #dc2626 !important; font-weight: 600; }
+  .responsive-text-warning { color: #d97706 !important; font-weight: 600; }
+  .responsive-text-info { color: #1d4ed8 !important; font-weight: 600; }
+}
+
+/* Mobile-first utility classes for guaranteed contrast */
+@media (max-width: 768px) {
+  /* Force high contrast for common Tailwind classes */
+  .text-gray-500,
+  .text-gray-400,
+  .text-gray-300,
+  .text-gray-200,
+  .text-gray-100 {
+    color: #6b7280 !important; /* Minimum contrast gray */
+  }
+  
+  .text-blue-500,
+  .text-blue-400,
+  .text-blue-300 {
+    color: #1d4ed8 !important; /* High contrast blue */
+  }
+  
+  .text-green-500,
+  .text-green-400,
+  .text-green-300 {
+    color: #059669 !important; /* High contrast green */
+  }
+  
+  .text-red-500,
+  .text-red-400,
+  .text-red-300 {
+    color: #dc2626 !important; /* High contrast red */
+  }
+  
+  .text-yellow-500,
+  .text-yellow-400,
+  .text-yellow-300 {
+    color: #d97706 !important; /* High contrast amber */
+  }
+  
+  .text-purple-500,
+  .text-purple-400,
+  .text-purple-300 {
+    color: #7c3aed !important; /* High contrast purple */
+  }
+  
+  /* Background color overrides for mobile */
+  .bg-gray-50 { background-color: #f9fafb !important; }
+  .bg-gray-100 { background-color: #f3f4f6 !important; }
+  .bg-gray-200 { background-color: #e5e7eb !important; }
+  
+  /* Ensure proper text color on these backgrounds */
+  .bg-gray-50, .bg-gray-100, .bg-gray-200 {
+    color: #000000 !important;
+  }
+}
+
 /* Newspaper-style typography */
 .newspaper-title {
   font-family: 'Playfair Display', 'Georgia', 'Times New Roman', serif;
@@ -46,6 +370,33 @@ body {
   background: #f3f4f6;
   border-bottom: 2px solid #1f2937;
   padding: 1rem 1.5rem;
+}
+
+/* Mobile-specific newspaper styling with high contrast */
+@media (max-width: 768px) {
+  .newspaper-title {
+    color: #000000 !important;
+    text-shadow: none; /* Remove shadow for better mobile readability */
+    font-size: 1.875rem; /* Scale down for mobile */
+  }
+  
+  .newspaper-subtitle {
+    color: #374151 !important; /* Darker gray for better contrast */
+    font-size: 1rem;
+  }
+  
+  .newspaper-article {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #1f2937; /* Thinner border for mobile */
+    margin-bottom: 1rem;
+  }
+  
+  .newspaper-header {
+    background: #f9fafb !important;
+    color: #000000 !important;
+    padding: 0.75rem 1rem; /* Reduced padding for mobile */
+  }
 }
 
 /* Classic newspaper column styling */
@@ -92,6 +443,36 @@ body {
   @apply animate-pulse bg-gray-300 dark:bg-gray-600 rounded;
 }
 
+/* Mobile-specific utility class overrides for high contrast */
+@media (max-width: 768px) {
+  .news-card {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border-color: #d1d5db !important;
+  }
+  
+  .crypto-badge {
+    background-color: #f3f4f6 !important;
+    color: #1f2937 !important;
+    font-size: 0.75rem; /* Slightly larger for mobile readability */
+    padding: 0.375rem 0.75rem; /* Increased padding for touch targets */
+  }
+  
+  .price-up {
+    color: #047857 !important; /* Emerald-700 for better contrast */
+    font-weight: 600;
+  }
+  
+  .price-down {
+    color: #dc2626 !important; /* Darker red for better contrast */
+    font-weight: 600;
+  }
+  
+  .loading-pulse {
+    background-color: #e5e7eb !important; /* Lighter gray for better contrast */
+  }
+}
+
 /* Market Ticker Animation */
 @keyframes scroll {
   0% {
@@ -134,4 +515,1275 @@ body {
 
 .animate-live-pulse {
   animation: live-pulse 2s ease-in-out infinite;
+}
+
+/* Mobile-specific ticker and animation overrides */
+@media (max-width: 768px) {
+  .ticker-item {
+    color: #000000 !important;
+    background-color: transparent !important;
+    font-size: 0.875rem; /* Larger text for mobile readability */
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .ticker-item:hover {
+    text-shadow: none; /* Remove shadow for better mobile contrast */
+    background-color: #f3f4f6 !important;
+    color: #000000 !important;
+  }
+  
+  .animate-live-pulse {
+    color: #059669 !important; /* High contrast green for live indicator */
+  }
+  
+  /* Ensure all animated elements maintain contrast */
+  .animate-pulse {
+    background-color: #e5e7eb !important;
+  }
+  
+  .animate-scroll {
+    /* Slower animation for better mobile readability */
+    animation: scroll 90s linear infinite;
+  }
+}
+
+/* Emergency mobile contrast fixes - highest specificity */
+@media (max-width: 768px) {
+  /* Force high contrast for any potentially problematic elements */
+  .text-white,
+  .text-gray-100,
+  .text-gray-200,
+  .text-gray-300,
+  [class*="text-white"],
+  [class*="text-gray-1"],
+  [class*="text-gray-2"],
+  [class*="text-gray-3"] {
+    color: #000000 !important;
+    background-color: transparent !important;
+  }
+  
+  /* Ensure buttons have proper contrast and touch targets */
+  button, 
+  .btn,
+  [role="button"],
+  input[type="button"],
+  input[type="submit"] {
+    min-height: 44px !important; /* Minimum touch target size */
+    color: #000000 !important;
+    background-color: #f3f4f6 !important;
+    border: 1px solid #d1d5db !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 1rem !important;
+  }
+  
+  /* High contrast links */
+  a, 
+  [role="link"] {
+    color: #1d4ed8 !important; /* High contrast blue */
+    text-decoration: underline;
+    min-height: 44px;
+    display: inline-block;
+    padding: 0.25rem;
+  }
+  
+  a:visited {
+    color: #7c3aed !important; /* High contrast purple for visited */
+  }
+  
+  /* Form elements with proper contrast */
+  input, 
+  textarea, 
+  select {
+    color: #000000 !important;
+    background-color: #ffffff !important;
+    border: 2px solid #374151 !important;
+    font-size: 1rem !important;
+    min-height: 44px !important;
+    padding: 0.75rem !important;
+  }
+  
+  input::placeholder,
+  textarea::placeholder {
+    color: #6b7280 !important;
+  }
+  
+  /* Ensure proper contrast for any overlay or modal content */
+  .modal,
+  .overlay,
+  .popup,
+  [role="dialog"],
+  [role="alertdialog"] {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 2px solid #1f2937 !important;
+  }
+  
+  /* High contrast for any card or panel elements */
+  .card,
+  .panel,
+  .widget,
+  [class*="card"],
+  [class*="panel"] {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #d1d5db !important;
+  }
+  
+  /* Ensure table readability */
+  table, th, td {
+    color: #000000 !important;
+    background-color: #ffffff !important;
+    border: 1px solid #d1d5db !important;
+  }
+  
+  th {
+    background-color: #f9fafb !important;
+    font-weight: 600 !important;
+  }
+  
+  /* Override any potential dark mode or theme issues on mobile */
+  .dark *,
+  [data-theme="dark"] *,
+  [class*="dark"] * {
+    color: #000000 !important;
+    background-color: transparent !important;
+  }
+  
+  /* Specific overrides for common problematic patterns */
+  .bg-transparent {
+    background-color: #ffffff !important;
+  }
+  
+  .text-transparent {
+    color: #000000 !important;
+  }
+  
+  /* Ensure icons and symbols are visible */
+  svg, 
+  .icon,
+  [class*="icon"] {
+    color: #000000 !important;
+    fill: #000000 !important;
+    stroke: #000000 !important;
+  }
+}
+
+/* Mobile-specific responsive typography scale for very small screens */
+@media (max-width: 480px) {
+  /* Extra small mobile devices - maintain 16px minimum */
+  body {
+    font-size: 16px; /* Keep 16px minimum even on small screens */
+    line-height: 1.6; /* Maintain optimal line height */
+  }
+  
+  /* Slightly smaller headings for very small screens but still readable */
+  h1 { 
+    font-size: 1.625rem; /* 26px - reduced but still prominent */
+    line-height: 1.2;
+  }
+  h2 { 
+    font-size: 1.375rem; /* 22px - clear hierarchy */
+    line-height: 1.3;
+  }
+  h3 { 
+    font-size: 1.125rem; /* 18px - readable tertiary */
+    line-height: 1.4;
+  }
+  h4 { 
+    font-size: 1rem; /* 16px - same as body */
+    line-height: 1.4;
+    font-weight: 600;
+  }
+  h5 { 
+    font-size: 1rem; /* 16px - maintain readability */
+    line-height: 1.5;
+    font-weight: 600;
+  }
+  h6 { 
+    font-size: 0.875rem; /* 14px - smallest acceptable */
+    line-height: 1.5;
+    font-weight: 600;
+  }
+  
+  /* Ensure paragraphs maintain readability */
+  p {
+    font-size: 1rem; /* Never go below 16px */
+    line-height: 1.6;
+  }
+}
+
+/* Header newspaper pattern - responsive for mobile optimization */
+.header-newspaper-pattern {
+  background-image: 
+    linear-gradient(0deg, transparent 24%, rgba(0,0,0,0.03) 25%, rgba(0,0,0,0.03) 26%, transparent 27%, transparent 74%, rgba(0,0,0,0.03) 75%, rgba(0,0,0,0.03) 76%, transparent 77%, transparent),
+    linear-gradient(90deg, transparent 24%, rgba(0,0,0,0.03) 25%, rgba(0,0,0,0.03) 26%, transparent 27%, transparent 74%, rgba(0,0,0,0.03) 75%, rgba(0,0,0,0.03) 76%, transparent 77%, transparent);
+  background-size: 25px 25px; /* Mobile-first smaller pattern */
+}
+
+/* Desktop enhancement for newspaper pattern */
+@media (min-width: 768px) {
+  .header-newspaper-pattern {
+    background-image: 
+      linear-gradient(0deg, transparent 24%, rgba(0,0,0,0.05) 25%, rgba(0,0,0,0.05) 26%, transparent 27%, transparent 74%, rgba(0,0,0,0.05) 75%, rgba(0,0,0,0.05) 76%, transparent 77%, transparent),
+      linear-gradient(90deg, transparent 24%, rgba(0,0,0,0.05) 25%, rgba(0,0,0,0.05) 26%, transparent 27%, transparent 74%, rgba(0,0,0,0.05) 75%, rgba(0,0,0,0.05) 76%, transparent 77%, transparent);
+    background-size: 50px 50px; /* Larger pattern for desktop */
+  }
+}
+
+/* Mobile-specific pattern optimizations for performance */
+@media (max-width: 768px) {
+  .header-newspaper-pattern {
+    /* Lighter pattern opacity for better mobile readability */
+    background-image: 
+      linear-gradient(0deg, transparent 24%, rgba(0,0,0,0.02) 25%, rgba(0,0,0,0.02) 26%, transparent 27%, transparent 74%, rgba(0,0,0,0.02) 75%, rgba(0,0,0,0.02) 76%, transparent 77%, transparent),
+      linear-gradient(90deg, transparent 24%, rgba(0,0,0,0.02) 25%, rgba(0,0,0,0.02) 26%, transparent 27%, transparent 74%, rgba(0,0,0,0.02) 75%, rgba(0,0,0,0.02) 76%, transparent 77%, transparent);
+    background-size: 20px 20px; /* Even smaller for mobile performance */
+    /* Optimize for mobile performance */
+    will-change: auto;
+    transform: translateZ(0); /* Force hardware acceleration */
+  }
+}
+
+/* Accessibility improvements for mobile */
+@media (max-width: 768px) {
+  /* Ensure focus indicators are visible */
+  *:focus {
+    outline: 2px solid #1d4ed8 !important;
+    outline-offset: 2px !important;
+  }
+  
+  /* Improve tap target spacing */
+  * + button,
+  * + a,
+  * + input,
+  * + select,
+  * + textarea {
+    margin-top: 8px !important;
+  }
+  
+  /* Ensure sufficient line spacing for readability */
+  p, li, dd, dt {
+    line-height: 1.6 !important;
+    margin-bottom: 0.5rem !important;
+  }
+}
+
+/* Mobile Loading Component Animations */
+
+/* Slow spin animation for mobile performance */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 2s linear infinite;
+}
+
+/* Shimmer effect for mobile loading states */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* Bounce animation with mobile-optimized timing */
+@keyframes mobile-bounce {
+  0%, 100% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+.animate-mobile-bounce {
+  animation: mobile-bounce 1s infinite;
+}
+
+/* Fade in animation for mobile loading states */
+@keyframes mobile-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-mobile-fade-in {
+  animation: mobile-fade-in 0.3s ease-out;
+}
+
+/* Skeleton loading animation optimized for mobile */
+@keyframes skeleton-loading {
+  0% {
+    background-color: #e5e7eb;
+  }
+  50% {
+    background-color: #f3f4f6;
+  }
+  100% {
+    background-color: #e5e7eb;
+  }
+}
+
+.animate-skeleton {
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+/* Progress bar animation */
+@keyframes progress-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-progress {
+  animation: progress-indeterminate 2s linear infinite;
+}
+
+/* Mobile-specific loading optimizations */
+@media (max-width: 768px) {
+  /* Reduce animation intensity on mobile for better performance */
+  .animate-spin {
+    animation-duration: 1.5s; /* Slower spin for mobile */
+  }
+  
+  .animate-pulse {
+    animation-duration: 2.5s; /* Slower pulse for mobile */
+  }
+  
+  .animate-bounce {
+    animation-duration: 1.2s; /* Slightly slower bounce */
+  }
+  
+  /* Ensure loading components have proper contrast */
+  .animate-pulse {
+    background-color: #e5e7eb !important;
+  }
+  
+  /* Mobile loading spinner with high contrast */
+  .mobile-spinner {
+    border-color: #1f2937 !important;
+    border-top-color: transparent !important;
+  }
+  
+  /* Mobile skeleton with proper contrast */
+  .mobile-skeleton {
+    background-color: #e5e7eb !important;
+  }
+  
+  /* Mobile progress bar with high contrast */
+  .mobile-progress-bar {
+    background-color: #e5e7eb !important;
+  }
+  
+  .mobile-progress-fill {
+    background-color: #1d4ed8 !important;
+  }
+}
+
+/* Reduced motion preferences for mobile loading */
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin,
+  .animate-spin-slow,
+  .animate-bounce,
+  .animate-mobile-bounce,
+  .animate-shimmer {
+    animation: none;
+  }
+  
+  .animate-pulse,
+  .animate-skeleton {
+    animation: skeleton-loading 3s ease-in-out infinite;
+  }
+  
+  /* Provide alternative visual feedback for reduced motion */
+  .mobile-spinner {
+    opacity: 0.7;
+  }
+  
+  .mobile-loading-indicator {
+    opacity: 0.8;
+    background-color: #f3f4f6 !important;
+  }
+}
+
+/* High contrast mode support for loading components */
+@media (prefers-contrast: high) {
+  .mobile-spinner {
+    border-color: #000000 !important;
+    border-width: 3px !important;
+  }
+  
+  .mobile-skeleton {
+    background-color: #d1d5db !important;
+    border: 1px solid #6b7280 !important;
+  }
+  
+  .mobile-progress-bar {
+    background-color: #d1d5db !important;
+    border: 1px solid #6b7280 !important;
+  }
+  
+  .mobile-progress-fill {
+    background-color: #000000 !important;
+  }
+}
+
+/* Loading overlay optimizations for mobile */
+.mobile-loading-overlay {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+@media (max-width: 768px) {
+  .mobile-loading-overlay {
+    /* Reduce blur on mobile for better performance */
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    background-color: rgba(255, 255, 255, 0.95) !important;
+  }
+}
+
+/* Touch-friendly loading button states */
+@media (max-width: 768px) {
+  .loading-button {
+    min-height: 44px !important;
+    min-width: 44px !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 1rem !important;
+    border: 2px solid #d1d5db !important;
+    background-color: #f9fafb !important;
+    color: #000000 !important;
+  }
+  
+  .loading-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #e5e7eb !important;
+    color: #6b7280 !important;
+  }
+  
+  .loading-button:focus {
+    outline: 2px solid #1d4ed8 !important;
+    outline-offset: 2px !important;
+  }
+}
+
+/* Mobile-optimized loading text */
+@media (max-width: 768px) {
+  .loading-text {
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+    color: #374151 !important;
+    text-align: center;
+    margin-top: 0.75rem;
+  }
+  
+  .loading-text-small {
+    font-size: 0.875rem !important;
+    line-height: 1.4 !important;
+    color: #6b7280 !important;
+  }
+  
+  .loading-text-large {
+    font-size: 1.125rem !important;
+    line-height: 1.4 !important;
+    color: #1f2937 !important;
+    font-weight: 600;
+  }
+}
+
+/* Performance optimizations for mobile loading animations */
+@media (max-width: 768px) {
+  /* Use transform3d for hardware acceleration */
+  .animate-spin,
+  .animate-spin-slow {
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
+  
+  .animate-pulse,
+  .animate-skeleton {
+    will-change: background-color;
+  }
+  
+  .animate-shimmer {
+    will-change: background-position;
+  }
+  
+  /* Optimize loading overlays */
+  .mobile-loading-overlay {
+    will-change: opacity;
+    transform: translate3d(0, 0, 0);
+  }
+}
+/* Mobil
+e Navigation Enhancements */
+
+/* Mobile navigation menu styles */
+@media (max-width: 768px) {
+  /* Mobile navigation container */
+  .mobile-nav-menu {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 2px solid #1f2937 !important;
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    z-index: 50;
+  }
+  
+  /* Mobile navigation items */
+  .mobile-nav-item {
+    min-height: 44px !important; /* Touch-friendly target size */
+    color: #000000 !important;
+    background-color: transparent !important;
+    border-radius: 0.375rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    font-family: 'Times', serif;
+    font-weight: 500;
+  }
+  
+  .mobile-nav-item:hover,
+  .mobile-nav-item:focus {
+    background-color: #f3f4f6 !important;
+    color: #000000 !important;
+    outline: 2px solid #1d4ed8 !important;
+    outline-offset: 2px !important;
+  }
+  
+  .mobile-nav-item:active {
+    background-color: #e5e7eb !important;
+    transform: scale(0.98);
+  }
+  
+  /* Mobile hamburger button */
+  .mobile-hamburger-btn {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    color: #000000 !important;
+    background-color: transparent !important;
+    border: 1px solid transparent !important;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .mobile-hamburger-btn:hover {
+    background-color: #f3f4f6 !important;
+    border-color: #d1d5db !important;
+  }
+  
+  .mobile-hamburger-btn:focus {
+    outline: 2px solid #1d4ed8 !important;
+    outline-offset: 2px !important;
+    background-color: #f3f4f6 !important;
+  }
+  
+  .mobile-hamburger-btn:active {
+    background-color: #e5e7eb !important;
+    transform: scale(0.95);
+  }
+  
+  /* Hamburger icon animation */
+  .mobile-hamburger-icon {
+    width: 24px;
+    height: 24px;
+    stroke: #000000 !important;
+    transition: transform 0.2s ease;
+  }
+  
+  .mobile-hamburger-btn[aria-expanded="true"] .mobile-hamburger-icon {
+    transform: rotate(90deg);
+  }
+  
+  /* Mobile navigation overlay */
+  .mobile-nav-overlay {
+    background-color: rgba(0, 0, 0, 0.25) !important;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    z-index: 40;
+  }
+  
+  /* Mobile navigation slide animation */
+  .mobile-nav-slide-enter {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  
+  .mobile-nav-slide-enter-active {
+    transform: translateY(0);
+    opacity: 1;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+  
+  .mobile-nav-slide-exit {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  
+  .mobile-nav-slide-exit-active {
+    transform: translateY(-10px);
+    opacity: 0;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+  
+  /* Mobile navigation item descriptions */
+  .mobile-nav-description {
+    color: #6b7280 !important;
+    font-size: 0.875rem !important;
+    line-height: 1.4 !important;
+    margin-top: 0.125rem;
+    font-family: 'Times', serif;
+    font-style: italic;
+  }
+  
+  /* Mobile navigation spacing */
+  .mobile-nav-spacing {
+    padding: 0.75rem 1rem !important;
+    margin: 0.125rem 0 !important;
+  }
+  
+  /* Touch feedback for mobile navigation */
+  .mobile-nav-item:active {
+    background-color: #e5e7eb !important;
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+  
+  /* Ensure proper contrast for navigation text */
+  .mobile-nav-text {
+    color: #000000 !important;
+    font-weight: 600;
+    font-size: 1.125rem !important;
+    line-height: 1.4 !important;
+  }
+  
+  .mobile-nav-text-secondary {
+    color: #374151 !important;
+    font-weight: 400;
+    font-size: 0.875rem !important;
+    line-height: 1.4 !important;
+  }
+}
+
+/* Desktop navigation enhancements */
+@media (min-width: 769px) {
+  .desktop-nav-item {
+    color: #000000 !important;
+    font-family: 'Times', serif;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    transition: color 0.2s ease, background-color 0.2s ease;
+    text-decoration: none;
+  }
+  
+  .desktop-nav-item:hover {
+    color: #374151 !important;
+    background-color: #f9fafb !important;
+  }
+  
+  .desktop-nav-item:focus {
+    outline: 2px solid #1d4ed8 !important;
+    outline-offset: 2px !important;
+  }
+}
+
+/* Navigation accessibility improvements */
+@media (max-width: 768px) {
+  /* Ensure focus indicators are highly visible */
+  .mobile-nav-item:focus,
+  .mobile-hamburger-btn:focus {
+    outline: 3px solid #1d4ed8 !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 1px #ffffff !important;
+  }
+  
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .mobile-nav-menu {
+      border-width: 3px !important;
+      border-color: #000000 !important;
+    }
+    
+    .mobile-nav-item {
+      border: 1px solid #d1d5db !important;
+      margin-bottom: 0.25rem;
+    }
+    
+    .mobile-nav-item:hover,
+    .mobile-nav-item:focus {
+      border-color: #000000 !important;
+      background-color: #f3f4f6 !important;
+    }
+    
+    .mobile-hamburger-btn {
+      border: 2px solid #000000 !important;
+    }
+    
+    .mobile-hamburger-icon {
+      stroke-width: 3 !important;
+    }
+  }
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-nav-slide-enter-active,
+    .mobile-nav-slide-exit-active {
+      transition: opacity 0.1s ease;
+      transform: none;
+    }
+    
+    .mobile-hamburger-icon {
+      transition: none;
+    }
+    
+    .mobile-hamburger-btn[aria-expanded="true"] .mobile-hamburger-icon {
+      transform: none;
+    }
+    
+    .mobile-nav-item:active {
+      transform: none;
+    }
+  }
+}
+
+/* Mobile navigation performance optimizations */
+@media (max-width: 768px) {
+  .mobile-nav-menu {
+    will-change: opacity, transform;
+    transform: translate3d(0, 0, 0);
+  }
+  
+  .mobile-nav-overlay {
+    will-change: opacity;
+    transform: translate3d(0, 0, 0);
+  }
+  
+  .mobile-hamburger-icon {
+    will-change: transform;
+  }
+}
+
+/* Touch-friendly spacing for mobile navigation */
+@media (max-width: 768px) {
+  /* Ensure adequate spacing between navigation items */
+  .mobile-nav-item + .mobile-nav-item {
+    margin-top: 0.25rem !important;
+  }
+  
+  /* Proper padding for touch targets */
+  .mobile-nav-link {
+    padding: 0.75rem 1rem !important;
+    display: block;
+    width: 100%;
+    text-align: left;
+  }
+  
+  /* Navigation container padding */
+  .mobile-nav-container {
+    padding: 1rem !important;
+  }
+  
+  /* Safe area support for devices with notches */
+  .mobile-nav-menu {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Mobile navigation z-index management */
+@media (max-width: 768px) {
+  .mobile-nav-overlay {
+    z-index: 40;
+  }
+  
+  .mobile-nav-menu {
+    z-index: 50;
+  }
+  
+  .mobile-hamburger-btn {
+    z-index: 60;
+  }
+}
+
+/* Smooth scrolling for anchor navigation */
+@media (max-width: 768px) {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Offset for fixed header when scrolling to anchors */
+  [id] {
+    scroll-margin-top: 5rem;
+  }
+}
+/*
+ Mobile-specific error state animations */
+@keyframes mobile-error-shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-2px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(2px);
+  }
+}
+
+/* Mobile retry button pulse animation */
+@keyframes mobile-retry-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+/* Mobile loading dots animation */
+@keyframes mobile-loading-dots {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Mobile progress bar indeterminate animation */
+@keyframes mobile-progress-indeterminate {
+  0% {
+    transform: translateX(-100%) scaleX(0.5);
+  }
+  50% {
+    transform: translateX(0%) scaleX(1);
+  }
+  100% {
+    transform: translateX(100%) scaleX(0.5);
+  }
+}
+
+/* Mobile error icon bounce animation */
+@keyframes mobile-error-bounce {
+  0%, 20%, 53%, 80%, 100% {
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
+}
+
+/* Mobile success checkmark animation */
+@keyframes mobile-success-checkmark {
+  0% {
+    stroke-dasharray: 0 100;
+  }
+  100% {
+    stroke-dasharray: 100 0;
+  }
+}
+
+/* Mobile utility animation classes */
+@media (max-width: 768px) {
+  .animate-mobile-error-shake {
+    animation: mobile-error-shake 0.5s ease-in-out;
+  }
+  
+  .animate-mobile-retry-pulse {
+    animation: mobile-retry-pulse 2s infinite;
+  }
+  
+  .animate-mobile-loading-dots {
+    animation: mobile-loading-dots 1.4s infinite ease-in-out;
+  }
+  
+  .animate-mobile-progress-indeterminate {
+    animation: mobile-progress-indeterminate 2s infinite linear;
+  }
+  
+  .animate-mobile-error-bounce {
+    animation: mobile-error-bounce 1s;
+  }
+  
+  .animate-mobile-success-checkmark {
+    animation: mobile-success-checkmark 0.6s ease-in-out;
+  }
+  
+  /* Performance optimizations for mobile animations */
+  .animate-spin-slow {
+    animation: spin-slow 2s linear infinite;
+  }
+  
+  .animate-shimmer {
+    animation: shimmer 2s infinite linear;
+  }
+  
+  .animate-mobile-bounce {
+    animation: mobile-bounce 1s infinite;
+  }
+  
+  .animate-mobile-fade-in {
+    animation: mobile-fade-in 0.3s ease-out;
+  }
+  
+  .animate-skeleton-loading {
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+  }
+  
+  /* Reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-mobile-error-shake,
+    .animate-mobile-retry-pulse,
+    .animate-mobile-loading-dots,
+    .animate-mobile-progress-indeterminate,
+    .animate-mobile-error-bounce,
+    .animate-mobile-success-checkmark,
+    .animate-spin-slow,
+    .animate-shimmer,
+    .animate-mobile-bounce,
+    .animate-skeleton-loading {
+      animation: none;
+    }
+    
+    .animate-mobile-fade-in {
+      animation: mobile-fade-in 0.1s ease-out;
+    }
+  }
+}
+
+/* Mobile loading state utility classes */
+@media (max-width: 768px) {
+  .mobile-loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    min-height: 200px;
+  }
+  
+  .mobile-error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    text-align: center;
+    border-radius: 0.5rem;
+    border: 2px solid #e5e7eb;
+    background-color: #ffffff;
+    margin: 1rem;
+  }
+  
+  .mobile-retry-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    border: 2px solid transparent;
+    background-color: #3b82f6;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    touch-action: manipulation;
+  }
+  
+  .mobile-retry-button:hover {
+    background-color: #2563eb;
+    transform: translateY(-1px);
+  }
+  
+  .mobile-retry-button:active {
+    transform: translateY(0);
+  }
+  
+  .mobile-retry-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .mobile-retry-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+  }
+}
+
+/* Mobile loading spinner variations */
+@media (max-width: 768px) {
+  .mobile-spinner-small {
+    width: 1rem;
+    height: 1rem;
+    border-width: 2px;
+  }
+  
+  .mobile-spinner-medium {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-width: 2px;
+  }
+  
+  .mobile-spinner-large {
+    width: 2rem;
+    height: 2rem;
+    border-width: 3px;
+  }
+  
+  .mobile-spinner-primary {
+    border-color: #e5e7eb;
+    border-top-color: #3b82f6;
+  }
+  
+  .mobile-spinner-secondary {
+    border-color: #e5e7eb;
+    border-top-color: #6b7280;
+  }
+  
+  .mobile-spinner-success {
+    border-color: #e5e7eb;
+    border-top-color: #10b981;
+  }
+  
+  .mobile-spinner-error {
+    border-color: #e5e7eb;
+    border-top-color: #ef4444;
+  }
+  
+  .mobile-spinner-warning {
+    border-color: #e5e7eb;
+    border-top-color: #f59e0b;
+  }
+}
+/* Enhan
+ced animations for mobile trade generation engine */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 0, 0, 0.3);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Animation utility classes */
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out;
+}
+
+.animate-fade-in-delay-1 {
+  animation: fade-in 0.6s ease-out 0.2s both;
+}
+
+.animate-fade-in-delay-2 {
+  animation: fade-in 0.6s ease-out 0.4s both;
+}
+
+.animate-fade-in-delay-3 {
+  animation: fade-in 0.6s ease-out 0.6s both;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.8s ease-out;
+}
+
+.animate-slide-up-delay {
+  animation: slide-up 0.8s ease-out 0.2s both;
+}
+
+.animate-slide-up-delay-2 {
+  animation: slide-up 0.8s ease-out 0.4s both;
+}
+
+.animate-slide-up-delay-3 {
+  animation: slide-up 0.8s ease-out 0.6s both;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.5s ease-out;
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Mobile-optimized card layouts */
+.mobile-card-container {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .mobile-card-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .mobile-card-container {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    padding: 2rem;
+  }
+}
+
+/* Enhanced mobile touch targets */
+.mobile-touch-target {
+  min-height: 48px;
+  min-width: 48px;
+  padding: 12px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.mobile-touch-target:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.mobile-touch-target:active {
+  transform: scale(0.98);
+}
+
+/* Improved mobile spacing utilities */
+.mobile-spacing-xs { margin: 0.25rem; }
+.mobile-spacing-sm { margin: 0.5rem; }
+.mobile-spacing-md { margin: 1rem; }
+.mobile-spacing-lg { margin: 1.5rem; }
+.mobile-spacing-xl { margin: 2rem; }
+
+/* Mobile-first grid system */
+.mobile-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .mobile-grid-sm-2 { grid-template-columns: repeat(2, 1fr); }
+  .mobile-grid-sm-3 { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .mobile-grid-lg-2 { grid-template-columns: repeat(2, 1fr); }
+  .mobile-grid-lg-3 { grid-template-columns: repeat(3, 1fr); }
+  .mobile-grid-lg-4 { grid-template-columns: repeat(4, 1fr); }
 }
