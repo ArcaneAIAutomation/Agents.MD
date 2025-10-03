@@ -434,8 +434,6 @@ export default function TradeGenerationEngine() {
                tradeSignal.confidence >= 60 ? 'Medium Confidence' : 'Low Confidence'}
             </div>
           </div>
-          </div>
-
         </div>
       </div>
 
