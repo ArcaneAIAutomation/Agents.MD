@@ -148,47 +148,42 @@ export default function TradingChart({ symbol, currentPrice, supportResistance, 
           </div>
         </div>
         
-        {/* Timeframe selector */}
+        {/* Timeframe Display */}
         <div className={`flex ${chartDimensions.isMobile ? 'justify-center' : 'flex-col items-end'} space-y-2`}>
-          {!chartDimensions.isMobile && <div className="text-xs text-gray-500 font-medium">Time Range</div>}
-          <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
-            {['1H', '4H', '1D'].map((tf) => {
-              const isActive = timeframe === tf;
-              const dataPoints = tf === '1H' ? '60pts' : tf === '4H' ? '72pts' : '90pts';
-              return (
-                <button
-                  key={tf}
-                  onClick={() => setTimeframe(tf as any)}
-                  className={`${chartDimensions.isMobile ? 'px-3 py-2' : 'px-4 py-2'} rounded-md text-sm font-semibold transition-all ${
-                    isActive
-                      ? 'bg-blue-600 text-white shadow-sm' 
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'
-                  }`}
-                >
-                  <div className="flex flex-col items-center">
-                    <span>{tf}</span>
-                    {isActive && !chartDimensions.isMobile && <span className="text-xs opacity-80">{dataPoints}</span>}
-                  </div>
-                </button>
-              );
-            })}
+          <div className="text-xs text-gray-500 font-medium">Selected Timeframe</div>
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg shadow-md">
+            <div className="flex flex-col items-center">
+              <span className="text-lg font-bold">{timeframe}</span>
+              <span className="text-xs opacity-90">
+                {timeframe === '1H' ? 'Scalping (60 data points)' : 
+                 timeframe === '4H' ? 'Swing Trading (72 data points)' : 
+                 'Position Trading (90 data points)'}
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Chart Guide */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 md:p-4 mb-4 md:mb-6 mobile-bg-secondary">
+      {/* Chart Guide with Prominent Timeframe Display */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg p-3 md:p-4 mb-4 md:mb-6 mobile-bg-secondary">
         <div className="flex items-start space-x-2">
           <Target className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-          <div className="text-sm">
-            <div className="font-semibold text-blue-900 mb-2 mobile-text-primary">Chart Guide ({timeframe} Timeframe):</div>
+          <div className="text-sm flex-1">
+            <div className="flex items-center justify-between mb-3">
+              <div className="font-bold text-blue-900 text-base mobile-text-primary">
+                📊 Chart Guide
+              </div>
+              <div className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold">
+                {timeframe} TIMEFRAME
+              </div>
+            </div>
             <div className="text-blue-800 space-y-1 mobile-text-primary">
               <div>• <span className="font-medium text-black">Black Dotted Line:</span> Current real-time price (${currentPrice.toLocaleString()})</div>
               <div>• <span className="font-medium text-green-600">Green Zones:</span> Buy/Support areas with real order book + volume data</div>
               <div>• <span className="font-medium text-red-600">Red Zones:</span> Sell/Resistance areas with real order book + volume data</div>
               <div>• <span className="font-medium">Zone Intensity:</span> Darker = Stronger, Lighter = Weaker</div>
               <div className="text-xs mt-2 italic text-green-700 font-medium">
-                ✅ 100% Real Market Data: Live order book walls + Historical volume levels
+                ✅ 100% Real Market Data: Live order book walls + Historical volume levels ({timeframe === '1H' ? '60' : timeframe === '4H' ? '72' : '90'} data points)
               </div>
             </div>
           </div>
