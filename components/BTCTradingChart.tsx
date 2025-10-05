@@ -115,6 +115,8 @@ export default function BTCTradingChart() {
       }
       
       console.log(`📊 Supply zones: ${supplyDemandZones.supplyZones?.length || 0}, Demand zones: ${supplyDemandZones.demandZones?.length || 0}`);
+      console.log(`📊 Sample original supply zone:`, supplyDemandZones.supplyZones?.[0]);
+      console.log(`📊 Sample original demand zone:`, supplyDemandZones.demandZones?.[0]);
       
       // Calculate timeframe-specific parameters
       const timeframeParams = {
@@ -234,7 +236,9 @@ export default function BTCTradingChart() {
         orderBookImbalance: (marketConditions.orderBookImbalance * 100).toFixed(2) + '%',
         currentPrice: currentPrice,
         dataSource: 'Live Market APIs',
-        authenticity: '100% REAL'
+        authenticity: '100% REAL',
+        sampleSupplyZone: adjustedSupplyZones[0],
+        sampleDemandZone: adjustedDemandZones[0]
       });
 
     } catch (err) {
