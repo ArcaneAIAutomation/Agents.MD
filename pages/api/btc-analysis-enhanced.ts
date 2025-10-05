@@ -604,6 +604,8 @@ function analyzeSupplyDemandZones(orderBookData: any, currentPrice: number, high
   // Add historical pivot levels as supply/demand zones
   const pivotPoints = calculatePivotPoints(currentPrice, high24h, low24h);
   
+  // DISABLED: Only using real order book volume data - no fake zones
+  /*
   // Add pivot-based resistance levels as supply zones
   pivotPoints.resistance.forEach(level => {
     if (level.level > currentPrice) {
@@ -710,12 +712,15 @@ function analyzeSupplyDemandZones(orderBookData: any, currentPrice: number, high
       });
     }
   });
+  */
+  // END OF DISABLED FAKE ZONES
 
   if (!orderBookData || !orderBookData.bids || !orderBookData.asks) {
+    console.error('❌ NO ORDER BOOK DATA - Cannot generate zones without real volume');
     return { 
-      supplyZones: supplyZones.slice(0, 8), 
-      demandZones: demandZones.slice(0, 8), 
-      analysis: 'Using pivot points, Fibonacci, and psychological levels (no order book data)',
+      supplyZones: [], 
+      demandZones: [], 
+      analysis: 'ERROR: No real order book data available - refusing to generate fake zones',
       pivotPoints
     };
   }
