@@ -1,0 +1,381 @@
+{
+  "timestamp": "2025-10-02T14:39:41.580Z",
+  "summary": {
+    "overallScore": 72,
+    "grade": "C",
+    "wcagScore": 40,
+    "performanceScore": 85,
+    "mobileScore": 100
+  },
+  "details": {
+    "wcag": {
+      "tests": [
+        {
+          "name": "Minimum Touch Target Size",
+          "requirement": "Touch targets must be at least 44x44px",
+          "test": {
+            "passed": false,
+            "details": {
+              "cssSupport": true,
+              "buttonSizing": true,
+              "buttonCompliance": 36,
+              "properButtons": 13,
+              "totalButtons": 36
+            }
+          },
+          "weight": 20,
+          "result": {
+            "passed": false,
+            "details": {
+              "cssSupport": true,
+              "buttonSizing": true,
+              "buttonCompliance": 36,
+              "properButtons": 13,
+              "totalButtons": 36
+            }
+          },
+          "score": 0,
+          "status": "FAIL"
+        },
+        {
+          "name": "Color Contrast Ratios",
+          "requirement": "Text must have 4.5:1 contrast ratio (3:1 for large text)",
+          "test": {
+            "passed": false,
+            "details": {
+              "mobileTextClasses": true,
+              "mobileBgClasses": true,
+              "contrastOverrides": true,
+              "whiteTextFixes": true,
+              "potentialIssues": 9
+            }
+          },
+          "weight": 25,
+          "result": {
+            "passed": false,
+            "details": {
+              "mobileTextClasses": true,
+              "mobileBgClasses": true,
+              "contrastOverrides": true,
+              "whiteTextFixes": true,
+              "potentialIssues": 9
+            }
+          },
+          "score": 0,
+          "status": "FAIL"
+        },
+        {
+          "name": "Responsive Text Sizing",
+          "requirement": "Text must be readable at 200% zoom without horizontal scrolling",
+          "test": {
+            "passed": true,
+            "details": {
+              "mobileTypography": true,
+              "responsiveHeadings": true,
+              "lineHeightOptimization": true,
+              "tailwindMobileFonts": true
+            }
+          },
+          "weight": 15,
+          "result": {
+            "passed": true,
+            "details": {
+              "mobileTypography": true,
+              "responsiveHeadings": true,
+              "lineHeightOptimization": true,
+              "tailwindMobileFonts": true
+            }
+          },
+          "score": 15,
+          "status": "PASS"
+        },
+        {
+          "name": "Focus Indicators",
+          "requirement": "All interactive elements must have visible focus indicators",
+          "test": {
+            "passed": true,
+            "details": {
+              "focusStyles": true,
+              "mobileFocusStyles": true
+            }
+          },
+          "weight": 15,
+          "result": {
+            "passed": true,
+            "details": {
+              "focusStyles": true,
+              "mobileFocusStyles": true
+            }
+          },
+          "score": 15,
+          "status": "PASS"
+        },
+        {
+          "name": "Alternative Text",
+          "requirement": "All images must have appropriate alternative text",
+          "test": {
+            "passed": true,
+            "details": {
+              "imagesWithAlt": 0,
+              "totalImages": 0,
+              "compliance": 100
+            }
+          },
+          "weight": 10,
+          "result": {
+            "passed": true,
+            "details": {
+              "imagesWithAlt": 0,
+              "totalImages": 0,
+              "compliance": 100
+            }
+          },
+          "score": 10,
+          "status": "PASS"
+        },
+        {
+          "name": "Heading Hierarchy",
+          "requirement": "Headings must follow proper hierarchical structure",
+          "test": {
+            "passed": false,
+            "details": {
+              "properHierarchy": false,
+              "headingIssues": 13
+            }
+          },
+          "weight": 10,
+          "result": {
+            "passed": false,
+            "details": {
+              "properHierarchy": false,
+              "headingIssues": 13
+            }
+          },
+          "score": 0,
+          "status": "FAIL"
+        },
+        {
+          "name": "Form Labels",
+          "requirement": "All form controls must have associated labels",
+          "test": {
+            "passed": false,
+            "details": {
+              "formsWithLabels": 0,
+              "totalFormElements": 1,
+              "compliance": 0
+            }
+          },
+          "weight": 5,
+          "result": {
+            "passed": false,
+            "details": {
+              "formsWithLabels": 0,
+              "totalFormElements": 1,
+              "compliance": 0
+            }
+          },
+          "score": 0,
+          "status": "FAIL"
+        }
+      ],
+      "score": 40
+    },
+    "performance": {
+      "metrics": {
+        "Mobile Loading Components": {
+          "passed": true,
+          "details": {
+            "hasSpinner": true,
+            "hasSkeleton": true,
+            "hasProgressBar": true,
+            "hasOverlay": true,
+            "hasPerformanceOptimizations": true
+          },
+          "score": 20,
+          "status": "PASS"
+        },
+        "Responsive Images": {
+          "passed": true,
+          "details": {
+            "responsiveImages": 0,
+            "totalImages": 0,
+            "nextImageUsage": false,
+            "optimization": 100
+          },
+          "score": 15,
+          "status": "PASS"
+        },
+        "CSS Optimization": {
+          "passed": true,
+          "details": {
+            "mobileFirstQueries": true,
+            "performanceOptimizations": true,
+            "animationOptimizations": true,
+            "criticalCSS": true,
+            "cssSize": "27KB"
+          },
+          "score": 20,
+          "status": "PASS"
+        },
+        "Animation Performance": {
+          "passed": true,
+          "details": {
+            "reducedMotionSupport": true,
+            "hardwareAcceleration": true,
+            "optimizedAnimations": true
+          },
+          "score": 15,
+          "status": "PASS"
+        },
+        "Bundle Size": {
+          "passed": false,
+          "details": {
+            "totalComponents": 17,
+            "totalSize": "304KB",
+            "averageSize": "18KB",
+            "isReasonableSize": false
+          },
+          "score": 0,
+          "status": "FAIL"
+        },
+        "Lazy Loading": {
+          "passed": true,
+          "details": {
+            "hasLazyLoading": false,
+            "hasConditionalLoading": true
+          },
+          "score": 15,
+          "status": "PASS"
+        }
+      },
+      "score": 85
+    },
+    "mobile": {
+      "optimizations": [
+        {
+          "name": "Mobile Viewport Hook",
+          "test": {
+            "passed": true,
+            "details": {
+              "hasViewportDetection": true,
+              "hasDeviceCapabilities": true,
+              "hasBreakpoints": true,
+              "hasOptimizationHook": true
+            }
+          },
+          "weight": 25,
+          "result": {
+            "passed": true,
+            "details": {
+              "hasViewportDetection": true,
+              "hasDeviceCapabilities": true,
+              "hasBreakpoints": true,
+              "hasOptimizationHook": true
+            }
+          },
+          "score": 25,
+          "status": "PASS"
+        },
+        {
+          "name": "Touch-Friendly Components",
+          "test": {
+            "passed": true,
+            "details": {
+              "touchFriendlyComponents": 9,
+              "totalComponents": 17,
+              "ratio": 53
+            }
+          },
+          "weight": 25,
+          "result": {
+            "passed": true,
+            "details": {
+              "touchFriendlyComponents": 9,
+              "totalComponents": 17,
+              "ratio": 53
+            }
+          },
+          "score": 25,
+          "status": "PASS"
+        },
+        {
+          "name": "Mobile-First CSS",
+          "test": {
+            "passed": true,
+            "details": {
+              "mobileFirstMedia": true,
+              "mobileClasses": true,
+              "responsiveTypography": true
+            }
+          },
+          "weight": 20,
+          "result": {
+            "passed": true,
+            "details": {
+              "mobileFirstMedia": true,
+              "mobileClasses": true,
+              "responsiveTypography": true
+            }
+          },
+          "score": 20,
+          "status": "PASS"
+        },
+        {
+          "name": "Responsive Layout",
+          "test": {
+            "passed": true,
+            "details": {
+              "hasResponsiveGrid": true,
+              "hasResponsiveSpacing": true,
+              "hasFlexboxLayout": true
+            }
+          },
+          "weight": 15,
+          "result": {
+            "passed": true,
+            "details": {
+              "hasResponsiveGrid": true,
+              "hasResponsiveSpacing": true,
+              "hasFlexboxLayout": true
+            }
+          },
+          "score": 15,
+          "status": "PASS"
+        },
+        {
+          "name": "Mobile Navigation",
+          "test": {
+            "passed": true,
+            "details": {
+              "hasResponsiveHeader": true,
+              "hasMobileOptimization": true
+            }
+          },
+          "weight": 15,
+          "result": {
+            "passed": true,
+            "details": {
+              "hasResponsiveHeader": true,
+              "hasMobileOptimization": true
+            }
+          },
+          "score": 15,
+          "status": "PASS"
+        }
+      ],
+      "score": 100
+    },
+    "overall": {
+      "score": 72,
+      "grade": "C"
+    }
+  },
+  "recommendations": [
+    {
+      "category": "Accessibility",
+      "priority": "HIGH",
+      "issue": "WCAG compliance below 80%",
+      "solution": "Focus on contrast ratios and touch target sizes"
+    }
+  ]
+}

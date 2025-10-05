@@ -38,10 +38,10 @@ export default function TypewriterText({
   }, [currentIndex, text, speed, delay, onComplete, isComplete])
 
   return (
-    <span className={`${className} ${showCursor && !isComplete ? 'typewriter' : ''}`} style={style}>
+    <span className={`${className} ${showCursor && !isComplete ? 'typewriter' : ''} mobile-text-primary`} style={style}>
       {displayText}
       {showCursor && !isComplete && (
-        <span className="animate-blink">|</span>
+        <span className="animate-blink mobile-text-accent">|</span>
       )}
     </span>
   )
@@ -71,7 +71,7 @@ export function AnimatedHeadline({
   }, [delay])
 
   return (
-    <div className={`${className} ${isVisible ? 'ink-drop newspaper-fade-in' : 'opacity-0'}`} style={style}>
+    <div className={`${className} ${isVisible ? 'ink-drop newspaper-fade-in' : 'opacity-0'} mobile-text-primary`} style={style}>
       {children}
     </div>
   )
@@ -89,10 +89,10 @@ export function NewspaperLoading({
   return (
     <div className={`flex items-center justify-center ${className}`}>
       <div className="relative">
-        <div className="vintage-spin w-8 h-8 border-2 border-black border-t-transparent rounded-full"></div>
+        <div className="vintage-spin w-8 h-8 border-2 mobile-text-primary border-t-transparent rounded-full"></div>
         <div className="absolute inset-0 paper-texture opacity-30 rounded-full"></div>
       </div>
-      <span className="ml-3 text-gray-700 font-serif">
+      <span className="ml-3 mobile-text-secondary font-serif">
         <TypewriterText text={text} speed={80} showCursor={false} />
       </span>
     </div>

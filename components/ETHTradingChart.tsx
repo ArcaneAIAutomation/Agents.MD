@@ -251,13 +251,13 @@ export default function ETHTradingChart() {
   // Show timeframe selection screen first
   if (!selectedTimeframe || !realTimeData) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 mobile-bg-primary">
         <div className="text-center">
-          <h3 className="text-2xl font-bold text-gray-900 mb-2">📊 Visual Trading Zones Analysis</h3>
-          <p className="text-gray-600 mb-8">Choose your trading timeframe to generate zones with 100% real market data</p>
+          <h3 className="text-xl md:text-2xl font-bold mobile-text-primary mb-2">📊 Visual Trading Zones Analysis</h3>
+          <p className="text-sm md:text-base mobile-text-secondary mb-6 md:mb-8">Choose your trading timeframe to generate zones with 100% real market data</p>
           
           {/* Enhanced Timeframe Selection Buttons */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
             {(['1H', '4H', '1D'] as const).map((tf) => {
               const timeframeInfo = {
                 '1H': {
@@ -296,15 +296,15 @@ export default function ETHTradingChart() {
                   key={tf}
                   onClick={() => generateRealTimeframeData(tf)}
                   disabled={loading}
-                  className={`p-6 bg-gradient-to-br ${info.color} hover:shadow-2xl rounded-xl border-2 border-transparent hover:border-white transition-all duration-300 transform hover:scale-105 text-white ${
+                  className={`p-4 md:p-6 bg-gradient-to-br ${info.color} hover:shadow-2xl rounded-xl border-2 border-transparent hover:border-white transition-all duration-300 transform hover:scale-105 text-white min-h-[44px] ${
                     loading && selectedTimeframe === tf ? 'opacity-75 cursor-not-allowed' : ''
                   } ${loading && selectedTimeframe !== tf ? 'opacity-50' : ''}`}
                 >
-                  <div className="text-4xl mb-3">{info.icon}</div>
-                  <div className="text-2xl font-bold mb-1">{tf}</div>
-                  <div className="text-lg font-semibold mb-2">{info.title}</div>
-                  <div className="text-sm opacity-90 mb-3">{info.subtitle}</div>
-                  <div className="text-xs opacity-80 space-y-1 mb-3">
+                  <div className="text-3xl md:text-4xl mb-2 md:mb-3">{info.icon}</div>
+                  <div className="text-xl md:text-2xl font-bold mb-1">{tf}</div>
+                  <div className="text-base md:text-lg font-semibold mb-2">{info.title}</div>
+                  <div className="text-sm opacity-90 mb-2 md:mb-3">{info.subtitle}</div>
+                  <div className="text-xs opacity-80 space-y-1 mb-2 md:mb-3">
                     {info.features.map((feature, idx) => (
                       <div key={idx}>• {feature}</div>
                     ))}
@@ -323,10 +323,10 @@ export default function ETHTradingChart() {
           </div>
           
           {/* Real Data Features */}
-          <div className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg p-6">
-            <div className="text-sm text-gray-800">
-              <div className="font-bold text-lg text-blue-900 mb-4">🚀 100% Real Market Intelligence Features:</div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg p-4 md:p-6 mobile-bg-secondary">
+            <div className="text-sm mobile-text-primary">
+              <div className="font-bold text-base md:text-lg text-blue-900 mb-3 md:mb-4">🚀 100% Real Market Intelligence Features:</div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                 <div className="space-y-3">
                   <div className="font-semibold text-blue-800">📊 Live Order Book</div>
                   <div className="space-y-1 text-xs">
@@ -401,14 +401,14 @@ export default function ETHTradingChart() {
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="flex items-center justify-center h-64 text-red-600">
+      <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 mobile-bg-primary">
+        <div className="flex items-center justify-center h-48 md:h-64 text-red-600">
           <div className="text-center">
-            <div className="text-lg font-semibold mb-2">❌ Analysis Failed</div>
-            <div className="text-sm mb-4">{error}</div>
+            <div className="text-base md:text-lg font-semibold mb-2 mobile-text-primary">❌ Analysis Failed</div>
+            <div className="text-sm mb-4 mobile-text-secondary">{error}</div>
             <button 
               onClick={() => generateRealTimeframeData('1H')}
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              className="px-4 md:px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors min-h-[44px] mobile-text-primary"
             >
               Retry Analysis
             </button>
@@ -468,11 +468,11 @@ export default function ETHTradingChart() {
   return (
     <div className="space-y-4">
       {/* Enhanced Header with Real Data Indicators */}
-      <div className="bg-white rounded-lg shadow-lg p-4">
-        <div className="flex justify-between items-center">
+      <div className="bg-white rounded-lg shadow-lg p-4 mobile-bg-primary">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
           <div>
-            <h3 className="text-xl font-bold text-gray-900">📊 ETH Trading Zones Analysis</h3>
-            <div className="flex items-center space-x-3 text-sm mt-2">
+            <h3 className="text-lg md:text-xl font-bold mobile-text-primary">📊 ETH Trading Zones Analysis</h3>
+            <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-3 text-sm mt-2">
               <span className="text-gray-600">📊 Data Source:</span>
               <span className="font-semibold text-green-600">100% Real Market Data</span>
               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -523,41 +523,41 @@ export default function ETHTradingChart() {
         </div>
         
         {/* Real-Time Market Summary */}
-        <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-          <div className="text-center p-3 bg-green-50 rounded-lg">
-            <div className="font-semibold text-green-600">{tradingZones.buyZones.length}</div>
-            <div className="text-gray-600">Buy Zones</div>
+        <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-sm">
+          <div className="text-center p-2 md:p-3 bg-green-50 rounded-lg mobile-bg-secondary">
+            <div className="font-semibold text-green-600 mobile-text-primary">{tradingZones.buyZones.length}</div>
+            <div className="text-xs md:text-sm mobile-text-secondary">Buy Zones</div>
             <div className="text-xs text-green-500">
               {tradingZones.buyZones.filter(z => z.strength === 'Strong').length} Strong
             </div>
           </div>
-          <div className="text-center p-3 bg-red-50 rounded-lg">
-            <div className="font-semibold text-red-600">{tradingZones.sellZones.length}</div>
-            <div className="text-gray-600">Sell Zones</div>
+          <div className="text-center p-2 md:p-3 bg-red-50 rounded-lg mobile-bg-secondary">
+            <div className="font-semibold text-red-600 mobile-text-primary">{tradingZones.sellZones.length}</div>
+            <div className="text-xs md:text-sm mobile-text-secondary">Sell Zones</div>
             <div className="text-xs text-red-500">
               {tradingZones.sellZones.filter(z => z.strength === 'Strong').length} Strong
             </div>
           </div>
-          <div className="text-center p-3 bg-blue-50 rounded-lg">
-            <div className="font-semibold text-blue-600">
+          <div className="text-center p-2 md:p-3 bg-blue-50 rounded-lg mobile-bg-secondary">
+            <div className="font-semibold text-blue-600 mobile-text-primary">
               {Math.abs(realTimeData.marketConditions.orderBookImbalance * 100).toFixed(1)}%
             </div>
-            <div className="text-gray-600">Order Imbalance</div>
+            <div className="text-xs md:text-sm mobile-text-secondary">Order Imbalance</div>
             <div className="text-xs text-blue-500">
               {realTimeData.marketConditions.orderBookImbalance > 0 ? 'Buy Pressure' : 'Sell Pressure'}
             </div>
           </div>
-          <div className="text-center p-3 bg-purple-50 rounded-lg">
-            <div className="font-semibold text-purple-600">{realTimeData.marketConditions.whaleActivity}</div>
-            <div className="text-gray-600">Whale Moves</div>
+          <div className="text-center p-2 md:p-3 bg-purple-50 rounded-lg mobile-bg-secondary">
+            <div className="font-semibold text-purple-600 mobile-text-primary">{realTimeData.marketConditions.whaleActivity}</div>
+            <div className="text-xs md:text-sm mobile-text-secondary">Whale Moves</div>
             <div className="text-xs text-purple-500">Large Trades</div>
           </div>
         </div>
       </div>
 
       {/* Real-Time Analysis Details */}
-      <div className="bg-white rounded-lg shadow-lg p-4">
-        <div className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg p-4">
+      <div className="bg-white rounded-lg shadow-lg p-4 mobile-bg-primary">
+        <div className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg p-3 md:p-4 mobile-bg-secondary">
           <div className="flex items-start space-x-2">
             <Target className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
             <div className="text-sm">
@@ -589,12 +589,12 @@ export default function ETHTradingChart() {
       />
 
       {/* Detailed Zone Analysis */}
-      <div className="bg-white rounded-lg shadow-lg p-4">
-        <h4 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="bg-white rounded-lg shadow-lg p-4 mobile-bg-primary">
+        <h4 className="text-base md:text-lg font-semibold mobile-text-primary mb-4">
           🎯 {realTimeData.timeframe} Zone Details (Real Market Data)
         </h4>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {/* Buy Zones */}
           <div className="bg-green-50 p-4 rounded-lg border border-green-200">
             <h5 className="font-semibold text-green-800 mb-3 flex items-center">

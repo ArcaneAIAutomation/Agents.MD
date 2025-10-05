@@ -19,7 +19,7 @@ export default function Layout({
       <Head>
         <title>{title}</title>
         <meta name="description" content={description} />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <link rel="icon" href="/favicon.ico" />
         
         {/* Open Graph / Facebook */}
@@ -33,12 +33,20 @@ export default function Layout({
         <meta property="twitter:title" content={title} />
         <meta property="twitter:description" content={description} />
         <meta property="twitter:image" content="/og-image.jpg" />
+        
+        {/* Mobile-specific meta tags */}
+        <meta name="theme-color" content="#ffffff" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </Head>
       
-      <div className="min-h-screen flex flex-col bg-gray-50">
+      <div className="min-h-screen flex flex-col mobile-bg-secondary">
         <Header />
-        <main className="flex-grow">
-          {children}
+        <main className="flex-grow mobile-bg-primary">
+          <div className="mobile-text-primary">
+            {children}
+          </div>
         </main>
         <Footer />
       </div>

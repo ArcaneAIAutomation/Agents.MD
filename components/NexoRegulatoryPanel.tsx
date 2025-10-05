@@ -54,10 +54,10 @@ export default function NexoRegulatoryPanel() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-3 sm:p-6 border-2 md:border-4 border-black">
+      <div className="mobile-bg-card rounded-lg shadow-lg p-3 sm:p-6 border-2 md:border-4 border-black">
         <div className="flex items-center justify-center h-32 sm:h-64">
-          <RefreshCw className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-black" />
-          <span className="ml-2 text-gray-600 font-bold text-sm sm:text-base">Loading regulatory analysis...</span>
+          <RefreshCw className="h-6 w-6 sm:h-8 sm:w-8 animate-spin mobile-text-primary" />
+          <span className="ml-2 mobile-text-secondary font-bold text-sm sm:text-base">Loading regulatory analysis...</span>
         </div>
       </div>
     )
@@ -65,20 +65,20 @@ export default function NexoRegulatoryPanel() {
 
   if (!data && !loading) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-3 sm:p-6 border-2 md:border-4 border-black">
+      <div className="mobile-bg-card rounded-lg shadow-lg p-3 sm:p-6 border-2 md:border-4 border-black">
         <div className="text-center">
           <div className="flex items-center justify-center mb-4">
-            <div className="p-2 sm:p-3 bg-gray-100 rounded-lg border border-black sm:border-2">
-              <AlertTriangle className="h-6 w-6 sm:h-8 sm:w-8 text-black" />
+            <div className="p-2 sm:p-3 mobile-bg-secondary rounded-lg border border-black sm:border-2">
+              <AlertTriangle className="h-6 w-6 sm:h-8 sm:w-8 mobile-text-primary" />
             </div>
           </div>
-          <h2 className="text-xl sm:text-2xl font-black text-black mb-2" style={{ fontFamily: 'Times, serif' }}>
+          <h2 className="text-xl sm:text-2xl font-black mobile-text-primary mb-2" style={{ fontFamily: 'Times, serif' }}>
             NEXO.COM UK REGULATORY UPDATES
           </h2>
-          <p className="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">Click below to load the latest regulatory monitoring and compliance alerts</p>
+          <p className="mobile-text-secondary mb-4 sm:mb-6 text-sm sm:text-base">Click below to load the latest regulatory monitoring and compliance alerts</p>
           <button 
             onClick={refetch}
-            className="bg-black text-white font-bold py-2 sm:py-3 px-4 sm:px-6 border-2 sm:border-4 border-black hover:bg-gray-800 transition-colors flex items-center mx-auto text-sm sm:text-base"
+            className="mobile-retry-button bg-black text-white font-bold py-2 sm:py-3 px-4 sm:px-6 border-2 sm:border-4 border-black hover:bg-gray-800 transition-colors flex items-center mx-auto text-sm sm:text-base min-h-touch"
             style={{ fontFamily: 'Times, serif' }}
           >
             <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
@@ -112,15 +112,15 @@ export default function NexoRegulatoryPanel() {
   const lastUpdated = (data as any)?.lastUpdated
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-3 sm:p-6 border-2 md:border-4 border-black">
+    <div className="mobile-bg-card rounded-lg shadow-lg p-3 sm:p-6 border-2 md:border-4 border-black">
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div className="flex items-center space-x-2 sm:space-x-3">
-          <div className="p-1 sm:p-2 bg-gray-100 rounded-lg border border-black sm:border-2">
-            <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-black" />
+          <div className="p-1 sm:p-2 mobile-bg-secondary rounded-lg border border-black sm:border-2">
+            <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 mobile-text-primary" />
           </div>
           <div>
-            <h2 className="text-lg sm:text-xl font-black text-black" style={{ fontFamily: 'Times, serif' }}>Nexo.com UK Regulatory Updates</h2>
-            <p className="text-xs sm:text-sm text-gray-600">Real-time regulatory monitoring and compliance alerts</p>
+            <h2 className="text-lg sm:text-xl font-black mobile-text-primary" style={{ fontFamily: 'Times, serif' }}>Nexo.com UK Regulatory Updates</h2>
+            <p className="text-xs sm:text-sm mobile-text-secondary">Real-time regulatory monitoring and compliance alerts</p>
           </div>
         </div>
         <div className="text-right">
