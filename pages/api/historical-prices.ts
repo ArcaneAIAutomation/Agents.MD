@@ -60,16 +60,20 @@ export default async function handler(
     const coinId = coinGeckoIds[symbol.toUpperCase()] || 'bitcoin';
 
     // Determine days based on timeframe
-    const timeframeConfig: Record<string, { days: number, interval: string }> = {
-      '1H': { days: 1, interval: 'hourly' },
-      '4H': { days: 3, interval: 'hourly' },
-      '1D': { days: 30, interval: 'daily' },
+    // Note: CoinGecko free API auto-determines interval based on days
+    // 1 day = 5 minute intervals
+    // 2-90 days = hourly intervals
+    // 90+ days = daily intervals
+    const timeframeConfig: Record<string, { days: number }> = {
+      '1H': { days: 1 },    // Will get 5-min intervals, we'll filter to hourly
+      '4H': { days: 7 },    // Will get hourly intervals, we'll filter to 4-hourly
+      '1D': { days: 90 },   // Will get daily intervals
     };
 
     const config = timeframeConfig[timeframe] || timeframeConfig['1H'];
 
-    // Fetch from CoinGecko (free tier)
-    const coingeckoUrl = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${config.days}&interval=${config.interval}`;
+    // Fetch from CoinGecko (free tier) - no interval param, it's auto-determined
+    const coingeckoUrl = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${config.days}`;
 
     console.log(`📊 Fetching historical data: ${symbol} ${timeframe} (${config.days} days)`);
 
@@ -103,13 +107,15 @@ export default async function handler(
     let filteredData = historicalData;
     
     if (timeframe === '1H') {
-      // Last 60 hours (hourly data)
-      filteredData = historicalData.slice(-60);
+      // For 1 day of data, CoinGecko returns 5-min intervals (~288 points)
+      // Filter to get hourly data (every 12th point = 1 hour)
+      filteredData = historicalData.filter((_, index) => index % 12 === 0).slice(-60);
     } else if (timeframe === '4H') {
-      // Last 72 hours (every 4 hours)
+      // For 7 days of data, CoinGecko returns hourly intervals (~168 points)
+      // Filter to get 4-hour data (every 4th point)
       filteredData = historicalData.filter((_, index) => index % 4 === 0).slice(-72);
     } else if (timeframe === '1D') {
-      // Last 90 days (daily data)
+      // For 90 days, CoinGecko returns daily intervals
       filteredData = historicalData.slice(-90);
     }
 
