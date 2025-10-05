@@ -467,6 +467,8 @@ function analyzeEthSupplyDemandZones(orderBookData: any, currentPrice: number, h
   // Add ETH-specific pivot levels
   const pivotPoints = calculateEthPivotPoints(currentPrice, high24h, low24h);
   
+  // DISABLED: Only using real order book volume data - no fake zones
+  /*
   // Add pivot-based resistance levels as supply zones
   pivotPoints.resistance.forEach(level => {
     if (level.level > currentPrice) {
@@ -573,11 +575,14 @@ function analyzeEthSupplyDemandZones(orderBookData: any, currentPrice: number, h
       });
     }
   });
+  */
+  // END OF DISABLED FAKE ZONES
 
   if (!orderBookData || !orderBookData.bids || !orderBookData.asks) {
+    console.error('❌ NO ORDER BOOK DATA - Cannot generate ETH zones without real volume');
     return { 
-      supplyZones: supplyZones.slice(0, 8), 
-      demandZones: demandZones.slice(0, 8), 
+      supplyZones: [], 
+      demandZones: [], 
       analysis: 'Using ETH pivot points, Fibonacci, and psychological levels (no order book data)',
       pivotPoints
     };
