@@ -1,21 +1,82 @@
 # API Integration Guidelines
 
-## Multi-Source Data Strategy
+## AgentMDC Branch - Caesar API Exclusive
 
-The platform integrates multiple cryptocurrency data sources with intelligent fallback mechanisms to ensure reliable data delivery across all devices, especially mobile connections.
+**IMPORTANT:** The AgentMDC branch uses **Caesar API exclusively** as the sole data source for all cryptocurrency market data, technical analysis, trade signals, and news. This is a dedicated branch for Caesar API integration testing and development.
 
-### Primary Data Sources
+### Primary Data Source (AgentMDC Branch Only)
 
-#### Market Data APIs
+#### Caesar API - Exclusive Data Source
+- **Base URL**: `https://api.caesar.xyz/v1`
+- **Authentication**: Bearer token in Authorization header
+- **API Key**: Configured in environment variables
+- **Features**: Market data, technical analysis, trade signals, news, sentiment analysis
+- **Documentation**: https://docs.caesar.xyz/get-started/introduction
+
+### Main Branch - Multi-Source Data Strategy
+
+The main branch continues to use multiple cryptocurrency data sources with intelligent fallback mechanisms:
+
+#### Market Data APIs (Main Branch)
 - **CoinGecko API** - Primary market data source with rate limiting
 - **CoinMarketCap API** - Secondary source with premium features
 - **Kraken API** - Live trading data and order book analysis
-- **Caesar API** - Advanced market analysis (Coming Soon)
 
-#### News & Intelligence APIs
+#### News & Intelligence APIs (Main Branch)
 - **NewsAPI** - Real-time cryptocurrency news aggregation
 - **CryptoCompare** - Additional news source and market insights
 - **OpenAI GPT-4o** - AI-powered analysis and trade signal generation
+
+## Caesar API Integration (AgentMDC Branch)
+
+### Available Endpoints
+
+#### Market Data
+```typescript
+GET /api/caesar-market-data?symbol=BTC
+// Returns: Real-time price, volume, market cap, technical indicators
+```
+
+#### Trade Signals
+```typescript
+GET /api/caesar-trade-signals?symbol=BTC
+// Returns: AI-powered buy/sell signals with confidence scores
+```
+
+#### News & Sentiment
+```typescript
+GET /api/caesar-news?symbols=BTC,ETH&limit=15
+// Returns: Cryptocurrency news with sentiment analysis
+```
+
+#### Health Monitoring
+```typescript
+GET /api/caesar-health
+// Returns: API status, latency, uptime
+```
+
+### Caesar API Client
+
+```typescript
+import {
+  getCaesarMarketData,
+  getCaesarTechnicalAnalysis,
+  getCaesarTradeSignals,
+  getCaesarNews,
+  caesarHealthCheck
+} from '../utils/caesarApi';
+```
+
+### React Hooks
+
+```typescript
+import {
+  useCaesarMarketData,
+  useCaesarTradeSignals,
+  useCaesarNews,
+  useCaesarHealth
+} from '../hooks/useCaesarData';
+```
 
 ### Mobile-Optimized API Patterns
 
