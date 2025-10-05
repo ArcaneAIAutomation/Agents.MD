@@ -580,12 +580,12 @@ export default function BTCTradingChart() {
 
       {/* Enhanced Trading Chart */}
       <TradingChart
+        key={`btc-chart-${realTimeData.timeframe}-${realTimeData.calculatedAt}`}
         symbol="BTC"
         currentPrice={realTimeData.currentPrice}
         supportResistance={supportResistance}
         tradingZones={tradingZones}
-
-
+        timeframe={realTimeData.timeframe}
       />
 
       {/* Detailed Zone Analysis */}

@@ -580,12 +580,12 @@ export default function ETHTradingChart() {
 
       {/* Enhanced Trading Chart */}
       <TradingChart
+        key={`eth-chart-${realTimeData.timeframe}-${realTimeData.calculatedAt}`}
         symbol="ETH"
         currentPrice={realTimeData.currentPrice}
         supportResistance={supportResistance}
         tradingZones={tradingZones}
-
-
+        timeframe={realTimeData.timeframe}
       />
 
       {/* Detailed Zone Analysis */}

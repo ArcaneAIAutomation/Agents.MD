@@ -23,11 +23,19 @@ interface ChartProps {
     buyZones: TradingZone[];
     sellZones: TradingZone[];
   };
+  timeframe?: '1H' | '4H' | '1D';
 }
 
-export default function TradingChart({ symbol, currentPrice, supportResistance, tradingZones }: ChartProps) {
-  const [timeframe, setTimeframe] = useState<'1H' | '4H' | '1D'>('4H');
+export default function TradingChart({ symbol, currentPrice, supportResistance, tradingZones, timeframe: propTimeframe }: ChartProps) {
+  const [timeframe, setTimeframe] = useState<'1H' | '4H' | '1D'>(propTimeframe || '4H');
   const [hoveredZone, setHoveredZone] = useState<TradingZone | null>(null);
+  
+  // Update timeframe when prop changes
+  useEffect(() => {
+    if (propTimeframe) {
+      setTimeframe(propTimeframe);
+    }
+  }, [propTimeframe]);
 
   // Calculate optimal price range for better visual distribution
   const calculateOptimalRange = () => {
