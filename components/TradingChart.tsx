@@ -80,8 +80,8 @@ export default function TradingChart({ symbol, currentPrice, supportResistance, 
   
   // Responsive chart dimensions
   const [chartDimensions, setChartDimensions] = useState({
-    height: 400,
-    width: 800,
+    height: 500,
+    width: 1000,
     isMobile: false
   });
 
@@ -91,8 +91,8 @@ export default function TradingChart({ symbol, currentPrice, supportResistance, 
       const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
       
       setChartDimensions({
-        height: isMobile ? 300 : isTablet ? 350 : 400,
-        width: isMobile ? Math.min(window.innerWidth - 40, 600) : isTablet ? 700 : 800,
+        height: isMobile ? 400 : isTablet ? 450 : 500,
+        width: isMobile ? Math.min(window.innerWidth - 40, 700) : isTablet ? 900 : 1000,
         isMobile
       });
     };
@@ -272,60 +272,57 @@ export default function TradingChart({ symbol, currentPrice, supportResistance, 
               {/* Buy Zones (Support) */}
               {tradingZones.buyZones.map((zone, index) => {
                 const y = priceToY(zone.level);
-                const zoneHeight = zone.strength === 'Strong' ? 25 : zone.strength === 'Moderate' ? 20 : 15;
-                const opacity = zone.strength === 'Strong' ? 0.7 : zone.strength === 'Moderate' ? 0.5 : 0.3;
+                const zoneHeight = zone.strength === 'Strong' ? 30 : zone.strength === 'Moderate' ? 24 : 18;
+                const opacity = zone.strength === 'Strong' ? 0.6 : zone.strength === 'Moderate' ? 0.45 : 0.3;
                 
                 return (
                   <g key={`buy-${index}`}>
                     {/* Zone rectangle */}
                     <rect
-                      x={60}
+                      x={70}
                       y={y - zoneHeight / 2}
-                      width={chartWidth - 200}
+                      width={chartWidth - 280}
                       height={zoneHeight}
                       fill="#10B981"
                       fillOpacity={opacity}
                       stroke="#059669"
-                      strokeWidth={zone.strength === 'Strong' ? 3 : 2}
+                      strokeWidth={zone.strength === 'Strong' ? 2.5 : 1.5}
                       onMouseEnter={() => setHoveredZone(zone)}
                       onMouseLeave={() => setHoveredZone(null)}
-                      className="cursor-pointer"
+                      className="cursor-pointer transition-opacity hover:opacity-80"
                     />
                     
-                    {/* Zone label */}
+                    {/* Zone label - positioned to the right */}
                     <rect
-                      x={chartWidth - (chartDimensions.isMobile ? 140 : 190)}
-                      y={y - 10}
-                      width={chartDimensions.isMobile ? 120 : 170}
-                      height={20}
-                      fill="white"
-                      stroke="#059669"
-                      strokeWidth={1}
-                      rx={3}
+                      x={chartWidth - 200}
+                      y={y - 14}
+                      width={180}
+                      height={28}
+                      fill="#059669"
+                      stroke="#047857"
+                      strokeWidth={1.5}
+                      rx={4}
                     />
                     <text
-                      x={chartWidth - (chartDimensions.isMobile ? 80 : 105)}
-                      y={y + 4}
+                      x={chartWidth - 110}
+                      y={y + 1}
                       textAnchor="middle"
-                      fontSize={chartDimensions.isMobile ? "9" : "11"}
-                      fontWeight="600"
-                      fill="#059669"
+                      fontSize="13"
+                      fontWeight="700"
+                      fill="white"
                     >
-                      🟢 BUY ${chartDimensions.isMobile ? Math.round(zone.level/1000) + 'k' : Math.round(zone.level).toLocaleString()}
+                      🟢 BUY ${Math.round(zone.level).toLocaleString()}
                     </text>
-                    {!chartDimensions.isMobile && (
-                      <text
-                        x={chartWidth - 105}
-                        y={y - 2}
-                        textAnchor="middle"
-                        fontSize="9"
-                        fill="#059669"
-                        opacity={0.8}
-                      >
-                        {zone.strength} • {zone.volume.toFixed(1)} BTC
-                        {zone.source && ` • ${zone.source === 'orderbook' ? 'OrderBook' : 'Historical'}`}
-                      </text>
-                    )}
+                    <text
+                      x={chartWidth - 110}
+                      y={y + 11}
+                      textAnchor="middle"
+                      fontSize="9"
+                      fill="white"
+                      opacity={0.9}
+                    >
+                      {zone.strength} • {zone.volume.toFixed(1)} BTC
+                    </text>
                   </g>
                 );
               })}
@@ -333,60 +330,57 @@ export default function TradingChart({ symbol, currentPrice, supportResistance, 
               {/* Sell Zones (Resistance) */}
               {tradingZones.sellZones.map((zone, index) => {
                 const y = priceToY(zone.level);
-                const zoneHeight = zone.strength === 'Strong' ? 25 : zone.strength === 'Moderate' ? 20 : 15;
-                const opacity = zone.strength === 'Strong' ? 0.7 : zone.strength === 'Moderate' ? 0.5 : 0.3;
+                const zoneHeight = zone.strength === 'Strong' ? 30 : zone.strength === 'Moderate' ? 24 : 18;
+                const opacity = zone.strength === 'Strong' ? 0.6 : zone.strength === 'Moderate' ? 0.45 : 0.3;
                 
                 return (
                   <g key={`sell-${index}`}>
                     {/* Zone rectangle */}
                     <rect
-                      x={60}
+                      x={70}
                       y={y - zoneHeight / 2}
-                      width={chartWidth - 200}
+                      width={chartWidth - 280}
                       height={zoneHeight}
                       fill="#EF4444"
                       fillOpacity={opacity}
                       stroke="#DC2626"
-                      strokeWidth={zone.strength === 'Strong' ? 3 : 2}
+                      strokeWidth={zone.strength === 'Strong' ? 2.5 : 1.5}
                       onMouseEnter={() => setHoveredZone(zone)}
                       onMouseLeave={() => setHoveredZone(null)}
-                      className="cursor-pointer"
+                      className="cursor-pointer transition-opacity hover:opacity-80"
                     />
                     
-                    {/* Zone label */}
+                    {/* Zone label - positioned to the right */}
                     <rect
-                      x={chartWidth - (chartDimensions.isMobile ? 140 : 190)}
-                      y={y - 10}
-                      width={chartDimensions.isMobile ? 120 : 170}
-                      height={20}
-                      fill="white"
-                      stroke="#DC2626"
-                      strokeWidth={1}
-                      rx={3}
+                      x={chartWidth - 200}
+                      y={y - 14}
+                      width={180}
+                      height={28}
+                      fill="#DC2626"
+                      stroke="#B91C1C"
+                      strokeWidth={1.5}
+                      rx={4}
                     />
                     <text
-                      x={chartWidth - (chartDimensions.isMobile ? 80 : 105)}
-                      y={y + 4}
+                      x={chartWidth - 110}
+                      y={y + 1}
                       textAnchor="middle"
-                      fontSize={chartDimensions.isMobile ? "9" : "11"}
-                      fontWeight="600"
-                      fill="#DC2626"
+                      fontSize="13"
+                      fontWeight="700"
+                      fill="white"
                     >
-                      🔴 SELL ${chartDimensions.isMobile ? Math.round(zone.level/1000) + 'k' : Math.round(zone.level).toLocaleString()}
+                      🔴 SELL ${Math.round(zone.level).toLocaleString()}
                     </text>
-                    {!chartDimensions.isMobile && (
-                      <text
-                        x={chartWidth - 105}
-                        y={y - 2}
-                        textAnchor="middle"
-                        fontSize="9"
-                        fill="#DC2626"
-                        opacity={0.8}
-                      >
-                        {zone.strength} • {zone.volume.toFixed(1)} BTC
-                        {zone.source && ` • ${zone.source === 'orderbook' ? 'OrderBook' : 'Historical'}`}
-                      </text>
-                    )}
+                    <text
+                      x={chartWidth - 110}
+                      y={y + 11}
+                      textAnchor="middle"
+                      fontSize="9"
+                      fill="white"
+                      opacity={0.9}
+                    >
+                      {zone.strength} • {zone.volume.toFixed(1)} BTC
+                    </text>
                   </g>
                 );
               })}
