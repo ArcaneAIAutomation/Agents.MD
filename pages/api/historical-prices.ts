@@ -1,4 +1,10 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+/**
+ * Historical Prices API
+ * Fetches real historical price data for different timeframes
+ * Supports: BTC, ETH, and other major cryptocurrencies
+ */
 
 interface HistoricalDataPoint {
   timestamp: number;
@@ -8,119 +14,127 @@ interface HistoricalDataPoint {
 
 interface HistoricalResponse {
   success: boolean;
-  data: HistoricalDataPoint[];
-  symbol: string;
-  timeframe: string;
+  data?: HistoricalDataPoint[];
   error?: string;
+  timeframe: string;
+  symbol: string;
+  dataPoints: number;
 }
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<HistoricalResponse>
 ) {
-  const { symbol, timeframe } = req.query;
-  const symbolStr = (symbol as string || 'BTC').toUpperCase();
-  const timeframeStr = timeframe as string || '1D';
-
-  console.log(`🚀 Fetching 100% REAL historical prices for ${symbolStr} ${timeframeStr}`);
+  if (req.method !== 'GET') {
+    return res.status(405).json({
+      success: false,
+      error: 'Method not allowed',
+      timeframe: '',
+      symbol: '',
+      dataPoints: 0,
+    });
+  }
 
   try {
-    // Map symbols to CoinMarketCap IDs
-    const cmcSymbol = symbolStr === 'BTC' ? 'BTC' : symbolStr === 'ETH' ? 'ETH' : null;
-    
-    if (!cmcSymbol) {
+    const { symbol = 'BTC', timeframe = '1H' } = req.query;
+
+    if (typeof symbol !== 'string' || typeof timeframe !== 'string') {
       return res.status(400).json({
         success: false,
-        data: [],
-        symbol: symbolStr,
-        timeframe: timeframeStr,
-        error: `Unsupported symbol: ${symbolStr}`
+        error: 'Invalid parameters',
+        timeframe: timeframe as string,
+        symbol: symbol as string,
+        dataPoints: 0,
       });
     }
 
-    // Calculate time range based on timeframe
-    const now = new Date();
-    const timeStart = new Date();
-    
-    if (timeframeStr === '1H') {
-      timeStart.setDate(now.getDate() - 7); // 7 days for hourly data
-    } else if (timeframeStr === '4H') {
-      timeStart.setDate(now.getDate() - 30); // 30 days for 4H data
-    } else {
-      timeStart.setFullYear(now.getFullYear() - 1); // 1 year for daily data
-    }
-    
-    // Use CoinMarketCap's latest quotes endpoint to generate recent historical data
-    // This provides real market data for the last few periods
-    console.log(`📡 Generating real historical data from CoinMarketCap Pro current data`);
-    
-    // Get current market data from CoinMarketCap
-    const cmcUrl = `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=${cmcSymbol}&convert=USD`;
-    
-    const response = await fetch(cmcUrl, {
-      signal: AbortSignal.timeout(15000),
+    // Map crypto symbols to CoinGecko IDs
+    const coinGeckoIds: Record<string, string> = {
+      'BTC': 'bitcoin',
+      'ETH': 'ethereum',
+      'SOL': 'solana',
+      'AVAX': 'avalanche-2',
+      'MATIC': 'matic-network',
+    };
+
+    const coinId = coinGeckoIds[symbol.toUpperCase()] || 'bitcoin';
+
+    // Determine days based on timeframe
+    const timeframeConfig: Record<string, { days: number, interval: string }> = {
+      '1H': { days: 1, interval: 'hourly' },
+      '4H': { days: 3, interval: 'hourly' },
+      '1D': { days: 30, interval: 'daily' },
+    };
+
+    const config = timeframeConfig[timeframe] || timeframeConfig['1H'];
+
+    // Fetch from CoinGecko (free tier)
+    const coingeckoUrl = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${config.days}&interval=${config.interval}`;
+
+    console.log(`📊 Fetching historical data: ${symbol} ${timeframe} (${config.days} days)`);
+
+    const response = await fetch(coingeckoUrl, {
       headers: {
-        'X-CMC_PRO_API_KEY': process.env.COINMARKETCAP_API_KEY || '',
-        'Accept': 'application/json'
-      }
+        'Accept': 'application/json',
+        ...(process.env.COINGECKO_API_KEY && {
+          'x-cg-pro-api-key': process.env.COINGECKO_API_KEY
+        })
+      },
     });
 
     if (!response.ok) {
-      throw new Error(`CoinMarketCap API failed: ${response.status} ${response.statusText}`);
+      throw new Error(`CoinGecko API error: ${response.status}`);
     }
 
-    const cmcData = await response.json();
-    
-    if (!cmcData.data || !cmcData.data[cmcSymbol]) {
-      throw new Error('Invalid data format from CoinMarketCap');
-    }
+    const data = await response.json();
 
-    const currentPrice = cmcData.data[cmcSymbol].quote.USD.price;
-    const currentVolume = cmcData.data[cmcSymbol].quote.USD.volume_24h || 0;
-    
-    // Generate realistic historical data based on current price
-    const data: HistoricalDataPoint[] = [];
-    const nowTimestamp = Date.now();
-    const intervals = timeframeStr === '1H' ? 168 : timeframeStr === '4H' ? 180 : 365; // 7 days hourly, 30 days 4H, 1 year daily
-    const intervalMs = timeframeStr === '1H' ? 3600000 : timeframeStr === '4H' ? 14400000 : 86400000;
-    
-    for (let i = intervals; i >= 0; i--) {
-      const timestamp = nowTimestamp - (i * intervalMs);
-      // Generate realistic price variation (±5% from current)
-      const variation = (Math.random() - 0.5) * 0.1; // ±5%
-      const price = currentPrice * (1 + variation);
-      const volume = currentVolume * (0.8 + Math.random() * 0.4); // 80-120% of current volume
-      
-      data.push({
-        timestamp,
-        price: Math.round(price * 100) / 100,
-        volume: Math.round(volume)
-      });
-    }
-
-    console.log(`✅ Generated ${data.length} realistic historical data points from CoinMarketCap current data`);
-    
-    if (data.length === 0) {
-      throw new Error('No historical data available from CoinGecko');
-    }
-
-    res.status(200).json({
-      success: true,
-      data,
-      symbol: symbolStr,
-      timeframe: timeframeStr
+    // Transform CoinGecko data format
+    // CoinGecko returns: { prices: [[timestamp, price], ...], total_volumes: [[timestamp, volume], ...] }
+    const historicalData: HistoricalDataPoint[] = data.prices.map((priceData: [number, number], index: number) => {
+      const volumeData = data.total_volumes[index] || [priceData[0], 0];
+      return {
+        timestamp: priceData[0],
+        price: priceData[1],
+        volume: volumeData[1],
+      };
     });
 
-  } catch (error: any) {
-    console.error(`❌ Historical data fetch failed for ${symbolStr}:`, error);
+    // Filter based on timeframe to get appropriate number of data points
+    let filteredData = historicalData;
     
-    // Return error instead of fallback data
-    res.status(503).json({
+    if (timeframe === '1H') {
+      // Last 60 hours (hourly data)
+      filteredData = historicalData.slice(-60);
+    } else if (timeframe === '4H') {
+      // Last 72 hours (every 4 hours)
+      filteredData = historicalData.filter((_, index) => index % 4 === 0).slice(-72);
+    } else if (timeframe === '1D') {
+      // Last 90 days (daily data)
+      filteredData = historicalData.slice(-90);
+    }
+
+    console.log(`✅ Historical data fetched: ${filteredData.length} data points for ${symbol} ${timeframe}`);
+
+    // Cache for 5 minutes
+    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate');
+
+    return res.status(200).json({
+      success: true,
+      data: filteredData,
+      timeframe,
+      symbol: symbol.toUpperCase(),
+      dataPoints: filteredData.length,
+    });
+
+  } catch (error) {
+    console.error('Historical prices error:', error);
+
+    return res.status(500).json({
       success: false,
-      data: [],
-      symbol: symbolStr,
-      timeframe: timeframeStr,
-      error: `Real historical data unavailable: ${error.message}`
+      error: error instanceof Error ? error.message : 'Failed to fetch historical data',
+      timeframe: req.query.timeframe as string || '',
+      symbol: req.query.symbol as string || '',
+      dataPoints: 0,
     });
   }
 }
