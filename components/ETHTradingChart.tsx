@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import TradingChart from './TradingChart';
+import ModernTradingChart from './ModernTradingChart';
 import { Target } from 'lucide-react';
 
 interface RealTimeframeETHData {
@@ -578,12 +578,11 @@ export default function ETHTradingChart() {
         </div>
       </div>
 
-      {/* Enhanced Trading Chart */}
-      <TradingChart
+      {/* Modern Trading Chart */}
+      <ModernTradingChart
         key={`eth-chart-${realTimeData.timeframe}-${realTimeData.calculatedAt}`}
         symbol="ETH"
         currentPrice={realTimeData.currentPrice}
-        supportResistance={supportResistance}
         tradingZones={tradingZones}
         timeframe={realTimeData.timeframe}
       />
