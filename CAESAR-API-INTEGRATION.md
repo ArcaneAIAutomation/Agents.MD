@@ -13,12 +13,24 @@ The AgentMDC branch is dedicated to **Caesar API exclusive integration**, replac
 
 ## Caesar API Configuration
 
+### What Caesar Actually Is
+Caesar is a **research engine API** - NOT a trading/exchange API. It:
+- Searches and synthesizes information from multiple sources
+- Generates cited research reports with sources
+- Perfect for crypto news briefs, market intelligence, and due diligence
+- Should be paired with exchange APIs (Binance, Coinbase, CCXT) for actual trading
+
 ### API Credentials
 ```bash
 CAESAR_API_KEY=sk-572d19cd4d21.0XRZ1wLU0Vwnr6TpYkw3L2sWNgcsvzpXVuhVMN93HII
-CAESAR_API_BASE_URL=https://api.caesar.xyz
-USE_CAESAR_API_ONLY=true
 ```
+
+### API Details
+- **Base URL**: `https://api.caesar.xyz`
+- **Authentication**: `Authorization: Bearer <API_KEY>`
+- **Beta Limits**: 5 concurrent jobs, 200 monthly Compute Units (CU)
+- **Beta Access**: Requires 10,000 $CAESAR tokens (or email support)
+- **Compute Units**: 1-10 (~1 minute per CU), start with 2-3 for balanced speed/depth
 
 ### Vercel Environment Variables
 - ✅ `OPENAI_API_KEY` - Added (for AI analysis)
@@ -29,17 +41,29 @@ USE_CAESAR_API_ONLY=true
 
 ### ✅ Completed
 1. **Caesar API Client** (`utils/caesarClient.ts`)
-   - Mobile-optimized request handling
-   - 15-second timeout for mobile networks
-   - Retry logic with 3 attempts
+   - Full research engine API implementation
+   - Create research jobs with query + optional files
+   - Poll job status until completion
+   - Retrieve results with citations
+   - Upload files for research context
+   - Get raw source content for citations
    - Bearer token authentication
    - Error handling and recovery
 
-2. **Market Data Endpoint** (`pages/api/caesar/market-data.ts`)
-   - GET endpoint for real-time market data
-   - Symbol parameter support
-   - 30-second caching for performance
-   - Mobile-optimized response format
+2. **Crypto News Endpoint** (`pages/api/caesar/crypto-news.ts`)
+   - GET endpoint for crypto news briefs
+   - Configurable assets (BTC, ETH, SOL, etc.)
+   - Configurable lookback period (hours)
+   - JSON or Markdown output format
+   - Structured output with headlines, summaries, URLs, timestamps
+   - 5-minute caching for performance
+
+3. **Market Research Endpoint** (`pages/api/caesar/market-research.ts`)
+   - Deep dive research on any crypto topic
+   - Configurable compute units (1-10) for research depth
+   - Returns synthesized content + cited sources
+   - 30-minute caching for deep research
+   - Perfect for due diligence and analysis
 
 3. **Environment Configuration**
    - Caesar API key configured
@@ -120,29 +144,51 @@ caesarClient.healthCheck()
 
 ## API Endpoints Structure
 
-### Market Data
+### Crypto News Brief
 ```
-GET /api/caesar/market-data?symbol=btc
-Response: Real-time price, volume, and market metrics
+GET /api/caesar/crypto-news?assets=BTC,ETH,SOL&hours=12&format=json
+Response: {
+  success: true,
+  data: {
+    date_utc: "2025-01-05T...",
+    items: [
+      {
+        asset: "BTC",
+        headline: "Bitcoin surges past $45k...",
+        summary: "Brief summary...",
+        url: "https://source.com/article",
+        time_utc: "2025-01-05T10:30:00Z"
+      }
+    ],
+    job_id: "research_job_id"
+  }
+}
 ```
 
-### Technical Analysis (To Be Implemented)
+### Market Research
 ```
-GET /api/caesar/technical-analysis?symbol=btc&timeframe=1h
-Response: Indicators, patterns, support/resistance levels
+GET /api/caesar/market-research?topic=Ethereum%20Layer%202%20scaling&depth=3
+Response: {
+  success: true,
+  data: {
+    job_id: "research_job_id",
+    content: "Comprehensive research synthesis...",
+    sources: [
+      {
+        title: "Source article title",
+        url: "https://source.com",
+        citation_index: 1
+      }
+    ]
+  }
+}
 ```
 
-### Trading Signals (To Be Implemented)
-```
-GET /api/caesar/trading-signals?symbol=btc
-Response: AI-generated trade recommendations with confidence scores
-```
-
-### Market Intelligence (To Be Implemented)
-```
-GET /api/caesar/market-intelligence?symbol=btc
-Response: Sentiment, whale movements, institutional flow
-```
+### Future Endpoints (To Be Implemented)
+- **Regulatory Intelligence**: Track crypto regulatory changes
+- **DeFi Protocol Analysis**: Deep dive on specific protocols
+- **Token Due Diligence**: Research new token launches
+- **Market Sentiment Analysis**: Aggregate sentiment from multiple sources
 
 ## Mobile Optimization Features
 
