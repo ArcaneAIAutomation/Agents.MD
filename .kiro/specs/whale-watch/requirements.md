@@ -43,9 +43,11 @@ For each whale transaction, Caesar researches:
 ### Data Sources
 
 **Blockchain Data:**
-- Etherscan API (Ethereum)
-- Blockchain.com API (Bitcoin)
-- Whale Alert API (optional premium)
+- ✅ Blockchain.com API (Bitcoin) - WORKING
+- ⚠️ Etherscan API (Ethereum) - Need valid key
+- Alternative: Alchemy API (Ethereum) - Free tier available
+- Alternative: Infura API (Ethereum) - Free tier available
+- Optional: Whale Alert API (premium, pre-filtered whale data)
 
 **Context Research:**
 - Caesar API (2 CU per whale transaction)
