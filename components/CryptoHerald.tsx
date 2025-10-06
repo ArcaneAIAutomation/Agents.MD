@@ -420,8 +420,8 @@ const CryptoHerald: React.FC = () => {
                         </div>
                       </div>
                       <span className="font-semibold">Caesar API</span>
-                      <span className="text-xs bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 px-2 py-0.5 rounded-full font-bold animate-pulse">
-                        Coming Soon
+                      <span className="text-xs bg-gradient-to-r from-green-100 to-green-200 text-green-800 px-2 py-0.5 rounded-full font-bold">
+                        Live
                       </span>
                     </span>
                   </span>

@@ -250,11 +250,14 @@ export default function WhaleWatchDashboard() {
     return (
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="flex items-center justify-center h-64">
-          <div className="text-center">
+          <div className="text-center max-w-2xl">
             <div className="text-6xl mb-4">🐋</div>
             <h3 className="text-2xl font-bold text-gray-900 mb-2">Bitcoin Whale Watch</h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 mb-2">
               Click below to scan for large Bitcoin transactions (&gt;50 BTC)
+            </p>
+            <p className="text-sm text-gray-500 mb-6">
+              AI analysis powered by Caesar API • Analysis takes 2-3 minutes (max 7 minutes) • Will timeout if not completed
             </p>
             <button
               onClick={fetchWhaleData}
@@ -292,7 +295,7 @@ export default function WhaleWatchDashboard() {
             🐋 Bitcoin Whale Watch
           </h2>
           <p className="text-sm text-gray-600 mt-1">
-            Live tracking of large BTC transactions (&gt;50 BTC)
+            Live tracking of large BTC transactions (&gt;50 BTC) • Caesar AI analysis: 2-3 min (max 7 min timeout)
           </p>
         </div>
         
