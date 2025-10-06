@@ -25,9 +25,9 @@ interface WhaleData {
 
 export default function WhaleWatchDashboard() {
   const [whaleData, setWhaleData] = useState<WhaleData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [analyzingTx, setAnalyzingTx] = useState<string | null>(null);
 
   const fetchWhaleData = async () => {
@@ -36,16 +36,25 @@ export default function WhaleWatchDashboard() {
       setError(null);
       
       const response = await fetch('/api/whale-watch/detect?threshold=100');
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      
       const data = await response.json();
       
       if (data.success) {
         setWhaleData(data);
         setLastUpdate(new Date());
+        setError(null);
       } else {
-        setError(data.error || 'Failed to fetch whale data');
+        throw new Error(data.error || 'Failed to fetch whale data');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch whale data');
+      const errorMsg = err instanceof Error ? err.message : 'Failed to fetch whale data';
+      setError(errorMsg);
+      console.error('Whale detection error:', err);
+      // Don't clear existing data on error
     } finally {
       setLoading(false);
     }
@@ -62,6 +71,10 @@ export default function WhaleWatchDashboard() {
         body: JSON.stringify(whale),
       });
       
+      if (!response.ok) {
+        throw new Error(`Analysis API error: ${response.status}`);
+      }
+      
       const data = await response.json();
       
       if (data.success && data.jobId) {
@@ -77,9 +90,20 @@ export default function WhaleWatchDashboard() {
         
         // Poll for results
         pollAnalysis(whale.txHash, data.jobId);
+      } else {
+        throw new Error(data.error || 'Failed to start analysis');
       }
     } catch (error) {
       console.error('Failed to start analysis:', error);
+      // Mark as failed
+      if (whaleData) {
+        const updatedWhales = whaleData.whales.map(w =>
+          w.txHash === whale.txHash
+            ? { ...w, analysisStatus: 'failed' as const }
+            : w
+        );
+        setWhaleData({ ...whaleData, whales: updatedWhales });
+      }
     } finally {
       setAnalyzingTx(null);
     }
@@ -90,52 +114,66 @@ export default function WhaleWatchDashboard() {
     let attempts = 0;
     
     const poll = async () => {
-      if (attempts >= maxAttempts) return;
+      if (attempts >= maxAttempts) {
+        console.error('Analysis polling timeout');
+        // Mark as failed after timeout
+        setWhaleData(prev => {
+          if (!prev) return prev;
+          const updatedWhales = prev.whales.map(w =>
+            w.txHash === txHash
+              ? { ...w, analysisStatus: 'failed' as const }
+              : w
+          );
+          return { ...prev, whales: updatedWhales };
+        });
+        return;
+      }
       attempts++;
       
       try {
         const response = await fetch(`/api/whale-watch/analysis/${jobId}`);
+        
+        if (!response.ok) {
+          throw new Error(`Polling error: ${response.status}`);
+        }
+        
         const data = await response.json();
         
         if (data.status === 'completed' && data.analysis) {
           // Update whale with completed analysis
-          if (whaleData) {
-            const updatedWhales = whaleData.whales.map(w =>
+          setWhaleData(prev => {
+            if (!prev) return prev;
+            const updatedWhales = prev.whales.map(w =>
               w.txHash === txHash
                 ? { ...w, analysis: data.analysis, analysisStatus: 'completed' as const, sources: data.sources }
                 : w
             );
-            setWhaleData({ ...whaleData, whales: updatedWhales });
-          }
+            return { ...prev, whales: updatedWhales };
+          });
         } else if (data.status === 'failed') {
           // Mark as failed
-          if (whaleData) {
-            const updatedWhales = whaleData.whales.map(w =>
+          setWhaleData(prev => {
+            if (!prev) return prev;
+            const updatedWhales = prev.whales.map(w =>
               w.txHash === txHash
                 ? { ...w, analysisStatus: 'failed' as const }
                 : w
             );
-            setWhaleData({ ...whaleData, whales: updatedWhales });
-          }
+            return { ...prev, whales: updatedWhales };
+          });
         } else {
           // Still processing, poll again in 2 seconds
           setTimeout(poll, 2000);
         }
       } catch (error) {
         console.error('Polling error:', error);
+        // Retry on error
+        setTimeout(poll, 3000);
       }
     };
     
     poll();
   };
-
-  useEffect(() => {
-    fetchWhaleData();
-    
-    // Auto-refresh every 60 seconds
-    const interval = setInterval(fetchWhaleData, 60000);
-    return () => clearInterval(interval);
-  }, []);
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -185,32 +223,38 @@ export default function WhaleWatchDashboard() {
     }
   };
 
-  if (loading && !whaleData) {
+  // Initial state - no data loaded yet
+  if (!whaleData && !loading && !error) {
     return (
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <RefreshCw className="h-12 w-12 text-blue-500 animate-spin mx-auto mb-4" />
-            <p className="text-gray-700 font-medium">Loading whale transactions...</p>
+            <div className="text-6xl mb-4">🐋</div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">Bitcoin Whale Watch</h3>
+            <p className="text-gray-600 mb-6">
+              Click below to scan for large Bitcoin transactions (&gt;100 BTC)
+            </p>
+            <button
+              onClick={fetchWhaleData}
+              className="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-lg font-bold rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg"
+            >
+              🔍 Scan for Whale Transactions
+            </button>
           </div>
         </div>
       </div>
     );
   }
 
-  if (error) {
+  // Loading state
+  if (loading && !whaleData) {
     return (
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <p className="text-red-600 font-medium mb-4">{error}</p>
-            <button
-              onClick={fetchWhaleData}
-              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              Retry
-            </button>
+            <RefreshCw className="h-12 w-12 text-blue-500 animate-spin mx-auto mb-4" />
+            <p className="text-gray-700 font-medium">Scanning blockchain for whale transactions...</p>
+            <p className="text-gray-500 text-sm mt-2">This may take a few seconds</p>
           </div>
         </div>
       </div>
@@ -231,21 +275,43 @@ export default function WhaleWatchDashboard() {
         </div>
         
         <div className="flex items-center space-x-4">
-          <div className="text-right">
-            <div className="text-xs text-gray-500">Last Updated</div>
-            <div className="text-sm font-medium text-gray-700">
-              {lastUpdate.toLocaleTimeString()}
+          {lastUpdate && (
+            <div className="text-right">
+              <div className="text-xs text-gray-500">Last Updated</div>
+              <div className="text-sm font-medium text-gray-700">
+                {lastUpdate.toLocaleTimeString()}
+              </div>
             </div>
-          </div>
+          )}
           <button
             onClick={fetchWhaleData}
             disabled={loading}
             className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+            title="Refresh whale data"
           >
             <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
+
+      {/* Error Banner (non-blocking) */}
+      {error && (
+        <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <AlertCircle className="h-5 w-5 text-red-500 mr-2 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-red-800 font-medium">Error loading whale data</p>
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+            <button
+              onClick={fetchWhaleData}
+              className="ml-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -361,6 +427,25 @@ export default function WhaleWatchDashboard() {
                     <div className="flex items-center justify-center">
                       <RefreshCw className="h-5 w-5 text-purple-600 animate-spin mr-2" />
                       <span className="text-purple-700 font-medium">Caesar AI is analyzing... (1-2 minutes)</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {whale.analysisStatus === 'failed' && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
+                        <span className="text-red-700 font-medium">Analysis failed</span>
+                      </div>
+                      <button
+                        onClick={() => analyzeTransaction(whale)}
+                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm"
+                      >
+                        Retry Analysis
+                      </button>
                     </div>
                   </div>
                 </div>
