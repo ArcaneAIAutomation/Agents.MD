@@ -110,7 +110,7 @@ export default function WhaleWatchDashboard() {
   };
 
   const pollAnalysis = async (txHash: string, jobId: string) => {
-    const maxAttempts = 7; // 7 minutes max (7 attempts × 60 seconds = 420 seconds)
+    const maxAttempts = 10; // 10 minutes max (10 attempts × 60 seconds = 600 seconds)
     let attempts = 0;
     
     const poll = async () => {
@@ -257,7 +257,7 @@ export default function WhaleWatchDashboard() {
               Click below to scan for large Bitcoin transactions (&gt;50 BTC)
             </p>
             <p className="text-sm text-gray-500 mb-6">
-              AI analysis powered by Caesar API • Analysis takes 2-3 minutes (max 7 minutes) • Will timeout if not completed
+              AI analysis powered by Caesar API • Analysis takes 5-7 minutes typically (max 10 minutes) • Will timeout if not completed
             </p>
             <button
               onClick={fetchWhaleData}
@@ -295,7 +295,7 @@ export default function WhaleWatchDashboard() {
             🐋 Bitcoin Whale Watch
           </h2>
           <p className="text-sm text-gray-600 mt-1">
-            Live tracking of large BTC transactions (&gt;50 BTC) • Caesar AI analysis: 2-3 min (max 7 min timeout)
+            Live tracking of large BTC transactions (&gt;50 BTC) • Caesar AI analysis: 5-7 min (max 10 min timeout)
           </p>
         </div>
         
@@ -455,7 +455,7 @@ export default function WhaleWatchDashboard() {
                         <span className="text-purple-700 font-medium">Caesar AI is researching...</span>
                       </div>
                       <p className="text-purple-600 text-sm">
-                        This typically takes 2-3 minutes with deep research (max 7 minutes)
+                        This typically takes 5-7 minutes with deep research (max 10 minutes)
                       </p>
                       <p className="text-purple-500 text-xs">
                         Checking status every 60 seconds • Analyzing market data, news, and historical patterns
