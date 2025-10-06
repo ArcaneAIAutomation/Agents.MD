@@ -1,23 +1,50 @@
 # Etherscan API Key Setup Guide
 
 ## Current Status
-❌ **Etherscan API Key Invalid**
+❌ **Etherscan V2 API Key Invalid**
 - Current Key: `6S8BPC9PYMKQXFX9P265NTMEYQAT98QQR2`
 - Error: "Invalid API Key (#err2)|10"
+- API Version: V2 (multi-chain support)
+- Endpoint Format: `https://api.etherscan.io/v2/api?chainid=1&...`
 
-## How to Get a New Etherscan API Key
+## Why V2 API?
+Etherscan V2 allows you to use **ONE API key** for all 50+ supported chains:
+- Ethereum (chainid=1)
+- BSC (chainid=56)
+- Polygon (chainid=137)
+- Arbitrum (chainid=42161)
+- Optimism (chainid=10)
+- And 45+ more chains!
 
-### Step 1: Create Etherscan Account
-1. Go to https://etherscan.io/register
+## How to Get a Valid Etherscan V2 API Key
+
+### Step 1: Create/Login to Etherscan Account
+1. Go to https://etherscan.io/register (or login if you have account)
 2. Create a free account
-3. Verify your email
+3. **IMPORTANT**: Verify your email (key won't work without verification!)
 
-### Step 2: Generate API Key
+### Step 2: Generate V2 API Key
 1. Log in to https://etherscan.io/login
 2. Go to https://etherscan.io/myapikey
 3. Click "Add" to create a new API key
-4. Give it a name (e.g., "AgentMDC Whale Watch")
-5. Copy the generated API key
+4. Give it a name (e.g., "AgentMDC Whale Watch V2")
+5. **Wait 5 minutes** for the key to activate
+6. Copy the generated API key
+
+### Step 3: Verify Key is Active
+Test your new key immediately:
+```bash
+curl "https://api.etherscan.io/v2/api?chainid=1&module=account&action=balance&address=0x28C6c06298d514Db089934071355E5743bf21d60&tag=latest&apikey=YOUR_NEW_KEY"
+```
+
+Expected response:
+```json
+{
+  "status": "1",
+  "message": "OK",
+  "result": "123456789000000000000000"
+}
+```
 
 ### Step 3: Update Environment Variables
 
