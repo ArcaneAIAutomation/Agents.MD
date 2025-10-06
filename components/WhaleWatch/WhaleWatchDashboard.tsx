@@ -141,7 +141,13 @@ export default function WhaleWatchDashboard() {
         }
         
         const data = await response.json();
-        console.log(`📡 Poll response:`, data);
+        console.log(`📡 Poll response:`, JSON.stringify(data, null, 2));
+        
+        // Check if API call itself failed
+        if (data.success === false) {
+          console.error('❌ API returned success: false', data.error);
+          throw new Error(data.error || 'API request failed');
+        }
         
         if (data.status === 'completed' && data.analysis) {
           console.log('✅ Analysis completed!', data.analysis);
@@ -155,8 +161,8 @@ export default function WhaleWatchDashboard() {
             );
             return { ...prev, whales: updatedWhales };
           });
-        } else if (data.status === 'failed') {
-          console.error('❌ Analysis failed on server');
+        } else if (data.status === 'failed' || data.status === 'cancelled' || data.status === 'expired') {
+          console.error(`❌ Analysis ${data.status} on server`);
           // Mark as failed
           setWhaleData(prev => {
             if (!prev) return prev;
@@ -174,22 +180,17 @@ export default function WhaleWatchDashboard() {
         }
       } catch (error) {
         console.error('❌ Polling error:', error);
-        // Retry on error (but still count the attempt)
-        if (attempts < maxAttempts) {
-          console.log(`🔄 Retrying in 3s... (attempt ${attempts}/${maxAttempts})`);
-          setTimeout(poll, 3000);
-        } else {
-          console.error('❌ Max attempts reached, giving up');
-          setWhaleData(prev => {
-            if (!prev) return prev;
-            const updatedWhales = prev.whales.map(w =>
-              w.txHash === txHash
-                ? { ...w, analysisStatus: 'failed' as const }
-                : w
-            );
-            return { ...prev, whales: updatedWhales };
-          });
-        }
+        // Don't retry on error - just mark as failed
+        console.error('❌ Marking analysis as failed due to polling error');
+        setWhaleData(prev => {
+          if (!prev) return prev;
+          const updatedWhales = prev.whales.map(w =>
+            w.txHash === txHash
+              ? { ...w, analysisStatus: 'failed' as const }
+              : w
+          );
+          return { ...prev, whales: updatedWhales };
+        });
       }
     };
     
