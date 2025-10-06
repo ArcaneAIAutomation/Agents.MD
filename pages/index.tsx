@@ -5,6 +5,7 @@ import BTCMarketAnalysis from '../components/BTCMarketAnalysis'
 import ETHMarketAnalysis from '../components/ETHMarketAnalysis'
 import TradeGenerationEngine from '../components/TradeGenerationEngine'
 import NexoRegulatoryPanel from '../components/NexoRegulatoryPanel'
+import WhaleWatchDashboard from '../components/WhaleWatch/WhaleWatchDashboard'
 
 export default function Home() {
   return (
@@ -85,6 +86,21 @@ export default function Home() {
               <div className="p-6">
                 <ETHMarketAnalysis />
               </div>
+            </div>
+          </div>
+
+          {/* Whale Watch - Live Tracking */}
+          <div className="mobile-bg-card border-2 border-gray-900 shadow-lg">
+            <div className="border-b-2 border-gray-900 bg-gradient-to-r from-blue-50 to-cyan-50 px-6 py-3">
+              <h2 className="text-2xl font-bold mobile-text-primary font-serif">
+                🐋 BITCOIN WHALE WATCH
+              </h2>
+              <p className="text-sm mobile-text-secondary font-serif italic mt-1">
+                Real-time tracking of large Bitcoin transactions and market movements
+              </p>
+            </div>
+            <div className="p-6">
+              <WhaleWatchDashboard />
             </div>
           </div>
 
