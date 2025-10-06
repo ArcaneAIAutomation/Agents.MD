@@ -8,7 +8,7 @@ import { Caesar } from '../../../../utils/caesarClient';
 
 interface AnalysisResultResponse {
   success: boolean;
-  status?: 'queued' | 'researching' | 'completed' | 'failed';
+  status?: 'queued' | 'researching' | 'completed' | 'failed' | 'cancelled' | 'expired' | 'pending';
   analysis?: any;
   sources?: any[];
   error?: string;
@@ -42,6 +42,8 @@ export default async function handler(
 
     // Get job status from Caesar
     const job = await Caesar.getResearch(jobId);
+    
+    console.log(`📊 Job status: ${job.status}, has content: ${!!job.content}, has transformed: ${!!job.transformed_content}`);
 
     if (job.status === 'completed') {
       console.log(`✅ Analysis complete for job: ${jobId}`);
@@ -50,14 +52,40 @@ export default async function handler(
       let analysis = null;
       if (job.transformed_content) {
         try {
+          console.log(`🔍 Parsing transformed_content: ${job.transformed_content.substring(0, 200)}...`);
           analysis = JSON.parse(job.transformed_content);
+          console.log(`✅ Successfully parsed analysis JSON`);
         } catch (parseError) {
-          console.error('Failed to parse analysis JSON, using raw content');
+          console.error('❌ Failed to parse analysis JSON:', parseError);
+          console.error('Raw transformed_content:', job.transformed_content);
+          // Fallback: use raw content
           analysis = {
-            reasoning: job.content || 'Analysis completed but format error',
+            reasoning: job.content || job.transformed_content || 'Analysis completed but format error',
             confidence: 50,
+            transaction_type: 'unknown',
+            impact_prediction: 'neutral',
+            key_findings: ['Analysis completed but could not parse structured output'],
           };
         }
+      } else if (job.content) {
+        // No transformed content, use raw content
+        console.log(`⚠️ No transformed_content, using raw content`);
+        analysis = {
+          reasoning: job.content,
+          confidence: 50,
+          transaction_type: 'unknown',
+          impact_prediction: 'neutral',
+          key_findings: ['Analysis completed without structured output'],
+        };
+      } else {
+        console.error(`❌ No content or transformed_content in completed job`);
+        analysis = {
+          reasoning: 'Analysis completed but no content returned',
+          confidence: 0,
+          transaction_type: 'unknown',
+          impact_prediction: 'neutral',
+          key_findings: ['No analysis content available'],
+        };
       }
 
       // Extract sources
@@ -80,22 +108,22 @@ export default async function handler(
       });
     }
 
-    if (job.status === 'failed') {
-      console.error(`❌ Analysis failed for job: ${jobId}`);
+    if (job.status === 'failed' || job.status === 'cancelled' || job.status === 'expired') {
+      console.error(`❌ Analysis ${job.status} for job: ${jobId}`);
       return res.status(500).json({
         success: false,
         status: 'failed',
-        error: 'Analysis job failed',
+        error: `Analysis job ${job.status}`,
         timestamp: new Date().toISOString(),
       });
     }
 
-    // Still processing
+    // Still processing (queued, researching, pending)
     console.log(`⏳ Job ${jobId} status: ${job.status}`);
     
     return res.status(200).json({
       success: true,
-      status: job.status,
+      status: job.status as any,
       timestamp: new Date().toISOString(),
     });
 

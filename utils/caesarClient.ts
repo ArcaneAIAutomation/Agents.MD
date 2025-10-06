@@ -19,7 +19,7 @@ export type CreateResearchBody = {
   system_prompt?: string;
 };
 
-export type ResearchStatus = 'queued' | 'researching' | 'completed' | 'failed';
+export type ResearchStatus = 'queued' | 'researching' | 'completed' | 'failed' | 'cancelled' | 'expired' | 'pending';
 
 export type ResearchResult = {
   id: string;
@@ -31,10 +31,12 @@ export type ResearchResult = {
 
 export type ResearchJob = {
   id: string;
+  created_at?: string; // ISO 8601 timestamp
   status: ResearchStatus;
+  query?: string; // Original query
   results?: ResearchResult[];
-  content?: string; // Final synthesis
-  transformed_content?: string; // Formatted output if system_prompt used
+  content?: string | null; // Final synthesis (null until completed)
+  transformed_content?: string | null; // Formatted output if system_prompt used (null until completed)
 };
 
 export type PaginatedResponse<T> = {

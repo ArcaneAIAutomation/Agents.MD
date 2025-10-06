@@ -70,21 +70,18 @@ Research and answer:
 Provide sources for all claims and focus on actionable intelligence for traders.
     `.trim();
 
-    // System prompt for structured output
-    const systemPrompt = `
-You are formatting research output for crypto traders. Return strict JSON:
+    // System prompt for structured output - MUST return valid JSON only
+    const systemPrompt = `You are a crypto market analyst. Analyze the whale transaction and return ONLY valid JSON (no markdown, no code blocks, just raw JSON):
 {
-  "transaction_type": "string (exchange_deposit, exchange_withdrawal, otc_deal, accumulation, distribution)",
-  "reasoning": "string (2-3 sentences explaining why)",
-  "impact_prediction": "bullish|bearish|neutral",
-  "confidence": "number (0-100)",
-  "key_findings": ["string", "string", "string"],
-  "market_context": "string (current market conditions)",
-  "historical_precedent": "string (what happened in similar cases)",
-  "trader_action": "string (recommended action for traders)",
-  "sources": [{"title": "string", "url": "string"}]
-}
-    `.trim();
+  "transaction_type": "exchange_deposit or exchange_withdrawal or otc_deal or accumulation or distribution",
+  "reasoning": "2-3 sentences explaining why this transaction happened",
+  "impact_prediction": "bullish or bearish or neutral",
+  "confidence": 85,
+  "key_findings": ["finding 1", "finding 2", "finding 3"],
+  "market_context": "current market conditions",
+  "historical_precedent": "what happened in similar cases",
+  "trader_action": "recommended action for traders"
+}`.trim();
 
     // Create Caesar research job (2 CU for balanced speed/depth)
     const job = await Caesar.createResearch({
