@@ -137,12 +137,12 @@ export class BlockchainClient {
   }
 
   /**
-   * Detect whale transactions (>100 BTC)
+   * Detect whale transactions (>50 BTC)
    * Returns transactions with total output > threshold
    */
   detectWhaleTransactions(
     transactions: BitcoinTransaction[],
-    thresholdBTC: number = 100,
+    thresholdBTC: number = 50,
     currentBTCPrice: number = 45000
   ): WhaleTransaction[] {
     const whaleTransactions: WhaleTransaction[] = [];

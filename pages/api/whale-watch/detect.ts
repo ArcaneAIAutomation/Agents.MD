@@ -28,7 +28,7 @@ export default async function handler(
   }
 
   try {
-    const { threshold = '100' } = req.query;
+    const { threshold = '50' } = req.query;
     const thresholdBTC = parseFloat(threshold as string);
 
     console.log(`🐋 Detecting whale transactions (>${thresholdBTC} BTC)...`);

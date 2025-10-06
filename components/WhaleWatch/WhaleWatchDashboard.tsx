@@ -35,7 +35,7 @@ export default function WhaleWatchDashboard() {
       setLoading(true);
       setError(null);
       
-      const response = await fetch('/api/whale-watch/detect?threshold=100');
+      const response = await fetch('/api/whale-watch/detect?threshold=50');
       
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
@@ -232,7 +232,7 @@ export default function WhaleWatchDashboard() {
             <div className="text-6xl mb-4">🐋</div>
             <h3 className="text-2xl font-bold text-gray-900 mb-2">Bitcoin Whale Watch</h3>
             <p className="text-gray-600 mb-6">
-              Click below to scan for large Bitcoin transactions (&gt;100 BTC)
+              Click below to scan for large Bitcoin transactions (&gt;50 BTC)
             </p>
             <button
               onClick={fetchWhaleData}
@@ -270,7 +270,7 @@ export default function WhaleWatchDashboard() {
             🐋 Bitcoin Whale Watch
           </h2>
           <p className="text-sm text-gray-600 mt-1">
-            Live tracking of large BTC transactions (&gt;100 BTC)
+            Live tracking of large BTC transactions (&gt;50 BTC)
           </p>
         </div>
         
@@ -522,7 +522,7 @@ export default function WhaleWatchDashboard() {
           <Activity className="h-16 w-16 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-600 text-lg font-medium">No whale transactions detected</p>
           <p className="text-gray-500 text-sm mt-2">
-            Monitoring for transactions &gt;100 BTC
+            Monitoring for transactions &gt;50 BTC
           </p>
         </div>
       )}
