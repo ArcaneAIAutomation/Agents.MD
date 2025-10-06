@@ -11,6 +11,9 @@ interface WhaleTransaction {
   timestamp: string;
   type: 'exchange_deposit' | 'exchange_withdrawal' | 'whale_to_whale' | 'unknown';
   description: string;
+  analysisJobId?: string;
+  analysis?: any;
+  analysisStatus?: 'pending' | 'analyzing' | 'completed' | 'failed';
 }
 
 interface WhaleData {
@@ -25,6 +28,7 @@ export default function WhaleWatchDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [analyzingTx, setAnalyzingTx] = useState<string | null>(null);
 
   const fetchWhaleData = async () => {
     try {
@@ -45,6 +49,84 @@ export default function WhaleWatchDashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const analyzeTransaction = async (whale: WhaleTransaction) => {
+    try {
+      setAnalyzingTx(whale.txHash);
+      
+      // Start Caesar analysis
+      const response = await fetch('/api/whale-watch/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(whale),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success && data.jobId) {
+        // Update whale with job ID
+        if (whaleData) {
+          const updatedWhales = whaleData.whales.map(w =>
+            w.txHash === whale.txHash
+              ? { ...w, analysisJobId: data.jobId, analysisStatus: 'analyzing' as const }
+              : w
+          );
+          setWhaleData({ ...whaleData, whales: updatedWhales });
+        }
+        
+        // Poll for results
+        pollAnalysis(whale.txHash, data.jobId);
+      }
+    } catch (error) {
+      console.error('Failed to start analysis:', error);
+    } finally {
+      setAnalyzingTx(null);
+    }
+  };
+
+  const pollAnalysis = async (txHash: string, jobId: string) => {
+    const maxAttempts = 60; // 2 minutes max
+    let attempts = 0;
+    
+    const poll = async () => {
+      if (attempts >= maxAttempts) return;
+      attempts++;
+      
+      try {
+        const response = await fetch(`/api/whale-watch/analysis/${jobId}`);
+        const data = await response.json();
+        
+        if (data.status === 'completed' && data.analysis) {
+          // Update whale with completed analysis
+          if (whaleData) {
+            const updatedWhales = whaleData.whales.map(w =>
+              w.txHash === txHash
+                ? { ...w, analysis: data.analysis, analysisStatus: 'completed' as const, sources: data.sources }
+                : w
+            );
+            setWhaleData({ ...whaleData, whales: updatedWhales });
+          }
+        } else if (data.status === 'failed') {
+          // Mark as failed
+          if (whaleData) {
+            const updatedWhales = whaleData.whales.map(w =>
+              w.txHash === txHash
+                ? { ...w, analysisStatus: 'failed' as const }
+                : w
+            );
+            setWhaleData({ ...whaleData, whales: updatedWhales });
+          }
+        } else {
+          // Still processing, poll again in 2 seconds
+          setTimeout(poll, 2000);
+        }
+      } catch (error) {
+        console.error('Polling error:', error);
+      }
+    };
+    
+    poll();
   };
 
   useEffect(() => {
@@ -252,6 +334,101 @@ export default function WhaleWatchDashboard() {
                   </div>
                 </div>
               </div>
+
+              {/* AI Analysis Section */}
+              {!whale.analysisJobId && !whale.analysis && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <button
+                    onClick={() => analyzeTransaction(whale)}
+                    disabled={analyzingTx === whale.txHash}
+                    className="w-full py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all font-medium disabled:opacity-50"
+                  >
+                    {analyzingTx === whale.txHash ? (
+                      <span className="flex items-center justify-center">
+                        <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                        Starting AI Analysis...
+                      </span>
+                    ) : (
+                      <span>🤖 Analyze with Caesar AI</span>
+                    )}
+                  </button>
+                </div>
+              )}
+
+              {whale.analysisStatus === 'analyzing' && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <div className="flex items-center justify-center">
+                      <RefreshCw className="h-5 w-5 text-purple-600 animate-spin mr-2" />
+                      <span className="text-purple-700 font-medium">Caesar AI is analyzing... (1-2 minutes)</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {whale.analysisStatus === 'completed' && whale.analysis && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-300 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-bold text-purple-900 flex items-center">
+                        🤖 Caesar AI Analysis
+                      </h4>
+                      <span className="px-2 py-1 bg-purple-600 text-white text-xs font-bold rounded">
+                        {whale.analysis.confidence}% Confidence
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-3 text-sm">
+                      <div>
+                        <span className="font-semibold text-gray-900">Type:</span>
+                        <span className="ml-2 text-gray-700">{whale.analysis.transaction_type?.replace(/_/g, ' ').toUpperCase()}</span>
+                      </div>
+                      
+                      <div>
+                        <span className="font-semibold text-gray-900">Reasoning:</span>
+                        <p className="text-gray-700 mt-1">{whale.analysis.reasoning}</p>
+                      </div>
+                      
+                      {whale.analysis.key_findings && whale.analysis.key_findings.length > 0 && (
+                        <div>
+                          <span className="font-semibold text-gray-900">Key Findings:</span>
+                          <ul className="mt-1 space-y-1">
+                            {whale.analysis.key_findings.map((finding: string, idx: number) => (
+                              <li key={idx} className="text-gray-700">• {finding}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      
+                      {whale.analysis.trader_action && (
+                        <div className="bg-yellow-50 border border-yellow-300 rounded p-3 mt-3">
+                          <span className="font-semibold text-gray-900">💡 Trader Action:</span>
+                          <p className="text-gray-700 mt-1">{whale.analysis.trader_action}</p>
+                        </div>
+                      )}
+                      
+                      {whale.analysis.sources && whale.analysis.sources.length > 0 && (
+                        <div className="mt-3">
+                          <span className="font-semibold text-gray-900">📚 Sources ({whale.analysis.sources.length}):</span>
+                          <div className="mt-2 space-y-1">
+                            {whale.analysis.sources.slice(0, 3).map((source: any, idx: number) => (
+                              <a
+                                key={idx}
+                                href={source.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block text-blue-600 hover:text-blue-800 text-xs"
+                              >
+                                {idx + 1}. {source.title} →
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
