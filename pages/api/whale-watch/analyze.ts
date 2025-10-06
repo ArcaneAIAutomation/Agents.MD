@@ -84,18 +84,26 @@ Provide sources for all claims and focus on actionable intelligence for traders.
 }`.trim();
 
     // Create Caesar research job (2 CU for balanced speed/depth)
+    console.log('📤 Sending request to Caesar API...');
+    console.log(`Query length: ${query.length} chars`);
+    console.log(`System prompt length: ${systemPrompt.length} chars`);
+    
     const job = await Caesar.createResearch({
       query,
       compute_units: 2,
       system_prompt: systemPrompt,
     });
 
-    console.log(`✅ Caesar job created: ${job.id}`);
+    console.log(`✅ Caesar job created successfully`);
+    console.log(`Job ID: ${job.id}`);
+    console.log(`Initial status: ${job.status}`);
+    console.log(`Full response:`, JSON.stringify(job, null, 2));
 
     // Return job ID immediately for polling
     return res.status(200).json({
       success: true,
       jobId: job.id,
+      status: job.status,
       timestamp: new Date().toISOString(),
     });
 

@@ -55,25 +55,40 @@ async function caesarFetch(path: string, init: RequestInit = {}) {
   const apiKey = process.env.CAESAR_API_KEY;
   
   if (!apiKey) {
+    console.error('❌ CAESAR_API_KEY not found in environment');
     throw new Error('CAESAR_API_KEY environment variable is not set');
   }
 
-  const res = await fetch(`${BASE_URL}${path}`, {
-    ...init,
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      Accept: "application/json",
-      ...(init.headers || {}),
-    },
-    cache: "no-store",
-  });
+  const url = `${BASE_URL}${path}`;
+  console.log(`🌐 Caesar API Request: ${init.method || 'GET'} ${url}`);
 
-  if (!res.ok) {
-    const msg = await res.text().catch(() => "");
-    throw new Error(`Caesar ${res.status}: ${msg || res.statusText}`);
+  try {
+    const res = await fetch(url, {
+      ...init,
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: "application/json",
+        ...(init.headers || {}),
+      },
+      cache: "no-store",
+    });
+
+    console.log(`📡 Caesar API Response: ${res.status} ${res.statusText}`);
+
+    if (!res.ok) {
+      const msg = await res.text().catch(() => "");
+      console.error(`❌ Caesar API Error ${res.status}:`, msg);
+      throw new Error(`Caesar ${res.status}: ${msg || res.statusText}`);
+    }
+
+    const data = await res.json();
+    console.log(`✅ Caesar API Success:`, JSON.stringify(data).substring(0, 200));
+    return data;
+    
+  } catch (error) {
+    console.error(`❌ Caesar API Request Failed:`, error);
+    throw error;
   }
-
-  return res.json();
 }
 
 /**

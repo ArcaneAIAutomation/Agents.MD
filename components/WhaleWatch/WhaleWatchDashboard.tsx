@@ -115,7 +115,7 @@ export default function WhaleWatchDashboard() {
     
     const poll = async () => {
       if (attempts >= maxAttempts) {
-        console.error('Analysis polling timeout');
+        console.error('❌ Analysis polling timeout after', attempts, 'attempts');
         // Mark as failed after timeout
         setWhaleData(prev => {
           if (!prev) return prev;
@@ -130,16 +130,21 @@ export default function WhaleWatchDashboard() {
       }
       attempts++;
       
+      console.log(`📊 Polling attempt ${attempts}/${maxAttempts} for job ${jobId}`);
+      
       try {
         const response = await fetch(`/api/whale-watch/analysis/${jobId}`);
         
         if (!response.ok) {
+          console.error(`❌ Polling HTTP error: ${response.status}`);
           throw new Error(`Polling error: ${response.status}`);
         }
         
         const data = await response.json();
+        console.log(`📡 Poll response:`, data);
         
         if (data.status === 'completed' && data.analysis) {
+          console.log('✅ Analysis completed!', data.analysis);
           // Update whale with completed analysis
           setWhaleData(prev => {
             if (!prev) return prev;
@@ -151,6 +156,7 @@ export default function WhaleWatchDashboard() {
             return { ...prev, whales: updatedWhales };
           });
         } else if (data.status === 'failed') {
+          console.error('❌ Analysis failed on server');
           // Mark as failed
           setWhaleData(prev => {
             if (!prev) return prev;
@@ -162,13 +168,28 @@ export default function WhaleWatchDashboard() {
             return { ...prev, whales: updatedWhales };
           });
         } else {
+          console.log(`⏳ Still ${data.status}, polling again in 2s...`);
           // Still processing, poll again in 2 seconds
           setTimeout(poll, 2000);
         }
       } catch (error) {
-        console.error('Polling error:', error);
-        // Retry on error
-        setTimeout(poll, 3000);
+        console.error('❌ Polling error:', error);
+        // Retry on error (but still count the attempt)
+        if (attempts < maxAttempts) {
+          console.log(`🔄 Retrying in 3s... (attempt ${attempts}/${maxAttempts})`);
+          setTimeout(poll, 3000);
+        } else {
+          console.error('❌ Max attempts reached, giving up');
+          setWhaleData(prev => {
+            if (!prev) return prev;
+            const updatedWhales = prev.whales.map(w =>
+              w.txHash === txHash
+                ? { ...w, analysisStatus: 'failed' as const }
+                : w
+            );
+            return { ...prev, whales: updatedWhales };
+          });
+        }
       }
     };
     
