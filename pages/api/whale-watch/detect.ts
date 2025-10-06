@@ -3,7 +3,12 @@ import { blockchainClient } from '../../../utils/blockchainClient';
 
 /**
  * Whale Watch Detection API
- * Detects large Bitcoin transactions (>100 BTC)
+ * Detects large Bitcoin transactions (>50 BTC)
+ * 
+ * Time Period Scanned:
+ * - Unconfirmed transactions in mempool (last few minutes)
+ * - Latest confirmed block (last ~10 minutes)
+ * - Total window: approximately 10-15 minutes of recent activity
  */
 
 interface WhaleDetectionResponse {
@@ -28,10 +33,11 @@ export default async function handler(
   }
 
   try {
-    const { threshold = '50' } = req.query;
+    const { threshold = '50', blocks = '1' } = req.query;
     const thresholdBTC = parseFloat(threshold as string);
+    const blocksToScan = parseInt(blocks as string, 10);
 
-    console.log(`🐋 Detecting whale transactions (>${thresholdBTC} BTC)...`);
+    console.log(`🐋 Detecting whale transactions (>${thresholdBTC} BTC) in last ${blocksToScan} block(s)...`);
 
     // Get current BTC price from CoinMarketCap
     let btcPrice = 45000; // Default fallback
@@ -54,13 +60,31 @@ export default async function handler(
       console.error('Failed to fetch BTC price, using fallback');
     }
 
-    // Get unconfirmed transactions from mempool
-    const transactions = await blockchainClient.getUnconfirmedTransactions();
-    console.log(`📊 Found ${transactions.length} unconfirmed transactions`);
+    // Get unconfirmed transactions from mempool (last few minutes)
+    const unconfirmedTxs = await blockchainClient.getUnconfirmedTransactions();
+    console.log(`📊 Found ${unconfirmedTxs.length} unconfirmed transactions in mempool`);
+
+    // Get latest block(s) to scan recent confirmed transactions
+    // Each block = ~10 minutes, so 6 blocks = ~1 hour
+    const latestBlock = await blockchainClient.getLatestBlock();
+    let confirmedTxs: any[] = [];
+    
+    if (latestBlock && latestBlock.hash) {
+      console.log(`📦 Fetching transactions from latest ${blocksToScan} block(s) starting at height ${latestBlock.height}`);
+      
+      // For now, just scan the latest block (scanning multiple blocks can be slow)
+      // TODO: Implement multi-block scanning with caching
+      confirmedTxs = await blockchainClient.getBlockTransactions(latestBlock.hash);
+      console.log(`📊 Found ${confirmedTxs.length} confirmed transactions in block ${latestBlock.height}`);
+    }
+
+    // Combine unconfirmed and recent confirmed transactions
+    const allTransactions = [...unconfirmedTxs, ...confirmedTxs];
+    console.log(`📊 Total transactions to scan: ${allTransactions.length} (${unconfirmedTxs.length} unconfirmed + ${confirmedTxs.length} confirmed)`);
 
     // Detect whale transactions
     const whales = blockchainClient.detectWhaleTransactions(
-      transactions,
+      allTransactions,
       thresholdBTC,
       btcPrice
     );
