@@ -110,7 +110,7 @@ export default function WhaleWatchDashboard() {
   };
 
   const pollAnalysis = async (txHash: string, jobId: string) => {
-    const maxAttempts = 5; // 5 minutes max (5 attempts × 60 seconds = 300 seconds)
+    const maxAttempts = 7; // 7 minutes max (7 attempts × 60 seconds = 420 seconds)
     let attempts = 0;
     
     const poll = async () => {
@@ -452,10 +452,10 @@ export default function WhaleWatchDashboard() {
                         <span className="text-purple-700 font-medium">Caesar AI is researching...</span>
                       </div>
                       <p className="text-purple-600 text-sm">
-                        This typically takes 2-3 minutes with deep research
+                        This typically takes 2-3 minutes with deep research (max 7 minutes)
                       </p>
                       <p className="text-purple-500 text-xs">
-                        Analyzing market data, news, and historical patterns
+                        Checking status every 60 seconds • Analyzing market data, news, and historical patterns
                       </p>
                     </div>
                   </div>
