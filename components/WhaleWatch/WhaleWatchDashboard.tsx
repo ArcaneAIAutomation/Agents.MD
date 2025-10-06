@@ -110,7 +110,7 @@ export default function WhaleWatchDashboard() {
   };
 
   const pollAnalysis = async (txHash: string, jobId: string) => {
-    const maxAttempts = 30; // 5 minutes max (30 attempts × 10 seconds = 300 seconds)
+    const maxAttempts = 5; // 5 minutes max (5 attempts × 60 seconds = 300 seconds)
     let attempts = 0;
     
     const poll = async () => {
@@ -174,9 +174,9 @@ export default function WhaleWatchDashboard() {
             return { ...prev, whales: updatedWhales };
           });
         } else {
-          console.log(`⏳ Still ${data.status}, polling again in 10s...`);
-          // Still processing, poll again in 10 seconds
-          setTimeout(poll, 10000);
+          console.log(`⏳ Still ${data.status}, polling again in 60s...`);
+          // Still processing, poll again in 60 seconds
+          setTimeout(poll, 60000);
         }
       } catch (error) {
         console.error('❌ Polling error:', error);
