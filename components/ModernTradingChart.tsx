@@ -109,53 +109,53 @@ export default function ModernTradingChart({ symbol, currentPrice, tradingZones,
               onMouseLeave={() => setHoveredZone(null)}
             >
               <div className="p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-4">
                   {/* Left: Zone Info */}
-                  <div className="flex items-center space-x-4">
-                    <div className={`flex items-center justify-center w-16 h-16 rounded-lg ${
+                  <div className="flex items-center space-x-3 md:space-x-4 flex-1 min-w-0">
+                    <div className={`flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-lg flex-shrink-0 ${
                       isBuy ? 'bg-green-600' : 'bg-red-600'
                     }`}>
-                      <span className="text-3xl">{isBuy ? '🟢' : '🔴'}</span>
+                      <span className="text-2xl md:text-3xl">{isBuy ? '🟢' : '🔴'}</span>
                     </div>
                     
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <span className={`text-xl font-bold ${isBuy ? 'text-green-700' : 'text-red-700'}`}>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center flex-wrap gap-2">
+                        <span className={`text-lg md:text-xl font-bold ${isBuy ? 'text-green-700' : 'text-red-700'}`}>
                           {isBuy ? 'BUY' : 'SELL'}
                         </span>
-                        <span className={`px-2 py-1 rounded text-xs font-bold ${
-                          zone.strength === 'Strong' ? 'bg-yellow-400 text-yellow-900' :
+                        <span className={`px-2 py-1 rounded text-xs font-bold whitespace-nowrap ${
+                          zone.strength === 'Strong' ? 'bg-gray-600 text-white' :
                           zone.strength === 'Moderate' ? 'bg-blue-400 text-blue-900' :
                           'bg-gray-400 text-gray-900'
                         }`}>
-                          {zone.strength}
+                          {zone.strength === 'Strong' ? 'Very Strong' : zone.strength}
                         </span>
                         {isNearPrice && (
-                          <span className="px-2 py-1 rounded text-xs font-bold bg-yellow-400 text-yellow-900 animate-pulse">
+                          <span className="px-2 py-1 rounded text-xs font-bold bg-yellow-400 text-yellow-900 animate-pulse whitespace-nowrap">
                             NEAR PRICE
                           </span>
                         )}
                       </div>
                       
-                      <div className="text-2xl font-bold text-gray-900 mt-1">
+                      <div className="text-xl md:text-2xl font-bold text-gray-900 mt-1">
                         ${zone.level.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </div>
                       
-                      <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
-                        <div className="flex items-center">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs md:text-sm text-gray-600">
+                        <div className="flex items-center whitespace-nowrap">
                           <span className="font-medium">Volume:</span>
                           <span className="ml-1 font-bold text-gray-900">
                             {zone.volume > 0 ? `${zone.volume.toFixed(2)} ${symbol}` : 'N/A'}
                           </span>
                         </div>
                         {zone.confidence && (
-                          <div className="flex items-center">
+                          <div className="flex items-center whitespace-nowrap">
                             <span className="font-medium">Confidence:</span>
                             <span className="ml-1 font-bold text-gray-900">{zone.confidence.toFixed(0)}%</span>
                           </div>
                         )}
                         {zone.source && (
-                          <div className="flex items-center">
+                          <div className="flex items-center whitespace-nowrap">
                             <span className="font-medium">Source:</span>
                             <span className="ml-1 font-bold text-gray-900 capitalize">{zone.source}</span>
                           </div>
@@ -165,9 +165,9 @@ export default function ModernTradingChart({ symbol, currentPrice, tradingZones,
                   </div>
 
                   {/* Right: Distance from Current Price */}
-                  <div className="text-right">
+                  <div className="text-right flex-shrink-0 min-w-[80px]">
                     <div className="text-xs text-gray-500 font-medium">Distance</div>
-                    <div className={`text-lg font-bold ${
+                    <div className={`text-base md:text-lg font-bold ${
                       distanceFromPrice > 0 ? 'text-green-600' : 'text-red-600'
                     }`}>
                       {distanceFromPrice > 0 ? '+' : ''}{distanceFromPrice.toFixed(2)}%
