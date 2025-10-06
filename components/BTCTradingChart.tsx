@@ -472,11 +472,15 @@ export default function BTCTradingChart() {
   return (
     <div className="space-y-4">
       {/* Enhanced Header with Real Data Indicators */}
-      <div className="bg-white rounded-lg shadow-lg p-4 mobile-bg-primary">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
-          <div>
-            <h3 className="text-lg md:text-xl font-bold mobile-text-primary">📊 BTC Trading Zones Analysis</h3>
-            <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-3 text-sm mt-2">
+      <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 mobile-bg-primary">
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start space-y-4 lg:space-y-0 lg:space-x-4">
+          <div className="flex-1">
+            <h3 className="text-xl md:text-2xl font-bold mobile-text-primary mb-3">📊 BTC Trading Zones</h3>
+            <div className="flex items-center text-base md:text-lg font-semibold text-gray-700 mb-2">
+              <span className="mr-2">Current Price:</span>
+              <span className="text-gray-900">${realTimeData.currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-sm">
               <span className="text-gray-600">📊 Data Source:</span>
               <span className="font-semibold text-green-600">100% Real Market Data</span>
               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -490,14 +494,14 @@ export default function BTCTradingChart() {
           </div>
           
           {/* Timeframe Selector */}
-          <div className="flex flex-col items-end space-y-2">
-            <div className="text-xs text-gray-500 font-medium">Trading Timeframe</div>
-            <div className="flex space-x-2">
+          <div className="flex flex-col items-start lg:items-end space-y-2">
+            <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">Selected Timeframe</div>
+            <div className="flex flex-wrap gap-2">
               {(['1H', '4H', '1D'] as const).map(tf => {
                 const timeframeInfo = {
-                  '1H': { label: '1H Scalping', color: 'from-green-400 to-green-600' },
-                  '4H': { label: '4H Swing', color: 'from-blue-400 to-blue-600' },
-                  '1D': { label: '1D Position', color: 'from-purple-400 to-purple-600' }
+                  '1H': { label: '1D', subtitle: 'Position Trading', color: 'from-green-400 to-green-600' },
+                  '4H': { label: '4H', subtitle: 'Swing Trading', color: 'from-blue-400 to-blue-600' },
+                  '1D': { label: '1H', subtitle: 'Scalping', color: 'from-purple-400 to-purple-600' }
                 };
                 
                 return (
@@ -505,19 +509,22 @@ export default function BTCTradingChart() {
                     key={tf}
                     onClick={() => generateRealTimeframeData(tf)}
                     disabled={loading}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    className={`px-4 py-3 rounded-lg text-sm font-bold transition-all duration-200 min-w-[80px] ${
                       selectedTimeframe === tf
-                        ? `bg-gradient-to-r ${timeframeInfo[tf].color} text-white shadow-lg transform scale-105`
+                        ? `bg-gradient-to-r ${timeframeInfo[tf].color} text-white shadow-lg`
                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-md'
                     } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {loading && selectedTimeframe === tf ? (
-                      <div className="flex items-center">
+                      <div className="flex items-center justify-center">
                         <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
                         {tf}
                       </div>
                     ) : (
-                      timeframeInfo[tf].label
+                      <div className="text-center">
+                        <div className="text-lg">{timeframeInfo[tf].label}</div>
+                        <div className="text-xs opacity-90">{timeframeInfo[tf].subtitle}</div>
+                      </div>
                     )}
                   </button>
                 );
