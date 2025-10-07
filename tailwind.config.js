@@ -6,9 +6,12 @@ module.exports = {
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
-    // Mobile-first responsive breakpoints
+    // Mobile-first responsive breakpoints with precise iPhone sizes
     screens: {
-      'xs': '320px',     // Extra small mobile devices
+      'xs': '320px',     // Extra small mobile devices (iPhone SE 1st gen, small Android)
+      'se': '375px',     // iPhone SE 2nd/3rd gen, iPhone 6/7/8
+      'ip': '390px',     // iPhone 12/13/14 standard models
+      'ip-max': '428px', // iPhone 12/13/14 Pro Max, Plus models
       'sm': '480px',     // Small mobile devices
       'md': '768px',     // Tablets
       'lg': '1024px',    // Desktop

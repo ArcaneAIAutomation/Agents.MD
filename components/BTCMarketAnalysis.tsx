@@ -573,22 +573,22 @@ export default function BTCMarketAnalysis() {
                   <div className="text-xs mobile-text-muted">Resistance Levels</div>
                 </div>
                 {data.technicalIndicators?.supplyDemandZones?.supplyZones?.slice(0, 4).map((zone, index) => (
-                  <div key={index} className="bg-red-50 p-3 rounded-lg border-l-4 border-red-400 mobile-bg-secondary hover:bg-red-100 transition-colors">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="font-bold mobile-text-primary text-sm">
+                  <div key={index} className="bg-red-50 p-3 rounded-lg border-l-4 border-red-400 mobile-bg-secondary hover:bg-red-100 transition-colors overflow-hidden">
+                    <div className="flex items-center justify-between mb-1 gap-2 min-w-0">
+                      <div className="font-bold mobile-text-primary text-sm sm:text-base truncate min-w-0 flex-shrink" style={{ fontSize: 'clamp(0.875rem, 3vw, 1rem)' }}>
                         ${zone.level >= 1000 ? `${Math.round(zone.level/1000)}k` : zone.level.toLocaleString()}
                       </div>
-                      <div className={`px-2 py-1 rounded text-xs font-medium ${
+                      <div className={`px-2 py-1 rounded font-medium flex-shrink-0 ${
                         zone.strength === 'Strong' || zone.strength === 'Very Strong' 
                           ? 'bg-red-200 text-red-800' 
                           : 'bg-red-100 text-red-600'
-                      }`}>
+                      }`} style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>
                         {zone.strength}
                       </div>
                     </div>
                     
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="mobile-text-secondary">
+                    <div className="flex items-center justify-between gap-2 min-w-0" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>
+                      <span className="mobile-text-secondary truncate min-w-0 flex-shrink">
                         {zone.source === 'live_orderbook' && '📊 Live OrderBook'}
                         {zone.source === 'pivot_analysis' && '📈 Pivot Analysis'}
                         {zone.source === 'fibonacci' && '🔢 Fibonacci'}
@@ -596,21 +596,21 @@ export default function BTCMarketAnalysis() {
                         {!zone.source && '📊 Technical'}
                       </span>
                       {zone.confidence && (
-                        <span className="text-blue-600 font-medium">{zone.confidence}%</span>
+                        <span className="text-blue-600 font-medium flex-shrink-0" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>{zone.confidence}%</span>
                       )}
                     </div>
                     
                     {/* Enhanced Zone Information Display */}
-                    <div className="text-xs mobile-text-muted mt-1">
+                    <div className="mobile-text-muted mt-1 min-w-0 overflow-hidden" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>
                       {zone.volume && zone.volume > 0 ? (
-                        <div className="flex items-center justify-between">
-                          <span>Volume: {zone.volume.toFixed(2)} BTC</span>
+                        <div className="flex items-center justify-between gap-2 min-w-0">
+                          <span className="truncate min-w-0">Volume: {zone.volume.toFixed(2)} BTC</span>
                           {zone.volumePercentage && (
-                            <span className="text-blue-600">({zone.volumePercentage.toFixed(1)}%)</span>
+                            <span className="text-blue-600 flex-shrink-0">({zone.volumePercentage.toFixed(1)}%)</span>
                           )}
                         </div>
                       ) : (
-                        <div className="italic">
+                        <div className="italic truncate">
                           {zone.source === 'pivot_analysis' && 'Mathematical pivot level'}
                           {zone.source === 'fibonacci' && 'Fibonacci retracement level'}
                           {zone.source === 'psychological' && 'Psychological round number'}
@@ -622,13 +622,13 @@ export default function BTCMarketAnalysis() {
                     
                     {/* Order Count for Live OrderBook zones */}
                     {zone.orderCount && zone.orderCount > 0 && (
-                      <div className="text-xs text-purple-600 mt-1">
+                      <div className="text-purple-600 mt-1 truncate" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>
                         {zone.orderCount} active orders
                       </div>
                     )}
                     
                     {zone.distanceFromPrice && (
-                      <div className="text-xs text-orange-600 mt-1">
+                      <div className="text-orange-600 mt-1 truncate" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>
                         +{zone.distanceFromPrice.toFixed(1)}% from current
                       </div>
                     )}
@@ -643,22 +643,22 @@ export default function BTCMarketAnalysis() {
                   <div className="text-xs mobile-text-muted">Support Levels</div>
                 </div>
                 {data.technicalIndicators?.supplyDemandZones?.demandZones?.slice(0, 4).map((zone, index) => (
-                  <div key={index} className="bg-green-50 p-3 rounded-lg border-l-4 border-green-400 mobile-bg-secondary hover:bg-green-100 transition-colors">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="font-bold mobile-text-primary text-sm">
+                  <div key={index} className="bg-green-50 p-3 rounded-lg border-l-4 border-green-400 mobile-bg-secondary hover:bg-green-100 transition-colors overflow-hidden">
+                    <div className="flex items-center justify-between mb-1 gap-2 min-w-0">
+                      <div className="font-bold mobile-text-primary text-sm sm:text-base truncate min-w-0 flex-shrink" style={{ fontSize: 'clamp(0.875rem, 3vw, 1rem)' }}>
                         ${zone.level >= 1000 ? `${Math.round(zone.level/1000)}k` : zone.level.toLocaleString()}
                       </div>
-                      <div className={`px-2 py-1 rounded text-xs font-medium ${
+                      <div className={`px-2 py-1 rounded font-medium flex-shrink-0 ${
                         zone.strength === 'Strong' || zone.strength === 'Very Strong' 
                           ? 'bg-green-200 text-green-800' 
                           : 'bg-green-100 text-green-600'
-                      }`}>
+                      }`} style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>
                         {zone.strength}
                       </div>
                     </div>
                     
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="mobile-text-secondary">
+                    <div className="flex items-center justify-between gap-2 min-w-0" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>
+                      <span className="mobile-text-secondary truncate min-w-0 flex-shrink">
                         {zone.source === 'live_orderbook' && '📊 Live OrderBook'}
                         {zone.source === 'pivot_analysis' && '📈 Pivot Analysis'}
                         {zone.source === 'fibonacci' && '🔢 Fibonacci'}
@@ -666,21 +666,21 @@ export default function BTCMarketAnalysis() {
                         {!zone.source && '📊 Technical'}
                       </span>
                       {zone.confidence && (
-                        <span className="text-blue-600 font-medium">{zone.confidence}%</span>
+                        <span className="text-blue-600 font-medium flex-shrink-0" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>{zone.confidence}%</span>
                       )}
                     </div>
                     
                     {/* Enhanced Zone Information Display */}
-                    <div className="text-xs mobile-text-muted mt-1">
+                    <div className="mobile-text-muted mt-1 min-w-0 overflow-hidden" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>
                       {zone.volume && zone.volume > 0 ? (
-                        <div className="flex items-center justify-between">
-                          <span>Volume: {zone.volume.toFixed(2)} BTC</span>
+                        <div className="flex items-center justify-between gap-2 min-w-0">
+                          <span className="truncate min-w-0">Volume: {zone.volume.toFixed(2)} BTC</span>
                           {zone.volumePercentage && (
-                            <span className="text-blue-600">({zone.volumePercentage.toFixed(1)}%)</span>
+                            <span className="text-blue-600 flex-shrink-0">({zone.volumePercentage.toFixed(1)}%)</span>
                           )}
                         </div>
                       ) : (
-                        <div className="italic">
+                        <div className="italic truncate">
                           {zone.source === 'pivot_analysis' && 'Mathematical pivot level'}
                           {zone.source === 'fibonacci' && 'Fibonacci retracement level'}
                           {zone.source === 'psychological' && 'Psychological round number'}
@@ -692,13 +692,13 @@ export default function BTCMarketAnalysis() {
                     
                     {/* Order Count for Live OrderBook zones */}
                     {zone.orderCount && zone.orderCount > 0 && (
-                      <div className="text-xs text-purple-600 mt-1">
+                      <div className="text-purple-600 mt-1 truncate" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>
                         {zone.orderCount} active orders
                       </div>
                     )}
                     
                     {zone.distanceFromPrice && (
-                      <div className="text-xs text-blue-600 mt-1">
+                      <div className="text-blue-600 mt-1 truncate" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>
                         -{zone.distanceFromPrice.toFixed(1)}% from current
                       </div>
                     )}
