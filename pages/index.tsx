@@ -123,29 +123,79 @@ export default function Home() {
           <div className="mobile-bg-card border-2 border-gray-900 shadow-lg">
             <div className="border-b-2 border-gray-900 mobile-bg-secondary px-6 py-3">
               <h3 className="text-2xl font-bold mobile-text-primary font-serif">
-                📰 PLATFORM FEATURES
+                📰 INTELLIGENCE CAPABILITIES
               </h3>
               <p className="text-sm mobile-text-secondary font-serif italic mt-1">
-                Advanced trading intelligence capabilities now active
+                AI-powered market analysis with real-time blockchain intelligence
               </p>
             </div>
             <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="border border-gray-300 p-4 bg-purple-50 mobile-bg-card">
-                  <div className="mobile-text-primary font-bold mb-2 font-serif">🎯 Hidden Pivot Analysis</div>
-                  <div className="mobile-text-secondary text-sm">Fibonacci extensions with supply/demand zones</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* AI Trade Generation */}
+                <div className="border-2 border-gray-800 p-4 bg-gradient-to-br from-purple-50 to-purple-100 mobile-bg-card hover:shadow-md transition-shadow">
+                  <div className="mobile-text-primary font-bold mb-2 font-serif flex items-center gap-2">
+                    <span className="text-xl">🤖</span>
+                    <span>AI Trade Signals</span>
+                  </div>
+                  <div className="mobile-text-secondary text-sm leading-relaxed">
+                    GPT-4o powered trade generation with confidence scoring and risk management
+                  </div>
                 </div>
-                <div className="border border-gray-300 p-4 bg-blue-50 mobile-bg-card">
-                  <div className="mobile-text-primary font-bold mb-2 font-serif">📊 Fear & Greed Sliders</div>
-                  <div className="mobile-text-secondary text-sm">Enhanced visual sentiment indicators</div>
+
+                {/* Technical Analysis */}
+                <div className="border-2 border-gray-800 p-4 bg-gradient-to-br from-blue-50 to-blue-100 mobile-bg-card hover:shadow-md transition-shadow">
+                  <div className="mobile-text-primary font-bold mb-2 font-serif flex items-center gap-2">
+                    <span className="text-xl">📊</span>
+                    <span>Multi-Timeframe Analysis</span>
+                  </div>
+                  <div className="mobile-text-secondary text-sm leading-relaxed">
+                    15m, 1h, 4h, 1d technical indicators with supply/demand zones
+                  </div>
                 </div>
-                <div className="border border-gray-300 p-4 bg-green-50 mobile-bg-card">
-                  <div className="mobile-text-primary font-bold mb-2 font-serif">⏱️ Stable Timeframes</div>
-                  <div className="mobile-text-secondary text-sm">Consistent 4H, 1D, 1W analysis</div>
+
+                {/* Real-Time News */}
+                <div className="border-2 border-gray-800 p-4 bg-gradient-to-br from-green-50 to-green-100 mobile-bg-card hover:shadow-md transition-shadow">
+                  <div className="mobile-text-primary font-bold mb-2 font-serif flex items-center gap-2">
+                    <span className="text-xl">📰</span>
+                    <span>Live News Feed</span>
+                  </div>
+                  <div className="mobile-text-secondary text-sm leading-relaxed">
+                    Real-time crypto news with AI sentiment analysis and market impact
+                  </div>
                 </div>
-                <div className="border border-gray-300 p-4 bg-orange-50 mobile-bg-card">
-                  <div className="mobile-text-primary font-bold mb-2 font-serif">✅ API Verified</div>
-                  <div className="mobile-text-secondary text-sm">All 6 APIs operational & tested</div>
+
+                {/* Whale Watch - Coming Soon */}
+                <div className="border-2 border-gray-800 p-4 bg-gradient-to-br from-amber-50 to-amber-100 mobile-bg-card hover:shadow-md transition-shadow relative">
+                  <div className="absolute top-2 right-2 bg-amber-600 text-white text-xs px-2 py-1 rounded font-bold">
+                    SOON
+                  </div>
+                  <div className="mobile-text-primary font-bold mb-2 font-serif flex items-center gap-2">
+                    <span className="text-xl">🐋</span>
+                    <span>Whale Watch</span>
+                  </div>
+                  <div className="mobile-text-secondary text-sm leading-relaxed">
+                    Track large wallet movements with AI-powered context analysis
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Features Row */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 pt-4 border-t-2 border-gray-300">
+                <div className="text-center p-3 bg-gray-50 mobile-bg-card rounded border border-gray-300">
+                  <div className="mobile-text-primary font-bold text-lg font-serif">6+</div>
+                  <div className="mobile-text-secondary text-xs">Data Sources</div>
+                </div>
+                <div className="text-center p-3 bg-gray-50 mobile-bg-card rounded border border-gray-300">
+                  <div className="mobile-text-primary font-bold text-lg font-serif">24/7</div>
+                  <div className="mobile-text-secondary text-xs">Live Monitoring</div>
+                </div>
+                <div className="text-center p-3 bg-gray-50 mobile-bg-card rounded border border-gray-300">
+                  <div className="mobile-text-primary font-bold text-lg font-serif">WCAG AA</div>
+                  <div className="mobile-text-secondary text-xs">Accessible</div>
+                </div>
+                <div className="text-center p-3 bg-gray-50 mobile-bg-card rounded border border-gray-300">
+                  <div className="mobile-text-primary font-bold text-lg font-serif">Mobile</div>
+                  <div className="mobile-text-secondary text-xs">Optimized</div>
                 </div>
               </div>
             </div>

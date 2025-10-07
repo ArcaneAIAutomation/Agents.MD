@@ -2,26 +2,25 @@
 
 ## Branch Strategy
 
-### AgentMDC Development Branch
-- **Primary Development**: All work must be done on the `AgentMDC` branch
-- **Never update main**: The main branch should remain untouched without explicit permission
-- **Commit Strategy**: All commits, pushes, and development work stays on AgentMDC
-- **Protection**: Always ask before any merge operations to main branch
+### Main Branch Development
+- **Primary Development**: All work is done directly on the `main` branch
+- **Direct commits**: Commit and push changes directly to main
+- **Continuous deployment**: Changes to main trigger automatic Vercel deployments
+- **Production branch**: Main branch is the live production branch
 
 ### Branch Commands
 ```bash
-# Verify current branch (should always be AgentMDC)
+# Verify current branch (should always be main)
 git branch --show-current
 
-# Switch to AgentMDC if needed
-git checkout AgentMDC
+# Switch to main if needed
+git checkout main
 
-# Push changes to AgentMDC branch
-git push origin AgentMDC
+# Push changes to main branch
+git push origin main
 
-# NEVER do this without permission:
-# git checkout main
-# git merge AgentMDC
+# Pull latest changes before starting work
+git pull origin main
 ```
 
 ### Commit Guidelines
@@ -29,25 +28,26 @@ git push origin AgentMDC
 - **Feature-based commits**: Group related changes together
 - **Mobile-first focus**: Emphasize mobile optimization and accessibility improvements
 - **API integration**: Highlight API changes and fallback implementations
+- **Deployment-ready**: Ensure all commits are production-ready
 
 ### Development Workflow
-1. **Always verify branch**: Confirm working on AgentMDC before making changes
-2. **Regular commits**: Commit frequently with meaningful messages
-3. **Push regularly**: Keep remote AgentMDC branch updated
-4. **No main branch access**: Never switch to or modify main without explicit permission
-5. **Pull request preparation**: Prepare for eventual PR to main when requested
+1. **Always verify branch**: Confirm working on main before making changes
+2. **Pull before work**: Always pull latest changes before starting
+3. **Regular commits**: Commit frequently with meaningful messages
+4. **Push regularly**: Keep remote main branch updated
+5. **Test before push**: Verify changes work locally before pushing
 
-### Branch Protection Rules
-- **AgentMDC**: Active development branch for all cryptocurrency platform enhancements
-- **Main**: Protected branch requiring explicit permission for any updates
-- **Feature isolation**: Keep all mobile optimization, API integration, and component development on AgentMDC
-- **Safe experimentation**: AgentMDC allows for safe testing and iteration without affecting production
+### Deployment Process
+- **Automatic**: Vercel automatically deploys on push to main
+- **Preview**: Each push creates a deployment preview
+- **Production**: Successful builds go live immediately
+- **Rollback**: Use Vercel dashboard to rollback if needed
 
 ### Emergency Procedures
-- If accidentally on main branch: Immediately switch back to AgentMDC
-- If changes made to main: Stop and ask for guidance before proceeding
-- If merge conflicts: Resolve on AgentMDC branch, never force merge to main
-- If branch confusion: Always verify with `git branch --show-current`
+- If deployment fails: Check Vercel dashboard for error logs
+- If breaking changes: Use Vercel rollback feature immediately
+- If conflicts on pull: Resolve locally before pushing
+- If unsure about changes: Test thoroughly in local development first
 
 ## Integration with Other Steering Files
 This git workflow applies to all development activities covered by:
@@ -57,4 +57,4 @@ This git workflow applies to all development activities covered by:
 - Technology stack implementations
 - Product feature development
 
-All code changes, regardless of the steering file they relate to, must follow this AgentMDC branch workflow.
+All code changes, regardless of the steering file they relate to, follow this main branch workflow with automatic Vercel deployment.
