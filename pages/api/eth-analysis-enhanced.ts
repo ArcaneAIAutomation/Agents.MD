@@ -171,76 +171,62 @@ async function fetchRealEthereumData() {
 }
 
 // Calculate REAL technical indicators from actual price data
-// Fetch historical price data for proper RSI and MACD calculation (ETH)
-async function fetchHistoricalEthPrices(periods: number = 14): Promise<number[]> {
+// Fetch historical OHLC data from Kraken for ETH - NO FALLBACKS
+async function fetchKrakenOHLCEth(periods: number = 50): Promise<number[]> {
+  const krakenPair = 'XETHZUSD'; // ETH/USD pair on Kraken
+  const interval = 60; // 60 minutes (1 hour)
+  
   try {
-    // Use Kraken API (free, no API key needed, no location restrictions)
-    const krakenPair = 'XETHZUSD'; // ETH/USD pair on Kraken
-    const interval = 60; // 60 minutes (1 hour)
-    const since = Math.floor(Date.now() / 1000) - (periods + 10) * 3600; // Get extra data
-    
-    const krakenResponse = await fetch(
-      `https://api.kraken.com/0/public/OHLC?pair=${krakenPair}&interval=${interval}&since=${since}`,
-      { signal: AbortSignal.timeout(15000) }
-    );
-
-    if (krakenResponse.ok) {
-      const data = await krakenResponse.json();
-      
-      if (data.error && data.error.length > 0) {
-        throw new Error(`Kraken API error: ${data.error.join(', ')}`);
-      }
-      
-      // Kraken returns: { result: { XETHZUSD: [[timestamp, open, high, low, close, vwap, volume, count], ...] } }
-      const ohlcData = data.result[krakenPair] || data.result['XETHZUSD'];
-      
-      if (!ohlcData || ohlcData.length === 0) {
-        throw new Error('No OHLC data returned from Kraken for ETH');
-      }
-      
-      // Extract closing prices (index 4)
-      const prices = ohlcData
-        .slice(-(periods + 1)) // Get last N+1 periods
-        .map((candle: any[]) => parseFloat(candle[4])); // Close price
-
-      console.log(`✅ Fetched ${prices.length} ETH historical prices from Kraken`);
-      return prices;
-    } else {
-      throw new Error(`Kraken API returned status ${krakenResponse.status}`);
-    }
-  } catch (error) {
-    console.warn('⚠️ Kraken API failed for ETH, trying CoinGecko fallback:', error);
-  }
-
-  // Fallback to CoinGecko if Kraken fails
-  try {
-    const days = periods <= 24 ? 1 : 2;
+    console.log(`📊 Fetching ${periods} hourly candles from Kraken for ETH...`);
     
     const response = await fetch(
-      `https://api.coingecko.com/api/v3/coins/ethereum/market_chart?vs_currency=usd&days=${days}&interval=hourly`,
-      {
+      `https://api.kraken.com/0/public/OHLC?pair=${krakenPair}&interval=${interval}`,
+      { 
+        signal: AbortSignal.timeout(20000),
         headers: {
-          'x-cg-pro-api-key': process.env.COINGECKO_API_KEY || ''
-        },
-        signal: AbortSignal.timeout(10000)
+          'User-Agent': 'CryptoHerald/1.0'
+        }
       }
     );
 
     if (!response.ok) {
-      throw new Error('Failed to fetch ETH historical prices from CoinGecko');
+      throw new Error(`Kraken API HTTP error: ${response.status}`);
     }
 
     const data = await response.json();
-    const requiredPrices = periods + 1;
-    const prices = data.prices
-      .slice(-requiredPrices)
-      .map((point: [number, number]) => point[1]);
+    
+    // Check for Kraken API errors
+    if (data.error && data.error.length > 0) {
+      throw new Error(`Kraken API error: ${data.error.join(', ')}`);
+    }
+    
+    // Get the OHLC data - Kraken returns different key formats
+    const resultKeys = Object.keys(data.result || {});
+    const ohlcKey = resultKeys.find(key => key !== 'last') || krakenPair;
+    const ohlcData = data.result?.[ohlcKey];
+    
+    if (!ohlcData || !Array.isArray(ohlcData) || ohlcData.length === 0) {
+      throw new Error('No OHLC data in Kraken response for ETH');
+    }
+    
+    // Kraken OHLC format: [timestamp, open, high, low, close, vwap, volume, count]
+    // Extract closing prices (index 4)
+    const prices = ohlcData
+      .slice(-periods) // Get last N periods
+      .map((candle: any[]) => parseFloat(candle[4])); // Close price
+    
+    if (prices.length < periods) {
+      console.warn(`⚠️ Only got ${prices.length} ETH prices, requested ${periods}`);
+    }
 
-    console.log(`✅ Fetched ${prices.length} ETH historical prices from CoinGecko (fallback)`);
+    console.log(`✅ Kraken: Fetched ${prices.length} ETH hourly closing prices`);
+    console.log(`   Latest ETH price: $${prices[prices.length - 1].toLocaleString()}`);
+    
     return prices;
+    
   } catch (error) {
-    console.error('❌ Failed to fetch ETH historical prices from both APIs:', error);
-    return [];
+    console.error('❌ Kraken OHLC fetch failed for ETH:', error);
+    throw new Error(`Failed to fetch ETH historical data from Kraken: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
@@ -369,77 +355,58 @@ function calculateProperEthMACD(prices: number[]): { macdLine: number; signalLin
 }
 
 async function calculateRealEthTechnicalIndicators(currentPrice: number, high24h: number, low24h: number, volume24h: number, orderBookData: any) {
-  // Fetch historical prices for proper RSI and MACD calculation (need 26+ for MACD)
-  const historicalPrices = await fetchHistoricalEthPrices(35);
+  console.log('📊 Calculating ETH technical indicators from Kraken OHLC data...');
   
-  // Calculate proper 14-period RSI
-  let rsi = 50; // Default neutral value
-  if (historicalPrices.length > 0) {
-    rsi = calculateProperEthRSI(historicalPrices, 14);
-  } else {
-    // Fallback: estimate based on 24h price position
-    console.warn('⚠️ Using fallback ETH RSI calculation');
-    const priceRange = high24h - low24h;
-    const pricePosition = (currentPrice - low24h) / priceRange;
-    rsi = 30 + (pricePosition * 40);
+  // Fetch 50 periods from Kraken (enough for all indicators)
+  const historicalPrices = await fetchKrakenOHLCEth(50);
+  
+  // STRICT: Must have minimum data for calculations
+  if (historicalPrices.length < 26) {
+    throw new Error(`Insufficient ETH historical data: got ${historicalPrices.length} periods, need at least 26 for MACD`);
   }
   
-  // Calculate proper MACD
-  let macdData = {
-    macdLine: 0,
-    signalLine: 0,
-    histogram: 0,
-    signal: 'NEUTRAL' as const
+  // Calculate RSI (14-period) - REQUIRED
+  const rsi = calculateProperEthRSI(historicalPrices, 14);
+  console.log(`   ETH RSI(14): ${rsi.toFixed(2)}`);
+  
+  // Calculate MACD (12,26,9) - REQUIRED
+  const macdData = calculateProperEthMACD(historicalPrices);
+  console.log(`   ETH MACD: ${macdData.histogram.toFixed(2)} (${macdData.signal})`);
+  
+  // Calculate EMAs - REQUIRED
+  const ema20 = calculateEthEMA(historicalPrices, 20);
+  const ema50 = historicalPrices.length >= 50 
+    ? calculateEthEMA(historicalPrices, 50)
+    : calculateEthEMA(historicalPrices, historicalPrices.length); // Use all available if < 50
+  
+  console.log(`   ETH EMA(20): $${ema20.toFixed(2)}, EMA(50): $${ema50.toFixed(2)}`);
+  
+  // Calculate Bollinger Bands (20-period) - REQUIRED
+  const last20 = historicalPrices.slice(-20);
+  const sma20 = last20.reduce((sum, p) => sum + p, 0) / 20;
+  const squaredDiffs = last20.map(p => Math.pow(p - sma20, 2));
+  const variance = squaredDiffs.reduce((sum, sq) => sum + sq, 0) / 20;
+  const stdDev = Math.sqrt(variance);
+  
+  const bollinger = {
+    upper: sma20 + (2 * stdDev),
+    middle: sma20,
+    lower: sma20 - (2 * stdDev)
   };
   
-  if (historicalPrices.length >= 26) {
-    macdData = calculateProperEthMACD(historicalPrices);
-  } else {
-    console.warn('⚠️ Using fallback ETH MACD calculation');
-    const priceChange = ((currentPrice - (high24h + low24h) / 2) / ((high24h + low24h) / 2)) * 100;
-    macdData = {
-      macdLine: priceChange,
-      signalLine: priceChange * 0.9,
-      histogram: priceChange * 0.1,
-      signal: priceChange > 1 ? 'BULLISH' : priceChange < -1 ? 'BEARISH' : 'NEUTRAL'
-    };
-  }
+  console.log(`   ETH Bollinger: $${bollinger.lower.toFixed(0)} - $${bollinger.middle.toFixed(0)} - $${bollinger.upper.toFixed(0)}`);
   
-  // Calculate real EMAs from historical data
-  let ema20 = currentPrice * 0.99; // Fallback
-  let ema50 = currentPrice * 0.97; // Fallback
-  
-  if (historicalPrices.length >= 20) {
-    ema20 = calculateEthEMA(historicalPrices, 20);
-  }
-  if (historicalPrices.length >= 50) {
-    ema50 = calculateEthEMA(historicalPrices, 50);
-  }
-  
-  // Bollinger Bands calculation from historical data
-  let upper = currentPrice * 1.02;
-  let middle = currentPrice;
-  let lower = currentPrice * 0.98;
-  
-  if (historicalPrices.length >= 20) {
-    // Calculate 20-period SMA
-    const sma20 = historicalPrices.slice(-20).reduce((sum, p) => sum + p, 0) / 20;
-    
-    // Calculate standard deviation
-    const squaredDiffs = historicalPrices.slice(-20).map(p => Math.pow(p - sma20, 2));
-    const variance = squaredDiffs.reduce((sum, sq) => sum + sq, 0) / 20;
-    const stdDev = Math.sqrt(variance);
-    
-    middle = sma20;
-    upper = sma20 + (2 * stdDev);
-    lower = sma20 - (2 * stdDev);
-  }
-  
-  // Support/Resistance from historical data
+  // Support/Resistance from 24h data
   const range = high24h - low24h;
   
+  console.log('✅ All ETH technical indicators calculated successfully');
+  
   return {
-    rsi: { value: rsi, signal: rsi > 70 ? 'BEARISH' : rsi < 30 ? 'BULLISH' : 'NEUTRAL', timeframe: '14' },
+    rsi: { 
+      value: rsi, 
+      signal: rsi > 70 ? 'BEARISH' : rsi < 30 ? 'BULLISH' : 'NEUTRAL', 
+      timeframe: '14' 
+    },
     ema20,
     ema50,
     macd: { 
@@ -448,7 +415,7 @@ async function calculateRealEthTechnicalIndicators(currentPrice: number, high24h
       macdLine: macdData.macdLine,
       signalLine: macdData.signalLine
     },
-    bollinger: { upper, middle, lower },
+    bollinger,
     supportResistance: {
       strongSupport: low24h,
       support: currentPrice - (range * 0.3),

@@ -156,8 +156,8 @@ async function fetchRealBitcoinData() {
       results.orderBookData = {
         bids,
         asks,
-        bidVolume: bids.reduce((sum, bid) => sum + bid.quantity, 0),
-        askVolume: asks.reduce((sum, ask) => sum + ask.quantity, 0),
+        bidVolume: bids.reduce((sum: number, bid: any) => sum + bid.quantity, 0),
+        askVolume: asks.reduce((sum: number, ask: any) => sum + ask.quantity, 0),
         source: 'Kraken OrderBook'
       };
       console.log('✅ Order book data: Bids:', results.orderBookData.bidVolume.toFixed(2), 'Asks:', results.orderBookData.askVolume.toFixed(2));
@@ -169,76 +169,62 @@ async function fetchRealBitcoinData() {
   return results;
 }
 
-// Fetch historical price data for proper RSI and MACD calculation
-async function fetchHistoricalPrices(symbol: string = 'BTC', periods: number = 14): Promise<number[]> {
+// Fetch historical OHLC data from Kraken - NO FALLBACKS
+async function fetchKrakenOHLC(symbol: string = 'BTC', periods: number = 50): Promise<number[]> {
+  const krakenPair = 'XXBTZUSD'; // BTC/USD pair on Kraken
+  const interval = 60; // 60 minutes (1 hour)
+  
   try {
-    // Use Kraken API (free, no API key needed, no location restrictions)
-    const krakenPair = 'XXBTZUSD'; // BTC/USD pair on Kraken
-    const interval = 60; // 60 minutes (1 hour)
-    const since = Math.floor(Date.now() / 1000) - (periods + 10) * 3600; // Get extra data
-    
-    const krakenResponse = await fetch(
-      `https://api.kraken.com/0/public/OHLC?pair=${krakenPair}&interval=${interval}&since=${since}`,
-      { signal: AbortSignal.timeout(15000) }
-    );
-
-    if (krakenResponse.ok) {
-      const data = await krakenResponse.json();
-      
-      if (data.error && data.error.length > 0) {
-        throw new Error(`Kraken API error: ${data.error.join(', ')}`);
-      }
-      
-      // Kraken returns: { result: { XXBTZUSD: [[timestamp, open, high, low, close, vwap, volume, count], ...] } }
-      const ohlcData = data.result[krakenPair] || data.result['XXBTZUSD'];
-      
-      if (!ohlcData || ohlcData.length === 0) {
-        throw new Error('No OHLC data returned from Kraken');
-      }
-      
-      // Extract closing prices (index 4)
-      const prices = ohlcData
-        .slice(-(periods + 1)) // Get last N+1 periods
-        .map((candle: any[]) => parseFloat(candle[4])); // Close price
-
-      console.log(`✅ Fetched ${prices.length} historical prices from Kraken for technical indicators`);
-      return prices;
-    } else {
-      throw new Error(`Kraken API returned status ${krakenResponse.status}`);
-    }
-  } catch (error) {
-    console.warn('⚠️ Kraken API failed, trying CoinGecko fallback:', error);
-  }
-
-  // Fallback to CoinGecko if Kraken fails
-  try {
-    const days = periods <= 24 ? 1 : 2;
+    console.log(`📊 Fetching ${periods} hourly candles from Kraken for ${symbol}...`);
     
     const response = await fetch(
-      `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}&interval=hourly`,
-      {
+      `https://api.kraken.com/0/public/OHLC?pair=${krakenPair}&interval=${interval}`,
+      { 
+        signal: AbortSignal.timeout(20000),
         headers: {
-          'x-cg-pro-api-key': process.env.COINGECKO_API_KEY || ''
-        },
-        signal: AbortSignal.timeout(10000)
+          'User-Agent': 'CryptoHerald/1.0'
+        }
       }
     );
 
     if (!response.ok) {
-      throw new Error('Failed to fetch historical prices from CoinGecko');
+      throw new Error(`Kraken API HTTP error: ${response.status}`);
     }
 
     const data = await response.json();
-    const requiredPrices = periods + 1;
-    const prices = data.prices
-      .slice(-requiredPrices)
-      .map((point: [number, number]) => point[1]);
+    
+    // Check for Kraken API errors
+    if (data.error && data.error.length > 0) {
+      throw new Error(`Kraken API error: ${data.error.join(', ')}`);
+    }
+    
+    // Get the OHLC data - Kraken returns different key formats
+    const resultKeys = Object.keys(data.result || {});
+    const ohlcKey = resultKeys.find(key => key !== 'last') || krakenPair;
+    const ohlcData = data.result?.[ohlcKey];
+    
+    if (!ohlcData || !Array.isArray(ohlcData) || ohlcData.length === 0) {
+      throw new Error('No OHLC data in Kraken response');
+    }
+    
+    // Kraken OHLC format: [timestamp, open, high, low, close, vwap, volume, count]
+    // Extract closing prices (index 4)
+    const prices = ohlcData
+      .slice(-periods) // Get last N periods
+      .map((candle: any[]) => parseFloat(candle[4])); // Close price
+    
+    if (prices.length < periods) {
+      console.warn(`⚠️ Only got ${prices.length} prices, requested ${periods}`);
+    }
 
-    console.log(`✅ Fetched ${prices.length} historical prices from CoinGecko (fallback)`);
+    console.log(`✅ Kraken: Fetched ${prices.length} hourly closing prices`);
+    console.log(`   Latest price: $${prices[prices.length - 1].toLocaleString()}`);
+    
     return prices;
+    
   } catch (error) {
-    console.error('❌ Failed to fetch historical prices from both APIs:', error);
-    return [];
+    console.error('❌ Kraken OHLC fetch failed:', error);
+    throw new Error(`Failed to fetch historical data from Kraken: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
@@ -368,79 +354,60 @@ function calculateProperMACD(prices: number[]): { macdLine: number; signalLine: 
   };
 }
 
-// Calculate REAL technical indicators from actual price data
+// Calculate REAL technical indicators from Kraken OHLC data - NO FALLBACKS
 async function calculateRealTechnicalIndicators(currentPrice: number, high24h: number, low24h: number, volume24h: number, orderBookData: any) {
-  // Fetch historical prices for proper RSI and MACD calculation (need 26+ for MACD)
-  const historicalPrices = await fetchHistoricalPrices('BTC', 35); // Fetch 35 periods for MACD
+  console.log('📊 Calculating technical indicators from Kraken OHLC data...');
   
-  // Calculate proper 14-period RSI
-  let rsi = 50; // Default neutral value
-  if (historicalPrices.length > 0) {
-    rsi = calculateProperRSI(historicalPrices, 14);
-  } else {
-    // Fallback: estimate based on 24h price position
-    console.warn('⚠️ Using fallback RSI calculation');
-    const priceRange = high24h - low24h;
-    const pricePosition = (currentPrice - low24h) / priceRange;
-    rsi = 30 + (pricePosition * 40);
+  // Fetch 50 periods from Kraken (enough for all indicators)
+  const historicalPrices = await fetchKrakenOHLC('BTC', 50);
+  
+  // STRICT: Must have minimum data for calculations
+  if (historicalPrices.length < 26) {
+    throw new Error(`Insufficient historical data: got ${historicalPrices.length} periods, need at least 26 for MACD`);
   }
   
-  // Calculate proper MACD
-  let macdData = {
-    macdLine: 0,
-    signalLine: 0,
-    histogram: 0,
-    signal: 'NEUTRAL' as const
+  // Calculate RSI (14-period) - REQUIRED
+  const rsi = calculateProperRSI(historicalPrices, 14);
+  console.log(`   RSI(14): ${rsi.toFixed(2)}`);
+  
+  // Calculate MACD (12,26,9) - REQUIRED
+  const macdData = calculateProperMACD(historicalPrices);
+  console.log(`   MACD: ${macdData.histogram.toFixed(2)} (${macdData.signal})`);
+  
+  // Calculate EMAs - REQUIRED
+  const ema20 = calculateEMA(historicalPrices, 20);
+  const ema50 = historicalPrices.length >= 50 
+    ? calculateEMA(historicalPrices, 50)
+    : calculateEMA(historicalPrices, historicalPrices.length); // Use all available if < 50
+  
+  console.log(`   EMA(20): $${ema20.toFixed(2)}, EMA(50): $${ema50.toFixed(2)}`);
+  
+  // Calculate Bollinger Bands (20-period) - REQUIRED
+  const last20 = historicalPrices.slice(-20);
+  const sma20 = last20.reduce((sum, p) => sum + p, 0) / 20;
+  const squaredDiffs = last20.map(p => Math.pow(p - sma20, 2));
+  const variance = squaredDiffs.reduce((sum, sq) => sum + sq, 0) / 20;
+  const stdDev = Math.sqrt(variance);
+  
+  const bollinger = {
+    upper: sma20 + (2 * stdDev),
+    middle: sma20,
+    lower: sma20 - (2 * stdDev)
   };
   
-  if (historicalPrices.length >= 26) {
-    macdData = calculateProperMACD(historicalPrices);
-  } else {
-    console.warn('⚠️ Using fallback MACD calculation');
-    const priceChange = ((currentPrice - (high24h + low24h) / 2) / ((high24h + low24h) / 2)) * 100;
-    macdData = {
-      macdLine: priceChange,
-      signalLine: priceChange * 0.9,
-      histogram: priceChange * 0.1,
-      signal: priceChange > 1 ? 'BULLISH' : priceChange < -1 ? 'BEARISH' : 'NEUTRAL'
-    };
-  }
+  console.log(`   Bollinger: $${bollinger.lower.toFixed(0)} - $${bollinger.middle.toFixed(0)} - $${bollinger.upper.toFixed(0)}`);
   
-  // Calculate real EMAs from historical data
-  let ema20 = currentPrice * 0.99; // Fallback
-  let ema50 = currentPrice * 0.97; // Fallback
-  
-  if (historicalPrices.length >= 20) {
-    ema20 = calculateEMA(historicalPrices, 20);
-  }
-  if (historicalPrices.length >= 50) {
-    ema50 = calculateEMA(historicalPrices, 50);
-  }
-  
-  // Bollinger Bands calculation from historical data
-  let upper = currentPrice * 1.02;
-  let middle = currentPrice;
-  let lower = currentPrice * 0.98;
-  
-  if (historicalPrices.length >= 20) {
-    // Calculate 20-period SMA
-    const sma20 = historicalPrices.slice(-20).reduce((sum, p) => sum + p, 0) / 20;
-    
-    // Calculate standard deviation
-    const squaredDiffs = historicalPrices.slice(-20).map(p => Math.pow(p - sma20, 2));
-    const variance = squaredDiffs.reduce((sum, sq) => sum + sq, 0) / 20;
-    const stdDev = Math.sqrt(variance);
-    
-    middle = sma20;
-    upper = sma20 + (2 * stdDev);
-    lower = sma20 - (2 * stdDev);
-  }
-  
-  // Support/Resistance from historical data
+  // Support/Resistance from 24h data
   const range = high24h - low24h;
   
+  console.log('✅ All technical indicators calculated successfully');
+  
   return {
-    rsi: { value: rsi, signal: rsi > 70 ? 'BEARISH' : rsi < 30 ? 'BULLISH' : 'NEUTRAL', timeframe: '14' },
+    rsi: { 
+      value: rsi, 
+      signal: rsi > 70 ? 'BEARISH' : rsi < 30 ? 'BULLISH' : 'NEUTRAL', 
+      timeframe: '14' 
+    },
     ema20,
     ema50,
     macd: { 
@@ -449,7 +416,7 @@ async function calculateRealTechnicalIndicators(currentPrice: number, high24h: n
       macdLine: macdData.macdLine,
       signalLine: macdData.signalLine
     },
-    bollinger: { upper, middle, lower },
+    bollinger,
     supportResistance: {
       strongSupport: low24h,
       support: currentPrice - (range * 0.3),
@@ -1150,7 +1117,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     
     const currentPrice = realData.price.current;
-    const technicalIndicators = calculateRealTechnicalIndicators(
+    const technicalIndicators = await calculateRealTechnicalIndicators(
       currentPrice,
       realData.price.high24h,
       realData.price.low24h,
@@ -1243,11 +1210,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch (error) {
     console.error('Enhanced BTC Analysis API Error:', error);
     
+    const errorMessage = error instanceof Error ? error.message : 'Failed to connect to live market data APIs';
+    
     // Return proper error - NO FALLBACK DATA
     res.status(503).json({
       success: false,
       error: 'Unable to fetch real Bitcoin market data',
-      details: error.message || 'Failed to connect to live market data APIs',
+      details: errorMessage,
       timestamp: new Date().toISOString(),
       symbol: 'BTC'
     });
