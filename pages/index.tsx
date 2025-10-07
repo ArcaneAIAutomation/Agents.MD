@@ -160,7 +160,10 @@ export default function Home() {
                 </div>
 
                 {/* Technical Analysis */}
-                <div className="border-2 border-gray-800 p-4 bg-gradient-to-br from-blue-50 to-blue-100 mobile-bg-card hover:shadow-md transition-shadow">
+                <div className="border-2 border-gray-800 p-4 bg-gradient-to-br from-blue-50 to-blue-100 mobile-bg-card hover:shadow-md transition-shadow relative">
+                  <div className="absolute top-2 right-2 bg-green-600 text-white text-xs px-2 py-1 rounded font-bold">
+                    LIVE
+                  </div>
                   <div className="mobile-text-primary font-bold mb-2 font-serif flex items-center gap-2">
                     <span className="text-xl">📊</span>
                     <span>Multi-Timeframe Analysis</span>
@@ -171,7 +174,10 @@ export default function Home() {
                 </div>
 
                 {/* Real-Time News */}
-                <div className="border-2 border-gray-800 p-4 bg-gradient-to-br from-green-50 to-green-100 mobile-bg-card hover:shadow-md transition-shadow">
+                <div className="border-2 border-gray-800 p-4 bg-gradient-to-br from-green-50 to-green-100 mobile-bg-card hover:shadow-md transition-shadow relative">
+                  <div className="absolute top-2 right-2 bg-green-600 text-white text-xs px-2 py-1 rounded font-bold">
+                    LIVE
+                  </div>
                   <div className="mobile-text-primary font-bold mb-2 font-serif flex items-center gap-2">
                     <span className="text-xl">📰</span>
                     <span>Live News Feed</span>
