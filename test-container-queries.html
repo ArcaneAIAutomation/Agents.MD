@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Container Queries Test - Mobile Optimization</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px;
+      background: #f9fafb;
+    }
+
+    .test-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      color: #000;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 2rem 0 1rem;
+      color: #374151;
+    }
+
+    .description {
+      color: #6b7280;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .grid {
+      display: grid;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .grid-1 { grid-template-columns: 1fr; }
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+    /* Zone Card Container Queries */
+    .zone-card-container {
+      container-type: inline-size;
+      container-name: zone-card;
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+
+    .zone-card-content {
+      padding: 0.5rem;
+      font-size: 0.75rem;
+    }
+
+    .zone-card-price {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: #000;
+      margin-bottom: 0.25rem;
+    }
+
+    .zone-distance {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    @container zone-card (min-width: 200px) {
+      .zone-card-content {
+        font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+        padding: 0.75rem;
+      }
+      
+      .zone-card-price {
+        font-size: clamp(0.875rem, 3vw, 1rem);
+      }
+      
+      .zone-distance {
+        font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+      }
+    }
+
+    @container zone-card (min-width: 250px) {
+      .zone-card-content {
+        font-size: clamp(0.875rem, 3vw, 1rem);
+        padding: 1rem;
+      }
+      
+      .zone-card-price {
+        font-size: clamp(1rem, 3.5vw, 1.125rem);
+      }
+      
+      .zone-distance {
+        font-size: clamp(0.875rem, 3vw, 1rem);
+      }
+    }
+
+    @container zone-card (min-width: 300px) {
+      .zone-card-content {
+        font-size: 1rem;
+        padding: 1.25rem;
+      }
+      
+      .zone-card-price {
+        font-size: 1.125rem;
+      }
+      
+      .zone-distance {
+        font-size: 1rem;
+      }
+    }
+
+    /* Badge Container Queries */
+    .badge-container-query {
+      container-type: inline-size;
+      container-name: badge;
+      display: inline-block;
+      background: #dbeafe;
+      border: 1px solid #3b82f6;
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .badge-text {
+      font-size: 0.625rem;
+      padding: 0.25rem 0.5rem;
+      font-weight: 600;
+      color: #1e40af;
+      white-space: nowrap;
+    }
+
+    @container badge (min-width: 60px) {
+      .badge-text {
+        font-size: clamp(0.625rem, 2vw, 0.75rem);
+        padding: 0.25rem 0.5rem;
+      }
+    }
+
+    @container badge (min-width: 80px) {
+      .badge-text {
+        font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+        padding: 0.375rem 0.75rem;
+      }
+    }
+
+    @container badge (min-width: 100px) {
+      .badge-text {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+      }
+    }
+
+    /* Chart Container Queries */
+    .chart-container-query {
+      container-type: inline-size;
+      container-name: chart;
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+
+    .chart-content {
+      padding: 0.5rem;
+    }
+
+    .chart-label {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 0.25rem;
+    }
+
+    .chart-value {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: #000;
+    }
+
+    @container chart (min-width: 300px) {
+      .chart-content {
+        padding: 0.75rem;
+      }
+      
+      .chart-label {
+        font-size: 0.75rem;
+      }
+      
+      .chart-value {
+        font-size: 0.875rem;
+      }
+    }
+
+    @container chart (min-width: 500px) {
+      .chart-content {
+        padding: 1rem;
+      }
+      
+      .chart-label {
+        font-size: 0.875rem;
+      }
+      
+      .chart-value {
+        font-size: 1rem;
+      }
+    }
+
+    @container chart (min-width: 700px) {
+      .chart-content {
+        padding: 1.5rem;
+      }
+      
+      .chart-label {
+        font-size: 1rem;
+      }
+      
+      .chart-value {
+        font-size: 1.125rem;
+      }
+    }
+
+    .support-status {
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 2rem;
+      font-weight: 600;
+    }
+
+    .support-yes {
+      background: #d1fae5;
+      color: #065f46;
+      border: 2px solid #059669;
+    }
+
+    .support-no {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 2px solid #dc2626;
+    }
+
+    .resize-handle {
+      background: #3b82f6;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 0.5rem 0.5rem 0.5rem 0;
+    }
+
+    .resize-handle:hover {
+      background: #2563eb;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>📦 Container Queries Test</h1>
+    <p class="description">
+      This page demonstrates container queries for mobile optimization. 
+      Components adapt based on their container size, not the viewport size.
+      Resize your browser or use the buttons below to see the effect.
+    </p>
+
+    <div id="support-status" class="support-status"></div>
+
+    <div style="margin-bottom: 2rem;">
+      <button class="resize-handle" onclick="setGridColumns(1)">1 Column</button>
+      <button class="resize-handle" onclick="setGridColumns(2)">2 Columns</button>
+      <button class="resize-handle" onclick="setGridColumns(3)">3 Columns</button>
+      <button class="resize-handle" onclick="setGridColumns(4)">4 Columns</button>
+    </div>
+
+    <h2>Zone Cards (Trading Zones)</h2>
+    <p class="description">
+      Zone cards adapt their font size and padding based on container width.
+      Watch how the text scales as you change the grid layout.
+    </p>
+    <div id="zone-grid" class="grid grid-3">
+      <div class="zone-card-container">
+        <div class="zone-card-content">
+          <div class="zone-card-price">$95,234.50</div>
+          <div style="font-size: 0.75rem; font-weight: 600; color: #059669; margin: 0.25rem 0;">Strong Support</div>
+          <div class="zone-distance">2.3% below current</div>
+        </div>
+      </div>
+      <div class="zone-card-container">
+        <div class="zone-card-content">
+          <div class="zone-card-price">$97,845.20</div>
+          <div style="font-size: 0.75rem; font-weight: 600; color: #d97706; margin: 0.25rem 0;">Moderate Resistance</div>
+          <div class="zone-distance">0.5% above current</div>
+        </div>
+      </div>
+      <div class="zone-card-container">
+        <div class="zone-card-content">
+          <div class="zone-card-price">$99,123.75</div>
+          <div style="font-size: 0.75rem; font-weight: 600; color: #dc2626; margin: 0.25rem 0;">Strong Resistance</div>
+          <div class="zone-distance">1.8% above current</div>
+        </div>
+      </div>
+    </div>
+
+    <h2>Badges (Status Indicators)</h2>
+    <p class="description">
+      Badges scale their text and padding based on available space.
+    </p>
+    <div id="badge-grid" class="grid grid-4">
+      <div class="badge-container-query">
+        <span class="badge-text">LIVE</span>
+      </div>
+      <div class="badge-container-query">
+        <span class="badge-text">High Confidence</span>
+      </div>
+      <div class="badge-container-query">
+        <span class="badge-text">Strong</span>
+      </div>
+      <div class="badge-container-query">
+        <span class="badge-text">Real Data</span>
+      </div>
+    </div>
+
+    <h2>Chart Components</h2>
+    <p class="description">
+      Chart components adapt their padding and font sizes based on container width.
+    </p>
+    <div id="chart-grid" class="grid grid-2">
+      <div class="chart-container-query">
+        <div class="chart-content">
+          <div class="chart-label">Current Price</div>
+          <div class="chart-value">$97,234.50</div>
+        </div>
+      </div>
+      <div class="chart-container-query">
+        <div class="chart-content">
+          <div class="chart-label">24h Volume</div>
+          <div class="chart-value">$28.5B</div>
+        </div>
+      </div>
+      <div class="chart-container-query">
+        <div class="chart-content">
+          <div class="chart-label">Market Cap</div>
+          <div class="chart-value">$1.92T</div>
+        </div>
+      </div>
+      <div class="chart-container-query">
+        <div class="chart-content">
+          <div class="chart-label">RSI (14)</div>
+          <div class="chart-value">62.5</div>
+        </div>
+      </div>
+    </div>
+
+    <h2>Browser Support</h2>
+    <p class="description">
+      Container queries are supported in Chrome 105+, Safari 16+, and Firefox 110+.
+      This page will show whether your browser supports container queries.
+    </p>
+  </div>
+
+  <script>
+    // Check container query support
+    function checkSupport() {
+      const supported = CSS.supports('container-type', 'inline-size');
+      const statusEl = document.getElementById('support-status');
+      
+      if (supported) {
+        statusEl.className = 'support-status support-yes';
+        statusEl.textContent = '✅ Your browser supports container queries! Components will adapt to their container size.';
+      } else {
+        statusEl.className = 'support-status support-no';
+        statusEl.textContent = '❌ Your browser does not support container queries. Please use Chrome 105+, Safari 16+, or Firefox 110+.';
+      }
+    }
+
+    // Change grid columns
+    function setGridColumns(columns) {
+      const grids = ['zone-grid', 'badge-grid', 'chart-grid'];
+      grids.forEach(gridId => {
+        const grid = document.getElementById(gridId);
+        grid.className = `grid grid-${columns}`;
+      });
+    }
+
+    // Initialize
+    checkSupport();
+  </script>
+</body>
+</html>

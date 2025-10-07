@@ -712,6 +712,272 @@ body {
   }
 }
 
+/* ============================================
+   PRECISE MOBILE BREAKPOINTS FOR IPHONE MODELS
+   ============================================ */
+
+/* iPhone SE (2nd/3rd gen) - 375px width */
+@media (min-width: 375px) and (max-width: 389px) {
+  /* Optimized for iPhone SE 2nd/3rd gen, iPhone 6/7/8 */
+  body {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  
+  /* Slightly larger headings for better hierarchy */
+  h1 { 
+    font-size: 1.75rem; /* 28px - better prominence on SE */
+    line-height: 1.2;
+  }
+  h2 { 
+    font-size: 1.5rem; /* 24px - clear secondary level */
+    line-height: 1.3;
+  }
+  h3 { 
+    font-size: 1.25rem; /* 20px - readable tertiary */
+    line-height: 1.4;
+  }
+  
+  /* Optimized container padding for 375px width */
+  .container,
+  .mobile-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  /* Optimized card layouts */
+  .news-card,
+  .mobile-bg-card,
+  .newspaper-article {
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  
+  /* Touch targets remain at minimum 44px */
+  button,
+  a[role="button"],
+  .mobile-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Optimized text sizing for zone cards and badges */
+  .zone-card-price,
+  .zone-distance,
+  .crypto-badge {
+    font-size: clamp(0.8rem, 3vw, 0.95rem);
+  }
+}
+
+/* iPhone 12/13/14 Standard - 390px width */
+@media (min-width: 390px) and (max-width: 427px) {
+  /* Optimized for iPhone 12/13/14 standard models */
+  body {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  
+  /* Enhanced headings for 390px screens */
+  h1 { 
+    font-size: 1.875rem; /* 30px - full prominence */
+    line-height: 1.2;
+  }
+  h2 { 
+    font-size: 1.5rem; /* 24px - clear hierarchy */
+    line-height: 1.3;
+  }
+  h3 { 
+    font-size: 1.25rem; /* 20px - readable tertiary */
+    line-height: 1.4;
+  }
+  
+  /* Optimized container padding for 390px width */
+  .container,
+  .mobile-container {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  
+  /* Enhanced card layouts with more breathing room */
+  .news-card,
+  .mobile-bg-card,
+  .newspaper-article {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  /* Touch targets can be slightly larger */
+  button,
+  a[role="button"],
+  .mobile-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.75rem 1rem;
+  }
+  
+  /* Optimized text sizing for zone cards and badges */
+  .zone-card-price,
+  .zone-distance,
+  .crypto-badge {
+    font-size: clamp(0.85rem, 3.2vw, 1rem);
+  }
+  
+  /* Better spacing for whale watch components */
+  .whale-transaction-card {
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .whale-amount,
+  .whale-value {
+    font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+  }
+}
+
+/* iPhone Pro Max - 428px width */
+@media (min-width: 428px) and (max-width: 479px) {
+  /* Optimized for iPhone 12/13/14 Pro Max, Plus models */
+  body {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  
+  /* Full-size headings for larger iPhone screens */
+  h1 { 
+    font-size: 2rem; /* 32px - maximum mobile prominence */
+    line-height: 1.2;
+  }
+  h2 { 
+    font-size: 1.625rem; /* 26px - strong hierarchy */
+    line-height: 1.3;
+  }
+  h3 { 
+    font-size: 1.375rem; /* 22px - clear tertiary */
+    line-height: 1.4;
+  }
+  h4 { 
+    font-size: 1.125rem; /* 18px - distinct from body */
+    line-height: 1.4;
+    font-weight: 600;
+  }
+  
+  /* Optimized container padding for 428px width */
+  .container,
+  .mobile-container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  
+  /* Enhanced card layouts with maximum mobile spacing */
+  .news-card,
+  .mobile-bg-card,
+  .newspaper-article {
+    padding: 18px;
+    margin-bottom: 18px;
+  }
+  
+  /* Larger touch targets for bigger screen */
+  button,
+  a[role="button"],
+  .mobile-touch-target {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 0.875rem 1.25rem;
+  }
+  
+  /* Optimized text sizing for zone cards and badges */
+  .zone-card-price,
+  .zone-distance,
+  .crypto-badge {
+    font-size: clamp(0.9rem, 3.5vw, 1.05rem);
+  }
+  
+  /* Enhanced spacing for whale watch components */
+  .whale-transaction-card {
+    padding: 18px;
+    gap: 14px;
+  }
+  
+  .whale-amount,
+  .whale-value {
+    font-size: clamp(0.95rem, 3.8vw, 1.15rem);
+  }
+  
+  /* Better grid layouts for larger mobile screens */
+  .trading-zones-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+  }
+  
+  /* Enhanced market ticker for Pro Max screens */
+  .ticker-item {
+    font-size: 0.95rem;
+    padding: 0.375rem 0.75rem;
+  }
+}
+
+/* Smooth scaling between all breakpoints */
+@media (min-width: 320px) and (max-width: 767px) {
+  /* Universal mobile optimizations that apply across all sizes */
+  
+  /* Ensure all text containers prevent overflow */
+  .zone-card,
+  .whale-card,
+  .trade-signal-card,
+  .market-data-card {
+    overflow: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Responsive number and price displays */
+  .price-display,
+  .amount-display,
+  .percentage-display {
+    font-size: clamp(0.875rem, 3.5vw, 1.125rem);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Responsive badge sizing */
+  .badge,
+  .tag,
+  .label {
+    font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+    padding: clamp(0.25rem, 1vw, 0.375rem) clamp(0.5rem, 2vw, 0.75rem);
+  }
+  
+  /* Ensure buttons scale smoothly */
+  button,
+  .btn {
+    font-size: clamp(0.875rem, 3.5vw, 1rem);
+    padding: clamp(0.625rem, 2vw, 0.875rem) clamp(0.875rem, 3vw, 1.25rem);
+  }
+  
+  /* Responsive chart containers */
+  .chart-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Responsive table layouts */
+  .data-table {
+    font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+  }
+  
+  /* Ensure proper spacing scales */
+  .section-gap {
+    margin-bottom: clamp(1rem, 4vw, 1.5rem);
+  }
+  
+  .content-gap {
+    margin-bottom: clamp(0.75rem, 3vw, 1rem);
+  }
+}
+
 /* Header newspaper pattern - responsive for mobile optimization */
 .header-newspaper-pattern {
   background-image: 
@@ -765,6 +1031,575 @@ body {
   p, li, dd, dt {
     line-height: 1.6 !important;
     margin-bottom: 0.5rem !important;
+  }
+}
+
+/* ============================================
+   TEXT OVERFLOW PREVENTION UTILITIES
+   ============================================ */
+
+/* CSS Containment Strategies - Prevent text overflow */
+
+/* Single-line text with ellipsis */
+.text-overflow-ellipsis {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+/* Multi-line text with word breaking */
+.text-overflow-break {
+  min-width: 0;
+  overflow: hidden;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Anywhere breaking for long strings (URLs, hashes, crypto addresses) */
+.text-overflow-anywhere {
+  min-width: 0;
+  overflow: hidden;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+
+/* Scrollable container for preserving content */
+.text-overflow-scroll {
+  min-width: 0;
+  overflow: auto;
+  word-break: normal;
+  overflow-wrap: normal;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Safe default for most containers */
+.text-overflow-safe {
+  min-width: 0;
+  overflow: hidden;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Word break utilities */
+.word-break-normal {
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+.word-break-words {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.word-break-all {
+  word-break: break-all;
+}
+
+.word-break-keep {
+  word-break: keep-all;
+}
+
+/* Overflow wrap utilities */
+.overflow-wrap-normal {
+  overflow-wrap: normal;
+}
+
+.overflow-wrap-break {
+  overflow-wrap: break-word;
+}
+
+.overflow-wrap-anywhere {
+  overflow-wrap: anywhere;
+}
+
+/* Safe container wrapper - prevents all overflow issues */
+.safe-container {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  box-sizing: border-box;
+}
+
+/* Safe flex child - prevents flex overflow issues */
+.safe-flex-child {
+  min-width: 0;
+  min-height: 0;
+  flex-shrink: 1;
+  overflow: hidden;
+}
+
+/* Safe grid child - prevents grid overflow issues */
+.safe-grid-child {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Text truncation utilities */
+.truncate-1-line {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.truncate-2-lines {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.truncate-3-lines {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Mobile-specific overflow prevention */
+@media (max-width: 768px) {
+  /* Apply safe containment to common mobile containers */
+  .mobile-safe-container {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Zone cards - prevent price and distance overflow */
+  .zone-card,
+  .zone-card-content,
+  .zone-card-price,
+  .zone-distance {
+    min-width: 0;
+    overflow: hidden;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Whale watch cards - prevent amount and value overflow */
+  .whale-card,
+  .whale-transaction-card,
+  .whale-amount,
+  .whale-value {
+    min-width: 0;
+    overflow: hidden;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Badge and label overflow prevention */
+  .badge,
+  .crypto-badge,
+  .tag,
+  .label {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Price and number displays */
+  .price-display,
+  .amount-display,
+  .percentage-display,
+  .number-display {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Status messages and alerts */
+  .status-message,
+  .alert-message,
+  .error-message {
+    min-width: 0;
+    overflow: hidden;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Ensure all flex containers handle overflow properly */
+  .flex,
+  [class*="flex"] {
+    min-width: 0;
+  }
+  
+  .flex > * {
+    min-width: 0;
+    flex-shrink: 1;
+  }
+  
+  /* Ensure all grid containers handle overflow properly */
+  .grid,
+  [class*="grid"] {
+    min-width: 0;
+  }
+  
+  .grid > * {
+    min-width: 0;
+  }
+}
+
+/* Development mode overflow detection indicator */
+[data-overflow-detected="true"] {
+  outline: 2px solid red !important;
+  outline-offset: 2px !important;
+  position: relative;
+}
+
+[data-overflow-detected="true"]::after {
+  content: "⚠️ OVERFLOW";
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: red;
+  color: white;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: bold;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* ============================================
+   CONTAINER QUERIES FOR COMPONENT RESPONSIVENESS
+   ============================================ */
+
+/* Container query utilities for component-level responsiveness */
+.container-query {
+  container-type: inline-size;
+  container-name: component;
+}
+
+.container-query-normal {
+  container-type: normal;
+}
+
+.container-query-size {
+  container-type: size;
+}
+
+/* Zone card container queries */
+.zone-card-container {
+  container-type: inline-size;
+  container-name: zone-card;
+}
+
+@container zone-card (min-width: 200px) {
+  .zone-card-content {
+    font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+    padding: 0.75rem;
+  }
+  
+  .zone-card-price {
+    font-size: clamp(0.875rem, 3vw, 1rem);
+  }
+  
+  .zone-distance {
+    font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+  }
+}
+
+@container zone-card (min-width: 250px) {
+  .zone-card-content {
+    font-size: clamp(0.875rem, 3vw, 1rem);
+    padding: 1rem;
+  }
+  
+  .zone-card-price {
+    font-size: clamp(1rem, 3.5vw, 1.125rem);
+  }
+  
+  .zone-distance {
+    font-size: clamp(0.875rem, 3vw, 1rem);
+  }
+}
+
+@container zone-card (min-width: 300px) {
+  .zone-card-content {
+    font-size: 1rem;
+    padding: 1.25rem;
+  }
+  
+  .zone-card-price {
+    font-size: 1.125rem;
+  }
+  
+  .zone-distance {
+    font-size: 1rem;
+  }
+}
+
+/* Chart container queries */
+.chart-container-query {
+  container-type: inline-size;
+  container-name: chart;
+}
+
+@container chart (min-width: 300px) {
+  .chart-content {
+    padding: 0.75rem;
+  }
+  
+  .chart-label {
+    font-size: 0.75rem;
+  }
+  
+  .chart-value {
+    font-size: 0.875rem;
+  }
+}
+
+@container chart (min-width: 500px) {
+  .chart-content {
+    padding: 1rem;
+  }
+  
+  .chart-label {
+    font-size: 0.875rem;
+  }
+  
+  .chart-value {
+    font-size: 1rem;
+  }
+}
+
+@container chart (min-width: 700px) {
+  .chart-content {
+    padding: 1.5rem;
+  }
+  
+  .chart-label {
+    font-size: 1rem;
+  }
+  
+  .chart-value {
+    font-size: 1.125rem;
+  }
+}
+
+/* Badge container queries */
+.badge-container-query {
+  container-type: inline-size;
+  container-name: badge;
+}
+
+@container badge (min-width: 60px) {
+  .badge-text {
+    font-size: clamp(0.625rem, 2vw, 0.75rem);
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+@container badge (min-width: 80px) {
+  .badge-text {
+    font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+    padding: 0.375rem 0.75rem;
+  }
+}
+
+@container badge (min-width: 100px) {
+  .badge-text {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* Whale watch container queries */
+.whale-card-container {
+  container-type: inline-size;
+  container-name: whale-card;
+}
+
+@container whale-card (min-width: 280px) {
+  .whale-amount {
+    font-size: clamp(0.875rem, 3vw, 1rem);
+  }
+  
+  .whale-value {
+    font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+  }
+  
+  .whale-status {
+    font-size: clamp(0.625rem, 2vw, 0.75rem);
+  }
+}
+
+@container whale-card (min-width: 350px) {
+  .whale-amount {
+    font-size: clamp(1rem, 3.5vw, 1.125rem);
+  }
+  
+  .whale-value {
+    font-size: clamp(0.875rem, 3vw, 1rem);
+  }
+  
+  .whale-status {
+    font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+  }
+}
+
+@container whale-card (min-width: 420px) {
+  .whale-amount {
+    font-size: 1.125rem;
+  }
+  
+  .whale-value {
+    font-size: 1rem;
+  }
+  
+  .whale-status {
+    font-size: 0.875rem;
+  }
+}
+
+/* Trade signal container queries */
+.trade-signal-container {
+  container-type: inline-size;
+  container-name: trade-signal;
+}
+
+@container trade-signal (min-width: 300px) {
+  .signal-price {
+    font-size: clamp(0.875rem, 3vw, 1rem);
+  }
+  
+  .signal-label {
+    font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+  }
+}
+
+@container trade-signal (min-width: 400px) {
+  .signal-price {
+    font-size: clamp(1rem, 3.5vw, 1.125rem);
+  }
+  
+  .signal-label {
+    font-size: clamp(0.875rem, 3vw, 1rem);
+  }
+}
+
+@container trade-signal (min-width: 500px) {
+  .signal-price {
+    font-size: 1.25rem;
+  }
+  
+  .signal-label {
+    font-size: 1rem;
+  }
+}
+
+/* Market data container queries */
+.market-data-container {
+  container-type: inline-size;
+  container-name: market-data;
+}
+
+@container market-data (min-width: 250px) {
+  .market-data-value {
+    font-size: clamp(0.875rem, 3vw, 1rem);
+  }
+  
+  .market-data-label {
+    font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+  }
+}
+
+@container market-data (min-width: 350px) {
+  .market-data-value {
+    font-size: clamp(1rem, 3.5vw, 1.125rem);
+  }
+  
+  .market-data-label {
+    font-size: clamp(0.875rem, 3vw, 1rem);
+  }
+}
+
+@container market-data (min-width: 450px) {
+  .market-data-value {
+    font-size: 1.125rem;
+  }
+  
+  .market-data-label {
+    font-size: 1rem;
+  }
+}
+
+/* Generic responsive container utilities */
+.responsive-container {
+  container-type: inline-size;
+  container-name: responsive;
+}
+
+@container responsive (min-width: 200px) {
+  .responsive-text-sm {
+    font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+  }
+}
+
+@container responsive (min-width: 300px) {
+  .responsive-text-base {
+    font-size: clamp(0.875rem, 3vw, 1rem);
+  }
+}
+
+@container responsive (min-width: 400px) {
+  .responsive-text-lg {
+    font-size: clamp(1rem, 3.5vw, 1.125rem);
+  }
+}
+
+@container responsive (min-width: 500px) {
+  .responsive-text-xl {
+    font-size: clamp(1.125rem, 4vw, 1.25rem);
+  }
+}
+
+/* Container query fallback for browsers without support */
+@supports not (container-type: inline-size) {
+  .container-query,
+  .zone-card-container,
+  .chart-container-query,
+  .badge-container-query,
+  .whale-card-container,
+  .trade-signal-container,
+  .market-data-container,
+  .responsive-container {
+    /* Fallback to regular responsive design */
+    width: 100%;
+  }
+  
+  /* Apply mobile-first responsive styles as fallback */
+  @media (max-width: 768px) {
+    .zone-card-content,
+    .chart-content,
+    .whale-amount,
+    .signal-price,
+    .market-data-value {
+      font-size: clamp(0.875rem, 3.5vw, 1rem);
+    }
+    
+    .badge-text,
+    .zone-distance,
+    .chart-label,
+    .whale-value,
+    .signal-label,
+    .market-data-label {
+      font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+    }
   }
 }
 
