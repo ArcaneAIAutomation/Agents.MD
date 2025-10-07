@@ -131,14 +131,31 @@ export default function Home() {
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* AI Trade Generation */}
-                <div className="border-2 border-gray-800 p-4 bg-gradient-to-br from-purple-50 to-purple-100 mobile-bg-card hover:shadow-md transition-shadow">
+                {/* BTC/ETH Trade Generation Engine */}
+                <div className="border-2 border-gray-800 p-4 bg-gradient-to-br from-purple-50 to-purple-100 mobile-bg-card hover:shadow-md transition-shadow relative">
+                  <div className="absolute top-2 right-2 bg-green-600 text-white text-xs px-2 py-1 rounded font-bold">
+                    LIVE
+                  </div>
                   <div className="mobile-text-primary font-bold mb-2 font-serif flex items-center gap-2">
                     <span className="text-xl">🤖</span>
-                    <span>AI Trade Signals</span>
+                    <span>BTC/ETH Trade Engine</span>
                   </div>
                   <div className="mobile-text-secondary text-sm leading-relaxed">
                     GPT-4o powered trade generation with confidence scoring and risk management
+                  </div>
+                </div>
+
+                {/* Whale Watch with Caesar API */}
+                <div className="border-2 border-gray-800 p-4 bg-gradient-to-br from-cyan-50 to-cyan-100 mobile-bg-card hover:shadow-md transition-shadow relative">
+                  <div className="absolute top-2 right-2 bg-green-600 text-white text-xs px-2 py-1 rounded font-bold">
+                    LIVE
+                  </div>
+                  <div className="mobile-text-primary font-bold mb-2 font-serif flex items-center gap-2">
+                    <span className="text-xl">🐋</span>
+                    <span>Whale Watch</span>
+                  </div>
+                  <div className="mobile-text-secondary text-sm leading-relaxed">
+                    Track large wallet movements with Caesar API-powered context analysis
                   </div>
                 </div>
 
@@ -163,35 +180,21 @@ export default function Home() {
                     Real-time crypto news with AI sentiment analysis and market impact
                   </div>
                 </div>
-
-                {/* Whale Watch - Coming Soon */}
-                <div className="border-2 border-gray-800 p-4 bg-gradient-to-br from-amber-50 to-amber-100 mobile-bg-card hover:shadow-md transition-shadow relative">
-                  <div className="absolute top-2 right-2 bg-amber-600 text-white text-xs px-2 py-1 rounded font-bold">
-                    SOON
-                  </div>
-                  <div className="mobile-text-primary font-bold mb-2 font-serif flex items-center gap-2">
-                    <span className="text-xl">🐋</span>
-                    <span>Whale Watch</span>
-                  </div>
-                  <div className="mobile-text-secondary text-sm leading-relaxed">
-                    Track large wallet movements with AI-powered context analysis
-                  </div>
-                </div>
               </div>
 
               {/* Additional Features Row */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 pt-4 border-t-2 border-gray-300">
                 <div className="text-center p-3 bg-gray-50 mobile-bg-card rounded border border-gray-300">
-                  <div className="mobile-text-primary font-bold text-lg font-serif">6+</div>
-                  <div className="mobile-text-secondary text-xs">Data Sources</div>
+                  <div className="mobile-text-primary font-bold text-lg font-serif">Caesar AI</div>
+                  <div className="mobile-text-secondary text-xs">Research Engine</div>
+                </div>
+                <div className="text-center p-3 bg-gray-50 mobile-bg-card rounded border border-gray-300">
+                  <div className="mobile-text-primary font-bold text-lg font-serif">GPT-4o</div>
+                  <div className="mobile-text-secondary text-xs">Trade Analysis</div>
                 </div>
                 <div className="text-center p-3 bg-gray-50 mobile-bg-card rounded border border-gray-300">
                   <div className="mobile-text-primary font-bold text-lg font-serif">24/7</div>
                   <div className="mobile-text-secondary text-xs">Live Monitoring</div>
-                </div>
-                <div className="text-center p-3 bg-gray-50 mobile-bg-card rounded border border-gray-300">
-                  <div className="mobile-text-primary font-bold text-lg font-serif">WCAG AA</div>
-                  <div className="mobile-text-secondary text-xs">Accessible</div>
                 </div>
                 <div className="text-center p-3 bg-gray-50 mobile-bg-card rounded border border-gray-300">
                   <div className="mobile-text-primary font-bold text-lg font-serif">Mobile</div>
