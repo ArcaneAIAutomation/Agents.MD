@@ -172,11 +172,48 @@ async function fetchRealBitcoinData() {
 // Fetch historical price data for proper RSI and MACD calculation
 async function fetchHistoricalPrices(symbol: string = 'BTC', periods: number = 14): Promise<number[]> {
   try {
-    // Determine how many days of data we need based on periods
-    // For hourly data: 35 periods = ~1.5 days, but we'll fetch 2 days to be safe
+    // Use Kraken API (free, no API key needed, no location restrictions)
+    const krakenPair = 'XXBTZUSD'; // BTC/USD pair on Kraken
+    const interval = 60; // 60 minutes (1 hour)
+    const since = Math.floor(Date.now() / 1000) - (periods + 10) * 3600; // Get extra data
+    
+    const krakenResponse = await fetch(
+      `https://api.kraken.com/0/public/OHLC?pair=${krakenPair}&interval=${interval}&since=${since}`,
+      { signal: AbortSignal.timeout(15000) }
+    );
+
+    if (krakenResponse.ok) {
+      const data = await krakenResponse.json();
+      
+      if (data.error && data.error.length > 0) {
+        throw new Error(`Kraken API error: ${data.error.join(', ')}`);
+      }
+      
+      // Kraken returns: { result: { XXBTZUSD: [[timestamp, open, high, low, close, vwap, volume, count], ...] } }
+      const ohlcData = data.result[krakenPair] || data.result['XXBTZUSD'];
+      
+      if (!ohlcData || ohlcData.length === 0) {
+        throw new Error('No OHLC data returned from Kraken');
+      }
+      
+      // Extract closing prices (index 4)
+      const prices = ohlcData
+        .slice(-(periods + 1)) // Get last N+1 periods
+        .map((candle: any[]) => parseFloat(candle[4])); // Close price
+
+      console.log(`✅ Fetched ${prices.length} historical prices from Kraken for technical indicators`);
+      return prices;
+    } else {
+      throw new Error(`Kraken API returned status ${krakenResponse.status}`);
+    }
+  } catch (error) {
+    console.warn('⚠️ Kraken API failed, trying CoinGecko fallback:', error);
+  }
+
+  // Fallback to CoinGecko if Kraken fails
+  try {
     const days = periods <= 24 ? 1 : 2;
     
-    // Fetch hourly OHLC data from CoinGecko
     const response = await fetch(
       `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}&interval=hourly`,
       {
@@ -188,21 +225,19 @@ async function fetchHistoricalPrices(symbol: string = 'BTC', periods: number = 1
     );
 
     if (!response.ok) {
-      throw new Error('Failed to fetch historical prices');
+      throw new Error('Failed to fetch historical prices from CoinGecko');
     }
 
     const data = await response.json();
-    
-    // Extract closing prices from the last N+1 periods (we need N+1 to calculate N-period indicators)
     const requiredPrices = periods + 1;
     const prices = data.prices
       .slice(-requiredPrices)
       .map((point: [number, number]) => point[1]);
 
-    console.log(`✅ Fetched ${prices.length} historical prices for technical indicators (requested ${periods})`);
+    console.log(`✅ Fetched ${prices.length} historical prices from CoinGecko (fallback)`);
     return prices;
   } catch (error) {
-    console.error('❌ Failed to fetch historical prices:', error);
+    console.error('❌ Failed to fetch historical prices from both APIs:', error);
     return [];
   }
 }
@@ -424,10 +459,17 @@ async function calculateRealTechnicalIndicators(currentPrice: number, high24h: n
   };
 }
 
+// Helper function to safely get RSI value
+function getRSIValue(rsi: any): number {
+  if (typeof rsi === 'number') return rsi;
+  if (rsi && typeof rsi.value === 'number') return rsi.value;
+  return 50; // Default neutral value
+}
+
 // Advanced trading signals based on multi-factor analysis
 function generateIntelligentTradingSignals(currentPrice: number, technicalIndicators: any, realData: any, newsData: any) {
   const signals = [];
-  const rsi = technicalIndicators.rsi.value;
+  const rsi = getRSIValue(technicalIndicators.rsi);
   const change24h = realData.price.change24h;
   const fearGreed = realData.fearGreedIndex?.value || 50;
   const bidAskRatio = realData.orderBookData ? realData.orderBookData.bidVolume / realData.orderBookData.askVolume : 1;
@@ -553,7 +595,7 @@ function generateIntelligentTradingSignals(currentPrice: number, technicalIndica
 // Intelligent price predictions using advanced market analysis
 function generateIntelligentPredictions(currentPrice: number, technicalIndicators: any, realData: any, newsData: any) {
   const change24h = realData.price.change24h;
-  const rsi = technicalIndicators.rsi.value;
+  const rsi = getRSIValue(technicalIndicators.rsi);
   const fearGreed = realData.fearGreedIndex?.value || 50;
   const volume24h = realData.price.volume24h;
   const priceRange = realData.price.high24h - realData.price.low24h;
@@ -653,7 +695,7 @@ function generateIntelligentPredictions(currentPrice: number, technicalIndicator
 // Advanced multi-dimensional market sentiment analysis
 function analyzeIntelligentMarketSentiment(realData: any, technicalIndicators: any, newsData: any) {
   const change24h = realData.price.change24h;
-  const rsi = technicalIndicators.rsi.value;
+  const rsi = getRSIValue(technicalIndicators.rsi);
   const fearGreed = realData.fearGreedIndex?.value || 50;
   const bidAskRatio = realData.orderBookData ? realData.orderBookData.bidVolume / realData.orderBookData.askVolume : 1;
   const volume24h = realData.price.volume24h;
@@ -1140,7 +1182,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             },
             {
               role: "user",
-              content: `Bitcoin is at $${currentPrice.toLocaleString()} with ${realData.price.change24h}% 24h change. RSI is ${technicalIndicators.rsi.value.toFixed(1)} and Fear & Greed Index is ${realData.fearGreedIndex?.value || 50}/100. Provide professional analysis.`
+              content: `Bitcoin is at $${currentPrice.toLocaleString()} with ${realData.price.change24h}% 24h change. RSI is ${getRSIValue(technicalIndicators.rsi).toFixed(1)} and Fear & Greed Index is ${realData.fearGreedIndex?.value || 50}/100. Provide professional analysis.`
             }
           ],
           temperature: 0.3,
