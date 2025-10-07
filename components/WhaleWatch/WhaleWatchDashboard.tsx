@@ -29,6 +29,9 @@ export default function WhaleWatchDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [analyzingTx, setAnalyzingTx] = useState<string | null>(null);
+  
+  // Track if any transaction is currently being analyzed (includes both starting and in-progress)
+  const hasActiveAnalysis = (whaleData?.whales.some(w => w.analysisStatus === 'analyzing') || analyzingTx !== null);
 
   const fetchWhaleData = async () => {
     try {
@@ -62,7 +65,18 @@ export default function WhaleWatchDashboard() {
 
   const analyzeTransaction = async (whale: WhaleTransaction) => {
     try {
+      // Immediately set analyzing state to prevent race condition
       setAnalyzingTx(whale.txHash);
+      
+      // Also immediately update the whale status to 'analyzing' to lock UI
+      if (whaleData) {
+        const updatedWhales = whaleData.whales.map(w =>
+          w.txHash === whale.txHash
+            ? { ...w, analysisStatus: 'analyzing' as const }
+            : w
+        );
+        setWhaleData({ ...whaleData, whales: updatedWhales });
+      }
       
       // Start Caesar analysis
       const response = await fetch('/api/whale-watch/analyze', {
@@ -78,7 +92,7 @@ export default function WhaleWatchDashboard() {
       const data = await response.json();
       
       if (data.success && data.jobId) {
-        // Update whale with job ID
+        // Update whale with job ID (keep analyzing status)
         if (whaleData) {
           const updatedWhales = whaleData.whales.map(w =>
             w.txHash === whale.txHash
@@ -319,6 +333,21 @@ export default function WhaleWatchDashboard() {
         </div>
       </div>
 
+      {/* Active Analysis Banner */}
+      {hasActiveAnalysis && (
+        <div className="mb-4 bg-purple-50 border-2 border-purple-300 rounded-lg p-4 animate-pulse">
+          <div className="flex items-center">
+            <RefreshCw className="h-5 w-5 text-purple-600 animate-spin mr-3 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-purple-900 font-bold">🤖 Caesar AI Analysis in Progress</p>
+              <p className="text-purple-700 text-sm">
+                Other transactions are temporarily disabled to prevent API overload. This typically takes 5-7 minutes.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Error Banner (non-blocking) */}
       {error && (
         <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
@@ -363,10 +392,22 @@ export default function WhaleWatchDashboard() {
       {/* Whale Transactions */}
       {whaleData && whaleData.whales.length > 0 ? (
         <div className="space-y-4">
-          {whaleData.whales.map((whale, index) => (
+          {whaleData.whales.map((whale, index) => {
+            // Check if this transaction is being analyzed or if another one is
+            const isThisAnalyzing = whale.analysisStatus === 'analyzing';
+            const isOtherAnalyzing = hasActiveAnalysis && !isThisAnalyzing;
+            const isDisabled = isOtherAnalyzing;
+            
+            return (
             <div
               key={whale.txHash}
-              className="border-2 border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow"
+              className={`border-2 rounded-lg p-4 transition-all ${
+                isDisabled 
+                  ? 'border-gray-200 opacity-50 cursor-not-allowed bg-gray-50' 
+                  : isThisAnalyzing
+                  ? 'border-purple-300 shadow-lg bg-purple-50'
+                  : 'border-gray-200 hover:shadow-lg'
+              }`}
             >
               <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
                 {/* Left: Icon and Type */}
@@ -431,18 +472,32 @@ export default function WhaleWatchDashboard() {
                 <div className="mt-4 pt-4 border-t border-gray-200">
                   <button
                     onClick={() => analyzeTransaction(whale)}
-                    disabled={analyzingTx === whale.txHash}
-                    className="w-full py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all font-medium disabled:opacity-50"
+                    disabled={analyzingTx === whale.txHash || isDisabled}
+                    className={`w-full py-3 rounded-lg transition-all font-medium ${
+                      isDisabled
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700'
+                    } disabled:opacity-50`}
+                    title={isDisabled ? 'Please wait for the current analysis to complete' : 'Analyze this transaction with Caesar AI'}
                   >
                     {analyzingTx === whale.txHash ? (
                       <span className="flex items-center justify-center">
                         <RefreshCw className="h-4 w-4 animate-spin mr-2" />
                         Starting AI Analysis...
                       </span>
+                    ) : isDisabled ? (
+                      <span className="flex items-center justify-center">
+                        ⏳ Analysis in progress on another transaction
+                      </span>
                     ) : (
                       <span>🤖 Analyze with Caesar AI</span>
                     )}
                   </button>
+                  {isDisabled && (
+                    <p className="text-xs text-gray-500 text-center mt-2">
+                      Please wait for the current analysis to complete before starting another
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -475,11 +530,22 @@ export default function WhaleWatchDashboard() {
                       </div>
                       <button
                         onClick={() => analyzeTransaction(whale)}
-                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm"
+                        disabled={isDisabled}
+                        className={`px-4 py-2 rounded transition-colors text-sm ${
+                          isDisabled
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-red-500 text-white hover:bg-red-600'
+                        }`}
+                        title={isDisabled ? 'Please wait for the current analysis to complete' : 'Retry analysis'}
                       >
                         Retry Analysis
                       </button>
                     </div>
+                    {isDisabled && (
+                      <p className="text-xs text-gray-500 mt-2">
+                        Another analysis is in progress. Please wait before retrying.
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
@@ -548,7 +614,8 @@ export default function WhaleWatchDashboard() {
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="text-center py-12">
