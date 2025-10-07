@@ -64,6 +64,12 @@ export default function WhaleWatchDashboard() {
   };
 
   const analyzeTransaction = async (whale: WhaleTransaction) => {
+    // Guard clause: Prevent execution if any analysis is already in progress
+    if (analyzingTx !== null || whaleData?.whales.some(w => w.analysisStatus === 'analyzing')) {
+      console.log('⚠️ Analysis already in progress, ignoring click');
+      return;
+    }
+    
     try {
       // Immediately set analyzing state to prevent race condition
       setAnalyzingTx(whale.txHash);
@@ -403,11 +409,12 @@ export default function WhaleWatchDashboard() {
               key={whale.txHash}
               className={`border-2 rounded-lg p-4 transition-all ${
                 isDisabled 
-                  ? 'border-gray-200 opacity-50 cursor-not-allowed bg-gray-50' 
+                  ? 'border-gray-200 opacity-50 cursor-not-allowed bg-gray-50 pointer-events-none' 
                   : isThisAnalyzing
                   ? 'border-purple-300 shadow-lg bg-purple-50'
                   : 'border-gray-200 hover:shadow-lg'
               }`}
+              style={isDisabled ? { pointerEvents: 'none' } : undefined}
             >
               <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
                 {/* Left: Icon and Type */}
