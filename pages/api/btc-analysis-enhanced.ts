@@ -169,32 +169,251 @@ async function fetchRealBitcoinData() {
   return results;
 }
 
+// Fetch historical price data for proper RSI and MACD calculation
+async function fetchHistoricalPrices(symbol: string = 'BTC', periods: number = 14): Promise<number[]> {
+  try {
+    // Determine how many days of data we need based on periods
+    // For hourly data: 35 periods = ~1.5 days, but we'll fetch 2 days to be safe
+    const days = periods <= 24 ? 1 : 2;
+    
+    // Fetch hourly OHLC data from CoinGecko
+    const response = await fetch(
+      `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}&interval=hourly`,
+      {
+        headers: {
+          'x-cg-pro-api-key': process.env.COINGECKO_API_KEY || ''
+        },
+        signal: AbortSignal.timeout(10000)
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch historical prices');
+    }
+
+    const data = await response.json();
+    
+    // Extract closing prices from the last N+1 periods (we need N+1 to calculate N-period indicators)
+    const requiredPrices = periods + 1;
+    const prices = data.prices
+      .slice(-requiredPrices)
+      .map((point: [number, number]) => point[1]);
+
+    console.log(`✅ Fetched ${prices.length} historical prices for technical indicators (requested ${periods})`);
+    return prices;
+  } catch (error) {
+    console.error('❌ Failed to fetch historical prices:', error);
+    return [];
+  }
+}
+
+// Calculate proper RSI using the standard 14-period formula
+function calculateProperRSI(prices: number[], period: number = 14): number {
+  if (prices.length < period + 1) {
+    console.warn('⚠️ Insufficient price data for RSI calculation, using fallback');
+    // Fallback: estimate based on current position
+    const currentPrice = prices[prices.length - 1];
+    const avgPrice = prices.reduce((sum, p) => sum + p, 0) / prices.length;
+    return 50 + ((currentPrice - avgPrice) / avgPrice) * 100;
+  }
+
+  // Calculate price changes
+  const changes: number[] = [];
+  for (let i = 1; i < prices.length; i++) {
+    changes.push(prices[i] - prices[i - 1]);
+  }
+
+  // Separate gains and losses
+  const gains = changes.map(change => change > 0 ? change : 0);
+  const losses = changes.map(change => change < 0 ? Math.abs(change) : 0);
+
+  // Calculate initial average gain and loss (SMA for first period)
+  let avgGain = gains.slice(0, period).reduce((sum, gain) => sum + gain, 0) / period;
+  let avgLoss = losses.slice(0, period).reduce((sum, loss) => sum + loss, 0) / period;
+
+  // Calculate subsequent averages using Wilder's smoothing method
+  for (let i = period; i < changes.length; i++) {
+    avgGain = ((avgGain * (period - 1)) + gains[i]) / period;
+    avgLoss = ((avgLoss * (period - 1)) + losses[i]) / period;
+  }
+
+  // Calculate RS and RSI
+  if (avgLoss === 0) {
+    return 100; // No losses means maximum RSI
+  }
+
+  const rs = avgGain / avgLoss;
+  const rsi = 100 - (100 / (1 + rs));
+
+  console.log(`📊 Calculated RSI: ${rsi.toFixed(2)} (avgGain: ${avgGain.toFixed(2)}, avgLoss: ${avgLoss.toFixed(2)})`);
+  return rsi;
+}
+
+// Calculate EMA (Exponential Moving Average)
+function calculateEMA(prices: number[], period: number): number {
+  if (prices.length < period) {
+    // If not enough data, return simple average
+    return prices.reduce((sum, p) => sum + p, 0) / prices.length;
+  }
+
+  // Calculate initial SMA
+  const sma = prices.slice(0, period).reduce((sum, p) => sum + p, 0) / period;
+  
+  // Calculate multiplier
+  const multiplier = 2 / (period + 1);
+  
+  // Calculate EMA
+  let ema = sma;
+  for (let i = period; i < prices.length; i++) {
+    ema = (prices[i] - ema) * multiplier + ema;
+  }
+  
+  return ema;
+}
+
+// Calculate proper MACD (Moving Average Convergence Divergence)
+function calculateProperMACD(prices: number[]): { macdLine: number; signalLine: number; histogram: number; signal: string } {
+  if (prices.length < 26) {
+    console.warn('⚠️ Insufficient price data for MACD calculation, using fallback');
+    return {
+      macdLine: 0,
+      signalLine: 0,
+      histogram: 0,
+      signal: 'NEUTRAL'
+    };
+  }
+
+  // Calculate 12-period EMA
+  const ema12 = calculateEMA(prices, 12);
+  
+  // Calculate 26-period EMA
+  const ema26 = calculateEMA(prices, 26);
+  
+  // MACD Line = 12 EMA - 26 EMA
+  const macdLine = ema12 - ema26;
+  
+  // Calculate Signal Line (9-period EMA of MACD Line)
+  // For simplicity, we'll calculate it from recent MACD values
+  // In a full implementation, you'd track MACD history
+  const macdHistory: number[] = [];
+  
+  // Calculate MACD for last 9+ periods to get signal line
+  for (let i = Math.max(0, prices.length - 35); i < prices.length; i++) {
+    const slice = prices.slice(0, i + 1);
+    if (slice.length >= 26) {
+      const ema12_i = calculateEMA(slice, 12);
+      const ema26_i = calculateEMA(slice, 26);
+      macdHistory.push(ema12_i - ema26_i);
+    }
+  }
+  
+  // Signal Line = 9-period EMA of MACD
+  const signalLine = macdHistory.length >= 9 ? calculateEMA(macdHistory, 9) : macdLine;
+  
+  // Histogram = MACD Line - Signal Line
+  const histogram = macdLine - signalLine;
+  
+  // Determine signal
+  let signal: string;
+  if (histogram > 0.5) {
+    signal = 'BULLISH';
+  } else if (histogram < -0.5) {
+    signal = 'BEARISH';
+  } else {
+    signal = 'NEUTRAL';
+  }
+  
+  console.log(`📊 Calculated MACD: Line=${macdLine.toFixed(2)}, Signal=${signalLine.toFixed(2)}, Histogram=${histogram.toFixed(2)}`);
+  
+  return {
+    macdLine,
+    signalLine,
+    histogram,
+    signal
+  };
+}
+
 // Calculate REAL technical indicators from actual price data
-function calculateRealTechnicalIndicators(currentPrice: number, high24h: number, low24h: number, volume24h: number, orderBookData: any) {
-  // Calculate real RSI based on price momentum
-  const priceRange = high24h - low24h;
-  const pricePosition = (currentPrice - low24h) / priceRange;
-  const rsi = 30 + (pricePosition * 40); // Real RSI based on price position in 24h range
+async function calculateRealTechnicalIndicators(currentPrice: number, high24h: number, low24h: number, volume24h: number, orderBookData: any) {
+  // Fetch historical prices for proper RSI and MACD calculation (need 26+ for MACD)
+  const historicalPrices = await fetchHistoricalPrices('BTC', 35); // Fetch 35 periods for MACD
   
-  // Calculate real EMAs based on actual price levels
-  const ema20 = currentPrice * 0.99; // Slightly below current (realistic EMA20)
-  const ema50 = currentPrice * 0.97; // Further below current (realistic EMA50)
+  // Calculate proper 14-period RSI
+  let rsi = 50; // Default neutral value
+  if (historicalPrices.length > 0) {
+    rsi = calculateProperRSI(historicalPrices, 14);
+  } else {
+    // Fallback: estimate based on 24h price position
+    console.warn('⚠️ Using fallback RSI calculation');
+    const priceRange = high24h - low24h;
+    const pricePosition = (currentPrice - low24h) / priceRange;
+    rsi = 30 + (pricePosition * 40);
+  }
   
-  // Bollinger Bands calculation
-  const middle = (high24h + low24h) / 2;
+  // Calculate proper MACD
+  let macdData = {
+    macdLine: 0,
+    signalLine: 0,
+    histogram: 0,
+    signal: 'NEUTRAL' as const
+  };
+  
+  if (historicalPrices.length >= 26) {
+    macdData = calculateProperMACD(historicalPrices);
+  } else {
+    console.warn('⚠️ Using fallback MACD calculation');
+    const priceChange = ((currentPrice - (high24h + low24h) / 2) / ((high24h + low24h) / 2)) * 100;
+    macdData = {
+      macdLine: priceChange,
+      signalLine: priceChange * 0.9,
+      histogram: priceChange * 0.1,
+      signal: priceChange > 1 ? 'BULLISH' : priceChange < -1 ? 'BEARISH' : 'NEUTRAL'
+    };
+  }
+  
+  // Calculate real EMAs from historical data
+  let ema20 = currentPrice * 0.99; // Fallback
+  let ema50 = currentPrice * 0.97; // Fallback
+  
+  if (historicalPrices.length >= 20) {
+    ema20 = calculateEMA(historicalPrices, 20);
+  }
+  if (historicalPrices.length >= 50) {
+    ema50 = calculateEMA(historicalPrices, 50);
+  }
+  
+  // Bollinger Bands calculation from historical data
+  let upper = currentPrice * 1.02;
+  let middle = currentPrice;
+  let lower = currentPrice * 0.98;
+  
+  if (historicalPrices.length >= 20) {
+    // Calculate 20-period SMA
+    const sma20 = historicalPrices.slice(-20).reduce((sum, p) => sum + p, 0) / 20;
+    
+    // Calculate standard deviation
+    const squaredDiffs = historicalPrices.slice(-20).map(p => Math.pow(p - sma20, 2));
+    const variance = squaredDiffs.reduce((sum, sq) => sum + sq, 0) / 20;
+    const stdDev = Math.sqrt(variance);
+    
+    middle = sma20;
+    upper = sma20 + (2 * stdDev);
+    lower = sma20 - (2 * stdDev);
+  }
+  
+  // Support/Resistance from historical data
   const range = high24h - low24h;
-  const upper = middle + (range * 0.6);
-  const lower = middle - (range * 0.6);
-  
-  // MACD signal based on price momentum
-  const priceChange = ((currentPrice - middle) / middle) * 100;
-  const macdSignal = priceChange > 1 ? 'BULLISH' : priceChange < -1 ? 'BEARISH' : 'NEUTRAL';
   
   return {
     rsi: { value: rsi, signal: rsi > 70 ? 'BEARISH' : rsi < 30 ? 'BULLISH' : 'NEUTRAL', timeframe: '14' },
     ema20,
     ema50,
-    macd: { signal: macdSignal, histogram: priceChange * 10 },
+    macd: { 
+      signal: macdData.signal, 
+      histogram: macdData.histogram,
+      macdLine: macdData.macdLine,
+      signalLine: macdData.signalLine
+    },
     bollinger: { upper, middle, lower },
     supportResistance: {
       strongSupport: low24h,
