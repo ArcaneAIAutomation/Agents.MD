@@ -232,14 +232,70 @@
     - Add mobile accessibility testing helpers
     - _Requirements: 1.1, 2.1_
 
-- [x] 10. Final integration and testing
+- [ ] 10. Implement responsive text scaling and container overflow fixes
+  - [ ] 10.1 Add responsive font sizing utilities to globals.css
+    - Add CSS clamp() based responsive text sizing classes
+    - Implement fluid typography scale (small, base, large, xlarge)
+    - Create responsive number and price display utilities
+    - Add text truncation and ellipsis utilities
+    - _Requirements: 7.1, 7.2, 7.3, 7.7_
+
+  - [ ] 10.2 Fix zone card text overflow issues
+    - Update zone card containers with proper overflow handling
+    - Implement responsive font sizing for zone prices and distances
+    - Add container constraints to prevent text clipping
+    - Fix badge text overflow with ellipsis or responsive sizing
+    - Ensure distance values fit within their containers
+    - _Requirements: 7.1, 7.2, 7.4_
+
+  - [ ] 10.3 Fix whale watch dashboard container issues
+    - Update transaction card layouts with proper text containment
+    - Implement responsive sizing for whale amounts and values
+    - Fix status message overflow issues
+    - Ensure all buttons meet touch target requirements
+    - Add proper padding and spacing for mobile devices
+    - _Requirements: 7.1, 7.2, 7.3, 7.4_
+
+  - [ ] 10.4 Add precise mobile breakpoints
+    - Implement breakpoint at 375px for iPhone SE
+    - Add breakpoint at 390px for iPhone 12/13/14
+    - Add breakpoint at 428px for iPhone Pro Max
+    - Ensure smooth scaling between all breakpoints
+    - Test layout at each breakpoint for text containment
+    - _Requirements: 7.3, 7.6_
+
+  - [ ] 10.5 Implement container queries for component responsiveness
+    - Add container query support to zone cards
+    - Implement container queries for chart components
+    - Add container-based responsive sizing for badges
+    - Ensure components adapt to their container size
+    - _Requirements: 7.3, 7.4_
+
+  - [ ] 10.6 Add text overflow detection and prevention
+    - Implement CSS containment strategies (min-width: 0, overflow: hidden)
+    - Add word-break and overflow-wrap utilities
+    - Create safe container wrapper components
+    - Add development mode overflow detection
+    - _Requirements: 7.1, 7.4, 7.7_
+
+  - [ ]* 10.7 Test text containment across all device sizes
+    - Test at 320px (smallest mobile)
+    - Test at 375px (iPhone SE)
+    - Test at 390px (iPhone 12/13/14)
+    - Test at 428px (iPhone Pro Max)
+    - Test at 768px (iPad Mini)
+    - Test portrait and landscape orientations
+    - Verify zero text overflow instances
+    - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6_
+
+- [x] 11. Final integration and testing
 
 
 
 
 
 
-  - [x] 10.1 Integrate mobile optimizations across all remaining components
+  - [x] 11.1 Integrate mobile optimizations across all remaining components
 
 
     - Apply mobile CSS classes to all components not yet updated
@@ -248,7 +304,7 @@
     - Test complete user flows on mobile devices
     - _Requirements: All requirements_
 
-  - [x] 10.2 Validate mobile performance and accessibility
+  - [x] 11.2 Validate mobile performance and accessibility
 
 
     - Verify all contrast ratios meet WCAG guidelines
@@ -256,7 +312,7 @@
     - Validate mobile performance metrics
     - _Requirements: 1.1, 2.1, 5.1, 5.4_
 
-  - [ ]* 10.3 Create mobile testing documentation
+  - [ ]* 11.3 Create mobile testing documentation
     - Document mobile testing procedures
     - Create mobile device testing checklist
     - Add mobile performance monitoring setup

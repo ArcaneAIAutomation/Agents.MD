@@ -101,6 +101,22 @@ Mobile Color Hierarchy:
 - Larger sentiment indicators
 - Touch-friendly filter buttons
 
+### 6. Responsive Text Scaling and Container Management
+
+**Container Overflow Prevention:**
+- CSS containment strategies to prevent text overflow
+- Responsive font sizing using clamp() for fluid typography
+- Container queries for component-level responsiveness
+- Proper text wrapping and truncation strategies
+
+**Key Features:**
+- All containers use `overflow: hidden` with proper text handling
+- Font sizes scale with viewport using `clamp(min, preferred, max)`
+- Numbers and prices use responsive sizing to fit containers
+- Zone cards, badges, and data displays enforce strict boundaries
+- Text truncation with ellipsis for long content
+- Breakpoints at 320px, 375px, 390px, 428px, and 768px for precise scaling
+
 ## Data Models
 
 ### Mobile Viewport Detection
@@ -120,10 +136,32 @@ interface MobileViewport {
 ```typescript
 const breakpoints = {
   mobile: '320px',
-  mobileLarge: '480px', 
+  mobileSmall: '375px',    // iPhone SE
+  mobileMedium: '390px',   // iPhone 12/13/14
+  mobileLarge: '428px',    // iPhone Pro Max
   tablet: '768px',
   desktop: '1024px',
   desktopLarge: '1280px'
+};
+```
+
+### Text Scaling Configuration
+
+```typescript
+interface ResponsiveTextConfig {
+  minSize: string;      // Minimum font size (e.g., '0.875rem')
+  preferredSize: string; // Preferred viewport-based size (e.g., '3vw')
+  maxSize: string;      // Maximum font size (e.g., '1.25rem')
+  lineHeight: number;   // Line height ratio
+  containerPadding: string; // Container padding for text safety
+}
+
+// Example usage with CSS clamp()
+const responsiveText = {
+  small: 'clamp(0.75rem, 2.5vw, 0.875rem)',
+  base: 'clamp(1rem, 3.5vw, 1.125rem)',
+  large: 'clamp(1.25rem, 4.5vw, 1.5rem)',
+  xlarge: 'clamp(1.5rem, 5vw, 2rem)'
 };
 ```
 
@@ -158,6 +196,20 @@ interface ContrastConfig {
 - Graceful degradation for unsupported CSS features
 - Alternative layouts for very small screens (< 320px)
 - Fallback fonts for devices without web font support
+
+### Text Overflow Prevention
+
+**Container Strategies:**
+- Use `min-width: 0` on flex children to allow proper shrinking
+- Apply `overflow: hidden` with `text-overflow: ellipsis` for single-line text
+- Use `word-break: break-word` for multi-line text wrapping
+- Implement container queries for component-aware responsiveness
+
+**Error Detection:**
+- Runtime detection of text overflow in development mode
+- Console warnings for containers with clipped content
+- Visual indicators for overflow issues during testing
+- Automated testing for text containment across breakpoints
 
 ## Testing Strategy
 
@@ -208,6 +260,10 @@ interface ContrastConfig {
    - Test rotation between portrait and landscape
    - Verify content reflow at different screen sizes
    - Test with browser zoom at 200%
+   - Validate text containment at all breakpoints (320px, 375px, 390px, 428px, 768px)
+   - Check for text overflow in zone cards, badges, and price displays
+   - Verify numbers and prices fit within their containers
+   - Test with long text strings and edge cases
 
 4. **Performance Test:**
    - Measure load times on 3G/4G connections
@@ -221,6 +277,9 @@ interface ContrastConfig {
 - **Load Performance:** First contentful paint < 3 seconds on mobile
 - **Usability:** Zero reports of unreadable text on mobile devices
 - **Accessibility:** WCAG 2.1 AA compliance score of 100%
+- **Text Containment:** Zero instances of text overflow or clipping across all breakpoints
+- **Responsive Scaling:** All components scale properly from 320px to 768px width
+- **Container Integrity:** 100% of text content fits within designated containers
 
 ## Implementation Phases
 
@@ -234,12 +293,21 @@ interface ContrastConfig {
 - Optimize component layouts for mobile
 - Enhance touch interaction areas
 
-### Phase 3: Performance and Polish
+### Phase 3: Text Scaling and Container Management
+- Implement responsive font sizing with clamp()
+- Add container overflow prevention strategies
+- Fix text clipping in zone cards, badges, and price displays
+- Add precise breakpoints for common mobile devices
+- Implement container queries for component-level responsiveness
+- Add text truncation and wrapping strategies
+
+### Phase 4: Performance and Polish
 - Optimize images and animations for mobile
 - Implement advanced responsive features
 - Fine-tune newspaper aesthetic for mobile
 
-### Phase 4: Testing and Validation
-- Comprehensive device testing
+### Phase 5: Testing and Validation
+- Comprehensive device testing across all breakpoints
+- Text containment validation at 320px, 375px, 390px, 428px, 768px
 - Accessibility compliance verification
 - Performance optimization and monitoring

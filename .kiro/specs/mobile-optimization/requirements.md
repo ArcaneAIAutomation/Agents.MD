@@ -77,3 +77,17 @@ The Crypto Herald trading intelligence platform currently has significant mobile
 3. WHEN typography is displayed THEN it SHALL maintain the serif newspaper feel while being mobile-readable
 4. WHEN the header and footer are shown THEN they SHALL preserve the newspaper design at mobile sizes
 5. WHEN background patterns are used THEN they SHALL be subtle and not interfere with mobile readability
+
+### Requirement 7
+
+**User Story:** As a mobile user with different screen sizes and resolutions, I want all content to scale properly and fit within its containers, so that I can read all information without text clipping or overflow issues.
+
+#### Acceptance Criteria
+
+1. WHEN viewing on any mobile device resolution THEN all text SHALL fit completely within its designated containers without clipping or overflow
+2. WHEN numbers and prices are displayed THEN they SHALL scale appropriately to fit their boxes without extending beyond boundaries
+3. WHEN the viewport size changes THEN all components SHALL resize responsively to maintain proper layout and text containment
+4. WHEN viewing zone cards, badges, or data displays THEN text SHALL never be visible outside container boundaries
+5. WHEN switching between portrait and landscape orientations THEN all content SHALL reflow properly without overflow
+6. WHEN viewing on devices from 320px to 768px width THEN the layout SHALL scale proportionally with appropriate breakpoints
+7. IF text content exceeds container width THEN it SHALL either wrap properly, truncate with ellipsis, or use responsive font sizing to fit
