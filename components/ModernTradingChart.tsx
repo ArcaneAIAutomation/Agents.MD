@@ -38,18 +38,18 @@ export default function ModernTradingChart({ symbol, currentPrice, tradingZones,
   const sortedZones = [...allZones].sort((a, b) => b.level - a.level);
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
+    <div className="bitcoin-block bg-bitcoin-black rounded-lg p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h3 className="text-2xl font-bold text-gray-900 flex items-center">
-            <BarChart3 className="h-6 w-6 mr-2 text-blue-600" />
+          <h3 className="text-2xl font-bold text-bitcoin-white flex items-center">
+            <BarChart3 className="h-6 w-6 mr-2 text-bitcoin-orange" />
             {symbol} Trading Zones
           </h3>
           <div className="flex items-center space-x-4 text-sm mt-2">
             <div className="flex items-center">
-              <span className="text-gray-600">Current Price:</span>
-              <span className="font-bold text-black ml-2 text-lg">
+              <span className="text-bitcoin-white" style={{ opacity: 0.6 }}>Current Price:</span>
+              <span className="font-bold text-bitcoin-orange ml-2 text-lg">
                 ${currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
@@ -58,8 +58,8 @@ export default function ModernTradingChart({ symbol, currentPrice, tradingZones,
         
         {/* Timeframe Display */}
         <div className="flex flex-col items-end space-y-2">
-          <div className="text-xs text-gray-500 font-medium">Selected Timeframe</div>
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg shadow-md">
+          <div className="text-xs text-bitcoin-white font-medium" style={{ opacity: 0.6 }}>Selected Timeframe</div>
+          <div className="bg-bitcoin-orange text-bitcoin-black px-4 py-2 rounded-lg shadow-md">
             <div className="flex flex-col items-center">
               <span className="text-lg font-bold">{timeframe}</span>
               <span className="text-xs opacity-90">
@@ -71,19 +71,19 @@ export default function ModernTradingChart({ symbol, currentPrice, tradingZones,
       </div>
 
       {/* Chart Guide */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg p-4 mb-6">
+      <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-4 mb-6" style={{ borderOpacity: 0.3 }}>
         <div className="flex items-start space-x-2">
-          <Target className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <Target className="h-5 w-5 text-bitcoin-orange flex-shrink-0 mt-0.5" />
           <div className="text-sm flex-1">
             <div className="flex items-center justify-between mb-3">
-              <div className="font-bold text-blue-900 text-base">📊 Chart Guide</div>
-              <div className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold">
+              <div className="font-bold text-bitcoin-white text-base">📊 Chart Guide</div>
+              <div className="bg-bitcoin-orange text-bitcoin-black px-3 py-1 rounded-full text-xs font-bold">
                 {timeframe} TIMEFRAME
               </div>
             </div>
-            <div className="text-blue-800 space-y-1">
-              <div>• <span className="font-medium text-green-600">Green Zones:</span> Buy/Support levels - Consider long positions</div>
-              <div>• <span className="font-medium text-red-600">Red Zones:</span> Sell/Resistance levels - Consider taking profits</div>
+            <div className="text-bitcoin-white space-y-1" style={{ opacity: 0.8 }}>
+              <div>• <span className="font-medium text-green-500">Green Zones:</span> Buy/Support levels - Consider long positions</div>
+              <div>• <span className="font-medium text-red-500">Red Zones:</span> Sell/Resistance levels - Consider taking profits</div>
               <div>• <span className="font-medium">Strength:</span> Strong zones have higher volume and confidence</div>
             </div>
           </div>
@@ -102,9 +102,9 @@ export default function ModernTradingChart({ symbol, currentPrice, tradingZones,
               key={`${zone.type}-${index}`}
               className={`relative rounded-lg border-2 transition-all duration-200 ${
                 isBuy 
-                  ? 'bg-green-50 border-green-300 hover:border-green-500 hover:shadow-lg' 
-                  : 'bg-red-50 border-red-300 hover:border-red-500 hover:shadow-lg'
-              } ${isNearPrice ? 'ring-2 ring-yellow-400' : ''}`}
+                  ? 'bg-bitcoin-black border-green-500 hover:border-green-400 hover:shadow-lg' 
+                  : 'bg-bitcoin-black border-red-500 hover:border-red-400 hover:shadow-lg'
+              } ${isNearPrice ? 'ring-2 ring-bitcoin-orange' : ''}`}
               onMouseEnter={() => setHoveredZone(zone)}
               onMouseLeave={() => setHoveredZone(null)}
             >
@@ -120,44 +120,44 @@ export default function ModernTradingChart({ symbol, currentPrice, tradingZones,
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center flex-wrap gap-2">
-                        <span className={`text-lg md:text-xl font-bold ${isBuy ? 'text-green-700' : 'text-red-700'}`}>
+                        <span className={`text-lg md:text-xl font-bold ${isBuy ? 'text-green-500' : 'text-red-500'}`}>
                           {isBuy ? 'BUY' : 'SELL'}
                         </span>
                         <span className={`px-2 py-1 rounded text-xs font-bold whitespace-nowrap ${
-                          zone.strength === 'Strong' ? 'bg-gray-600 text-white' :
-                          zone.strength === 'Moderate' ? 'bg-blue-400 text-blue-900' :
-                          'bg-gray-400 text-gray-900'
-                        }`}>
+                          zone.strength === 'Strong' ? 'bg-bitcoin-orange text-bitcoin-black' :
+                          zone.strength === 'Moderate' ? 'bg-bitcoin-orange text-bitcoin-black' :
+                          'bg-bitcoin-white text-bitcoin-black'
+                        }`} style={{ opacity: zone.strength === 'Strong' ? 1 : zone.strength === 'Moderate' ? 0.8 : 0.6 }}>
                           {zone.strength === 'Strong' ? 'Very Strong' : zone.strength}
                         </span>
                         {isNearPrice && (
-                          <span className="px-2 py-1 rounded text-xs font-bold bg-yellow-400 text-yellow-900 animate-pulse whitespace-nowrap">
+                          <span className="px-2 py-1 rounded text-xs font-bold bg-bitcoin-orange text-bitcoin-black animate-pulse whitespace-nowrap">
                             NEAR PRICE
                           </span>
                         )}
                       </div>
                       
-                      <div className="text-xl md:text-2xl font-bold text-gray-900 mt-1">
+                      <div className="text-xl md:text-2xl font-bold text-bitcoin-orange mt-1">
                         ${zone.level.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </div>
                       
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs md:text-sm text-gray-600">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs md:text-sm text-bitcoin-white" style={{ opacity: 0.6 }}>
                         <div className="flex items-center whitespace-nowrap">
                           <span className="font-medium">Volume:</span>
-                          <span className="ml-1 font-bold text-gray-900">
+                          <span className="ml-1 font-bold text-bitcoin-white">
                             {zone.volume > 0 ? `${zone.volume.toFixed(2)} ${symbol}` : 'N/A'}
                           </span>
                         </div>
                         {zone.confidence && (
                           <div className="flex items-center whitespace-nowrap">
                             <span className="font-medium">Confidence:</span>
-                            <span className="ml-1 font-bold text-gray-900">{zone.confidence.toFixed(0)}%</span>
+                            <span className="ml-1 font-bold text-bitcoin-white">{zone.confidence.toFixed(0)}%</span>
                           </div>
                         )}
                         {zone.source && (
                           <div className="flex items-center whitespace-nowrap">
                             <span className="font-medium">Source:</span>
-                            <span className="ml-1 font-bold text-gray-900 capitalize">{zone.source}</span>
+                            <span className="ml-1 font-bold text-bitcoin-white capitalize">{zone.source}</span>
                           </div>
                         )}
                       </div>
@@ -166,13 +166,13 @@ export default function ModernTradingChart({ symbol, currentPrice, tradingZones,
 
                   {/* Right: Distance from Current Price */}
                   <div className="text-right flex-shrink-0 min-w-[80px]">
-                    <div className="text-xs text-gray-500 font-medium">Distance</div>
+                    <div className="text-xs text-bitcoin-white font-medium" style={{ opacity: 0.6 }}>Distance</div>
                     <div className={`text-base md:text-lg font-bold ${
-                      distanceFromPrice > 0 ? 'text-green-600' : 'text-red-600'
+                      distanceFromPrice > 0 ? 'text-green-500' : 'text-red-500'
                     }`}>
                       {distanceFromPrice > 0 ? '+' : ''}{distanceFromPrice.toFixed(2)}%
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-bitcoin-white mt-1" style={{ opacity: 0.6 }}>
                       ${Math.abs(zone.level - currentPrice).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                     </div>
                   </div>
@@ -180,10 +180,10 @@ export default function ModernTradingChart({ symbol, currentPrice, tradingZones,
 
                 {/* Progress bar showing strength */}
                 <div className="mt-3">
-                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}>
                     <div 
                       className={`h-full transition-all duration-500 ${
-                        isBuy ? 'bg-green-600' : 'bg-red-600'
+                        isBuy ? 'bg-green-500' : 'bg-red-500'
                       }`}
                       style={{ 
                         width: `${zone.confidence || (zone.strength === 'Strong' ? 85 : zone.strength === 'Moderate' ? 65 : 45)}%` 
@@ -199,23 +199,23 @@ export default function ModernTradingChart({ symbol, currentPrice, tradingZones,
 
       {/* Summary Stats */}
       <div className="mt-6 grid grid-cols-3 gap-4">
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
-          <div className="text-2xl font-bold text-green-600">
+        <div className="bg-bitcoin-black border-2 border-green-500 rounded-lg p-4 text-center">
+          <div className="text-2xl font-bold text-green-500">
             {tradingZones?.buyZones.length || 0}
           </div>
-          <div className="text-sm text-gray-600 mt-1">Buy Zones</div>
+          <div className="text-sm text-bitcoin-white mt-1" style={{ opacity: 0.6 }}>Buy Zones</div>
         </div>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-          <div className="text-2xl font-bold text-red-600">
+        <div className="bg-bitcoin-black border-2 border-red-500 rounded-lg p-4 text-center">
+          <div className="text-2xl font-bold text-red-500">
             {tradingZones?.sellZones.length || 0}
           </div>
-          <div className="text-sm text-gray-600 mt-1">Sell Zones</div>
+          <div className="text-sm text-bitcoin-white mt-1" style={{ opacity: 0.6 }}>Sell Zones</div>
         </div>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-          <div className="text-2xl font-bold text-blue-600">
+        <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-4 text-center">
+          <div className="text-2xl font-bold text-bitcoin-orange">
             {sortedZones.filter(z => Math.abs(((z.level - currentPrice) / currentPrice) * 100) < 2).length}
           </div>
-          <div className="text-sm text-gray-600 mt-1">Near Price</div>
+          <div className="text-sm text-bitcoin-white mt-1" style={{ opacity: 0.6 }}>Near Price</div>
         </div>
       </div>
     </div>

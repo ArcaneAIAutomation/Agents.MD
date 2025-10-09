@@ -221,43 +221,43 @@ export default function HiddenPivotChart({ symbol, currentPrice, priceHistory = 
 
   if (!pivotData) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="bitcoin-block-subtle p-6">
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          <span className="ml-3 text-gray-600">Calculating Hidden Pivots...</span>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-bitcoin-orange"></div>
+          <span className="ml-3 text-bitcoin-white-80">Calculating Hidden Pivots...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
+    <div className="bitcoin-block-subtle p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-purple-100 rounded-lg">
-            <Calculator className="h-6 w-6 text-purple-600" />
+          <div className="p-2 bg-bitcoin-black border border-bitcoin-orange rounded-lg">
+            <Calculator className="h-6 w-6 text-bitcoin-orange" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-gray-900">
+            <h3 className="text-lg font-bold text-bitcoin-white">
               {symbol} Hidden Pivot Analysis
             </h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-bitcoin-white-60">
               Fibonacci Extensions & Hidden Support/Resistance
             </p>
           </div>
         </div>
         
-        {/* Timeframe Selector */}
-        <div className="flex bg-gray-100 rounded-lg p-1">
+        {/* Timeframe Selector - Bitcoin Sovereign Style */}
+        <div className="flex bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-1">
           {(['4H', '1D', '1W'] as const).map((tf) => (
             <button
               key={tf}
               onClick={() => handleTimeframeChange(tf)}
               className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
                 timeframe === tf
-                  ? 'bg-white text-purple-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-bitcoin-orange text-bitcoin-black shadow-sm'
+                  : 'text-bitcoin-white-80 hover:text-bitcoin-orange'
               }`}
             >
               {tf}
@@ -266,14 +266,14 @@ export default function HiddenPivotChart({ symbol, currentPrice, priceHistory = 
         </div>
       </div>
 
-      {/* View Toggle */}
-      <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
+      {/* View Toggle - Bitcoin Sovereign Style */}
+      <div className="flex bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-1 mb-6">
         <button
           onClick={() => setActiveView('extensions')}
           className={`flex-1 py-2 px-4 rounded text-sm font-medium transition-colors ${
             activeView === 'extensions'
-              ? 'bg-white text-purple-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'bg-bitcoin-orange text-bitcoin-black shadow-sm'
+              : 'text-bitcoin-white-80 hover:text-bitcoin-orange'
           }`}
         >
           Fib Extensions
@@ -282,24 +282,24 @@ export default function HiddenPivotChart({ symbol, currentPrice, priceHistory = 
           onClick={() => setActiveView('pivots')}
           className={`flex-1 py-2 px-4 rounded text-sm font-medium transition-colors ${
             activeView === 'pivots'
-              ? 'bg-white text-purple-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'bg-bitcoin-orange text-bitcoin-black shadow-sm'
+              : 'text-bitcoin-white-80 hover:text-bitcoin-orange'
           }`}
         >
           Hidden Pivots
         </button>
       </div>
 
-      {/* Current Price Display */}
-      <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 mb-6">
+      {/* Current Price Display - Bitcoin Sovereign Style */}
+      <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-4 mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-600">Current {symbol} Price</p>
-            <p className="text-2xl font-bold text-gray-900">{formatPrice(currentPrice)}</p>
+            <p className="text-sm text-bitcoin-white-60">Current {symbol} Price</p>
+            <p className="text-2xl font-bold text-bitcoin-orange font-mono">{formatPrice(currentPrice)}</p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-gray-600">Pivot Range ({timeframe})</p>
-            <p className="text-lg font-semibold text-purple-600">
+            <p className="text-sm text-bitcoin-white-60">Pivot Range ({timeframe})</p>
+            <p className="text-lg font-semibold text-bitcoin-orange font-mono">
               {formatPrice(pivotData.pivotLow)} - {formatPrice(pivotData.pivotHigh)}
             </p>
           </div>
@@ -310,8 +310,8 @@ export default function HiddenPivotChart({ symbol, currentPrice, priceHistory = 
       {activeView === 'extensions' && (
         <div className="space-y-4">
           <div className="flex items-center space-x-2 mb-4">
-            <Target className="h-5 w-5 text-purple-600" />
-            <h4 className="font-semibold text-gray-900">Fibonacci Extension Levels</h4>
+            <Target className="h-5 w-5 text-bitcoin-orange" />
+            <h4 className="font-semibold text-bitcoin-white">Fibonacci Extension Levels</h4>
           </div>
           
           <div className="grid gap-3">
@@ -325,42 +325,40 @@ export default function HiddenPivotChart({ symbol, currentPrice, priceHistory = 
                   key={index}
                   className={`p-4 rounded-lg border-2 transition-all hover:shadow-md ${
                     fib.strength === 'Strong'
-                      ? 'border-red-200 bg-red-50 hover:border-red-300'
+                      ? 'border-bitcoin-orange bg-bitcoin-black hover:border-bitcoin-orange hover:shadow-[0_0_10px_rgba(247,147,26,0.3)]'
                       : fib.strength === 'Moderate'
-                      ? 'border-yellow-200 bg-yellow-50 hover:border-yellow-300'
-                      : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+                      ? 'border-bitcoin-orange-20 bg-bitcoin-black hover:border-bitcoin-orange'
+                      : 'border-bitcoin-orange-20 bg-bitcoin-black hover:border-bitcoin-orange-20'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className={`w-3 h-3 rounded-full ${
                         fib.strength === 'Strong'
-                          ? 'bg-red-500'
+                          ? 'bg-bitcoin-orange'
                           : fib.strength === 'Moderate'
-                          ? 'bg-yellow-500'
-                          : 'bg-gray-400'
+                          ? 'bg-bitcoin-orange border border-bitcoin-black'
+                          : 'bg-bitcoin-white-60'
                       }`} />
                       <div>
-                        <p className="font-semibold text-gray-900">
+                        <p className="font-semibold text-bitcoin-white">
                           {fib.level}x Extension
                         </p>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-bitcoin-white-60">
                           {fib.strength} Level
                         </p>
                       </div>
                     </div>
                     
                     <div className="text-right">
-                      <p className="font-bold text-gray-900">{formatPrice(fib.price)}</p>
-                      <p className={`text-sm font-medium ${
-                        isAboveCurrent ? 'text-green-600' : 'text-red-600'
-                      }`}>
+                      <p className="font-bold text-bitcoin-orange font-mono">{formatPrice(fib.price)}</p>
+                      <p className="text-sm font-medium text-bitcoin-orange">
                         {percentageChange}
                       </p>
                     </div>
                   </div>
                   
-                  <div className="mt-2 text-xs text-gray-500">
+                  <div className="mt-2 text-xs text-bitcoin-white-60">
                     {isAboveCurrent ? '↗ Resistance Target' : '↘ Support Target'} • 
                     Distance: {formatPrice(distance)}
                   </div>
@@ -377,8 +375,8 @@ export default function HiddenPivotChart({ symbol, currentPrice, priceHistory = 
           {/* Bullish Hidden Pivots */}
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-              <h4 className="font-semibold text-gray-900">Bullish Hidden Pivots</h4>
+              <TrendingUp className="h-5 w-5 text-bitcoin-orange" />
+              <h4 className="font-semibold text-bitcoin-white">Bullish Hidden Pivots</h4>
             </div>
             
             <div className="grid gap-2">
@@ -391,24 +389,24 @@ export default function HiddenPivotChart({ symbol, currentPrice, priceHistory = 
                     key={index}
                     className={`p-3 rounded-lg border transition-all ${
                       isReached
-                        ? 'border-green-300 bg-green-50'
-                        : 'border-green-200 bg-green-25 hover:border-green-300'
+                        ? 'border-bitcoin-orange bg-bitcoin-black shadow-[0_0_10px_rgba(247,147,26,0.3)]'
+                        : 'border-bitcoin-orange-20 bg-bitcoin-black hover:border-bitcoin-orange'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        <Zap className={`h-4 w-4 ${isReached ? 'text-green-700' : 'text-green-600'}`} />
-                        <span className="font-medium text-gray-900">
+                        <Zap className="h-4 w-4 text-bitcoin-orange" />
+                        <span className="font-medium text-bitcoin-white">
                           Hidden Pivot {index + 1}
                         </span>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-gray-900">{formatPrice(price)}</p>
-                        <p className="text-sm text-green-600">{percentageChange}</p>
+                        <p className="font-bold text-bitcoin-orange font-mono">{formatPrice(price)}</p>
+                        <p className="text-sm text-bitcoin-orange">{percentageChange}</p>
                       </div>
                     </div>
                     {isReached && (
-                      <p className="text-xs text-green-700 mt-1">✓ Level Reached</p>
+                      <p className="text-xs text-bitcoin-orange mt-1">✓ Level Reached</p>
                     )}
                   </div>
                 );
@@ -419,8 +417,8 @@ export default function HiddenPivotChart({ symbol, currentPrice, priceHistory = 
           {/* Bearish Hidden Pivots */}
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <TrendingUp className="h-5 w-5 text-red-600 rotate-180" />
-              <h4 className="font-semibold text-gray-900">Bearish Hidden Pivots</h4>
+              <TrendingUp className="h-5 w-5 text-bitcoin-orange rotate-180" />
+              <h4 className="font-semibold text-bitcoin-white">Bearish Hidden Pivots</h4>
             </div>
             
             <div className="grid gap-2">
@@ -433,24 +431,24 @@ export default function HiddenPivotChart({ symbol, currentPrice, priceHistory = 
                     key={index}
                     className={`p-3 rounded-lg border transition-all ${
                       isReached
-                        ? 'border-red-300 bg-red-50'
-                        : 'border-red-200 bg-red-25 hover:border-red-300'
+                        ? 'border-bitcoin-orange bg-bitcoin-black shadow-[0_0_10px_rgba(247,147,26,0.3)]'
+                        : 'border-bitcoin-orange-20 bg-bitcoin-black hover:border-bitcoin-orange'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        <Zap className={`h-4 w-4 ${isReached ? 'text-red-700' : 'text-red-600'}`} />
-                        <span className="font-medium text-gray-900">
+                        <Zap className="h-4 w-4 text-bitcoin-orange" />
+                        <span className="font-medium text-bitcoin-white">
                           Hidden Pivot {index + 1}
                         </span>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-gray-900">{formatPrice(price)}</p>
-                        <p className="text-sm text-red-600">{percentageChange}</p>
+                        <p className="font-bold text-bitcoin-orange font-mono">{formatPrice(price)}</p>
+                        <p className="text-sm text-bitcoin-orange">{percentageChange}</p>
                       </div>
                     </div>
                     {isReached && (
-                      <p className="text-xs text-red-700 mt-1">✓ Level Reached</p>
+                      <p className="text-xs text-bitcoin-orange mt-1">✓ Level Reached</p>
                     )}
                   </div>
                 );
@@ -460,15 +458,15 @@ export default function HiddenPivotChart({ symbol, currentPrice, priceHistory = 
         </div>
       )}
 
-      {/* Analysis Summary */}
-      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+      {/* Analysis Summary - Bitcoin Sovereign Style */}
+      <div className="mt-6 p-4 bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg">
         <div className="flex justify-between items-start mb-2">
-          <h4 className="font-semibold text-gray-900">Hidden Pivot Analysis</h4>
-          <div className="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded">
+          <h4 className="font-semibold text-bitcoin-white">Hidden Pivot Analysis</h4>
+          <div className="text-xs text-bitcoin-black bg-bitcoin-orange px-2 py-1 rounded">
             {timeframe} Analysis
           </div>
         </div>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-bitcoin-white-80">
           Hidden pivots use Fibonacci relationships to identify potential reversal points that may not be 
           visible on standard charts. These levels often act as magnetic price zones where significant 
           market reactions occur. Analysis period: {timeframe === '4H' ? '4 Hours' : timeframe === '1D' ? '1 Day' : '1 Week'}.

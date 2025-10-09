@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bitcoin Sovereign - Data Display Components Test</title>
+  <link rel="stylesheet" href="styles/globals.css">
+  <style>
+    body {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .demo-section {
+      margin-bottom: 3rem;
+      padding: 2rem;
+      border: 1px solid var(--bitcoin-orange-20);
+      border-radius: 12px;
+    }
+    
+    .demo-title {
+      color: var(--bitcoin-orange);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .demo-grid {
+      display: grid;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="headline-bitcoin">Bitcoin Sovereign Data Display Components</h1>
+  <p style="color: var(--bitcoin-white-80); margin-bottom: 3rem;">
+    Testing the new price displays, stat cards, and data visualization components with the Bitcoin Sovereign aesthetic.
+  </p>
+
+  <!-- Price Displays Section -->
+  <div class="demo-section">
+    <div class="demo-title">Price Displays - Glowing Orange Monospace</div>
+    
+    <div class="demo-grid">
+      <div>
+        <p style="color: var(--bitcoin-white-60); margin-bottom: 0.5rem;">Small Price Display</p>
+        <div class="price-display price-display-sm">$42,567.89</div>
+      </div>
+      
+      <div>
+        <p style="color: var(--bitcoin-white-60); margin-bottom: 0.5rem;">Default Price Display</p>
+        <div class="price-display">$42,567.89</div>
+      </div>
+      
+      <div>
+        <p style="color: var(--bitcoin-white-60); margin-bottom: 0.5rem;">Large Price Display</p>
+        <div class="price-display price-display-lg">$42,567.89</div>
+      </div>
+      
+      <div>
+        <p style="color: var(--bitcoin-white-60); margin-bottom: 0.5rem;">Extra Large Price Display</p>
+        <div class="price-display price-display-xl">$42,567.89</div>
+      </div>
+      
+      <div>
+        <p style="color: var(--bitcoin-white-60); margin-bottom: 0.5rem;">Live Price Display (Animated)</p>
+        <div class="price-display price-display-live">$42,567.89</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stat Cards Section -->
+  <div class="demo-section">
+    <div class="demo-title">Stat Cards - Black with Orange Borders</div>
+    
+    <div class="stat-grid stat-grid-4">
+      <div class="stat-card">
+        <div class="stat-label">Market Cap</div>
+        <div class="stat-value">$832.5B</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-label">24h Volume</div>
+        <div class="stat-value">$28.3B</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-label">24h Change</div>
+        <div class="stat-value stat-value-orange">+5.67%</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-label">Circulating Supply</div>
+        <div class="stat-value">19.5M BTC</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Orange Emphasis Variants -->
+  <div class="demo-section">
+    <div class="demo-title">Orange Stat Value Variants - For Key Metrics</div>
+    
+    <div class="stat-grid stat-grid-3">
+      <div class="stat-card stat-card-accent">
+        <div class="stat-label">Current Price</div>
+        <div class="stat-value stat-value-orange stat-value-lg">$42,567</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-label">All-Time High</div>
+        <div class="stat-value stat-value-orange">$69,000</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-label">Fear & Greed Index</div>
+        <div class="stat-value stat-value-orange stat-value-live">72</div>
+        <p style="color: var(--bitcoin-white-60); font-size: 0.75rem; margin-top: 0.25rem;">Greed</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stat Card Variants -->
+  <div class="demo-section">
+    <div class="demo-title">Stat Card Variants</div>
+    
+    <div class="demo-grid">
+      <div class="stat-card stat-card-horizontal">
+        <div>
+          <div class="stat-label">Bitcoin Dominance</div>
+          <div class="stat-value">54.2%</div>
+        </div>
+        <div style="color: var(--bitcoin-orange); font-size: 2rem;">₿</div>
+      </div>
+      
+      <div class="stat-card stat-card-compact">
+        <div class="stat-label">RSI (14)</div>
+        <div class="stat-value">68.5</div>
+      </div>
+      
+      <div class="stat-card stat-card-accent">
+        <div class="stat-label">Active Addresses</div>
+        <div class="stat-value stat-value-orange">1.2M</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stat Grid Layouts -->
+  <div class="demo-section">
+    <div class="demo-title">Stat Grid Layouts - Responsive</div>
+    
+    <h3 style="color: var(--bitcoin-white); margin-bottom: 1rem;">2-Column Grid</h3>
+    <div class="stat-grid stat-grid-2">
+      <div class="stat-card">
+        <div class="stat-label">Hash Rate</div>
+        <div class="stat-value">450 EH/s</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Difficulty</div>
+        <div class="stat-value">62.5T</div>
+      </div>
+    </div>
+    
+    <h3 style="color: var(--bitcoin-white); margin: 2rem 0 1rem;">3-Column Grid</h3>
+    <div class="stat-grid stat-grid-3">
+      <div class="stat-card">
+        <div class="stat-label">Block Height</div>
+        <div class="stat-value">820,450</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Mempool Size</div>
+        <div class="stat-value">125 MB</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Fee</div>
+        <div class="stat-value stat-value-orange">12 sat/vB</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Size Variants -->
+  <div class="demo-section">
+    <div class="demo-title">Stat Value Size Variants</div>
+    
+    <div class="stat-grid stat-grid-4">
+      <div class="stat-card">
+        <div class="stat-label">Small</div>
+        <div class="stat-value stat-value-sm">$42.5K</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-label">Default</div>
+        <div class="stat-value">$42.5K</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-label">Large</div>
+        <div class="stat-value stat-value-lg">$42.5K</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-label">Extra Large</div>
+        <div class="stat-value stat-value-xl stat-value-orange">$42.5K</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Preview Note -->
+  <div class="demo-section" style="border-color: var(--bitcoin-orange);">
+    <div class="demo-title">📱 Mobile Optimization</div>
+    <p style="color: var(--bitcoin-white-80); line-height: 1.6;">
+      All data display components are fully responsive and optimized for mobile devices:
+    </p>
+    <ul style="color: var(--bitcoin-white-80); line-height: 1.8; margin-top: 1rem;">
+      <li>Price displays scale down appropriately (1.75rem on mobile)</li>
+      <li>Stat cards have reduced padding and font sizes</li>
+      <li>Stat grids collapse to single column on mobile</li>
+      <li>Horizontal stat cards stack vertically on mobile</li>
+      <li>Touch-friendly hover states and interactions</li>
+    </ul>
+    <p style="color: var(--bitcoin-orange); margin-top: 1rem; font-weight: 600;">
+      Resize your browser window to see the responsive behavior!
+    </p>
+  </div>
+
+</body>
+</html>

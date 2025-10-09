@@ -2,6 +2,18 @@
 
 This is the active development branch for Agents.MD. All new features and improvements are developed here before being merged to main.
 
+## Design System
+
+All development follows the **Bitcoin Sovereign Technology** design system:
+- **Pure Black Backgrounds** (#000000) - The digital canvas
+- **Bitcoin Orange Accents** (#F7931A) - CTAs and emphasis
+- **Thin Orange Borders** (1-2px) - Signature visual element
+- **Typography**: Inter (UI) + Roboto Mono (data)
+- **Mobile-First** with progressive enhancement
+- **WCAG 2.1 AA Compliant** accessibility standards
+
+See `.kiro/steering/bitcoin-sovereign-design.md` for complete design guidelines.
+
 ## Branch Strategy
 
 - **main** - Production-ready releases (v1.1.0+)
@@ -77,8 +89,10 @@ This is the active development branch for Agents.MD. All new features and improv
 ### User Experience Improvements
 - Faster loading times
 - Better error messages
-- Improved mobile interface
-- Enhanced visual feedback
+- Improved mobile interface with Bitcoin Sovereign aesthetic
+- Enhanced visual feedback with orange glow effects
+- Thin orange borders on all card components
+- Minimalist, clean layouts with single-column mobile stacks
 
 ### Technical Debt
 - Code refactoring for maintainability

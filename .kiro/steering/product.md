@@ -1,6 +1,6 @@
 # Product Overview
 
-**Agents.MD** is an advanced cryptocurrency trading intelligence platform that provides real-time market analysis, AI-powered trading signals, and regulatory news monitoring. The platform focuses on Bitcoin and Ethereum analysis with a distinctive newspaper-style interface optimized for both desktop and mobile experiences.
+**Agents.MD** is an advanced cryptocurrency trading intelligence platform that provides real-time market analysis, AI-powered trading signals, and regulatory news monitoring. The platform focuses on Bitcoin and Ethereum analysis with a distinctive **Bitcoin Sovereign Technology aesthetic** - a minimalist, black and orange design that embodies digital scarcity and forward-looking innovation.
 
 ## Core Features
 
@@ -15,6 +15,14 @@
 - **Technical Indicators**: RSI, MACD, EMA, Bollinger Bands, ATR, Stochastic with live calculations
 - **Market Sentiment**: Fear & Greed Index integration and whale movement detection
 - **Cross-Exchange Analysis**: Price comparison and arbitrage opportunity detection
+
+### Whale Watch Intelligence
+- **Bitcoin Whale Tracking**: Real-time detection of large BTC transactions (>50 BTC)
+- **Caesar AI Analysis**: Deep research and analysis of whale transactions with 5-7 minute processing
+- **Transaction Classification**: Automatic identification of exchange deposits, withdrawals, and whale-to-whale transfers
+- **Market Impact Assessment**: AI-powered analysis of potential market effects (Bearish/Bullish/Neutral)
+- **Analysis Lock System**: Prevents API spam by allowing only one analysis at a time
+- **Source Citations**: Research-backed analysis with verifiable sources
 
 ### News & Intelligence
 - **Crypto Herald**: Real-time news aggregation from NewsAPI and CryptoCompare
@@ -37,10 +45,17 @@
 
 ## Design Philosophy
 
-The platform combines a classic newspaper aesthetic with modern mobile-first design principles to present complex financial data in an accessible, professional format that builds trust and credibility across all devices.
+The platform embodies **Bitcoin Sovereign Technology** principles with a pure black and orange aesthetic. The design is minimalist, confident, and forward-looking, treating the black background as the digital space in which Bitcoin exists. Thin orange borders on black backgrounds create a clean, high-contrast interface that emphasizes digital scarcity and cutting-edge financial intelligence.
+
+## Recently Launched
+
+- **Whale Watch Dashboard**: Live Bitcoin whale transaction tracking with Caesar AI analysis (✅ Live)
+- **Caesar API Integration**: Advanced market analysis and research capabilities (✅ Live)
+- **Analysis Lock System**: API protection preventing multiple simultaneous analyses (✅ Live)
 
 ## Upcoming Features
 
-- **Caesar API Integration**: Advanced market analysis capabilities (Coming Soon)
+- **Multi-Chain Whale Watch**: Expand to Ethereum and other major cryptocurrencies
 - **Enhanced Mobile Components**: Additional mobile-optimized trading tools
-- **Real-time Notifications**: Push notifications for trade signals and market alerts
+- **Real-time Notifications**: Push notifications for trade signals and whale alerts
+- **Whale Alert Subscriptions**: Custom alerts for specific wallet addresses or transaction sizes

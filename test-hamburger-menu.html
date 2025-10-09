@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bitcoin Sovereign - Hamburger Menu Test</title>
+  <link rel="stylesheet" href="styles/globals.css">
+  <style>
+    /* Additional test styles */
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    
+    .test-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 80px;
+      background: var(--bitcoin-black);
+      border-bottom: 1px solid var(--bitcoin-orange-20);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      z-index: 100;
+    }
+    
+    .test-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--bitcoin-orange);
+      text-shadow: 0 0 20px var(--bitcoin-orange-30);
+    }
+    
+    .test-content {
+      margin-top: 100px;
+      padding: 2rem;
+    }
+    
+    .test-card {
+      background: var(--bitcoin-black);
+      border: 1px solid var(--bitcoin-orange);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Test Header with Hamburger Menu -->
+  <header class="test-header">
+    <div class="test-logo">AGENTS.MD</div>
+    
+    <!-- Hamburger Menu Icon -->
+    <div class="hamburger-menu" id="hamburger" onclick="toggleMenu()">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </div>
+  </header>
+  
+  <!-- Full-Screen Menu Overlay -->
+  <nav class="menu-overlay" id="menuOverlay">
+    <a href="#" class="menu-item" onclick="closeMenu()">CRYPTO NEWS WIRE</a>
+    <a href="#" class="menu-item" onclick="closeMenu()">AI TRADE GENERATION ENGINE</a>
+    <a href="#" class="menu-item" onclick="closeMenu()">BITCOIN MARKET REPORT</a>
+    <a href="#" class="menu-item" onclick="closeMenu()">ETHEREUM MARKET REPORT</a>
+    <a href="#" class="menu-item" onclick="closeMenu()">BITCOIN WHALE WATCH</a>
+    <a href="#" class="menu-item" onclick="closeMenu()">NEXO.COM UK REGULATORY UPDATES</a>
+  </nav>
+  
+  <!-- Test Content -->
+  <main class="test-content">
+    <h1 class="headline-bitcoin">Bitcoin Sovereign Navigation Test</h1>
+    
+    <div class="test-card">
+      <h2>Hamburger Menu Features</h2>
+      <ul style="color: var(--bitcoin-white-80); line-height: 1.8;">
+        <li>✅ Three horizontal orange lines (28px × 3px)</li>
+        <li>✅ 6px gap between lines</li>
+        <li>✅ Smooth transition animations</li>
+        <li>✅ Transforms to X when active</li>
+        <li>✅ Orange glow on hover</li>
+      </ul>
+    </div>
+    
+    <div class="test-card">
+      <h2>Full-Screen Overlay Menu</h2>
+      <ul style="color: var(--bitcoin-white-80); line-height: 1.8;">
+        <li>✅ Fixed position covering entire viewport</li>
+        <li>✅ Pure black background (#000000)</li>
+        <li>✅ Centered flex layout for menu items</li>
+        <li>✅ Opacity transition for show/hide</li>
+        <li>✅ Prevents body scroll when open</li>
+      </ul>
+    </div>
+    
+    <div class="test-card">
+      <h2>Menu Item Styling</h2>
+      <ul style="color: var(--bitcoin-white-80); line-height: 1.8;">
+        <li>✅ Large orange text (1.5rem) with bold weight</li>
+        <li>✅ Uppercase with letter-spacing</li>
+        <li>✅ Orange glow text-shadow</li>
+        <li>✅ Hover: fills with orange, text becomes black</li>
+        <li>✅ Hover: slides right with transform</li>
+        <li>✅ Staggered fade-in animation</li>
+      </ul>
+    </div>
+    
+    <div class="test-card">
+      <h2>Instructions</h2>
+      <p style="color: var(--bitcoin-white-80); line-height: 1.8;">
+        Click the hamburger menu icon in the top-right corner to open the full-screen navigation menu.
+        Hover over menu items to see the orange fill effect and slide-right animation.
+        Click any menu item or the hamburger icon again to close the menu.
+      </p>
+    </div>
+  </main>
+  
+  <script>
+    // Simple JavaScript for menu toggle (CSS-only styling)
+    function toggleMenu() {
+      const hamburger = document.getElementById('hamburger');
+      const menuOverlay = document.getElementById('menuOverlay');
+      const body = document.body;
+      
+      hamburger.classList.toggle('active');
+      menuOverlay.classList.toggle('active');
+      body.classList.toggle('menu-open');
+    }
+    
+    function closeMenu() {
+      const hamburger = document.getElementById('hamburger');
+      const menuOverlay = document.getElementById('menuOverlay');
+      const body = document.body;
+      
+      hamburger.classList.remove('active');
+      menuOverlay.classList.remove('active');
+      body.classList.remove('menu-open');
+    }
+    
+    // Close menu on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeMenu();
+      }
+    });
+  </script>
+</body>
+</html>

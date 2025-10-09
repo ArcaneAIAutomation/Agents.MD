@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { TrendingUp, TrendingDown, AlertTriangle, Target, Clock, BarChart3, Activity } from 'lucide-react'
+import { TrendingUp, TrendingDown, AlertTriangle, Target, Clock, BarChart3, Activity, ChevronDown, ChevronUp } from 'lucide-react'
 import ETHTradingChart from './ETHTradingChart'
 import ETHHiddenPivotChart from './ETHHiddenPivotChart'
 
@@ -33,43 +33,37 @@ const FearGreedSlider = ({ value }: { value: number }) => {
   const clampedValue = Math.max(0, Math.min(100, value))
 
   return (
-    <div className={`text-center p-2 md:p-3 bg-gray-50 rounded-lg mobile-bg-secondary min-h-[60px] md:min-h-[70px] flex flex-col justify-center min-w-[44px]`}>
-      <p className={`text-xs md:text-sm mobile-text-secondary mb-2`}>
-        {isMobile ? 'F&G' : 'Fear & Greed'}
+    <div className="bitcoin-block-subtle min-h-[80px] md:min-h-[90px] flex flex-col justify-center min-w-[44px] p-3 md:p-4 overflow-hidden">
+      <p className="text-xs font-semibold uppercase tracking-wider text-bitcoin-white-60 mb-2 truncate">
+        {isMobile ? 'Fear & Greed' : 'Fear & Greed'}
       </p>
       
       {/* Visual Slider - Enhanced Mobile Optimized */}
-      <div className={`relative w-full h-8 md:h-6 bg-gray-200 rounded-full mb-2 touch-manipulation`}>
+      <div className="relative w-full h-8 md:h-6 bg-bitcoin-black border border-bitcoin-orange-20 rounded-full mb-2 touch-manipulation">
         {/* Background gradient zones */}
-        <div className="absolute inset-0 rounded-full overflow-hidden">
-          <div className="h-full w-full bg-gradient-to-r from-red-500 via-yellow-400 to-green-500"></div>
+        <div className="absolute inset-0 rounded-full overflow-hidden opacity-30">
+          <div className="h-full w-full bg-gradient-to-r from-bitcoin-orange via-bitcoin-orange to-bitcoin-orange"></div>
         </div>
         
-        {/* Slider indicator - Touch-friendly size */}
+        {/* Slider indicator - Properly constrained */}
         <div 
-          className={`absolute top-1/2 transform -translate-y-1/2 w-6 h-6 md:w-4 md:h-4 bg-white border-2 border-gray-700 rounded-full shadow-md transition-all duration-300 cursor-pointer`}
-          style={{ left: `calc(${clampedValue}% - 12px)` }}
+          className="absolute top-1/2 transform -translate-y-1/2 w-5 h-5 md:w-4 md:h-4 bg-bitcoin-orange border-2 border-bitcoin-white rounded-full shadow-md transition-all duration-300 cursor-pointer glow-bitcoin"
+          style={{ 
+            left: `calc(${clampedValue}% - ${clampedValue * 0.05}px)`,
+            marginLeft: '2.5px'
+          }}
         />
         
         {/* Value overlay */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className={`text-sm md:text-xs font-bold text-white mix-blend-difference mobile-text-primary`}>
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <span className="text-sm md:text-xs font-bold text-bitcoin-white font-mono">
             {clampedValue}
           </span>
         </div>
       </div>
       
-      {/* Label and value - Mobile Optimized */}
-      <div className={`flex justify-between text-xs mobile-text-secondary mb-1`}>
-        <span>Fear</span>
-        <span>Greed</span>
-      </div>
-      <p className={`text-xs md:text-sm font-semibold mobile-text-primary ${
-        clampedValue <= 25 ? 'text-red-600' :
-        clampedValue <= 45 ? 'text-orange-500' :
-        clampedValue <= 55 ? 'text-yellow-600' :
-        clampedValue <= 75 ? 'text-green-500' : 'text-green-600'
-      }`}>
+      {/* Label - Mobile Optimized */}
+      <p className="text-base md:text-lg font-bold text-bitcoin-orange truncate">
         {getLabel(clampedValue)}
       </p>
     </div>
@@ -200,6 +194,8 @@ export default function ETHMarketAnalysis() {
   const [data, setData] = useState<ETHAnalysisData | null>(null)
   const [loading, setLoading] = useState(false) // Start with loading false - manual only
   const [error, setError] = useState<string | null>(null)
+  const [showTradingZones, setShowTradingZones] = useState(false)
+  const [showHiddenPivot, setShowHiddenPivot] = useState(false)
 
   // Helper function to extract RSI value from either number or object format
   const getRSIValue = (rsi: any): number => {
@@ -342,10 +338,10 @@ export default function ETHMarketAnalysis() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mobile-bg-primary">
+      <div className="bitcoin-block">
         <div className="flex items-center justify-center h-48 sm:h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          <span className="ml-2 mobile-text-secondary">Loading ETH analysis...</span>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-bitcoin-orange"></div>
+          <span className="ml-2 text-bitcoin-white-80">Loading ETH analysis...</span>
         </div>
       </div>
     )
@@ -353,14 +349,14 @@ export default function ETHMarketAnalysis() {
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mobile-bg-primary">
+      <div className="bitcoin-block">
         <div className="flex items-center justify-center h-48 sm:h-64">
           <div className="text-center">
-            <p className="font-medium mobile-text-primary">Error loading ETH analysis</p>
-            <p className="text-sm mobile-text-secondary mt-1">{error}</p>
+            <p className="font-medium text-bitcoin-white">Error loading ETH analysis</p>
+            <p className="text-sm text-bitcoin-white-60 mt-1">{error}</p>
             <button
               onClick={fetchETHAnalysis}
-              className="mt-3 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors min-h-[44px] min-w-[44px] mobile-bg-primary mobile-text-primary touch-manipulation"
+              className="btn-bitcoin-primary mt-3"
             >
               Retry
             </button>
@@ -372,15 +368,15 @@ export default function ETHMarketAnalysis() {
 
   if (!data) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mobile-bg-primary">
+      <div className="bitcoin-block">
         <div className="flex items-center justify-center h-48 sm:h-64">
           <div className="text-center">
-            <EthereumIcon className="h-12 w-12 mx-auto text-blue-500 mb-4" />
-            <h3 className="text-lg font-semibold mobile-text-primary mb-2">Ethereum Market Analysis</h3>
-            <p className="mobile-text-secondary mb-4">Click to load current Ethereum market data</p>
+            <EthereumIcon className="h-12 w-12 mx-auto text-bitcoin-orange mb-4" />
+            <h3 className="text-lg font-semibold text-bitcoin-white mb-2">Ethereum Market Analysis</h3>
+            <p className="text-bitcoin-white-60 mb-4">Click to load current Ethereum market data</p>
             <button
               onClick={fetchETHAnalysis}
-              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors min-h-[44px] min-w-[44px] mobile-bg-primary mobile-text-primary touch-manipulation"
+              className="btn-bitcoin-primary btn-bitcoin-lg"
             >
               Load AI Analysis
             </button>
@@ -391,13 +387,13 @@ export default function ETHMarketAnalysis() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mobile-bg-primary">
+    <div className="bitcoin-block">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0 mb-6">
         <div>
-          <h2 className="text-lg md:text-xl font-bold mobile-text-primary">Ethereum Market Analysis</h2>
+          <h2 className="text-lg md:text-xl font-bold text-bitcoin-white">Ethereum Market Analysis</h2>
           <div className="flex items-center mt-1 space-x-2">
             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium min-h-[32px] ${
-              data.isLiveData ? 'mobile-bg-success mobile-text-success' : 'mobile-bg-info mobile-text-info'
+              data.isLiveData ? 'bg-bitcoin-orange text-bitcoin-black' : 'border border-bitcoin-orange text-bitcoin-orange'
             }`}>
               <span className="w-2 h-2 bg-current rounded-full mr-1"></span>
               LIVE DATA
@@ -405,17 +401,17 @@ export default function ETHMarketAnalysis() {
             {/* Data Source Indicators */}
             <div className="flex items-center space-x-1">
               <span className={`px-2 py-1 rounded text-xs min-h-[32px] flex items-center ${
-                data.isLiveData ? 'mobile-bg-info mobile-text-info' : 'mobile-bg-muted mobile-text-muted'
+                data.isLiveData ? 'border border-bitcoin-orange-20 text-bitcoin-orange' : 'border border-bitcoin-white-60 text-bitcoin-white-60'
               }`}>
                 AI
               </span>
               <span className={`px-2 py-1 rounded text-xs min-h-[32px] flex items-center ${
-                data.currentPrice && data.currentPrice > 3000 ? 'mobile-bg-success mobile-text-success' : 'mobile-bg-muted mobile-text-muted'
+                data.currentPrice && data.currentPrice > 3000 ? 'border border-bitcoin-orange text-bitcoin-orange' : 'border border-bitcoin-white-60 text-bitcoin-white-60'
               }`}>
                 Price
               </span>
               <span className={`px-2 py-1 rounded text-xs min-h-[32px] flex items-center ${
-                data.newsImpact && data.newsImpact.length > 3 ? 'mobile-bg-info mobile-text-info' : 'mobile-bg-muted mobile-text-muted'
+                data.newsImpact && data.newsImpact.length > 3 ? 'border border-bitcoin-orange text-bitcoin-orange' : 'border border-bitcoin-white-60 text-bitcoin-white-60'
               }`}>
                 News
               </span>
@@ -424,144 +420,141 @@ export default function ETHMarketAnalysis() {
         </div>
         <button
           onClick={fetchETHAnalysis}
-          className="px-4 py-3 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors min-h-[44px] min-w-[44px] mobile-bg-primary mobile-text-primary touch-manipulation"
+          className="btn-bitcoin-primary"
         >
           Refresh
         </button>
       </div>
 
       {/* Price Overview - Mobile Optimized */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
-        <div className="text-center p-3 md:p-4 bg-gray-50 rounded-lg mobile-bg-secondary">
-          <p className="text-xs md:text-sm mobile-text-secondary">Price</p>
-          <p className="text-base md:text-2xl font-bold mobile-text-primary">
+      <div className="stat-grid stat-grid-4 mb-6">
+        <div className="stat-card">
+          <div className="stat-label">Price</div>
+          <div className="price-display price-display-sm">
             ${Math.round((data.currentPrice || data.priceAnalysis?.current || data.marketData?.price || 0)).toLocaleString()}
-          </p>
+          </div>
         </div>
-        <div className="text-center p-3 md:p-4 bg-gray-50 rounded-lg mobile-bg-secondary">
-          <p className="text-xs md:text-sm mobile-text-secondary">24h Change</p>
-          <p className={`text-sm md:text-lg font-semibold ${(data.priceAnalysis?.change24h || data.marketData?.change24h || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+        <div className="stat-card">
+          <div className="stat-label">24h Change</div>
+          <div className={`stat-value ${(data.priceAnalysis?.change24h || data.marketData?.change24h || 0) >= 0 ? 'stat-value-orange' : 'text-bitcoin-white'}`}>
             {(data.priceAnalysis?.change24h || data.marketData?.change24h || 0) >= 0 ? '+' : ''}{(data.priceAnalysis?.change24h || data.marketData?.change24h || 0).toFixed(1)}%
-          </p>
+          </div>
         </div>
-        <div className="text-center p-3 md:p-4 bg-gray-50 rounded-lg mobile-bg-secondary">
-          <p className="text-xs md:text-sm mobile-text-secondary">Support</p>
-          <p className="text-sm md:text-lg font-semibold text-blue-600">
+        <div className="stat-card">
+          <div className="stat-label">Support</div>
+          <div className="stat-value text-bitcoin-white">
             ${Math.round(data.priceAnalysis?.support || 0).toLocaleString()}
-          </p>
+          </div>
         </div>
-        <div className="text-center p-3 md:p-4 bg-gray-50 rounded-lg mobile-bg-secondary">
-          <p className="text-xs md:text-sm mobile-text-secondary">Resistance</p>
-          <p className="text-sm md:text-lg font-semibold text-red-600">
+        <div className="stat-card">
+          <div className="stat-label">Resistance</div>
+          <div className="stat-value text-bitcoin-white">
             ${Math.round(data.priceAnalysis?.resistance || 0).toLocaleString()}
-          </p>
+          </div>
         </div>
       </div>
 
       {/* Technical Indicators - Mobile Optimized */}
       <div className="mb-6">
-        <h3 className="text-base md:text-lg font-semibold mobile-text-primary mb-4 flex items-center">
-          <BarChart3 className="h-4 w-4 md:h-5 md:w-5 mr-2 text-blue-600" />
+        <h3 className="text-base md:text-lg font-semibold text-bitcoin-white mb-4 flex items-center">
+          <BarChart3 className="h-4 w-4 md:h-5 md:w-5 mr-2 text-bitcoin-orange" />
           Technical Indicators
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
-          <div className="bg-gray-50 p-3 md:p-4 rounded-lg mobile-bg-secondary">
+          <div className="bitcoin-block-subtle">
             <div className="flex justify-between items-center">
-              <span className="text-xs md:text-sm font-medium mobile-text-secondary">RSI (14)</span>
-              <span className={`text-lg font-bold ${
-                getRSIValue(data.technicalIndicators?.rsi) > 70 ? 'text-red-600' : 
-                getRSIValue(data.technicalIndicators?.rsi) < 30 ? 'text-green-600' : 'text-yellow-600'
+              <span className="stat-label">RSI (14)</span>
+              <span className={`text-lg font-bold font-mono ${
+                getRSIValue(data.technicalIndicators?.rsi) > 70 ? 'text-bitcoin-orange' : 
+                getRSIValue(data.technicalIndicators?.rsi) < 30 ? 'text-bitcoin-orange' : 'text-bitcoin-white'
               }`}>
                 {getRSIValue(data.technicalIndicators?.rsi).toFixed(1)}
               </span>
             </div>
-            <div className="mt-2 bg-gray-200 rounded-full h-2">
+            <div className="mt-2 bg-bitcoin-black border border-bitcoin-orange-20 rounded-full h-2">
               <div 
-                className={`h-2 rounded-full ${
-                  getRSIValue(data.technicalIndicators?.rsi) > 70 ? 'bg-red-500' : 
-                  getRSIValue(data.technicalIndicators?.rsi) < 30 ? 'bg-green-500' : 'bg-yellow-500'
-                }`}
+                className="h-2 rounded-full bg-bitcoin-orange"
                 style={{ width: `${Math.min(getRSIValue(data.technicalIndicators?.rsi), 100)}%` }}
               ></div>
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-bitcoin-white-60 mt-1">
               {getRSIValue(data.technicalIndicators?.rsi) > 70 ? 'Overbought' : 
                getRSIValue(data.technicalIndicators?.rsi) < 30 ? 'Oversold' : 'Neutral'}
             </p>
           </div>
 
-          <div className="bg-gray-50 p-3 md:p-4 rounded-lg mobile-bg-secondary">
+          <div className="bitcoin-block-subtle">
             <div className="flex justify-between items-center">
-              <span className="text-xs md:text-sm font-medium mobile-text-secondary">MACD</span>
-              <span className={`text-sm font-semibold ${
-                data.technicalIndicators?.macd?.signal === 'BUY' ? 'text-green-600' : 
-                data.technicalIndicators?.macd?.signal === 'SELL' ? 'text-red-600' : 'text-gray-600'
+              <span className="stat-label">MACD</span>
+              <span className={`text-sm font-semibold font-mono ${
+                data.technicalIndicators?.macd?.signal === 'BUY' ? 'text-bitcoin-orange' : 
+                data.technicalIndicators?.macd?.signal === 'SELL' ? 'text-bitcoin-orange' : 'text-bitcoin-white'
               }`}>
                 {data.technicalIndicators?.macd?.signal || 'NEUTRAL'}
               </span>
             </div>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-bitcoin-white-60 mt-2 font-mono">
               Histogram: {(data.technicalIndicators?.macd?.histogram || 0).toFixed(2)}
             </p>
           </div>
 
-          <div className="bg-gray-50 p-3 md:p-4 rounded-lg mobile-bg-secondary">
+          <div className="bitcoin-block-subtle">
             <div className="flex justify-between items-center">
-              <span className="text-xs md:text-sm font-medium mobile-text-secondary">Moving Averages</span>
-              <TrendingUp className="h-4 w-4 text-blue-600" />
+              <span className="stat-label">Moving Averages</span>
+              <TrendingUp className="h-4 w-4 text-bitcoin-orange" />
             </div>
-            <div className="text-xs text-gray-600 mt-2 space-y-1">
+            <div className="text-xs text-bitcoin-white-80 mt-2 space-y-1 font-mono">
               <div>EMA 20: ${Math.round(data.technicalIndicators?.ema20 || 0).toLocaleString()}</div>
               <div>EMA 50: ${Math.round(data.technicalIndicators?.ema50 || 0).toLocaleString()}</div>
             </div>
           </div>
 
-          <div className="bg-gray-50 p-3 md:p-4 rounded-lg mobile-bg-secondary">
+          <div className="bitcoin-block-subtle">
             <div className="flex justify-between items-center">
-              <span className="text-xs md:text-sm font-medium mobile-text-secondary">Bollinger Bands</span>
-              <Activity className="h-4 w-4 text-purple-600" />
+              <span className="stat-label">Bollinger Bands</span>
+              <Activity className="h-4 w-4 text-bitcoin-orange" />
             </div>
-            <div className="text-xs text-gray-600 mt-2 space-y-1">
+            <div className="text-xs text-bitcoin-white-80 mt-2 space-y-1 font-mono">
               <div>Upper: ${Math.round(data.technicalIndicators?.bollinger?.upper || 0).toLocaleString()}</div>
               <div>Middle: ${Math.round(data.technicalIndicators?.bollinger?.middle || 0).toLocaleString()}</div>
               <div>Lower: ${Math.round(data.technicalIndicators?.bollinger?.lower || 0).toLocaleString()}</div>
             </div>
           </div>
 
-          <div className="bg-gray-50 p-3 md:p-4 rounded-lg col-span-1 lg:col-span-2 mobile-bg-secondary">
+          <div className="bitcoin-block-subtle col-span-1 lg:col-span-2">
             <div className="flex justify-between items-center mb-3">
-              <span className="text-xs md:text-sm font-medium mobile-text-secondary">Support/Resistance Levels</span>
-              <BarChart3 className="h-4 w-4 text-red-600" />
+              <span className="stat-label">Support/Resistance Levels</span>
+              <BarChart3 className="h-4 w-4 text-bitcoin-orange" />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
               <div className="space-y-2">
-                <div className="font-medium mobile-text-primary">Resistance</div>
-                <div className="text-red-500 font-medium">Strong: ${Math.round(data.technicalIndicators?.supportResistance?.strongResistance || 0).toLocaleString()}</div>
-                <div className="text-orange-500">Normal: ${Math.round(data.technicalIndicators?.supportResistance?.resistance || 0).toLocaleString()}</div>
+                <div className="font-medium text-bitcoin-white">Resistance</div>
+                <div className="text-bitcoin-orange font-medium">Strong: ${Math.round(data.technicalIndicators?.supportResistance?.strongResistance || 0).toLocaleString()}</div>
+                <div className="text-bitcoin-white-80">Normal: ${Math.round(data.technicalIndicators?.supportResistance?.resistance || 0).toLocaleString()}</div>
               </div>
               <div className="space-y-2">
-                <div className="font-medium mobile-text-primary">Support</div>
-                <div className="text-green-500">Normal: ${Math.round(data.technicalIndicators?.supportResistance?.support || 0).toLocaleString()}</div>
-                <div className="text-green-600 font-medium">Strong: ${Math.round(data.technicalIndicators?.supportResistance?.strongSupport || 0).toLocaleString()}</div>
+                <div className="font-medium text-bitcoin-white">Support</div>
+                <div className="text-bitcoin-white-80">Normal: ${Math.round(data.technicalIndicators?.supportResistance?.support || 0).toLocaleString()}</div>
+                <div className="text-bitcoin-orange font-medium">Strong: ${Math.round(data.technicalIndicators?.supportResistance?.strongSupport || 0).toLocaleString()}</div>
               </div>
             </div>
           </div>
 
-          <div className="bg-gray-50 p-3 md:p-4 rounded-lg col-span-1 lg:col-span-2 mobile-bg-secondary">
+          <div className="bitcoin-block col-span-1 lg:col-span-2">
             <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-3 space-y-2 md:space-y-0">
               <div className="flex items-center space-x-2">
-                <span className="text-xs md:text-sm font-medium mobile-text-secondary">
+                <span className="text-xs md:text-sm font-bold text-bitcoin-white">
                   {data.isEnhancedData ? '🎯 LIVE Supply/Demand Zones' : 'Supply/Demand Zones'}
                 </span>
                 {data.isEnhancedData && (
-                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded font-medium animate-pulse">
+                  <span className="px-2 py-1 bg-bitcoin-orange text-bitcoin-black text-xs rounded font-medium animate-pulse">
                     REAL-TIME
                   </span>
                 )}
               </div>
               <div className="flex items-center space-x-2">
-                <Target className="h-4 w-4 text-indigo-600" />
-                <span className="text-xs mobile-text-muted">
+                <Target className="h-4 w-4 text-bitcoin-orange" />
+                <span className="text-xs text-bitcoin-white-60">
                   {data.technicalIndicators?.supplyDemandZones?.supplyZones?.length || 0}S / 
                   {data.technicalIndicators?.supplyDemandZones?.demandZones?.length || 0}D
                 </span>
@@ -573,19 +566,19 @@ export default function ETHMarketAnalysis() {
               {/* Supply Zones */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="font-medium text-red-600 mobile-text-primary">📈 Supply Zones</div>
+                  <div className="font-medium text-bitcoin-orange mobile-text-primary">📈 Supply Zones</div>
                   <div className="text-xs mobile-text-muted">Resistance Levels</div>
                 </div>
                 {data.technicalIndicators?.supplyDemandZones?.supplyZones?.slice(0, 4).map((zone, index) => (
-                  <div key={index} className="bg-red-50 p-3 rounded-lg border-l-4 border-red-400 mobile-bg-secondary hover:bg-red-100 transition-colors overflow-hidden">
+                  <div key={index} className="bitcoin-block-subtle border-l-4 border-bitcoin-orange hover:border-bitcoin-orange transition-colors overflow-hidden">
                     <div className="flex items-center justify-between mb-1 gap-2 min-w-0">
-                      <div className="font-bold mobile-text-primary text-sm sm:text-base truncate min-w-0 flex-shrink" style={{ fontSize: 'clamp(0.875rem, 3vw, 1rem)' }}>
+                      <div className="font-bold text-bitcoin-white text-sm sm:text-base truncate min-w-0 flex-shrink font-mono" style={{ fontSize: 'clamp(0.875rem, 3vw, 1rem)' }}>
                         ${Math.round(zone.level).toLocaleString()}
                       </div>
                       <div className={`px-2 py-1 rounded font-medium flex-shrink-0 ${
                         zone.strength === 'Strong' || zone.strength === 'Very Strong' 
-                          ? 'bg-red-200 text-red-800' 
-                          : 'bg-red-100 text-red-600'
+                          ? 'bg-bitcoin-orange text-bitcoin-black' 
+                          : 'border border-bitcoin-orange text-bitcoin-orange'
                       }`} style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>
                         {zone.strength}
                       </div>
@@ -601,7 +594,7 @@ export default function ETHMarketAnalysis() {
                         {!zone.source && '📊 Technical'}
                       </span>
                       {zone.confidence && (
-                        <span className="text-blue-600 font-medium flex-shrink-0" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>{zone.confidence}%</span>
+                        <span className="text-bitcoin-orange font-medium flex-shrink-0" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>{zone.confidence}%</span>
                       )}
                     </div>
                     
@@ -611,7 +604,7 @@ export default function ETHMarketAnalysis() {
                         <div className="flex items-center justify-between gap-2 min-w-0">
                           <span className="truncate min-w-0">Volume: {zone.volume.toFixed(2)} ETH</span>
                           {zone.volumePercentage && (
-                            <span className="text-blue-600 flex-shrink-0">({zone.volumePercentage.toFixed(1)}%)</span>
+                            <span className="text-bitcoin-orange flex-shrink-0">({zone.volumePercentage.toFixed(1)}%)</span>
                           )}
                         </div>
                       ) : (
@@ -628,13 +621,13 @@ export default function ETHMarketAnalysis() {
                     
                     {/* Order Count for Live OrderBook zones */}
                     {zone.orderCount && zone.orderCount > 0 && (
-                      <div className="text-purple-600 mt-1 truncate" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>
+                      <div className="text-bitcoin-orange mt-1 truncate" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>
                         {zone.orderCount} active orders
                       </div>
                     )}
                     
                     {zone.distanceFromPrice && (
-                      <div className="text-orange-600 mt-1 truncate" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>
+                      <div className="text-bitcoin-orange mt-1 truncate" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>
                         +{zone.distanceFromPrice.toFixed(1)}% from current
                       </div>
                     )}
@@ -645,19 +638,19 @@ export default function ETHMarketAnalysis() {
               {/* Demand Zones */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="font-medium text-green-600 mobile-text-primary">📉 Demand Zones</div>
+                  <div className="font-medium text-bitcoin-orange mobile-text-primary">📉 Demand Zones</div>
                   <div className="text-xs mobile-text-muted">Support Levels</div>
                 </div>
                 {data.technicalIndicators?.supplyDemandZones?.demandZones?.slice(0, 4).map((zone, index) => (
-                  <div key={index} className="bg-green-50 p-3 rounded-lg border-l-4 border-green-400 mobile-bg-secondary hover:bg-green-100 transition-colors overflow-hidden">
+                  <div key={index} className="bitcoin-block-subtle border-l-4 border-bitcoin-orange hover:border-bitcoin-orange transition-colors overflow-hidden">
                     <div className="flex items-center justify-between mb-1 gap-2 min-w-0">
-                      <div className="font-bold mobile-text-primary text-sm sm:text-base truncate min-w-0 flex-shrink" style={{ fontSize: 'clamp(0.875rem, 3vw, 1rem)' }}>
+                      <div className="font-bold text-bitcoin-white text-sm sm:text-base truncate min-w-0 flex-shrink font-mono" style={{ fontSize: 'clamp(0.875rem, 3vw, 1rem)' }}>
                         ${Math.round(zone.level).toLocaleString()}
                       </div>
                       <div className={`px-2 py-1 rounded font-medium flex-shrink-0 ${
                         zone.strength === 'Strong' || zone.strength === 'Very Strong' 
-                          ? 'bg-green-200 text-green-800' 
-                          : 'bg-green-100 text-green-600'
+                          ? 'bg-bitcoin-orange text-bitcoin-black' 
+                          : 'border border-bitcoin-orange text-bitcoin-orange'
                       }`} style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>
                         {zone.strength}
                       </div>
@@ -673,7 +666,7 @@ export default function ETHMarketAnalysis() {
                         {!zone.source && '📊 Technical'}
                       </span>
                       {zone.confidence && (
-                        <span className="text-blue-600 font-medium flex-shrink-0" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>{zone.confidence}%</span>
+                        <span className="text-bitcoin-orange font-medium flex-shrink-0" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>{zone.confidence}%</span>
                       )}
                     </div>
                     
@@ -683,7 +676,7 @@ export default function ETHMarketAnalysis() {
                         <div className="flex items-center justify-between gap-2 min-w-0">
                           <span className="truncate min-w-0">Volume: {zone.volume.toFixed(2)} ETH</span>
                           {zone.volumePercentage && (
-                            <span className="text-blue-600 flex-shrink-0">({zone.volumePercentage.toFixed(1)}%)</span>
+                            <span className="text-bitcoin-orange flex-shrink-0">({zone.volumePercentage.toFixed(1)}%)</span>
                           )}
                         </div>
                       ) : (
@@ -700,13 +693,13 @@ export default function ETHMarketAnalysis() {
                     
                     {/* Order Count for Live OrderBook zones */}
                     {zone.orderCount && zone.orderCount > 0 && (
-                      <div className="text-purple-600 mt-1 truncate" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>
+                      <div className="text-bitcoin-orange mt-1 truncate" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>
                         {zone.orderCount} active orders
                       </div>
                     )}
                     
                     {zone.distanceFromPrice && (
-                      <div className="text-blue-600 mt-1 truncate" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>
+                      <div className="text-bitcoin-orange mt-1 truncate" style={{ fontSize: 'clamp(0.625rem, 2.5vw, 0.75rem)' }}>
                         -{zone.distanceFromPrice.toFixed(1)}% from current
                       </div>
                     )}
@@ -717,8 +710,8 @@ export default function ETHMarketAnalysis() {
 
             {/* Market Analysis Summary */}
             {data.technicalIndicators?.supplyDemandZones?.analysis && (
-              <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="text-xs font-medium mobile-text-primary mb-2">📊 Market Analysis</div>
+              <div className="mt-4 bitcoin-block-subtle">
+                <div className="text-xs font-medium text-bitcoin-white mb-2">📊 Market Analysis</div>
                 {typeof data.technicalIndicators.supplyDemandZones.analysis === 'object' ? (
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
@@ -737,7 +730,7 @@ export default function ETHMarketAnalysis() {
                       <span className="mobile-text-secondary">Pressure: </span>
                       <span className={`font-medium ${
                         data.technicalIndicators.supplyDemandZones.analysis.marketPressure === 'Bullish' 
-                          ? 'text-green-600' : 'text-red-600'
+                          ? 'text-bitcoin-orange' : 'text-bitcoin-white-80'
                       }`}>
                         {data.technicalIndicators.supplyDemandZones.analysis.marketPressure}
                       </span>
@@ -757,13 +750,13 @@ export default function ETHMarketAnalysis() {
       {/* Trading Signals */}
       <div className="mb-6">
         <h3 className="text-base md:text-lg font-semibold mobile-text-primary mb-4 flex items-center">
-          <Target className="h-4 w-4 md:h-5 md:w-5 mr-2 text-green-600" />
+          <Target className="h-4 w-4 md:h-5 md:w-5 mr-2 text-bitcoin-orange" />
           Trading Signals
         </h3>
         <div className="space-y-3">
           {Array.isArray(data.tradingSignals) && data.tradingSignals.length > 0 ? (
             data.tradingSignals.slice(0, 3).map((signal, index) => (
-              <div key={index} className="border border-gray-200 rounded-lg p-3 md:p-4 mobile-bg-card">
+              <div key={index} className="border border-bitcoin-orange-20 rounded-lg p-3 md:p-4 mobile-bg-card">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 mb-2">
                   <div className="flex items-center space-x-2">
                     {signal.type === 'BUY' ? (
@@ -806,7 +799,7 @@ export default function ETHMarketAnalysis() {
       {data.isEnhancedData && data.enhancedMarketData && (
         <div className="mb-6">
           <h3 className="text-base md:text-lg font-semibold mobile-text-primary mb-4 flex items-center">
-            <Activity className="h-4 w-4 md:h-5 md:w-5 mr-2 text-blue-600" />
+            <Activity className="h-4 w-4 md:h-5 md:w-5 mr-2 text-bitcoin-orange" />
             Real-Time Market Analysis
             <span className="ml-2 px-2 py-1 mobile-bg-info mobile-text-info text-xs rounded font-medium min-h-[32px] flex items-center">
               LIVE DATA
@@ -820,26 +813,26 @@ export default function ETHMarketAnalysis() {
               <div className="mobile-bg-info p-3 md:p-4 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium mobile-text-info">Order Book Imbalance</span>
-                  <BarChart3 className="h-4 w-4 text-blue-600" />
+                  <BarChart3 className="h-4 w-4 text-bitcoin-orange" />
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Volume Bias:</span>
                     <span className={`font-semibold ${
-                      data.enhancedMarketData.orderBookImbalance.volumeImbalance > 0 ? 'text-green-600' : 'text-red-600'
+                      data.enhancedMarketData.orderBookImbalance.volumeImbalance > 0 ? 'text-bitcoin-orange' : 'text-bitcoin-white-80'
                     }`}>
                       {(data.enhancedMarketData.orderBookImbalance.volumeImbalance * 100).toFixed(2)}%
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Bid Pressure:</span>
-                    <span className="text-green-600 font-medium">
+                    <span className="text-bitcoin-orange font-medium">
                       {(data.enhancedMarketData.orderBookImbalance.bidPressure * 100).toFixed(1)}%
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Ask Pressure:</span>
-                    <span className="text-red-600 font-medium">
+                    <span className="text-bitcoin-white-80 font-medium">
                       {(data.enhancedMarketData.orderBookImbalance.askPressure * 100).toFixed(1)}%
                     </span>
                   </div>
@@ -849,17 +842,17 @@ export default function ETHMarketAnalysis() {
 
             {/* Market Sentiment */}
             {data.enhancedMarketData.realMarketSentiment && (
-              <div className="bg-purple-50 p-4 rounded-lg">
+              <div className="bg-bitcoin-black border border-bitcoin-orange-20 p-4 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-purple-800">Market Sentiment</span>
-                  <AlertTriangle className="h-4 w-4 text-purple-600" />
+                  <span className="text-sm font-medium text-bitcoin-white">Market Sentiment</span>
+                  <AlertTriangle className="h-4 w-4 text-bitcoin-orange" />
                 </div>
                 <div className="space-y-2">
                   {data.enhancedMarketData.realMarketSentiment.fearGreedIndex && (
                     <div className="flex justify-between text-sm">
                       <span>Fear & Greed:</span>
                       <span className={`font-semibold ${
-                        data.enhancedMarketData.realMarketSentiment.fearGreedIndex > 50 ? 'text-green-600' : 'text-red-600'
+                        data.enhancedMarketData.realMarketSentiment.fearGreedIndex > 50 ? 'text-bitcoin-orange' : 'text-bitcoin-white-80'
                       }`}>
                         {data.enhancedMarketData.realMarketSentiment.fearGreedIndex}/100
                       </span>
@@ -869,7 +862,7 @@ export default function ETHMarketAnalysis() {
                     <div className="flex justify-between text-sm">
                       <span>Funding Rate:</span>
                       <span className={`font-medium ${
-                        data.enhancedMarketData.realMarketSentiment.fundingRate > 0 ? 'text-green-600' : 'text-red-600'
+                        data.enhancedMarketData.realMarketSentiment.fundingRate > 0 ? 'text-bitcoin-orange' : 'text-bitcoin-white-80'
                       }`}>
                         {(data.enhancedMarketData.realMarketSentiment.fundingRate * 100).toFixed(4)}%
                       </span>
@@ -881,18 +874,18 @@ export default function ETHMarketAnalysis() {
 
             {/* Whale Movements */}
             {data.enhancedMarketData.whaleMovements && data.enhancedMarketData.whaleMovements.length > 0 && (
-              <div className="bg-orange-50 p-4 rounded-lg">
+              <div className="bg-bitcoin-black border border-bitcoin-orange p-4 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-orange-800">Whale Activity</span>
-                  <TrendingUp className="h-4 w-4 text-orange-600" />
+                  <span className="text-sm font-medium text-bitcoin-white">Whale Activity</span>
+                  <TrendingUp className="h-4 w-4 text-bitcoin-orange" />
                 </div>
                 <div className="space-y-1">
                   {data.enhancedMarketData.whaleMovements.slice(0, 3).map((whale: any, index: number) => (
                     <div key={index} className="text-xs">
-                      <span className={`font-medium ${whale.isBuyerMaker ? 'text-red-600' : 'text-green-600'}`}>
+                      <span className={`font-medium ${whale.isBuyerMaker ? 'text-bitcoin-white-80' : 'text-bitcoin-orange'}`}>
                         {whale.isBuyerMaker ? 'SELL' : 'BUY'}
                       </span>
-                      <span className="text-gray-600 ml-1">
+                      <span className="text-bitcoin-white-60 ml-1">
                         {whale.quantity.toFixed(1)} ETH @ ${whale.price.toLocaleString()}
                       </span>
                     </div>
@@ -902,16 +895,16 @@ export default function ETHMarketAnalysis() {
             )}
 
             {/* Data Quality Indicators */}
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-bitcoin-black border border-bitcoin-orange-20 p-4 rounded-lg">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-800">Data Quality</span>
-                <Activity className="h-4 w-4 text-gray-600" />
+                <span className="text-sm font-medium text-bitcoin-white-80">Data Quality</span>
+                <Activity className="h-4 w-4 text-bitcoin-white-60" />
               </div>
               <div className="space-y-1">
                 <div className="flex justify-between text-xs">
                   <span>Order Book:</span>
                   <span className={`font-medium ${
-                    data.enhancedMarketData.dataQuality?.orderBookData ? 'text-green-600' : 'text-red-600'
+                    data.enhancedMarketData.dataQuality?.orderBookData ? 'text-bitcoin-orange' : 'text-bitcoin-white-80'
                   }`}>
                     {data.enhancedMarketData.dataQuality?.orderBookData ? '✓ Live' : '✗ Unavailable'}
                   </span>
@@ -919,7 +912,7 @@ export default function ETHMarketAnalysis() {
                 <div className="flex justify-between text-xs">
                   <span>Volume Data:</span>
                   <span className={`font-medium ${
-                    data.enhancedMarketData.dataQuality?.volumeData ? 'text-green-600' : 'text-red-600'
+                    data.enhancedMarketData.dataQuality?.volumeData ? 'text-bitcoin-orange' : 'text-bitcoin-white-80'
                   }`}>
                     {data.enhancedMarketData.dataQuality?.volumeData ? '✓ Live' : '✗ Unavailable'}
                   </span>
@@ -927,7 +920,7 @@ export default function ETHMarketAnalysis() {
                 <div className="flex justify-between text-xs">
                   <span>Sentiment:</span>
                   <span className={`font-medium ${
-                    data.enhancedMarketData.dataQuality?.sentimentData ? 'text-green-600' : 'text-red-600'
+                    data.enhancedMarketData.dataQuality?.sentimentData ? 'text-bitcoin-orange' : 'text-bitcoin-white-80'
                   }`}>
                     {data.enhancedMarketData.dataQuality?.sentimentData ? '✓ Live' : '✗ Unavailable'}
                   </span>
@@ -940,107 +933,172 @@ export default function ETHMarketAnalysis() {
 
       {/* Market Predictions */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <Clock className="h-5 w-5 mr-2 text-purple-600" />
+        <h3 className="text-lg font-semibold text-bitcoin-white mb-4 flex items-center">
+          <Clock className="h-5 w-5 mr-2 text-bitcoin-orange" />
           Price Predictions
         </h3>
         {/* Mobile-optimized predictions grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-blue-800">1 Hour</span>
-              <span className="text-lg font-bold text-blue-900">
+          <div className="bitcoin-block-subtle overflow-hidden p-3 md:p-4">
+            <div className="flex flex-col space-y-2 min-w-0">
+              <span className="text-xs font-semibold uppercase tracking-wider text-bitcoin-white-60 truncate">1 Hour</span>
+              <span className="font-mono text-xl md:text-2xl font-bold text-bitcoin-orange truncate min-w-0">
                 ${Math.round(data.predictions?.hourly?.target || 0).toLocaleString()}
               </span>
+              <p className="text-xs text-bitcoin-white-60 truncate">
+                Confidence: <span className="text-bitcoin-orange font-semibold">{(data.predictions?.hourly?.confidence || 0).toFixed(1)}%</span>
+              </p>
             </div>
-            <p className="text-xs text-blue-600 mt-1">
-              Confidence: {(data.predictions?.hourly?.confidence || 0)}%
-            </p>
           </div>
-          <div className="bg-green-50 p-4 rounded-lg">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-green-800">24 Hours</span>
-              <span className="text-lg font-bold text-green-900">
+          <div className="bitcoin-block-subtle overflow-hidden p-3 md:p-4">
+            <div className="flex flex-col space-y-2 min-w-0">
+              <span className="text-xs font-semibold uppercase tracking-wider text-bitcoin-white-60 truncate">24 Hours</span>
+              <span className="font-mono text-xl md:text-2xl font-bold text-bitcoin-orange truncate min-w-0">
                 ${Math.round(data.predictions?.daily?.target || 0).toLocaleString()}
               </span>
+              <p className="text-xs text-bitcoin-white-60 truncate">
+                Confidence: <span className="text-bitcoin-orange font-semibold">{(data.predictions?.daily?.confidence || 0).toFixed(1)}%</span>
+              </p>
             </div>
-            <p className="text-xs text-green-600 mt-1">
-              Confidence: {(data.predictions?.daily?.confidence || 0)}%
-            </p>
           </div>
-          <div className="bg-purple-50 p-4 rounded-lg">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-purple-800">7 Days</span>
-              <span className="text-lg font-bold text-purple-900">
+          <div className="bitcoin-block-subtle overflow-hidden p-3 md:p-4">
+            <div className="flex flex-col space-y-2 min-w-0">
+              <span className="text-xs font-semibold uppercase tracking-wider text-bitcoin-white-60 truncate">7 Days</span>
+              <span className="font-mono text-xl md:text-2xl font-bold text-bitcoin-orange truncate min-w-0">
                 ${Math.round(data.predictions?.weekly?.target || 0).toLocaleString()}
               </span>
+              <p className="text-xs text-bitcoin-white-60 truncate">
+                Confidence: <span className="text-bitcoin-orange font-semibold">{(data.predictions?.weekly?.confidence || 0).toFixed(1)}%</span>
+              </p>
             </div>
-            <p className="text-xs text-purple-600 mt-1">
-              Confidence: {(data.predictions?.weekly?.confidence || 0)}%
-            </p>
           </div>
         </div>
       </div>
 
       {/* Market Sentiment */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <AlertTriangle className="h-5 w-5 mr-2 text-yellow-600" />
+        <h3 className="text-lg font-semibold text-bitcoin-white mb-4 flex items-center">
+          <AlertTriangle className="h-5 w-5 mr-2 text-bitcoin-orange" />
           Market Sentiment
         </h3>
         {/* Enhanced mobile-optimized sentiment grid with touch-friendly indicators */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-          <div className="text-center p-2 md:p-3 bg-gray-50 rounded-lg mobile-bg-secondary min-h-[60px] md:min-h-[70px] flex flex-col justify-center min-w-[44px]">
-            <p className="text-xs md:text-sm mobile-text-secondary mb-1">Overall</p>
-            <p className={`text-sm md:text-base font-semibold mobile-text-primary ${
-              data.marketSentiment?.overall === 'Bullish' ? 'text-green-600' :
-              data.marketSentiment?.overall === 'Bearish' ? 'text-red-600' : 'text-yellow-600'
+          <div className="bitcoin-block-subtle text-center p-3 md:p-4 min-h-[80px] md:min-h-[90px] flex flex-col justify-center overflow-hidden">
+            <p className="text-xs font-semibold uppercase tracking-wider text-bitcoin-white-60 mb-2">Overall</p>
+            <p className={`text-base md:text-lg font-bold truncate ${
+              data.marketSentiment?.overall === 'Bullish' ? 'text-bitcoin-orange' :
+              data.marketSentiment?.overall === 'Bearish' ? 'text-bitcoin-white-80' : 'text-bitcoin-orange'
             }`}>
               {data.marketSentiment?.overall || 'Neutral'}
             </p>
           </div>
           <FearGreedSlider value={data.marketSentiment?.fearGreed || 50} />
-          <div className="text-center p-2 md:p-3 bg-gray-50 rounded-lg mobile-bg-secondary min-h-[60px] md:min-h-[70px] flex flex-col justify-center min-w-[44px]">
-            <p className="text-xs md:text-sm mobile-text-secondary mb-1">Social</p>
-            <p className="text-sm md:text-base font-semibold text-purple-600 mobile-text-primary">
+          <div className="bitcoin-block-subtle text-center p-3 md:p-4 min-h-[80px] md:min-h-[90px] flex flex-col justify-center overflow-hidden">
+            <p className="text-xs font-semibold uppercase tracking-wider text-bitcoin-white-60 mb-2">Social</p>
+            <p className="text-base md:text-lg font-bold text-bitcoin-orange truncate">
               {data.marketSentiment?.socialMedia || 'Neutral'}
             </p>
           </div>
-          <div className="text-center p-2 md:p-3 bg-gray-50 rounded-lg mobile-bg-secondary min-h-[60px] md:min-h-[70px] flex flex-col justify-center min-w-[44px]">
-            <p className="text-xs md:text-sm mobile-text-secondary mb-1">Institutional</p>
-            <p className="text-sm md:text-base font-semibold text-orange-600 mobile-text-primary">
+          <div className="bitcoin-block-subtle text-center p-3 md:p-4 min-h-[80px] md:min-h-[90px] flex flex-col justify-center overflow-hidden">
+            <p className="text-xs font-semibold uppercase tracking-wider text-bitcoin-white-60 mb-2">Institutional</p>
+            <p className="text-base md:text-lg font-bold text-bitcoin-orange truncate">
               {data.marketSentiment?.institutionalFlow || 'Neutral'}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Visual Trading Chart */}
+      {/* Visual Trading Zones - Expandable */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Visual Trading Zones</h3>
-        <ETHTradingChart />
+        <button
+          onClick={() => setShowTradingZones(!showTradingZones)}
+          className="w-full bitcoin-block-subtle hover:border-bitcoin-orange transition-all duration-300 p-4 flex items-center justify-between min-h-[56px] touch-manipulation group"
+        >
+          <div className="flex items-center space-x-3">
+            <Target className="h-5 w-5 text-bitcoin-orange flex-shrink-0" />
+            <div className="text-left">
+              <h3 className="text-base md:text-lg font-bold text-bitcoin-white group-hover:text-bitcoin-orange transition-colors">
+                Visual Trading Zones
+              </h3>
+              <p className="text-xs text-bitcoin-white-60">
+                {showTradingZones ? 'Click to collapse' : 'Click to expand timeframe analysis'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            {showTradingZones && (
+              <span className="text-xs font-semibold text-bitcoin-orange uppercase tracking-wider hidden sm:inline">
+                Expanded
+              </span>
+            )}
+            {showTradingZones ? (
+              <ChevronUp className="h-5 w-5 text-bitcoin-orange animate-pulse" />
+            ) : (
+              <ChevronDown className="h-5 w-5 text-bitcoin-orange" />
+            )}
+          </div>
+        </button>
+        
+        {showTradingZones && (
+          <div className="mt-4 animate-slide-down">
+            <ETHTradingChart />
+          </div>
+        )}
       </div>
 
-      {/* Hidden Pivot Analysis */}
+      {/* Hidden Pivot Analysis - Expandable */}
       <div className="mb-6">
-        <ETHHiddenPivotChart />
+        <button
+          onClick={() => setShowHiddenPivot(!showHiddenPivot)}
+          className="w-full bitcoin-block-subtle hover:border-bitcoin-orange transition-all duration-300 p-4 flex items-center justify-between min-h-[56px] touch-manipulation group"
+        >
+          <div className="flex items-center space-x-3">
+            <BarChart3 className="h-5 w-5 text-bitcoin-orange flex-shrink-0" />
+            <div className="text-left">
+              <h3 className="text-base md:text-lg font-bold text-bitcoin-white group-hover:text-bitcoin-orange transition-colors">
+                Hidden Pivot Analysis
+              </h3>
+              <p className="text-xs text-bitcoin-white-60">
+                {showHiddenPivot ? 'Click to collapse' : 'Fibonacci Extensions & Hidden Support/Resistance'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            {showHiddenPivot && (
+              <span className="text-xs font-semibold text-bitcoin-orange uppercase tracking-wider hidden sm:inline">
+                Expanded
+              </span>
+            )}
+            {showHiddenPivot ? (
+              <ChevronUp className="h-5 w-5 text-bitcoin-orange animate-pulse" />
+            ) : (
+              <ChevronDown className="h-5 w-5 text-bitcoin-orange" />
+            )}
+          </div>
+        </button>
+        
+        {showHiddenPivot && (
+          <div className="mt-4 animate-slide-down">
+            <ETHHiddenPivotChart />
+          </div>
+        )}
       </div>
 
       {/* News Impact */}
       {data.newsImpact && data.newsImpact.length > 0 && (
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Market News Impact</h3>
+          <h3 className="text-lg font-semibold text-bitcoin-white mb-4">Market News Impact</h3>
           <div className="space-y-2">
             {data.newsImpact.slice(0, 3).map((news, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div key={index} className="flex items-center justify-between p-3 bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg">
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">{news.headline}</p>
-                  <p className="text-xs text-gray-500">{news.source} • {news.timeAgo}</p>
+                  <p className="text-sm font-medium text-bitcoin-white">{news.headline}</p>
+                  <p className="text-xs text-bitcoin-white-60">{news.source} • {news.timeAgo}</p>
                 </div>
                 <span className={`px-2 py-1 rounded text-xs font-medium ml-3 ${
-                  news.impact === 'Bullish' ? 'bg-green-100 text-green-800' :
-                  news.impact === 'Bearish' ? 'bg-red-100 text-red-800' :
-                  'bg-gray-100 text-gray-800'
+                  news.impact === 'Bullish' ? 'bg-bitcoin-orange text-bitcoin-white' :
+                  news.impact === 'Bearish' ? 'bg-bitcoin-black border border-bitcoin-orange text-bitcoin-white' :
+                  'bg-bitcoin-black border border-bitcoin-orange-20 text-bitcoin-white-80'
                 }`}>
                   {news.impact}
                 </span>
@@ -1050,9 +1108,13 @@ export default function ETHMarketAnalysis() {
         </div>
       )}
 
-      <div className="mt-6 text-xs text-gray-500 text-center">
+      <div className="mt-6 text-xs text-bitcoin-white-60 text-center">
         Last updated: {new Date(data.lastUpdated || data.timestamp || Date.now()).toLocaleString()}
       </div>
     </div>
   )
 }
+
+
+
+

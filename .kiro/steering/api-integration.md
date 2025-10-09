@@ -49,6 +49,19 @@ GET /api/caesar-news?symbols=BTC,ETH&limit=15
 // Returns: Cryptocurrency news with sentiment analysis
 ```
 
+#### Whale Watch (✅ Live in Production)
+```typescript
+GET /api/whale-watch/detect?threshold=50
+// Returns: List of large Bitcoin transactions above threshold
+
+POST /api/whale-watch/analyze
+// Body: { txHash, amount, fromAddress, toAddress, ... }
+// Returns: { success, jobId } - Starts Caesar AI research job
+
+GET /api/whale-watch/analysis/[jobId]
+// Returns: { status, analysis, sources } - Poll for analysis results
+```
+
 #### Health Monitoring
 ```typescript
 GET /api/caesar-health
@@ -77,6 +90,47 @@ import {
   useCaesarHealth
 } from '../hooks/useCaesarData';
 ```
+
+### API Protection Patterns
+
+#### Analysis Lock System (Whale Watch)
+To prevent API spam from multiple simultaneous requests:
+
+```typescript
+// 1. Track active analysis state
+const [analyzingTx, setAnalyzingTx] = useState<string | null>(null);
+const hasActiveAnalysis = (
+  whaleData?.whales.some(w => w.analysisStatus === 'analyzing') || 
+  analyzingTx !== null
+);
+
+// 2. Guard clause at function start
+const analyzeTransaction = async (whale: WhaleTransaction) => {
+  // STOP execution if any analysis is active
+  if (analyzingTx !== null || whaleData?.whales.some(w => w.analysisStatus === 'analyzing')) {
+    console.log('⚠️ Analysis already in progress, ignoring click');
+    return;
+  }
+  
+  // 3. Immediately set state before API call
+  setAnalyzingTx(whale.txHash);
+  // Update status to 'analyzing' immediately
+  // ... then make API call
+};
+
+// 4. Disable UI with pointer-events
+<div 
+  className={isDisabled ? 'pointer-events-none opacity-50' : ''}
+  style={isDisabled ? { pointerEvents: 'none' } : undefined}
+>
+```
+
+**Key Principles:**
+- Guard clause prevents function execution
+- Immediate state updates before async operations
+- Pointer events disabled on UI elements
+- Visual feedback (greyed out, disabled buttons)
+- Clear user messaging about why actions are blocked
 
 ### Mobile-Optimized API Patterns
 

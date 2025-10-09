@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Desktop Navigation - Bitcoin Sovereign</title>
+  <link rel="stylesheet" href="styles/globals.css">
+  <style>
+    /* Demo container */
+    .demo-container {
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    
+    .demo-section {
+      margin-bottom: 3rem;
+      padding: 2rem;
+      border: 1px solid var(--bitcoin-orange-20);
+      border-radius: 12px;
+    }
+    
+    .demo-title {
+      color: var(--bitcoin-orange);
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .demo-description {
+      color: var(--bitcoin-white-80);
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+    
+    .demo-note {
+      color: var(--bitcoin-white-60);
+      font-size: 0.875rem;
+      font-style: italic;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--bitcoin-orange-5);
+      border-left: 3px solid var(--bitcoin-orange);
+      border-radius: 4px;
+    }
+    
+    /* Header demo */
+    .demo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 2rem;
+      background: var(--bitcoin-black);
+      border-bottom: 1px solid var(--bitcoin-orange-20);
+      margin-bottom: 2rem;
+    }
+    
+    .demo-logo {
+      color: var(--bitcoin-white);
+      font-size: 1.5rem;
+      font-weight: 800;
+      text-decoration: none;
+    }
+    
+    .demo-logo:hover {
+      color: var(--bitcoin-orange);
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <h1 class="headline-bitcoin" style="text-align: center; margin-bottom: 3rem;">
+      Desktop Navigation System
+    </h1>
+    
+    <!-- Demo 1: Basic Desktop Nav -->
+    <div class="demo-section">
+      <h2 class="demo-title">1. Basic Desktop Navigation</h2>
+      <p class="demo-description">
+        Horizontal navigation with orange underline on hover. Hidden on mobile/tablet, visible on desktop (1025px+).
+      </p>
+      
+      <nav class="desktop-nav">
+        <a href="#" class="nav-link">Crypto News Wire</a>
+        <a href="#" class="nav-link active">AI Trade Generation</a>
+        <a href="#" class="nav-link">Bitcoin Market Report</a>
+        <a href="#" class="nav-link">Ethereum Market Report</a>
+        <a href="#" class="nav-link">Whale Watch</a>
+        <a href="#" class="nav-link">Regulatory Updates</a>
+      </nav>
+      
+      <p class="demo-note">
+        <strong>Note:</strong> Resize your browser to 1025px+ width to see the desktop navigation. 
+        Below 1024px, it will be hidden (mobile hamburger menu would show instead).
+      </p>
+    </div>
+    
+    <!-- Demo 2: Desktop Nav with Brand -->
+    <div class="demo-section">
+      <h2 class="demo-title">2. Desktop Nav with Brand Logo</h2>
+      <p class="demo-description">
+        Full header layout with logo and navigation links.
+      </p>
+      
+      <div class="demo-header">
+        <a href="#" class="demo-logo">AGENTS.MD</a>
+        
+        <nav class="desktop-nav">
+          <a href="#" class="nav-link">News</a>
+          <a href="#" class="nav-link">Trading</a>
+          <a href="#" class="nav-link active">Markets</a>
+          <a href="#" class="nav-link">Analysis</a>
+        </nav>
+      </div>
+      
+      <p class="demo-note">
+        <strong>Hover Effect:</strong> Links show orange color, orange bottom border, and subtle glow on hover.
+      </p>
+    </div>
+    
+    <!-- Demo 3: Desktop Nav with CTA Button -->
+    <div class="demo-section">
+      <h2 class="demo-title">3. Desktop Nav with CTA Button</h2>
+      <p class="demo-description">
+        Navigation with a call-to-action button at the end.
+      </p>
+      
+      <div class="demo-header">
+        <a href="#" class="demo-logo">₿ BITCOIN SOVEREIGN</a>
+        
+        <div style="display: flex; align-items: center; gap: 2rem;">
+          <nav class="desktop-nav">
+            <a href="#" class="nav-link">Dashboard</a>
+            <a href="#" class="nav-link">Signals</a>
+            <a href="#" class="nav-link">Whale Watch</a>
+            <a href="#" class="nav-link">News</a>
+          </nav>
+          
+          <button class="btn-bitcoin-primary">Get Started</button>
+        </div>
+      </div>
+      
+      <p class="demo-note">
+        <strong>Integration:</strong> Desktop nav works seamlessly with Bitcoin Sovereign button system.
+      </p>
+    </div>
+    
+    <!-- Demo 4: Desktop Nav Variants -->
+    <div class="demo-section">
+      <h2 class="demo-title">4. Desktop Nav Layout Variants</h2>
+      <p class="demo-description">
+        Different alignment options for desktop navigation.
+      </p>
+      
+      <div style="margin-bottom: 2rem;">
+        <h3 style="color: var(--bitcoin-white); font-size: 1rem; margin-bottom: 1rem;">Left-Aligned (Default)</h3>
+        <nav class="desktop-nav desktop-nav-left">
+          <a href="#" class="nav-link">Home</a>
+          <a href="#" class="nav-link">About</a>
+          <a href="#" class="nav-link">Contact</a>
+        </nav>
+      </div>
+      
+      <div style="margin-bottom: 2rem;">
+        <h3 style="color: var(--bitcoin-white); font-size: 1rem; margin-bottom: 1rem;">Centered</h3>
+        <nav class="desktop-nav desktop-nav-center">
+          <a href="#" class="nav-link">Home</a>
+          <a href="#" class="nav-link">About</a>
+          <a href="#" class="nav-link">Contact</a>
+        </nav>
+      </div>
+      
+      <div>
+        <h3 style="color: var(--bitcoin-white); font-size: 1rem; margin-bottom: 1rem;">Right-Aligned</h3>
+        <nav class="desktop-nav desktop-nav-right">
+          <a href="#" class="nav-link">Home</a>
+          <a href="#" class="nav-link">About</a>
+          <a href="#" class="nav-link">Contact</a>
+        </nav>
+      </div>
+      
+      <p class="demo-note">
+        <strong>Classes:</strong> Use <code>desktop-nav-left</code>, <code>desktop-nav-center</code>, or <code>desktop-nav-right</code> for alignment.
+      </p>
+    </div>
+    
+    <!-- Demo 5: Accessibility Features -->
+    <div class="demo-section">
+      <h2 class="demo-title">5. Accessibility Features</h2>
+      <p class="demo-description">
+        Keyboard navigation and focus states for accessibility compliance.
+      </p>
+      
+      <nav class="desktop-nav">
+        <a href="#" class="nav-link">Link 1</a>
+        <a href="#" class="nav-link">Link 2</a>
+        <a href="#" class="nav-link">Link 3</a>
+        <a href="#" class="nav-link">Link 4</a>
+      </nav>
+      
+      <p class="demo-note">
+        <strong>Try it:</strong> Press Tab to navigate through links. Focus states show orange outline and glow for WCAG compliance.
+      </p>
+    </div>
+    
+    <!-- Demo 6: Responsive Behavior -->
+    <div class="demo-section">
+      <h2 class="demo-title">6. Responsive Behavior</h2>
+      <p class="demo-description">
+        Desktop navigation automatically hides on mobile/tablet and shows on desktop.
+      </p>
+      
+      <div style="padding: 1.5rem; background: var(--bitcoin-orange-5); border-radius: 8px; margin-bottom: 1rem;">
+        <h3 style="color: var(--bitcoin-orange); font-size: 1rem; margin-bottom: 0.5rem;">Breakpoints:</h3>
+        <ul style="color: var(--bitcoin-white-80); line-height: 1.8;">
+          <li><strong>Mobile (0-640px):</strong> Desktop nav hidden, hamburger menu visible</li>
+          <li><strong>Tablet (641px-1024px):</strong> Desktop nav hidden, hamburger menu visible</li>
+          <li><strong>Desktop (1025px+):</strong> Desktop nav visible, hamburger menu hidden</li>
+        </ul>
+      </div>
+      
+      <nav class="desktop-nav">
+        <a href="#" class="nav-link">This nav</a>
+        <a href="#" class="nav-link">is only</a>
+        <a href="#" class="nav-link">visible on</a>
+        <a href="#" class="nav-link">desktop</a>
+      </nav>
+      
+      <p class="demo-note">
+        <strong>Responsive:</strong> Resize your browser window to see the navigation hide/show at the 1025px breakpoint.
+      </p>
+    </div>
+    
+    <!-- Implementation Guide -->
+    <div class="demo-section">
+      <h2 class="demo-title">Implementation Guide</h2>
+      <p class="demo-description">
+        How to use the desktop navigation system in your components.
+      </p>
+      
+      <div style="background: var(--bitcoin-black); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--bitcoin-orange-20);">
+        <pre style="color: var(--bitcoin-white-80); font-family: 'Roboto Mono', monospace; font-size: 0.875rem; line-height: 1.6; overflow-x: auto;"><code>&lt;!-- Basic Desktop Nav --&gt;
+&lt;nav className="desktop-nav"&gt;
+  &lt;a href="#" className="nav-link"&gt;Link 1&lt;/a&gt;
+  &lt;a href="#" className="nav-link active"&gt;Link 2&lt;/a&gt;
+  &lt;a href="#" className="nav-link"&gt;Link 3&lt;/a&gt;
+&lt;/nav&gt;
+
+&lt;!-- With Layout Variants --&gt;
+&lt;nav className="desktop-nav desktop-nav-center"&gt;
+  &lt;a href="#" className="nav-link"&gt;Centered Links&lt;/a&gt;
+&lt;/nav&gt;
+
+&lt;!-- Full Header Example --&gt;
+&lt;header&gt;
+  &lt;a href="/" className="desktop-nav-brand"&gt;
+    Logo
+  &lt;/a&gt;
+  &lt;nav className="desktop-nav"&gt;
+    &lt;a href="#" className="nav-link"&gt;Nav Link&lt;/a&gt;
+  &lt;/nav&gt;
+  &lt;button className="btn-bitcoin-primary"&gt;CTA&lt;/button&gt;
+&lt;/header&gt;</code></pre>
+      </div>
+      
+      <p class="demo-note">
+        <strong>CSS Classes:</strong> All styles are in <code>styles/globals.css</code>. No JavaScript required for basic functionality.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

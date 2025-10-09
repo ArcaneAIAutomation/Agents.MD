@@ -78,12 +78,23 @@ Thank you for your interest in contributing to Agents.MD! This document provides
 
 ## 📋 Development Guidelines
 
+### Design System
+All contributions must follow the **Bitcoin Sovereign Technology** design system:
+- **Colors**: Black (#000000), Orange (#F7931A), White (#FFFFFF) only
+- **Typography**: Inter (UI) + Roboto Mono (data)
+- **Borders**: Thin orange borders (1-2px) on black backgrounds
+- **Mobile-First**: Progressive enhancement from 320px to 1920px+
+- **Accessibility**: WCAG 2.1 AA compliance required
+
+See `.kiro/steering/bitcoin-sovereign-design.md` for complete guidelines.
+
 ### Code Style
 - Use TypeScript for all new code
 - Follow existing naming conventions
 - Add JSDoc comments for functions
 - Use Prettier for formatting
 - Follow ESLint rules
+- Use Bitcoin Sovereign CSS classes for styling
 
 ### Component Structure
 ```typescript
@@ -97,13 +108,19 @@ interface ExampleProps {
 
 export default function ExampleComponent({ title, data }: ExampleProps) {
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      <h3 className="text-xl font-bold mb-4">{title}</h3>
+    <div className="bitcoin-block">
+      <h3 className="text-xl font-bold mb-4 text-bitcoin-white">{title}</h3>
       {/* Component content */}
     </div>
   );
 }
 ```
+
+**Note**: All components should follow the Bitcoin Sovereign Technology design system:
+- Use `.bitcoin-block` for cards with thin orange borders
+- Use Bitcoin Sovereign color classes (`text-bitcoin-white`, `text-bitcoin-orange`, `bg-bitcoin-black`)
+- Follow mobile-first responsive design principles
+- Ensure WCAG 2.1 AA accessibility compliance
 
 ### API Route Structure
 ```typescript
@@ -128,6 +145,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 - **Performance optimization** - Minimize API calls and improve loading times
 - **Error handling** - Robust error recovery and user feedback
 - **Mobile responsiveness** - Ensure all features work on mobile devices
+- **Bitcoin Sovereign compliance** - All visual changes must follow the design system
+- **Accessibility** - Maintain WCAG 2.1 AA standards for all new features
 
 ### Medium Priority
 - **Additional trading pairs** - Support for more cryptocurrencies

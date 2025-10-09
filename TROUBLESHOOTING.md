@@ -38,17 +38,26 @@
 ### **3. Mobile Display Issues**
 
 #### Problem: Components overlapping on mobile
-- **Fixed**: All components now mobile-optimized
-- **Borders**: Responsive (border-2 md:border-4)
-- **Padding**: Adaptive (p-3 sm:p-6)
+- **Fixed**: All components now mobile-optimized with Bitcoin Sovereign design
+- **Borders**: Thin orange borders (1-2px) responsive across breakpoints
+- **Padding**: Adaptive (p-3 sm:p-6) with mobile-first approach
+- **Design System**: Follow `.kiro/steering/bitcoin-sovereign-design.md`
 
 #### Problem: Text too small on mobile
 - **Solution**: Responsive typography implemented
 - **Classes**: text-xs sm:text-sm, text-sm sm:text-base
+- **Fonts**: Inter (UI) + Roboto Mono (data)
+- **Minimum**: 16px base font size to prevent iOS zoom
 
 #### Problem: Market ticker not visible
 - **Check**: Screen rotation (portrait vs landscape)
 - **CSS**: Global animation with proper z-index
+- **Colors**: Bitcoin Orange (#F7931A) on black background for high contrast
+
+#### Problem: Colors not matching design system
+- **Solution**: Use only Black (#000000), Orange (#F7931A), White (#FFFFFF)
+- **Classes**: `.bitcoin-block`, `.text-bitcoin-orange`, `.bg-bitcoin-black`
+- **Reference**: See `BITCOIN-SOVEREIGN-DOCUMENTATION-UPDATE.md`
 
 ### **4. Branch/Version Issues**
 
@@ -154,16 +163,22 @@ curl "https://api.coinbase.com/v2/exchange-rates?currency=BTC"
 - `components/TradeGenerationEngine.tsx` - AI trading features
 - `pages/api/trade-generation.ts` - AI reasoning endpoint
 - `pages/index.tsx` - Main layout
-- `styles/globals.css` - Global styles + animations
+- `styles/globals.css` - Global styles + Bitcoin Sovereign design system
+- `.kiro/steering/bitcoin-sovereign-design.md` - Complete design guidelines
+- `BITCOIN-SOVEREIGN-DOCUMENTATION-UPDATE.md` - Documentation update summary
 
 ## 🎯 Prevention Tips
 
 1. **Always commit before experimenting**
 2. **Use feature branches for changes**
-3. **Test on multiple devices**
+3. **Test on multiple devices** (320px - 1920px+)
 4. **Check console for errors**
 5. **Monitor API rate limits**
 6. **Keep stable branch untouched**
+7. **Follow Bitcoin Sovereign design system** - Black, Orange, White only
+8. **Ensure WCAG 2.1 AA compliance** - Test color contrast and focus states
+9. **Use mobile-first approach** - Start with mobile, enhance for desktop
+10. **Reference design documentation** - Check `.kiro/steering/bitcoin-sovereign-design.md`
 
 ---
 

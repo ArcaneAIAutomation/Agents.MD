@@ -20,18 +20,28 @@ module.exports = {
     },
     extend: {
       colors: {
-        primary: {
-          50: '#eff6ff',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          900: '#1e3a8a',
-        },
+        // Bitcoin Sovereign Color Palette - PRIMARY COLORS
+        'bitcoin-black': '#000000',
+        'bitcoin-orange': '#F7931A',
+        'bitcoin-white': '#FFFFFF',
+        
+        // Bitcoin Orange Variants
+        'bitcoin-orange-light': '#FF8C00',
+        'bitcoin-orange-dark': '#D97706',
+        
+        // Legacy colors (commented out for Bitcoin Sovereign compliance)
+        // primary: {
+        //   50: '#eff6ff',
+        //   500: '#3b82f6',
+        //   600: '#2563eb',
+        //   700: '#1d4ed8',
+        //   900: '#1e3a8a',
+        // },
         crypto: {
-          green: '#00d4aa',
-          red: '#ff6b6b',
-          bitcoin: '#f7931a',
-          nexo: '#1e4dd8',
+          // green: '#00d4aa',  // ❌ Removed - Not Bitcoin Sovereign compliant
+          // red: '#ff6b6b',    // ❌ Removed - Not Bitcoin Sovereign compliant
+          bitcoin: '#f7931a',   // ✅ Bitcoin Sovereign Orange
+          // nexo: '#1e4dd8',   // ❌ Removed - Not Bitcoin Sovereign compliant
         },
         // Mobile-specific high-contrast color variants
         mobile: {
@@ -67,25 +77,8 @@ module.exports = {
             success: '#34d399',      // Emerald-400 for success borders
           },
           crypto: {
-            // High-contrast versions of crypto colors for mobile
-            green: {
-              50: '#ecfdf5',         // Light background
-              100: '#d1fae5',        // Lighter variant
-              400: '#34d399',        // Medium contrast
-              500: '#10b981',        // Standard contrast (4.5:1)
-              600: '#059669',        // High contrast (6:1)
-              700: '#047857',        // Higher contrast (7:1)
-              900: '#064e3b',        // Maximum contrast
-            },
-            red: {
-              50: '#fef2f2',         // Light background
-              100: '#fee2e2',        // Lighter variant
-              400: '#f87171',        // Medium contrast
-              500: '#ef4444',        // Standard contrast (4.5:1)
-              600: '#dc2626',        // High contrast (6:1)
-              700: '#b91c1c',        // Higher contrast (7:1)
-              900: '#7f1d1d',        // Maximum contrast
-            },
+            // Bitcoin Sovereign compliant colors only
+            // ❌ Removed green, red, nexo variants - Not Bitcoin Sovereign compliant
             bitcoin: {
               50: '#fffbeb',         // Light background
               100: '#fef3c7',        // Lighter variant
@@ -95,15 +88,6 @@ module.exports = {
               700: '#b45309',        // Higher contrast (7:1)
               900: '#78350f',        // Maximum contrast
             },
-            nexo: {
-              50: '#eff6ff',         // Light background
-              100: '#dbeafe',        // Lighter variant
-              400: '#60a5fa',        // Medium contrast
-              500: '#3b82f6',        // Standard contrast (4.5:1)
-              600: '#2563eb',        // High contrast (6:1)
-              700: '#1d4ed8',        // Higher contrast (7:1)
-              900: '#1e3a8a',        // Maximum contrast
-            }
           },
           // Responsive color modifiers for different mobile contexts
           responsive: {
@@ -264,6 +248,12 @@ module.exports = {
         'mobile-card': '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
         'mobile-button': '0 1px 2px 0 rgba(0, 0, 0, 0.1)',
         'mobile-modal': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        
+        // Bitcoin Sovereign Glow Effects
+        'bitcoin-glow': '0 0 20px rgba(247, 147, 26, 0.5)',
+        'bitcoin-glow-sm': '0 0 10px rgba(247, 147, 26, 0.3)',
+        'bitcoin-glow-lg': '0 0 40px rgba(247, 147, 26, 0.6)',
+        'bitcoin-glow-xl': '0 0 60px rgba(247, 147, 26, 0.7)',
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
@@ -280,6 +270,14 @@ module.exports = {
         'mobile-progress-indeterminate': 'mobile-progress-indeterminate 2s infinite linear',
         'mobile-error-bounce': 'mobile-error-bounce 1s',
         'mobile-success-checkmark': 'mobile-success-checkmark 0.6s ease-in-out',
+        
+        // Bitcoin Sovereign Animations
+        'bitcoin-glow': 'bitcoin-glow 2s ease-in-out infinite',
+        'bitcoin-pulse': 'bitcoin-pulse 3s ease-in-out infinite',
+        'bitcoin-fade-in': 'bitcoin-fade-in 0.6s ease-out',
+        'bitcoin-fade-in-delay-1': 'bitcoin-fade-in 0.6s ease-out 0.2s both',
+        'bitcoin-fade-in-delay-2': 'bitcoin-fade-in 0.6s ease-out 0.4s both',
+        'bitcoin-fade-in-delay-3': 'bitcoin-fade-in 0.6s ease-out 0.6s both',
       },
       keyframes: {
         'spin-slow': {
@@ -372,6 +370,34 @@ module.exports = {
         'mobile-success-checkmark': {
           '0%': { strokeDasharray: '0 100' },
           '100%': { strokeDasharray: '100 0' }
+        },
+        
+        // Bitcoin Sovereign Keyframes
+        'bitcoin-glow': {
+          '0%, 100%': {
+            boxShadow: '0 0 10px rgba(247, 147, 26, 0.3)'
+          },
+          '50%': {
+            boxShadow: '0 0 20px rgba(247, 147, 26, 0.6)'
+          }
+        },
+        'bitcoin-pulse': {
+          '0%, 100%': {
+            opacity: '1'
+          },
+          '50%': {
+            opacity: '0.8'
+          }
+        },
+        'bitcoin-fade-in': {
+          from: {
+            opacity: '0',
+            transform: 'translateY(20px)'
+          },
+          to: {
+            opacity: '1',
+            transform: 'translateY(0)'
+          }
         }
       }
     },

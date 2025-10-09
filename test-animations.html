@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bitcoin Sovereign Animations Test</title>
+  <link rel="stylesheet" href="styles/globals.css">
+  <style>
+    body {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .demo-section {
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background: var(--bitcoin-black);
+      border: 1px solid var(--bitcoin-orange-20);
+      border-radius: 12px;
+    }
+    
+    .demo-title {
+      color: var(--bitcoin-orange);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .demo-item {
+      padding: 1.5rem;
+      background: var(--bitcoin-black);
+      border: 1px solid var(--bitcoin-orange);
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .demo-label {
+      color: var(--bitcoin-white-60);
+      font-size: 0.875rem;
+      margin-top: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="headline-bitcoin" style="text-align: center; margin-bottom: 3rem;">
+    Bitcoin Sovereign Animations Test
+  </h1>
+
+  <!-- Glow Animations -->
+  <div class="demo-section">
+    <h2 class="demo-title">Glow Animations</h2>
+    <div class="demo-grid">
+      <div class="demo-item glow-bitcoin">
+        <div class="price-display">$45,000</div>
+        <p class="demo-label">glow-bitcoin</p>
+      </div>
+      
+      <div class="demo-item glow-bitcoin-lg">
+        <div class="price-display">$45,000</div>
+        <p class="demo-label">glow-bitcoin-lg</p>
+      </div>
+      
+      <div class="demo-item glow-bitcoin-fast">
+        <div class="price-display">$45,000</div>
+        <p class="demo-label">glow-bitcoin-fast</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pulse Animations -->
+  <div class="demo-section">
+    <h2 class="demo-title">Pulse Animations</h2>
+    <div class="demo-grid">
+      <div class="demo-item pulse-subtle">
+        <div class="stat-value">1,234 BTC</div>
+        <p class="demo-label">pulse-subtle</p>
+      </div>
+      
+      <div class="demo-item pulse-subtle-fast">
+        <div class="stat-value">1,234 BTC</div>
+        <p class="demo-label">pulse-subtle-fast</p>
+      </div>
+      
+      <div class="demo-item">
+        <div class="price-display-live">$45,000</div>
+        <p class="demo-label">price-display-live</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fade In Animations -->
+  <div class="demo-section">
+    <h2 class="demo-title">Fade In Animations (Refresh to See)</h2>
+    <div class="demo-grid">
+      <div class="demo-item animate-fade-in">
+        <div class="stat-value">Fade In</div>
+        <p class="demo-label">animate-fade-in</p>
+      </div>
+      
+      <div class="demo-item animate-fade-in-delay-1">
+        <div class="stat-value">Delay 0.2s</div>
+        <p class="demo-label">animate-fade-in-delay-1</p>
+      </div>
+      
+      <div class="demo-item animate-fade-in-delay-2">
+        <div class="stat-value">Delay 0.4s</div>
+        <p class="demo-label">animate-fade-in-delay-2</p>
+      </div>
+      
+      <div class="demo-item animate-fade-in-delay-3">
+        <div class="stat-value">Delay 0.6s</div>
+        <p class="demo-label">animate-fade-in-delay-3</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Button Transitions -->
+  <div class="demo-section">
+    <h2 class="demo-title">Button Transitions (Hover to See)</h2>
+    <div class="demo-grid">
+      <div style="text-align: center;">
+        <button class="btn-bitcoin-primary">Primary Button</button>
+        <p class="demo-label">Smooth color & shadow transition</p>
+      </div>
+      
+      <div style="text-align: center;">
+        <button class="btn-bitcoin-secondary">Secondary Button</button>
+        <p class="demo-label">Fill transition on hover</p>
+      </div>
+      
+      <div style="text-align: center;">
+        <button class="btn-bitcoin-tertiary">Tertiary Button</button>
+        <p class="demo-label">Subtle background transition</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card Transitions -->
+  <div class="demo-section">
+    <h2 class="demo-title">Card Transitions (Hover to See)</h2>
+    <div class="demo-grid">
+      <div class="bitcoin-block">
+        <h3 style="color: var(--bitcoin-white); margin-bottom: 0.5rem;">Bitcoin Block</h3>
+        <p style="color: var(--bitcoin-white-80);">Hover to see orange glow effect</p>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-label">Market Cap</div>
+        <div class="stat-value">$850B</div>
+        <p style="color: var(--bitcoin-white-60); margin-top: 0.5rem; font-size: 0.75rem;">
+          Hover to see border transition
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Performance Note -->
+  <div class="demo-section" style="border-color: var(--bitcoin-orange);">
+    <h2 class="demo-title">Performance Features</h2>
+    <ul style="color: var(--bitcoin-white-80); line-height: 1.8;">
+      <li>✅ GPU-accelerated animations (transform & opacity)</li>
+      <li>✅ Respects prefers-reduced-motion</li>
+      <li>✅ 0.3s ease transitions for smooth interactions</li>
+      <li>✅ No jank or performance issues</li>
+      <li>✅ Mobile-optimized timing</li>
+    </ul>
+  </div>
+
+  <script>
+    // Add a refresh button for fade-in animations
+    const refreshBtn = document.createElement('button');
+    refreshBtn.className = 'btn-bitcoin-primary';
+    refreshBtn.textContent = 'Refresh Fade-In Animations';
+    refreshBtn.style.display = 'block';
+    refreshBtn.style.margin = '2rem auto';
+    refreshBtn.onclick = () => location.reload();
+    document.body.appendChild(refreshBtn);
+  </script>
+</body>
+</html>

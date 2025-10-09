@@ -7,10 +7,12 @@
 
 ## Frontend Stack
 - **React 18** - Component library with hooks and mobile-first components
-- **Tailwind CSS 3.3** - Utility-first CSS framework with custom crypto color palette and mobile utilities
-- **Lucide React** - Modern icon library with scalable SVG icons
+- **Tailwind CSS 3.3** - Utility-first CSS framework with **Bitcoin Sovereign color palette** (Black, Orange, White)
+- **Lucide React** - Modern icon library with scalable SVG icons (styled in orange/white)
 - **PostCSS & Autoprefixer** - CSS processing with mobile browser support
-- **Custom Animations** - CSS animations optimized for mobile performance
+- **Custom Animations** - CSS animations optimized for mobile performance (orange glow effects, smooth transitions)
+- **Inter Font** - Geometric sans-serif for UI and headlines
+- **Roboto Mono** - Monospaced font for data and technical displays
 
 ## Mobile & Accessibility
 - **Mobile-First Design** - Progressive enhancement from 320px to 1920px+

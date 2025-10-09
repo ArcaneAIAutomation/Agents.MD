@@ -396,10 +396,126 @@ async function calculateRealEthTechnicalIndicators(currentPrice: number, high24h
   
   console.log(`   ETH Bollinger: $${bollinger.lower.toFixed(0)} - $${bollinger.middle.toFixed(0)} - $${bollinger.upper.toFixed(0)}`);
   
-  // Support/Resistance from 24h data
-  const range = high24h - low24h;
+  // Calculate REAL Support/Resistance using multiple methods
+  console.log('📊 Calculating ETH support/resistance levels...');
   
-  console.log('✅ All ETH technical indicators calculated successfully');
+  // Method 1: Pivot Points (Standard)
+  const pivotPoint = (high24h + low24h + currentPrice) / 3;
+  const pivotR1 = (2 * pivotPoint) - low24h;
+  const pivotS1 = (2 * pivotPoint) - high24h;
+  const pivotR2 = pivotPoint + (high24h - low24h);
+  const pivotS2 = pivotPoint - (high24h - low24h);
+  
+  console.log(`   ETH Pivot Point: ${pivotPoint.toFixed(0)}`);
+  console.log(`   ETH Pivot R1: ${pivotR1.toFixed(0)}, R2: ${pivotR2.toFixed(0)}`);
+  console.log(`   ETH Pivot S1: ${pivotS1.toFixed(0)}, S2: ${pivotS2.toFixed(0)}`);
+  
+  // Method 2: Fibonacci Retracements (from 24h high/low)
+  const range = high24h - low24h;
+  const fib236 = high24h - (range * 0.236);
+  const fib382 = high24h - (range * 0.382);
+  const fib500 = high24h - (range * 0.500);
+  const fib618 = high24h - (range * 0.618);
+  const fib786 = high24h - (range * 0.786);
+  
+  console.log(`   ETH Fib 23.6%: ${fib236.toFixed(0)}, 38.2%: ${fib382.toFixed(0)}, 50%: ${fib500.toFixed(0)}`);
+  
+  // Method 3: Order Book Levels (if available)
+  let orderBookSupport = currentPrice * 0.98;
+  let orderBookResistance = currentPrice * 1.02;
+  
+  if (orderBookData && orderBookData.bids && orderBookData.asks) {
+    // Find strongest bid/ask levels (highest volume)
+    const strongBids = orderBookData.bids
+      .sort((a: any, b: any) => b.total - a.total)
+      .slice(0, 3);
+    const strongAsks = orderBookData.asks
+      .sort((a: any, b: any) => b.total - a.total)
+      .slice(0, 3);
+    
+    if (strongBids.length > 0) {
+      orderBookSupport = strongBids[0].price;
+      console.log(`   ETH Order Book Support: ${orderBookSupport.toFixed(0)} (${strongBids[0].quantity.toFixed(2)} ETH)`);
+    }
+    
+    if (strongAsks.length > 0) {
+      orderBookResistance = strongAsks[0].price;
+      console.log(`   ETH Order Book Resistance: ${orderBookResistance.toFixed(0)} (${strongAsks[0].quantity.toFixed(2)} ETH)`);
+    }
+  }
+  
+  // Method 4: Historical Price Levels (from OHLC data)
+  // Find recent swing highs and lows
+  const recentPrices = historicalPrices.slice(-20);
+  const localHighs: number[] = [];
+  const localLows: number[] = [];
+  
+  for (let i = 2; i < recentPrices.length - 2; i++) {
+    // Local high: higher than 2 candles before and after
+    if (recentPrices[i] > recentPrices[i-1] && 
+        recentPrices[i] > recentPrices[i-2] &&
+        recentPrices[i] > recentPrices[i+1] && 
+        recentPrices[i] > recentPrices[i+2]) {
+      localHighs.push(recentPrices[i]);
+    }
+    
+    // Local low: lower than 2 candles before and after
+    if (recentPrices[i] < recentPrices[i-1] && 
+        recentPrices[i] < recentPrices[i-2] &&
+        recentPrices[i] < recentPrices[i+1] && 
+        recentPrices[i] < recentPrices[i+2]) {
+      localLows.push(recentPrices[i]);
+    }
+  }
+  
+  // Find nearest swing levels
+  const nearestSwingHigh = localHighs.length > 0 
+    ? localHighs.reduce((prev, curr) => 
+        Math.abs(curr - currentPrice) < Math.abs(prev - currentPrice) ? curr : prev
+      )
+    : high24h;
+    
+  const nearestSwingLow = localLows.length > 0
+    ? localLows.reduce((prev, curr) => 
+        Math.abs(curr - currentPrice) < Math.abs(prev - currentPrice) ? curr : prev
+      )
+    : low24h;
+  
+  console.log(`   ETH Swing High: ${nearestSwingHigh.toFixed(0)}, Swing Low: ${nearestSwingLow.toFixed(0)}`);
+  
+  // Combine all methods to determine final support/resistance
+  // Priority: Order Book > Pivot Points > Fibonacci > Swing Levels
+  
+  // Support levels (below current price)
+  const supportCandidates = [
+    pivotS1,
+    pivotS2,
+    fib382,
+    fib500,
+    fib618,
+    orderBookSupport,
+    nearestSwingLow,
+    bollinger.lower
+  ].filter(level => level < currentPrice).sort((a, b) => b - a);
+  
+  // Resistance levels (above current price)
+  const resistanceCandidates = [
+    pivotR1,
+    pivotR2,
+    fib236,
+    orderBookResistance,
+    nearestSwingHigh,
+    bollinger.upper
+  ].filter(level => level > currentPrice).sort((a, b) => a - b);
+  
+  // Select the most relevant levels
+  const support = supportCandidates[0] || (currentPrice * 0.97);
+  const strongSupport = supportCandidates[1] || low24h;
+  const resistance = resistanceCandidates[0] || (currentPrice * 1.03);
+  const strongResistance = resistanceCandidates[1] || high24h;
+  
+  console.log(`✅ ETH Final S/R: Support ${support.toFixed(0)}, Strong Support ${strongSupport.toFixed(0)}`);
+  console.log(`   Resistance ${resistance.toFixed(0)}, Strong Resistance ${strongResistance.toFixed(0)}`);
   
   return {
     rsi: { 
@@ -417,10 +533,12 @@ async function calculateRealEthTechnicalIndicators(currentPrice: number, high24h
     },
     bollinger,
     supportResistance: {
-      strongSupport: low24h,
-      support: currentPrice - (range * 0.3),
-      resistance: currentPrice + (range * 0.3),
-      strongResistance: high24h,
+      strongSupport: Math.round(strongSupport),
+      support: Math.round(support),
+      resistance: Math.round(resistance),
+      strongResistance: Math.round(strongResistance),
+      pivotPoint: Math.round(pivotPoint),
+      method: 'Multi-factor: Pivot Points + Fibonacci + Order Book + Swing Levels'
     }
   };
 }
@@ -979,7 +1097,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     
     const currentPrice = realData.price.current;
-    const technicalIndicators = calculateRealEthTechnicalIndicators(
+    const technicalIndicators = await calculateRealEthTechnicalIndicators(
       currentPrice,
       realData.price.high24h,
       realData.price.low24h,

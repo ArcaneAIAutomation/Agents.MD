@@ -9,6 +9,15 @@ All components and features must be designed with mobile as the primary target, 
 - **Performance-First**: Fast loading and smooth animations on mobile devices
 - **Accessibility-First**: WCAG 2.1 AA compliance with high contrast ratios
 - **Progressive Enhancement**: Core functionality works on all devices, enhanced features for capable devices
+- **Bitcoin Sovereign Aesthetic**: Pure black backgrounds with thin orange borders, minimalist and clean
+
+### Bitcoin Sovereign Mobile Design
+- **Black Canvas**: Pure #000000 background on all mobile screens
+- **Orange Accents**: Bitcoin Orange (#F7931A) for CTAs and emphasis
+- **Thin Borders**: 1-2px orange borders on cards and blocks
+- **Single-Column Stack**: Clean vertical layout of "Block" cards
+- **Collapsible Sections**: Orange headers with expandable content
+- **Minimalist**: Remove clutter, show only essential information
 
 ## Mobile Component Standards
 
@@ -43,7 +52,15 @@ All components and features must be designed with mobile as the primary target, 
 - **Mobile Base**: 16px minimum for body text (WCAG compliance)
 - **Headings**: Scale from 18px (mobile) to 32px (desktop)
 - **Line Height**: 1.6 for optimal mobile readability
-- **Font Weight**: Bold (700) for important information, Regular (400) for body text
+- **Font Weight**: Bold (700-800) for important information, Regular (400) for body text
+- **Font Families**: 
+  - Inter for UI and headlines
+  - Roboto Mono for data and technical displays
+- **Colors**:
+  - Headlines: White (#FFFFFF)
+  - Body: White at 80% opacity
+  - Labels: White at 60% opacity
+  - Emphasis: Bitcoin Orange (#F7931A)
 
 ## Animation Guidelines
 

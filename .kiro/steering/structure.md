@@ -13,6 +13,8 @@ Agents.MD/
 │   ├── MobileErrorStates.tsx   # Mobile error handling components
 │   ├── MobileLoadingComponents.tsx # Mobile loading states
 │   ├── MobileFinalIntegration.tsx # Mobile integration testing
+│   ├── WhaleWatch/             # Whale Watch feature components
+│   │   └── WhaleWatchDashboard.tsx # Main whale tracking dashboard
 │   └── Layout.tsx              # Page layout wrapper
 ├── pages/                   # Next.js pages and API routes
 │   ├── api/                    # Backend API endpoints
@@ -22,7 +24,11 @@ Agents.MD/
 │   │   ├── crypto-herald-15-stories.ts # Optimized news endpoint
 │   │   ├── live-trade-generation.ts # Real-time trade signals
 │   │   ├── reliable-trade-generation.ts # Fallback trade signals
-│   │   └── diagnostic.ts       # API health monitoring
+│   │   ├── diagnostic.ts       # API health monitoring
+│   │   └── whale-watch/        # Whale Watch API endpoints
+│   │       ├── detect.ts       # Whale transaction detection
+│   │       ├── analyze.ts      # Start Caesar AI analysis
+│   │       └── analysis/[jobId].ts # Poll analysis results
 │   ├── _app.tsx               # App configuration
 │   ├── _document.tsx          # HTML document structure
 │   └── index.tsx              # Main dashboard page
@@ -59,6 +65,7 @@ Agents.MD/
 - **Descriptive prefixes**: BTC/ETH for crypto-specific components, Mobile for mobile-specific
 - **Functional naming**: Component name matches primary function
 - **Mobile components**: Prefix with `Mobile` for mobile-specific implementations
+- **Feature folders**: Group related components in folders (e.g., `WhaleWatch/`)
 
 ### API Routes
 - **kebab-case** for endpoints: `btc-analysis.ts`, `crypto-herald-15-stories.ts`

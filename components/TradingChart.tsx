@@ -124,25 +124,25 @@ export default function TradingChart({ symbol, currentPrice, supportResistance, 
   const priceLevels = generatePriceLevels();
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 mobile-bg-primary">
+    <div className="bitcoin-block bg-bitcoin-black rounded-lg p-4 md:p-6">
       {/* Enhanced Header */}
       <div className={`${chartDimensions.isMobile ? 'space-y-4' : 'flex justify-between items-center'} mb-6`}>
         <div>
-          <h3 className={`${chartDimensions.isMobile ? 'text-lg' : 'text-xl'} font-bold text-gray-900 flex items-center`}>
-            <BarChart3 className={`${chartDimensions.isMobile ? 'h-5 w-5' : 'h-6 w-6'} mr-2 text-blue-600`} />
+          <h3 className={`${chartDimensions.isMobile ? 'text-lg' : 'text-xl'} font-bold text-bitcoin-white flex items-center`}>
+            <BarChart3 className={`${chartDimensions.isMobile ? 'h-5 w-5' : 'h-6 w-6'} mr-2 text-bitcoin-orange`} />
             {symbol} Trading Zones Chart
           </h3>
           <div className={`${chartDimensions.isMobile ? 'flex-col space-y-2' : 'flex items-center space-x-4'} text-sm mt-2`}>
             <div className="flex items-center">
-              <span className="text-gray-600">Current Price:</span>
-              <span className={`font-bold text-black ml-2 ${chartDimensions.isMobile ? 'text-base' : 'text-lg'}`}>
+              <span className="text-bitcoin-white" style={{ opacity: 0.6 }}>Current Price:</span>
+              <span className={`font-bold text-bitcoin-orange ml-2 ${chartDimensions.isMobile ? 'text-base' : 'text-lg'}`}>
                 ${chartDimensions.isMobile ? Math.round(currentPrice/1000) + 'k' : currentPrice.toLocaleString()}
               </span>
             </div>
             {!chartDimensions.isMobile && (
               <div className="flex items-center space-x-2">
-                <div className="w-4 h-0.5 bg-black border-dashed"></div>
-                <span className="text-xs text-gray-500">(Black Dotted Line)</span>
+                <div className="w-4 h-0.5 bg-bitcoin-orange border-dashed"></div>
+                <span className="text-xs text-bitcoin-white" style={{ opacity: 0.6 }}>(Orange Dotted Line)</span>
               </div>
             )}
           </div>
@@ -165,24 +165,24 @@ export default function TradingChart({ symbol, currentPrice, supportResistance, 
       </div>
 
       {/* Chart Guide with Prominent Timeframe Display */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg p-3 md:p-4 mb-4 md:mb-6 mobile-bg-secondary">
+      <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-3 md:p-4 mb-4 md:mb-6" style={{ borderOpacity: 0.3 }}>
         <div className="flex items-start space-x-2">
-          <Target className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <Target className="h-5 w-5 text-bitcoin-orange flex-shrink-0 mt-0.5" />
           <div className="text-sm flex-1">
             <div className="flex items-center justify-between mb-3">
-              <div className="font-bold text-blue-900 text-base mobile-text-primary">
+              <div className="font-bold text-bitcoin-white text-base">
                 📊 Chart Guide
               </div>
-              <div className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold">
+              <div className="bg-bitcoin-orange text-bitcoin-black px-3 py-1 rounded-full text-xs font-bold">
                 {timeframe} TIMEFRAME
               </div>
             </div>
-            <div className="text-blue-800 space-y-1 mobile-text-primary">
-              <div>• <span className="font-medium text-black">Black Dotted Line:</span> Current real-time price (${currentPrice.toLocaleString()})</div>
-              <div>• <span className="font-medium text-green-600">Green Zones:</span> Buy/Support areas with real order book + volume data</div>
-              <div>• <span className="font-medium text-red-600">Red Zones:</span> Sell/Resistance areas with real order book + volume data</div>
+            <div className="text-bitcoin-white space-y-1" style={{ opacity: 0.8 }}>
+              <div>• <span className="font-medium text-bitcoin-orange">Orange Dotted Line:</span> Current real-time price (${currentPrice.toLocaleString()})</div>
+              <div>• <span className="font-medium text-green-500">Green Zones:</span> Buy/Support areas with real order book + volume data</div>
+              <div>• <span className="font-medium text-red-500">Red Zones:</span> Sell/Resistance areas with real order book + volume data</div>
               <div>• <span className="font-medium">Zone Intensity:</span> Darker = Stronger, Lighter = Weaker</div>
-              <div className="text-xs mt-2 italic text-green-700 font-medium">
+              <div className="text-xs mt-2 italic text-bitcoin-orange font-medium">
                 ✅ 100% Real Market Data: Live order book walls + Historical volume levels ({timeframe === '1H' ? '60' : timeframe === '4H' ? '72' : '90'} data points)
               </div>
             </div>
@@ -191,7 +191,7 @@ export default function TradingChart({ symbol, currentPrice, supportResistance, 
       </div>
 
       {/* Enhanced Chart */}
-      <div className="relative bg-gray-50 rounded-lg border-2 border-gray-200 overflow-hidden">
+      <div className="relative bg-bitcoin-black rounded-lg border-2 border-bitcoin-orange overflow-hidden" style={{ borderOpacity: 0.2 }}>
         {/* Mobile scroll container */}
         <div className={`${chartDimensions.isMobile ? 'overflow-x-auto' : ''}`}>
           <svg 
@@ -204,9 +204,10 @@ export default function TradingChart({ symbol, currentPrice, supportResistance, 
           {/* Background grid */}
           <defs>
             <pattern id="grid" width="50" height="40" patternUnits="userSpaceOnUse">
-              <path d="M 50 0 L 0 0 0 40" fill="none" stroke="#E5E7EB" strokeWidth="1"/>
+              <path d="M 50 0 L 0 0 0 40" fill="none" stroke="rgba(247, 147, 26, 0.1)" strokeWidth="1"/>
             </pattern>
           </defs>
+          <rect width={chartWidth} height={chartHeight} fill="#000000" />
           <rect width={chartWidth} height={chartHeight} fill="url(#grid)" />
           
           {/* Y-axis price levels */}
@@ -222,7 +223,7 @@ export default function TradingChart({ symbol, currentPrice, supportResistance, 
                   y1={y} 
                   x2={chartWidth - 20} 
                   y2={y} 
-                  stroke={isCurrentPrice ? "#EF4444" : "#D1D5DB"}
+                  stroke={isCurrentPrice ? "#F7931A" : "rgba(247, 147, 26, 0.2)"}
                   strokeWidth={isCurrentPrice ? 2 : 1}
                   strokeDasharray={isCurrentPrice ? "8,4" : "0"}
                 />
@@ -234,7 +235,7 @@ export default function TradingChart({ symbol, currentPrice, supportResistance, 
                   textAnchor="end" 
                   fontSize={chartDimensions.isMobile ? "10" : "12"}
                   fontWeight={isCurrentPrice ? "700" : "500"}
-                  fill={isCurrentPrice ? "#EF4444" : "#6B7280"}
+                  fill={isCurrentPrice ? "#F7931A" : "rgba(255, 255, 255, 0.6)"}
                 >
                   ${chartDimensions.isMobile ? Math.round(price/1000) + 'k' : Math.round(price).toLocaleString()}
                 </text>
@@ -247,7 +248,7 @@ export default function TradingChart({ symbol, currentPrice, supportResistance, 
                       y={y - 12}
                       width={130}
                       height={24}
-                      fill="#EF4444"
+                      fill="#F7931A"
                       rx={4}
                     />
                     <text
@@ -256,7 +257,7 @@ export default function TradingChart({ symbol, currentPrice, supportResistance, 
                       textAnchor="middle"
                       fontSize={chartDimensions.isMobile ? "10" : "12"}
                       fontWeight="700"
-                      fill="white"
+                      fill="#000000"
                     >
                       {chartDimensions.isMobile ? `$${Math.round(currentPrice/1000)}k` : `CURRENT $${Math.round(currentPrice).toLocaleString()}`}
                     </text>
@@ -415,7 +416,7 @@ export default function TradingChart({ symbol, currentPrice, supportResistance, 
                   y1={30} 
                   x2={x} 
                   y2={chartHeight - 30}
-                  stroke="#E5E7EB"
+                  stroke="rgba(247, 147, 26, 0.2)"
                   strokeWidth={0.5}
                   strokeDasharray="2,2"
                 />
@@ -424,7 +425,7 @@ export default function TradingChart({ symbol, currentPrice, supportResistance, 
                   y={chartHeight - 10} 
                   textAnchor="middle" 
                   fontSize={chartDimensions.isMobile ? "9" : "11"}
-                  fill="#6B7280"
+                  fill="rgba(255, 255, 255, 0.6)"
                   fontWeight="500"
                 >
                   {chartDimensions.isMobile ? 
@@ -460,38 +461,38 @@ export default function TradingChart({ symbol, currentPrice, supportResistance, 
       {/* Zone Summary */}
       {tradingZones && (
         <div className="mt-4 md:mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-green-50 p-3 md:p-4 rounded-lg border border-green-200 mobile-bg-secondary">
-            <h4 className={`font-semibold text-green-800 mb-2 mobile-text-primary ${chartDimensions.isMobile ? 'text-sm' : ''}`}>
+          <div className="bg-bitcoin-black p-3 md:p-4 rounded-lg border-2 border-green-500" style={{ borderOpacity: 0.5 }}>
+            <h4 className={`font-semibold text-green-500 mb-2 ${chartDimensions.isMobile ? 'text-sm' : ''}`}>
               🟢 Buy Zones (Support)
             </h4>
             <div className="space-y-2">
               {tradingZones.buyZones.slice(0, chartDimensions.isMobile ? 2 : 3).map((zone, index) => (
                 <div key={index} className={`${chartDimensions.isMobile ? 'text-xs' : 'text-sm'}`}>
-                  <span className="font-medium">
+                  <span className="font-medium text-bitcoin-white">
                     ${chartDimensions.isMobile ? Math.round(zone.level/1000) + 'k' : Math.round(zone.level).toLocaleString()}
                   </span>
-                  <span className="text-green-600 ml-2">({zone.strength})</span>
+                  <span className="text-green-500 ml-2">({zone.strength})</span>
                   {!chartDimensions.isMobile && (
-                    <span className="text-gray-600 ml-2">{zone.volume.toFixed(1)} BTC</span>
+                    <span className="text-bitcoin-white ml-2" style={{ opacity: 0.6 }}>{zone.volume.toFixed(1)} BTC</span>
                   )}
                 </div>
               ))}
             </div>
           </div>
           
-          <div className="bg-red-50 p-3 md:p-4 rounded-lg border border-red-200 mobile-bg-secondary">
-            <h4 className={`font-semibold text-red-800 mb-2 mobile-text-primary ${chartDimensions.isMobile ? 'text-sm' : ''}`}>
+          <div className="bg-bitcoin-black p-3 md:p-4 rounded-lg border-2 border-red-500" style={{ borderOpacity: 0.5 }}>
+            <h4 className={`font-semibold text-red-500 mb-2 ${chartDimensions.isMobile ? 'text-sm' : ''}`}>
               🔴 Sell Zones (Resistance)
             </h4>
             <div className="space-y-2">
               {tradingZones.sellZones.slice(0, chartDimensions.isMobile ? 2 : 3).map((zone, index) => (
                 <div key={index} className={`${chartDimensions.isMobile ? 'text-xs' : 'text-sm'}`}>
-                  <span className="font-medium">
+                  <span className="font-medium text-bitcoin-white">
                     ${chartDimensions.isMobile ? Math.round(zone.level/1000) + 'k' : Math.round(zone.level).toLocaleString()}
                   </span>
-                  <span className="text-red-600 ml-2">({zone.strength})</span>
+                  <span className="text-red-500 ml-2">({zone.strength})</span>
                   {!chartDimensions.isMobile && (
-                    <span className="text-gray-600 ml-2">{zone.volume.toFixed(1)} BTC</span>
+                    <span className="text-bitcoin-white ml-2" style={{ opacity: 0.6 }}>{zone.volume.toFixed(1)} BTC</span>
                   )}
                 </div>
               ))}

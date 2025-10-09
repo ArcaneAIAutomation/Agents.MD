@@ -6,7 +6,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-14-black.svg)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
 
-Advanced cryptocurrency trading intelligence platform powered by AI agents and real-time market data analysis. Built with Next.js, TypeScript, and modern web technologies.
+Advanced cryptocurrency trading intelligence platform powered by AI agents and real-time market data analysis. Built with Next.js, TypeScript, and the **Bitcoin Sovereign Technology** design system - a minimalist black and orange aesthetic that embodies digital scarcity and forward-looking innovation.
 
 🌐 **Live Demo**: [news.arcane.group](https://news.arcane.group)  
 📚 **Documentation**: [View Docs](docs/)  
@@ -261,21 +261,28 @@ interface TechnicalAnalysis {
 }
 ```
 
-## 🎨 Styling & UI
+## 🎨 Styling & UI - Bitcoin Sovereign Technology
 
-- **Tailwind CSS** for responsive design
-- **Dark mode** support
-- **Custom color scheme** for crypto branding
-- **Responsive grid** layout for desktop and mobile
-- **Real-time updates** with visual indicators
+- **Bitcoin Sovereign Design System** - Minimalist black and orange aesthetic
+- **Pure Black Canvas** (#000000) - The digital space where Bitcoin exists
+- **Bitcoin Orange Accents** (#F7931A) - Energy, action, and emphasis
+- **Thin Orange Borders** (1-2px) - Signature visual element on black backgrounds
+- **Typography**: Inter (UI/headlines) + Roboto Mono (data/technical displays)
+- **Mobile-First** responsive design with progressive enhancement
+- **WCAG 2.1 AA Compliant** - High contrast ratios for accessibility
 
-### Color Palette
+### Bitcoin Sovereign Color Palette
 ```css
---crypto-green: #00d4aa   /* Positive price movements */
---crypto-red: #ff6b6b     /* Negative price movements */
---crypto-bitcoin: #f7931a /* Bitcoin brand color */
---crypto-nexo: #1e4dd8    /* Nexo brand color */
+--bitcoin-black: #000000      /* Pure black backgrounds */
+--bitcoin-orange: #F7931A     /* Bitcoin orange for CTAs and emphasis */
+--bitcoin-white: #FFFFFF      /* Headlines and critical data */
+--bitcoin-white-80: rgba(255, 255, 255, 0.8)  /* Body text */
+--bitcoin-white-60: rgba(255, 255, 255, 0.6)  /* Labels */
+--bitcoin-orange-20: rgba(247, 147, 26, 0.2)  /* Subtle borders */
 ```
+
+### Design Philosophy
+The visual language is rooted in Sovereign Technology - a secure, digital-native environment. The mood is minimalist, confident, and forward-looking, treating the black background not as a color, but as the digital space in which Bitcoin exists.
 
 ## 🔄 Real-Time Features
 
@@ -455,8 +462,10 @@ npm run type-check   # Run TypeScript checks
 ### Frontend Stack
 - **Next.js 14** - React framework with SSR/SSG
 - **TypeScript** - Type-safe JavaScript
-- **Tailwind CSS** - Utility-first CSS framework
-- **Lucide React** - Modern icon library
+- **Tailwind CSS** - Utility-first CSS framework with Bitcoin Sovereign color palette
+- **Inter Font** - Geometric sans-serif for UI and headlines
+- **Roboto Mono** - Monospaced font for data and technical displays
+- **Lucide React** - Modern icon library (styled in orange/white)
 
 ### Backend & APIs
 - **Next.js API Routes** - Serverless API endpoints

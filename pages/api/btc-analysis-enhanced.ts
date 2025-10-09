@@ -11,7 +11,7 @@ const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-2024-08-06';
 // Real-time Bitcoin data fetcher using multiple APIs
 async function fetchRealBitcoinData() {
   console.log('🚀 Fetching 100% REAL Bitcoin data from multiple sources...');
-  
+
   const results: any = {
     price: null,
     marketData: null,
@@ -30,7 +30,7 @@ async function fetchRealBitcoinData() {
         'Accept': 'application/json'
       }
     });
-    
+
     if (cmcResponse.ok) {
       const cmcData = await cmcResponse.json();
       const btcData = cmcData.data?.BTC;
@@ -49,7 +49,7 @@ async function fetchRealBitcoinData() {
     }
   } catch (error) {
     console.error('❌ CoinMarketCap BTC API failed:', error);
-    
+
     // Fallback: Try CoinGecko if CoinMarketCap fails
     try {
       const coinGeckoResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true', {
@@ -58,7 +58,7 @@ async function fetchRealBitcoinData() {
         },
         signal: AbortSignal.timeout(10000)
       });
-      
+
       if (coinGeckoResponse.ok) {
         const coinGeckoData = await coinGeckoResponse.json();
         const btcData = coinGeckoData.bitcoin;
@@ -88,7 +88,7 @@ async function fetchRealBitcoinData() {
           'Accept': 'application/json'
         }
       });
-      
+
       if (cmcResponse.ok) {
         const cmcData = await cmcResponse.json();
         const btcData = cmcData.data?.BTC;
@@ -115,7 +115,7 @@ async function fetchRealBitcoinData() {
     const fearGreedResponse = await fetch('https://api.alternative.me/fng/', {
       signal: AbortSignal.timeout(20000)
     });
-    
+
     if (fearGreedResponse.ok) {
       const fearGreedData = await fearGreedResponse.json();
       results.fearGreedIndex = {
@@ -135,24 +135,24 @@ async function fetchRealBitcoinData() {
     const orderBookResponse = await fetch('https://api.kraken.com/0/public/Depth?pair=XBTUSD&count=100', {
       signal: AbortSignal.timeout(20000)
     });
-    
+
     if (orderBookResponse.ok) {
       const orderBookData = await orderBookResponse.json();
       const btcOrderBook = orderBookData.result.XXBTZUSD;
-      
+
       // Analyze order book for supply/demand zones
       const bids = btcOrderBook.bids.slice(0, 20).map(([price, quantity]: [string, string]) => ({
         price: parseFloat(price),
         quantity: parseFloat(quantity),
         total: parseFloat(price) * parseFloat(quantity)
       }));
-      
+
       const asks = btcOrderBook.asks.slice(0, 20).map(([price, quantity]: [string, string]) => ({
         price: parseFloat(price),
         quantity: parseFloat(quantity),
         total: parseFloat(price) * parseFloat(quantity)
       }));
-      
+
       results.orderBookData = {
         bids,
         asks,
@@ -173,13 +173,13 @@ async function fetchRealBitcoinData() {
 async function fetchKrakenOHLC(symbol: string = 'BTC', periods: number = 50): Promise<number[]> {
   const krakenPair = 'XXBTZUSD'; // BTC/USD pair on Kraken
   const interval = 60; // 60 minutes (1 hour)
-  
+
   try {
     console.log(`📊 Fetching ${periods} hourly candles from Kraken for ${symbol}...`);
-    
+
     const response = await fetch(
       `https://api.kraken.com/0/public/OHLC?pair=${krakenPair}&interval=${interval}`,
-      { 
+      {
         signal: AbortSignal.timeout(20000),
         headers: {
           'User-Agent': 'CryptoHerald/1.0'
@@ -192,36 +192,36 @@ async function fetchKrakenOHLC(symbol: string = 'BTC', periods: number = 50): Pr
     }
 
     const data = await response.json();
-    
+
     // Check for Kraken API errors
     if (data.error && data.error.length > 0) {
       throw new Error(`Kraken API error: ${data.error.join(', ')}`);
     }
-    
+
     // Get the OHLC data - Kraken returns different key formats
     const resultKeys = Object.keys(data.result || {});
     const ohlcKey = resultKeys.find(key => key !== 'last') || krakenPair;
     const ohlcData = data.result?.[ohlcKey];
-    
+
     if (!ohlcData || !Array.isArray(ohlcData) || ohlcData.length === 0) {
       throw new Error('No OHLC data in Kraken response');
     }
-    
+
     // Kraken OHLC format: [timestamp, open, high, low, close, vwap, volume, count]
     // Extract closing prices (index 4)
     const prices = ohlcData
       .slice(-periods) // Get last N periods
       .map((candle: any[]) => parseFloat(candle[4])); // Close price
-    
+
     if (prices.length < periods) {
       console.warn(`⚠️ Only got ${prices.length} prices, requested ${periods}`);
     }
 
     console.log(`✅ Kraken: Fetched ${prices.length} hourly closing prices`);
     console.log(`   Latest price: $${prices[prices.length - 1].toLocaleString()}`);
-    
+
     return prices;
-    
+
   } catch (error) {
     console.error('❌ Kraken OHLC fetch failed:', error);
     throw new Error(`Failed to fetch historical data from Kraken: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -279,16 +279,16 @@ function calculateEMA(prices: number[], period: number): number {
 
   // Calculate initial SMA
   const sma = prices.slice(0, period).reduce((sum, p) => sum + p, 0) / period;
-  
+
   // Calculate multiplier
   const multiplier = 2 / (period + 1);
-  
+
   // Calculate EMA
   let ema = sma;
   for (let i = period; i < prices.length; i++) {
     ema = (prices[i] - ema) * multiplier + ema;
   }
-  
+
   return ema;
 }
 
@@ -306,18 +306,18 @@ function calculateProperMACD(prices: number[]): { macdLine: number; signalLine: 
 
   // Calculate 12-period EMA
   const ema12 = calculateEMA(prices, 12);
-  
+
   // Calculate 26-period EMA
   const ema26 = calculateEMA(prices, 26);
-  
+
   // MACD Line = 12 EMA - 26 EMA
   const macdLine = ema12 - ema26;
-  
+
   // Calculate Signal Line (9-period EMA of MACD Line)
   // For simplicity, we'll calculate it from recent MACD values
   // In a full implementation, you'd track MACD history
   const macdHistory: number[] = [];
-  
+
   // Calculate MACD for last 9+ periods to get signal line
   for (let i = Math.max(0, prices.length - 35); i < prices.length; i++) {
     const slice = prices.slice(0, i + 1);
@@ -327,13 +327,13 @@ function calculateProperMACD(prices: number[]): { macdLine: number; signalLine: 
       macdHistory.push(ema12_i - ema26_i);
     }
   }
-  
+
   // Signal Line = 9-period EMA of MACD
   const signalLine = macdHistory.length >= 9 ? calculateEMA(macdHistory, 9) : macdLine;
-  
+
   // Histogram = MACD Line - Signal Line
   const histogram = macdLine - signalLine;
-  
+
   // Determine signal
   let signal: string;
   if (histogram > 0.5) {
@@ -343,9 +343,9 @@ function calculateProperMACD(prices: number[]): { macdLine: number; signalLine: 
   } else {
     signal = 'NEUTRAL';
   }
-  
+
   console.log(`📊 Calculated MACD: Line=${macdLine.toFixed(2)}, Signal=${signalLine.toFixed(2)}, Histogram=${histogram.toFixed(2)}`);
-  
+
   return {
     macdLine,
     signalLine,
@@ -357,71 +357,189 @@ function calculateProperMACD(prices: number[]): { macdLine: number; signalLine: 
 // Calculate REAL technical indicators from Kraken OHLC data - NO FALLBACKS
 async function calculateRealTechnicalIndicators(currentPrice: number, high24h: number, low24h: number, volume24h: number, orderBookData: any) {
   console.log('📊 Calculating technical indicators from Kraken OHLC data...');
-  
+
   // Fetch 50 periods from Kraken (enough for all indicators)
   const historicalPrices = await fetchKrakenOHLC('BTC', 50);
-  
+
   // STRICT: Must have minimum data for calculations
   if (historicalPrices.length < 26) {
     throw new Error(`Insufficient historical data: got ${historicalPrices.length} periods, need at least 26 for MACD`);
   }
-  
+
   // Calculate RSI (14-period) - REQUIRED
   const rsi = calculateProperRSI(historicalPrices, 14);
   console.log(`   RSI(14): ${rsi.toFixed(2)}`);
-  
+
   // Calculate MACD (12,26,9) - REQUIRED
   const macdData = calculateProperMACD(historicalPrices);
   console.log(`   MACD: ${macdData.histogram.toFixed(2)} (${macdData.signal})`);
-  
+
   // Calculate EMAs - REQUIRED
   const ema20 = calculateEMA(historicalPrices, 20);
-  const ema50 = historicalPrices.length >= 50 
+  const ema50 = historicalPrices.length >= 50
     ? calculateEMA(historicalPrices, 50)
     : calculateEMA(historicalPrices, historicalPrices.length); // Use all available if < 50
-  
+
   console.log(`   EMA(20): $${ema20.toFixed(2)}, EMA(50): $${ema50.toFixed(2)}`);
-  
+
   // Calculate Bollinger Bands (20-period) - REQUIRED
   const last20 = historicalPrices.slice(-20);
   const sma20 = last20.reduce((sum, p) => sum + p, 0) / 20;
   const squaredDiffs = last20.map(p => Math.pow(p - sma20, 2));
   const variance = squaredDiffs.reduce((sum, sq) => sum + sq, 0) / 20;
   const stdDev = Math.sqrt(variance);
-  
+
   const bollinger = {
     upper: sma20 + (2 * stdDev),
     middle: sma20,
     lower: sma20 - (2 * stdDev)
   };
-  
+
   console.log(`   Bollinger: $${bollinger.lower.toFixed(0)} - $${bollinger.middle.toFixed(0)} - $${bollinger.upper.toFixed(0)}`);
+
+  // Calculate REAL Support/Resistance using multiple methods
+  console.log('📊 Calculating support/resistance levels...');
   
-  // Support/Resistance from 24h data
+  // Method 1: Pivot Points (Standard)
+  const pivotPoint = (high24h + low24h + currentPrice) / 3;
+  const pivotR1 = (2 * pivotPoint) - low24h;
+  const pivotS1 = (2 * pivotPoint) - high24h;
+  const pivotR2 = pivotPoint + (high24h - low24h);
+  const pivotS2 = pivotPoint - (high24h - low24h);
+  
+  console.log(`   Pivot Point: ${pivotPoint.toFixed(0)}`);
+  console.log(`   Pivot R1: ${pivotR1.toFixed(0)}, R2: ${pivotR2.toFixed(0)}`);
+  console.log(`   Pivot S1: ${pivotS1.toFixed(0)}, S2: ${pivotS2.toFixed(0)}`);
+  
+  // Method 2: Fibonacci Retracements (from 24h high/low)
   const range = high24h - low24h;
+  const fib236 = high24h - (range * 0.236);
+  const fib382 = high24h - (range * 0.382);
+  const fib500 = high24h - (range * 0.500);
+  const fib618 = high24h - (range * 0.618);
+  const fib786 = high24h - (range * 0.786);
   
-  console.log('✅ All technical indicators calculated successfully');
+  console.log(`   Fib 23.6%: ${fib236.toFixed(0)}, 38.2%: ${fib382.toFixed(0)}, 50%: ${fib500.toFixed(0)}`);
   
+  // Method 3: Order Book Levels (if available)
+  let orderBookSupport = currentPrice * 0.98;
+  let orderBookResistance = currentPrice * 1.02;
+  
+  if (orderBookData && orderBookData.bids && orderBookData.asks) {
+    // Find strongest bid/ask levels (highest volume)
+    const strongBids = orderBookData.bids
+      .sort((a: any, b: any) => b.total - a.total)
+      .slice(0, 3);
+    const strongAsks = orderBookData.asks
+      .sort((a: any, b: any) => b.total - a.total)
+      .slice(0, 3);
+    
+    if (strongBids.length > 0) {
+      orderBookSupport = strongBids[0].price;
+      console.log(`   Order Book Support: ${orderBookSupport.toFixed(0)} (${strongBids[0].quantity.toFixed(2)} BTC)`);
+    }
+    
+    if (strongAsks.length > 0) {
+      orderBookResistance = strongAsks[0].price;
+      console.log(`   Order Book Resistance: ${orderBookResistance.toFixed(0)} (${strongAsks[0].quantity.toFixed(2)} BTC)`);
+    }
+  }
+  
+  // Method 4: Historical Price Levels (from OHLC data)
+  // Find recent swing highs and lows
+  const recentPrices = historicalPrices.slice(-20);
+  const localHighs: number[] = [];
+  const localLows: number[] = [];
+  
+  for (let i = 2; i < recentPrices.length - 2; i++) {
+    // Local high: higher than 2 candles before and after
+    if (recentPrices[i] > recentPrices[i-1] && 
+        recentPrices[i] > recentPrices[i-2] &&
+        recentPrices[i] > recentPrices[i+1] && 
+        recentPrices[i] > recentPrices[i+2]) {
+      localHighs.push(recentPrices[i]);
+    }
+    
+    // Local low: lower than 2 candles before and after
+    if (recentPrices[i] < recentPrices[i-1] && 
+        recentPrices[i] < recentPrices[i-2] &&
+        recentPrices[i] < recentPrices[i+1] && 
+        recentPrices[i] < recentPrices[i+2]) {
+      localLows.push(recentPrices[i]);
+    }
+  }
+  
+  // Find nearest swing levels
+  const nearestSwingHigh = localHighs.length > 0 
+    ? localHighs.reduce((prev, curr) => 
+        Math.abs(curr - currentPrice) < Math.abs(prev - currentPrice) ? curr : prev
+      )
+    : high24h;
+    
+  const nearestSwingLow = localLows.length > 0
+    ? localLows.reduce((prev, curr) => 
+        Math.abs(curr - currentPrice) < Math.abs(prev - currentPrice) ? curr : prev
+      )
+    : low24h;
+  
+  console.log(`   Swing High: ${nearestSwingHigh.toFixed(0)}, Swing Low: ${nearestSwingLow.toFixed(0)}`);
+  
+  // Combine all methods to determine final support/resistance
+  // Priority: Order Book > Pivot Points > Fibonacci > Swing Levels
+  
+  // Support levels (below current price)
+  const supportCandidates = [
+    pivotS1,
+    pivotS2,
+    fib382,
+    fib500,
+    fib618,
+    orderBookSupport,
+    nearestSwingLow,
+    bollinger.lower
+  ].filter(level => level < currentPrice).sort((a, b) => b - a);
+  
+  // Resistance levels (above current price)
+  const resistanceCandidates = [
+    pivotR1,
+    pivotR2,
+    fib236,
+    orderBookResistance,
+    nearestSwingHigh,
+    bollinger.upper
+  ].filter(level => level > currentPrice).sort((a, b) => a - b);
+  
+  // Select the most relevant levels
+  const support = supportCandidates[0] || (currentPrice * 0.97);
+  const strongSupport = supportCandidates[1] || low24h;
+  const resistance = resistanceCandidates[0] || (currentPrice * 1.03);
+  const strongResistance = resistanceCandidates[1] || high24h;
+  
+  console.log(`✅ Final S/R: Support ${support.toFixed(0)}, Strong Support ${strongSupport.toFixed(0)}`);
+  console.log(`   Resistance ${resistance.toFixed(0)}, Strong Resistance ${strongResistance.toFixed(0)}`);
+
   return {
-    rsi: { 
-      value: rsi, 
-      signal: rsi > 70 ? 'BEARISH' : rsi < 30 ? 'BULLISH' : 'NEUTRAL', 
-      timeframe: '14' 
+    rsi: {
+      value: rsi,
+      signal: rsi > 70 ? 'BEARISH' : rsi < 30 ? 'BULLISH' : 'NEUTRAL',
+      timeframe: '14'
     },
     ema20,
     ema50,
-    macd: { 
-      signal: macdData.signal, 
+    macd: {
+      signal: macdData.signal,
       histogram: macdData.histogram,
       macdLine: macdData.macdLine,
       signalLine: macdData.signalLine
     },
     bollinger,
     supportResistance: {
-      strongSupport: low24h,
-      support: currentPrice - (range * 0.3),
-      resistance: currentPrice + (range * 0.3),
-      strongResistance: high24h,
+      strongSupport: Math.round(strongSupport),
+      support: Math.round(support),
+      resistance: Math.round(resistance),
+      strongResistance: Math.round(strongResistance),
+      pivotPoint: Math.round(pivotPoint),
+      method: 'Multi-factor: Pivot Points + Fibonacci + Order Book + Swing Levels'
     }
   };
 }
@@ -443,11 +561,11 @@ function generateIntelligentTradingSignals(currentPrice: number, technicalIndica
   const volume24h = realData.price.volume24h;
   const priceRange = realData.price.high24h - realData.price.low24h;
   const pricePosition = (currentPrice - realData.price.low24h) / priceRange;
-  
+
   // Calculate volume momentum (compare to typical volume)
   const avgVolume = volume24h; // Use as baseline
   const volumeMultiplier = volume24h > avgVolume * 1.5 ? 1.3 : volume24h < avgVolume * 0.7 ? 0.8 : 1.0;
-  
+
   // News sentiment analysis (if available)
   let newsSentimentScore = 0;
   if (newsData && newsData.length > 0) {
@@ -461,7 +579,7 @@ function generateIntelligentTradingSignals(currentPrice: number, technicalIndica
     });
     newsSentimentScore = newsSentimentScore / newsData.length; // Normalize
   }
-  
+
   // Multi-timeframe RSI analysis
   if (rsi > 75) {
     const strength = rsi > 85 ? 'Strong' : 'Medium';
@@ -474,7 +592,7 @@ function generateIntelligentTradingSignals(currentPrice: number, technicalIndica
     const reason = `Severely oversold RSI ${rsi.toFixed(1)} with ${volume24h > avgVolume ? 'high' : 'normal'} volume`;
     signals.push(formatTradingSignal('BUY', strength, '1H', confidence, reason, currentPrice));
   }
-  
+
   // Advanced momentum analysis with volume confirmation
   const momentumThreshold = 2.5;
   if (Math.abs(change24h) > momentumThreshold) {
@@ -483,13 +601,13 @@ function generateIntelligentTradingSignals(currentPrice: number, technicalIndica
     const baseConfidence = 60 + Math.min(25, Math.abs(change24h) * 2);
     const newsBoost = newsSentimentScore * (change24h > 0 ? 1 : -1) > 0 ? 1.1 : 0.95;
     const confidence = Math.round(baseConfidence * volumeMultiplier * newsBoost);
-    
+
     const signalType = change24h > 0 ? 'BUY' : 'SELL';
     const reasonText = `${Math.abs(change24h).toFixed(1)}% momentum ${volumeConfirmed ? 'with volume confirmation' : 'needs volume confirmation'}${newsSentimentScore !== 0 ? ` + ${newsSentimentScore > 0 ? 'positive' : 'negative'} news sentiment` : ''}`;
-    
+
     signals.push(formatTradingSignal(signalType, strength, volumeConfirmed ? '4H' : '2H', Math.min(95, confidence), reasonText, currentPrice));
   }
-  
+
   // Price position analysis (where in daily range)
   if (pricePosition > 0.85 && change24h > 1) {
     const reason = `Price near daily high (${(pricePosition * 100).toFixed(0)}% of range) - potential resistance`;
@@ -498,7 +616,7 @@ function generateIntelligentTradingSignals(currentPrice: number, technicalIndica
     const reason = `Price near daily low (${(pricePosition * 100).toFixed(0)}% of range) - potential support`;
     signals.push(formatTradingSignal('BUY', 'Weak', '2H', Math.round(55 + (0.15 - pricePosition) * 100), reason, currentPrice));
   }
-  
+
   // Fear & Greed extremes with market context
   if (fearGreed > 80) {
     const marketCap = realData.marketData?.marketCap || 0;
@@ -511,7 +629,7 @@ function generateIntelligentTradingSignals(currentPrice: number, technicalIndica
     const reason = `Extreme fear (${fearGreed}/100) creating ${isLargeCap ? 'institutional' : 'retail'} buying opportunity`;
     signals.push(formatTradingSignal('BUY', fearGreed < 10 ? 'Medium' : 'Weak', isLargeCap ? '1D' : '12H', Math.round(50 + (20 - fearGreed) / 2), reason, currentPrice));
   }
-  
+
   // Order book pressure analysis
   const orderBookPressure = Math.abs(bidAskRatio - 1);
   if (orderBookPressure > 0.3) {
@@ -520,28 +638,28 @@ function generateIntelligentTradingSignals(currentPrice: number, technicalIndica
     const reason = `${isBuyPressure ? 'Buy' : 'Sell'} pressure in order book (${bidAskRatio.toFixed(2)} ratio)`;
     signals.push(formatTradingSignal(isBuyPressure ? 'BUY' : 'SELL', pressureStrength, '30M', Math.round(50 + Math.min(30, orderBookPressure * 50)), reason, currentPrice));
   }
-  
+
   // Cross-validation: Remove conflicting weak signals
   const strongSignals = signals.filter(s => s.strength === 'Strong');
   const mediumSignals = signals.filter(s => s.strength === 'Medium');
   const weakSignals = signals.filter(s => s.strength === 'Weak');
-  
+
   // If we have strong signals, prioritize them
   if (strongSignals.length > 0) {
     return strongSignals.slice(0, 2); // Max 2 strong signals
   }
-  
+
   // If we have medium signals, use them with best weak signal
   if (mediumSignals.length > 0) {
     const bestWeak = weakSignals.sort((a, b) => b.confidence - a.confidence)[0];
     return [...mediumSignals.slice(0, 2), bestWeak].filter(Boolean);
   }
-  
+
   // Use best weak signals
   if (weakSignals.length > 0) {
     return weakSignals.sort((a, b) => b.confidence - a.confidence).slice(0, 2);
   }
-  
+
   // Intelligent hold signal based on market conditions
   const holdReason = `Market consolidation: RSI ${rsi.toFixed(1)}, ${Math.abs(change24h).toFixed(1)}% daily change, ${fearGreed}/100 fear/greed`;
   const holdSignal = {
@@ -554,7 +672,7 @@ function generateIntelligentTradingSignals(currentPrice: number, technicalIndica
     reason: holdReason,
     reasoning: holdReason // Frontend expects 'reasoning'
   };
-  
+
   console.log(`🎯 Generated ${signals.length} trading signals for BTC`);
   return signals.length > 0 ? signals : [holdSignal];
 }
@@ -568,7 +686,7 @@ function generateIntelligentPredictions(currentPrice: number, technicalIndicator
   const priceRange = realData.price.high24h - realData.price.low24h;
   const pricePosition = (currentPrice - realData.price.low24h) / priceRange;
   const bidAskRatio = realData.orderBookData ? realData.orderBookData.bidVolume / realData.orderBookData.askVolume : 1;
-  
+
   // News sentiment impact
   let newsSentimentImpact = 0;
   if (newsData && newsData.length > 0) {
@@ -582,28 +700,28 @@ function generateIntelligentPredictions(currentPrice: number, technicalIndicator
     });
     newsSentimentImpact = Math.max(-0.1, Math.min(0.1, newsSentimentImpact)); // Cap at ±10%
   }
-  
+
   // Volume-weighted momentum analysis
   const avgVolume = volume24h; // Use current as baseline
   const volumeMultiplier = volume24h > avgVolume * 1.5 ? 1.2 : volume24h < avgVolume * 0.7 ? 0.8 : 1.0;
   const adjustedMomentum = (change24h / 100) * volumeMultiplier;
-  
+
   // RSI mean reversion factor
   const rsiMeanReversion = rsi > 70 ? -0.01 * (rsi - 70) : rsi < 30 ? 0.01 * (30 - rsi) : 0;
-  
+
   // Fear & Greed contrarian factor
   const fearGreedContrarian = fearGreed > 75 ? -0.005 * (fearGreed - 75) : fearGreed < 25 ? 0.005 * (25 - fearGreed) : 0;
-  
+
   // Order book pressure factor
   const orderBookFactor = (bidAskRatio - 1) * 0.01; // ±1% per ratio point deviation
-  
+
   // Price position factor (resistance/support)
   const positionFactor = pricePosition > 0.8 ? -0.005 : pricePosition < 0.2 ? 0.005 : 0;
-  
+
   // Market cap stability factor (larger cap = less volatility)
   const marketCap = realData.marketData?.marketCap || 0;
   const stabilityFactor = marketCap > 1000000000000 ? 0.7 : marketCap > 500000000000 ? 0.85 : 1.0;
-  
+
   // Combine all factors intelligently
   const hourlyFactor = (
     adjustedMomentum * 0.4 +
@@ -612,7 +730,7 @@ function generateIntelligentPredictions(currentPrice: number, technicalIndicator
     rsiMeanReversion * 0.1 +
     positionFactor * 0.05
   ) * 0.08 * stabilityFactor; // Scale for hourly prediction
-  
+
   const dailyFactor = (
     adjustedMomentum * 0.5 +
     newsSentimentImpact * 0.2 +
@@ -620,14 +738,14 @@ function generateIntelligentPredictions(currentPrice: number, technicalIndicator
     rsiMeanReversion * 0.1 +
     positionFactor * 0.05
   ) * 0.25 * stabilityFactor; // Scale for daily prediction
-  
+
   const weeklyFactor = (
     adjustedMomentum * 0.6 +
     newsSentimentImpact * 0.15 +
     fearGreedContrarian * 0.15 +
     rsiMeanReversion * 0.1
   ) * 0.6 * stabilityFactor; // Scale for weekly prediction
-  
+
   // Calculate confidence based on data quality and consistency
   const dataQuality = (
     (realData.price ? 0.3 : 0) +
@@ -636,13 +754,13 @@ function generateIntelligentPredictions(currentPrice: number, technicalIndicator
     (newsData && newsData.length > 0 ? 0.15 : 0) +
     (volume24h > 0 ? 0.15 : 0)
   );
-  
+
   const baseConfidence = 50 + (dataQuality * 40); // 50-90% based on data availability
-  
+
   // Adjust confidence based on market conditions
   const volatilityPenalty = Math.abs(change24h) > 10 ? 10 : Math.abs(change24h) > 5 ? 5 : 0;
   const extremeRsiPenalty = rsi > 80 || rsi < 20 ? 5 : 0;
-  
+
   return {
     hourly: {
       target: Math.round(currentPrice * (1 + hourlyFactor)),
@@ -669,7 +787,7 @@ function analyzeIntelligentMarketSentiment(realData: any, technicalIndicators: a
   const priceRange = realData.price.high24h - realData.price.low24h;
   const currentPrice = realData.price.current;
   const pricePosition = (currentPrice - realData.price.low24h) / priceRange;
-  
+
   // News sentiment analysis
   let newsScore = 0;
   let newsCount = 0;
@@ -689,49 +807,49 @@ function analyzeIntelligentMarketSentiment(realData: any, technicalIndicators: a
     });
   }
   const normalizedNewsScore = newsCount > 0 ? newsScore / newsCount : 0;
-  
+
   // Technical sentiment with weighted factors
   let technicalScore = 0;
-  
+
   // RSI analysis (30% weight)
   if (rsi > 70) technicalScore -= (rsi - 70) / 10; // Bearish when overbought
   else if (rsi < 30) technicalScore += (30 - rsi) / 10; // Bullish when oversold
   else technicalScore += (50 - Math.abs(rsi - 50)) / 25; // Neutral RSI is slightly positive
-  
+
   // Momentum analysis (25% weight)
   const momentumScore = Math.max(-2, Math.min(2, change24h / 2.5));
   technicalScore += momentumScore * 0.25;
-  
+
   // Price position analysis (15% weight)
   if (pricePosition > 0.8) technicalScore -= 0.3; // Near high = bearish
   else if (pricePosition < 0.2) technicalScore += 0.3; // Near low = bullish
-  
+
   // Volume confirmation (10% weight)
   const avgVolume = volume24h; // Use as baseline
   if (volume24h > avgVolume * 1.3 && change24h > 0) technicalScore += 0.2;
   else if (volume24h > avgVolume * 1.3 && change24h < 0) technicalScore -= 0.2;
-  
+
   // Order book sentiment analysis
   let orderBookScore = 0;
   if (bidAskRatio > 1.5) orderBookScore = 1; // Strong buy pressure
   else if (bidAskRatio > 1.2) orderBookScore = 0.5; // Moderate buy pressure
   else if (bidAskRatio < 0.7) orderBookScore = -1; // Strong sell pressure
   else if (bidAskRatio < 0.8) orderBookScore = -0.5; // Moderate sell pressure
-  
+
   // Fear & Greed contrarian analysis
   let fearGreedScore = 0;
   if (fearGreed > 80) fearGreedScore = -0.8; // Extreme greed = bearish
   else if (fearGreed > 60) fearGreedScore = -0.3; // Greed = slightly bearish
   else if (fearGreed < 20) fearGreedScore = 0.8; // Extreme fear = bullish
   else if (fearGreed < 40) fearGreedScore = 0.3; // Fear = slightly bullish
-  
+
   // Institutional flow analysis (based on market cap and volume)
   const marketCap = realData.marketData?.marketCap || 0;
   let institutionalScore = 0;
   if (marketCap > 1000000000000 && volume24h > avgVolume * 1.2) {
     institutionalScore = change24h > 0 ? 0.5 : -0.5; // Large cap with volume suggests institutional activity
   }
-  
+
   // Combine all scores with weights
   const overallScore = (
     technicalScore * 0.35 +
@@ -740,41 +858,41 @@ function analyzeIntelligentMarketSentiment(realData: any, technicalIndicators: a
     fearGreedScore * 0.15 +
     institutionalScore * 0.05
   );
-  
+
   // Convert scores to sentiment labels
   const getSentiment = (score: number) => {
     if (score > 0.5) return 'Bullish';
     if (score < -0.5) return 'Bearish';
     return 'Neutral';
   };
-  
+
   const getStrength = (score: number) => {
     const abs = Math.abs(score);
     if (abs > 1.5) return 'Strong';
     if (abs > 0.8) return 'Moderate';
     return 'Weak';
   };
-  
+
   return {
     overall: getSentiment(overallScore),
     overallStrength: getStrength(overallScore),
     overallScore: Math.round(overallScore * 100) / 100,
-    
+
     fearGreedIndex: fearGreed,
     socialSentiment: realData.fearGreedIndex?.classification || 'Neutral',
-    
+
     technicalSentiment: getSentiment(technicalScore),
     technicalScore: Math.round(technicalScore * 100) / 100,
-    
+
     orderBookSentiment: getSentiment(orderBookScore),
     orderBookPressure: bidAskRatio.toFixed(2),
-    
+
     newsSentiment: getSentiment(normalizedNewsScore),
     newsScore: Math.round(normalizedNewsScore * 100) / 100,
     newsCount,
-    
+
     institutionalFlow: institutionalScore > 0 ? 'Inflow' : institutionalScore < 0 ? 'Outflow' : 'Neutral',
-    
+
     marketConditions: {
       volatility: Math.abs(change24h) > 5 ? 'High' : Math.abs(change24h) > 2 ? 'Medium' : 'Low',
       volume: volume24h > avgVolume * 1.3 ? 'High' : volume24h < avgVolume * 0.7 ? 'Low' : 'Normal',
@@ -828,10 +946,10 @@ function calculatePivotPoints(currentPrice: number, high24h: number, low24h: num
 function analyzeSupplyDemandZones(orderBookData: any, currentPrice: number, high24h: number, low24h: number) {
   const supplyZones = [];
   const demandZones = [];
-  
+
   // Add historical pivot levels as supply/demand zones
   const pivotPoints = calculatePivotPoints(currentPrice, high24h, low24h);
-  
+
   // DISABLED: Only using real order book volume data - no fake zones
   /*
   // Add pivot-based resistance levels as supply zones
@@ -945,9 +1063,9 @@ function analyzeSupplyDemandZones(orderBookData: any, currentPrice: number, high
 
   if (!orderBookData || !orderBookData.bids || !orderBookData.asks) {
     console.error('❌ NO ORDER BOOK DATA - Cannot generate zones without real volume');
-    return { 
-      supplyZones: [], 
-      demandZones: [], 
+    return {
+      supplyZones: [],
+      demandZones: [],
       analysis: 'ERROR: No real order book data available - refusing to generate fake zones',
       pivotPoints
     };
@@ -955,18 +1073,18 @@ function analyzeSupplyDemandZones(orderBookData: any, currentPrice: number, high
 
   const bids = orderBookData.bids;
   const asks = orderBookData.asks;
-  
+
   // Calculate volume-weighted average prices and identify significant levels
   const totalBidVolume = bids.reduce((sum: number, bid: any) => sum + bid.quantity, 0);
   const totalAskVolume = asks.reduce((sum: number, ask: any) => sum + ask.quantity, 0);
-  
+
   // Find volume clusters for demand zones (bids) - add to existing array
   const bidClusters = findVolumeClusters(bids, 'bid', currentPrice);
-  
+
   for (const cluster of bidClusters) {
     const volumePercentage = (cluster.totalVolume / totalBidVolume) * 100;
     const distanceFromPrice = ((currentPrice - cluster.price) / currentPrice) * 100;
-    
+
     // Only include significant zones (>2% of total volume or >5 BTC)
     if (volumePercentage > 2 || cluster.totalVolume > 5) {
       demandZones.push({
@@ -983,14 +1101,14 @@ function analyzeSupplyDemandZones(orderBookData: any, currentPrice: number, high
       });
     }
   }
-  
+
   // Find volume clusters for supply zones (asks) - add to existing array
   const askClusters = findVolumeClusters(asks, 'ask', currentPrice);
-  
+
   for (const cluster of askClusters) {
     const volumePercentage = (cluster.totalVolume / totalAskVolume) * 100;
     const distanceFromPrice = ((cluster.price - currentPrice) / currentPrice) * 100;
-    
+
     // Only include significant zones (>2% of total volume or >5 BTC)
     if (volumePercentage > 2 || cluster.totalVolume > 5) {
       supplyZones.push({
@@ -1007,11 +1125,11 @@ function analyzeSupplyDemandZones(orderBookData: any, currentPrice: number, high
       });
     }
   }
-  
+
   // Sort by strength and proximity to current price
   demandZones.sort((a, b) => (b.volumePercentage * (1 / (a.distanceFromPrice + 1))) - (a.volumePercentage * (1 / (b.distanceFromPrice + 1))));
   supplyZones.sort((a, b) => (b.volumePercentage * (1 / (a.distanceFromPrice + 1))) - (a.volumePercentage * (1 / (b.distanceFromPrice + 1))));
-  
+
   return {
     supplyZones: supplyZones.slice(0, 5), // Top 5 supply zones
     demandZones: demandZones.slice(0, 5), // Top 5 demand zones
@@ -1029,26 +1147,26 @@ function analyzeSupplyDemandZones(orderBookData: any, currentPrice: number, high
 function findVolumeClusters(orders: any[], type: 'bid' | 'ask', currentPrice: number) {
   const clusters = [];
   const priceGrouping = currentPrice > 50000 ? 100 : currentPrice > 10000 ? 50 : 10; // Dynamic price grouping
-  
+
   // Group orders by price ranges to find clusters
   const priceGroups: { [key: string]: { orders: any[], totalVolume: number, avgPrice: number } } = {};
-  
+
   for (const order of orders) {
     const groupKey = Math.floor(order.price / priceGrouping) * priceGrouping;
-    
+
     if (!priceGroups[groupKey]) {
       priceGroups[groupKey] = { orders: [], totalVolume: 0, avgPrice: 0 };
     }
-    
+
     priceGroups[groupKey].orders.push(order);
     priceGroups[groupKey].totalVolume += order.quantity;
   }
-  
+
   // Calculate average prices and create clusters
   for (const [groupKey, group] of Object.entries(priceGroups)) {
     const weightedPriceSum = group.orders.reduce((sum, order) => sum + (order.price * order.quantity), 0);
     group.avgPrice = weightedPriceSum / group.totalVolume;
-    
+
     clusters.push({
       price: group.avgPrice,
       totalVolume: group.totalVolume,
@@ -1059,7 +1177,7 @@ function findVolumeClusters(orders: any[], type: 'bid' | 'ask', currentPrice: nu
       }
     });
   }
-  
+
   // Filter out small clusters and sort by volume
   return clusters
     .filter(cluster => cluster.totalVolume > 1) // Minimum 1 BTC
@@ -1071,14 +1189,14 @@ function findVolumeClusters(orders: any[], type: 'bid' | 'ask', currentPrice: nu
 function formatTradingSignal(signal: string, strength: string, timeframe: string, confidence: number, reason: string, currentPrice: number) {
   const signalType = signal.toUpperCase();
   let targetPrice = Math.round(currentPrice);
-  
+
   // Calculate target price based on signal type
   if (signalType === 'BUY') {
     targetPrice = Math.round(currentPrice * (1 + (confidence / 10000))); // Small premium for buy
   } else if (signalType === 'SELL') {
     targetPrice = Math.round(currentPrice * (1 - (confidence / 10000))); // Small discount for sell
   }
-  
+
   return {
     signal: signalType,
     type: signalType, // Frontend compatibility
@@ -1102,10 +1220,10 @@ function getZoneStrength(volumePercentage: number, totalVolume: number): string 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     console.log('🚀 Starting ENHANCED Bitcoin analysis with real data...');
-    
+
     // Fetch all real market data
     const realData = await fetchRealBitcoinData();
-    
+
     // Ensure we have at least price data
     if (!realData.price?.current) {
       return res.status(503).json({
@@ -1115,7 +1233,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         timestamp: new Date().toISOString()
       });
     }
-    
+
     const currentPrice = realData.price.current;
     const technicalIndicators = await calculateRealTechnicalIndicators(
       currentPrice,
@@ -1124,22 +1242,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       realData.price.volume24h,
       realData.orderBookData
     );
-    
+
     // Generate supply/demand zones from order book data + technical analysis
     const supplyDemandZones = analyzeSupplyDemandZones(realData.orderBookData, currentPrice, realData.price.high24h, realData.price.low24h);
-    
+
     // Generate intelligent trading signals and predictions using news data
     const newsData = realData.newsData || [];
     const tradingSignals = generateIntelligentTradingSignals(currentPrice, technicalIndicators, realData, newsData);
     const predictions = generateIntelligentPredictions(currentPrice, technicalIndicators, realData, newsData);
     const marketSentiment = analyzeIntelligentMarketSentiment(realData, technicalIndicators, newsData);
-    
+
     // Try to get AI analysis from OpenAI
     let aiAnalysis = null;
     if (process.env.OPENAI_API_KEY) {
       try {
         console.log('🤖 Generating AI analysis with', OPENAI_MODEL);
-        
+
         const completion = await openai.chat.completions.create({
           model: OPENAI_MODEL,
           messages: [
@@ -1155,20 +1273,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           temperature: 0.3,
           max_tokens: 200
         });
-        
+
         aiAnalysis = completion.choices[0]?.message?.content || null;
         console.log('✅ AI analysis generated');
       } catch (aiError) {
         console.error('❌ OpenAI failed:', aiError);
       }
     }
-    
+
     // Build comprehensive response with 100% real data
     const responseData = {
       symbol: 'BTC',
       currentPrice,
       isLiveData: true,
-      
+
       marketData: {
         price: currentPrice,
         change24h: realData.price.change24h,
@@ -1177,7 +1295,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         high24h: realData.price.high24h,
         low24h: realData.price.low24h,
       },
-      
+
       technicalIndicators: {
         ...technicalIndicators,
         supplyDemandZones
@@ -1185,14 +1303,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       tradingSignals,
       predictions,
       marketSentiment,
-      
+
       aiAnalysis,
-      
+
       enhancedMarketData: {
         orderBookData: realData.orderBookData,
         fearGreedData: realData.fearGreedIndex
       },
-      
+
       lastUpdated: new Date().toISOString(),
       source: `Live APIs: ${[
         realData.price?.source,
@@ -1206,12 +1324,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       success: true,
       data: responseData
     });
-    
+
   } catch (error) {
     console.error('Enhanced BTC Analysis API Error:', error);
-    
+
     const errorMessage = error instanceof Error ? error.message : 'Failed to connect to live market data APIs';
-    
+
     // Return proper error - NO FALLBACK DATA
     res.status(503).json({
       success: false,
