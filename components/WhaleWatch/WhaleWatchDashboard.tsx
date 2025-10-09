@@ -268,7 +268,7 @@ export default function WhaleWatchDashboard() {
   // Initial state - no data loaded yet
   if (!whaleData && !loading && !error) {
     return (
-      <div className="bg-bitcoin-black border border-bitcoin-orange rounded-lg p-6">
+      <div className="bg-bitcoin-black border border-bitcoin-orange rounded-lg p-6 whale-watch-initial-state">
         <div className="flex items-center justify-center h-64">
           <div className="text-center max-w-2xl">
             <div className="text-6xl mb-4">🐋</div>

@@ -3,7 +3,9 @@ import {
   Newspaper, 
   RefreshCw, 
   Radio,
-  Sparkles
+  Sparkles,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import TypewriterText, { 
   AnimatedHeadline, 
@@ -78,6 +80,7 @@ const CryptoHerald: React.FC = () => {
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
   const [articlesLoaded, setArticlesLoaded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false); // Collapsible state
   
   // Initialize with empty state - NO auto-fetching
   useEffect(() => {
@@ -177,6 +180,11 @@ const CryptoHerald: React.FC = () => {
           articles: articlesWithAI
         });
         setArticlesLoaded(true);
+        
+        // Auto-expand when news loads with smooth animation
+        setTimeout(() => {
+          setIsExpanded(true);
+        }, 300);
       } else {
         console.error('No live articles available:', result.error || result.message);
         throw new Error('No live data available - API keys may be missing or rate limited');
@@ -613,8 +621,42 @@ const CryptoHerald: React.FC = () => {
           </div>
         )}
 
-        {/* News Sections - Only show if we have articles */}
-        {!data?.meta?.error && Object.entries(articlesByCategory).map(([category, articles], categoryIndex) => {
+        {/* Collapsible News Header - Show when articles are loaded */}
+        {!data?.meta?.error && data?.articles && data.articles.length > 0 && (
+          <div className="mb-6">
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="w-full bitcoin-block bg-bitcoin-black p-6 hover:shadow-bitcoin-glow transition-all flex items-center justify-between group"
+            >
+              <div className="flex items-center space-x-4">
+                <Newspaper className="h-6 w-6 text-bitcoin-orange" />
+                <div className="text-left">
+                  <h3 className="text-2xl font-black text-bitcoin-white font-sans">
+                    📰 CRYPTO NEWS FEED
+                  </h3>
+                  <p className="text-sm text-bitcoin-white-60 mt-1">
+                    {data.articles.length} articles loaded • Click to {isExpanded ? 'collapse' : 'expand'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                {isExpanded ? (
+                  <ChevronUp className="h-8 w-8 text-bitcoin-orange group-hover:scale-110 transition-transform" />
+                ) : (
+                  <ChevronDown className="h-8 w-8 text-bitcoin-orange group-hover:scale-110 transition-transform animate-bounce" />
+                )}
+              </div>
+            </button>
+          </div>
+        )}
+
+        {/* News Sections - Collapsible with smooth animation */}
+        <div 
+          className={`transition-all duration-500 ease-in-out overflow-hidden ${
+            isExpanded ? 'max-h-[100000px] opacity-100' : 'max-h-0 opacity-0'
+          }`}
+        >
+          {!data?.meta?.error && Object.entries(articlesByCategory).map(([category, articles], categoryIndex) => {
           const categoryArticles = getArticlesForCategory(articles, 8);
           
           return (
@@ -782,6 +824,7 @@ const CryptoHerald: React.FC = () => {
             </div>
           );
         })}
+        </div>
 
         {/* Refresh News Button - Show when articles are already loaded */}
         {data?.articles && data.articles.length > 0 && (

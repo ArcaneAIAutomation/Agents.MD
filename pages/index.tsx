@@ -103,12 +103,19 @@ export default function Home() {
           {/* Regulatory Panel - Bottom Story */}
           <div className="bitcoin-block">
             <div className="border-b-2 border-bitcoin-orange bg-bitcoin-black px-6 py-3">
-              <h2 className="text-2xl font-bold text-bitcoin-white">
-                ⚖️ REGULATORY WATCH
-              </h2>
-              <p className="text-sm text-bitcoin-white-60 italic mt-1">
-                Latest regulatory developments and compliance monitoring
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-bitcoin-white">
+                    ⚖️ REGULATORY WATCH
+                  </h2>
+                  <p className="text-sm text-bitcoin-white-60 italic mt-1">
+                    Latest regulatory developments and compliance monitoring
+                  </p>
+                </div>
+                <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-3 py-1 text-xs font-bold tracking-wide rounded">
+                  NEXO
+                </div>
+              </div>
             </div>
             <div className="p-6">
               <NexoRegulatoryPanel />
@@ -157,7 +164,7 @@ export default function Home() {
 
                 {/* Technical Analysis */}
                 <div className="bitcoin-block-subtle hover:border-bitcoin-orange transition-all relative">
-                  <div className="absolute top-2 right-2 bg-bitcoin-orange text-bitcoin-black text-xs px-2 py-1 rounded font-bold">
+                  <div className="absolute top-2 right-2 bg-bitcoin-orange text-bitcoin-black text-xs px-2 py-1 rounded font-bold hidden lg:block">
                     LIVE
                   </div>
                   <div className="text-bitcoin-white font-bold mb-2 flex items-center gap-2">

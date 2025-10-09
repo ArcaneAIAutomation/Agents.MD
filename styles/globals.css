@@ -1416,159 +1416,174 @@ a,
   body {
     font-size: 16px; /* Minimum readable size for mobile - WCAG compliant */
     line-height: 1.6; /* Improved readability - optimal for mobile */
-    color: #000000 !important; /* Ensure black text for maximum contrast */
-    background: #ffffff !important; /* Ensure white background */
+    color: var(--bitcoin-white-80) !important; /* White text on black background */
+    background: var(--bitcoin-black) !important; /* Pure black background */
   }
   
-  /* High-contrast mobile text utilities with guaranteed contrast ratios */
+  /* Bitcoin Sovereign mobile text utilities */
   .mobile-text-primary {
-    color: #000000 !important; /* Pure black - 21:1 contrast ratio */
+    color: var(--bitcoin-white) !important; /* Pure white on black */
     background-color: transparent !important;
   }
   
   .mobile-text-secondary {
-    color: #374151 !important; /* Gray-700 - 8.9:1 contrast ratio */
+    color: var(--bitcoin-white-80) !important; /* 80% white */
     background-color: transparent !important;
   }
   
   .mobile-text-accent {
-    color: #1f2937 !important; /* Gray-800 - 12.6:1 contrast ratio */
+    color: var(--bitcoin-orange) !important; /* Bitcoin orange */
     background-color: transparent !important;
   }
   
   .mobile-text-muted {
-    color: #6b7280 !important; /* Gray-500 - 4.6:1 contrast ratio (WCAG AA) */
+    color: var(--bitcoin-white-60) !important; /* 60% white */
     background-color: transparent !important;
   }
   
   .mobile-text-success {
-    color: #047857 !important; /* Emerald-700 - 7.1:1 contrast ratio (AAA) */
+    color: var(--bitcoin-orange) !important; /* Orange for success */
     background-color: transparent !important;
     font-weight: 600;
   }
   
   .mobile-text-error {
-    color: #dc2626 !important; /* Red-600 - 5.9:1 contrast ratio */
+    color: var(--bitcoin-white-80) !important; /* White for errors */
     background-color: transparent !important;
     font-weight: 600;
   }
   
   .mobile-text-warning {
-    color: #b45309 !important; /* Amber-700 - 7.2:1 contrast ratio (AAA) */
+    color: var(--bitcoin-orange) !important; /* Orange for warnings */
     background-color: transparent !important;
     font-weight: 600;
   }
   
   .mobile-text-info {
-    color: #1d4ed8 !important; /* Blue-700 - 6.3:1 contrast ratio */
+    color: var(--bitcoin-white) !important; /* White for info */
     background-color: transparent !important;
     font-weight: 600;
   }
   
-  /* Responsive text color modifiers - apply only on mobile */
+  /* Bitcoin Sovereign crypto text colors */
   .mobile-text-crypto-green {
-    color: #047857 !important; /* Emerald-700 - High contrast green for crypto gains */
+    color: var(--bitcoin-orange) !important; /* Orange for gains */
     font-weight: 600;
   }
   
   .mobile-text-crypto-red {
-    color: #dc2626 !important; /* High contrast red for crypto losses */
+    color: var(--bitcoin-white-60) !important; /* Muted white for losses */
     font-weight: 600;
   }
   
   .mobile-text-link {
-    color: #1d4ed8 !important; /* High contrast blue for links */
+    color: var(--bitcoin-orange) !important; /* Orange links */
     text-decoration: underline;
     text-decoration-thickness: 2px;
   }
   
   .mobile-text-link:visited {
-    color: #7c3aed !important; /* High contrast purple for visited links */
+    color: var(--bitcoin-orange-80) !important; /* Slightly muted orange */
   }
   
   .mobile-text-link:hover {
-    color: #1e40af !important; /* Darker blue on hover */
+    color: var(--bitcoin-white) !important; /* White on hover */
     text-decoration-thickness: 3px;
   }
   
-  /* High-contrast mobile background utilities for optimal readability */
+  /* Bitcoin Sovereign mobile background utilities */
   .mobile-bg-primary {
-    background-color: #ffffff !important; /* Pure white background */
-    color: #000000 !important; /* Pure black text - 21:1 contrast */
+    background-color: var(--bitcoin-black) !important; /* Pure black background */
+    color: var(--bitcoin-white) !important; /* Pure white text */
   }
   
   .mobile-bg-secondary {
-    background-color: #f9fafb !important; /* Gray-50 - subtle background */
-    color: #000000 !important; /* Black text - 20.4:1 contrast */
+    background-color: var(--bitcoin-black) !important; /* Black background */
+    color: var(--bitcoin-white-80) !important; /* 80% white text */
   }
   
   .mobile-bg-accent {
-    background-color: #f3f4f6 !important; /* Gray-100 - light accent */
-    color: #1f2937 !important; /* Gray-800 text - 12.6:1 contrast */
+    background-color: var(--bitcoin-orange) !important; /* Orange background */
+    color: var(--bitcoin-black) !important; /* Black text on orange */
   }
   
   .mobile-bg-muted {
-    background-color: #e5e7eb !important; /* Gray-200 - muted background */
-    color: #1f2937 !important; /* Gray-800 text - 10.8:1 contrast */
+    background-color: var(--bitcoin-black) !important; /* Black background */
+    color: var(--bitcoin-white-60) !important; /* 60% white text */
   }
   
   .mobile-bg-success {
-    background-color: #d1fae5 !important; /* Emerald-100 - success background */
-    color: #065f46 !important; /* Emerald-800 text - 8.2:1 contrast */
+    background-color: var(--bitcoin-black) !important; /* Black background */
+    color: var(--bitcoin-orange) !important; /* Orange text */
   }
   
   .mobile-bg-error {
-    background-color: #fef2f2 !important; /* Red-50 - error background */
-    color: #991b1b !important; /* Red-800 text - 9.4:1 contrast */
+    background-color: var(--bitcoin-black) !important; /* Black background */
+    color: var(--bitcoin-white) !important; /* White text */
   }
   
   .mobile-bg-warning {
-    background-color: #fef3c7 !important; /* Amber-100 - warning background */
-    color: #92400e !important; /* Amber-800 text - 7.1:1 contrast */
+    background-color: var(--bitcoin-orange) !important; /* Orange background */
+    color: var(--bitcoin-black) !important; /* Black text */
   }
   
   .mobile-bg-info {
-    background-color: #dbeafe !important; /* Blue-100 - info background */
-    color: #1e40af !important; /* Blue-800 text - 7.8:1 contrast */
+    background-color: var(--bitcoin-black) !important; /* Black background */
+    color: var(--bitcoin-white-80) !important; /* 80% white text */
   }
   
-  /* Crypto-specific background utilities */
+  /* Bitcoin Sovereign crypto gain/loss colors */
   .mobile-bg-crypto-gain {
-    background-color: #d1fae5 !important; /* Light green for gains */
-    color: #047857 !important; /* Emerald-700 text for better contrast */
+    background-color: var(--bitcoin-black) !important; /* Black background */
+    color: var(--bitcoin-orange) !important; /* Orange for gains */
   }
   
   .mobile-bg-crypto-loss {
-    background-color: #fef2f2 !important; /* Light red for losses */
-    color: #991b1b !important; /* Dark red text */
+    background-color: var(--bitcoin-black) !important; /* Black background */
+    color: var(--bitcoin-white-60) !important; /* Muted white for losses */
   }
   
-  /* Card and panel backgrounds with guaranteed contrast */
+  /* Bitcoin Sovereign card and panel backgrounds */
   .mobile-bg-card {
-    background-color: #ffffff !important;
-    color: #000000 !important;
-    border: 1px solid #d1d5db !important;
+    background-color: var(--bitcoin-black) !important;
+    color: var(--bitcoin-white) !important;
+    border: 1px solid var(--bitcoin-orange) !important;
   }
   
   .mobile-bg-panel {
-    background-color: #f9fafb !important;
-    color: #000000 !important;
-    border: 1px solid #e5e7eb !important;
+    background-color: var(--bitcoin-black) !important;
+    color: var(--bitcoin-white-80) !important;
+    border: 1px solid var(--bitcoin-orange-20) !important;
   }
   
-  /* Fallback for white text on white background scenarios */
+  /* Bitcoin Sovereign: Ensure white text on black background */
   .text-white, 
-  [class*="text-white"],
-  .text-gray-100,
-  [class*="text-gray-100"] {
-    color: #000000 !important;
+  [class*="text-white"] {
+    color: var(--bitcoin-white) !important;
     text-shadow: none !important;
   }
   
-  /* Ensure all headings have proper contrast on mobile */
+  /* Bitcoin Sovereign: Ensure headings are white on mobile */
   h1, h2, h3, h4, h5, h6 {
-    color: #000000 !important;
+    color: var(--bitcoin-white) !important;
     background-color: transparent !important;
+  }
+  
+  /* Bitcoin Sovereign: Orange text stays orange */
+  .text-bitcoin-orange,
+  [class*="text-bitcoin-orange"] {
+    color: var(--bitcoin-orange) !important;
+  }
+  
+  /* Bitcoin Sovereign: Ensure proper text hierarchy */
+  .text-bitcoin-white-80,
+  [class*="text-bitcoin-white-80"] {
+    color: var(--bitcoin-white-80) !important;
+  }
+  
+  .text-bitcoin-white-60,
+  [class*="text-bitcoin-white-60"] {
+    color: var(--bitcoin-white-60) !important;
   }
   
   /* Mobile-optimized font sizes - scaled appropriately for mobile screens */
@@ -1821,11 +1836,11 @@ a,
 }
 
 .price-up {
-  @apply text-crypto-green;
+  color: var(--bitcoin-orange);
 }
 
 .price-down {
-  @apply text-crypto-red;
+  color: var(--bitcoin-white-60);
 }
 
 .loading-pulse {
@@ -6228,4 +6243,164 @@ img {
 
 /* ============================================
    END OF BITCOIN BLOCK COMPONENTS
+   ============================================ */
+
+
+/* ============================================
+   MOBILE & TABLET BUTTON ENHANCEMENTS
+   Improved button styling for mobile/tablet only
+   ============================================ */
+
+@media (max-width: 1024px) {
+  /* Enhanced button styling for mobile and tablet */
+  .btn-bitcoin-primary,
+  .btn-bitcoin-secondary,
+  .btn-bitcoin-tertiary {
+    /* Better sizing and spacing */
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1rem 1.5rem !important;
+    font-size: 0.875rem !important;
+    min-height: 52px !important;
+    
+    /* Better text wrapping */
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    text-align: center !important;
+    line-height: 1.4 !important;
+    
+    /* Enhanced visual appeal */
+    box-shadow: 0 2px 8px rgba(247, 147, 26, 0.2) !important;
+    border-width: 2px !important;
+    
+    /* Smooth transitions */
+    transition: all 0.3s ease !important;
+  }
+  
+  /* Enhanced hover states for mobile/tablet */
+  .btn-bitcoin-primary:hover,
+  .btn-bitcoin-primary:active {
+    box-shadow: 0 4px 16px rgba(247, 147, 26, 0.4) !important;
+    transform: translateY(-2px) !important;
+  }
+  
+  .btn-bitcoin-secondary:hover,
+  .btn-bitcoin-secondary:active {
+    box-shadow: 0 4px 16px rgba(247, 147, 26, 0.3) !important;
+    transform: translateY(-2px) !important;
+  }
+  
+  /* Better icon spacing in buttons */
+  .btn-bitcoin-primary svg,
+  .btn-bitcoin-secondary svg,
+  .btn-bitcoin-tertiary svg {
+    flex-shrink: 0 !important;
+    margin-right: 0.5rem !important;
+  }
+  
+  /* Ensure buttons fit in containers */
+  .bitcoin-block .btn-bitcoin-primary,
+  .bitcoin-block .btn-bitcoin-secondary,
+  .bitcoin-block .btn-bitcoin-tertiary {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Better button groups on mobile */
+  .btn-bitcoin-group-mobile {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1rem !important;
+    width: 100% !important;
+  }
+  
+  /* Enhanced press effect for mobile */
+  .btn-bitcoin-primary:active {
+    transform: scale(0.98) !important;
+  }
+  
+  .btn-bitcoin-secondary:active {
+    transform: scale(0.98) !important;
+  }
+}
+
+/* Tablet-specific enhancements (641px - 1024px) */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .btn-bitcoin-primary,
+  .btn-bitcoin-secondary,
+  .btn-bitcoin-tertiary {
+    font-size: 1rem !important;
+    padding: 1.125rem 2rem !important;
+    min-height: 56px !important;
+  }
+}
+
+/* Small mobile optimizations (max 480px) */
+@media (max-width: 480px) {
+  .btn-bitcoin-primary,
+  .btn-bitcoin-secondary,
+  .btn-bitcoin-tertiary {
+    font-size: 0.8125rem !important;
+    padding: 0.875rem 1.25rem !important;
+    min-height: 50px !important;
+    letter-spacing: 0.03em !important;
+  }
+}
+
+/* ============================================
+   END MOBILE & TABLET BUTTON ENHANCEMENTS
+   ============================================ */
+
+
+/* ============================================
+   MOBILE/TABLET WHALE WATCH ENHANCEMENTS
+   Increase height for whale image and button
+   ============================================ */
+
+@media (max-width: 1024px) {
+  /* Increase Whale Watch initial state container height on mobile/tablet */
+  .whale-watch-initial-state {
+    min-height: 500px !important;
+  }
+  
+  /* Better spacing for whale emoji and content */
+  .whale-watch-initial-state .text-6xl {
+    font-size: 5rem !important;
+    margin-bottom: 2rem !important;
+  }
+  
+  /* Ensure button has proper spacing */
+  .whale-watch-initial-state button {
+    margin-top: 2rem !important;
+    padding: 1.25rem 2rem !important;
+  }
+  
+  /* Better vertical spacing for description text */
+  .whale-watch-initial-state p {
+    margin-bottom: 1rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Even more height on mobile */
+  .whale-watch-initial-state {
+    min-height: 550px !important;
+  }
+  
+  .whale-watch-initial-state .text-6xl {
+    font-size: 6rem !important;
+    margin-bottom: 2.5rem !important;
+  }
+  
+  .whale-watch-initial-state button {
+    margin-top: 2.5rem !important;
+    width: 100% !important;
+  }
+}
+
+/* ============================================
+   END WHALE WATCH MOBILE ENHANCEMENTS
    ============================================ */
