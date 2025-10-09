@@ -156,14 +156,14 @@ export function TelegraphNotification({
   if (!isVisible) return null
 
   return (
-    <div className={`telegraph-pulse fixed top-4 right-4 bg-yellow-100 border-2 border-black p-3 rounded-lg shadow-lg z-50 ${className}`}>
+    <div className={`telegraph-pulse fixed top-4 right-4 bg-bitcoin-black border-2 border-bitcoin-orange p-3 rounded-lg shadow-lg z-50 glow-bitcoin ${className}`}>
       <div className="flex items-center">
-        <span className="text-lg mr-2">📡</span>
+        <span className="text-lg mr-2 text-bitcoin-orange">📡</span>
         <TypewriterText 
           text={message} 
           speed={50} 
           showCursor={false}
-          className="font-serif font-bold"
+          className="font-serif font-bold text-bitcoin-white"
         />
       </div>
     </div>

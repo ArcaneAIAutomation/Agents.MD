@@ -14,14 +14,6 @@ const FearGreedSlider = ({ value }: { value: number }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const getSliderColor = (val: number) => {
-    if (val <= 25) return 'from-red-600 to-red-400' // Extreme Fear
-    if (val <= 45) return 'from-orange-500 to-orange-400' // Fear
-    if (val <= 55) return 'from-yellow-500 to-yellow-400' // Neutral
-    if (val <= 75) return 'from-green-500 to-green-400' // Greed
-    return 'from-green-600 to-green-500' // Extreme Greed
-  }
-
   const getLabel = (val: number) => {
     if (val <= 25) return isMobile ? 'Ext Fear' : 'Extreme Fear'
     if (val <= 45) return 'Fear'

@@ -82,8 +82,8 @@ export default function ModernTradingChart({ symbol, currentPrice, tradingZones,
               </div>
             </div>
             <div className="text-bitcoin-white space-y-1" style={{ opacity: 0.8 }}>
-              <div>• <span className="font-medium text-green-500">Green Zones:</span> Buy/Support levels - Consider long positions</div>
-              <div>• <span className="font-medium text-red-500">Red Zones:</span> Sell/Resistance levels - Consider taking profits</div>
+              <div>• <span className="font-medium text-bitcoin-orange">Green Zones:</span> Buy/Support levels - Consider long positions</div>
+              <div>• <span className="font-medium text-bitcoin-orange">Red Zones:</span> Sell/Resistance levels - Consider taking profits</div>
               <div>• <span className="font-medium">Strength:</span> Strong zones have higher volume and confidence</div>
             </div>
           </div>
@@ -126,7 +126,7 @@ export default function ModernTradingChart({ symbol, currentPrice, tradingZones,
                         <span className={`px-2 py-1 rounded text-xs font-bold whitespace-nowrap ${
                           zone.strength === 'Strong' ? 'bg-bitcoin-orange text-bitcoin-black' :
                           zone.strength === 'Moderate' ? 'bg-bitcoin-orange text-bitcoin-black' :
-                          'bg-bitcoin-white text-bitcoin-black'
+                          'bg-bitcoin-black border border-bitcoin-orange text-bitcoin-orange'
                         }`} style={{ opacity: zone.strength === 'Strong' ? 1 : zone.strength === 'Moderate' ? 0.8 : 0.6 }}>
                           {zone.strength === 'Strong' ? 'Very Strong' : zone.strength}
                         </span>
@@ -168,7 +168,7 @@ export default function ModernTradingChart({ symbol, currentPrice, tradingZones,
                   <div className="text-right flex-shrink-0 min-w-[80px]">
                     <div className="text-xs text-bitcoin-white font-medium" style={{ opacity: 0.6 }}>Distance</div>
                     <div className={`text-base md:text-lg font-bold ${
-                      distanceFromPrice > 0 ? 'text-green-500' : 'text-red-500'
+                      distanceFromPrice > 0 ? 'text-bitcoin-orange' : 'text-bitcoin-white'
                     }`}>
                       {distanceFromPrice > 0 ? '+' : ''}{distanceFromPrice.toFixed(2)}%
                     </div>
