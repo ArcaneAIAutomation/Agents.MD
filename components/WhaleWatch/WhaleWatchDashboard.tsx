@@ -268,20 +268,31 @@ export default function WhaleWatchDashboard() {
   // Initial state - no data loaded yet
   if (!whaleData && !loading && !error) {
     return (
-      <div className="bg-bitcoin-black border border-bitcoin-orange rounded-lg p-6 whale-watch-initial-state">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center max-w-2xl">
-            <div className="text-6xl mb-4">🐋</div>
-            <h3 className="text-2xl font-bold text-bitcoin-white mb-2">Bitcoin Whale Watch</h3>
-            <p className="text-bitcoin-white-80 mb-2">
+      <div className="bg-bitcoin-black border border-bitcoin-orange rounded-lg p-4 md:p-6 whale-watch-initial-state">
+        <div className="flex flex-col items-center justify-center min-h-[400px] md:min-h-[300px] py-6">
+          <div className="text-center max-w-2xl w-full px-2">
+            {/* Whale emoji - properly sized for mobile */}
+            <div className="text-5xl md:text-6xl mb-6 md:mb-4">🐋</div>
+            
+            {/* Title */}
+            <h3 className="text-xl md:text-2xl font-bold text-bitcoin-white mb-3 md:mb-2">
+              Bitcoin Whale Watch
+            </h3>
+            
+            {/* Description */}
+            <p className="text-sm md:text-base text-bitcoin-white-80 mb-3 md:mb-2 leading-relaxed">
               Click below to scan for large Bitcoin transactions (&gt;50 BTC)
             </p>
-            <p className="text-sm text-bitcoin-white-60 mb-6">
+            
+            {/* Details */}
+            <p className="text-xs md:text-sm text-bitcoin-white-60 mb-6 md:mb-6 leading-relaxed px-2">
               AI analysis powered by Caesar API • Analysis takes 5-7 minutes typically (max 10 minutes) • Will timeout if not completed
             </p>
+            
+            {/* Button */}
             <button
               onClick={fetchWhaleData}
-              className="btn-bitcoin-primary px-8 py-4 text-lg font-bold rounded-lg transition-all"
+              className="btn-bitcoin-primary px-6 md:px-8 py-3 md:py-4 text-base md:text-lg font-bold rounded-lg transition-all w-full md:w-auto"
             >
               🔍 Scan for Whale Transactions
             </button>

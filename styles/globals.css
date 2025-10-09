@@ -6357,47 +6357,32 @@ img {
 
 /* ============================================
    MOBILE/TABLET WHALE WATCH ENHANCEMENTS
-   Increase height for whale image and button
+   Properly sized and spaced for mobile devices
    ============================================ */
 
-@media (max-width: 1024px) {
-  /* Increase Whale Watch initial state container height on mobile/tablet */
+.whale-watch-initial-state {
+  /* Ensure proper containment */
+  overflow: hidden;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
   .whale-watch-initial-state {
-    min-height: 500px !important;
+    /* Compact height for mobile - no excessive space */
+    min-height: auto !important;
   }
   
-  /* Better spacing for whale emoji and content */
-  .whale-watch-initial-state .text-6xl {
-    font-size: 5rem !important;
-    margin-bottom: 2rem !important;
-  }
-  
-  /* Ensure button has proper spacing */
-  .whale-watch-initial-state button {
-    margin-top: 2rem !important;
-    padding: 1.25rem 2rem !important;
-  }
-  
-  /* Better vertical spacing for description text */
-  .whale-watch-initial-state p {
-    margin-bottom: 1rem !important;
+  /* Ensure content is properly centered and spaced */
+  .whale-watch-initial-state > div {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
   }
 }
 
-@media (max-width: 768px) {
-  /* Even more height on mobile */
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
   .whale-watch-initial-state {
-    min-height: 550px !important;
-  }
-  
-  .whale-watch-initial-state .text-6xl {
-    font-size: 6rem !important;
-    margin-bottom: 2.5rem !important;
-  }
-  
-  .whale-watch-initial-state button {
-    margin-top: 2.5rem !important;
-    width: 100% !important;
+    min-height: auto !important;
   }
 }
 
