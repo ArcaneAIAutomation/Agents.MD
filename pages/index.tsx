@@ -224,6 +224,21 @@ export default function Home() {
                 <p className="text-xs mt-2 italic text-bitcoin-white-60">
                   "All the crypto news that's fit to trade" • Powered by AI & Live Market Data
                 </p>
+                
+                {/* Privacy-Friendly Notice - Subtle & Clever */}
+                <div className="mt-6 pt-4 border-t border-bitcoin-orange-20">
+                  <div className="inline-flex items-center space-x-2 bg-bitcoin-black border border-bitcoin-orange-20 rounded-full px-4 py-2 hover:border-bitcoin-orange transition-all">
+                    <svg className="h-4 w-4 text-bitcoin-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <span className="text-xs font-mono text-bitcoin-white-80">
+                      🍪 Zero Cookies • No Tracking • Privacy First
+                    </span>
+                  </div>
+                  <p className="text-xs text-bitcoin-white-60 mt-2 max-w-2xl mx-auto">
+                    Your privacy matters. We don't use cookies, tracking, or store any personal data. All market data is fetched fresh on each visit.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
