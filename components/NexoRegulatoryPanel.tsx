@@ -65,7 +65,11 @@ export default function NexoRegulatoryPanel() {
 
   if (!data && !loading) {
     return (
-      <div className="bg-bitcoin-black rounded-lg p-3 sm:p-6 border border-bitcoin-orange">
+      <div className="bg-bitcoin-black rounded-lg p-3 sm:p-6 border border-bitcoin-orange relative">
+        {/* NEXO badge - visible only on mobile/tablet, hidden on desktop */}
+        <div className="absolute top-3 right-3 lg:hidden bg-gradient-to-r from-blue-600 to-blue-500 text-white px-3 py-1 text-xs font-bold tracking-wide rounded">
+          NEXO
+        </div>
         <div className="text-center">
           <div className="flex items-center justify-center mb-4">
             <div className="p-2 sm:p-3 bg-bitcoin-black rounded-lg border border-bitcoin-orange">
@@ -111,7 +115,11 @@ export default function NexoRegulatoryPanel() {
   const lastUpdated = (data as any)?.lastUpdated
 
   return (
-    <div className="bitcoin-block bg-bitcoin-black rounded-lg p-3 sm:p-6 border border-bitcoin-orange transition-all hover:shadow-bitcoin-glow">
+    <div className="bitcoin-block bg-bitcoin-black rounded-lg p-3 sm:p-6 border border-bitcoin-orange transition-all hover:shadow-bitcoin-glow relative">
+      {/* NEXO badge - visible only on mobile/tablet, hidden on desktop */}
+      <div className="absolute top-3 right-3 lg:hidden bg-gradient-to-r from-blue-600 to-blue-500 text-white px-3 py-1 text-xs font-bold tracking-wide rounded z-10">
+        NEXO
+      </div>
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div className="flex items-center space-x-2 sm:space-x-3">
           <div className="p-1 sm:p-2 bg-bitcoin-black rounded-lg border border-bitcoin-orange">

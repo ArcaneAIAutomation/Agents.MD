@@ -112,7 +112,8 @@ export default function Home() {
                     Latest regulatory developments and compliance monitoring
                   </p>
                 </div>
-                <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-3 py-1 text-xs font-bold tracking-wide rounded">
+                {/* NEXO badge - hidden on mobile/tablet, shown on desktop */}
+                <div className="hidden lg:block bg-gradient-to-r from-blue-600 to-blue-500 text-white px-3 py-1 text-xs font-bold tracking-wide rounded">
                   NEXO
                 </div>
               </div>
