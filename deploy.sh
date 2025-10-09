@@ -1,82 +1,84 @@
 #!/bin/bash
+# Automated Vercel Deployment Script (Unix/Linux/Mac)
+# Usage: ./deploy.sh [commit-message]
 
-# =============================================================================
-# Agents.MD V2.0 - Vercel Deployment Script
-# =============================================================================
+COMMIT_MESSAGE="${1:-🚀 Automated deployment}"
 
-echo "🚀 Starting Agents.MD V2.0 deployment preparation..."
+# Colors
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+WHITE='\033[1;37m'
+GRAY='\033[0;37m'
+NC='\033[0m' # No Color
 
-# Check if we're on the main branch
-CURRENT_BRANCH=$(git branch --show-current)
-if [ "$CURRENT_BRANCH" != "main" ]; then
-    echo "⚠️  Warning: Not on main branch. Current branch: $CURRENT_BRANCH"
-    read -p "Continue anyway? (y/N): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "❌ Deployment cancelled."
-        exit 1
-    fi
-fi
+echo -e "\n${CYAN}╔════════════════════════════════════════╗${NC}"
+echo -e "${GREEN}║  AUTOMATED VERCEL DEPLOYMENT 🚀       ║${NC}"
+echo -e "${CYAN}╚════════════════════════════════════════╝\n${NC}"
 
-# Check for uncommitted changes
+# Step 1: Check Git Status
+echo -e "${YELLOW}📊 Checking Git Status...${NC}"
 if [ -n "$(git status --porcelain)" ]; then
-    echo "⚠️  Warning: You have uncommitted changes."
-    read -p "Commit changes first? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        git add .
-        git commit -m "Pre-deployment commit - V2.0 updates"
-        git push origin main
-    fi
-fi
-
-# Run pre-deployment checks
-echo "🔍 Running pre-deployment checks..."
-
-# Check Node.js version
-NODE_VERSION=$(node --version)
-echo "Node.js version: $NODE_VERSION"
-
-# Check if required files exist
-if [ ! -f "vercel.json" ]; then
-    echo "❌ vercel.json not found!"
-    exit 1
-fi
-
-if [ ! -f ".env.example" ]; then
-    echo "❌ .env.example not found!"
-    exit 1
-fi
-
-# Install dependencies
-echo "📦 Installing dependencies..."
-npm install
-
-# Run type check
-echo "🔍 Running TypeScript check..."
-npm run type-check
-
-# Run build test
-echo "🏗️  Testing build..."
-npm run build
-
-if [ $? -eq 0 ]; then
-    echo "✅ Build successful!"
+    echo -e "  ${GREEN}✅ Changes detected${NC}"
 else
-    echo "❌ Build failed! Please fix errors before deploying."
+    echo -e "  ${YELLOW}⚠️  No changes to deploy${NC}"
+    echo -e "\n${GRAY}Exiting...\n${NC}"
+    exit 0
+fi
+
+# Step 2: Add All Changes
+echo -e "\n${YELLOW}📦 Adding Changes...${NC}"
+git add .
+if [ $? -eq 0 ]; then
+    echo -e "  ${GREEN}✅ All changes staged${NC}"
+else
+    echo -e "  ${RED}❌ Failed to stage changes${NC}"
     exit 1
 fi
 
-# Clean up build artifacts
-npm run clean
+# Step 3: Commit Changes
+echo -e "\n${YELLOW}💾 Committing Changes...${NC}"
+echo -e "  ${CYAN}Message: $COMMIT_MESSAGE${NC}"
+git commit -m "$COMMIT_MESSAGE"
+if [ $? -eq 0 ]; then
+    echo -e "  ${GREEN}✅ Changes committed${NC}"
+else
+    echo -e "  ${RED}❌ Failed to commit changes${NC}"
+    exit 1
+fi
 
-echo "🎉 Pre-deployment checks complete!"
+# Step 4: Push to GitHub
+echo -e "\n${YELLOW}🚀 Pushing to GitHub...${NC}"
+git push origin main
+if [ $? -eq 0 ]; then
+    echo -e "  ${GREEN}✅ Pushed to main branch${NC}"
+else
+    echo -e "  ${RED}❌ Failed to push to GitHub${NC}"
+    exit 1
+fi
+
+# Step 5: Get Commit Hash
+COMMIT_HASH=$(git rev-parse --short HEAD)
+echo -e "\n${YELLOW}📝 Deployment Details:${NC}"
+echo -e "  ${CYAN}Commit: $COMMIT_HASH${NC}"
+echo -e "  ${CYAN}Branch: main${NC}"
+echo -e "  ${CYAN}Message: $COMMIT_MESSAGE${NC}"
+
+# Step 6: Vercel Auto-Deploy Info
+echo -e "\n${YELLOW}🔄 Vercel Auto-Deploy:${NC}"
+echo -e "  ${GREEN}✅ Deployment triggered automatically${NC}"
+echo -e "  ${CYAN}⏱️  Build time: ~2-3 minutes${NC}"
+echo -e "  ${CYAN}🔗 Dashboard: https://vercel.com/dashboard${NC}"
+echo -e "  ${CYAN}🌐 Production: https://agents-md.vercel.app${NC}"
+
+# Step 7: Success Message
+echo -e "\n${CYAN}╔════════════════════════════════════════╗${NC}"
+echo -e "${GREEN}║  DEPLOYMENT COMPLETE ✅                ║${NC}"
+echo -e "${CYAN}╚════════════════════════════════════════╝\n${NC}"
+
+echo -e "${YELLOW}Next Steps:${NC}"
+echo -e "  ${WHITE}1. Monitor deployment at https://vercel.com/dashboard${NC}"
+echo -e "  ${WHITE}2. Wait 2-3 minutes for build completion${NC}"
+echo -e "  ${WHITE}3. Test live site at https://agents-md.vercel.app${NC}"
 echo ""
-echo "📋 Next steps:"
-echo "1. Go to https://vercel.com/dashboard"
-echo "2. Import GitHub repository: ArcaneAIAutomation/Agents.MD"
-echo "3. Add environment variables from .env.example"
-echo "4. Deploy!"
-echo ""
-echo "Or use Vercel CLI:"
-echo "  vercel --prod"

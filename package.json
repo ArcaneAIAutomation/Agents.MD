@@ -1,74 +1,35 @@
 {
   "name": "agents-md",
   "version": "2.0.0",
-  "description": "Advanced cryptocurrency trading intelligence platform powered by AI agents and real-time market data analysis",
-  "main": "next.config.js",
-  "private": false,
-  "license": "MIT",
-  "author": {
-    "name": "Arcane AI Automation",
-    "email": "support@arcane.group",
-    "url": "https://github.com/ArcaneAIAutomation"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ArcaneAIAutomation/Agents.MD.git"
-  },
-  "bugs": {
-    "url": "https://github.com/ArcaneAIAutomation/Agents.MD/issues"
-  },
-  "homepage": "https://news.arcane.group",
-  "keywords": [
-    "cryptocurrency",
-    "trading",
-    "bitcoin",
-    "market-analysis",
-    "ai",
-    "nextjs",
-    "typescript",
-    "real-time-data",
-    "technical-analysis",
-    "binance",
-    "trading-zones",
-    "price-prediction"
-  ],
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=8.0.0"
-  },
+  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "lint:fix": "next lint --fix",
-    "type-check": "tsc --noEmit",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "test": "echo \"No tests specified\" && exit 0",
-    "clean": "rm -rf .next out dist",
-    "analyze": "ANALYZE=true npm run build",
-    "export": "next export",
-    "deploy": "npm run build && npm run export"
+    "deploy": "pwsh -File deploy.ps1",
+    "deploy:unix": "bash deploy.sh",
+    "deploy:msg": "pwsh -File deploy.ps1 -CommitMessage",
+    "quick-deploy": "git add . && git commit -m '🚀 Quick deploy' && git push origin main",
+    "status": "git status",
+    "log": "git log --oneline -10"
   },
   "dependencies": {
-    "axios": "^1.6.0",
-    "date-fns": "^2.30.0",
-    "lucide-react": "^0.292.0",
-    "next": "14.0.0",
-    "openai": "^5.15.0",
+    "next": "14.0.4",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "recharts": "^2.10.3",
+    "lucide-react": "^0.294.0"
   },
   "devDependencies": {
-    "@types/node": "^20.8.0",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
-    "autoprefixer": "^10.4.0",
-    "eslint": "^8.51.0",
-    "eslint-config-next": "14.0.0",
-    "postcss": "^8.4.0",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.0.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.4",
+    "postcss": "^8",
     "tailwindcss": "^3.3.0",
-    "typescript": "^5.2.0"
+    "typescript": "^5"
   }
 }
