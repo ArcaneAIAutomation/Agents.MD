@@ -626,11 +626,13 @@ const CryptoHerald: React.FC = () => {
           <div className="mb-6">
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="w-full bitcoin-block bg-bitcoin-black p-6 hover:shadow-bitcoin-glow transition-all flex items-center justify-between group cursor-pointer"
+              className="w-full p-6 hover:shadow-bitcoin-glow transition-all flex items-center justify-between group cursor-pointer"
               style={{ 
-                backgroundColor: '#000000',
-                border: '1px solid #F7931A',
-                outline: 'none'
+                backgroundColor: '#000000 !important',
+                border: '1px solid #F7931A !important',
+                borderRadius: '12px',
+                outline: 'none',
+                color: '#FFFFFF'
               }}
             >
               <div className="flex items-center space-x-4">
