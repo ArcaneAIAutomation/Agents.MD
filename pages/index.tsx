@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import Navigation from '../components/Navigation'
 import { ArrowRight } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 export default function Home() {
   // Live market data state
@@ -10,6 +10,9 @@ export default function Home() {
   const [btcChange, setBtcChange] = useState<number | null>(null);
   const [ethChange, setEthChange] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Navigation ref for menu control
+  const navigationRef = useRef<{ openMenu: () => void }>(null);
 
   // Fetch live market data
   useEffect(() => {
@@ -40,6 +43,13 @@ export default function Home() {
     
     return () => clearInterval(interval);
   }, []);
+
+  // Function to open menu
+  const handleOpenMenu = () => {
+    if (navigationRef.current?.openMenu) {
+      navigationRef.current.openMenu();
+    }
+  };
 
   const features = [
     {
@@ -124,7 +134,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Navigation />
+      <Navigation ref={navigationRef} />
 
       <div className="min-h-screen bg-bitcoin-black">
         {/* Live Market Data Banner */}
@@ -270,12 +280,16 @@ export default function Home() {
                     ))}
                   </div>
 
-                  {/* Access via Menu Indicator */}
+                  {/* Access via Menu Indicator - Now Clickable */}
                   <div className="mt-auto pt-4 border-t border-bitcoin-orange-20">
-                    <div className="flex items-center justify-center gap-2 text-bitcoin-orange">
+                    <button
+                      onClick={handleOpenMenu}
+                      className="w-full flex items-center justify-center gap-2 text-bitcoin-orange hover:text-bitcoin-white transition-all duration-300 py-2 px-4 rounded-lg hover:bg-bitcoin-orange-10 active:scale-95 min-h-[48px]"
+                      aria-label={`Open menu to access ${feature.title}`}
+                    >
                       <span className="text-sm font-semibold uppercase tracking-wider">Access via Menu</span>
                       <ArrowRight className="w-4 h-4" />
-                    </div>
+                    </button>
                   </div>
                 </div>
               </div>

@@ -1,11 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Menu, X, Home, Newspaper, Bot, Bitcoin, Coins, Fish, Scale } from 'lucide-react';
 
-export default function Navigation() {
+export interface NavigationRef {
+  openMenu: () => void;
+}
+
+const Navigation = forwardRef<NavigationRef>((props, ref) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
+
+  // Expose openMenu function to parent components
+  useImperativeHandle(ref, () => ({
+    openMenu: () => {
+      setIsMenuOpen(true);
+    }
+  }));
 
   // Close menu on route change
   useEffect(() => {
@@ -239,4 +250,8 @@ export default function Navigation() {
       )}
     </>
   );
-}
+});
+
+Navigation.displayName = 'Navigation';
+
+export default Navigation;
