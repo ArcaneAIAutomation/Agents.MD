@@ -14,6 +14,7 @@ interface WhaleTransaction {
   analysisJobId?: string;
   analysis?: any;
   analysisStatus?: 'pending' | 'analyzing' | 'completed' | 'failed';
+  analysisProvider?: 'caesar' | 'gemini';
 }
 
 interface WhaleData {
@@ -75,7 +76,7 @@ export default function WhaleWatchDashboard() {
     }
   };
 
-  const analyzeTransaction = async (whale: WhaleTransaction) => {
+  const analyzeTransaction = async (whale: WhaleTransaction, provider: 'caesar' | 'gemini' = 'caesar') => {
     // Guard clause: Prevent execution if any analysis is already in progress
     if (analyzingTx !== null || whaleData?.whales.some(w => w.analysisStatus === 'analyzing')) {
       console.log('⚠️ Analysis already in progress, ignoring click');
@@ -90,14 +91,20 @@ export default function WhaleWatchDashboard() {
       if (whaleData) {
         const updatedWhales = whaleData.whales.map(w =>
           w.txHash === whale.txHash
-            ? { ...w, analysisStatus: 'analyzing' as const }
+            ? { ...w, analysisStatus: 'analyzing' as const, analysisProvider: provider }
             : w
         );
         setWhaleData({ ...whaleData, whales: updatedWhales });
       }
       
-      // Start Caesar analysis
-      const response = await fetch('/api/whale-watch/analyze', {
+      // Choose API endpoint based on provider
+      const apiEndpoint = provider === 'gemini' 
+        ? '/api/whale-watch/analyze-gemini'
+        : '/api/whale-watch/analyze';
+      
+      console.log(`🤖 Starting ${provider === 'gemini' ? 'Gemini' : 'Caesar'} AI analysis...`);
+      
+      const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(whale),
@@ -109,21 +116,40 @@ export default function WhaleWatchDashboard() {
       
       const data = await response.json();
       
-      if (data.success && data.jobId) {
-        // Update whale with job ID (keep analyzing status)
-        if (whaleData) {
-          const updatedWhales = whaleData.whales.map(w =>
-            w.txHash === whale.txHash
-              ? { ...w, analysisJobId: data.jobId, analysisStatus: 'analyzing' as const }
-              : w
-          );
-          setWhaleData({ ...whaleData, whales: updatedWhales });
+      // Handle Gemini (instant response) vs Caesar (polling)
+      if (provider === 'gemini') {
+        // Gemini returns analysis immediately
+        if (data.success && data.analysis) {
+          console.log('✅ Gemini analysis completed instantly');
+          if (whaleData) {
+            const updatedWhales = whaleData.whales.map(w =>
+              w.txHash === whale.txHash
+                ? { ...w, analysis: data.analysis, analysisStatus: 'completed' as const }
+                : w
+            );
+            setWhaleData({ ...whaleData, whales: updatedWhales });
+          }
+        } else {
+          throw new Error(data.error || 'Failed to get Gemini analysis');
         }
-        
-        // Poll for results
-        pollAnalysis(whale.txHash, data.jobId);
       } else {
-        throw new Error(data.error || 'Failed to start analysis');
+        // Caesar requires polling
+        if (data.success && data.jobId) {
+          // Update whale with job ID (keep analyzing status)
+          if (whaleData) {
+            const updatedWhales = whaleData.whales.map(w =>
+              w.txHash === whale.txHash
+                ? { ...w, analysisJobId: data.jobId, analysisStatus: 'analyzing' as const }
+                : w
+            );
+            setWhaleData({ ...whaleData, whales: updatedWhales });
+          }
+          
+          // Poll for results
+          pollAnalysis(whale.txHash, data.jobId);
+        } else {
+          throw new Error(data.error || 'Failed to start Caesar analysis');
+        }
       }
     } catch (error) {
       console.error('Failed to start analysis:', error);
@@ -503,32 +529,65 @@ export default function WhaleWatchDashboard() {
               {/* AI Analysis Section */}
               {!whale.analysisJobId && !whale.analysis && (
                 <div className="mt-4 pt-4 border-t border-bitcoin-orange">
-                  <button
-                    onClick={() => analyzeTransaction(whale)}
-                    disabled={analyzingTx === whale.txHash || isDisabled}
-                    className={`btn-bitcoin-primary w-full py-3 rounded-lg transition-all font-bold uppercase text-base shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 ${
-                      isDisabled
-                        ? 'opacity-30 cursor-not-allowed'
-                        : ''
-                    } disabled:opacity-50`}
-                    title={isDisabled ? 'Please wait for the current analysis to complete' : 'Analyze this transaction with Caesar AI'}
-                  >
-                    {analyzingTx === whale.txHash ? (
-                      <span className="flex items-center justify-center">
-                        <RefreshCw className="h-5 w-5 animate-spin mr-2" />
-                        Starting AI Analysis...
-                      </span>
-                    ) : isDisabled ? (
-                      <span className="flex items-center justify-center">
-                        ⏳ Analysis in progress on another transaction
-                      </span>
-                    ) : (
-                      <span>🤖 Analyze with Caesar AI</span>
-                    )}
-                  </button>
+                  <div className="space-y-3">
+                    <p className="text-sm text-bitcoin-white-80 text-center font-semibold">
+                      Choose AI Analysis Provider:
+                    </p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {/* Caesar AI Button */}
+                      <button
+                        onClick={() => analyzeTransaction(whale, 'caesar')}
+                        disabled={analyzingTx === whale.txHash || isDisabled}
+                        className={`btn-bitcoin-primary py-3 rounded-lg transition-all font-bold uppercase text-sm shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[48px] ${
+                          isDisabled
+                            ? 'opacity-30 cursor-not-allowed'
+                            : ''
+                        } disabled:opacity-50`}
+                        title={isDisabled ? 'Please wait for the current analysis to complete' : 'Deep research analysis (5-7 min)'}
+                      >
+                        {analyzingTx === whale.txHash ? (
+                          <span className="flex items-center justify-center">
+                            <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                            Starting...
+                          </span>
+                        ) : (
+                          <span className="flex flex-col items-center">
+                            <span>🔬 Caesar AI</span>
+                            <span className="text-xs font-normal opacity-80">Deep Research</span>
+                          </span>
+                        )}
+                      </button>
+
+                      {/* Gemini AI Button */}
+                      <button
+                        onClick={() => analyzeTransaction(whale, 'gemini')}
+                        disabled={analyzingTx === whale.txHash || isDisabled}
+                        className={`btn-bitcoin-secondary py-3 rounded-lg transition-all font-bold uppercase text-sm shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[48px] ${
+                          isDisabled
+                            ? 'opacity-30 cursor-not-allowed'
+                            : ''
+                        } disabled:opacity-50`}
+                        title={isDisabled ? 'Please wait for the current analysis to complete' : 'Instant AI analysis'}
+                      >
+                        {analyzingTx === whale.txHash ? (
+                          <span className="flex items-center justify-center">
+                            <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                            Starting...
+                          </span>
+                        ) : (
+                          <span className="flex flex-col items-center">
+                            <span>⚡ Gemini 2.5 Pro</span>
+                            <span className="text-xs font-normal opacity-80">Instant Analysis</span>
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  
                   {isDisabled && (
-                    <p className="text-xs text-bitcoin-white-60 text-center mt-2">
-                      Please wait for the current analysis to complete before starting another
+                    <p className="text-xs text-bitcoin-white-60 text-center mt-3">
+                      ⏳ Please wait for the current analysis to complete before starting another
                     </p>
                   )}
                 </div>
@@ -556,26 +615,41 @@ export default function WhaleWatchDashboard() {
               {whale.analysisStatus === 'failed' && (
                 <div className="mt-4 pt-4 border-t border-bitcoin-orange">
                   <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <AlertCircle className="h-5 w-5 text-bitcoin-orange mr-2" />
-                        <span className="text-bitcoin-white font-medium">Analysis failed</span>
-                      </div>
+                    <div className="flex items-center mb-3">
+                      <AlertCircle className="h-5 w-5 text-bitcoin-orange mr-2" />
+                      <span className="text-bitcoin-white font-medium">Analysis failed</span>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       <button
-                        onClick={() => analyzeTransaction(whale)}
+                        onClick={() => analyzeTransaction(whale, 'caesar')}
                         disabled={isDisabled}
-                        className={`btn-bitcoin-primary px-4 py-2 rounded transition-all text-sm uppercase font-bold shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 ${
+                        className={`btn-bitcoin-primary px-4 py-2 rounded transition-all text-xs uppercase font-bold shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[44px] ${
                           isDisabled
                             ? 'opacity-30 cursor-not-allowed'
                             : ''
                         }`}
-                        title={isDisabled ? 'Please wait for the current analysis to complete' : 'Retry analysis'}
+                        title={isDisabled ? 'Please wait for the current analysis to complete' : 'Retry with Caesar AI'}
                       >
-                        Retry Analysis
+                        Retry Caesar AI
+                      </button>
+                      
+                      <button
+                        onClick={() => analyzeTransaction(whale, 'gemini')}
+                        disabled={isDisabled}
+                        className={`btn-bitcoin-secondary px-4 py-2 rounded transition-all text-xs uppercase font-bold shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[44px] ${
+                          isDisabled
+                            ? 'opacity-30 cursor-not-allowed'
+                            : ''
+                        }`}
+                        title={isDisabled ? 'Please wait for the current analysis to complete' : 'Retry with Gemini AI'}
+                      >
+                        Retry Gemini AI
                       </button>
                     </div>
+                    
                     {isDisabled && (
-                      <p className="text-xs text-bitcoin-white-60 mt-2">
+                      <p className="text-xs text-bitcoin-white-60 mt-2 text-center">
                         Another analysis is in progress. Please wait before retrying.
                       </p>
                     )}
