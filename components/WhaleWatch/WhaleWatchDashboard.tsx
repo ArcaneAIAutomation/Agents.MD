@@ -103,6 +103,7 @@ export default function WhaleWatchDashboard() {
         : '/api/whale-watch/analyze';
       
       console.log(`🤖 Starting ${provider === 'gemini' ? 'Gemini' : 'Caesar'} AI analysis...`);
+      console.log(`📡 API Endpoint: ${apiEndpoint}`);
       
       const response = await fetch(apiEndpoint, {
         method: 'POST',

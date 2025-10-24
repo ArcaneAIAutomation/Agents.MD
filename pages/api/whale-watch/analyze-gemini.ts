@@ -47,6 +47,7 @@ export default async function handler(
     const whale: GeminiAnalysisRequest = req.body;
 
     console.log(`🤖 Starting Gemini AI analysis for transaction ${whale.txHash}`);
+    console.log(`📋 Whale data:`, JSON.stringify(whale, null, 2));
 
     // Prepare the deep analysis prompt
     const prompt = `You are an expert cryptocurrency market analyst with deep knowledge of Bitcoin whale behavior, market psychology, and on-chain analytics. Conduct a comprehensive analysis of this Bitcoin whale transaction.
@@ -153,7 +154,8 @@ Be thorough, specific, and provide actionable intelligence. Avoid generic statem
     if (!geminiResponse.ok) {
       const errorText = await geminiResponse.text();
       console.error('❌ Gemini API error:', geminiResponse.status, errorText);
-      throw new Error(`Gemini API error: ${geminiResponse.status}`);
+      console.error('❌ API Key used:', geminiApiKey ? `${geminiApiKey.substring(0, 20)}...` : 'MISSING');
+      throw new Error(`Gemini API error: ${geminiResponse.status} - ${errorText}`);
     }
 
     const geminiData = await geminiResponse.json();
