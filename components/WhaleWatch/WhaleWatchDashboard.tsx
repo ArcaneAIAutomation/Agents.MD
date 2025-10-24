@@ -736,6 +736,11 @@ export default function WhaleWatchDashboard() {
   
   const pollDeepDiveResults = async (jobId: string, txHash: string) => {
     console.log(`📊 Starting to poll Deep Dive job: ${jobId}`);
+    console.log(`⏱️ Polling every 15 seconds with 1500 second (25 minute) timeout`);
+    
+    const POLL_INTERVAL = 15000; // 15 seconds
+    const TOTAL_TIMEOUT = 1500000; // 1500 seconds (25 minutes)
+    const startTime = Date.now();
     
     // Progress stages for UI feedback
     const progressStages = [
@@ -753,10 +758,42 @@ export default function WhaleWatchDashboard() {
         setDeepDiveProgress(prev => ({ ...prev, [txHash]: progressStages[currentStage] }));
         console.log(`📊 Progress: Stage ${currentStage + 1}/${progressStages.length} - ${progressStages[currentStage]}`);
       }
-    }, 3000); // Update every 3 seconds
+    }, POLL_INTERVAL); // Update progress with each poll
     
     const poll = async () => {
       try {
+        // Check if we've exceeded the total timeout
+        const elapsedTime = Date.now() - startTime;
+        if (elapsedTime > TOTAL_TIMEOUT) {
+          clearInterval(progressInterval);
+          console.error(`❌ Deep Dive analysis timed out after ${Math.round(elapsedTime / 1000)}s`);
+          
+          // Mark as failed due to timeout
+          setWhaleData(prev => {
+            if (!prev) return prev;
+            const updatedWhales = prev.whales.map(w =>
+              w.txHash === txHash
+                ? { ...w, analysisStatus: 'failed' as const }
+                : w
+            );
+            return { ...prev, whales: updatedWhales };
+          });
+          
+          // Clear progress
+          setDeepDiveProgress(prev => {
+            const newProgress = { ...prev };
+            delete newProgress[txHash];
+            return newProgress;
+          });
+          setDeepDiveStartTime(prev => {
+            const newStartTime = { ...prev };
+            delete newStartTime[txHash];
+            return newStartTime;
+          });
+          
+          return;
+        }
+        
         const response = await fetch(`/api/whale-watch/deep-dive-status/${jobId}`);
         
         if (!response.ok) {
@@ -767,7 +804,8 @@ export default function WhaleWatchDashboard() {
         
         if (data.status === 'completed' && data.result) {
           clearInterval(progressInterval);
-          console.log('✅ Deep Dive analysis completed');
+          const totalTime = Math.round((Date.now() - startTime) / 1000);
+          console.log(`✅ Deep Dive analysis completed in ${totalTime}s`);
           
           // Update whale with results
           setWhaleData(prev => {
@@ -827,9 +865,11 @@ export default function WhaleWatchDashboard() {
           });
           
         } else {
-          // Still processing, poll again in 3 seconds
-          console.log(`⏳ Still ${data.status}, polling again in 3s...`);
-          setTimeout(poll, 3000);
+          // Still processing, poll again in 15 seconds
+          const elapsedSeconds = Math.round(elapsedTime / 1000);
+          const remainingSeconds = Math.round((TOTAL_TIMEOUT - elapsedTime) / 1000);
+          console.log(`⏳ Still ${data.status}, polling again in 15s... (elapsed: ${elapsedSeconds}s, remaining: ${remainingSeconds}s)`);
+          setTimeout(poll, POLL_INTERVAL);
         }
       } catch (error) {
         clearInterval(progressInterval);
