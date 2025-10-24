@@ -595,18 +595,33 @@ export default function WhaleWatchDashboard() {
 
               {whale.analysisStatus === 'analyzing' && (
                 <div className="mt-4 pt-4 border-t border-bitcoin-orange">
-                  <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-4 shadow-[0_0_20px_rgba(247,147,26,0.3)]">
+                  <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-4 shadow-[0_0_30px_rgba(247,147,26,0.5)] animate-pulse">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <div className="flex items-center">
                         <RefreshCw className="h-5 w-5 text-bitcoin-orange animate-spin mr-2" />
-                        <span className="text-bitcoin-white font-medium">Caesar AI is researching...</span>
+                        <span className="text-bitcoin-white font-medium">
+                          {whale.analysisProvider === 'gemini' ? '⚡ Gemini 2.5 Pro is analyzing...' : '🤖 Caesar AI is researching...'}
+                        </span>
                       </div>
-                      <p className="text-bitcoin-white-80 text-sm">
-                        This typically takes 5-7 minutes with deep research (max 10 minutes)
-                      </p>
-                      <p className="text-bitcoin-white-60 text-xs">
-                        Checking status every 60 seconds • Analyzing market data, news, and historical patterns
-                      </p>
+                      {whale.analysisProvider === 'gemini' ? (
+                        <>
+                          <p className="text-bitcoin-white-80 text-sm text-center">
+                            Deep market intelligence analysis in progress
+                          </p>
+                          <p className="text-bitcoin-white-60 text-xs text-center">
+                            Gemini 2.5 Pro • Advanced reasoning • Typically completes in 2-5 seconds
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-bitcoin-white-80 text-sm text-center">
+                            This typically takes 5-7 minutes with deep research (max 10 minutes)
+                          </p>
+                          <p className="text-bitcoin-white-60 text-xs text-center">
+                            Checking status every 60 seconds • Analyzing market data, news, and historical patterns
+                          </p>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -659,12 +674,24 @@ export default function WhaleWatchDashboard() {
 
               {whale.analysisStatus === 'completed' && whale.analysis && (
                 <div className="mt-4 pt-4 border-t border-bitcoin-orange">
-                  <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-4 shadow-[0_0_20px_rgba(247,147,26,0.3)]">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-bold text-bitcoin-white flex items-center">
-                        🤖 Caesar AI Analysis
-                      </h4>
-                      <span className="px-2 py-1 bg-bitcoin-orange text-bitcoin-black text-xs font-bold rounded uppercase font-mono">
+                  <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-4 shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:shadow-[0_0_40px_rgba(247,147,26,0.6)] transition-all">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-3 gap-2">
+                      <div>
+                        <h4 className="font-bold text-bitcoin-white flex items-center mb-1">
+                          {whale.analysisProvider === 'gemini' ? '⚡ Gemini 2.5 Pro Analysis' : '🤖 Caesar AI Analysis'}
+                        </h4>
+                        {whale.analysisProvider === 'gemini' && whale.analysis.model && (
+                          <p className="text-xs text-bitcoin-orange font-mono">
+                            Model: {whale.analysis.model} • {whale.analysis.analysis_type || 'Deep Market Intelligence'}
+                          </p>
+                        )}
+                        {whale.analysisProvider === 'caesar' && (
+                          <p className="text-xs text-bitcoin-orange font-mono">
+                            Deep Research • Web Sources • 5-7 min analysis
+                          </p>
+                        )}
+                      </div>
+                      <span className="px-3 py-1.5 bg-bitcoin-orange text-bitcoin-black text-xs font-bold rounded uppercase font-mono shadow-[0_0_15px_rgba(247,147,26,0.5)]">
                         {whale.analysis.confidence}% Confidence
                       </span>
                     </div>

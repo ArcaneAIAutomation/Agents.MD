@@ -48,8 +48,8 @@ export default async function handler(
 
     console.log(`🤖 Starting Gemini AI analysis for transaction ${whale.txHash}`);
 
-    // Prepare the analysis prompt
-    const prompt = `You are a cryptocurrency market analyst. Analyze this Bitcoin whale transaction and provide insights.
+    // Prepare the deep analysis prompt
+    const prompt = `You are an expert cryptocurrency market analyst with deep knowledge of Bitcoin whale behavior, market psychology, and on-chain analytics. Conduct a comprehensive analysis of this Bitcoin whale transaction.
 
 Transaction Details:
 - Transaction Hash: ${whale.txHash}
@@ -60,23 +60,51 @@ Transaction Details:
 - Initial Classification: ${whale.type}
 - Description: ${whale.description}
 
-Please analyze this transaction and provide:
-1. Transaction Type (exchange_deposit, exchange_withdrawal, whale_to_whale, or unknown)
-2. Market Impact (Bearish, Bullish, or Neutral)
-3. Confidence Level (0-100)
-4. Detailed Reasoning
-5. Key Findings (3-5 bullet points)
-6. Recommended Trader Action
+Conduct a DEEP ANALYSIS considering:
 
-Return your analysis in the following JSON format:
+1. **Transaction Pattern Analysis:**
+   - Is this address known for specific behavior patterns?
+   - What does the transaction size relative to current market conditions suggest?
+   - Are there any timing patterns (market hours, price levels)?
+
+2. **Market Context:**
+   - Current Bitcoin market sentiment and price action
+   - Recent whale activity trends
+   - Exchange flow patterns (deposits vs withdrawals)
+   - Historical precedents for similar-sized transactions
+
+3. **Behavioral Psychology:**
+   - What might motivate this transaction at this specific time?
+   - Is this likely accumulation, distribution, or repositioning?
+   - What does the address history suggest about the holder's strategy?
+
+4. **Risk Assessment:**
+   - Potential market impact in the short term (24-48 hours)
+   - Medium-term implications (1-2 weeks)
+   - Key price levels to watch
+
+5. **Trading Intelligence:**
+   - Specific actionable insights for traders
+   - Risk management recommendations
+   - Entry/exit considerations
+
+Provide your analysis in the following JSON format with DETAILED, SPECIFIC insights:
 {
-  "transaction_type": "string",
-  "market_impact": "string",
-  "confidence": number,
-  "reasoning": "string",
-  "key_findings": ["string"],
-  "trader_action": "string"
-}`;
+  "transaction_type": "exchange_deposit | exchange_withdrawal | whale_to_whale | unknown",
+  "market_impact": "Bearish | Bullish | Neutral",
+  "confidence": number (0-100, be realistic based on available data),
+  "reasoning": "string (2-3 detailed paragraphs explaining your analysis with specific details)",
+  "key_findings": [
+    "string (specific, actionable finding)",
+    "string (specific, actionable finding)",
+    "string (specific, actionable finding)",
+    "string (specific, actionable finding)",
+    "string (specific, actionable finding)"
+  ],
+  "trader_action": "string (specific, actionable recommendation with price levels or conditions)"
+}
+
+Be thorough, specific, and provide actionable intelligence. Avoid generic statements.`;
 
     // Call Gemini API
     const geminiApiKey = process.env.GEMINI_API_KEY || 'AIzaSyAvGqzDvYiaaDOMFDNiNlxMziO0zYIE3no';
@@ -94,11 +122,30 @@ Return your analysis in the following JSON format:
             }]
           }],
           generationConfig: {
-            temperature: 0.7,
-            topK: 40,
+            temperature: 0.8,        // Higher for more creative, detailed analysis
+            topK: 64,                // Increased for more diverse token selection
             topP: 0.95,
-            maxOutputTokens: 2048,
-          }
+            maxOutputTokens: 4096,   // Doubled for more detailed responses
+            candidateCount: 1,
+          },
+          safetySettings: [
+            {
+              category: "HARM_CATEGORY_HARASSMENT",
+              threshold: "BLOCK_NONE"
+            },
+            {
+              category: "HARM_CATEGORY_HATE_SPEECH",
+              threshold: "BLOCK_NONE"
+            },
+            {
+              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+              threshold: "BLOCK_NONE"
+            },
+            {
+              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+              threshold: "BLOCK_NONE"
+            }
+          ]
         }),
       }
     );
@@ -138,14 +185,21 @@ Return your analysis in the following JSON format:
       reasoning: analysis.reasoning || 'Analysis completed',
       key_findings: Array.isArray(analysis.key_findings) ? analysis.key_findings : [],
       trader_action: analysis.trader_action || 'Monitor the situation',
+      // Add Gemini metadata
+      provider: 'Gemini 2.5 Pro',
+      model: 'gemini-2.0-flash-exp',
+      analysis_type: 'Deep Market Intelligence',
+      processing_time: '< 3 seconds',
     };
 
-    console.log('✅ Gemini analysis completed successfully');
+    console.log('✅ Gemini 2.5 Pro analysis completed successfully');
 
     return res.status(200).json({
       success: true,
       analysis: normalizedAnalysis,
       timestamp: new Date().toISOString(),
+      provider: 'Gemini 2.5 Pro',
+      model: 'gemini-2.0-flash-exp',
     });
 
   } catch (error) {
