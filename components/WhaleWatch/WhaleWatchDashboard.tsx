@@ -1,5 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, TrendingDown, Activity, AlertCircle, RefreshCw } from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity, AlertCircle, RefreshCw, Brain, ChevronDown, ChevronUp, Clock, Search, Loader, CheckCircle, Circle } from 'lucide-react';
+
+interface AnalysisMetadata {
+  model: string;
+  provider: string;
+  timestamp: string;
+  processingTime: number;
+  thinkingEnabled: boolean;
+  dataSourcesUsed?: string[];
+  analysisType?: string;
+  blockchainDataAvailable?: boolean;
+  dataSourceLimitations?: string[];
+  blockchainErrors?: Array<{
+    address: string;
+    errorType: string;
+    message: string;
+  }>;
+}
 
 interface WhaleTransaction {
   txHash: string;
@@ -13,8 +30,13 @@ interface WhaleTransaction {
   description: string;
   analysisJobId?: string;
   analysis?: any;
+  thinking?: string; // AI reasoning process (Gemini thinking mode)
   analysisStatus?: 'pending' | 'analyzing' | 'completed' | 'failed';
-  analysisProvider?: 'caesar' | 'gemini';
+  analysisProvider?: 'caesar' | 'gemini' | 'gemini-deep-dive';
+  thinkingEnabled?: boolean; // Indicates if thinking mode was used
+  metadata?: AnalysisMetadata; // Analysis metadata
+  deepDiveStatus?: 'idle' | 'fetching' | 'analyzing' | 'tracing' | 'identifying' | 'generating' | 'completed' | 'failed';
+  blockchainData?: any; // Blockchain data from Deep Dive
 }
 
 interface WhaleData {
@@ -30,9 +52,502 @@ export default function WhaleWatchDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [analyzingTx, setAnalyzingTx] = useState<string | null>(null);
+  const [expandedThinking, setExpandedThinking] = useState<Record<string, boolean>>({});
+  const [deepDiveProgress, setDeepDiveProgress] = useState<Record<string, string>>({});
+  const [deepDiveStartTime, setDeepDiveStartTime] = useState<Record<string, number>>({});
+  const [deepDiveAbortControllers, setDeepDiveAbortControllers] = useState<Record<string, AbortController>>({});
   
   // Track if any transaction is currently being analyzed (includes both starting and in-progress)
   const hasActiveAnalysis = (whaleData?.whales.some(w => w.analysisStatus === 'analyzing') || analyzingTx !== null);
+  
+  // ModelBadge component for displaying model name and processing time
+  const ModelBadge = ({ model, processingTime }: { model: string; processingTime?: number }) => {
+    // Determine display name based on model
+    const displayName = model.includes('gemini-2.5-pro') 
+      ? 'Gemini 2.5 Pro' 
+      : model.includes('gemini-2.5-flash')
+      ? 'Gemini 2.5 Flash'
+      : model.includes('gemini')
+      ? 'Gemini AI'
+      : 'Caesar AI';
+    
+    return (
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="px-3 py-1.5 bg-bitcoin-orange text-bitcoin-black rounded font-bold text-xs uppercase shadow-[0_0_15px_rgba(247,147,26,0.5)]">
+          {displayName}
+        </span>
+        {processingTime !== undefined && processingTime > 0 && (
+          <span className="flex items-center gap-1 text-bitcoin-white-60 text-xs font-mono">
+            <Clock className="w-3 h-3" />
+            {processingTime}ms
+          </span>
+        )}
+      </div>
+    );
+  };
+
+  // ConfidenceBadge component with color-coded indicator
+  const ConfidenceBadge = ({ confidence }: { confidence: number }) => {
+    // Color coding: green > 80, yellow 60-80, orange < 60
+    // Since we only use Bitcoin Sovereign colors (black, orange, white), we'll use opacity variations
+    const getConfidenceStyle = () => {
+      if (confidence > 80) {
+        // High confidence - solid orange with strong glow
+        return 'bg-bitcoin-orange text-bitcoin-black shadow-[0_0_20px_rgba(247,147,26,0.6)]';
+      } else if (confidence >= 60) {
+        // Medium confidence - orange with medium glow
+        return 'bg-bitcoin-orange text-bitcoin-black shadow-[0_0_15px_rgba(247,147,26,0.4)]';
+      } else {
+        // Low confidence - orange outline with subtle glow
+        return 'border-2 border-bitcoin-orange text-bitcoin-orange shadow-[0_0_10px_rgba(247,147,26,0.3)]';
+      }
+    };
+    
+    return (
+      <span className={`px-3 py-1.5 rounded font-bold text-xs uppercase font-mono ${getConfidenceStyle()}`}>
+        {confidence}% Confidence
+      </span>
+    );
+  };
+
+  // ThinkingSection component for displaying AI reasoning process
+  const ThinkingSection = ({ thinking, txHash }: { thinking: string; txHash: string }) => {
+    const isExpanded = expandedThinking[txHash] || false;
+    const shouldTruncate = thinking.length > 500;
+    const displayText = shouldTruncate && !isExpanded 
+      ? thinking.substring(0, 500) + '...' 
+      : thinking;
+    
+    return (
+      <div className="mt-4 border-t border-bitcoin-orange-20 pt-4">
+        <button
+          onClick={() => setExpandedThinking(prev => ({ ...prev, [txHash]: !prev[txHash] }))}
+          className="flex items-center gap-2 text-bitcoin-orange hover:text-bitcoin-white transition-colors w-full text-left"
+          aria-expanded={isExpanded}
+          aria-label="Toggle AI reasoning process"
+        >
+          <Brain className="w-5 h-5 flex-shrink-0" />
+          <span className="font-semibold text-base">AI Reasoning Process</span>
+          {isExpanded ? (
+            <ChevronUp className="w-4 h-4 ml-auto flex-shrink-0" />
+          ) : (
+            <ChevronDown className="w-4 h-4 ml-auto flex-shrink-0" />
+          )}
+        </button>
+        
+        {isExpanded && (
+          <div className="mt-3 p-4 bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg">
+            <p className="text-bitcoin-white-80 text-sm whitespace-pre-wrap font-mono leading-relaxed">
+              {displayText}
+            </p>
+            {shouldTruncate && !isExpanded && (
+              <button
+                onClick={() => setExpandedThinking(prev => ({ ...prev, [txHash]: true }))}
+                className="mt-2 text-bitcoin-orange hover:text-bitcoin-white text-sm font-semibold transition-colors"
+              >
+                Show More →
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // DeepDiveButton component - shows for transactions >= 100 BTC
+  const DeepDiveButton = ({ 
+    whale, 
+    onAnalyze, 
+    isAnalyzing,
+    isDisabled 
+  }: { 
+    whale: WhaleTransaction; 
+    onAnalyze: () => void; 
+    isAnalyzing: boolean;
+    isDisabled: boolean;
+  }) => {
+    const shouldShowDeepDive = whale.amount >= 100;
+    
+    if (!shouldShowDeepDive) return null;
+    
+    return (
+      <button
+        onClick={onAnalyze}
+        disabled={isAnalyzing || isDisabled}
+        className={`flex items-center justify-center gap-2 px-4 py-3 bg-bitcoin-orange text-bitcoin-black 
+                   font-bold rounded-lg hover:bg-bitcoin-black hover:text-bitcoin-orange 
+                   border-2 border-bitcoin-orange transition-all disabled:opacity-50 disabled:cursor-not-allowed
+                   shadow-[0_0_20px_rgba(247,147,26,0.5)] hover:shadow-[0_0_30px_rgba(247,147,26,0.6)]
+                   hover:scale-105 active:scale-95 min-h-[48px] w-full md:w-auto ${
+                     isDisabled ? 'pointer-events-none' : ''
+                   }`}
+        title={isDisabled ? 'Please wait for the current analysis to complete' : 'Deep blockchain analysis with Gemini 2.5 Pro'}
+      >
+        <Search className="w-5 h-5" />
+        <span className="flex flex-col items-start">
+          <span className="text-sm uppercase">🔬 Deep Dive Analysis</span>
+          <span className="text-xs font-normal opacity-80">Gemini 2.5 Pro + Blockchain Data</span>
+        </span>
+        {isAnalyzing && <Loader className="w-4 h-4 animate-spin" />}
+      </button>
+    );
+  };
+
+  // DeepDiveProgress component - multi-stage progress indicator with completion percentage
+  const DeepDiveProgress = ({ stage, txHash, startTime, onCancel }: { stage: string; txHash: string; startTime?: number; onCancel: () => void }) => {
+    const [elapsedTime, setElapsedTime] = useState(0);
+    
+    const stages = [
+      'Fetching blockchain data...',
+      'Analyzing transaction history...',
+      'Tracing fund flows...',
+      'Identifying patterns...',
+      'Generating comprehensive analysis...',
+    ];
+    
+    const currentIndex = stages.indexOf(stage);
+    const completionPercentage = currentIndex >= 0 ? Math.round(((currentIndex + 1) / stages.length) * 100) : 0;
+    
+    // Calculate estimated time remaining
+    const estimatedTotalTime = 12.5; // Average of 10-15 seconds
+    const timePerStage = estimatedTotalTime / stages.length;
+    const estimatedTimeRemaining = Math.max(0, Math.round(estimatedTotalTime - (elapsedTime / 1000)));
+    
+    // Update elapsed time every second
+    useEffect(() => {
+      if (!startTime) return;
+      
+      const interval = setInterval(() => {
+        setElapsedTime(Date.now() - startTime);
+      }, 1000);
+      
+      return () => clearInterval(interval);
+    }, [startTime]);
+    
+    return (
+      <div className="p-4 bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg shadow-[0_0_30px_rgba(247,147,26,0.5)] animate-pulse">
+        <div className="flex items-center gap-3 mb-4">
+          <Loader className="w-5 h-5 text-bitcoin-orange animate-spin" />
+          <span className="text-bitcoin-white font-bold text-lg">🔬 Deep Dive in Progress</span>
+        </div>
+        
+        {/* Progress Bar */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-bitcoin-white-80 font-medium">
+              Progress: {completionPercentage}%
+            </span>
+            <span className="text-sm text-bitcoin-white-60 font-mono">
+              {Math.floor(elapsedTime / 1000)}s / ~{Math.round(estimatedTotalTime)}s
+            </span>
+          </div>
+          <div className="w-full h-2 bg-bitcoin-black border border-bitcoin-orange-20 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-bitcoin-orange transition-all duration-500 ease-out shadow-[0_0_10px_rgba(247,147,26,0.5)]"
+              style={{ width: `${completionPercentage}%` }}
+            />
+          </div>
+        </div>
+        
+        {/* Stage List */}
+        <div className="space-y-3 mb-4">
+          {stages.map((s, i) => (
+            <div key={i} className="flex items-center gap-3">
+              {i < currentIndex && <CheckCircle className="w-5 h-5 text-bitcoin-orange flex-shrink-0" />}
+              {i === currentIndex && <Loader className="w-5 h-5 text-bitcoin-orange animate-spin flex-shrink-0" />}
+              {i > currentIndex && <Circle className="w-5 h-5 text-bitcoin-white-60 flex-shrink-0" />}
+              <span className={`text-sm ${i <= currentIndex ? 'text-bitcoin-white font-medium' : 'text-bitcoin-white-60'}`}>
+                {s}
+              </span>
+            </div>
+          ))}
+        </div>
+        
+        {/* Time Estimate */}
+        <div className="pt-3 border-t border-bitcoin-orange-20">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm text-bitcoin-white-80">
+              ⏱️ Estimated time remaining:
+            </p>
+            <p className="text-sm text-bitcoin-orange font-bold font-mono">
+              ~{estimatedTimeRemaining}s
+            </p>
+          </div>
+          <p className="text-xs text-bitcoin-white-60 text-center mb-3">
+            Gemini 2.5 Pro • Extended blockchain analysis • Real transaction data
+          </p>
+          
+          {/* Cancel Button */}
+          <button
+            onClick={onCancel}
+            className="w-full px-4 py-2 bg-transparent text-bitcoin-orange border-2 border-bitcoin-orange 
+                     font-bold rounded-lg hover:bg-bitcoin-orange hover:text-bitcoin-black 
+                     transition-all shadow-[0_0_15px_rgba(247,147,26,0.3)] 
+                     hover:shadow-[0_0_25px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 
+                     min-h-[44px] uppercase text-sm"
+            title="Cancel Deep Dive and use standard Gemini Flash analysis"
+          >
+            ✕ Cancel Deep Dive
+          </button>
+          <p className="text-xs text-bitcoin-white-60 text-center mt-2">
+            Will fallback to Gemini 2.5 Flash (instant analysis)
+          </p>
+        </div>
+      </div>
+    );
+  };
+
+  // DeepDiveResults component - comprehensive analysis display
+  const DeepDiveResults = ({ whale }: { whale: WhaleTransaction }) => {
+    if (!whale.analysis) return null;
+    
+    const analysis = whale.analysis;
+    
+    return (
+      <div className="space-y-4">
+        {/* Model Badge - Gemini 2.5 Pro Deep Dive */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="px-3 py-1.5 bg-bitcoin-orange text-bitcoin-black rounded font-bold text-xs uppercase shadow-[0_0_30px_rgba(247,147,26,0.6)]">
+            🔬 Gemini 2.5 Pro - Deep Dive
+          </span>
+          {whale.metadata?.processingTime && (
+            <span className="flex items-center gap-1 text-bitcoin-white-60 text-xs font-mono">
+              <Clock className="w-3 h-3" />
+              {whale.metadata.processingTime}ms
+            </span>
+          )}
+          {whale.metadata?.dataSourcesUsed && (
+            <span className="text-bitcoin-white-60 text-xs">
+              • {whale.metadata.dataSourcesUsed.join(', ')}
+            </span>
+          )}
+        </div>
+        
+        {/* Data Source Limitations Warning (if any) */}
+        {whale.metadata?.dataSourceLimitations && whale.metadata.dataSourceLimitations.length > 0 && (
+          <div className="p-4 bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-bitcoin-orange flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h4 className="text-bitcoin-orange font-bold mb-2 flex items-center gap-2">
+                  ⚠️ Data Source Limitations
+                </h4>
+                <p className="text-bitcoin-white-80 text-sm mb-3">
+                  The following limitations apply to this analysis:
+                </p>
+                <ul className="space-y-2">
+                  {whale.metadata.dataSourceLimitations.map((limitation: string, idx: number) => (
+                    <li key={idx} className="text-bitcoin-white-80 text-sm flex items-start gap-2">
+                      <span className="text-bitcoin-orange font-bold flex-shrink-0">•</span>
+                      <span>{limitation}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-bitcoin-white-60 text-xs mt-3 italic">
+                  Analysis confidence may be adjusted to reflect these limitations.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Blockchain Data Availability Status */}
+        {whale.metadata?.blockchainDataAvailable !== undefined && (
+          <div className={`p-3 rounded-lg border ${
+            whale.metadata.blockchainDataAvailable 
+              ? 'bg-bitcoin-black border-bitcoin-orange-20' 
+              : 'bg-bitcoin-black border-bitcoin-orange'
+          }`}>
+            <div className="flex items-center gap-2 text-sm">
+              {whale.metadata.blockchainDataAvailable ? (
+                <>
+                  <CheckCircle className="w-4 h-4 text-bitcoin-orange" />
+                  <span className="text-bitcoin-white-80">
+                    ✅ Complete blockchain data available for both addresses
+                  </span>
+                </>
+              ) : (
+                <>
+                  <AlertCircle className="w-4 h-4 text-bitcoin-orange" />
+                  <span className="text-bitcoin-white-80">
+                    ⚠️ Limited blockchain data - analysis based on available information
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* Address Behavior Section */}
+        {analysis.address_behavior && (
+          <div className="p-4 bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg">
+            <h4 className="text-bitcoin-white font-bold mb-3 flex items-center gap-2">
+              <Activity className="w-5 h-5 text-bitcoin-orange" />
+              Address Behavior Analysis
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-bitcoin-white-60 text-sm mb-1 uppercase font-semibold">Source Address</p>
+                <p className="text-bitcoin-orange font-bold text-lg mb-2">
+                  {analysis.address_behavior.source_classification}
+                </p>
+                <p className="text-bitcoin-white-80 text-sm leading-relaxed">
+                  {analysis.address_behavior.source_strategy}
+                </p>
+              </div>
+              <div>
+                <p className="text-bitcoin-white-60 text-sm mb-1 uppercase font-semibold">Destination Address</p>
+                <p className="text-bitcoin-orange font-bold text-lg mb-2">
+                  {analysis.address_behavior.destination_classification}
+                </p>
+                <p className="text-bitcoin-white-80 text-sm leading-relaxed">
+                  {analysis.address_behavior.destination_strategy}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Fund Flow Analysis */}
+        {analysis.fund_flow_analysis && (
+          <div className="p-4 bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg">
+            <h4 className="text-bitcoin-white font-bold mb-3 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-bitcoin-orange" />
+              Fund Flow Tracing
+            </h4>
+            <div className="space-y-3">
+              <div>
+                <p className="text-bitcoin-white-60 text-sm uppercase font-semibold mb-1">Origin Hypothesis</p>
+                <p className="text-bitcoin-white-80 text-sm leading-relaxed">{analysis.fund_flow_analysis.origin_hypothesis}</p>
+              </div>
+              <div>
+                <p className="text-bitcoin-white-60 text-sm uppercase font-semibold mb-1">Destination Hypothesis</p>
+                <p className="text-bitcoin-white-80 text-sm leading-relaxed">{analysis.fund_flow_analysis.destination_hypothesis}</p>
+              </div>
+              {analysis.fund_flow_analysis.mixing_detected && (
+                <div className="p-3 bg-bitcoin-orange-10 border border-bitcoin-orange-20 rounded">
+                  <p className="text-bitcoin-orange font-bold flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4" />
+                    ⚠️ Mixing Behavior Detected
+                  </p>
+                </div>
+              )}
+              {analysis.fund_flow_analysis.cluster_analysis && (
+                <div>
+                  <p className="text-bitcoin-white-60 text-sm uppercase font-semibold mb-1">Cluster Analysis</p>
+                  <p className="text-bitcoin-white-80 text-sm leading-relaxed">{analysis.fund_flow_analysis.cluster_analysis}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* Market Prediction */}
+        {analysis.market_prediction && (
+          <div className="p-4 bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg">
+            <h4 className="text-bitcoin-white font-bold mb-3 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-bitcoin-orange" />
+              Market Prediction
+            </h4>
+            <div className="space-y-3">
+              <div>
+                <p className="text-bitcoin-white-60 text-sm uppercase font-semibold mb-1">24-Hour Outlook</p>
+                <p className="text-bitcoin-white-80 text-sm leading-relaxed">{analysis.market_prediction.short_term_24h}</p>
+              </div>
+              <div>
+                <p className="text-bitcoin-white-60 text-sm uppercase font-semibold mb-1">7-Day Outlook</p>
+                <p className="text-bitcoin-white-80 text-sm leading-relaxed">{analysis.market_prediction.medium_term_7d}</p>
+              </div>
+              {analysis.market_prediction.key_price_levels && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-bitcoin-orange-20">
+                  <div>
+                    <p className="text-bitcoin-white-60 text-sm uppercase font-semibold mb-2">Support Levels</p>
+                    <div className="space-y-1">
+                      {analysis.market_prediction.key_price_levels.support.map((level: number, i: number) => (
+                        <p key={i} className="text-bitcoin-orange font-mono font-bold text-lg">
+                          ${level.toLocaleString()}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-bitcoin-white-60 text-sm uppercase font-semibold mb-2">Resistance Levels</p>
+                    <div className="space-y-1">
+                      {analysis.market_prediction.key_price_levels.resistance.map((level: number, i: number) => (
+                        <p key={i} className="text-bitcoin-orange font-mono font-bold text-lg">
+                          ${level.toLocaleString()}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {analysis.market_prediction.probability_further_movement !== undefined && (
+                <div className="pt-3 border-t border-bitcoin-orange-20">
+                  <p className="text-bitcoin-white-60 text-sm uppercase font-semibold mb-1">Probability of Further Movement</p>
+                  <p className="text-bitcoin-orange font-mono font-bold text-2xl">
+                    {analysis.market_prediction.probability_further_movement}%
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* Strategic Intelligence */}
+        {analysis.strategic_intelligence && (
+          <div className="p-4 bg-bitcoin-orange text-bitcoin-black rounded-lg shadow-[0_0_30px_rgba(247,147,26,0.5)]">
+            <h4 className="font-bold mb-3 text-lg">💡 Strategic Intelligence</h4>
+            <div className="space-y-2 text-sm">
+              <div>
+                <strong>Intent:</strong> {analysis.strategic_intelligence.intent}
+              </div>
+              <div>
+                <strong>Sentiment:</strong> {analysis.strategic_intelligence.sentiment_indicator}
+              </div>
+              <div>
+                <strong>Positioning:</strong> {analysis.strategic_intelligence.trader_positioning}
+              </div>
+              <div>
+                <strong>Risk/Reward:</strong> {analysis.strategic_intelligence.risk_reward_ratio}
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Standard Analysis Sections */}
+        <div className="space-y-3 text-sm">
+          <div>
+            <span className="font-semibold text-bitcoin-white">Type:</span>
+            <span className="ml-2 text-bitcoin-orange font-mono">{analysis.transaction_type?.replace(/_/g, ' ').toUpperCase()}</span>
+          </div>
+          
+          <div>
+            <span className="font-semibold text-bitcoin-white">Reasoning:</span>
+            <p className="text-bitcoin-white-80 mt-1 leading-relaxed">{analysis.reasoning}</p>
+          </div>
+          
+          {analysis.key_findings && analysis.key_findings.length > 0 && (
+            <div>
+              <span className="font-semibold text-bitcoin-white">Key Findings:</span>
+              <ul className="mt-1 space-y-1">
+                {analysis.key_findings.map((finding: string, idx: number) => (
+                  <li key={idx} className="text-bitcoin-white-80">• {finding}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
+          {analysis.trader_action && (
+            <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded p-3 mt-3">
+              <span className="font-semibold text-bitcoin-orange">💡 Trader Action:</span>
+              <p className="text-bitcoin-white-80 mt-1 leading-relaxed">{analysis.trader_action}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   const fetchWhaleData = async () => {
     // Guard clause: Prevent execution if any analysis is already in progress
@@ -73,6 +588,203 @@ export default function WhaleWatchDashboard() {
       // Don't clear existing data on error
     } finally {
       setLoading(false);
+    }
+  };
+
+  const cancelDeepDive = async (whale: WhaleTransaction) => {
+    console.log('🚫 Cancelling Deep Dive analysis for', whale.txHash);
+    
+    // Abort the fetch request if it exists
+    const abortController = deepDiveAbortControllers[whale.txHash];
+    if (abortController) {
+      abortController.abort();
+      console.log('✅ Aborted Deep Dive fetch request');
+    }
+    
+    // Clear progress and start time
+    setDeepDiveProgress(prev => {
+      const newProgress = { ...prev };
+      delete newProgress[whale.txHash];
+      return newProgress;
+    });
+    setDeepDiveStartTime(prev => {
+      const newStartTime = { ...prev };
+      delete newStartTime[whale.txHash];
+      return newStartTime;
+    });
+    setDeepDiveAbortControllers(prev => {
+      const newControllers = { ...prev };
+      delete newControllers[whale.txHash];
+      return newControllers;
+    });
+    
+    // Reset analyzing state
+    setAnalyzingTx(null);
+    
+    // Reset whale status to allow new analysis
+    if (whaleData) {
+      const updatedWhales = whaleData.whales.map(w =>
+        w.txHash === whale.txHash
+          ? { ...w, analysisStatus: undefined, analysisProvider: undefined }
+          : w
+      );
+      setWhaleData({ ...whaleData, whales: updatedWhales });
+    }
+    
+    console.log('🔄 Falling back to Gemini 2.5 Flash analysis...');
+    
+    // Fallback to standard Gemini Flash analysis
+    await analyzeTransaction(whale, 'gemini');
+  };
+
+  const analyzeDeepDive = async (whale: WhaleTransaction) => {
+    // Guard clause: Prevent execution if any analysis is already in progress
+    if (analyzingTx !== null || whaleData?.whales.some(w => w.analysisStatus === 'analyzing')) {
+      console.log('⚠️ Analysis already in progress, ignoring click');
+      return;
+    }
+    
+    // Create abort controller for this request
+    const abortController = new AbortController();
+    setDeepDiveAbortControllers(prev => ({ ...prev, [whale.txHash]: abortController }));
+    
+    try {
+      // Immediately set analyzing state to prevent race condition
+      setAnalyzingTx(whale.txHash);
+      
+      // Track start time for progress calculation
+      const startTime = Date.now();
+      setDeepDiveStartTime(prev => ({ ...prev, [whale.txHash]: startTime }));
+      
+      // Set initial progress stage
+      setDeepDiveProgress(prev => ({ ...prev, [whale.txHash]: 'Fetching blockchain data...' }));
+      
+      // Update whale status to 'analyzing' with deep-dive provider
+      if (whaleData) {
+        const updatedWhales = whaleData.whales.map(w =>
+          w.txHash === whale.txHash
+            ? { ...w, analysisStatus: 'analyzing' as const, analysisProvider: 'gemini-deep-dive' as const }
+            : w
+        );
+        setWhaleData({ ...whaleData, whales: updatedWhales });
+      }
+      
+      console.log('🔬 Starting Deep Dive analysis...');
+      console.log(`📡 API Endpoint: /api/whale-watch/deep-dive-gemini`);
+      console.log(`⏱️ Start time: ${new Date(startTime).toISOString()}`);
+      
+      // Simulate progress stages with realistic timing
+      const progressStages = [
+        'Fetching blockchain data...',
+        'Analyzing transaction history...',
+        'Tracing fund flows...',
+        'Identifying patterns...',
+        'Generating comprehensive analysis...',
+      ];
+      
+      let currentStage = 0;
+      const progressInterval = setInterval(() => {
+        if (currentStage < progressStages.length - 1) {
+          currentStage++;
+          setDeepDiveProgress(prev => ({ ...prev, [whale.txHash]: progressStages[currentStage] }));
+          console.log(`📊 Progress: Stage ${currentStage + 1}/${progressStages.length} - ${progressStages[currentStage]}`);
+        }
+      }, 2500); // Update every 2.5 seconds (12.5s total for 5 stages)
+      
+      const response = await fetch('/api/whale-watch/deep-dive-gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(whale),
+        signal: abortController.signal, // Add abort signal
+      });
+      
+      clearInterval(progressInterval);
+      
+      if (!response.ok) {
+        throw new Error(`Deep Dive API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.analysis) {
+        console.log('✅ Deep Dive analysis completed');
+        if (whaleData) {
+          const updatedWhales = whaleData.whales.map(w =>
+            w.txHash === whale.txHash
+              ? { 
+                  ...w, 
+                  analysis: data.analysis,
+                  blockchainData: data.blockchainData,
+                  metadata: data.metadata,
+                  analysisStatus: 'completed' as const,
+                  analysisProvider: 'gemini-deep-dive' as const
+                }
+              : w
+          );
+          setWhaleData({ ...whaleData, whales: updatedWhales });
+        }
+        
+        // Clear progress and start time
+        setDeepDiveProgress(prev => {
+          const newProgress = { ...prev };
+          delete newProgress[whale.txHash];
+          return newProgress;
+        });
+        setDeepDiveStartTime(prev => {
+          const newStartTime = { ...prev };
+          delete newStartTime[whale.txHash];
+          return newStartTime;
+        });
+        setDeepDiveAbortControllers(prev => {
+          const newControllers = { ...prev };
+          delete newControllers[whale.txHash];
+          return newControllers;
+        });
+        
+        // Log completion time
+        const endTime = Date.now();
+        const duration = ((endTime - (deepDiveStartTime[whale.txHash] || endTime)) / 1000).toFixed(1);
+        console.log(`✅ Deep Dive completed in ${duration}s`);
+      } else {
+        throw new Error(data.error || 'Failed to get Deep Dive analysis');
+      }
+    } catch (error) {
+      // Check if error is due to abort
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('🚫 Deep Dive analysis was cancelled by user');
+        // Don't mark as failed, the cancel handler will take care of fallback
+        return;
+      }
+      
+      console.error('Failed to start Deep Dive analysis:', error);
+      // Mark as failed
+      if (whaleData) {
+        const updatedWhales = whaleData.whales.map(w =>
+          w.txHash === whale.txHash
+            ? { ...w, analysisStatus: 'failed' as const }
+            : w
+        );
+        setWhaleData({ ...whaleData, whales: updatedWhales });
+      }
+      
+      // Clear progress and start time
+      setDeepDiveProgress(prev => {
+        const newProgress = { ...prev };
+        delete newProgress[whale.txHash];
+        return newProgress;
+      });
+      setDeepDiveStartTime(prev => {
+        const newStartTime = { ...prev };
+        delete newStartTime[whale.txHash];
+        return newStartTime;
+      });
+      setDeepDiveAbortControllers(prev => {
+        const newControllers = { ...prev };
+        delete newControllers[whale.txHash];
+        return newControllers;
+      });
+    } finally {
+      setAnalyzingTx(null);
     }
   };
 
@@ -125,7 +837,13 @@ export default function WhaleWatchDashboard() {
           if (whaleData) {
             const updatedWhales = whaleData.whales.map(w =>
               w.txHash === whale.txHash
-                ? { ...w, analysis: data.analysis, analysisStatus: 'completed' as const }
+                ? { 
+                    ...w, 
+                    analysis: data.analysis, 
+                    thinking: data.thinking, // Store thinking content
+                    thinkingEnabled: data.metadata?.thinkingEnabled, // Store thinking mode flag
+                    analysisStatus: 'completed' as const 
+                  }
                 : w
             );
             setWhaleData({ ...whaleData, whales: updatedWhales });
@@ -535,6 +1253,21 @@ export default function WhaleWatchDashboard() {
                       Choose AI Analysis Provider:
                     </p>
                     
+                    {/* Deep Dive Button (only for >= 100 BTC) */}
+                    {whale.amount >= 100 && (
+                      <div className="mb-3">
+                        <DeepDiveButton
+                          whale={whale}
+                          onAnalyze={() => analyzeDeepDive(whale)}
+                          isAnalyzing={analyzingTx === whale.txHash}
+                          isDisabled={isDisabled}
+                        />
+                        <p className="text-xs text-bitcoin-white-60 text-center mt-2">
+                          🔬 Recommended for large transactions • Includes blockchain data analysis
+                        </p>
+                      </div>
+                    )}
+                    
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {/* Caesar AI Button */}
                       <button
@@ -578,7 +1311,7 @@ export default function WhaleWatchDashboard() {
                           </span>
                         ) : (
                           <span className="flex flex-col items-center">
-                            <span>⚡ Gemini 2.5 Pro</span>
+                            <span>⚡ Gemini 2.5 Flash</span>
                             <span className="text-xs font-normal opacity-80">Instant Analysis</span>
                           </span>
                         )}
@@ -596,35 +1329,44 @@ export default function WhaleWatchDashboard() {
 
               {whale.analysisStatus === 'analyzing' && (
                 <div className="mt-4 pt-4 border-t border-bitcoin-orange">
-                  <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-4 shadow-[0_0_30px_rgba(247,147,26,0.5)] animate-pulse">
-                    <div className="flex flex-col items-center justify-center space-y-2">
-                      <div className="flex items-center">
-                        <RefreshCw className="h-5 w-5 text-bitcoin-orange animate-spin mr-2" />
-                        <span className="text-bitcoin-white font-medium">
-                          {whale.analysisProvider === 'gemini' ? '⚡ Gemini 2.5 Pro is analyzing...' : '🤖 Caesar AI is researching...'}
-                        </span>
+                  {whale.analysisProvider === 'gemini-deep-dive' && deepDiveProgress[whale.txHash] ? (
+                    <DeepDiveProgress 
+                      stage={deepDiveProgress[whale.txHash]} 
+                      txHash={whale.txHash}
+                      startTime={deepDiveStartTime[whale.txHash]}
+                      onCancel={() => cancelDeepDive(whale)}
+                    />
+                  ) : (
+                    <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-4 shadow-[0_0_30px_rgba(247,147,26,0.5)] animate-pulse">
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        <div className="flex items-center">
+                          <RefreshCw className="h-5 w-5 text-bitcoin-orange animate-spin mr-2" />
+                          <span className="text-bitcoin-white font-medium">
+                            {whale.analysisProvider === 'gemini' ? '⚡ Gemini 2.5 Flash is analyzing...' : '🤖 Caesar AI is researching...'}
+                          </span>
+                        </div>
+                        {whale.analysisProvider === 'gemini' ? (
+                          <>
+                            <p className="text-bitcoin-white-80 text-sm text-center">
+                              Deep market intelligence analysis in progress
+                            </p>
+                            <p className="text-bitcoin-white-60 text-xs text-center">
+                              Gemini 2.5 Flash • Advanced reasoning • Typically completes in 2-5 seconds
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-bitcoin-white-80 text-sm text-center">
+                              This typically takes 5-7 minutes with deep research (max 10 minutes)
+                            </p>
+                            <p className="text-bitcoin-white-60 text-xs text-center">
+                              Checking status every 60 seconds • Analyzing market data, news, and historical patterns
+                            </p>
+                          </>
+                        )}
                       </div>
-                      {whale.analysisProvider === 'gemini' ? (
-                        <>
-                          <p className="text-bitcoin-white-80 text-sm text-center">
-                            Deep market intelligence analysis in progress
-                          </p>
-                          <p className="text-bitcoin-white-60 text-xs text-center">
-                            Gemini 2.5 Pro • Advanced reasoning • Typically completes in 2-5 seconds
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <p className="text-bitcoin-white-80 text-sm text-center">
-                            This typically takes 5-7 minutes with deep research (max 10 minutes)
-                          </p>
-                          <p className="text-bitcoin-white-60 text-xs text-center">
-                            Checking status every 60 seconds • Analyzing market data, news, and historical patterns
-                          </p>
-                        </>
-                      )}
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
 
@@ -676,26 +1418,55 @@ export default function WhaleWatchDashboard() {
               {whale.analysisStatus === 'completed' && whale.analysis && (
                 <div className="mt-4 pt-4 border-t border-bitcoin-orange">
                   <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-4 shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:shadow-[0_0_40px_rgba(247,147,26,0.6)] transition-all">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-3 gap-2">
-                      <div>
-                        <h4 className="font-bold text-bitcoin-white flex items-center mb-1">
-                          {whale.analysisProvider === 'gemini' ? '⚡ Gemini 2.5 Pro Analysis' : '🤖 Caesar AI Analysis'}
-                        </h4>
-                        {whale.analysisProvider === 'gemini' && whale.analysis.model && (
-                          <p className="text-xs text-bitcoin-orange font-mono">
-                            Model: {whale.analysis.model} • {whale.analysis.analysis_type || 'Deep Market Intelligence'}
-                          </p>
-                        )}
-                        {whale.analysisProvider === 'caesar' && (
-                          <p className="text-xs text-bitcoin-orange font-mono">
-                            Deep Research • Web Sources • 5-7 min analysis
-                          </p>
-                        )}
-                      </div>
-                      <span className="px-3 py-1.5 bg-bitcoin-orange text-bitcoin-black text-xs font-bold rounded uppercase font-mono shadow-[0_0_15px_rgba(247,147,26,0.5)]">
-                        {whale.analysis.confidence}% Confidence
-                      </span>
-                    </div>
+                    {/* Show Deep Dive Results if it's a deep dive analysis */}
+                    {whale.analysisProvider === 'gemini-deep-dive' ? (
+                      <DeepDiveResults whale={whale} />
+                    ) : (
+                      <>
+                        {/* Metadata Header with Model Badge and Confidence */}
+                        <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4 gap-3">
+                          <div className="space-y-2">
+                            {/* Model Badge */}
+                            <ModelBadge 
+                              model={whale.metadata?.model || whale.analysis.model || (whale.analysisProvider === 'gemini' ? 'gemini-2.5-flash' : 'caesar')}
+                              processingTime={whale.metadata?.processingTime}
+                            />
+                            
+                            {/* Reasoning Available Badge */}
+                            {whale.thinkingEnabled && whale.thinking && (
+                              <div className="flex items-center gap-2">
+                                <span className="px-2 py-1 bg-bitcoin-orange text-bitcoin-black text-xs font-bold rounded uppercase inline-flex items-center gap-1">
+                                  <Brain className="w-3 h-3" />
+                                  Reasoning Available
+                                </span>
+                              </div>
+                            )}
+                            
+                            {/* Provider Info */}
+                            {whale.analysisProvider === 'gemini' && (
+                              <p className="text-xs text-bitcoin-white-60 font-mono">
+                                {whale.metadata?.provider || 'Google Gemini'} • {whale.analysis.analysis_type || 'Deep Market Intelligence'}
+                              </p>
+                            )}
+                            {whale.analysisProvider === 'caesar' && (
+                              <p className="text-xs text-bitcoin-white-60 font-mono">
+                                Caesar AI • Deep Research • Web Sources
+                              </p>
+                            )}
+                            
+                            {/* Timestamp */}
+                            {whale.metadata?.timestamp && (
+                              <p className="text-xs text-bitcoin-white-60 font-mono">
+                                Analyzed: {new Date(whale.metadata.timestamp).toLocaleString()}
+                              </p>
+                            )}
+                          </div>
+                          
+                          {/* Confidence Badge */}
+                          <div className="flex-shrink-0">
+                            <ConfidenceBadge confidence={whale.analysis.confidence || 0} />
+                          </div>
+                        </div>
                     
                     <div className="space-y-3 text-sm">
                       <div>
@@ -745,6 +1516,13 @@ export default function WhaleWatchDashboard() {
                         </div>
                       )}
                     </div>
+                    
+                        {/* Display thinking section if available */}
+                        {whale.thinking && whale.thinkingEnabled && (
+                          <ThinkingSection thinking={whale.thinking} txHash={whale.txHash} />
+                        )}
+                      </>
+                    )}
                   </div>
                 </div>
               )}
