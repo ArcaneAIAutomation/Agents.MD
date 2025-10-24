@@ -311,3 +311,161 @@ interface ContrastConfig {
 - Text containment validation at 320px, 375px, 390px, 428px, 768px
 - Accessibility compliance verification
 - Performance optimization and monitoring
+
+## Detailed Mobile/Tablet Visual Issues Identified
+
+### Critical Issues Requiring Immediate Attention
+
+#### 1. **Navigation Component Issues**
+**Problem:** Mobile navigation may have contrast issues on certain backgrounds
+**Impact:** Users may struggle to see menu items on mobile devices
+**Solution:** 
+- Ensure all navigation text uses `text-bitcoin-white` or `text-bitcoin-orange`
+- Add proper background colors to mobile menu overlay
+- Verify hamburger icon has sufficient contrast
+- Test on all device sizes (320px-768px)
+
+#### 2. **Bitcoin Block Container Overflow**
+**Problem:** Long text in bitcoin-block components may overflow on small screens
+**Impact:** Text gets cut off or extends beyond container boundaries
+**Solution:**
+- Add `overflow: hidden` to all `.bitcoin-block` containers
+- Implement `text-overflow: ellipsis` for single-line text
+- Use `word-break: break-word` for multi-line content
+- Add responsive padding that scales with viewport
+
+#### 3. **Price Display Scaling Issues**
+**Problem:** Large price numbers may not fit in containers on small screens (320px-375px)
+**Impact:** Prices get cut off or overflow their containers
+**Solution:**
+```css
+.price-display {
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+```
+
+#### 4. **Stat Card Text Overflow**
+**Problem:** Stat values and labels may overflow on iPhone SE (375px) and smaller
+**Impact:** Numbers and labels get cut off, reducing readability
+**Solution:**
+```css
+.stat-value {
+  font-size: clamp(1rem, 4vw, 1.5rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stat-label {
+  font-size: clamp(0.625rem, 2.5vw, 0.75rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+```
+
+#### 5. **Whale Watch Dashboard Issues**
+**Problem:** Transaction cards have text overflow on mobile devices
+**Impact:** Whale amounts, addresses, and status messages get cut off
+**Solution:**
+- Implement responsive font sizing for whale amounts
+- Add ellipsis truncation for long addresses
+- Use flex containers with `min-width: 0` for proper shrinking
+- Add proper padding that scales with device size
+
+#### 6. **Zone Card Distance and Price Overflow**
+**Problem:** Zone card prices and distance values overflow on small screens
+**Impact:** Critical trading information gets cut off
+**Solution:**
+```css
+.zone-card-price {
+  font-size: clamp(0.875rem, 3.5vw, 1.125rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.zone-distance {
+  font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+  white-space: nowrap;
+}
+```
+
+#### 7. **Button Text Wrapping Issues**
+**Problem:** Long button text wraps awkwardly on mobile
+**Impact:** Buttons look broken and are harder to tap
+**Solution:**
+- Use `white-space: nowrap` for button text
+- Implement responsive button padding
+- Add ellipsis for very long button labels
+- Ensure minimum 48px height maintained
+
+#### 8. **Table and Chart Overflow**
+**Problem:** Trading charts and data tables extend beyond viewport on mobile
+**Impact:** Users must scroll horizontally, poor UX
+**Solution:**
+- Wrap tables in containers with `overflow-x: auto`
+- Make charts responsive with `max-width: 100%`
+- Add touch-friendly scrolling with `-webkit-overflow-scrolling: touch`
+- Consider stacked layouts for complex tables on mobile
+
+### Device-Specific Optimizations Needed
+
+#### iPhone SE (375px width)
+- Reduce padding from 16px to 14px in cards
+- Scale headings: h1 to 1.75rem, h2 to 1.5rem
+- Use tighter spacing between elements (12px instead of 16px)
+- Implement more aggressive text truncation
+
+#### iPhone 12/13/14 (390px width)
+- Standard mobile padding (16px)
+- Full mobile heading sizes (h1: 1.875rem, h2: 1.5rem)
+- Standard spacing (16px between elements)
+- Balanced text truncation
+
+#### iPhone Pro Max (428px width)
+- Enhanced padding (18px in cards)
+- Larger headings (h1: 2rem, h2: 1.625rem)
+- More generous spacing (18px between elements)
+- Minimal text truncation needed
+
+#### Tablets (768px-1024px)
+- Transition to two-column layouts
+- Larger touch targets (52px instead of 48px)
+- Desktop-like spacing with mobile touch optimization
+- Full text display without truncation
+
+### Bitcoin Sovereign Styling Compliance Checklist
+
+#### Colors (Mobile/Tablet)
+- [ ] All backgrounds are pure black (#000000)
+- [ ] All primary text is white (#FFFFFF)
+- [ ] All accent text is orange (#F7931A)
+- [ ] All borders are thin orange (1-2px solid)
+- [ ] No forbidden colors (green, red, blue, gray shades)
+- [ ] Text hierarchy uses white opacity (100%, 80%, 60%)
+
+#### Typography (Mobile/Tablet)
+- [ ] All UI text uses Inter font
+- [ ] All data/prices use Roboto Mono font
+- [ ] Headings are bold (font-weight: 800)
+- [ ] Body text is regular (font-weight: 400)
+- [ ] Minimum 16px font size for body text
+- [ ] Proper line-height (1.6 for body, 1.2 for headings)
+
+#### Components (Mobile/Tablet)
+- [ ] All buttons have orange glow effects
+- [ ] Hover states invert colors properly
+- [ ] All containers clip overflow
+- [ ] All touch targets are minimum 48px
+- [ ] All cards have thin orange borders
+- [ ] All animations are smooth (0.3s ease)
+
+#### Layout (Mobile/Tablet)
+- [ ] No horizontal scroll on any screen size
+- [ ] Single-column layouts on mobile
+- [ ] Proper spacing between elements
+- [ ] Collapsible sections work correctly
+- [ ] All text fits within containers
+- [ ] Responsive breakpoints work smoothly

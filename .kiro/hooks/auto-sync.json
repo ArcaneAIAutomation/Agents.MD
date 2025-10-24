@@ -1,0 +1,31 @@
+{
+  "name": "Auto-Sync Work/Home",
+  "description": "Automatically sync changes between work and home computers",
+  "version": "1.0.0",
+  "hooks": [
+    {
+      "id": "pre-work-sync",
+      "name": "Pull Latest Changes Before Work",
+      "trigger": "manual",
+      "icon": "download",
+      "command": "git pull origin main --rebase",
+      "description": "Run this when starting work to get latest changes"
+    },
+    {
+      "id": "post-work-sync",
+      "name": "Push Changes After Work",
+      "trigger": "manual",
+      "icon": "upload",
+      "command": "git add . && git commit -m 'Auto-sync: $(date)' && git push origin main",
+      "description": "Run this when ending work session to sync changes"
+    },
+    {
+      "id": "auto-commit-on-save",
+      "name": "Auto-Commit on File Save",
+      "trigger": "onSave",
+      "filePattern": "**/*.{ts,tsx,js,jsx,css,md}",
+      "command": "git add . && git commit -m 'Auto-save: Updated files' --allow-empty",
+      "description": "Automatically commits changes when you save files"
+    }
+  ]
+}

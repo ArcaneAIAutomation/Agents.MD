@@ -1,0 +1,433 @@
+{
+  "totalIssues": 54,
+  "criticalIssues": 31,
+  "highIssues": 3,
+  "mediumIssues": 18,
+  "lowIssues": 2,
+  "components": {
+    "BTCMarketAnalysis.tsx": {
+      "totalIssues": 1,
+      "issues": [
+        {
+          "severity": "LOW",
+          "type": "MISSING_ACTIVE_STATE",
+          "line": 0,
+          "code": "N/A",
+          "message": "Active states may not be properly styled"
+        }
+      ]
+    },
+    "ETHMarketAnalysis.tsx": {
+      "totalIssues": 1,
+      "issues": [
+        {
+          "severity": "LOW",
+          "type": "MISSING_ACTIVE_STATE",
+          "line": 0,
+          "code": "N/A",
+          "message": "Active states may not be properly styled"
+        }
+      ]
+    },
+    "CryptoHerald.tsx": {
+      "totalIssues": 0,
+      "issues": []
+    },
+    "WhaleWatch/WhaleWatchDashboard.tsx": {
+      "totalIssues": 0,
+      "issues": []
+    },
+    "TradeGenerationEngine.tsx": {
+      "totalIssues": 0,
+      "issues": []
+    },
+    "BTCTradingChart.tsx": {
+      "totalIssues": 0,
+      "issues": []
+    },
+    "ETHTradingChart.tsx": {
+      "totalIssues": 5,
+      "issues": [
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 427,
+          "code": "text-lg font-semibold text-gray-900",
+          "message": "Forbidden color detected: text-lg font-semibold text-gray-900"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 430,
+          "code": "text-sm text-gray-600 mt-1",
+          "message": "Forbidden color detected: text-sm text-gray-600 mt-1"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 269,
+          "code": "'from-green-400 to-green-600',\r",
+          "message": "Forbidden color detected: 'from-green-400 to-green-600',\r"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 278,
+          "code": "'from-blue-400 to-blue-600',\r",
+          "message": "Forbidden color detected: 'from-blue-400 to-blue-600',\r"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 287,
+          "code": "'from-purple-400 to-purple-600',\r",
+          "message": "Forbidden color detected: 'from-purple-400 to-purple-600',\r"
+        }
+      ]
+    },
+    "Header.tsx": {
+      "totalIssues": 9,
+      "issues": [
+        {
+          "severity": "HIGH",
+          "type": "INVISIBLE_ELEMENT",
+          "line": 40,
+          "code": "bg-white border-b-4 md:border-b-8 border-black header-newspaper-pattern relative",
+          "message": "Potential white-on-white combination"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 47,
+          "code": "mobile-text-primary p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black transition-colors",
+          "message": "Forbidden color detected: mobile-text-primary p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black transition-colors"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 115,
+          "code": "mobile-text-primary hover:text-gray-600 transition-colors font-medium",
+          "message": "Forbidden color detected: mobile-text-primary hover:text-gray-600 transition-colors font-medium"
+        },
+        {
+          "severity": "HIGH",
+          "type": "INVISIBLE_ELEMENT",
+          "line": 135,
+          "code": "md:hidden absolute top-full left-0 right-0 bg-white border-b-4 border-black shadow-lg z-50",
+          "message": "Potential white-on-white combination"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 142,
+          "code": "block mobile-text-primary hover:bg-gray-100 rounded-md transition-colors",
+          "message": "Forbidden color detected: block mobile-text-primary hover:bg-gray-100 rounded-md transition-colors"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 99,
+          "code": " \r\n                color: '#374151' // Ensure high contrast gray text\r\n              ",
+          "message": "Forbidden color detected:  \r\n                color: '#374151' // Ensure high contrast gray text\r\n              "
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 152,
+          "code": " color: '#374151' ",
+          "message": "Forbidden color detected:  color: '#374151' "
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 100,
+          "code": "'#374151' // Ensure high contrast gray text\r",
+          "message": "Forbidden color detected: '#374151' // Ensure high contrast gray text\r"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 152,
+          "code": "'#374151' ",
+          "message": "Forbidden color detected: '#374151' "
+        }
+      ]
+    },
+    "Footer.tsx": {
+      "totalIssues": 20,
+      "issues": [
+        {
+          "severity": "HIGH",
+          "type": "INVISIBLE_ELEMENT",
+          "line": 8,
+          "code": "bg-white border-t-4 md:border-t-8 border-black",
+          "message": "Potential white-on-white combination"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 21,
+          "code": "text-sm sm:text-base md:text-lg text-gray-800 font-bold max-w-3xl mx-auto px-2 leading-relaxed",
+          "message": "Forbidden color detected: text-sm sm:text-base md:text-lg text-gray-800 font-bold max-w-3xl mx-auto px-2 leading-relaxed"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 29,
+          "code": "bg-gray-50 border-2 md:border-4 border-black p-3 md:p-4 lg:p-6",
+          "message": "Forbidden color detected: bg-gray-50 border-2 md:border-4 border-black p-3 md:p-4 lg:p-6"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 34,
+          "code": "flex items-center min-h-[44px] py-2 hover:bg-gray-100 rounded px-2 -mx-2 transition-colors duration-150 cursor-pointer touch-manipulation",
+          "message": "Forbidden color detected: flex items-center min-h-[44px] py-2 hover:bg-gray-100 rounded px-2 -mx-2 transition-colors duration-150 cursor-pointer touch-manipulation"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 38,
+          "code": "flex items-center min-h-[44px] py-2 hover:bg-gray-100 rounded px-2 -mx-2 transition-colors duration-150 cursor-pointer touch-manipulation",
+          "message": "Forbidden color detected: flex items-center min-h-[44px] py-2 hover:bg-gray-100 rounded px-2 -mx-2 transition-colors duration-150 cursor-pointer touch-manipulation"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 42,
+          "code": "flex items-center min-h-[44px] py-2 hover:bg-gray-100 rounded px-2 -mx-2 transition-colors duration-150 cursor-pointer touch-manipulation",
+          "message": "Forbidden color detected: flex items-center min-h-[44px] py-2 hover:bg-gray-100 rounded px-2 -mx-2 transition-colors duration-150 cursor-pointer touch-manipulation"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 50,
+          "code": "bg-gray-50 border-2 md:border-4 border-black p-3 md:p-4 lg:p-6",
+          "message": "Forbidden color detected: bg-gray-50 border-2 md:border-4 border-black p-3 md:p-4 lg:p-6"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 55,
+          "code": "min-h-[44px] flex items-center py-2 hover:bg-gray-100 rounded px-2 -mx-2 transition-colors duration-150 cursor-pointer touch-manipulation",
+          "message": "Forbidden color detected: min-h-[44px] flex items-center py-2 hover:bg-gray-100 rounded px-2 -mx-2 transition-colors duration-150 cursor-pointer touch-manipulation"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 58,
+          "code": "min-h-[44px] flex items-center py-2 hover:bg-gray-100 rounded px-2 -mx-2 transition-colors duration-150 cursor-pointer touch-manipulation",
+          "message": "Forbidden color detected: min-h-[44px] flex items-center py-2 hover:bg-gray-100 rounded px-2 -mx-2 transition-colors duration-150 cursor-pointer touch-manipulation"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 61,
+          "code": "min-h-[44px] flex items-center py-2 hover:bg-gray-100 rounded px-2 -mx-2 transition-colors duration-150 cursor-pointer touch-manipulation",
+          "message": "Forbidden color detected: min-h-[44px] flex items-center py-2 hover:bg-gray-100 rounded px-2 -mx-2 transition-colors duration-150 cursor-pointer touch-manipulation"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 64,
+          "code": "min-h-[44px] flex items-center py-2 hover:bg-gray-100 rounded px-2 -mx-2 transition-colors duration-150 cursor-pointer touch-manipulation",
+          "message": "Forbidden color detected: min-h-[44px] flex items-center py-2 hover:bg-gray-100 rounded px-2 -mx-2 transition-colors duration-150 cursor-pointer touch-manipulation"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 67,
+          "code": "min-h-[44px] flex items-center py-2 hover:bg-gray-100 rounded px-2 -mx-2 transition-colors duration-150 cursor-pointer touch-manipulation",
+          "message": "Forbidden color detected: min-h-[44px] flex items-center py-2 hover:bg-gray-100 rounded px-2 -mx-2 transition-colors duration-150 cursor-pointer touch-manipulation"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 74,
+          "code": "bg-gray-50 border-2 md:border-4 border-black p-3 md:p-4 lg:p-6",
+          "message": "Forbidden color detected: bg-gray-50 border-2 md:border-4 border-black p-3 md:p-4 lg:p-6"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 81,
+          "code": "text-green-600 font-black text-sm bg-green-50 px-2 py-1 rounded border border-green-200",
+          "message": "Forbidden color detected: text-green-600 font-black text-sm bg-green-50 px-2 py-1 rounded border border-green-200"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 85,
+          "code": "text-green-600 font-black text-sm bg-green-50 px-2 py-1 rounded border border-green-200",
+          "message": "Forbidden color detected: text-green-600 font-black text-sm bg-green-50 px-2 py-1 rounded border border-green-200"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 89,
+          "code": "text-green-600 font-black text-sm bg-green-50 px-2 py-1 rounded border border-green-200",
+          "message": "Forbidden color detected: text-green-600 font-black text-sm bg-green-50 px-2 py-1 rounded border border-green-200"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 93,
+          "code": "text-green-600 font-black text-sm bg-green-50 px-2 py-1 rounded border border-green-200",
+          "message": "Forbidden color detected: text-green-600 font-black text-sm bg-green-50 px-2 py-1 rounded border border-green-200"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 106,
+          "code": "text-gray-700 font-bold text-xs md:text-sm mt-1",
+          "message": "Forbidden color detected: text-gray-700 font-bold text-xs md:text-sm mt-1"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 111,
+          "code": "text-black font-bold text-xs md:text-sm border-2 border-black px-4 py-3 text-center whitespace-nowrap min-h-[44px] hover:bg-gray-100 active:bg-gray-200 transition-colors duration-150 touch-manipulation",
+          "message": "Forbidden color detected: text-black font-bold text-xs md:text-sm border-2 border-black px-4 py-3 text-center whitespace-nowrap min-h-[44px] hover:bg-gray-100 active:bg-gray-200 transition-colors duration-150 touch-manipulation"
+        },
+        {
+          "severity": "CRITICAL",
+          "type": "FORBIDDEN_COLOR",
+          "line": 114,
+          "code": "text-black font-bold text-xs md:text-sm border-2 border-black px-4 py-3 text-center whitespace-nowrap min-h-[44px] hover:bg-gray-100 active:bg-gray-200 transition-colors duration-150 touch-manipulation",
+          "message": "Forbidden color detected: text-black font-bold text-xs md:text-sm border-2 border-black px-4 py-3 text-center whitespace-nowrap min-h-[44px] hover:bg-gray-100 active:bg-gray-200 transition-colors duration-150 touch-manipulation"
+        }
+      ]
+    },
+    "Navigation.tsx": {
+      "totalIssues": 18,
+      "issues": [
+        {
+          "severity": "MEDIUM",
+          "type": "MISSING_MOBILE_STYLES",
+          "line": 0,
+          "code": "N/A",
+          "message": "Component may lack mobile-specific responsive styles"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "MISSING_MOBILE_STYLES",
+          "line": 0,
+          "code": "N/A",
+          "message": "Component may lack mobile-specific responsive styles"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "MISSING_MOBILE_STYLES",
+          "line": 0,
+          "code": "N/A",
+          "message": "Component may lack mobile-specific responsive styles"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "MISSING_MOBILE_STYLES",
+          "line": 0,
+          "code": "N/A",
+          "message": "Component may lack mobile-specific responsive styles"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "MISSING_MOBILE_STYLES",
+          "line": 0,
+          "code": "N/A",
+          "message": "Component may lack mobile-specific responsive styles"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "MISSING_MOBILE_STYLES",
+          "line": 0,
+          "code": "N/A",
+          "message": "Component may lack mobile-specific responsive styles"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "MISSING_MOBILE_STYLES",
+          "line": 0,
+          "code": "N/A",
+          "message": "Component may lack mobile-specific responsive styles"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "MISSING_MOBILE_STYLES",
+          "line": 0,
+          "code": "N/A",
+          "message": "Component may lack mobile-specific responsive styles"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "MISSING_MOBILE_STYLES",
+          "line": 0,
+          "code": "N/A",
+          "message": "Component may lack mobile-specific responsive styles"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "MISSING_MOBILE_STYLES",
+          "line": 0,
+          "code": "N/A",
+          "message": "Component may lack mobile-specific responsive styles"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "MISSING_MOBILE_STYLES",
+          "line": 0,
+          "code": "N/A",
+          "message": "Component may lack mobile-specific responsive styles"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "MISSING_MOBILE_STYLES",
+          "line": 0,
+          "code": "N/A",
+          "message": "Component may lack mobile-specific responsive styles"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "MISSING_MOBILE_STYLES",
+          "line": 0,
+          "code": "N/A",
+          "message": "Component may lack mobile-specific responsive styles"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "MISSING_MOBILE_STYLES",
+          "line": 0,
+          "code": "N/A",
+          "message": "Component may lack mobile-specific responsive styles"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "MISSING_MOBILE_STYLES",
+          "line": 0,
+          "code": "N/A",
+          "message": "Component may lack mobile-specific responsive styles"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "MISSING_MOBILE_STYLES",
+          "line": 0,
+          "code": "N/A",
+          "message": "Component may lack mobile-specific responsive styles"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "MISSING_MOBILE_STYLES",
+          "line": 0,
+          "code": "N/A",
+          "message": "Component may lack mobile-specific responsive styles"
+        },
+        {
+          "severity": "MEDIUM",
+          "type": "MISSING_MOBILE_STYLES",
+          "line": 0,
+          "code": "N/A",
+          "message": "Component may lack mobile-specific responsive styles"
+        }
+      ]
+    }
+  }
+}

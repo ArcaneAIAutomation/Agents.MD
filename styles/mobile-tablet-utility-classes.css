@@ -1,0 +1,1040 @@
+/* ============================================
+   TASK 7: FOOLPROOF MOBILE/TABLET STYLING SYSTEM
+   Mobile-Specific CSS Utility Classes (320px-1023px)
+   Requirements: 11.1, 11.2, 11.3, 11.4, 11.5
+   ============================================ */
+
+/* ============================================
+   TASK 7.1: MOBILE-SPECIFIC CSS UTILITY CLASSES
+   Guaranteed Contrast and Visibility
+   ============================================ */
+
+/* MOBILE/TABLET ONLY - Apply these classes on mobile and tablet devices */
+@media (max-width: 1023px) {
+  
+  /* ============================================
+     MOBILE BUTTON ACTIVE STATE - GUARANTEED CONTRAST
+     Prevents white-on-white and ensures visibility
+     ============================================ */
+  
+  .mobile-btn-active {
+    /* ACTIVE STATE: Orange background with black text */
+    background-color: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    
+    /* Typography */
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    
+    /* Visual Feedback */
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.5) !important;
+    
+    /* Smooth Transitions */
+    transition: all 0.3s ease;
+    
+    /* Touch Target Size */
+    min-height: 48px !important;
+    min-width: 48px !important;
+    
+    /* Cursor */
+    cursor: pointer;
+  }
+  
+  .mobile-btn-active:hover {
+    /* Enhanced glow on hover */
+    box-shadow: 0 0 30px rgba(247, 147, 26, 0.6) !important;
+    transform: scale(1.02);
+  }
+  
+  .mobile-btn-active:active {
+    /* Pressed state */
+    transform: scale(0.98);
+  }
+  
+  .mobile-btn-active:disabled {
+    /* Disabled state */
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  
+  /* ============================================
+     MOBILE TEXT VISIBLE - FORCE WHITE TEXT
+     Emergency override for invisible text
+     ============================================ */
+  
+  .mobile-text-visible {
+    /* FORCE WHITE TEXT on black background */
+    color: var(--bitcoin-white) !important;
+    background-color: transparent !important;
+    
+    /* Enhanced readability */
+    font-weight: 500 !important;
+    
+    /* Ensure minimum contrast */
+    text-shadow: none !important;
+  }
+  
+  .mobile-text-visible-strong {
+    /* Extra strong visibility */
+    color: var(--bitcoin-white) !important;
+    background-color: transparent !important;
+    font-weight: 700 !important;
+    text-shadow: 0 0 1px rgba(255, 255, 255, 0.3) !important;
+  }
+  
+  /* ============================================
+     MOBILE BACKGROUND SAFE - ENSURE BLACK BACKGROUND
+     Prevents color conflicts
+     ============================================ */
+  
+  .mobile-bg-safe {
+    /* FORCE BLACK BACKGROUND */
+    background-color: var(--bitcoin-black) !important;
+    
+    /* Ensure text is visible */
+    color: var(--bitcoin-white-80) !important;
+  }
+  
+  .mobile-bg-safe-with-border {
+    /* Black background with orange border */
+    background-color: var(--bitcoin-black) !important;
+    color: var(--bitcoin-white-80) !important;
+    border: 1px solid var(--bitcoin-orange-20) !important;
+  }
+  
+  /* ============================================
+     MOBILE BORDER VISIBLE - ORANGE BORDERS
+     Ensures borders are always visible
+     ============================================ */
+  
+  .mobile-border-visible {
+    /* FORCE VISIBLE ORANGE BORDER */
+    border: 2px solid var(--bitcoin-orange) !important;
+    border-radius: 8px;
+  }
+  
+  .mobile-border-visible-subtle {
+    /* Subtle orange border */
+    border: 1px solid var(--bitcoin-orange-20) !important;
+    border-radius: 8px;
+  }
+  
+  .mobile-border-visible-subtle:hover {
+    /* Brighter on hover */
+    border-color: var(--bitcoin-orange) !important;
+  }
+  
+  .mobile-border-visible-strong {
+    /* Strong orange border */
+    border: 3px solid var(--bitcoin-orange) !important;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(247, 147, 26, 0.3) !important;
+  }
+
+  
+  /* ============================================
+     MOBILE BUTTON INACTIVE STATE - GUARANTEED CONTRAST
+     Orange text on black background
+     ============================================ */
+  
+  .mobile-btn-inactive {
+    /* INACTIVE STATE: Black background with orange text */
+    background-color: var(--bitcoin-black) !important;
+    color: var(--bitcoin-orange) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    
+    /* Typography */
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    
+    /* Smooth Transitions */
+    transition: all 0.3s ease;
+    
+    /* Touch Target Size */
+    min-height: 48px !important;
+    min-width: 48px !important;
+    
+    /* Cursor */
+    cursor: pointer;
+  }
+  
+  .mobile-btn-inactive:hover {
+    /* Invert to active state on hover */
+    background-color: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.3) !important;
+    transform: scale(1.02);
+  }
+  
+  .mobile-btn-inactive:active {
+    /* Pressed state */
+    transform: scale(0.98);
+  }
+  
+  .mobile-btn-inactive:disabled {
+    /* Disabled state */
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  
+  /* ============================================
+     MOBILE SAFE CONTRAST - EMERGENCY OVERRIDE
+     Last resort to prevent invisible elements
+     ============================================ */
+  
+  .mobile-safe-contrast {
+    /* Guaranteed high contrast */
+    background-color: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    font-weight: 700 !important;
+  }
+  
+  .mobile-safe-contrast-inverted {
+    /* Inverted high contrast */
+    background-color: var(--bitcoin-black) !important;
+    color: var(--bitcoin-white) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    font-weight: 700 !important;
+  }
+  
+  /* ============================================
+     MOBILE HIGH VISIBILITY - MAXIMUM EMPHASIS
+     For critical elements that must be seen
+     ============================================ */
+  
+  .mobile-high-visibility {
+    /* Maximum visibility with glow */
+    border: 3px solid var(--bitcoin-orange) !important;
+    box-shadow: 0 0 25px rgba(247, 147, 26, 0.6) !important;
+    background-color: var(--bitcoin-black) !important;
+    color: var(--bitcoin-white) !important;
+  }
+  
+  .mobile-high-visibility-orange {
+    /* Orange background with maximum visibility */
+    border: 3px solid var(--bitcoin-orange) !important;
+    box-shadow: 0 0 30px rgba(247, 147, 26, 0.7) !important;
+    background-color: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    font-weight: 800 !important;
+  }
+
+  
+  /* ============================================
+     MOBILE ICON VISIBILITY - ENSURE ICONS ARE VISIBLE
+     Orange or white icons on black backgrounds
+     ============================================ */
+  
+  .mobile-icon-visible svg {
+    /* Force orange color for icons */
+    color: var(--bitcoin-orange) !important;
+    stroke: var(--bitcoin-orange) !important;
+    fill: none !important;
+    stroke-width: 2.5 !important;
+  }
+  
+  .mobile-icon-visible-white svg {
+    /* Force white color for icons */
+    color: var(--bitcoin-white) !important;
+    stroke: var(--bitcoin-white) !important;
+    fill: none !important;
+    stroke-width: 2.5 !important;
+  }
+  
+  .mobile-icon-visible-filled svg {
+    /* Filled orange icons */
+    color: var(--bitcoin-orange) !important;
+    fill: var(--bitcoin-orange) !important;
+    stroke: none !important;
+  }
+  
+  /* ============================================
+     MOBILE CARD SAFE - GUARANTEED CARD STYLING
+     Black background with orange border
+     ============================================ */
+  
+  .mobile-card-safe {
+    /* Safe card styling */
+    background-color: var(--bitcoin-black) !important;
+    border: 1px solid var(--bitcoin-orange) !important;
+    border-radius: 12px;
+    padding: 1rem;
+    color: var(--bitcoin-white-80) !important;
+  }
+  
+  .mobile-card-safe:hover {
+    /* Enhanced on hover */
+    border-color: var(--bitcoin-orange) !important;
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.3) !important;
+  }
+  
+  .mobile-card-safe-subtle {
+    /* Subtle card styling */
+    background-color: var(--bitcoin-black) !important;
+    border: 1px solid var(--bitcoin-orange-20) !important;
+    border-radius: 12px;
+    padding: 1rem;
+    color: var(--bitcoin-white-80) !important;
+  }
+  
+  .mobile-card-safe-subtle:hover {
+    /* Brighter on hover */
+    border-color: var(--bitcoin-orange) !important;
+    box-shadow: 0 0 15px rgba(247, 147, 26, 0.2) !important;
+  }
+  
+  /* ============================================
+     MOBILE LINK SAFE - GUARANTEED LINK VISIBILITY
+     Orange links with proper contrast
+     ============================================ */
+  
+  .mobile-link-safe {
+    /* Safe link styling */
+    color: var(--bitcoin-orange) !important;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-decoration-color: var(--bitcoin-orange);
+    font-weight: 600;
+  }
+  
+  .mobile-link-safe:hover {
+    /* White on hover */
+    color: var(--bitcoin-white) !important;
+    text-decoration-thickness: 3px;
+  }
+  
+  .mobile-link-safe:visited {
+    /* Slightly muted orange for visited */
+    color: var(--bitcoin-orange-80) !important;
+  }
+  
+  /* ============================================
+     MOBILE INPUT SAFE - GUARANTEED INPUT VISIBILITY
+     Proper borders and contrast
+     ============================================ */
+  
+  .mobile-input-safe {
+    /* Safe input styling */
+    background-color: var(--bitcoin-black) !important;
+    color: var(--bitcoin-white) !important;
+    border: 2px solid var(--bitcoin-orange-20) !important;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-size: 1rem; /* Prevent iOS zoom */
+  }
+  
+  .mobile-input-safe:focus {
+    /* Orange border on focus */
+    border-color: var(--bitcoin-orange) !important;
+    outline: 2px solid var(--bitcoin-orange) !important;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(247, 147, 26, 0.3) !important;
+  }
+  
+  .mobile-input-safe::placeholder {
+    /* Visible placeholder */
+    color: var(--bitcoin-white-60) !important;
+  }
+}
+
+/* ============================================
+   END TASK 7.1: MOBILE-SPECIFIC CSS UTILITY CLASSES
+   ============================================ */
+
+
+
+/* ============================================
+   TASK 7.2: CSS VALIDATION AND ERROR PREVENTION
+   Automatic Fallbacks for Invalid Color Combinations
+   Requirements: 11.2, 11.3, 11.4, 11.5
+   ============================================ */
+
+/* ============================================
+   COLOR VIOLATION PREVENTION
+   Prevent white-on-white, black-on-black, orange-on-orange
+   ============================================ */
+
+@media (max-width: 1023px) {
+  
+  /* ============================================
+     PREVENT WHITE-ON-WHITE
+     ============================================ */
+  
+  /* Never allow white text on white background */
+  .bg-white *:not(.text-bitcoin-black):not([class*="text-black"]),
+  .bg-bitcoin-white *:not(.text-bitcoin-black):not([class*="text-black"]),
+  [style*="background: white"] *:not(.text-bitcoin-black),
+  [style*="background: #fff"] *:not(.text-bitcoin-black),
+  [style*="background: #ffffff"] *:not(.text-bitcoin-black) {
+    color: var(--bitcoin-black) !important;
+  }
+  
+  /* ============================================
+     PREVENT BLACK-ON-BLACK
+     ============================================ */
+  
+  /* Never allow black text on black background */
+  .bg-black *:not(.text-bitcoin-white):not(.text-bitcoin-white-80):not(.text-bitcoin-white-60):not(.text-bitcoin-orange):not([class*="text-white"]):not([class*="text-orange"]),
+  .bg-bitcoin-black *:not(.text-bitcoin-white):not(.text-bitcoin-white-80):not(.text-bitcoin-white-60):not(.text-bitcoin-orange):not([class*="text-white"]):not([class*="text-orange"]),
+  [style*="background: black"] *:not([class*="text-white"]):not([class*="text-orange"]),
+  [style*="background: #000"] *:not([class*="text-white"]):not([class*="text-orange"]),
+  [style*="background: #000000"] *:not([class*="text-white"]):not([class*="text-orange"]) {
+    color: var(--bitcoin-white-80) !important;
+  }
+  
+  /* ============================================
+     PREVENT ORANGE-ON-ORANGE
+     ============================================ */
+  
+  /* Never allow orange text on orange background */
+  .bg-bitcoin-orange *:not(.text-bitcoin-black):not([class*="text-black"]),
+  [style*="background: #F7931A"] *:not(.text-bitcoin-black),
+  [style*="background: #f7931a"] *:not(.text-bitcoin-black) {
+    color: var(--bitcoin-black) !important;
+  }
+  
+  /* ============================================
+     AUTOMATIC FALLBACK FOR INVALID COMBINATIONS
+     ============================================ */
+  
+  /* If background and text are same color, force contrast */
+  .auto-contrast-fix {
+    /* Detect and fix same-color combinations */
+    background-color: var(--bitcoin-black) !important;
+    color: var(--bitcoin-white) !important;
+  }
+  
+  /* ============================================
+     BITCOIN SOVEREIGN COLOR ENFORCEMENT
+     Only allow black, orange, white
+     ============================================ */
+  
+  /* Forbidden colors - automatically convert to Bitcoin Sovereign */
+  .text-red-500,
+  .text-red-600,
+  .text-red-700,
+  [class*="text-red"] {
+    color: var(--bitcoin-white-80) !important; /* Convert red to white */
+  }
+  
+  .text-green-500,
+  .text-green-600,
+  .text-green-700,
+  [class*="text-green"] {
+    color: var(--bitcoin-orange) !important; /* Convert green to orange */
+  }
+  
+  .text-blue-500,
+  .text-blue-600,
+  .text-blue-700,
+  [class*="text-blue"] {
+    color: var(--bitcoin-white) !important; /* Convert blue to white */
+  }
+  
+  .text-yellow-500,
+  .text-yellow-600,
+  .text-yellow-700,
+  [class*="text-yellow"] {
+    color: var(--bitcoin-orange) !important; /* Convert yellow to orange */
+  }
+  
+  .text-purple-500,
+  .text-purple-600,
+  .text-purple-700,
+  [class*="text-purple"] {
+    color: var(--bitcoin-white-60) !important; /* Convert purple to muted white */
+  }
+  
+  /* Forbidden background colors - automatically convert */
+  .bg-red-500,
+  .bg-red-600,
+  .bg-red-700,
+  [class*="bg-red"] {
+    background-color: var(--bitcoin-black) !important; /* Convert to black */
+    color: var(--bitcoin-white) !important;
+  }
+  
+  .bg-green-500,
+  .bg-green-600,
+  .bg-green-700,
+  [class*="bg-green"] {
+    background-color: var(--bitcoin-black) !important; /* Convert to black */
+    color: var(--bitcoin-orange) !important;
+  }
+  
+  .bg-blue-500,
+  .bg-blue-600,
+  .bg-blue-700,
+  [class*="bg-blue"] {
+    background-color: var(--bitcoin-black) !important; /* Convert to black */
+    color: var(--bitcoin-white) !important;
+  }
+  
+  .bg-yellow-500,
+  .bg-yellow-600,
+  .bg-yellow-700,
+  [class*="bg-yellow"] {
+    background-color: var(--bitcoin-orange) !important; /* Convert to orange */
+    color: var(--bitcoin-black) !important;
+  }
+  
+  .bg-purple-500,
+  .bg-purple-600,
+  .bg-purple-700,
+  [class*="bg-purple"] {
+    background-color: var(--bitcoin-black) !important; /* Convert to black */
+    color: var(--bitcoin-white-60) !important;
+  }
+
+  
+  /* ============================================
+     MINIMUM CONTRAST ENFORCEMENT
+     Ensure 4.5:1 ratio minimum (WCAG AA)
+     ============================================ */
+  
+  /* Force minimum contrast for any text element */
+  .enforce-min-contrast {
+    /* Guaranteed WCAG AA compliance */
+    color: var(--bitcoin-white) !important;
+    background-color: var(--bitcoin-black) !important;
+    font-weight: 500 !important;
+  }
+  
+  .enforce-min-contrast-strong {
+    /* Extra strong contrast */
+    color: var(--bitcoin-white) !important;
+    background-color: var(--bitcoin-black) !important;
+    font-weight: 700 !important;
+    text-shadow: 0 0 1px rgba(255, 255, 255, 0.3) !important;
+  }
+  
+  /* ============================================
+     EMERGENCY HIGH-CONTRAST OVERRIDES
+     Last resort to fix visibility issues
+     ============================================ */
+  
+  .emergency-contrast {
+    /* Maximum contrast override */
+    background-color: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    border: 3px solid var(--bitcoin-orange) !important;
+    font-weight: 800 !important;
+    box-shadow: 0 0 30px rgba(247, 147, 26, 0.7) !important;
+  }
+  
+  .emergency-contrast-inverted {
+    /* Inverted maximum contrast */
+    background-color: var(--bitcoin-black) !important;
+    color: var(--bitcoin-white) !important;
+    border: 3px solid var(--bitcoin-orange) !important;
+    font-weight: 800 !important;
+    box-shadow: 0 0 30px rgba(247, 147, 26, 0.7) !important;
+  }
+  
+  /* ============================================
+     BUTTON STATE VALIDATION
+     Ensure buttons always have proper contrast
+     ============================================ */
+  
+  /* Validate button states */
+  button:not([class*="mobile-btn"]):not([class*="btn-bitcoin"]) {
+    /* Apply safe defaults to unstyled buttons */
+    background-color: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    font-weight: 700;
+    min-height: 48px;
+    min-width: 48px;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  
+  button:not([class*="mobile-btn"]):not([class*="btn-bitcoin"]):hover {
+    /* Safe hover state */
+    background-color: var(--bitcoin-black) !important;
+    color: var(--bitcoin-orange) !important;
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.3) !important;
+  }
+  
+  /* ============================================
+     LINK STATE VALIDATION
+     Ensure links always have proper contrast
+     ============================================ */
+  
+  /* Validate link states */
+  a:not([class*="mobile-link"]):not([class*="link-"]) {
+    /* Apply safe defaults to unstyled links */
+    color: var(--bitcoin-orange) !important;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    font-weight: 600;
+  }
+  
+  a:not([class*="mobile-link"]):not([class*="link-"]):hover {
+    /* Safe hover state */
+    color: var(--bitcoin-white) !important;
+    text-decoration-thickness: 3px;
+  }
+  
+  a:not([class*="mobile-link"]):not([class*="link-"]):visited {
+    /* Safe visited state */
+    color: var(--bitcoin-orange-80) !important;
+  }
+}
+
+/* ============================================
+   END TASK 7.2: CSS VALIDATION AND ERROR PREVENTION
+   ============================================ */
+
+
+
+/* ============================================
+   TASK 7.3: MOBILE/TABLET MEDIA QUERY OVERRIDES
+   Comprehensive Breakpoint Coverage
+   Requirements: 11.1, 11.2, 11.4
+   ============================================ */
+
+/* ============================================
+   EXTRA SMALL MOBILE (320px-479px)
+   iPhone SE, Small Android Devices
+   ============================================ */
+
+@media (max-width: 479px) {
+  
+  /* ============================================
+     BUTTON STATES - EXPLICIT COLOR DEFINITIONS
+     ============================================ */
+  
+  /* All buttons must have explicit states */
+  button,
+  [role="button"],
+  .btn-bitcoin-primary,
+  .btn-bitcoin-secondary,
+  .mobile-btn-active,
+  .mobile-btn-inactive {
+    /* Ensure minimum touch target */
+    min-height: 48px !important;
+    min-width: 48px !important;
+    padding: 0.875rem 1rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Primary button - explicit colors */
+  .btn-bitcoin-primary,
+  .mobile-btn-active {
+    background-color: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+  }
+  
+  /* Secondary button - explicit colors */
+  .btn-bitcoin-secondary,
+  .mobile-btn-inactive {
+    background-color: var(--bitcoin-black) !important;
+    color: var(--bitcoin-orange) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+  }
+  
+  /* ============================================
+     TEXT VISIBILITY - FORCE WHITE ON BLACK
+     ============================================ */
+  
+  /* All text must be visible */
+  body,
+  p,
+  span,
+  div:not([class*="bg-bitcoin-orange"]) {
+    color: var(--bitcoin-white-80) !important;
+    background-color: transparent !important;
+  }
+  
+  /* Headings must be white */
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--bitcoin-white) !important;
+    background-color: transparent !important;
+  }
+  
+  /* ============================================
+     BORDER VISIBILITY - ORANGE BORDERS
+     ============================================ */
+  
+  /* All borders must be visible */
+  .bitcoin-block,
+  .stat-card,
+  .news-card,
+  .feature-card {
+    border: 1px solid var(--bitcoin-orange) !important;
+  }
+  
+  /* Subtle borders */
+  .bitcoin-block-subtle,
+  .info-card {
+    border: 1px solid var(--bitcoin-orange-20) !important;
+  }
+  
+  .bitcoin-block-subtle:hover,
+  .info-card:hover {
+    border-color: var(--bitcoin-orange) !important;
+  }
+}
+
+/* ============================================
+   SMALL MOBILE (480px-639px)
+   Standard Mobile Phones
+   ============================================ */
+
+@media (min-width: 480px) and (max-width: 639px) {
+  
+  /* ============================================
+     BUTTON STATES - EXPLICIT COLOR DEFINITIONS
+     ============================================ */
+  
+  /* Slightly larger buttons */
+  button,
+  [role="button"],
+  .btn-bitcoin-primary,
+  .btn-bitcoin-secondary,
+  .mobile-btn-active,
+  .mobile-btn-inactive {
+    min-height: 48px !important;
+    min-width: 48px !important;
+    padding: 0.875rem 1.25rem !important;
+    font-size: 0.9375rem !important;
+  }
+  
+  /* Primary button - explicit colors */
+  .btn-bitcoin-primary,
+  .mobile-btn-active {
+    background-color: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+  }
+  
+  /* Secondary button - explicit colors */
+  .btn-bitcoin-secondary,
+  .mobile-btn-inactive {
+    background-color: var(--bitcoin-black) !important;
+    color: var(--bitcoin-orange) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+  }
+  
+  /* ============================================
+     TEXT VISIBILITY - FORCE WHITE ON BLACK
+     ============================================ */
+  
+  /* All text must be visible */
+  body {
+    color: var(--bitcoin-white-80) !important;
+    font-size: 16px !important;
+  }
+  
+  /* Headings */
+  h1 { font-size: 1.875rem !important; }
+  h2 { font-size: 1.5rem !important; }
+  h3 { font-size: 1.25rem !important; }
+  h4 { font-size: 1.125rem !important; }
+}
+
+/* ============================================
+   LARGE MOBILE (640px-767px)
+   Large Phones, Small Tablets
+   ============================================ */
+
+@media (min-width: 640px) and (max-width: 767px) {
+  
+  /* ============================================
+     BUTTON STATES - EXPLICIT COLOR DEFINITIONS
+     ============================================ */
+  
+  /* Standard button sizing */
+  button,
+  [role="button"],
+  .btn-bitcoin-primary,
+  .btn-bitcoin-secondary,
+  .mobile-btn-active,
+  .mobile-btn-inactive {
+    min-height: 48px !important;
+    min-width: 48px !important;
+    padding: 0.875rem 1.5rem !important;
+    font-size: 1rem !important;
+  }
+  
+  /* Primary button - explicit colors */
+  .btn-bitcoin-primary,
+  .mobile-btn-active {
+    background-color: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+  }
+  
+  /* Secondary button - explicit colors */
+  .btn-bitcoin-secondary,
+  .mobile-btn-inactive {
+    background-color: var(--bitcoin-black) !important;
+    color: var(--bitcoin-orange) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+  }
+  
+  /* ============================================
+     TEXT VISIBILITY - FORCE WHITE ON BLACK
+     ============================================ */
+  
+  /* Enhanced text sizing */
+  body {
+    color: var(--bitcoin-white-80) !important;
+    font-size: 16px !important;
+  }
+  
+  /* Headings */
+  h1 { font-size: 2rem !important; }
+  h2 { font-size: 1.75rem !important; }
+  h3 { font-size: 1.5rem !important; }
+  h4 { font-size: 1.25rem !important; }
+}
+
+
+/* ============================================
+   TABLET (768px-1023px)
+   iPad Mini, Standard Tablets
+   ============================================ */
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  
+  /* ============================================
+     BUTTON STATES - EXPLICIT COLOR DEFINITIONS
+     ============================================ */
+  
+  /* Larger buttons for tablets */
+  button,
+  [role="button"],
+  .btn-bitcoin-primary,
+  .btn-bitcoin-secondary,
+  .mobile-btn-active,
+  .mobile-btn-inactive {
+    min-height: 52px !important;
+    min-width: 52px !important;
+    padding: 1rem 1.75rem !important;
+    font-size: 1rem !important;
+  }
+  
+  /* Primary button - explicit colors */
+  .btn-bitcoin-primary,
+  .mobile-btn-active {
+    background-color: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+  }
+  
+  /* Secondary button - explicit colors */
+  .btn-bitcoin-secondary,
+  .mobile-btn-inactive {
+    background-color: var(--bitcoin-black) !important;
+    color: var(--bitcoin-orange) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+  }
+  
+  /* ============================================
+     TEXT VISIBILITY - FORCE WHITE ON BLACK
+     ============================================ */
+  
+  /* Enhanced text sizing for tablets */
+  body {
+    color: var(--bitcoin-white-80) !important;
+    font-size: 17px !important;
+  }
+  
+  /* Headings */
+  h1 { font-size: 2.25rem !important; }
+  h2 { font-size: 2rem !important; }
+  h3 { font-size: 1.75rem !important; }
+  h4 { font-size: 1.5rem !important; }
+  
+  /* ============================================
+     BORDER VISIBILITY - SLIGHTLY THICKER
+     ============================================ */
+  
+  /* Thicker borders on tablets */
+  .bitcoin-block,
+  .stat-card,
+  .news-card,
+  .feature-card {
+    border-width: 1.5px !important;
+  }
+  
+  /* ============================================
+     TWO-COLUMN LAYOUTS ON TABLETS
+     ============================================ */
+  
+  /* Button groups can be two columns */
+  .mobile-btn-group-tablet {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem !important;
+  }
+  
+  /* Stat grids can be two columns */
+  .stat-grid-3,
+  .stat-grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* ============================================
+   EMERGENCY HIGH-CONTRAST OVERRIDES
+   Apply to all mobile/tablet breakpoints
+   ============================================ */
+
+@media (max-width: 1023px) {
+  
+  /* ============================================
+     FORCE CONTRAST ON HOVER STATES
+     ============================================ */
+  
+  /* Button hover states must maintain contrast */
+  .btn-bitcoin-primary:hover,
+  .mobile-btn-active:hover {
+    background-color: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    box-shadow: 0 0 30px rgba(247, 147, 26, 0.6) !important;
+  }
+  
+  .btn-bitcoin-secondary:hover,
+  .mobile-btn-inactive:hover {
+    background-color: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.3) !important;
+  }
+  
+  /* ============================================
+     FORCE CONTRAST ON ACTIVE STATES
+     ============================================ */
+  
+  /* Button active states must maintain contrast */
+  .btn-bitcoin-primary:active,
+  .mobile-btn-active:active {
+    background-color: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    transform: scale(0.98) !important;
+  }
+  
+  .btn-bitcoin-secondary:active,
+  .mobile-btn-inactive:active {
+    background-color: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    transform: scale(0.98) !important;
+  }
+  
+  /* ============================================
+     FORCE CONTRAST ON FOCUS STATES
+     ============================================ */
+  
+  /* All interactive elements must have visible focus */
+  *:focus-visible {
+    outline: 3px solid var(--bitcoin-orange) !important;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 5px rgba(247, 147, 26, 0.4) !important;
+  }
+  
+  button:focus-visible,
+  .btn-bitcoin-primary:focus-visible,
+  .btn-bitcoin-secondary:focus-visible {
+    outline: 3px solid var(--bitcoin-orange) !important;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 6px rgba(247, 147, 26, 0.5) !important;
+  }
+  
+  /* ============================================
+     FORCE CONTRAST ON DISABLED STATES
+     ============================================ */
+  
+  /* Disabled buttons must be clearly disabled */
+  button:disabled,
+  .btn-bitcoin-primary:disabled,
+  .btn-bitcoin-secondary:disabled,
+  .mobile-btn-active:disabled,
+  .mobile-btn-inactive:disabled {
+    background-color: var(--bitcoin-black) !important;
+    color: var(--bitcoin-orange-30) !important;
+    border-color: var(--bitcoin-orange-30) !important;
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+}
+
+/* ============================================
+   COMPREHENSIVE COMMENTS FOR MAINTAINABILITY
+   ============================================ */
+
+/*
+  MOBILE/TABLET STYLING SYSTEM DOCUMENTATION
+  
+  This file provides a foolproof styling system for mobile and tablet devices (320px-1023px).
+  
+  KEY PRINCIPLES:
+  1. All buttons must have explicit color states (active, inactive, hover, focus, disabled)
+  2. All text must be visible with minimum 4.5:1 contrast ratio (WCAG AA)
+  3. All borders must be visible using orange at appropriate opacity
+  4. All icons must be orange or white on black backgrounds
+  5. No white-on-white, black-on-black, or orange-on-orange combinations allowed
+  
+  UTILITY CLASSES:
+  - .mobile-btn-active: Orange background with black text (active state)
+  - .mobile-btn-inactive: Black background with orange text (inactive state)
+  - .mobile-text-visible: Force white text on transparent background
+  - .mobile-bg-safe: Force black background with white text
+  - .mobile-border-visible: Force visible orange border
+  - .mobile-icon-visible: Force orange icons
+  - .mobile-card-safe: Safe card styling with proper contrast
+  - .mobile-link-safe: Safe link styling with proper contrast
+  - .mobile-input-safe: Safe input styling with proper contrast
+  
+  AUTOMATIC FALLBACKS:
+  - Forbidden colors (red, green, blue, yellow, purple) are automatically converted to Bitcoin Sovereign colors
+  - Invalid color combinations are automatically fixed
+  - Unstyled buttons and links get safe default styling
+  
+  BREAKPOINTS:
+  - 320px-479px: Extra small mobile (iPhone SE, small Android)
+  - 480px-639px: Small mobile (standard phones)
+  - 640px-767px: Large mobile (large phones, small tablets)
+  - 768px-1023px: Tablet (iPad Mini, standard tablets)
+  
+  EMERGENCY OVERRIDES:
+  - .emergency-contrast: Maximum contrast override (orange bg, black text)
+  - .emergency-contrast-inverted: Inverted maximum contrast (black bg, white text)
+  - .mobile-high-visibility: Maximum visibility with glow effects
+  
+  TESTING:
+  - Test all pages on physical devices (iPhone SE, iPhone 14, iPad)
+  - Verify all button states (inactive, active, hover, focus, disabled)
+  - Check all text for visibility (minimum 4.5:1 contrast)
+  - Ensure all borders and icons are visible
+  - Validate no white-on-white or black-on-black combinations
+  
+  MAINTENANCE:
+  - Always use these utility classes for mobile/tablet styling
+  - Never override with inline styles
+  - Test on physical devices after any changes
+  - Document any new utility classes added
+  - Keep Bitcoin Sovereign color system (black, orange, white only)
+*/
+
+/* ============================================
+   END TASK 7.3: MOBILE/TABLET MEDIA QUERY OVERRIDES
+   ============================================ */
+
+
+/* ============================================
+   END TASK 7: FOOLPROOF MOBILE/TABLET STYLING SYSTEM
+   ============================================ */

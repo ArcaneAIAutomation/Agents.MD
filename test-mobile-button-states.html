@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile/Tablet Button State Test - Bitcoin Sovereign</title>
+  <link rel="stylesheet" href="./styles/globals.css">
+  <style>
+    body {
+      background: #000000;
+      color: #FFFFFF;
+      font-family: 'Inter', system-ui, sans-serif;
+      padding: 2rem 1rem;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+    
+    .test-section {
+      margin-bottom: 3rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(247, 147, 26, 0.2);
+      border-radius: 12px;
+    }
+    
+    .test-section h2 {
+      color: #F7931A;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+    
+    .test-section p {
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+    }
+    
+    .button-grid {
+      display: grid;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .button-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .state-label {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    
+    .viewport-indicator {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: #F7931A;
+      color: #000000;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.75rem;
+      z-index: 9999;
+    }
+    
+    .test-result {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(247, 147, 26, 0.1);
+      border: 1px solid rgba(247, 147, 26, 0.3);
+      border-radius: 8px;
+    }
+    
+    .test-result.pass {
+      border-color: #F7931A;
+      background: rgba(247, 147, 26, 0.15);
+    }
+    
+    .test-result.fail {
+      border-color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    @media (max-width: 1023px) {
+      .mobile-only-indicator {
+        display: block;
+        background: #F7931A;
+        color: #000000;
+        padding: 1rem;
+        text-align: center;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        border-radius: 8px;
+      }
+    }
+    
+    @media (min-width: 1024px) {
+      .mobile-only-indicator {
+        display: block;
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.6);
+        padding: 1rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        border-radius: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="viewport-indicator" id="viewportIndicator">
+    Loading...
+  </div>
+  
+  <div class="mobile-only-indicator" id="mobileIndicator">
+    ✓ Mobile/Tablet Mode Active (320px-1023px)
+  </div>
+  
+  <h1 style="color: #F7931A; text-align: center; margin-bottom: 2rem;">
+    Mobile/Tablet Button State Test
+  </h1>
+  
+  <!-- Test Section 1: Mobile Button States -->
+  <div class="test-section">
+    <h2>1. Mobile Button State Classes</h2>
+    <p>Testing .mobile-btn-inactive and .mobile-btn-active classes</p>
+    
+    <div class="button-grid">
+      <div>
+        <div class="state-label">Inactive State (Orange text on Black)</div>
+        <button class="mobile-btn-inactive">Inactive Button</button>
+      </div>
+      
+      <div>
+        <div class="state-label">Active State (Black text on Orange)</div>
+        <button class="mobile-btn-active">Active Button</button>
+      </div>
+      
+      <div>
+        <div class="state-label">Hover Test (Hover over inactive)</div>
+        <button class="mobile-btn-inactive">Hover Me</button>
+      </div>
+    </div>
+    
+    <div class="test-result pass">
+      <strong>✓ Expected Behavior:</strong><br>
+      - Inactive: Orange text (#F7931A) on Black background (#000000)<br>
+      - Active: Black text (#000000) on Orange background (#F7931A)<br>
+      - Hover: Should transition to orange background with black text<br>
+      - NO white-on-white combinations allowed
+    </div>
+  </div>
+  
+  <!-- Test Section 2: Feature Buttons -->
+  <div class="test-section">
+    <h2>2. Feature Button States</h2>
+    <p>Testing .mobile-feature-btn class with active states</p>
+    
+    <div class="button-grid">
+      <div>
+        <div class="state-label">Crypto News Wire (Inactive)</div>
+        <button class="mobile-feature-btn">📰 Crypto News Wire</button>
+      </div>
+      
+      <div>
+        <div class="state-label">Crypto News Wire (Active)</div>
+        <button class="mobile-feature-btn active">📰 Crypto News Wire</button>
+      </div>
+      
+      <div>
+        <div class="state-label">Bitcoin Report (Inactive)</div>
+        <button class="mobile-feature-btn">₿ Bitcoin Report</button>
+      </div>
+      
+      <div>
+        <div class="state-label">Bitcoin Report (Active)</div>
+        <button class="mobile-feature-btn" aria-pressed="true">₿ Bitcoin Report</button>
+      </div>
+      
+      <div>
+        <div class="state-label">Ethereum Report (Inactive)</div>
+        <button class="mobile-feature-btn">⟠ Ethereum Report</button>
+      </div>
+      
+      <div>
+        <div class="state-label">Ethereum Report (Active)</div>
+        <button class="mobile-feature-btn" data-active="true">⟠ Ethereum Report</button>
+      </div>
+    </div>
+    
+    <div class="test-result pass">
+      <strong>✓ Expected Behavior:</strong><br>
+      - All inactive buttons: Orange text on Black<br>
+      - All active buttons: Black text on Orange<br>
+      - Active buttons have orange glow effect<br>
+      - Hover transitions smoothly
+    </div>
+  </div>
+  
+  <!-- Test Section 3: Navigation Links -->
+  <div class="test-section">
+    <h2>3. Navigation Link States</h2>
+    <p>Testing .mobile-nav-link class</p>
+    
+    <div class="button-grid">
+      <div>
+        <div class="state-label">Nav Link (Inactive)</div>
+        <a href="#" class="mobile-nav-link">Home</a>
+      </div>
+      
+      <div>
+        <div class="state-label">Nav Link (Active)</div>
+        <a href="#" class="mobile-nav-link active">Bitcoin Report</a>
+      </div>
+      
+      <div>
+        <div class="state-label">Nav Link (Current Page)</div>
+        <a href="#" class="mobile-nav-link" aria-current="page">Ethereum Report</a>
+      </div>
+    </div>
+    
+    <div class="test-result pass">
+      <strong>✓ Expected Behavior:</strong><br>
+      - Inactive: White text at 60% opacity<br>
+      - Active: Orange text with orange bottom border<br>
+      - Hover: Orange text with orange bottom border
+    </div>
+  </div>
+  
+  <!-- Test Section 4: Menu Item Cards -->
+  <div class="test-section">
+    <h2>4. Menu Item Card States</h2>
+    <p>Testing .mobile-menu-item class (full-screen menu)</p>
+    
+    <div class="button-grid">
+      <div>
+        <div class="state-label">Menu Item (Inactive)</div>
+        <div class="mobile-menu-item" style="cursor: pointer;">
+          <div class="menu-title" style="font-weight: 700; font-size: 1.125rem; margin-bottom: 0.25rem;">
+            Crypto News Wire
+          </div>
+          <div class="menu-description" style="font-size: 0.875rem;">
+            Real-Time News & Sentiment
+          </div>
+        </div>
+      </div>
+      
+      <div>
+        <div class="state-label">Menu Item (Active)</div>
+        <div class="mobile-menu-item active" style="cursor: pointer;">
+          <div class="menu-title" style="font-weight: 700; font-size: 1.125rem; margin-bottom: 0.25rem;">
+            Bitcoin Report
+          </div>
+          <div class="menu-description" style="font-size: 0.875rem;">
+            BTC Market Analysis
+          </div>
+        </div>
+      </div>
+      
+      <div>
+        <div class="state-label">Menu Item (Current Page)</div>
+        <div class="mobile-menu-item" aria-current="page" style="cursor: pointer;">
+          <div class="menu-title" style="font-weight: 700; font-size: 1.125rem; margin-bottom: 0.25rem;">
+            Ethereum Report
+          </div>
+          <div class="menu-description" style="font-size: 0.875rem;">
+            ETH & DeFi Insights
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="test-result pass">
+      <strong>✓ Expected Behavior:</strong><br>
+      - Inactive: Black background with thin orange border, white text<br>
+      - Active: Orange background, black text<br>
+      - Hover: Border brightens to full orange, subtle glow
+    </div>
+  </div>
+  
+  <!-- Test Section 5: Emergency Overrides -->
+  <div class="test-section">
+    <h2>5. Emergency High-Contrast Overrides</h2>
+    <p>Testing safety classes to prevent invisible elements</p>
+    
+    <div class="button-grid">
+      <div>
+        <div class="state-label">Safe Contrast Button</div>
+        <button class="mobile-btn-safe-contrast">Always Visible</button>
+      </div>
+      
+      <div>
+        <div class="state-label">Visible Text</div>
+        <div class="mobile-text-visible" style="padding: 1rem; border-radius: 8px;">
+          This text is guaranteed visible
+        </div>
+      </div>
+      
+      <div>
+        <div class="state-label">Safe Background</div>
+        <div class="mobile-bg-safe mobile-border-visible" style="padding: 1rem; border-radius: 8px; color: #FFFFFF;">
+          Safe black background with orange border
+        </div>
+      </div>
+    </div>
+    
+    <div class="test-result pass">
+      <strong>✓ Expected Behavior:</strong><br>
+      - All elements have guaranteed high contrast<br>
+      - No white-on-white or black-on-black combinations<br>
+      - Emergency fallback for any visibility issues
+    </div>
+  </div>
+  
+  <!-- Test Section 6: Disabled States -->
+  <div class="test-section">
+    <h2>6. Disabled Button States</h2>
+    <p>Testing disabled state styling</p>
+    
+    <div class="button-grid">
+      <div>
+        <div class="state-label">Disabled Inactive</div>
+        <button class="mobile-btn-inactive" disabled>Disabled Button</button>
+      </div>
+      
+      <div>
+        <div class="state-label">Disabled Active</div>
+        <button class="mobile-btn-active" disabled>Disabled Button</button>
+      </div>
+      
+      <div>
+        <div class="state-label">Disabled Feature Button</div>
+        <button class="mobile-feature-btn" disabled>📰 Disabled Feature</button>
+      </div>
+    </div>
+    
+    <div class="test-result pass">
+      <strong>✓ Expected Behavior:</strong><br>
+      - Disabled buttons have reduced opacity (50%)<br>
+      - Orange color at 30% opacity<br>
+      - Cursor shows not-allowed<br>
+      - No hover effects
+    </div>
+  </div>
+  
+  <!-- Test Section 7: Focus States -->
+  <div class="test-section">
+    <h2>7. Focus States (Keyboard Navigation)</h2>
+    <p>Tab through these buttons to test focus visibility</p>
+    
+    <div class="button-grid">
+      <button class="mobile-btn-inactive">Tab to Focus 1</button>
+      <button class="mobile-btn-active">Tab to Focus 2</button>
+      <button class="mobile-feature-btn">Tab to Focus 3</button>
+      <a href="#" class="mobile-nav-link">Tab to Focus 4</a>
+    </div>
+    
+    <div class="test-result pass">
+      <strong>✓ Expected Behavior:</strong><br>
+      - 3px solid orange outline on focus<br>
+      - Orange glow box shadow (5px)<br>
+      - Clearly visible on all button types
+    </div>
+  </div>
+  
+  <!-- Test Section 8: Viewport Breakpoint Tests -->
+  <div class="test-section">
+    <h2>8. Viewport Breakpoint Tests</h2>
+    <p>Resize browser to test different breakpoints</p>
+    
+    <div class="test-result" id="breakpointTest">
+      <strong>Current Viewport:</strong> <span id="currentViewport">Calculating...</span><br>
+      <strong>Width:</strong> <span id="currentWidth">0px</span><br>
+      <strong>Mobile/Tablet Styles Active:</strong> <span id="stylesActive">No</span>
+    </div>
+    
+    <div style="margin-top: 1rem; padding: 1rem; background: rgba(247, 147, 26, 0.1); border-radius: 8px;">
+      <strong>Test These Breakpoints:</strong><br>
+      - 320px (iPhone SE, small Android)<br>
+      - 375px (iPhone 12 Mini)<br>
+      - 390px (iPhone 12/13/14)<br>
+      - 428px (iPhone 14 Pro Max)<br>
+      - 768px (iPad Mini)<br>
+      - 1024px (iPad Pro / Desktop boundary)
+    </div>
+  </div>
+  
+  <script>
+    // Update viewport indicator
+    function updateViewportInfo() {
+      const width = window.innerWidth;
+      const indicator = document.getElementById('viewportIndicator');
+      const currentWidth = document.getElementById('currentWidth');
+      const currentViewport = document.getElementById('currentViewport');
+      const stylesActive = document.getElementById('stylesActive');
+      const mobileIndicator = document.getElementById('mobileIndicator');
+      const breakpointTest = document.getElementById('breakpointTest');
+      
+      currentWidth.textContent = width + 'px';
+      
+      let viewport = '';
+      let isMobileTablet = false;
+      
+      if (width <= 375) {
+        viewport = 'Mobile Small (≤375px)';
+        isMobileTablet = true;
+      } else if (width <= 428) {
+        viewport = 'Mobile Large (376-428px)';
+        isMobileTablet = true;
+      } else if (width <= 768) {
+        viewport = 'Mobile XL / Small Tablet (429-768px)';
+        isMobileTablet = true;
+      } else if (width <= 1023) {
+        viewport = 'Tablet (769-1023px)';
+        isMobileTablet = true;
+      } else {
+        viewport = 'Desktop (≥1024px)';
+        isMobileTablet = false;
+      }
+      
+      indicator.textContent = width + 'px - ' + viewport;
+      currentViewport.textContent = viewport;
+      stylesActive.textContent = isMobileTablet ? 'YES ✓' : 'NO (Desktop)';
+      
+      if (isMobileTablet) {
+        indicator.style.background = '#F7931A';
+        indicator.style.color = '#000000';
+        mobileIndicator.textContent = '✓ Mobile/Tablet Mode Active (320px-1023px)';
+        mobileIndicator.style.background = '#F7931A';
+        mobileIndicator.style.color = '#000000';
+        breakpointTest.classList.add('pass');
+        breakpointTest.classList.remove('fail');
+        stylesActive.style.color = '#F7931A';
+        stylesActive.style.fontWeight = '700';
+      } else {
+        indicator.style.background = 'rgba(255, 255, 255, 0.2)';
+        indicator.style.color = '#FFFFFF';
+        mobileIndicator.textContent = '⚠ Desktop Mode - Resize to ≤1023px to test mobile/tablet styles';
+        mobileIndicator.style.background = 'rgba(255, 255, 255, 0.1)';
+        mobileIndicator.style.color = 'rgba(255, 255, 255, 0.6)';
+        breakpointTest.classList.remove('pass');
+        breakpointTest.classList.add('fail');
+        stylesActive.style.color = 'rgba(255, 255, 255, 0.6)';
+        stylesActive.style.fontWeight = '400';
+      }
+    }
+    
+    // Update on load and resize
+    updateViewportInfo();
+    window.addEventListener('resize', updateViewportInfo);
+    
+    // Add click handlers to demonstrate state changes
+    document.querySelectorAll('.mobile-feature-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        if (!this.disabled) {
+          this.classList.toggle('active');
+          const isActive = this.classList.contains('active');
+          this.setAttribute('aria-pressed', isActive);
+          this.setAttribute('data-active', isActive);
+        }
+      });
+    });
+    
+    // Log button state changes for debugging
+    console.log('Mobile/Tablet Button State Test Loaded');
+    console.log('Current viewport:', window.innerWidth + 'px');
+    console.log('Mobile/Tablet styles active:', window.innerWidth <= 1023);
+  </script>
+</body>
+</html>

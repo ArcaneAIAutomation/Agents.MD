@@ -1,244 +1,347 @@
 import Head from 'next/head'
+import Navigation from '../components/Navigation'
+import { ArrowRight } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import CryptoHerald from '../components/CryptoHerald'
-import BTCMarketAnalysis from '../components/BTCMarketAnalysis'
-import ETHMarketAnalysis from '../components/ETHMarketAnalysis'
-import TradeGenerationEngine from '../components/TradeGenerationEngine'
-import NexoRegulatoryPanel from '../components/NexoRegulatoryPanel'
-import WhaleWatchDashboard from '../components/WhaleWatch/WhaleWatchDashboard'
 
 export default function Home() {
+  // Live market data state
+  const [btcPrice, setBtcPrice] = useState<number | null>(null);
+  const [ethPrice, setEthPrice] = useState<number | null>(null);
+  const [btcChange, setBtcChange] = useState<number | null>(null);
+  const [ethChange, setEthChange] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch live market data
+  useEffect(() => {
+    const fetchMarketData = async () => {
+      try {
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true');
+        const data = await response.json();
+        
+        if (data.bitcoin) {
+          setBtcPrice(data.bitcoin.usd);
+          setBtcChange(data.bitcoin.usd_24h_change);
+        }
+        
+        if (data.ethereum) {
+          setEthPrice(data.ethereum.usd);
+          setEthChange(data.ethereum.usd_24h_change);
+        }
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('Failed to fetch market data:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchMarketData();
+    const interval = setInterval(fetchMarketData, 30000); // Update every 30 seconds
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  const features = [
+    {
+      title: 'Crypto News Wire',
+      icon: '📰',
+      path: '/crypto-news',
+      description: 'Real-time cryptocurrency news aggregation with AI-powered sentiment analysis',
+      stats: ['15+ Stories', 'Live Updates', 'Multi-Source'],
+      benefits: [
+        'Stay ahead of market-moving news',
+        'AI sentiment analysis on every story',
+        'Aggregated from NewsAPI & CryptoCompare'
+      ]
+    },
+    {
+      title: 'AI Trade Generation Engine',
+      icon: '🤖',
+      path: '/trade-generation',
+      description: 'GPT-4o powered trading signals with step-by-step reasoning and risk management',
+      stats: ['GPT-4o AI', 'Live Signals', 'Risk Managed'],
+      benefits: [
+        'AI-powered trade recommendations',
+        'Confidence scoring and reasoning',
+        'Automated stop-loss & take-profit levels'
+      ]
+    },
+    {
+      title: 'Bitcoin Market Report',
+      icon: '₿',
+      path: '/bitcoin-report',
+      description: 'Comprehensive Bitcoin analysis with multi-timeframe technical indicators',
+      stats: ['4 Timeframes', 'Live Data', '10+ Indicators'],
+      benefits: [
+        'Real-time price and volume analysis',
+        'Supply/demand zone identification',
+        'RSI, MACD, Bollinger Bands & more'
+      ]
+    },
+    {
+      title: 'Ethereum Market Report',
+      icon: '⟠',
+      path: '/ethereum-report',
+      description: 'Smart contract platform analysis with DeFi insights and technical indicators',
+      stats: ['4 Timeframes', 'Live Data', 'DeFi Focus'],
+      benefits: [
+        'Ethereum-specific market intelligence',
+        'Smart contract platform metrics',
+        'Multi-exchange price comparison'
+      ]
+    },
+    {
+      title: 'Bitcoin Whale Watch',
+      icon: '🐋',
+      path: '/whale-watch',
+      description: 'Track large Bitcoin transactions with Caesar AI-powered context analysis',
+      stats: ['50+ BTC', 'Caesar AI', 'Live Tracking'],
+      benefits: [
+        'Real-time whale transaction detection',
+        'AI research on market impact',
+        'Exchange flow analysis'
+      ]
+    },
+    {
+      title: 'Regulatory Watch',
+      icon: '⚖️',
+      path: '/regulatory-watch',
+      description: 'Monitor cryptocurrency regulatory developments and compliance updates',
+      stats: ['NEXO.COM', 'UK Focus', 'Live Updates'],
+      benefits: [
+        'Latest regulatory news',
+        'Compliance monitoring',
+        'Market impact assessment'
+      ]
+    }
+  ];
+
   return (
     <>
       <Head>
-        <title>The Crypto Herald - Real-Time Market Intelligence</title>
-        <meta name="description" content="Professional cryptocurrency market analysis and trading intelligence in classic newspaper format" />
+        <title>Bitcoin Sovereign Technology - Real-Time Market Intelligence</title>
+        <meta name="description" content="Advanced cryptocurrency trading intelligence platform with AI-powered analysis, whale tracking, and real-time market data" />
         <link rel="icon" href="/favicon.ico" />
-
       </Head>
 
+      <Navigation />
+
       <div className="min-h-screen bg-bitcoin-black">
-        {/* News Herald Section with Enhanced Header */}
-        <div className="w-full">
-          <CryptoHerald />
+        {/* Live Market Data Banner */}
+        <div className="border-b-2 border-bitcoin-orange bg-bitcoin-black">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
+              {/* BTC Price */}
+              <div className="flex items-center gap-3">
+                <span className="text-bitcoin-white-60 text-sm font-semibold uppercase tracking-wider">BTC</span>
+                {loading ? (
+                  <div className="font-mono text-xl md:text-2xl text-bitcoin-orange animate-pulse">Loading...</div>
+                ) : (
+                  <>
+                    <div className="font-mono text-xl md:text-2xl font-bold text-bitcoin-orange" style={{ textShadow: '0 0 20px rgba(247, 147, 26, 0.5)' }}>
+                      ${btcPrice?.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                    </div>
+                    {btcChange !== null && (
+                      <div className={`text-sm font-mono ${btcChange >= 0 ? 'text-bitcoin-orange' : 'text-bitcoin-white-60'}`}>
+                        {btcChange >= 0 ? '+' : ''}{btcChange.toFixed(2)}%
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Divider */}
+              <div className="hidden md:block w-px h-8 bg-bitcoin-orange opacity-20"></div>
+
+              {/* ETH Price */}
+              <div className="flex items-center gap-3">
+                <span className="text-bitcoin-white-60 text-sm font-semibold uppercase tracking-wider">ETH</span>
+                {loading ? (
+                  <div className="font-mono text-xl md:text-2xl text-bitcoin-orange animate-pulse">Loading...</div>
+                ) : (
+                  <>
+                    <div className="font-mono text-xl md:text-2xl font-bold text-bitcoin-orange" style={{ textShadow: '0 0 20px rgba(247, 147, 26, 0.5)' }}>
+                      ${ethPrice?.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                    </div>
+                    {ethChange !== null && (
+                      <div className={`text-sm font-mono ${ethChange >= 0 ? 'text-bitcoin-orange' : 'text-bitcoin-white-60'}`}>
+                        {ethChange >= 0 ? '+' : ''}{ethChange.toFixed(2)}%
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Live Indicator */}
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-bitcoin-orange rounded-full animate-pulse"></div>
+                <span className="text-xs text-bitcoin-white-60 uppercase tracking-wider">Live</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Main Newspaper Content */}
-        <div className="container mx-auto px-4 py-8 space-y-8">
+        {/* Hero Section */}
+        <div className="container mx-auto px-4 py-16 md:py-24">
+          <div className="text-center max-w-4xl mx-auto">
+            <h1 className="text-5xl md:text-7xl font-extrabold text-bitcoin-white mb-6 leading-tight" style={{ letterSpacing: '-0.03em' }}>
+              Bitcoin Sovereign Technology
+            </h1>
+            <p className="text-2xl md:text-3xl text-bitcoin-orange font-mono mb-6 font-bold" style={{ textShadow: '0 0 30px rgba(247, 147, 26, 0.3)' }}>
+              Real-Time Market Intelligence
+            </p>
+            <p className="text-lg md:text-xl text-bitcoin-white-80 mb-12 leading-relaxed max-w-3xl mx-auto">
+              Advanced cryptocurrency trading intelligence powered by AI. Real-time market analysis, 
+              whale tracking, and automated trade generation for professional traders and crypto enthusiasts.
+            </p>
+            
+            {/* Key Stats with Orange Glow */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-12">
+              <div className="bitcoin-block-subtle p-6 hover:border-bitcoin-orange transition-all">
+                <div className="text-4xl md:text-5xl font-bold text-bitcoin-orange font-mono mb-2" style={{ textShadow: '0 0 30px rgba(247, 147, 26, 0.5)' }}>
+                  24/7
+                </div>
+                <div className="text-sm text-bitcoin-white-60 uppercase tracking-wider font-semibold">Live Monitoring</div>
+              </div>
+              <div className="bitcoin-block-subtle p-6 hover:border-bitcoin-orange transition-all">
+                <div className="text-4xl md:text-5xl font-bold text-bitcoin-orange font-mono mb-2" style={{ textShadow: '0 0 30px rgba(247, 147, 26, 0.5)' }}>
+                  6
+                </div>
+                <div className="text-sm text-bitcoin-white-60 uppercase tracking-wider font-semibold">AI Features</div>
+              </div>
+              <div className="bitcoin-block-subtle p-6 hover:border-bitcoin-orange transition-all">
+                <div className="text-3xl md:text-4xl font-bold text-bitcoin-orange font-mono mb-2" style={{ textShadow: '0 0 30px rgba(247, 147, 26, 0.5)' }}>
+                  GPT-4o
+                </div>
+                <div className="text-sm text-bitcoin-white-60 uppercase tracking-wider font-semibold">AI Engine</div>
+              </div>
+              <div className="bitcoin-block-subtle p-6 hover:border-bitcoin-orange transition-all">
+                <div className="text-3xl md:text-4xl font-bold text-bitcoin-orange font-mono mb-2" style={{ textShadow: '0 0 30px rgba(247, 147, 26, 0.5)' }}>
+                  Caesar
+                </div>
+                <div className="text-sm text-bitcoin-white-60 uppercase tracking-wider font-semibold">Research AI</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Features Grid - Informational Only */}
+        <div className="container mx-auto px-4 py-8 md:py-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-bitcoin-white text-center mb-4">
+            Intelligence Features
+          </h2>
+          <p className="text-center text-bitcoin-white-60 mb-12 max-w-2xl mx-auto">
+            Access all features through the menu. Each feature provides real-time data and AI-powered analysis.
+          </p>
           
-          {/* Trade Generation Engine - Front Page Story */}
-          <div className="bitcoin-block">
-            <div className="border-b-2 border-bitcoin-orange px-6 py-3 bg-bitcoin-black">
-              <h2 className="text-2xl font-bold text-bitcoin-white">
-                📈 AI TRADE GENERATION ENGINE
-              </h2>
-              <p className="text-sm text-bitcoin-white-60 italic mt-1">
-                Advanced algorithmic trading signals powered by artificial intelligence
-              </p>
-            </div>
-            <div className="p-6">
-              <TradeGenerationEngine />
-            </div>
-          </div>
-
-          {/* Bitcoin Market Report */}
-          <div className="bitcoin-block">
-            <div className="border-b-2 border-bitcoin-orange bg-bitcoin-black px-6 py-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-bitcoin-white">
-                    ₿ BITCOIN MARKET REPORT
-                  </h2>
-                  <p className="text-sm text-bitcoin-white-60 italic mt-1">
-                    Digital gold analysis with real-time market intelligence
-                  </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((feature) => (
+              <div key={feature.path} className="bitcoin-block transition-all h-full">
+                {/* Header */}
+                <div className="border-b-2 border-bitcoin-orange px-6 py-4 bg-bitcoin-black">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-4xl">{feature.icon}</span>
+                    <div className="flex flex-wrap gap-2 justify-end">
+                      {feature.stats.map((stat, idx) => (
+                        <span key={idx} className="bg-bitcoin-orange text-bitcoin-black text-xs px-2 py-1 rounded font-bold whitespace-nowrap">
+                          {stat}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold text-bitcoin-white">
+                    {feature.title}
+                  </h3>
                 </div>
-                <div className="bg-bitcoin-orange text-bitcoin-black px-3 py-1 text-xs font-bold tracking-wide rounded">
-                  ENHANCED
+
+                {/* Content */}
+                <div className="p-6">
+                  <p className="text-bitcoin-white-80 mb-4 leading-relaxed">
+                    {feature.description}
+                  </p>
+
+                  {/* Benefits */}
+                  <div className="space-y-2 mb-6">
+                    {feature.benefits.map((benefit, idx) => (
+                      <div key={idx} className="flex items-start gap-2">
+                        <span className="text-bitcoin-orange mt-1 flex-shrink-0">✓</span>
+                        <span className="text-sm text-bitcoin-white-60">{benefit}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Access via Menu Indicator */}
+                  <div className="mt-auto pt-4 border-t border-bitcoin-orange-20">
+                    <div className="flex items-center justify-center gap-2 text-bitcoin-orange">
+                      <span className="text-sm font-semibold uppercase tracking-wider">Access via Menu</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="p-6">
-              <BTCMarketAnalysis />
-            </div>
+            ))}
           </div>
-          
-          {/* Ethereum Market Report */}
-          <div className="bitcoin-block">
-            <div className="border-b-2 border-bitcoin-orange bg-bitcoin-black px-6 py-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-bitcoin-white">
-                    ⟠ ETHEREUM MARKET REPORT
-                  </h2>
-                  <p className="text-sm text-bitcoin-white-60 italic mt-1">
-                    Smart contract platform analysis with DeFi insights
-                  </p>
-                </div>
-                <div className="bg-bitcoin-orange text-bitcoin-black px-3 py-1 text-xs font-bold tracking-wide rounded">
-                  ENHANCED
-                </div>
-              </div>
-            </div>
-            <div className="p-6">
-              <ETHMarketAnalysis />
-            </div>
-          </div>
+        </div>
 
-          {/* Whale Watch - Live Tracking */}
+        {/* Platform Capabilities */}
+        <div className="container mx-auto px-4 py-16">
           <div className="bitcoin-block">
-            <div className="border-b-2 border-bitcoin-orange bg-bitcoin-black px-6 py-3">
-              <h2 className="text-2xl font-bold text-bitcoin-white">
-                🐋 BITCOIN WHALE WATCH
-              </h2>
-              <p className="text-sm text-bitcoin-white-60 italic mt-1">
-                Real-time tracking of large Bitcoin transactions and market movements
-              </p>
-            </div>
-            <div className="p-6">
-              <WhaleWatchDashboard />
-            </div>
-          </div>
-
-          {/* Regulatory Panel - Bottom Story */}
-          <div className="bitcoin-block">
-            <div className="border-b-2 border-bitcoin-orange bg-bitcoin-black px-6 py-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-bitcoin-white">
-                    ⚖️ REGULATORY WATCH
-                  </h2>
-                  <p className="text-sm text-bitcoin-white-60 italic mt-1">
-                    Latest regulatory developments and compliance monitoring
-                  </p>
-                </div>
-                {/* NEXO badge - hidden on mobile/tablet, shown on desktop */}
-                <div className="hidden lg:block bg-gradient-to-r from-blue-600 to-blue-500 text-white px-3 py-1 text-xs font-bold tracking-wide rounded">
-                  NEXO
-                </div>
-              </div>
-            </div>
-            <div className="p-6">
-              <NexoRegulatoryPanel />
-            </div>
-          </div>
-
-          {/* Features Summary - Newspaper Style */}
-          <div className="bitcoin-block">
-            <div className="border-b-2 border-bitcoin-orange bg-bitcoin-black px-6 py-3">
+            <div className="border-b-2 border-bitcoin-orange px-6 py-4 bg-bitcoin-black">
               <h3 className="text-2xl font-bold text-bitcoin-white">
-                📰 INTELLIGENCE CAPABILITIES
+                Platform Capabilities
               </h3>
               <p className="text-sm text-bitcoin-white-60 italic mt-1">
-                AI-powered market analysis with real-time blockchain intelligence
+                Powered by cutting-edge AI and real-time blockchain data
               </p>
             </div>
             <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* BTC/ETH Trade Generation Engine */}
-                <div className="bitcoin-block-subtle hover:border-bitcoin-orange transition-all relative">
-                  <div className="absolute top-2 right-2 bg-bitcoin-orange text-bitcoin-black text-xs px-2 py-1 rounded font-bold">
-                    LIVE
-                  </div>
-                  <div className="text-bitcoin-white font-bold mb-2 flex items-center gap-2">
-                    <span className="text-xl">🤖</span>
-                    <span>BTC/ETH Trade Engine</span>
-                  </div>
-                  <div className="text-bitcoin-white-60 text-sm leading-relaxed">
-                    GPT-4o powered trade generation with confidence scoring and risk management
-                  </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 bitcoin-block-subtle">
+                  <div className="text-bitcoin-orange text-2xl mb-2">⚡</div>
+                  <div className="text-bitcoin-white font-bold text-sm">Real-Time Data</div>
+                  <div className="text-bitcoin-white-60 text-xs mt-1">Live market feeds</div>
                 </div>
-
-                {/* Whale Watch with Caesar API */}
-                <div className="bitcoin-block-subtle hover:border-bitcoin-orange transition-all relative">
-                  <div className="absolute top-2 right-2 bg-bitcoin-orange text-bitcoin-black text-xs px-2 py-1 rounded font-bold">
-                    LIVE
-                  </div>
-                  <div className="text-bitcoin-white font-bold mb-2 flex items-center gap-2">
-                    <span className="text-xl">🐋</span>
-                    <span>Whale Watch</span>
-                  </div>
-                  <div className="text-bitcoin-white-60 text-sm leading-relaxed">
-                    Track large wallet movements with Caesar API-powered context analysis
-                  </div>
+                <div className="text-center p-4 bitcoin-block-subtle">
+                  <div className="text-bitcoin-orange text-2xl mb-2">🧠</div>
+                  <div className="text-bitcoin-white font-bold text-sm">AI Analysis</div>
+                  <div className="text-bitcoin-white-60 text-xs mt-1">GPT-4o & Caesar</div>
                 </div>
-
-                {/* Technical Analysis */}
-                <div className="bitcoin-block-subtle hover:border-bitcoin-orange transition-all relative">
-                  <div className="absolute top-2 right-2 bg-bitcoin-orange text-bitcoin-black text-xs px-2 py-1 rounded font-bold hidden lg:block">
-                    LIVE
-                  </div>
-                  <div className="text-bitcoin-white font-bold mb-2 flex items-center gap-2">
-                    <span className="text-xl">📊</span>
-                    <span>Multi-Timeframe Analysis</span>
-                  </div>
-                  <div className="text-bitcoin-white-60 text-sm leading-relaxed">
-                    15m, 1h, 4h, 1d technical indicators with supply/demand zones
-                  </div>
+                <div className="text-center p-4 bitcoin-block-subtle">
+                  <div className="text-bitcoin-orange text-2xl mb-2">🔒</div>
+                  <div className="text-bitcoin-white font-bold text-sm">Privacy First</div>
+                  <div className="text-bitcoin-white-60 text-xs mt-1">No tracking</div>
                 </div>
-
-                {/* Real-Time News */}
-                <div className="bitcoin-block-subtle hover:border-bitcoin-orange transition-all relative">
-                  <div className="absolute top-2 right-2 bg-bitcoin-orange text-bitcoin-black text-xs px-2 py-1 rounded font-bold">
-                    LIVE
-                  </div>
-                  <div className="text-bitcoin-white font-bold mb-2 flex items-center gap-2">
-                    <span className="text-xl">📰</span>
-                    <span>Live News Feed</span>
-                  </div>
-                  <div className="text-bitcoin-white-60 text-sm leading-relaxed">
-                    Real-time crypto news with AI sentiment analysis and market impact
-                  </div>
-                </div>
-              </div>
-
-              {/* Additional Features Row */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 pt-4 border-t border-bitcoin-orange-20">
-                <div className="text-center p-3 bg-bitcoin-black rounded border border-bitcoin-orange-30 hover:border-bitcoin-orange transition-colors">
-                  <div className="text-bitcoin-white font-bold text-lg">Caesar AI</div>
-                  <div className="text-bitcoin-white-60 text-xs">Research Engine</div>
-                </div>
-                <div className="text-center p-3 bg-bitcoin-black rounded border border-bitcoin-orange-30 hover:border-bitcoin-orange transition-colors">
-                  <div className="text-bitcoin-white font-bold text-lg">GPT-4o</div>
-                  <div className="text-bitcoin-white-60 text-xs">Trade Analysis</div>
-                </div>
-                <div className="text-center p-3 bg-bitcoin-black rounded border border-bitcoin-orange-30 hover:border-bitcoin-orange transition-colors">
-                  <div className="text-bitcoin-white font-bold text-lg">24/7</div>
-                  <div className="text-bitcoin-white-60 text-xs">Live Monitoring</div>
-                </div>
-                <div className="text-center p-3 bg-bitcoin-black rounded border border-bitcoin-orange-30 hover:border-bitcoin-orange transition-colors">
-                  <div className="text-bitcoin-white font-bold text-lg">Mobile</div>
-                  <div className="text-bitcoin-white-60 text-xs">Optimized</div>
+                <div className="text-center p-4 bitcoin-block-subtle">
+                  <div className="text-bitcoin-orange text-2xl mb-2">📱</div>
+                  <div className="text-bitcoin-white font-bold text-sm">Mobile Ready</div>
+                  <div className="text-bitcoin-white-60 text-xs mt-1">Fully responsive</div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Newspaper Footer */}
-          <div className="border-t-2 border-bitcoin-orange mt-12 bg-bitcoin-black">
-            <div className="container mx-auto px-4 py-6">
-              <div className="text-center">
-                <p className="text-sm text-bitcoin-white-60">
-                  © 2024 The Crypto Herald • Real-Time Market Intelligence Platform
-                </p>
-                <p className="text-xs mt-2 italic text-bitcoin-white-60">
-                  "All the crypto news that's fit to trade" • Powered by AI & Live Market Data
-                </p>
-                
-                {/* Privacy-Friendly Notice - Subtle & Clever */}
-                <div className="mt-6 pt-4 border-t border-bitcoin-orange-20">
-                  <div className="inline-flex items-center space-x-2 bg-bitcoin-black border border-bitcoin-orange-20 rounded-full px-4 py-2 hover:border-bitcoin-orange transition-all">
-                    <svg className="h-4 w-4 text-bitcoin-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                    <span className="text-xs font-mono text-bitcoin-white-80">
-                      🍪 Zero Cookies • No Tracking • Privacy First
-                    </span>
-                  </div>
-                  <p className="text-xs text-bitcoin-white-60 mt-2 max-w-2xl mx-auto">
-                    Your privacy matters. We don't use cookies, tracking, or store any personal data. All market data is fetched fresh on each visit.
-                  </p>
+        {/* Footer */}
+        <div className="border-t-2 border-bitcoin-orange mt-16 bg-bitcoin-black">
+          <div className="container mx-auto px-4 py-8">
+            <div className="text-center">
+              <p className="text-sm text-bitcoin-white-60">
+                © 2024 Bitcoin Sovereign Technology • Real-Time Market Intelligence Platform
+              </p>
+              <p className="text-xs mt-2 italic text-bitcoin-white-60">
+                Powered by AI & Live Blockchain Data
+              </p>
+              
+              {/* Privacy Notice */}
+              <div className="mt-6 pt-4 border-t border-bitcoin-orange-20">
+                <div className="inline-flex items-center space-x-2 bg-bitcoin-black border border-bitcoin-orange-20 rounded-full px-4 py-2 hover:border-bitcoin-orange transition-all">
+                  <span className="text-xs font-mono text-bitcoin-white-80">
+                    🍪 Zero Cookies • No Tracking • Privacy First
+                  </span>
                 </div>
+                <p className="text-xs text-bitcoin-white-60 mt-2 max-w-2xl mx-auto">
+                  Your privacy matters. We don't use cookies, tracking, or store any personal data. All market data is fetched fresh on each visit.
+                </p>
               </div>
             </div>
           </div>

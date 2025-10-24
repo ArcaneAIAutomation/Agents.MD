@@ -12,7 +12,12 @@
     "deploy:msg": "pwsh -File deploy.ps1 -CommitMessage",
     "quick-deploy": "git add . && git commit -m '🚀 Quick deploy' && git push origin main",
     "status": "git status",
-    "log": "git log --oneline -10"
+    "log": "git log --oneline -10",
+    "sync-start": "pwsh -File sync-start.ps1",
+    "sync-end": "pwsh -File sync-end.ps1",
+    "sync-status": "pwsh -File sync-status.ps1",
+    "sync-quick": "pwsh -File sync-quick.ps1",
+    "sync": "pwsh -File sync-quick.ps1"
   },
   "dependencies": {
     "next": "14.0.4",

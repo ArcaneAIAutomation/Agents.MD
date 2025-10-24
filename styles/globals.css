@@ -408,6 +408,574 @@ h6 {
   }
 }
 
+/* ============================================
+   HAMBURGER MENU MOBILE/TABLET ENHANCEMENTS
+   Full-Screen Overlay with Smooth Transitions
+   ============================================ */
+
+/* MOBILE/TABLET ONLY - Hamburger Menu Styles */
+@media (max-width: 1023px) {
+  
+  /* ============================================
+     HAMBURGER ICON - Three Horizontal Lines
+     ============================================ */
+  
+  /* Hamburger Icon Container */
+  .hamburger-icon {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 28px;
+    height: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  /* Hamburger Lines */
+  .hamburger-line {
+    width: 100%;
+    height: 2px;
+    background-color: var(--bitcoin-orange);
+    transition: all 0.3s ease;
+    border-radius: 2px;
+  }
+  
+  /* Hamburger Icon Hover State */
+  .hamburger-icon:hover .hamburger-line {
+    background-color: var(--bitcoin-white);
+    box-shadow: 0 0 10px rgba(247, 147, 26, 0.5);
+  }
+  
+  /* Hamburger Icon Active State (Menu Open) */
+  .hamburger-icon.active .hamburger-line:nth-child(1) {
+    transform: rotate(45deg) translateY(10px);
+  }
+  
+  .hamburger-icon.active .hamburger-line:nth-child(2) {
+    opacity: 0;
+  }
+  
+  .hamburger-icon.active .hamburger-line:nth-child(3) {
+    transform: rotate(-45deg) translateY(-10px);
+  }
+  
+  /* ============================================
+     FULL-SCREEN MENU OVERLAY
+     Pure Black Background with Smooth Fade-In
+     ============================================ */
+  
+  /* Menu Overlay Container */
+  .mobile-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--bitcoin-black);
+    z-index: 9999;
+    overflow-y: auto;
+    overflow-x: hidden;
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  /* Menu Overlay Header */
+  .mobile-menu-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--bitcoin-black);
+    border-bottom: 2px solid var(--bitcoin-orange);
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.3);
+  }
+  
+  /* Menu Items Container */
+  .mobile-menu-items {
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  /* ============================================
+     MENU ITEM CARDS
+     White Text with Orange Accents
+     ============================================ */
+  
+  /* Menu Item Card - Inactive */
+  .mobile-menu-item-card {
+    background-color: var(--bitcoin-black);
+    border: 1px solid var(--bitcoin-orange-20);
+    border-radius: 12px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  /* Menu Item Card - Hover */
+  .mobile-menu-item-card:hover {
+    border-color: var(--bitcoin-orange);
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.3);
+    transform: translateY(-2px);
+  }
+  
+  /* Menu Item Card - Active */
+  .mobile-menu-item-card.active {
+    background-color: var(--bitcoin-orange);
+    border-color: var(--bitcoin-orange);
+    box-shadow: 0 0 30px rgba(247, 147, 26, 0.5);
+  }
+  
+  /* Menu Item Icon Container - Inactive */
+  .mobile-menu-item-icon {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    background-color: var(--bitcoin-black);
+    border: 2px solid var(--bitcoin-orange-20);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+  
+  /* Menu Item Icon - Hover */
+  .mobile-menu-item-card:hover .mobile-menu-item-icon {
+    border-color: var(--bitcoin-orange);
+    transform: scale(1.05);
+  }
+  
+  /* Menu Item Icon - Active */
+  .mobile-menu-item-card.active .mobile-menu-item-icon {
+    background-color: var(--bitcoin-black);
+    border-color: var(--bitcoin-orange);
+    transform: scale(1.1);
+  }
+  
+  /* Menu Item Icon SVG */
+  .mobile-menu-item-icon svg {
+    color: var(--bitcoin-orange);
+    width: 28px;
+    height: 28px;
+    stroke-width: 2.5;
+  }
+  
+  /* Menu Item Content */
+  .mobile-menu-item-content {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  /* Menu Item Title - Inactive */
+  .mobile-menu-item-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--bitcoin-white);
+    margin-bottom: 0.25rem;
+    letter-spacing: -0.01em;
+  }
+  
+  /* Menu Item Title - Active */
+  .mobile-menu-item-card.active .mobile-menu-item-title {
+    color: var(--bitcoin-black);
+  }
+  
+  /* Menu Item Description - Inactive */
+  .mobile-menu-item-description {
+    font-size: 0.875rem;
+    color: var(--bitcoin-white-60);
+    line-height: 1.4;
+  }
+  
+  /* Menu Item Description - Active */
+  .mobile-menu-item-card.active .mobile-menu-item-description {
+    color: var(--bitcoin-black);
+    opacity: 0.8;
+  }
+  
+  /* Menu Item Arrow */
+  .mobile-menu-item-arrow {
+    flex-shrink: 0;
+    color: var(--bitcoin-orange);
+    transition: all 0.3s ease;
+  }
+  
+  /* Menu Item Arrow - Hover */
+  .mobile-menu-item-card:hover .mobile-menu-item-arrow {
+    transform: translateX(4px);
+  }
+  
+  /* Menu Item Arrow - Active */
+  .mobile-menu-item-card.active .mobile-menu-item-arrow {
+    color: var(--bitcoin-black);
+  }
+  
+  /* ============================================
+     MENU FOOTER
+     Platform Information
+     ============================================ */
+  
+  .mobile-menu-footer {
+    border-top: 2px solid var(--bitcoin-orange);
+    background-color: var(--bitcoin-black);
+    padding: 2rem 1rem;
+    margin-top: 2rem;
+  }
+  
+  /* ============================================
+     MENU ITEM STAGGERED ANIMATION
+     Fade In Up with Delay
+     ============================================ */
+  
+  .mobile-menu-item-card:nth-child(1) {
+    animation: fadeInUp 0.3s ease-out 0s both;
+  }
+  
+  .mobile-menu-item-card:nth-child(2) {
+    animation: fadeInUp 0.3s ease-out 0.05s both;
+  }
+  
+  .mobile-menu-item-card:nth-child(3) {
+    animation: fadeInUp 0.3s ease-out 0.1s both;
+  }
+  
+  .mobile-menu-item-card:nth-child(4) {
+    animation: fadeInUp 0.3s ease-out 0.15s both;
+  }
+  
+  .mobile-menu-item-card:nth-child(5) {
+    animation: fadeInUp 0.3s ease-out 0.2s both;
+  }
+  
+  .mobile-menu-item-card:nth-child(6) {
+    animation: fadeInUp 0.3s ease-out 0.25s both;
+  }
+  
+  .mobile-menu-item-card:nth-child(7) {
+    animation: fadeInUp 0.3s ease-out 0.3s both;
+  }
+  
+  /* ============================================
+     TABLET SPECIFIC (768px-1023px)
+     Slightly Larger Elements
+     ============================================ */
+  
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .mobile-menu-item-card {
+      min-height: 88px;
+      padding: 1.25rem;
+    }
+    
+    .mobile-menu-item-icon {
+      width: 60px;
+      height: 60px;
+    }
+    
+    .mobile-menu-item-icon svg {
+      width: 30px;
+      height: 30px;
+    }
+    
+    .mobile-menu-item-title {
+      font-size: 1.25rem;
+    }
+    
+    .mobile-menu-item-description {
+      font-size: 0.9375rem;
+    }
+  }
+}
+
+/* ============================================
+   MOBILE/TABLET BUTTON STATE FIXES (320px-1024px)
+   CRITICAL: Fix Color Conflicts on Feature Activation
+   ============================================ */
+
+/* MOBILE/TABLET ONLY - Button State Management */
+@media (max-width: 1023px) {
+  
+  /* ============================================
+     EXPLICIT BUTTON STATE CLASSES
+     Prevents white-on-white and other conflicts
+     ============================================ */
+  
+  /* INACTIVE STATE - Orange text on black background */
+  .mobile-btn-inactive {
+    background: var(--bitcoin-black) !important;
+    color: var(--bitcoin-orange) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.3s ease;
+    min-height: 48px;
+    min-width: 48px;
+    cursor: pointer;
+  }
+  
+  /* ACTIVE STATE - Orange background with black text (NEVER white-on-white) */
+  .mobile-btn-active {
+    background: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.5);
+    transition: all 0.3s ease;
+    min-height: 48px;
+    min-width: 48px;
+    cursor: pointer;
+  }
+  
+  /* HOVER STATE - Maintain contrast */
+  .mobile-btn-inactive:hover {
+    background: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.3);
+    transform: scale(1.02);
+  }
+  
+  .mobile-btn-active:hover {
+    background: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    box-shadow: 0 0 30px rgba(247, 147, 26, 0.6);
+    transform: scale(1.02);
+  }
+  
+  /* PRESSED STATE */
+  .mobile-btn-inactive:active,
+  .mobile-btn-active:active {
+    transform: scale(0.98);
+  }
+  
+  /* ============================================
+     FEATURE BUTTON SPECIFIC FIXES
+     For Crypto News, Bitcoin Report, Ethereum Report, etc.
+     ============================================ */
+  
+  /* Feature Button Base - Inactive */
+  .mobile-feature-btn {
+    background: var(--bitcoin-black) !important;
+    color: var(--bitcoin-orange) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.875rem 1.25rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    min-height: 48px;
+    min-width: 48px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  /* Feature Button Active State */
+  .mobile-feature-btn.active,
+  .mobile-feature-btn[aria-pressed="true"],
+  .mobile-feature-btn[data-active="true"] {
+    background: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.5);
+  }
+  
+  /* Feature Button Hover */
+  .mobile-feature-btn:hover {
+    background: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.3);
+    transform: scale(1.02);
+  }
+  
+  /* Feature Button Active + Hover */
+  .mobile-feature-btn.active:hover,
+  .mobile-feature-btn[aria-pressed="true"]:hover,
+  .mobile-feature-btn[data-active="true"]:hover {
+    background: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    box-shadow: 0 0 30px rgba(247, 147, 26, 0.6);
+  }
+  
+  /* ============================================
+     NAVIGATION BUTTON FIXES
+     For menu items and navigation links
+     ============================================ */
+  
+  /* Navigation Link - Inactive */
+  .mobile-nav-link {
+    color: var(--bitcoin-white-60) !important;
+    background: transparent !important;
+    border-bottom: 2px solid transparent !important;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Navigation Link - Active */
+  .mobile-nav-link.active,
+  .mobile-nav-link[aria-current="page"] {
+    color: var(--bitcoin-orange) !important;
+    border-bottom: 2px solid var(--bitcoin-orange) !important;
+    background: transparent !important;
+  }
+  
+  /* Navigation Link - Hover */
+  .mobile-nav-link:hover {
+    color: var(--bitcoin-orange) !important;
+    border-bottom: 2px solid var(--bitcoin-orange) !important;
+  }
+  
+  /* ============================================
+     MENU ITEM CARD FIXES
+     For full-screen mobile menu items
+     ============================================ */
+  
+  /* Menu Item Card - Inactive */
+  .mobile-menu-item {
+    background: var(--bitcoin-black) !important;
+    border: 1px solid var(--bitcoin-orange-20) !important;
+    border-radius: 12px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+  
+  /* Menu Item Card - Active */
+  .mobile-menu-item.active,
+  .mobile-menu-item[aria-current="page"] {
+    background: var(--bitcoin-orange) !important;
+    border: 1px solid var(--bitcoin-orange) !important;
+  }
+  
+  /* Menu Item Card - Hover */
+  .mobile-menu-item:hover {
+    border-color: var(--bitcoin-orange) !important;
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.3);
+  }
+  
+  /* Menu Item Card Active - Hover */
+  .mobile-menu-item.active:hover,
+  .mobile-menu-item[aria-current="page"]:hover {
+    background: var(--bitcoin-orange) !important;
+    box-shadow: 0 0 30px rgba(247, 147, 26, 0.5);
+  }
+  
+  /* Menu Item Text - Inactive */
+  .mobile-menu-item .menu-title {
+    color: var(--bitcoin-white) !important;
+  }
+  
+  .mobile-menu-item .menu-description {
+    color: var(--bitcoin-white-60) !important;
+  }
+  
+  /* Menu Item Text - Active */
+  .mobile-menu-item.active .menu-title,
+  .mobile-menu-item[aria-current="page"] .menu-title {
+    color: var(--bitcoin-black) !important;
+  }
+  
+  .mobile-menu-item.active .menu-description,
+  .mobile-menu-item[aria-current="page"] .menu-description {
+    color: var(--bitcoin-black) !important;
+    opacity: 0.8;
+  }
+  
+  /* ============================================
+     EMERGENCY HIGH-CONTRAST OVERRIDES
+     Last resort to prevent invisible elements
+     ============================================ */
+  
+  /* Prevent white-on-white */
+  .mobile-btn-safe-contrast {
+    background: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+  }
+  
+  /* Ensure text visibility */
+  .mobile-text-visible {
+    color: var(--bitcoin-white) !important;
+    background: var(--bitcoin-black) !important;
+  }
+  
+  /* Ensure background safety */
+  .mobile-bg-safe {
+    background: var(--bitcoin-black) !important;
+  }
+  
+  /* Ensure border visibility */
+  .mobile-border-visible {
+    border: 2px solid var(--bitcoin-orange) !important;
+  }
+  
+  /* ============================================
+     TABLET SPECIFIC (768px-1023px)
+     Additional refinements for tablet devices
+     ============================================ */
+  
+  @media (min-width: 768px) and (max-width: 1023px) {
+    /* Slightly larger buttons on tablets */
+    .mobile-btn-inactive,
+    .mobile-btn-active,
+    .mobile-feature-btn {
+      min-height: 52px;
+      padding: 1rem 1.5rem;
+      font-size: 0.9375rem;
+    }
+    
+    /* Two-column button layouts on tablets */
+    .mobile-btn-group-tablet {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+  }
+  
+  /* ============================================
+     FOCUS STATES FOR MOBILE/TABLET
+     Enhanced visibility for keyboard navigation
+     ============================================ */
+  
+  .mobile-btn-inactive:focus-visible,
+  .mobile-btn-active:focus-visible,
+  .mobile-feature-btn:focus-visible,
+  .mobile-nav-link:focus-visible,
+  .mobile-menu-item:focus-visible {
+    outline: 3px solid var(--bitcoin-orange) !important;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 5px rgba(247, 147, 26, 0.4) !important;
+  }
+  
+  /* ============================================
+     DISABLED STATES FOR MOBILE/TABLET
+     Clear visual feedback for disabled buttons
+     ============================================ */
+  
+  .mobile-btn-inactive:disabled,
+  .mobile-btn-active:disabled,
+  .mobile-feature-btn:disabled {
+    background: var(--bitcoin-black) !important;
+    color: var(--bitcoin-orange-30) !important;
+    border-color: var(--bitcoin-orange-30) !important;
+    cursor: not-allowed;
+    opacity: 0.5;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+}
+
 /* BUTTON GROUP - HORIZONTAL LAYOUT (DESKTOP) */
 .btn-bitcoin-group {
   display: flex;
@@ -1229,6 +1797,28 @@ body.using-mouse *:focus {
   from {
     opacity: 0;
     transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* FADE IN - Simple Opacity */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* FADE IN UP - For Menu Items */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -6389,3 +6979,3738 @@ img {
 /* ============================================
    END WHALE WATCH MOBILE ENHANCEMENTS
    ============================================ */
+
+
+/* ============================================
+   TASK 10.1: RESPONSIVE TEXT SCALING UTILITIES
+   CSS clamp() based fluid typography for mobile optimization
+   ============================================ */
+
+/* Responsive Text Sizing - Fluid Typography with clamp() */
+.responsive-text-sm {
+  font-size: clamp(0.75rem, 2.5vw, 0.875rem); /* 12px - 14px */
+  line-height: 1.5;
+}
+
+.responsive-text-base {
+  font-size: clamp(1rem, 3.5vw, 1.125rem); /* 16px - 18px */
+  line-height: 1.6;
+}
+
+.responsive-text-lg {
+  font-size: clamp(1.25rem, 4.5vw, 1.5rem); /* 20px - 24px */
+  line-height: 1.4;
+}
+
+.responsive-text-xl {
+  font-size: clamp(1.5rem, 5vw, 2rem); /* 24px - 32px */
+  line-height: 1.3;
+}
+
+/* Responsive Price Display - For large price numbers */
+.responsive-price {
+  font-size: clamp(1.5rem, 5vw, 2.5rem); /* 24px - 40px */
+  font-family: 'Roboto Mono', 'Courier New', monospace;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--bitcoin-orange);
+  text-shadow: 0 0 20px var(--bitcoin-orange-30);
+}
+
+/* Responsive Stat Value - For stat cards and data displays */
+.responsive-stat {
+  font-size: clamp(1rem, 4vw, 1.5rem); /* 16px - 24px */
+  font-family: 'Roboto Mono', 'Courier New', monospace;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Text Truncation Utility - Single line with ellipsis */
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Text Wrap Safe - Multi-line text with proper word breaking */
+.text-wrap-safe {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Combined Responsive + Truncate Utilities */
+.responsive-text-sm-truncate {
+  font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.responsive-text-base-truncate {
+  font-size: clamp(1rem, 3.5vw, 1.125rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.responsive-text-lg-truncate {
+  font-size: clamp(1.25rem, 4.5vw, 1.5rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Responsive Price with Truncation */
+.responsive-price-truncate {
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  font-family: 'Roboto Mono', 'Courier New', monospace;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Responsive Stat with Truncation */
+.responsive-stat-truncate {
+  font-size: clamp(1rem, 4vw, 1.5rem);
+  font-family: 'Roboto Mono', 'Courier New', monospace;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Multi-line Truncation Utilities (2-3 lines) */
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.text-truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Responsive Text with Safe Wrapping */
+.responsive-text-wrap {
+  font-size: clamp(1rem, 3.5vw, 1.125rem);
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Mobile-specific responsive text overrides */
+@media (max-width: 768px) {
+  .responsive-text-sm {
+    font-size: clamp(0.75rem, 3vw, 0.875rem); /* Slightly larger on mobile */
+  }
+  
+  .responsive-text-base {
+    font-size: clamp(1rem, 4vw, 1.125rem);
+  }
+  
+  .responsive-text-lg {
+    font-size: clamp(1.125rem, 5vw, 1.5rem);
+  }
+  
+  .responsive-text-xl {
+    font-size: clamp(1.375rem, 6vw, 2rem);
+  }
+  
+  .responsive-price {
+    font-size: clamp(1.25rem, 6vw, 2.5rem); /* Adjusted for mobile screens */
+  }
+  
+  .responsive-stat {
+    font-size: clamp(0.875rem, 4.5vw, 1.5rem);
+  }
+}
+
+/* Tablet-specific responsive text */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .responsive-text-sm {
+    font-size: clamp(0.8125rem, 2.2vw, 0.875rem);
+  }
+  
+  .responsive-text-base {
+    font-size: clamp(1rem, 3vw, 1.125rem);
+  }
+  
+  .responsive-text-lg {
+    font-size: clamp(1.25rem, 4vw, 1.5rem);
+  }
+  
+  .responsive-text-xl {
+    font-size: clamp(1.5rem, 4.5vw, 2rem);
+  }
+  
+  .responsive-price {
+    font-size: clamp(1.75rem, 4.5vw, 2.5rem);
+  }
+  
+  .responsive-stat {
+    font-size: clamp(1.125rem, 3.5vw, 1.5rem);
+  }
+}
+
+
+/* ============================================
+   TASK 10.3: BITCOIN-BLOCK CONTAINER OVERFLOW FIXES
+   Prevent content from extending beyond container boundaries
+   ============================================ */
+
+/* Bitcoin Block - Add overflow hidden to prevent content overflow */
+.bitcoin-block {
+  overflow: hidden;
+  padding: clamp(1rem, 3vw, 1.5rem); /* Responsive padding */
+  position: relative;
+}
+
+/* Bitcoin Block Subtle - Add overflow hidden */
+.bitcoin-block-subtle {
+  overflow: hidden;
+  padding: clamp(1rem, 3vw, 1.5rem); /* Responsive padding */
+  position: relative;
+}
+
+/* Bitcoin Block Orange - Add overflow hidden */
+.bitcoin-block-orange {
+  overflow: hidden;
+  padding: clamp(1rem, 3vw, 1.5rem); /* Responsive padding */
+  position: relative;
+}
+
+/* Flex children within bitcoin-blocks need min-width: 0 */
+.bitcoin-block > *,
+.bitcoin-block-subtle > *,
+.bitcoin-block-orange > * {
+  min-width: 0; /* Allow flex items to shrink below content size */
+}
+
+/* Specific flex container fixes within bitcoin-blocks */
+.bitcoin-block .flex,
+.bitcoin-block-subtle .flex,
+.bitcoin-block-orange .flex,
+.bitcoin-block [class*="flex"],
+.bitcoin-block-subtle [class*="flex"],
+.bitcoin-block-orange [class*="flex"] {
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Grid children within bitcoin-blocks */
+.bitcoin-block .grid,
+.bitcoin-block-subtle .grid,
+.bitcoin-block-orange .grid,
+.bitcoin-block [class*="grid"],
+.bitcoin-block-subtle [class*="grid"],
+.bitcoin-block-orange [class*="grid"] {
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Mobile-specific bitcoin-block optimizations */
+@media (max-width: 768px) {
+  .bitcoin-block,
+  .bitcoin-block-subtle,
+  .bitcoin-block-orange {
+    padding: clamp(0.875rem, 3vw, 1.25rem); /* Tighter padding on mobile */
+    overflow: hidden;
+  }
+  
+  /* Ensure all children respect container boundaries */
+  .bitcoin-block *,
+  .bitcoin-block-subtle *,
+  .bitcoin-block-orange * {
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+}
+
+/* iPhone SE specific (375px) */
+@media (min-width: 375px) and (max-width: 389px) {
+  .bitcoin-block,
+  .bitcoin-block-subtle,
+  .bitcoin-block-orange {
+    padding: 14px; /* Fixed padding for iPhone SE */
+  }
+}
+
+/* iPhone 12/13/14 (390px) */
+@media (min-width: 390px) and (max-width: 427px) {
+  .bitcoin-block,
+  .bitcoin-block-subtle,
+  .bitcoin-block-orange {
+    padding: 16px; /* Standard mobile padding */
+  }
+}
+
+/* iPhone Pro Max (428px) */
+@media (min-width: 428px) and (max-width: 479px) {
+  .bitcoin-block,
+  .bitcoin-block-subtle,
+  .bitcoin-block-orange {
+    padding: 18px; /* Enhanced padding for larger screens */
+  }
+}
+
+
+/* ============================================
+   TASK 10.4: PRICE DISPLAY SCALING FIXES
+   Responsive font sizing with overflow prevention
+   ============================================ */
+
+/* Update existing price-display classes with responsive sizing */
+.price-display {
+  font-size: clamp(1.5rem, 5vw, 2.5rem); /* 24px - 40px */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.price-display-sm {
+  font-size: clamp(1rem, 4vw, 1.5rem); /* 16px - 24px */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.price-display-lg {
+  font-size: clamp(2rem, 6vw, 3rem); /* 32px - 48px */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Mobile-specific price display adjustments */
+@media (max-width: 768px) {
+  .price-display {
+    font-size: clamp(1.25rem, 6vw, 2rem); /* Adjusted for mobile */
+  }
+  
+  .price-display-sm {
+    font-size: clamp(0.875rem, 4.5vw, 1.25rem);
+  }
+  
+  .price-display-lg {
+    font-size: clamp(1.5rem, 7vw, 2.5rem);
+  }
+}
+
+/* iPhone SE (375px) - More aggressive scaling */
+@media (min-width: 320px) and (max-width: 389px) {
+  .price-display {
+    font-size: clamp(1.125rem, 5.5vw, 1.75rem);
+  }
+  
+  .price-display-sm {
+    font-size: clamp(0.875rem, 4vw, 1.125rem);
+  }
+  
+  .price-display-lg {
+    font-size: clamp(1.375rem, 6.5vw, 2rem);
+  }
+}
+
+/* iPhone 12/13/14 (390px) - Balanced scaling */
+@media (min-width: 390px) and (max-width: 427px) {
+  .price-display {
+    font-size: clamp(1.25rem, 5.5vw, 1.875rem);
+  }
+  
+  .price-display-sm {
+    font-size: clamp(0.9375rem, 4.25vw, 1.25rem);
+  }
+  
+  .price-display-lg {
+    font-size: clamp(1.5rem, 6.5vw, 2.25rem);
+  }
+}
+
+/* ============================================
+   TASK 10.5: STAT CARD TEXT OVERFLOW FIXES
+   Responsive sizing for stat values and labels
+   ============================================ */
+
+/* Update existing stat-value classes with responsive sizing */
+.stat-value {
+  font-size: clamp(1rem, 4vw, 1.5rem); /* 16px - 24px */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.stat-value-sm {
+  font-size: clamp(0.875rem, 3.5vw, 1.125rem); /* 14px - 18px */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.stat-value-lg {
+  font-size: clamp(1.25rem, 5vw, 2rem); /* 20px - 32px */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Update stat-label with responsive sizing */
+.stat-label {
+  font-size: clamp(0.625rem, 2.5vw, 0.75rem); /* 10px - 12px */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Mobile-specific stat card adjustments */
+@media (max-width: 768px) {
+  .stat-value {
+    font-size: clamp(0.9375rem, 4.5vw, 1.375rem);
+  }
+  
+  .stat-value-sm {
+    font-size: clamp(0.8125rem, 3.75vw, 1.0625rem);
+  }
+  
+  .stat-value-lg {
+    font-size: clamp(1.125rem, 5.5vw, 1.75rem);
+  }
+  
+  .stat-label {
+    font-size: clamp(0.625rem, 2.75vw, 0.75rem);
+  }
+}
+
+/* iPhone SE (375px) - Compact stat displays */
+@media (min-width: 320px) and (max-width: 389px) {
+  .stat-value {
+    font-size: clamp(0.875rem, 4.25vw, 1.25rem);
+  }
+  
+  .stat-value-sm {
+    font-size: clamp(0.75rem, 3.5vw, 1rem);
+  }
+  
+  .stat-value-lg {
+    font-size: clamp(1rem, 5vw, 1.5rem);
+  }
+  
+  .stat-label {
+    font-size: clamp(0.5625rem, 2.5vw, 0.6875rem);
+  }
+}
+
+/* iPhone 12/13/14 (390px) - Balanced stat displays */
+@media (min-width: 390px) and (max-width: 427px) {
+  .stat-value {
+    font-size: clamp(0.9375rem, 4.25vw, 1.3125rem);
+  }
+  
+  .stat-value-sm {
+    font-size: clamp(0.8125rem, 3.625vw, 1.0625rem);
+  }
+  
+  .stat-value-lg {
+    font-size: clamp(1.0625rem, 5.25vw, 1.625rem);
+  }
+  
+  .stat-label {
+    font-size: clamp(0.625rem, 2.625vw, 0.71875rem);
+  }
+}
+
+
+/* ============================================
+   TASK 10.6: WHALE WATCH DASHBOARD CONTAINER FIXES
+   Responsive sizing for whale transaction displays
+   ============================================ */
+
+/* Whale transaction card layouts */
+.whale-transaction-card,
+.whale-card {
+  overflow: hidden;
+  padding: clamp(14px, 4vw, 18px);
+  gap: clamp(10px, 3vw, 14px);
+}
+
+/* Whale amount displays */
+.whale-amount {
+  font-size: clamp(1.125rem, 4.5vw, 1.5rem); /* 18px - 24px */
+  font-family: 'Roboto Mono', 'Courier New', monospace;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Whale value displays */
+.whale-value {
+  font-size: clamp(0.875rem, 3.5vw, 1.125rem); /* 14px - 18px */
+  font-family: 'Roboto Mono', 'Courier New', monospace;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Wallet address truncation */
+.wallet-address,
+.whale-address {
+  font-family: 'Roboto Mono', 'Courier New', monospace;
+  font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Status message with word breaking */
+.whale-status,
+.status-message {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Analyze buttons - ensure minimum touch target */
+.whale-analyze-btn,
+.analyze-button {
+  min-height: 48px;
+  padding: clamp(0.625rem, 2vw, 0.875rem) clamp(0.875rem, 3vw, 1.25rem);
+}
+
+/* Device-specific whale watch optimizations */
+@media (min-width: 375px) and (max-width: 389px) {
+  /* iPhone SE */
+  .whale-transaction-card {
+    padding: 14px;
+    gap: 10px;
+  }
+  
+  .whale-amount {
+    font-size: clamp(1rem, 4.25vw, 1.375rem);
+  }
+  
+  .whale-value {
+    font-size: clamp(0.8125rem, 3.25vw, 1.0625rem);
+  }
+}
+
+@media (min-width: 390px) and (max-width: 427px) {
+  /* iPhone 12/13/14 */
+  .whale-transaction-card {
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .whale-amount {
+    font-size: clamp(1.0625rem, 4.375vw, 1.4375rem);
+  }
+  
+  .whale-value {
+    font-size: clamp(0.875rem, 3.375vw, 1.125rem);
+  }
+}
+
+@media (min-width: 428px) and (max-width: 479px) {
+  /* iPhone Pro Max */
+  .whale-transaction-card {
+    padding: 18px;
+    gap: 14px;
+  }
+  
+  .whale-amount {
+    font-size: clamp(1.125rem, 4.5vw, 1.5rem);
+  }
+  
+  .whale-value {
+    font-size: clamp(0.9375rem, 3.5vw, 1.1875rem);
+  }
+}
+
+/* ============================================
+   TASK 10.7: ZONE CARD DISTANCE AND PRICE OVERFLOW FIXES
+   Responsive sizing for trading zone displays
+   ============================================ */
+
+/* Zone card containers */
+.zone-card,
+.trading-zone-card {
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* Zone card price displays */
+.zone-card-price,
+.zone-price {
+  font-size: clamp(0.875rem, 3.5vw, 1.125rem); /* 14px - 18px */
+  font-family: 'Roboto Mono', 'Courier New', monospace;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Zone distance values */
+.zone-distance,
+.zone-card-distance {
+  font-size: clamp(0.75rem, 2.5vw, 0.875rem); /* 12px - 14px */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Flex children in zone cards */
+.zone-card > *,
+.trading-zone-card > * {
+  min-width: 0;
+}
+
+/* Mobile-specific zone card adjustments */
+@media (max-width: 768px) {
+  .zone-card,
+  .trading-zone-card {
+    padding: clamp(0.75rem, 3vw, 1rem);
+  }
+  
+  .zone-card-price {
+    font-size: clamp(0.8125rem, 3.75vw, 1.0625rem);
+  }
+  
+  .zone-distance {
+    font-size: clamp(0.6875rem, 2.75vw, 0.8125rem);
+  }
+}
+
+/* iPhone SE (375px) - Compact zone displays */
+@media (min-width: 320px) and (max-width: 389px) {
+  .zone-card-price {
+    font-size: clamp(0.8125rem, 3.5vw, 1rem);
+  }
+  
+  .zone-distance {
+    font-size: clamp(0.6875rem, 2.5vw, 0.8125rem);
+  }
+}
+
+/* iPhone 12/13/14 (390px) - Balanced zone displays */
+@media (min-width: 390px) and (max-width: 427px) {
+  .zone-card-price {
+    font-size: clamp(0.875rem, 3.5vw, 1.0625rem);
+  }
+  
+  .zone-distance {
+    font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+  }
+}
+
+/* ============================================
+   TASK 10.8: BUTTON TEXT WRAPPING FIXES
+   Prevent button text from wrapping awkwardly
+   ============================================ */
+
+/* Update existing button classes with nowrap and responsive padding */
+.btn-bitcoin-primary,
+.btn-bitcoin-secondary,
+.btn-bitcoin-tertiary {
+  white-space: nowrap;
+  padding: clamp(0.625rem, 2vw, 0.875rem) clamp(0.875rem, 3vw, 1.25rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  min-height: 48px; /* Ensure minimum touch target */
+}
+
+/* Button size variants with responsive padding */
+.btn-bitcoin-sm {
+  padding: clamp(0.5rem, 1.5vw, 0.625rem) clamp(0.75rem, 2.5vw, 1rem);
+  min-height: 44px;
+}
+
+.btn-bitcoin-lg {
+  padding: clamp(0.75rem, 2.5vw, 1rem) clamp(1.25rem, 3.5vw, 1.75rem);
+  min-height: 52px;
+}
+
+.btn-bitcoin-xl {
+  padding: clamp(0.875rem, 3vw, 1.25rem) clamp(1.5rem, 4vw, 2rem);
+  min-height: 56px;
+}
+
+/* Mobile-specific button adjustments */
+@media (max-width: 768px) {
+  .btn-bitcoin-primary,
+  .btn-bitcoin-secondary,
+  .btn-bitcoin-tertiary {
+    padding: clamp(0.75rem, 2.5vw, 0.875rem) clamp(1rem, 3.5vw, 1.25rem);
+    font-size: clamp(0.875rem, 3.5vw, 1rem);
+    min-height: 48px;
+  }
+  
+  .btn-bitcoin-sm {
+    padding: clamp(0.625rem, 2vw, 0.75rem) clamp(0.875rem, 3vw, 1rem);
+    font-size: clamp(0.75rem, 3vw, 0.875rem);
+    min-height: 44px;
+  }
+  
+  .btn-bitcoin-lg {
+    padding: clamp(0.875rem, 3vw, 1rem) clamp(1.25rem, 4vw, 1.5rem);
+    font-size: clamp(0.9375rem, 3.75vw, 1.0625rem);
+    min-height: 52px;
+  }
+}
+
+/* ============================================
+   TASK 10.9: TABLE AND CHART OVERFLOW FIXES
+   Prevent horizontal scroll on main viewport
+   ============================================ */
+
+/* Table container with horizontal scroll */
+.table-container,
+.data-table-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+/* Chart containers */
+.chart-container,
+.trading-chart-container {
+  max-width: 100%;
+  height: auto;
+  overflow: hidden;
+}
+
+/* Responsive charts */
+.chart-container canvas,
+.chart-container svg,
+.trading-chart-container canvas,
+.trading-chart-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Data tables */
+.data-table,
+table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.data-table td,
+.data-table th,
+table td,
+table th {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: clamp(0.5rem, 2vw, 0.75rem);
+}
+
+/* Mobile-specific table and chart adjustments */
+@media (max-width: 640px) {
+  /* Stacked layout for complex tables on mobile */
+  .table-stacked-mobile {
+    display: block;
+  }
+  
+  .table-stacked-mobile thead {
+    display: none;
+  }
+  
+  .table-stacked-mobile tbody,
+  .table-stacked-mobile tr,
+  .table-stacked-mobile td {
+    display: block;
+    width: 100%;
+  }
+  
+  .table-stacked-mobile tr {
+    margin-bottom: 1rem;
+    border: 1px solid var(--bitcoin-orange-20);
+    border-radius: 8px;
+    padding: 0.75rem;
+  }
+  
+  .table-stacked-mobile td {
+    text-align: left;
+    padding: 0.5rem 0;
+    border: none;
+  }
+  
+  .table-stacked-mobile td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--bitcoin-white-60);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+}
+
+/* Chart responsiveness */
+@media (max-width: 768px) {
+  .chart-container,
+  .trading-chart-container {
+    padding: 0.5rem;
+  }
+  
+  /* Reduce chart height on mobile */
+  .chart-container canvas,
+  .trading-chart-container canvas {
+    max-height: 300px;
+  }
+}
+
+
+/* ============================================
+   TASK 10.10: PRECISE DEVICE-SPECIFIC BREAKPOINTS
+   Optimized styles for specific iPhone models
+   ============================================ */
+
+/* iPhone SE (375px) - Aggressive optimization for smallest screen */
+@media (min-width: 375px) and (max-width: 389px) {
+  /* Card padding */
+  .bitcoin-block,
+  .bitcoin-block-subtle,
+  .bitcoin-block-orange,
+  .stat-card,
+  .news-card {
+    padding: 14px;
+  }
+  
+  /* Heading sizes */
+  h1 {
+    font-size: 1.75rem; /* 28px */
+    line-height: 1.2;
+  }
+  
+  h2 {
+    font-size: 1.5rem; /* 24px */
+    line-height: 1.3;
+  }
+  
+  h3 {
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.4;
+  }
+  
+  /* Element spacing */
+  .section-gap,
+  .content-section {
+    margin-bottom: 12px;
+  }
+  
+  .content-gap,
+  .element-gap {
+    margin-bottom: 8px;
+  }
+  
+  /* More aggressive text truncation */
+  .truncate-mobile {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Container padding */
+  .container,
+  .mobile-container {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}
+
+/* iPhone 12/13/14 (390px) - Balanced optimization */
+@media (min-width: 390px) and (max-width: 427px) {
+  /* Card padding */
+  .bitcoin-block,
+  .bitcoin-block-subtle,
+  .bitcoin-block-orange,
+  .stat-card,
+  .news-card {
+    padding: 16px;
+  }
+  
+  /* Heading sizes */
+  h1 {
+    font-size: 1.875rem; /* 30px */
+    line-height: 1.2;
+  }
+  
+  h2 {
+    font-size: 1.5rem; /* 24px */
+    line-height: 1.3;
+  }
+  
+  h3 {
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.4;
+  }
+  
+  /* Element spacing */
+  .section-gap,
+  .content-section {
+    margin-bottom: 16px;
+  }
+  
+  .content-gap,
+  .element-gap {
+    margin-bottom: 12px;
+  }
+  
+  /* Balanced text truncation */
+  .truncate-mobile {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Container padding */
+  .container,
+  .mobile-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+/* iPhone Pro Max (428px) - Maximum mobile optimization */
+@media (min-width: 428px) and (max-width: 479px) {
+  /* Card padding */
+  .bitcoin-block,
+  .bitcoin-block-subtle,
+  .bitcoin-block-orange,
+  .stat-card,
+  .news-card {
+    padding: 18px;
+  }
+  
+  /* Heading sizes */
+  h1 {
+    font-size: 2rem; /* 32px */
+    line-height: 1.2;
+  }
+  
+  h2 {
+    font-size: 1.625rem; /* 26px */
+    line-height: 1.3;
+  }
+  
+  h3 {
+    font-size: 1.375rem; /* 22px */
+    line-height: 1.4;
+  }
+  
+  /* Element spacing */
+  .section-gap,
+  .content-section {
+    margin-bottom: 18px;
+  }
+  
+  .content-gap,
+  .element-gap {
+    margin-bottom: 14px;
+  }
+  
+  /* Minimal text truncation needed */
+  .truncate-mobile {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Container padding */
+  .container,
+  .mobile-container {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+}
+
+/* Smooth scaling between all breakpoints using clamp() */
+@media (min-width: 320px) and (max-width: 767px) {
+  /* Universal smooth scaling */
+  .responsive-padding {
+    padding: clamp(12px, 4vw, 18px);
+  }
+  
+  .responsive-margin {
+    margin: clamp(12px, 4vw, 18px);
+  }
+  
+  .responsive-gap {
+    gap: clamp(8px, 3vw, 16px);
+  }
+  
+  /* Smooth heading transitions */
+  h1 {
+    font-size: clamp(1.625rem, 6vw, 2rem);
+  }
+  
+  h2 {
+    font-size: clamp(1.375rem, 5vw, 1.625rem);
+  }
+  
+  h3 {
+    font-size: clamp(1.125rem, 4vw, 1.375rem);
+  }
+  
+  h4 {
+    font-size: clamp(1rem, 3.5vw, 1.125rem);
+  }
+}
+
+/* ============================================
+   TASK 10.11: CONTAINER OVERFLOW PREVENTION STRATEGIES
+   Universal overflow prevention utilities
+   ============================================ */
+
+/* Add min-width: 0 to all flex children */
+.flex > *,
+[class*="flex"] > * {
+  min-width: 0;
+}
+
+/* Add overflow: hidden to all grid containers */
+.grid,
+[class*="grid"] {
+  overflow: hidden;
+}
+
+.grid > *,
+[class*="grid"] > * {
+  min-width: 0;
+}
+
+/* Safe Container Utility - Comprehensive overflow prevention */
+.safe-container {
+  overflow: hidden;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Word breaking utilities */
+.word-break-safe {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.word-break-all {
+  word-break: break-all;
+}
+
+/* Flex Safe - Flex container with overflow prevention */
+.flex-safe {
+  display: flex;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.flex-safe > * {
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+/* Grid Safe - Grid container with overflow prevention */
+.grid-safe {
+  display: grid;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.grid-safe > * {
+  min-width: 0;
+}
+
+/* Apply safe container classes to major layout components */
+.page-container,
+.main-content,
+.content-wrapper {
+  overflow: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Ensure body never causes horizontal scroll */
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+/* Universal box-sizing */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Responsive container that never exceeds viewport */
+.responsive-container {
+  max-width: 100%;
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Prevent horizontal scroll on any element */
+.no-horizontal-scroll {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* Image containment */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.image-contained {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.image-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Mobile-specific container integrity */
+@media (max-width: 768px) {
+  /* Ensure all major containers prevent overflow */
+  .bitcoin-block,
+  .bitcoin-block-subtle,
+  .bitcoin-block-orange,
+  .stat-card,
+  .news-card,
+  .whale-card,
+  .zone-card,
+  .trade-signal-card {
+    overflow: hidden;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Ensure all text respects container boundaries */
+  * {
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Prevent any element from causing horizontal scroll */
+  body > * {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+}
+
+/* Debugging utility (remove in production) */
+.debug-overflow {
+  outline: 2px solid red !important;
+}
+
+.debug-overflow * {
+  outline: 1px solid orange !important;
+}
+
+/* ============================================
+   COMPREHENSIVE TEXT CONTAINMENT
+   Ensure zero text overflow across all devices
+   ============================================ */
+
+/* Universal text containment rules */
+.text-container,
+.content-block,
+.text-block {
+  overflow: hidden;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  max-width: 100%;
+}
+
+/* Specific component text containment */
+.zone-card *,
+.whale-card *,
+.trade-signal-card *,
+.market-data-card * {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+/* Number and price display containment */
+.price-display,
+.amount-display,
+.percentage-display,
+.stat-value,
+.whale-amount,
+.whale-value,
+.zone-card-price {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Badge and label containment */
+.badge,
+.tag,
+.label,
+.crypto-badge {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Long text containment (addresses, hashes, URLs) */
+.address,
+.hash,
+.url,
+.wallet-address {
+  font-family: 'Roboto Mono', 'Courier New', monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  word-break: break-all;
+}
+
+/* Multi-line text containment */
+.description,
+.message,
+.status-message {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  max-width: 100%;
+}
+
+/* Ensure all headings respect container boundaries */
+h1, h2, h3, h4, h5, h6 {
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Ensure all paragraphs respect container boundaries */
+p {
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Ensure all links respect container boundaries */
+a {
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Mobile-specific text containment enforcement */
+@media (max-width: 768px) {
+  /* Force text containment on all elements */
+  * {
+    max-width: 100%;
+  }
+  
+  /* Aggressive overflow prevention */
+  body,
+  html {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  
+  /* Ensure no element can cause horizontal scroll */
+  body > * {
+    max-width: 100vw;
+  }
+  
+  /* Force word breaking on long words */
+  .force-break {
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+}
+
+/* Device-specific text containment testing */
+@media (min-width: 320px) and (max-width: 374px) {
+  /* Extra small mobile (320px) - Most aggressive containment */
+  * {
+    max-width: 100%;
+    word-wrap: break-word;
+  }
+}
+
+@media (min-width: 375px) and (max-width: 389px) {
+  /* iPhone SE - Aggressive containment */
+  * {
+    max-width: 100%;
+    word-wrap: break-word;
+  }
+}
+
+@media (min-width: 390px) and (max-width: 427px) {
+  /* iPhone 12/13/14 - Balanced containment */
+  * {
+    max-width: 100%;
+    word-wrap: break-word;
+  }
+}
+
+@media (min-width: 428px) and (max-width: 639px) {
+  /* iPhone Pro Max - Standard containment */
+  * {
+    max-width: 100%;
+    word-wrap: break-word;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 767px) {
+  /* Large mobile/small tablet - Standard containment */
+  * {
+    max-width: 100%;
+    word-wrap: break-word;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  /* Tablet - Standard containment */
+  * {
+    max-width: 100%;
+    word-wrap: break-word;
+  }
+}
+
+/* ============================================
+   END OF TASK 10 IMPLEMENTATIONS
+   All responsive text scaling and container overflow fixes complete
+   ============================================ */
+
+
+/* ============================================
+   TASK 10.2: NAVIGATION COMPONENT MOBILE/TABLET FIXES
+   Ensure proper contrast and touch targets for navigation
+   ============================================ */
+
+/* Mobile/Tablet Navigation Bar */
+@media (max-width: 1023px) {
+  /* Navigation container - pure black background */
+  nav {
+    background-color: var(--bitcoin-black) !important;
+  }
+  
+  /* Hamburger button - orange on black with proper contrast */
+  nav button[aria-label="Toggle menu"],
+  nav button[aria-label="Close menu"] {
+    color: var(--bitcoin-orange) !important;
+    background-color: transparent !important;
+    min-height: 48px;
+    min-width: 48px;
+    padding: 0.75rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  
+  nav button[aria-label="Toggle menu"]:hover,
+  nav button[aria-label="Close menu"]:hover {
+    color: var(--bitcoin-white) !important;
+    background-color: rgba(247, 147, 26, 0.1) !important;
+  }
+  
+  /* Hamburger icon sizing */
+  nav button svg {
+    width: 32px;
+    height: 32px;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+  
+  /* Mobile menu overlay - pure black background */
+  nav + div[class*="fixed"] {
+    background-color: var(--bitcoin-black) !important;
+  }
+  
+  /* Menu items - white or orange text on black */
+  nav a {
+    color: var(--bitcoin-white) !important;
+    background-color: transparent !important;
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  nav a:hover {
+    color: var(--bitcoin-orange) !important;
+    background-color: rgba(247, 147, 26, 0.1) !important;
+  }
+  
+  /* Active menu item */
+  nav a[class*="text-bitcoin-orange"] {
+    color: var(--bitcoin-orange) !important;
+  }
+  
+  /* Close button (X) - proper contrast and size */
+  .absolute.top-4.right-4 button {
+    color: var(--bitcoin-orange) !important;
+    background-color: transparent !important;
+    min-height: 48px;
+    min-width: 48px;
+    padding: 0.75rem;
+    border-radius: 8px;
+  }
+  
+  .absolute.top-4.right-4 button:hover {
+    color: var(--bitcoin-white) !important;
+    background-color: rgba(247, 147, 26, 0.1) !important;
+  }
+  
+  /* Menu items in overlay - proper spacing */
+  .flex.flex-col.items-center.justify-center a {
+    min-height: 48px;
+    padding: 1rem 1.5rem;
+    margin: 0.5rem 0;
+    border-radius: 8px;
+  }
+  
+  /* Footer text in menu */
+  .absolute.bottom-8 p {
+    color: var(--bitcoin-white-60) !important;
+  }
+}
+
+/* Device-specific navigation optimizations */
+@media (min-width: 320px) and (max-width: 389px) {
+  /* iPhone SE and smaller - compact navigation */
+  nav .container {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  
+  nav button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  nav a {
+    font-size: clamp(1.25rem, 5vw, 1.5rem);
+    min-height: 44px;
+  }
+}
+
+@media (min-width: 390px) and (max-width: 427px) {
+  /* iPhone 12/13/14 - balanced navigation */
+  nav .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  nav button {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  nav a {
+    font-size: clamp(1.375rem, 5vw, 1.625rem);
+    min-height: 48px;
+  }
+}
+
+@media (min-width: 428px) and (max-width: 767px) {
+  /* iPhone Pro Max and larger - enhanced navigation */
+  nav .container {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  
+  nav button {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  nav a {
+    font-size: clamp(1.5rem, 5vw, 1.75rem);
+    min-height: 48px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Tablet - larger touch targets */
+  nav button {
+    min-height: 52px;
+    min-width: 52px;
+  }
+  
+  nav a {
+    font-size: clamp(1.625rem, 4.5vw, 1.875rem);
+    min-height: 52px;
+    padding: 1rem 1.75rem;
+  }
+}
+
+/* Ensure proper spacing between menu items */
+@media (max-width: 1023px) {
+  .flex.flex-col.items-center.justify-center {
+    gap: 16px; /* Minimum 16px spacing */
+  }
+  
+  .flex.flex-col.items-center.justify-center a {
+    margin: 8px 0; /* Additional margin for touch targets */
+  }
+}
+
+/* Focus states for navigation elements */
+@media (max-width: 1023px) {
+  nav button:focus-visible,
+  nav a:focus-visible {
+    outline: 2px solid var(--bitcoin-orange);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(247, 147, 26, 0.3);
+  }
+}
+
+/* High contrast mode for navigation */
+@media (prefers-contrast: high) and (max-width: 1023px) {
+  nav {
+    background-color: var(--bitcoin-black) !important;
+    border-bottom: 2px solid var(--bitcoin-orange) !important;
+  }
+  
+  nav button,
+  nav a {
+    font-weight: 700;
+  }
+  
+  nav button:hover,
+  nav a:hover {
+    background-color: rgba(247, 147, 26, 0.2) !important;
+  }
+}
+
+/* ============================================
+   END OF TASK 10.2 IMPLEMENTATION
+   Navigation component mobile/tablet fixes complete
+   ============================================ */
+
+
+/* ============================================
+   TEXT CONTAINMENT FIXES - TASK 10.12
+   Comprehensive overflow prevention across all devices
+   Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 8.1, 8.2, 8.3, 8.4, 8.5
+   ============================================ */
+
+/* 1. RESPONSIVE FONT SIZING USING CLAMP() - FLUID TYPOGRAPHY */
+
+/* Responsive text sizing utilities */
+.responsive-text-sm {
+  font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+}
+
+.responsive-text-base {
+  font-size: clamp(1rem, 3.5vw, 1.125rem);
+}
+
+.responsive-text-lg {
+  font-size: clamp(1.25rem, 4.5vw, 1.5rem);
+}
+
+.responsive-text-xl {
+  font-size: clamp(1.5rem, 5vw, 2rem);
+}
+
+/* Responsive price displays */
+.responsive-price {
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Responsive stat values */
+.responsive-stat {
+  font-size: clamp(1rem, 4vw, 1.5rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* 2. TEXT TRUNCATION UTILITIES */
+
+/* Single-line text truncation */
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Safe text wrapping */
+.text-wrap-safe {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Multi-line truncation (2 lines) */
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+/* Multi-line truncation (3 lines) */
+.text-truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+/* 3. CONTAINER OVERFLOW PREVENTION */
+
+/* All bitcoin-block containers must prevent overflow */
+.bitcoin-block,
+.bitcoin-block-subtle,
+.bitcoin-block-orange {
+  overflow: hidden;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Safe container utility */
+.safe-container {
+  overflow: hidden;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Flex container with overflow prevention */
+.flex-safe {
+  display: flex;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Flex children that can shrink */
+.flex-child-safe {
+  min-width: 0;
+  flex-shrink: 1;
+  overflow: hidden;
+}
+
+/* Grid container with overflow prevention */
+.grid-safe {
+  display: grid;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Grid children that can shrink */
+.grid-item-safe {
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* 4. DEVICE-SPECIFIC OPTIMIZATIONS */
+
+/* 320px - Extra Small Android (HIGHEST PRIORITY) */
+@media (max-width: 320px) {
+  /* Most aggressive font sizing for smallest devices */
+  .price-display {
+    font-size: clamp(1.25rem, 4vw, 1.5rem) !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .stat-value {
+    font-size: clamp(0.875rem, 3vw, 1rem) !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .stat-label {
+    font-size: clamp(0.625rem, 2vw, 0.75rem) !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Ensure all containers clip overflow */
+  .bitcoin-block,
+  .stat-card,
+  .news-card,
+  .whale-transaction-card {
+    overflow: hidden;
+    padding: 12px !important;
+  }
+  
+  /* More aggressive text truncation */
+  h1 {
+    font-size: 1.5rem !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  h2 {
+    font-size: 1.25rem !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  h3 {
+    font-size: 1.125rem !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Button text must not wrap */
+  button,
+  .btn-bitcoin-primary,
+  .btn-bitcoin-secondary {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.75rem !important;
+    padding: 8px 12px !important;
+  }
+  
+  /* Zone card optimizations */
+  .zone-card-price {
+    font-size: clamp(0.75rem, 3vw, 0.875rem) !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .zone-distance {
+    font-size: clamp(0.625rem, 2.5vw, 0.75rem) !important;
+    white-space: nowrap;
+  }
+  
+  /* Whale watch optimizations */
+  .whale-amount {
+    font-size: clamp(0.875rem, 3.5vw, 1rem) !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .whale-value {
+    font-size: clamp(0.75rem, 3vw, 0.875rem) !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Wallet address truncation */
+  .wallet-address {
+    font-size: 0.75rem !important;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* 375px - iPhone SE (MEDIUM PRIORITY) */
+@media (min-width: 321px) and (max-width: 389px) {
+  /* Wallet address truncation for Whale Watch */
+  .wallet-address {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.875rem;
+  }
+  
+  /* Price displays - slightly less aggressive */
+  .price-display {
+    font-size: clamp(1.5rem, 4.5vw, 1.875rem);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Ensure containers clip overflow */
+  .bitcoin-block,
+  .stat-card {
+    overflow: hidden;
+    padding: 14px;
+  }
+  
+  /* Zone card optimizations */
+  .zone-card-price {
+    font-size: clamp(0.8rem, 3vw, 0.95rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .zone-distance {
+    font-size: clamp(0.7rem, 2.5vw, 0.85rem);
+    white-space: nowrap;
+  }
+}
+
+/* 390px+ - iPhone 12/13/14 and larger (LOW PRIORITY) */
+@media (min-width: 390px) {
+  /* Standard responsive sizing - already working well */
+  .price-display {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    max-width: 100%;
+  }
+  
+  .stat-value {
+    font-size: clamp(1rem, 4vw, 1.5rem);
+    max-width: 100%;
+  }
+  
+  /* Ensure all containers still prevent overflow */
+  .bitcoin-block,
+  .stat-card,
+  .news-card {
+    overflow: hidden;
+  }
+}
+
+/* 5. UNIVERSAL OVERFLOW PREVENTION (ALL DEVICES) */
+
+/* Prevent horizontal scroll on body */
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* All elements must respect container boundaries */
+* {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+/* Flex items must be able to shrink */
+.flex > * {
+  min-width: 0;
+}
+
+/* Grid items must be able to shrink */
+.grid > * {
+  min-width: 0;
+}
+
+/* Images must never exceed container */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 6. TABLE AND CHART OVERFLOW HANDLING */
+
+/* Tables must be scrollable horizontally */
+.table-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+td, th {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Charts must be responsive */
+.chart-container {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.chart-container canvas,
+.chart-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 7. BUTTON TEXT WRAPPING PREVENTION */
+
+/* All buttons must prevent text wrapping */
+button,
+.btn,
+.btn-bitcoin-primary,
+.btn-bitcoin-secondary,
+.btn-bitcoin-tertiary {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Responsive button padding */
+@media (max-width: 768px) {
+  button,
+  .btn {
+    padding: clamp(0.625rem, 2vw, 0.875rem) clamp(0.875rem, 3vw, 1.25rem);
+    font-size: clamp(0.875rem, 3.5vw, 1rem);
+  }
+}
+
+/* 8. SPECIFIC COMPONENT FIXES */
+
+/* Zone cards - prevent overflow */
+.zone-card {
+  overflow: hidden;
+  min-width: 0;
+}
+
+.zone-card-price {
+  font-size: clamp(0.875rem, 3.5vw, 1.125rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.zone-distance {
+  font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+  white-space: nowrap;
+}
+
+/* Whale transaction cards - prevent overflow */
+.whale-transaction-card {
+  overflow: hidden;
+  min-width: 0;
+}
+
+.whale-amount {
+  font-size: clamp(1.125rem, 4.5vw, 1.5rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.whale-value {
+  font-size: clamp(0.875rem, 3.5vw, 1.125rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wallet-address {
+  font-family: 'Roboto Mono', monospace;
+  font-size: clamp(0.75rem, 3vw, 0.875rem);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Stat cards - prevent overflow */
+.stat-card {
+  overflow: hidden;
+  min-width: 0;
+}
+
+.stat-value {
+  font-size: clamp(1rem, 4vw, 1.5rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.stat-label {
+  font-size: clamp(0.625rem, 2.5vw, 0.75rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Price displays - prevent overflow */
+.price-display {
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.price-display-sm {
+  font-size: clamp(1rem, 4vw, 1.5rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.price-display-lg {
+  font-size: clamp(2rem, 6vw, 3rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 9. ORIENTATION-SPECIFIC FIXES */
+
+/* Portrait orientation - more aggressive truncation */
+@media (orientation: portrait) and (max-width: 768px) {
+  .price-display,
+  .stat-value,
+  .whale-amount {
+    font-size: clamp(1rem, 4vw, 1.5rem);
+  }
+  
+  .zone-card-price,
+  .whale-value {
+    font-size: clamp(0.875rem, 3.5vw, 1.125rem);
+  }
+}
+
+/* Landscape orientation - can be slightly larger */
+@media (orientation: landscape) and (max-width: 768px) {
+  .price-display {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+  }
+  
+  .stat-value {
+    font-size: clamp(1.125rem, 3.5vw, 1.5rem);
+  }
+}
+
+/* 10. DEBUGGING UTILITIES (DEVELOPMENT ONLY) */
+
+/* Uncomment to visualize overflow issues during development */
+/*
+.debug-overflow * {
+  outline: 1px solid red !important;
+}
+
+.debug-overflow *:hover {
+  outline: 2px solid blue !important;
+}
+*/
+
+/* ============================================
+   END TEXT CONTAINMENT FIXES
+   ============================================ */
+
+
+/* ============================================
+   MOBILE/TABLET TEXT VISIBILITY FIXES (320px-1023px)
+   CRITICAL: Ensure All Text Elements Are Visible
+   Task 3.2: Fix Invisible Text Elements
+   ============================================ */
+
+@media (max-width: 1023px) {
+  
+  /* ============================================
+     FORCE WHITE TEXT ON BLACK BACKGROUNDS
+     Prevents any invisible text issues
+     ============================================ */
+  
+  /* All body text must be white on black */
+  body {
+    color: var(--bitcoin-white-80) !important;
+    background-color: var(--bitcoin-black) !important;
+  }
+  
+  /* All paragraphs must be visible */
+  p {
+    color: var(--bitcoin-white-80) !important;
+    background-color: transparent !important;
+  }
+  
+  /* All spans and divs inherit proper colors */
+  span, div {
+    color: inherit;
+    background-color: transparent;
+  }
+  
+  /* ============================================
+     HEADING VISIBILITY - PURE WHITE
+     ============================================ */
+  
+  /* All headings must be pure white */
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--bitcoin-white) !important;
+    background-color: transparent !important;
+    text-shadow: none !important;
+  }
+  
+  /* Heading variants */
+  .headline-bitcoin,
+  .headline-white,
+  .headline-orange {
+    color: var(--bitcoin-white) !important;
+  }
+  
+  /* Orange accent headings stay orange */
+  .text-bitcoin-orange,
+  [class*="text-bitcoin-orange"] {
+    color: var(--bitcoin-orange) !important;
+    background-color: transparent !important;
+  }
+  
+  /* ============================================
+     TEXT HIERARCHY - EXPLICIT COLORS
+     ============================================ */
+  
+  /* Primary text - Pure white */
+  .text-bitcoin-white,
+  [class*="text-bitcoin-white"]:not([class*="text-bitcoin-white-"]) {
+    color: var(--bitcoin-white) !important;
+    background-color: transparent !important;
+  }
+  
+  /* Secondary text - White 80% */
+  .text-bitcoin-white-80,
+  [class*="text-bitcoin-white-80"] {
+    color: var(--bitcoin-white-80) !important;
+    background-color: transparent !important;
+  }
+  
+  /* Tertiary text - White 60% (enhanced for mobile) */
+  .text-bitcoin-white-60,
+  [class*="text-bitcoin-white-60"] {
+    color: var(--bitcoin-white-60) !important;
+    background-color: transparent !important;
+    /* Ensure minimum readability */
+    font-weight: 500;
+  }
+  
+  /* ============================================
+     LABEL AND DESCRIPTION VISIBILITY
+     ============================================ */
+  
+  /* Stat labels - Enhanced visibility */
+  .stat-label {
+    color: var(--bitcoin-white-60) !important;
+    background-color: transparent !important;
+    font-weight: 600 !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  
+  /* Feature descriptions */
+  .feature-description,
+  [class*="description"] {
+    color: var(--bitcoin-white-80) !important;
+    background-color: transparent !important;
+    line-height: 1.6;
+  }
+  
+  /* Subtitle text */
+  .subtitle,
+  [class*="subtitle"] {
+    color: var(--bitcoin-white-60) !important;
+    background-color: transparent !important;
+    font-style: italic;
+  }
+  
+  /* Caption text */
+  .caption,
+  [class*="caption"] {
+    color: var(--bitcoin-white-60) !important;
+    background-color: transparent !important;
+    font-size: 0.875rem;
+  }
+  
+  /* ============================================
+     DATA DISPLAY TEXT VISIBILITY
+     ============================================ */
+  
+  /* Price displays - Orange with glow */
+  .price-display,
+  .price-display-sm,
+  .price-display-lg,
+  .price-display-xl {
+    color: var(--bitcoin-orange) !important;
+    background-color: transparent !important;
+    text-shadow: 0 0 20px var(--bitcoin-orange-30) !important;
+    font-family: 'Roboto Mono', monospace !important;
+    font-weight: 700 !important;
+  }
+  
+  /* Stat values - White or orange */
+  .stat-value {
+    color: var(--bitcoin-white) !important;
+    background-color: transparent !important;
+    font-family: 'Roboto Mono', monospace !important;
+    font-weight: 700 !important;
+  }
+  
+  .stat-value-orange {
+    color: var(--bitcoin-orange) !important;
+    background-color: transparent !important;
+    text-shadow: 0 0 15px var(--bitcoin-orange-30) !important;
+  }
+  
+  /* Technical data */
+  .data-display,
+  .technical-callout {
+    color: var(--bitcoin-white) !important;
+    background-color: transparent !important;
+    font-family: 'Roboto Mono', monospace !important;
+  }
+  
+  /* ============================================
+     LINK TEXT VISIBILITY
+     ============================================ */
+  
+  /* All links must be visible */
+  a {
+    color: var(--bitcoin-orange) !important;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-decoration-color: var(--bitcoin-orange);
+  }
+  
+  a:hover {
+    color: var(--bitcoin-white) !important;
+    text-decoration-thickness: 3px;
+  }
+  
+  a:visited {
+    color: var(--bitcoin-orange-80) !important;
+  }
+  
+  /* Link variants */
+  .link-text-white {
+    color: var(--bitcoin-white) !important;
+    text-decoration-color: var(--bitcoin-orange) !important;
+  }
+  
+  .link-text-orange {
+    color: var(--bitcoin-orange) !important;
+    text-decoration-color: var(--bitcoin-orange) !important;
+  }
+  
+  /* ============================================
+     FORM ELEMENT TEXT VISIBILITY
+     ============================================ */
+  
+  /* Input text */
+  input,
+  textarea,
+  select {
+    color: var(--bitcoin-white) !important;
+    background-color: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange-20) !important;
+  }
+  
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--bitcoin-white-60) !important;
+    opacity: 1 !important;
+  }
+  
+  /* Input labels */
+  label {
+    color: var(--bitcoin-white) !important;
+    background-color: transparent !important;
+    font-weight: 600;
+  }
+  
+  /* ============================================
+     BUTTON TEXT VISIBILITY
+     ============================================ */
+  
+  /* Primary button text - Black on orange */
+  .btn-bitcoin-primary,
+  .mobile-btn-active {
+    color: var(--bitcoin-black) !important;
+    background-color: var(--bitcoin-orange) !important;
+    font-weight: 700 !important;
+  }
+  
+  /* Secondary button text - Orange on black */
+  .btn-bitcoin-secondary,
+  .mobile-btn-inactive {
+    color: var(--bitcoin-orange) !important;
+    background-color: var(--bitcoin-black) !important;
+    font-weight: 700 !important;
+  }
+  
+  /* Tertiary button text - White on black */
+  .btn-bitcoin-tertiary {
+    color: var(--bitcoin-white) !important;
+    background-color: transparent !important;
+    font-weight: 600 !important;
+  }
+  
+  /* ============================================
+     CARD AND CONTAINER TEXT VISIBILITY
+     ============================================ */
+  
+  /* Bitcoin block text */
+  .bitcoin-block,
+  .bitcoin-block-subtle {
+    color: var(--bitcoin-white-80) !important;
+    background-color: var(--bitcoin-black) !important;
+  }
+  
+  .bitcoin-block h1,
+  .bitcoin-block h2,
+  .bitcoin-block h3,
+  .bitcoin-block h4,
+  .bitcoin-block h5,
+  .bitcoin-block h6 {
+    color: var(--bitcoin-white) !important;
+  }
+  
+  /* Bitcoin block orange variant */
+  .bitcoin-block-orange {
+    color: var(--bitcoin-black) !important;
+    background-color: var(--bitcoin-orange) !important;
+  }
+  
+  .bitcoin-block-orange h1,
+  .bitcoin-block-orange h2,
+  .bitcoin-block-orange h3,
+  .bitcoin-block-orange h4,
+  .bitcoin-block-orange h5,
+  .bitcoin-block-orange h6 {
+    color: var(--bitcoin-black) !important;
+  }
+  
+  /* Stat card text */
+  .stat-card {
+    color: var(--bitcoin-white) !important;
+    background-color: var(--bitcoin-black) !important;
+  }
+  
+  /* ============================================
+     NAVIGATION TEXT VISIBILITY
+     ============================================ */
+  
+  /* Navigation links */
+  .nav-link,
+  .mobile-nav-link {
+    color: var(--bitcoin-white-60) !important;
+    background-color: transparent !important;
+  }
+  
+  .nav-link.active,
+  .mobile-nav-link.active,
+  .nav-link[aria-current="page"],
+  .mobile-nav-link[aria-current="page"] {
+    color: var(--bitcoin-orange) !important;
+  }
+  
+  .nav-link:hover,
+  .mobile-nav-link:hover {
+    color: var(--bitcoin-orange) !important;
+  }
+  
+  /* Menu item text */
+  .mobile-menu-item .menu-title {
+    color: var(--bitcoin-white) !important;
+    background-color: transparent !important;
+    font-weight: 700;
+  }
+  
+  .mobile-menu-item .menu-description {
+    color: var(--bitcoin-white-60) !important;
+    background-color: transparent !important;
+  }
+  
+  /* Menu item active state */
+  .mobile-menu-item.active .menu-title,
+  .mobile-menu-item[aria-current="page"] .menu-title {
+    color: var(--bitcoin-black) !important;
+  }
+  
+  .mobile-menu-item.active .menu-description,
+  .mobile-menu-item[aria-current="page"] .menu-description {
+    color: var(--bitcoin-black) !important;
+    opacity: 0.8;
+  }
+  
+  /* ============================================
+     TABLE TEXT VISIBILITY
+     ============================================ */
+  
+  /* Table headers */
+  table thead th {
+    color: var(--bitcoin-white) !important;
+    background-color: var(--bitcoin-black) !important;
+    font-weight: 700;
+    border-bottom: 2px solid var(--bitcoin-orange) !important;
+  }
+  
+  /* Table cells */
+  table tbody td {
+    color: var(--bitcoin-white-80) !important;
+    background-color: var(--bitcoin-black) !important;
+    border-bottom: 1px solid var(--bitcoin-orange-20) !important;
+  }
+  
+  /* Table rows hover */
+  table tbody tr:hover td {
+    color: var(--bitcoin-white) !important;
+    background-color: rgba(247, 147, 26, 0.05) !important;
+  }
+  
+  /* ============================================
+     LIST TEXT VISIBILITY
+     ============================================ */
+  
+  /* Unordered and ordered lists */
+  ul, ol {
+    color: var(--bitcoin-white-80) !important;
+  }
+  
+  ul li, ol li {
+    color: inherit;
+    background-color: transparent;
+  }
+  
+  /* List markers */
+  ul li::marker {
+    color: var(--bitcoin-orange) !important;
+  }
+  
+  ol li::marker {
+    color: var(--bitcoin-orange) !important;
+    font-weight: 700;
+  }
+  
+  /* ============================================
+     BADGE AND TAG TEXT VISIBILITY
+     ============================================ */
+  
+  /* Badges */
+  .badge,
+  .crypto-badge,
+  [class*="badge"] {
+    color: var(--bitcoin-black) !important;
+    background-color: var(--bitcoin-orange) !important;
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+  }
+  
+  /* Tags */
+  .tag,
+  [class*="tag"] {
+    color: var(--bitcoin-orange) !important;
+    background-color: transparent !important;
+    border: 1px solid var(--bitcoin-orange) !important;
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+  }
+  
+  /* ============================================
+     ALERT AND MESSAGE TEXT VISIBILITY
+     ============================================ */
+  
+  /* Success messages */
+  .alert-success,
+  .message-success {
+    color: var(--bitcoin-orange) !important;
+    background-color: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    font-weight: 600;
+  }
+  
+  /* Error messages */
+  .alert-error,
+  .message-error {
+    color: var(--bitcoin-white) !important;
+    background-color: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-white-60) !important;
+    font-weight: 600;
+  }
+  
+  /* Warning messages */
+  .alert-warning,
+  .message-warning {
+    color: var(--bitcoin-black) !important;
+    background-color: var(--bitcoin-orange) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    font-weight: 600;
+  }
+  
+  /* Info messages */
+  .alert-info,
+  .message-info {
+    color: var(--bitcoin-white) !important;
+    background-color: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange-20) !important;
+    font-weight: 600;
+  }
+  
+  /* ============================================
+     CODE AND PRE TEXT VISIBILITY
+     ============================================ */
+  
+  /* Code blocks */
+  code {
+    color: var(--bitcoin-orange) !important;
+    background-color: rgba(247, 147, 26, 0.1) !important;
+    font-family: 'Roboto Mono', monospace !important;
+    padding: 0.125rem 0.375rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+  }
+  
+  /* Pre-formatted text */
+  pre {
+    color: var(--bitcoin-white) !important;
+    background-color: var(--bitcoin-black) !important;
+    border: 1px solid var(--bitcoin-orange-20) !important;
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+  
+  pre code {
+    color: var(--bitcoin-white) !important;
+    background-color: transparent !important;
+    padding: 0;
+  }
+  
+  /* ============================================
+     BLOCKQUOTE TEXT VISIBILITY
+     ============================================ */
+  
+  /* Blockquotes */
+  blockquote {
+    color: var(--bitcoin-white-80) !important;
+    background-color: transparent !important;
+    border-left: 4px solid var(--bitcoin-orange) !important;
+    padding-left: 1rem;
+    font-style: italic;
+  }
+  
+  /* ============================================
+     SMALL TEXT AND FINE PRINT VISIBILITY
+     ============================================ */
+  
+  /* Small text */
+  small,
+  .text-sm,
+  .text-xs {
+    color: var(--bitcoin-white-60) !important;
+    background-color: transparent !important;
+  }
+  
+  /* Fine print */
+  .fine-print,
+  .legal-text {
+    color: var(--bitcoin-white-60) !important;
+    background-color: transparent !important;
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+  
+  /* ============================================
+     EMPHASIS AND STRONG TEXT VISIBILITY
+     ============================================ */
+  
+  /* Emphasized text */
+  em,
+  .italic {
+    color: inherit;
+    font-style: italic;
+  }
+  
+  /* Strong text */
+  strong,
+  .bold,
+  .font-bold {
+    color: inherit;
+    font-weight: 700;
+  }
+  
+  /* Mark/highlight text */
+  mark,
+  .highlight {
+    color: var(--bitcoin-black) !important;
+    background-color: var(--bitcoin-orange) !important;
+    padding: 0.125rem 0.25rem;
+    border-radius: 2px;
+  }
+  
+  /* ============================================
+     MINIMUM CONTRAST ENFORCEMENT
+     Ensure 4.5:1 ratio minimum
+     ============================================ */
+  
+  /* Force minimum contrast for any text */
+  .mobile-text-visible {
+    color: var(--bitcoin-white) !important;
+    background-color: var(--bitcoin-black) !important;
+    font-weight: 500 !important;
+  }
+  
+  /* Emergency high contrast override */
+  .mobile-text-high-contrast {
+    color: var(--bitcoin-white) !important;
+    background-color: var(--bitcoin-black) !important;
+    font-weight: 700 !important;
+    text-shadow: 0 0 1px rgba(255, 255, 255, 0.5) !important;
+  }
+  
+  /* ============================================
+     PREVENT INVISIBLE TEXT COMBINATIONS
+     ============================================ */
+  
+  /* Never allow white on white */
+  .bg-bitcoin-white *,
+  .bg-white * {
+    color: var(--bitcoin-black) !important;
+  }
+  
+  /* Never allow black on black */
+  .bg-bitcoin-black *:not(.text-bitcoin-white):not(.text-bitcoin-white-80):not(.text-bitcoin-white-60):not(.text-bitcoin-orange) {
+    color: var(--bitcoin-white-80) !important;
+  }
+  
+  /* Never allow orange on orange */
+  .bg-bitcoin-orange *:not(.text-bitcoin-black) {
+    color: var(--bitcoin-black) !important;
+  }
+  
+  /* ============================================
+     TABLET SPECIFIC (768px-1023px)
+     Slightly enhanced text for larger screens
+     ============================================ */
+  
+  @media (min-width: 768px) and (max-width: 1023px) {
+    /* Slightly larger base font for tablets */
+    body {
+      font-size: 17px;
+      line-height: 1.6;
+    }
+    
+    /* Enhanced headings for tablets */
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.75rem; }
+    h3 { font-size: 1.5rem; }
+    h4 { font-size: 1.25rem; }
+    
+    /* Enhanced stat labels for tablets */
+    .stat-label {
+      font-size: 0.8125rem;
+    }
+    
+    /* Enhanced descriptions for tablets */
+    .feature-description,
+    [class*="description"] {
+      font-size: 1.0625rem;
+    }
+  }
+}
+
+/* ============================================
+   END MOBILE/TABLET TEXT VISIBILITY FIXES
+   ============================================ */
+
+
+/* ============================================
+   MOBILE/TABLET ICON AND BORDER VISIBILITY FIXES (320px-1023px)
+   CRITICAL: Ensure All Icons and Borders Are Visible
+   Task 3.3: Fix Invisible Icons and Borders
+   ============================================ */
+
+@media (max-width: 1023px) {
+  
+  /* ============================================
+     ICON VISIBILITY - ORANGE OR WHITE ONLY
+     ============================================ */
+  
+  /* All SVG icons must be visible */
+  svg {
+    color: var(--bitcoin-orange) !important;
+    fill: currentColor !important;
+    stroke: currentColor !important;
+  }
+  
+  /* Icon elements */
+  .icon,
+  [class*="icon"] {
+    color: var(--bitcoin-orange) !important;
+    fill: var(--bitcoin-orange) !important;
+    stroke: var(--bitcoin-orange) !important;
+  }
+  
+  /* Lucide React icons */
+  .lucide,
+  [class*="lucide"] {
+    color: var(--bitcoin-orange) !important;
+    stroke: var(--bitcoin-orange) !important;
+    fill: none !important;
+    stroke-width: 2 !important;
+  }
+  
+  /* White icon variant */
+  .icon-white,
+  svg.icon-white {
+    color: var(--bitcoin-white) !important;
+    fill: var(--bitcoin-white) !important;
+    stroke: var(--bitcoin-white) !important;
+  }
+  
+  /* Orange icon variant (explicit) */
+  .icon-orange,
+  svg.icon-orange {
+    color: var(--bitcoin-orange) !important;
+    fill: var(--bitcoin-orange) !important;
+    stroke: var(--bitcoin-orange) !important;
+  }
+  
+  /* ============================================
+     NAVIGATION ICONS
+     ============================================ */
+  
+  /* Hamburger menu icon */
+  .hamburger-menu svg,
+  .menu-icon svg,
+  [aria-label*="menu" i] svg {
+    color: var(--bitcoin-orange) !important;
+    stroke: var(--bitcoin-orange) !important;
+    fill: none !important;
+    stroke-width: 2.5 !important;
+  }
+  
+  /* Close icon */
+  .close-icon svg,
+  [aria-label*="close" i] svg {
+    color: var(--bitcoin-orange) !important;
+    stroke: var(--bitcoin-orange) !important;
+    fill: none !important;
+    stroke-width: 2.5 !important;
+  }
+  
+  /* Navigation arrow icons */
+  .nav-arrow svg,
+  [class*="arrow"] svg {
+    color: var(--bitcoin-orange) !important;
+    stroke: var(--bitcoin-orange) !important;
+    fill: none !important;
+  }
+  
+  /* ============================================
+     FEATURE ICONS
+     ============================================ */
+  
+  /* Feature card icons */
+  .feature-icon,
+  .feature-card svg {
+    color: var(--bitcoin-orange) !important;
+    fill: var(--bitcoin-orange) !important;
+    stroke: var(--bitcoin-orange) !important;
+    width: 2rem !important;
+    height: 2rem !important;
+  }
+  
+  /* Large feature icons */
+  .feature-icon-lg {
+    width: 3rem !important;
+    height: 3rem !important;
+  }
+  
+  /* Small feature icons */
+  .feature-icon-sm {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+  }
+  
+  /* ============================================
+     BUTTON ICONS
+     ============================================ */
+  
+  /* Icons inside buttons */
+  button svg,
+  .btn-bitcoin-primary svg,
+  .btn-bitcoin-secondary svg,
+  .btn-bitcoin-tertiary svg {
+    color: currentColor !important;
+    stroke: currentColor !important;
+    fill: none !important;
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+  }
+  
+  /* Primary button icons (black on orange) */
+  .btn-bitcoin-primary svg,
+  .mobile-btn-active svg {
+    color: var(--bitcoin-black) !important;
+    stroke: var(--bitcoin-black) !important;
+  }
+  
+  /* Secondary button icons (orange on black) */
+  .btn-bitcoin-secondary svg,
+  .mobile-btn-inactive svg {
+    color: var(--bitcoin-orange) !important;
+    stroke: var(--bitcoin-orange) !important;
+  }
+  
+  /* Tertiary button icons (white on black) */
+  .btn-bitcoin-tertiary svg {
+    color: var(--bitcoin-white) !important;
+    stroke: var(--bitcoin-white) !important;
+  }
+  
+  /* ============================================
+     STATUS ICONS
+     ============================================ */
+  
+  /* Success icons */
+  .icon-success,
+  .success-icon svg {
+    color: var(--bitcoin-orange) !important;
+    stroke: var(--bitcoin-orange) !important;
+    fill: none !important;
+  }
+  
+  /* Error icons */
+  .icon-error,
+  .error-icon svg {
+    color: var(--bitcoin-white) !important;
+    stroke: var(--bitcoin-white) !important;
+    fill: none !important;
+  }
+  
+  /* Warning icons */
+  .icon-warning,
+  .warning-icon svg {
+    color: var(--bitcoin-orange) !important;
+    stroke: var(--bitcoin-orange) !important;
+    fill: var(--bitcoin-orange) !important;
+  }
+  
+  /* Info icons */
+  .icon-info,
+  .info-icon svg {
+    color: var(--bitcoin-white) !important;
+    stroke: var(--bitcoin-white) !important;
+    fill: none !important;
+  }
+  
+  /* ============================================
+     SOCIAL AND EXTERNAL ICONS
+     ============================================ */
+  
+  /* Social media icons */
+  .social-icon svg {
+    color: var(--bitcoin-orange) !important;
+    fill: var(--bitcoin-orange) !important;
+    stroke: none !important;
+  }
+  
+  /* External link icons */
+  .external-link-icon svg {
+    color: var(--bitcoin-orange) !important;
+    stroke: var(--bitcoin-orange) !important;
+    fill: none !important;
+    width: 1rem !important;
+    height: 1rem !important;
+  }
+  
+  /* ============================================
+     EMOJI AND UNICODE ICONS
+     ============================================ */
+  
+  /* Emoji icons (already visible, but ensure proper sizing) */
+  .emoji-icon {
+    font-size: 2rem;
+    line-height: 1;
+    display: inline-block;
+  }
+  
+  /* Unicode symbols */
+  .bitcoin-symbol,
+  .crypto-symbol {
+    color: var(--bitcoin-orange) !important;
+    font-weight: 700;
+    font-size: 1.5rem;
+  }
+  
+  /* ============================================
+     BORDER VISIBILITY - ORANGE AT PROPER OPACITY
+     ============================================ */
+  
+  /* All borders must be visible */
+  .border,
+  [class*="border"] {
+    border-color: var(--bitcoin-orange-20) !important;
+  }
+  
+  /* Bitcoin block borders */
+  .bitcoin-block {
+    border: 1px solid var(--bitcoin-orange) !important;
+    border-radius: 12px;
+  }
+  
+  .bitcoin-block-subtle {
+    border: 1px solid var(--bitcoin-orange-20) !important;
+    border-radius: 12px;
+  }
+  
+  .bitcoin-block-subtle:hover {
+    border-color: var(--bitcoin-orange) !important;
+  }
+  
+  .bitcoin-block-orange {
+    border: 1px solid var(--bitcoin-orange) !important;
+    border-radius: 12px;
+  }
+  
+  /* ============================================
+     STAT CARD BORDERS
+     ============================================ */
+  
+  /* Stat card borders */
+  .stat-card {
+    border: 2px solid var(--bitcoin-orange-20) !important;
+    border-radius: 8px;
+  }
+  
+  .stat-card:hover {
+    border-color: var(--bitcoin-orange) !important;
+  }
+  
+  /* Stat card with accent border */
+  .stat-card-accent {
+    border-top: 3px solid var(--bitcoin-orange) !important;
+    border-left: 1px solid var(--bitcoin-orange-20) !important;
+    border-right: 1px solid var(--bitcoin-orange-20) !important;
+    border-bottom: 1px solid var(--bitcoin-orange-20) !important;
+  }
+  
+  .stat-card-accent:hover {
+    border-color: var(--bitcoin-orange) !important;
+  }
+  
+  /* ============================================
+     DIVIDER LINES
+     ============================================ */
+  
+  /* Horizontal dividers */
+  hr,
+  .divider,
+  .divider-bitcoin {
+    border: none !important;
+    height: 1px !important;
+    background: var(--bitcoin-orange-20) !important;
+    margin: 1rem 0 !important;
+  }
+  
+  /* Strong dividers */
+  .divider-strong,
+  .divider-bitcoin-strong {
+    background: var(--bitcoin-orange) !important;
+    height: 2px !important;
+  }
+  
+  /* Vertical dividers */
+  .divider-vertical {
+    width: 1px !important;
+    height: 100% !important;
+    background: var(--bitcoin-orange-20) !important;
+    margin: 0 1rem !important;
+  }
+  
+  /* ============================================
+     SECTION BORDERS
+     ============================================ */
+  
+  /* Section top borders */
+  .section-border-top {
+    border-top: 2px solid var(--bitcoin-orange) !important;
+    padding-top: 1rem;
+  }
+  
+  /* Section bottom borders */
+  .section-border-bottom {
+    border-bottom: 2px solid var(--bitcoin-orange) !important;
+    padding-bottom: 1rem;
+  }
+  
+  /* Section side borders */
+  .section-border-left {
+    border-left: 4px solid var(--bitcoin-orange) !important;
+    padding-left: 1rem;
+  }
+  
+  .section-border-right {
+    border-right: 4px solid var(--bitcoin-orange) !important;
+    padding-right: 1rem;
+  }
+  
+  /* ============================================
+     CARD BORDERS
+     ============================================ */
+  
+  /* News cards */
+  .news-card {
+    border: 1px solid var(--bitcoin-orange) !important;
+    background-color: var(--bitcoin-black) !important;
+  }
+  
+  /* Feature cards */
+  .feature-card {
+    border: 1px solid var(--bitcoin-orange) !important;
+    background-color: var(--bitcoin-black) !important;
+  }
+  
+  /* Info cards */
+  .info-card {
+    border: 1px solid var(--bitcoin-orange-20) !important;
+    background-color: var(--bitcoin-black) !important;
+  }
+  
+  .info-card:hover {
+    border-color: var(--bitcoin-orange) !important;
+  }
+  
+  /* ============================================
+     FORM ELEMENT BORDERS
+     ============================================ */
+  
+  /* Input borders */
+  input,
+  textarea,
+  select {
+    border: 2px solid var(--bitcoin-orange-20) !important;
+    border-radius: 8px;
+  }
+  
+  input:focus,
+  textarea:focus,
+  select:focus {
+    border-color: var(--bitcoin-orange) !important;
+    outline: 2px solid var(--bitcoin-orange) !important;
+    outline-offset: 2px;
+  }
+  
+  /* Checkbox and radio borders */
+  input[type="checkbox"],
+  input[type="radio"] {
+    border: 2px solid var(--bitcoin-orange) !important;
+    appearance: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 4px;
+  }
+  
+  input[type="radio"] {
+    border-radius: 50%;
+  }
+  
+  input[type="checkbox"]:checked,
+  input[type="radio"]:checked {
+    background-color: var(--bitcoin-orange) !important;
+    border-color: var(--bitcoin-orange) !important;
+  }
+  
+  /* ============================================
+     TABLE BORDERS
+     ============================================ */
+  
+  /* Table borders */
+  table {
+    border: 1px solid var(--bitcoin-orange-20) !important;
+    border-collapse: collapse;
+  }
+  
+  table th,
+  table td {
+    border: 1px solid var(--bitcoin-orange-20) !important;
+    padding: 0.75rem;
+  }
+  
+  table thead th {
+    border-bottom: 2px solid var(--bitcoin-orange) !important;
+  }
+  
+  table tbody tr:hover {
+    border-color: var(--bitcoin-orange) !important;
+  }
+  
+  /* ============================================
+     BUTTON BORDERS
+     ============================================ */
+  
+  /* Primary button borders */
+  .btn-bitcoin-primary,
+  .mobile-btn-active {
+    border: 2px solid var(--bitcoin-orange) !important;
+  }
+  
+  /* Secondary button borders */
+  .btn-bitcoin-secondary,
+  .mobile-btn-inactive {
+    border: 2px solid var(--bitcoin-orange) !important;
+  }
+  
+  /* Tertiary button borders */
+  .btn-bitcoin-tertiary {
+    border: 2px solid var(--bitcoin-white-60) !important;
+  }
+  
+  .btn-bitcoin-tertiary:hover {
+    border-color: var(--bitcoin-white) !important;
+  }
+  
+  /* ============================================
+     NAVIGATION BORDERS
+     ============================================ */
+  
+  /* Navigation link borders (underline) */
+  .nav-link {
+    border-bottom: 2px solid transparent !important;
+  }
+  
+  .nav-link.active,
+  .nav-link[aria-current="page"] {
+    border-bottom-color: var(--bitcoin-orange) !important;
+  }
+  
+  .nav-link:hover {
+    border-bottom-color: var(--bitcoin-orange) !important;
+  }
+  
+  /* Mobile navigation link borders */
+  .mobile-nav-link {
+    border-bottom: 2px solid transparent !important;
+  }
+  
+  .mobile-nav-link.active,
+  .mobile-nav-link[aria-current="page"] {
+    border-bottom-color: var(--bitcoin-orange) !important;
+  }
+  
+  /* Menu item borders */
+  .mobile-menu-item {
+    border: 1px solid var(--bitcoin-orange-20) !important;
+    border-radius: 12px;
+  }
+  
+  .mobile-menu-item.active,
+  .mobile-menu-item[aria-current="page"] {
+    border-color: var(--bitcoin-orange) !important;
+  }
+  
+  .mobile-menu-item:hover {
+    border-color: var(--bitcoin-orange) !important;
+  }
+  
+  /* ============================================
+     BADGE AND TAG BORDERS
+     ============================================ */
+  
+  /* Badge borders (solid background, no border needed) */
+  .badge,
+  .crypto-badge {
+    border: none !important;
+  }
+  
+  /* Tag borders */
+  .tag {
+    border: 1px solid var(--bitcoin-orange) !important;
+    border-radius: 4px;
+  }
+  
+  /* ============================================
+     ALERT AND MESSAGE BORDERS
+     ============================================ */
+  
+  /* Success alert borders */
+  .alert-success,
+  .message-success {
+    border: 2px solid var(--bitcoin-orange) !important;
+    border-radius: 8px;
+  }
+  
+  /* Error alert borders */
+  .alert-error,
+  .message-error {
+    border: 2px solid var(--bitcoin-white-60) !important;
+    border-radius: 8px;
+  }
+  
+  /* Warning alert borders */
+  .alert-warning,
+  .message-warning {
+    border: 2px solid var(--bitcoin-orange) !important;
+    border-radius: 8px;
+  }
+  
+  /* Info alert borders */
+  .alert-info,
+  .message-info {
+    border: 2px solid var(--bitcoin-orange-20) !important;
+    border-radius: 8px;
+  }
+  
+  /* ============================================
+     HOVER STATE VISUAL FEEDBACK
+     ============================================ */
+  
+  /* Card hover states */
+  .bitcoin-block:hover,
+  .stat-card:hover,
+  .news-card:hover,
+  .feature-card:hover,
+  .info-card:hover {
+    border-color: var(--bitcoin-orange) !important;
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.3) !important;
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+  }
+  
+  /* Button hover states */
+  .btn-bitcoin-primary:hover,
+  .mobile-btn-active:hover {
+    box-shadow: 0 0 30px rgba(247, 147, 26, 0.5) !important;
+    transform: scale(1.02);
+  }
+  
+  .btn-bitcoin-secondary:hover,
+  .mobile-btn-inactive:hover {
+    background-color: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.3) !important;
+  }
+  
+  .btn-bitcoin-tertiary:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: var(--bitcoin-white) !important;
+  }
+  
+  /* Link hover states */
+  a:hover {
+    color: var(--bitcoin-white) !important;
+    text-decoration-thickness: 3px !important;
+    text-shadow: 0 0 10px rgba(247, 147, 26, 0.3) !important;
+  }
+  
+  /* Icon hover states */
+  .icon:hover,
+  svg:hover {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 8px rgba(247, 147, 26, 0.5));
+    transition: all 0.3s ease;
+  }
+  
+  /* ============================================
+     FOCUS STATE VISUAL FEEDBACK
+     ============================================ */
+  
+  /* All interactive elements focus states */
+  *:focus-visible {
+    outline: 2px solid var(--bitcoin-orange) !important;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(247, 147, 26, 0.3) !important;
+  }
+  
+  /* Button focus states */
+  button:focus-visible,
+  .btn-bitcoin-primary:focus-visible,
+  .btn-bitcoin-secondary:focus-visible,
+  .btn-bitcoin-tertiary:focus-visible {
+    outline: 2px solid var(--bitcoin-orange) !important;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(247, 147, 26, 0.4) !important;
+  }
+  
+  /* Link focus states */
+  a:focus-visible {
+    outline: 2px solid var(--bitcoin-orange) !important;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(247, 147, 26, 0.3) !important;
+    text-decoration-thickness: 2px !important;
+  }
+  
+  /* Input focus states */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--bitcoin-orange) !important;
+    outline-offset: 2px;
+    border-color: var(--bitcoin-orange) !important;
+    box-shadow: 0 0 0 3px rgba(247, 147, 26, 0.3) !important;
+  }
+  
+  /* ============================================
+     ACTIVE STATE VISUAL FEEDBACK
+     ============================================ */
+  
+  /* Button active states */
+  .btn-bitcoin-primary:active,
+  .mobile-btn-active:active {
+    transform: scale(0.98) !important;
+    box-shadow: 0 0 10px rgba(247, 147, 26, 0.3) !important;
+  }
+  
+  .btn-bitcoin-secondary:active,
+  .mobile-btn-inactive:active {
+    transform: scale(0.98) !important;
+  }
+  
+  /* Link active states */
+  a:active {
+    transform: scale(0.98);
+  }
+  
+  /* ============================================
+     DISABLED STATE VISUAL FEEDBACK
+     ============================================ */
+  
+  /* Disabled buttons */
+  button:disabled,
+  .btn-bitcoin-primary:disabled,
+  .btn-bitcoin-secondary:disabled,
+  .btn-bitcoin-tertiary:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    border-color: var(--bitcoin-orange-30) !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  
+  /* Disabled inputs */
+  input:disabled,
+  textarea:disabled,
+  select:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    border-color: var(--bitcoin-orange-20) !important;
+    background-color: rgba(247, 147, 26, 0.05) !important;
+  }
+  
+  /* ============================================
+     MINIMUM VISIBILITY ENFORCEMENT
+     ============================================ */
+  
+  /* Force visible borders */
+  .mobile-border-visible {
+    border: 2px solid var(--bitcoin-orange) !important;
+  }
+  
+  /* Force visible icons */
+  .mobile-icon-visible svg {
+    color: var(--bitcoin-orange) !important;
+    stroke: var(--bitcoin-orange) !important;
+    fill: none !important;
+    stroke-width: 2.5 !important;
+  }
+  
+  /* Emergency high visibility override */
+  .mobile-high-visibility {
+    border: 3px solid var(--bitcoin-orange) !important;
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.5) !important;
+  }
+  
+  .mobile-high-visibility svg {
+    color: var(--bitcoin-orange) !important;
+    stroke: var(--bitcoin-orange) !important;
+    stroke-width: 3 !important;
+    filter: drop-shadow(0 0 10px rgba(247, 147, 26, 0.5)) !important;
+  }
+  
+  /* ============================================
+     TABLET SPECIFIC (768px-1023px)
+     Slightly enhanced borders and icons for larger screens
+     ============================================ */
+  
+  @media (min-width: 768px) and (max-width: 1023px) {
+    /* Slightly thicker borders on tablets */
+    .bitcoin-block,
+    .stat-card,
+    .news-card,
+    .feature-card {
+      border-width: 1.5px !important;
+    }
+    
+    /* Larger icons on tablets */
+    svg {
+      width: 1.5rem !important;
+      height: 1.5rem !important;
+    }
+    
+    .feature-icon {
+      width: 2.5rem !important;
+      height: 2.5rem !important;
+    }
+    
+    /* Enhanced hover effects on tablets */
+    .bitcoin-block:hover,
+    .stat-card:hover {
+      box-shadow: 0 0 25px rgba(247, 147, 26, 0.4) !important;
+      transform: translateY(-3px);
+    }
+  }
+}
+
+/* ============================================
+   END MOBILE/TABLET ICON AND BORDER VISIBILITY FIXES
+   ============================================ */
+
+
+/* ============================================
+   HEADER MOBILE/TABLET OPTIMIZATIONS (320px-1024px)
+   Task 6.3: Optimize header layout for mobile/tablet
+   ============================================ */
+
+/* MOBILE/TABLET ONLY - Header Responsive Styles */
+@media (max-width: 1023px) {
+  
+  /* ============================================
+     HEADER CONTAINER OPTIMIZATIONS
+     ============================================ */
+  
+  /* Header main container */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: var(--bitcoin-black) !important;
+    border-bottom: 2px solid var(--bitcoin-orange);
+  }
+  
+  /* Prevent header from being too tall on small screens */
+  header .h-16 {
+    min-height: 56px;
+    height: auto;
+  }
+  
+  /* ============================================
+     MARKET DATA BANNER MOBILE OPTIMIZATIONS
+     ============================================ */
+  
+  /* Market data banner - ensure proper spacing */
+  header .py-2 {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  /* Market data items - prevent overflow */
+  header .flex-1 {
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  /* Price text - ensure readability */
+  header .font-mono {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.25rem;
+  }
+  
+  /* ============================================
+     LOGO/TITLE MOBILE OPTIMIZATIONS
+     ============================================ */
+  
+  /* Logo text - responsive sizing */
+  header .text-lg {
+    font-size: 1rem; /* 16px on mobile */
+    line-height: 1.25rem;
+  }
+  
+  header .sm\:text-xl {
+    font-size: 1.125rem; /* 18px on small mobile */
+  }
+  
+  header .md\:text-2xl {
+    font-size: 1.25rem; /* 20px on tablet */
+  }
+  
+  /* Subtitle - ensure visibility */
+  header .text-xs {
+    font-size: 0.625rem; /* 10px */
+    line-height: 0.875rem;
+    letter-spacing: 0.05em;
+  }
+  
+  header .md\:text-sm {
+    font-size: 0.75rem; /* 12px on tablet */
+    line-height: 1rem;
+  }
+  
+  /* ============================================
+     HAMBURGER MENU BUTTON OPTIMIZATIONS
+     ============================================ */
+  
+  /* Hamburger button - ensure visibility */
+  header button[aria-label="Toggle navigation menu"] {
+    background-color: transparent !important;
+    border: 1px solid var(--bitcoin-orange-20);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  
+  header button[aria-label="Toggle navigation menu"]:hover {
+    background-color: var(--bitcoin-orange-10) !important;
+    border-color: var(--bitcoin-orange);
+    box-shadow: 0 0 15px rgba(247, 147, 26, 0.3);
+  }
+  
+  /* Hamburger icon - ensure orange color */
+  header button[aria-label="Toggle navigation menu"] svg {
+    color: var(--bitcoin-orange) !important;
+    stroke: var(--bitcoin-orange) !important;
+    stroke-width: 2.5;
+  }
+  
+  /* ============================================
+     MOBILE NAVIGATION MENU OPTIMIZATIONS
+     ============================================ */
+  
+  /* Mobile menu container */
+  header nav.px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  
+  /* Mobile menu items */
+  header nav a {
+    display: block;
+    background-color: var(--bitcoin-black) !important;
+    border: 1px solid var(--bitcoin-orange-20) !important;
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+  }
+  
+  header nav a:hover {
+    border-color: var(--bitcoin-orange) !important;
+    box-shadow: 0 0 15px rgba(247, 147, 26, 0.3);
+    transform: translateX(4px);
+  }
+  
+  /* Mobile menu item text */
+  header nav a .font-bold {
+    color: var(--bitcoin-white) !important;
+    font-size: 0.9375rem; /* 15px */
+    line-height: 1.25rem;
+  }
+  
+  header nav a .text-sm {
+    color: var(--bitcoin-white-60) !important;
+    font-size: 0.8125rem; /* 13px */
+    line-height: 1.125rem;
+  }
+  
+  /* ============================================
+     MOBILE SPECIFIC (320px-767px)
+     Extra small screens need tighter spacing
+     ============================================ */
+  
+  @media (max-width: 767px) {
+    /* Reduce header padding on very small screens */
+    header .px-4 {
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+    
+    /* Smaller logo text on very small screens */
+    header .text-lg {
+      font-size: 0.875rem; /* 14px */
+      line-height: 1.125rem;
+    }
+    
+    /* Hide subtitle on very small screens if needed */
+    header .text-xs {
+      font-size: 0.5625rem; /* 9px */
+      line-height: 0.75rem;
+      letter-spacing: 0.025em;
+    }
+    
+    /* Smaller market data text */
+    header .font-mono {
+      font-size: 0.75rem; /* 12px */
+      line-height: 1rem;
+    }
+    
+    /* Tighter gaps in market data banner */
+    header .gap-4 {
+      gap: 0.5rem;
+    }
+    
+    header .gap-2 {
+      gap: 0.375rem;
+    }
+  }
+  
+  /* ============================================
+     TABLET SPECIFIC (768px-1023px)
+     Slightly larger elements for tablet screens
+     ============================================ */
+  
+  @media (min-width: 768px) and (max-width: 1023px) {
+    /* Larger header on tablets */
+    header .h-16 {
+      min-height: 64px;
+    }
+    
+    /* Larger logo text on tablets */
+    header .md\:text-2xl {
+      font-size: 1.5rem; /* 24px */
+      line-height: 1.75rem;
+    }
+    
+    /* Larger subtitle on tablets */
+    header .md\:text-sm {
+      font-size: 0.875rem; /* 14px */
+      line-height: 1.25rem;
+    }
+    
+    /* Larger market data text on tablets */
+    header .font-mono {
+      font-size: 1rem; /* 16px */
+      line-height: 1.5rem;
+    }
+    
+    /* More spacing in market data banner */
+    header .gap-4 {
+      gap: 1rem;
+    }
+    
+    /* Larger mobile menu items on tablets */
+    header nav a {
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    header nav a .font-bold {
+      font-size: 1.0625rem; /* 17px */
+      line-height: 1.5rem;
+    }
+    
+    header nav a .text-sm {
+      font-size: 0.9375rem; /* 15px */
+      line-height: 1.375rem;
+    }
+  }
+  
+  /* ============================================
+     HEADER ACCESSIBILITY ENHANCEMENTS
+     ============================================ */
+  
+  /* Focus states for header elements */
+  header button:focus-visible,
+  header a:focus-visible {
+    outline: 2px solid var(--bitcoin-orange) !important;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(247, 147, 26, 0.3) !important;
+  }
+  
+  /* Ensure minimum touch targets in header */
+  header button,
+  header a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* ============================================
+     HEADER ANIMATION OPTIMIZATIONS
+     ============================================ */
+  
+  /* Smooth transitions for all header elements */
+  header * {
+    transition-property: color, background-color, border-color, box-shadow, transform;
+    transition-duration: 0.3s;
+    transition-timing-function: ease;
+  }
+  
+  /* Prevent layout shift when menu opens */
+  header nav {
+    animation: slideDown 0.3s ease-out;
+  }
+  
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* ============================================
+     HEADER PERFORMANCE OPTIMIZATIONS
+     ============================================ */
+  
+  /* Use GPU acceleration for header animations */
+  header button,
+  header a,
+  header nav {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+  
+  /* Prevent text selection in header */
+  header {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+  }
+  
+  /* Allow text selection for logo/title */
+  header a[href="/"] {
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+  }
+}
+
+/* ============================================
+   END HEADER MOBILE/TABLET OPTIMIZATIONS
+   ============================================ */
+
+
+/* ============================================
+   IMPORT MOBILE/TABLET UTILITY CLASSES
+   Task 7: Foolproof Mobile/Tablet Styling System
+   ============================================ */
+
+@import url('./mobile-tablet-utility-classes.css');

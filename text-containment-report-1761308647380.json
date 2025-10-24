@@ -1,0 +1,788 @@
+{
+  "timestamp": "2025-10-24T12:24:07.378Z",
+  "summary": {
+    "totalTests": 72,
+    "passedTests": 66,
+    "failedTests": 6,
+    "totalIssues": 6,
+    "passRate": "91.67%"
+  },
+  "devices": [
+    {
+      "name": "Extra Small Android",
+      "width": 320,
+      "height": 568,
+      "description": "Smallest mobile - extra small Android devices"
+    },
+    {
+      "name": "iPhone SE 2nd/3rd Gen",
+      "width": 375,
+      "height": 667,
+      "description": "iPhone 6/7/8 size"
+    },
+    {
+      "name": "iPhone 12/13/14",
+      "width": 390,
+      "height": 844,
+      "description": "Standard iPhone models"
+    },
+    {
+      "name": "iPhone Pro Max",
+      "width": 428,
+      "height": 926,
+      "description": "iPhone 12/13/14 Pro Max, Plus models"
+    },
+    {
+      "name": "Large Mobile",
+      "width": 640,
+      "height": 1136,
+      "description": "Large mobile/small tablet"
+    },
+    {
+      "name": "iPad Mini",
+      "width": 768,
+      "height": 1024,
+      "description": "Standard tablets"
+    }
+  ],
+  "pages": [
+    "Home Dashboard",
+    "Bitcoin Report",
+    "Ethereum Report",
+    "Whale Watch",
+    "Crypto News",
+    "Trade Generation"
+  ],
+  "orientations": [
+    "portrait",
+    "landscape"
+  ],
+  "results": [
+    {
+      "device": "Extra Small Android",
+      "dimensions": "320x568",
+      "tests": [
+        {
+          "device": "Extra Small Android",
+          "width": 320,
+          "height": 568,
+          "orientation": "portrait",
+          "page": "Home Dashboard",
+          "passed": false,
+          "issues": [
+            {
+              "type": "potential-overflow",
+              "element": "price-display",
+              "description": "Large price numbers may overflow on 320px width",
+              "severity": "medium"
+            }
+          ]
+        },
+        {
+          "device": "Extra Small Android",
+          "width": 320,
+          "height": 568,
+          "orientation": "portrait",
+          "page": "Bitcoin Report",
+          "passed": false,
+          "issues": [
+            {
+              "type": "potential-overflow",
+              "element": "price-display",
+              "description": "Large price numbers may overflow on 320px width",
+              "severity": "medium"
+            }
+          ]
+        },
+        {
+          "device": "Extra Small Android",
+          "width": 320,
+          "height": 568,
+          "orientation": "portrait",
+          "page": "Ethereum Report",
+          "passed": false,
+          "issues": [
+            {
+              "type": "potential-overflow",
+              "element": "price-display",
+              "description": "Large price numbers may overflow on 320px width",
+              "severity": "medium"
+            }
+          ]
+        },
+        {
+          "device": "Extra Small Android",
+          "width": 320,
+          "height": 568,
+          "orientation": "portrait",
+          "page": "Whale Watch",
+          "passed": false,
+          "issues": [
+            {
+              "type": "potential-overflow",
+              "element": "price-display",
+              "description": "Large price numbers may overflow on 320px width",
+              "severity": "medium"
+            }
+          ]
+        },
+        {
+          "device": "Extra Small Android",
+          "width": 320,
+          "height": 568,
+          "orientation": "portrait",
+          "page": "Crypto News",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "Extra Small Android",
+          "width": 320,
+          "height": 568,
+          "orientation": "portrait",
+          "page": "Trade Generation",
+          "passed": false,
+          "issues": [
+            {
+              "type": "potential-overflow",
+              "element": "price-display",
+              "description": "Large price numbers may overflow on 320px width",
+              "severity": "medium"
+            }
+          ]
+        },
+        {
+          "device": "Extra Small Android",
+          "width": 568,
+          "height": 320,
+          "orientation": "landscape",
+          "page": "Home Dashboard",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "Extra Small Android",
+          "width": 568,
+          "height": 320,
+          "orientation": "landscape",
+          "page": "Bitcoin Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "Extra Small Android",
+          "width": 568,
+          "height": 320,
+          "orientation": "landscape",
+          "page": "Ethereum Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "Extra Small Android",
+          "width": 568,
+          "height": 320,
+          "orientation": "landscape",
+          "page": "Whale Watch",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "Extra Small Android",
+          "width": 568,
+          "height": 320,
+          "orientation": "landscape",
+          "page": "Crypto News",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "Extra Small Android",
+          "width": 568,
+          "height": 320,
+          "orientation": "landscape",
+          "page": "Trade Generation",
+          "passed": true,
+          "issues": []
+        }
+      ]
+    },
+    {
+      "device": "iPhone SE 2nd/3rd Gen",
+      "dimensions": "375x667",
+      "tests": [
+        {
+          "device": "iPhone SE 2nd/3rd Gen",
+          "width": 375,
+          "height": 667,
+          "orientation": "portrait",
+          "page": "Home Dashboard",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone SE 2nd/3rd Gen",
+          "width": 375,
+          "height": 667,
+          "orientation": "portrait",
+          "page": "Bitcoin Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone SE 2nd/3rd Gen",
+          "width": 375,
+          "height": 667,
+          "orientation": "portrait",
+          "page": "Ethereum Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone SE 2nd/3rd Gen",
+          "width": 375,
+          "height": 667,
+          "orientation": "portrait",
+          "page": "Whale Watch",
+          "passed": false,
+          "issues": [
+            {
+              "type": "text-truncation",
+              "element": "whale-transaction-card",
+              "description": "Long wallet addresses may need truncation",
+              "severity": "low"
+            }
+          ]
+        },
+        {
+          "device": "iPhone SE 2nd/3rd Gen",
+          "width": 375,
+          "height": 667,
+          "orientation": "portrait",
+          "page": "Crypto News",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone SE 2nd/3rd Gen",
+          "width": 375,
+          "height": 667,
+          "orientation": "portrait",
+          "page": "Trade Generation",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone SE 2nd/3rd Gen",
+          "width": 667,
+          "height": 375,
+          "orientation": "landscape",
+          "page": "Home Dashboard",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone SE 2nd/3rd Gen",
+          "width": 667,
+          "height": 375,
+          "orientation": "landscape",
+          "page": "Bitcoin Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone SE 2nd/3rd Gen",
+          "width": 667,
+          "height": 375,
+          "orientation": "landscape",
+          "page": "Ethereum Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone SE 2nd/3rd Gen",
+          "width": 667,
+          "height": 375,
+          "orientation": "landscape",
+          "page": "Whale Watch",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone SE 2nd/3rd Gen",
+          "width": 667,
+          "height": 375,
+          "orientation": "landscape",
+          "page": "Crypto News",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone SE 2nd/3rd Gen",
+          "width": 667,
+          "height": 375,
+          "orientation": "landscape",
+          "page": "Trade Generation",
+          "passed": true,
+          "issues": []
+        }
+      ]
+    },
+    {
+      "device": "iPhone 12/13/14",
+      "dimensions": "390x844",
+      "tests": [
+        {
+          "device": "iPhone 12/13/14",
+          "width": 390,
+          "height": 844,
+          "orientation": "portrait",
+          "page": "Home Dashboard",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone 12/13/14",
+          "width": 390,
+          "height": 844,
+          "orientation": "portrait",
+          "page": "Bitcoin Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone 12/13/14",
+          "width": 390,
+          "height": 844,
+          "orientation": "portrait",
+          "page": "Ethereum Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone 12/13/14",
+          "width": 390,
+          "height": 844,
+          "orientation": "portrait",
+          "page": "Whale Watch",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone 12/13/14",
+          "width": 390,
+          "height": 844,
+          "orientation": "portrait",
+          "page": "Crypto News",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone 12/13/14",
+          "width": 390,
+          "height": 844,
+          "orientation": "portrait",
+          "page": "Trade Generation",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone 12/13/14",
+          "width": 844,
+          "height": 390,
+          "orientation": "landscape",
+          "page": "Home Dashboard",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone 12/13/14",
+          "width": 844,
+          "height": 390,
+          "orientation": "landscape",
+          "page": "Bitcoin Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone 12/13/14",
+          "width": 844,
+          "height": 390,
+          "orientation": "landscape",
+          "page": "Ethereum Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone 12/13/14",
+          "width": 844,
+          "height": 390,
+          "orientation": "landscape",
+          "page": "Whale Watch",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone 12/13/14",
+          "width": 844,
+          "height": 390,
+          "orientation": "landscape",
+          "page": "Crypto News",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone 12/13/14",
+          "width": 844,
+          "height": 390,
+          "orientation": "landscape",
+          "page": "Trade Generation",
+          "passed": true,
+          "issues": []
+        }
+      ]
+    },
+    {
+      "device": "iPhone Pro Max",
+      "dimensions": "428x926",
+      "tests": [
+        {
+          "device": "iPhone Pro Max",
+          "width": 428,
+          "height": 926,
+          "orientation": "portrait",
+          "page": "Home Dashboard",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone Pro Max",
+          "width": 428,
+          "height": 926,
+          "orientation": "portrait",
+          "page": "Bitcoin Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone Pro Max",
+          "width": 428,
+          "height": 926,
+          "orientation": "portrait",
+          "page": "Ethereum Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone Pro Max",
+          "width": 428,
+          "height": 926,
+          "orientation": "portrait",
+          "page": "Whale Watch",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone Pro Max",
+          "width": 428,
+          "height": 926,
+          "orientation": "portrait",
+          "page": "Crypto News",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone Pro Max",
+          "width": 428,
+          "height": 926,
+          "orientation": "portrait",
+          "page": "Trade Generation",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone Pro Max",
+          "width": 926,
+          "height": 428,
+          "orientation": "landscape",
+          "page": "Home Dashboard",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone Pro Max",
+          "width": 926,
+          "height": 428,
+          "orientation": "landscape",
+          "page": "Bitcoin Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone Pro Max",
+          "width": 926,
+          "height": 428,
+          "orientation": "landscape",
+          "page": "Ethereum Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone Pro Max",
+          "width": 926,
+          "height": 428,
+          "orientation": "landscape",
+          "page": "Whale Watch",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone Pro Max",
+          "width": 926,
+          "height": 428,
+          "orientation": "landscape",
+          "page": "Crypto News",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPhone Pro Max",
+          "width": 926,
+          "height": 428,
+          "orientation": "landscape",
+          "page": "Trade Generation",
+          "passed": true,
+          "issues": []
+        }
+      ]
+    },
+    {
+      "device": "Large Mobile",
+      "dimensions": "640x1136",
+      "tests": [
+        {
+          "device": "Large Mobile",
+          "width": 640,
+          "height": 1136,
+          "orientation": "portrait",
+          "page": "Home Dashboard",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "Large Mobile",
+          "width": 640,
+          "height": 1136,
+          "orientation": "portrait",
+          "page": "Bitcoin Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "Large Mobile",
+          "width": 640,
+          "height": 1136,
+          "orientation": "portrait",
+          "page": "Ethereum Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "Large Mobile",
+          "width": 640,
+          "height": 1136,
+          "orientation": "portrait",
+          "page": "Whale Watch",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "Large Mobile",
+          "width": 640,
+          "height": 1136,
+          "orientation": "portrait",
+          "page": "Crypto News",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "Large Mobile",
+          "width": 640,
+          "height": 1136,
+          "orientation": "portrait",
+          "page": "Trade Generation",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "Large Mobile",
+          "width": 1136,
+          "height": 640,
+          "orientation": "landscape",
+          "page": "Home Dashboard",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "Large Mobile",
+          "width": 1136,
+          "height": 640,
+          "orientation": "landscape",
+          "page": "Bitcoin Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "Large Mobile",
+          "width": 1136,
+          "height": 640,
+          "orientation": "landscape",
+          "page": "Ethereum Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "Large Mobile",
+          "width": 1136,
+          "height": 640,
+          "orientation": "landscape",
+          "page": "Whale Watch",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "Large Mobile",
+          "width": 1136,
+          "height": 640,
+          "orientation": "landscape",
+          "page": "Crypto News",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "Large Mobile",
+          "width": 1136,
+          "height": 640,
+          "orientation": "landscape",
+          "page": "Trade Generation",
+          "passed": true,
+          "issues": []
+        }
+      ]
+    },
+    {
+      "device": "iPad Mini",
+      "dimensions": "768x1024",
+      "tests": [
+        {
+          "device": "iPad Mini",
+          "width": 768,
+          "height": 1024,
+          "orientation": "portrait",
+          "page": "Home Dashboard",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPad Mini",
+          "width": 768,
+          "height": 1024,
+          "orientation": "portrait",
+          "page": "Bitcoin Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPad Mini",
+          "width": 768,
+          "height": 1024,
+          "orientation": "portrait",
+          "page": "Ethereum Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPad Mini",
+          "width": 768,
+          "height": 1024,
+          "orientation": "portrait",
+          "page": "Whale Watch",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPad Mini",
+          "width": 768,
+          "height": 1024,
+          "orientation": "portrait",
+          "page": "Crypto News",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPad Mini",
+          "width": 768,
+          "height": 1024,
+          "orientation": "portrait",
+          "page": "Trade Generation",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPad Mini",
+          "width": 1024,
+          "height": 768,
+          "orientation": "landscape",
+          "page": "Home Dashboard",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPad Mini",
+          "width": 1024,
+          "height": 768,
+          "orientation": "landscape",
+          "page": "Bitcoin Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPad Mini",
+          "width": 1024,
+          "height": 768,
+          "orientation": "landscape",
+          "page": "Ethereum Report",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPad Mini",
+          "width": 1024,
+          "height": 768,
+          "orientation": "landscape",
+          "page": "Whale Watch",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPad Mini",
+          "width": 1024,
+          "height": 768,
+          "orientation": "landscape",
+          "page": "Crypto News",
+          "passed": true,
+          "issues": []
+        },
+        {
+          "device": "iPad Mini",
+          "width": 1024,
+          "height": 768,
+          "orientation": "landscape",
+          "page": "Trade Generation",
+          "passed": true,
+          "issues": []
+        }
+      ]
+    }
+  ]
+}

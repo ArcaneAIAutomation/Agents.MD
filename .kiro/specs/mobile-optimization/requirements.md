@@ -91,3 +91,17 @@ The Crypto Herald trading intelligence platform currently has significant mobile
 5. WHEN switching between portrait and landscape orientations THEN all content SHALL reflow properly without overflow
 6. WHEN viewing on devices from 320px to 768px width THEN the layout SHALL scale proportionally with appropriate breakpoints
 7. IF text content exceeds container width THEN it SHALL either wrap properly, truncate with ellipsis, or use responsive font sizing to fit
+
+### Requirement 8
+
+**User Story:** As a mobile user viewing the platform on various iPhone and Android devices, I want the interface to be perfectly optimized for my specific device size, so that all content is readable and properly sized without any visual glitches.
+
+#### Acceptance Criteria
+
+1. WHEN viewing on iPhone SE (375px width) THEN all components SHALL scale appropriately with optimized padding and font sizes
+2. WHEN viewing on iPhone 12/13/14 (390px width) THEN the layout SHALL provide enhanced spacing and larger touch targets
+3. WHEN viewing on iPhone Pro Max (428px width) THEN the interface SHALL utilize the larger screen with maximum mobile spacing
+4. WHEN viewing on small Android devices (360px-400px width) THEN all content SHALL remain readable and properly contained
+5. WHEN viewing on tablets (768px-1024px width) THEN the layout SHALL transition to two-column layouts where appropriate
+6. WHEN text is displayed in stat cards, zone cards, or whale transaction cards THEN font sizes SHALL use CSS clamp() for fluid scaling
+7. WHEN viewing price displays or large numbers THEN they SHALL scale responsively using viewport-based sizing (vw units with min/max constraints)

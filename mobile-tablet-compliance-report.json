@@ -1,0 +1,1098 @@
+{
+  "totalFiles": 177,
+  "passedFiles": 2,
+  "failedFiles": 175,
+  "issues": [
+    {
+      "file": "advanced-price-prediction-engine.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-components\\ArticleCard.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-components\\BTCHiddenPivotChart-CMC.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-components\\BTCHiddenPivotChart.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-components\\BTCMarketAnalysis.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-components\\BTCTradingChart-CMC.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-components\\BTCTradingChart.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-components\\CryptoHerald.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-components\\ETHHiddenPivotChart-CMC.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-components\\ETHHiddenPivotChart.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-components\\ETHMarketAnalysis.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-components\\ETHTradingChart-CMC.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-components\\ETHTradingChart.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-components\\Footer.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-components\\Header.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-components\\HiddenPivotChart.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-components\\Layout.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-components\\NexoRegulatoryPanel.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-components\\TradeGenerationEngine.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-components\\TradingChart.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-components\\TypewriterText.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-hooks\\useApiData.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-hooks\\useMarketData.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-hooks\\useNewspaperAudio.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-pages\\api\\bitcoin-analysis.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-pages\\api\\btc-analysis.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-pages\\api\\cmc-trading-analysis.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-pages\\api\\crypto-herald-enhanced.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-pages\\api\\crypto-herald.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-pages\\api\\crypto-prices.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-pages\\api\\eth-analysis.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-pages\\api\\historical-prices.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-pages\\api\\news-aggregation.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-pages\\api\\nexo-news.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-pages\\api\\nexo-regulatory.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-pages\\api\\trade-generation-new.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-pages\\api\\trade-generation.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-pages\\index-backup.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-pages\\index-new.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-pages\\index.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-pages\\_app.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "backup-current-styles\\globals.css",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\BTCHiddenPivotChart.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\BTCMarketAnalysis.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\BTCTradingChart.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\BTCTradingChart_backup.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\CaesarDashboard.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\CryptoHerald.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\ETHHiddenPivotChart.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\ETHMarketAnalysis.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\ETHTradingChart.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\Footer.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\Header.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\HiddenPivotChart.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\Layout.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\MobileErrorStates.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\MobileFinalIntegration.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\MobileIntegrationTest.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\MobileLoadingComponents.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\MobileLoadingDemo.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\ModernTradingChart.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\Navigation.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\NexoRegulatoryPanel.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\SafeContainer.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\TextOverflowExample.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\TradeGenerationEngine.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\TradingChart.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\TypewriterText.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "components\\WhaleWatch\\WhaleWatchDashboard.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "crypto-herald-optimized.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "debug-api.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "enhanced-supply-demand-calculator.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "final-comparison-demo.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "final-layout-verification.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "hooks\\useApiData.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "hooks\\useCaesarData.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "hooks\\useContrastValidation.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "hooks\\useMarketData.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "hooks\\useMobileViewport.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "hooks\\useNewspaperAudio.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "hooks\\useOverflowDetection.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "live-data-demonstration.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "next-env.d.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "next.config.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\bitcoin-analysis.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\btc-analysis-enhanced.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\btc-analysis-simple.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\btc-analysis.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\caesar\\crypto-news.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\caesar\\market-research.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\caesar-analysis.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\caesar-health.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\caesar-market-data.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\caesar-news.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\caesar-trade-signals.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\cmc-trading-analysis.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\crypto-herald-15-stories.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\crypto-herald-clean.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\crypto-herald-enhanced.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\crypto-herald-fast-15.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\crypto-herald-fast.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\crypto-herald.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\crypto-prices.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\diagnostic.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\enhanced-trade-generation.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\eth-analysis-enhanced.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\eth-analysis-intelligent.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\eth-analysis-simple.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\eth-analysis.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\favicon.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\health-check.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\historical-prices.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\live-trade-generation.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\news-aggregation.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\nexo-news.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\nexo-regulatory.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\reliable-live-trade-generation.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\reliable-trade-generation.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\simple-trade-generation.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\test-whale-analysis.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\trade-generation-new.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\trade-generation.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\ultimate-trade-generation.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\whale-watch\\analysis\\[jobId].ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\whale-watch\\analyze.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\api\\whale-watch\\detect.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\bitcoin-report.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\crypto-news.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\ethereum-report.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\index-backup.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\index-new.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\index-v1.4.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\index.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\regulatory-watch.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\trade-generation.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\whale-watch.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\_app.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "pages\\_document.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "postcss.config.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "quick-fix.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "scripts\\audit-mobile-colors.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "scripts\\setup-mobile-monitoring.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "scripts\\validate-mobile-tablet-compliance.js",
+      "type": "FORBIDDEN_COLOR",
+      "severity": "HIGH",
+      "message": "Forbidden color found: #00ff00",
+      "line": 218
+    },
+    {
+      "file": "scripts\\validate-mobile-tablet-compliance.js",
+      "type": "FORBIDDEN_COLOR",
+      "severity": "HIGH",
+      "message": "Forbidden color found: #ff0000",
+      "line": 218
+    },
+    {
+      "file": "scripts\\validate-mobile-tablet-compliance.js",
+      "type": "FORBIDDEN_COLOR",
+      "severity": "HIGH",
+      "message": "Forbidden color found: #0000ff",
+      "line": 218
+    },
+    {
+      "file": "scripts\\validate-mobile-tablet-compliance.js",
+      "type": "FORBIDDEN_COLOR",
+      "severity": "HIGH",
+      "message": "Forbidden color found: #800080",
+      "line": 218
+    },
+    {
+      "file": "scripts\\validate-mobile-tablet-compliance.js",
+      "type": "FORBIDDEN_COLOR",
+      "severity": "HIGH",
+      "message": "Forbidden color found: #ffff00",
+      "line": 218
+    },
+    {
+      "file": "show-live-calculation.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "social-institutional-breakdown.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "tailwind.config.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "temp-hidden-pivot.tsx",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "test-advanced-predictions.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "test-all-apis.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "test-current-api.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "test-dual-data-sources.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "test-enhanced-analysis.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "test-herald-api.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "test-trade-engine.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "utils\\accessibilityIntegration.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "utils\\accessibilityTesting.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "utils\\blockchainClient.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "utils\\caesarApi.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "utils\\caesarClient.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "utils\\containerQueries.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "utils\\contrastValidation.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "utils\\examples\\accessibilityTestingExample.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "utils\\mobileValidation.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "utils\\textOverflowPrevention.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "utils\\__tests__\\accessibilityTesting.test.ts",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "utils\\__tests__\\contrastValidation.test.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "validate-breakpoints.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "validate-breakpoints.js",
+      "type": "TOUCH_TARGET",
+      "severity": "MEDIUM",
+      "message": "Touch targets should be minimum 48px"
+    },
+    {
+      "file": "validate-container-fitting.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "validate-glow-animations.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "validate-mobile-performance.js",
+      "type": "TOUCH_TARGET",
+      "severity": "MEDIUM",
+      "message": "Touch targets should be minimum 48px"
+    },
+    {
+      "file": "validate-responsive-breakpoints.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "validate-text-containment-all-devices.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "verify-config.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "verify-layout-match.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    },
+    {
+      "file": "verify-signal-fix.js",
+      "type": "MISSING_MOBILE_QUERY",
+      "severity": "MEDIUM",
+      "message": "No mobile-specific media queries found"
+    }
+  ],
+  "summary": {
+    "colorViolations": 5,
+    "mobileOptimizations": 173,
+    "contrastIssues": 0,
+    "touchTargetIssues": 2
+  }
+}
