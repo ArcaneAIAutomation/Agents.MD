@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { Menu, X, Home, Newspaper, Bot, Bitcoin, Coins, Whale, Scale } from 'lucide-react';
+import { Menu, X, Home, Newspaper, Bot, Bitcoin, Coins, Fish, Scale } from 'lucide-react';
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,7 +13,7 @@ export default function Navigation() {
     { name: 'AI Trade Generation', path: '/trade-generation', icon: Bot, emoji: '🤖', description: 'GPT-4o Trading Signals' },
     { name: 'Bitcoin Report', path: '/bitcoin-report', icon: Bitcoin, emoji: '₿', description: 'BTC Market Analysis' },
     { name: 'Ethereum Report', path: '/ethereum-report', icon: Coins, emoji: '⟠', description: 'ETH & DeFi Insights' },
-    { name: 'Whale Watch', path: '/whale-watch', icon: Whale, emoji: '🐋', description: 'Large Transaction Tracking' },
+    { name: 'Whale Watch', path: '/whale-watch', icon: Fish, emoji: '🐋', description: 'Large Transaction Tracking' },
     { name: 'Regulatory Watch', path: '/regulatory-watch', icon: Scale, emoji: '⚖️', description: 'Compliance & Regulations' },
   ];
 
