@@ -377,7 +377,7 @@ Be transparent about which aspects of the analysis are based on complete data vs
             }
           ]
         }),
-        signal: AbortSignal.timeout(30000), // 30 second timeout for Deep Dive
+        signal: AbortSignal.timeout(8000), // 8 second timeout (Vercel has 10s limit)
       }
     );
 

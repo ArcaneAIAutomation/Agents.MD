@@ -499,7 +499,7 @@ export async function fetchDeepDiveData(
   fromAddress: string,
   toAddress: string
 ): Promise<DeepDiveDataResult> {
-  const timeout = 15000; // 15 seconds max for blockchain data
+  const timeout = 5000; // 5 seconds max for blockchain data (Vercel timeout constraint)
   const errors: Array<{ address: string; errorType: BlockchainErrorType; message: string }> = [];
   const dataSourceLimitations: string[] = [];
   
