@@ -95,6 +95,132 @@
 - **Solution**: Automatic cleanup implemented
 - **Refresh**: Page refresh clears memory
 
+### **7. Gemini AI Analysis Issues**
+
+#### Problem: "GEMINI_API_KEY is missing" error
+- **Cause**: Environment variable not set
+- **Solution**: Add `GEMINI_API_KEY` to `.env.local`
+- **Get Key**: https://aistudio.google.com/app/apikey
+- **Format**: Must start with `AIzaSy` and be 39 characters long
+- **Example**: `GEMINI_API_KEY=AIzaSyAbCdEfGhIjKlMnOpQrStUvWxYz1234567`
+
+#### Problem: "Invalid GEMINI_API_KEY format" error
+- **Cause**: API key doesn't match expected format
+- **Check**: Key starts with `AIzaSy`
+- **Check**: Key is exactly 39 characters
+- **Check**: No extra spaces or quotes
+- **Verify**: Key is active in Google AI Studio
+
+#### Problem: Gemini analysis failing with 401 error
+- **Cause**: Invalid or expired API key
+- **Solution**: Generate new API key in Google AI Studio
+- **Check**: API key is correctly copied (no truncation)
+- **Verify**: No extra characters or whitespace
+
+#### Problem: Gemini analysis failing with 429 error (Rate Limit)
+- **Cause**: Too many requests in short time
+- **Free Tier**: 15 requests per minute
+- **Solution**: Wait 60 seconds before retrying
+- **Upgrade**: Consider pay-as-you-go for 360 RPM
+- **Config**: Adjust `GEMINI_MAX_REQUESTS_PER_MINUTE` in `.env.local`
+
+#### Problem: Gemini analysis timing out
+- **Default**: 15 second timeout
+- **Solution**: Increase `GEMINI_TIMEOUT_MS` in `.env.local`
+- **Example**: `GEMINI_TIMEOUT_MS=30000` (30 seconds)
+- **Note**: Longer timeouts may indicate API issues
+
+#### Problem: Analysis returns "unknown" or generic results
+- **Cause**: Insufficient transaction data
+- **Check**: All required fields are provided
+- **Improve**: Add more context in transaction description
+- **Model**: Try switching to Pro model for better analysis
+
+#### Problem: Model selection not working
+- **Check**: `GEMINI_MODEL` in `.env.local`
+- **Valid Options**: `gemini-2.5-flash` or `gemini-2.5-pro`
+- **Default**: Uses Flash if not specified
+- **Threshold**: Pro used for transactions >= 100 BTC
+- **Override**: Set `GEMINI_PRO_THRESHOLD_BTC` to change threshold
+
+#### Problem: Thinking mode not showing
+- **Check**: `GEMINI_ENABLE_THINKING=true` in `.env.local`
+- **Default**: Enabled by default
+- **UI**: Look for "AI Reasoning Process" collapsible section
+- **Note**: Only available with Gemini 2.5 models
+
+#### Problem: Deep Dive not available
+- **Requirement**: Transaction must be >= 100 BTC
+- **Config**: Check `GEMINI_PRO_THRESHOLD_BTC` setting
+- **Lower Threshold**: Set to 50 for 50+ BTC transactions
+- **Model**: Deep Dive requires Gemini 2.5 Pro
+
+#### Problem: JSON parsing errors in analysis
+- **Cause**: Gemini returned invalid JSON
+- **Check**: Console logs for raw response
+- **Retry**: Try analysis again (may be transient)
+- **Report**: If persistent, check Gemini API status
+
+#### Problem: High API costs
+- **Monitor**: Check Google Cloud Console for usage
+- **Optimize**: Use Flash model for smaller transactions
+- **Reduce**: Lower `GEMINI_FLASH_MAX_OUTPUT_TOKENS` to 4096
+- **Cache**: Implement caching for repeated analyses
+- **Limit**: Set daily/monthly usage quotas
+
+#### Problem: Slow analysis performance
+- **Flash**: Should complete in ~3 seconds
+- **Pro**: Should complete in ~7 seconds
+- **Deep Dive**: Should complete in ~10-15 seconds
+- **Check**: Network latency to Google APIs
+- **Optimize**: Reduce `maxOutputTokens` for faster responses
+
+#### Problem: Analysis quality is poor
+- **Model**: Try switching from Flash to Pro
+- **Context**: Provide more transaction details
+- **Prompt**: Check if prompt includes current market data
+- **Temperature**: Adjust in code (0.7-0.9 range)
+- **Tokens**: Increase `maxOutputTokens` for longer analysis
+
+#### Problem: Blockchain data not loading (Deep Dive)
+- **Check**: Blockchain.com API key in `.env.local`
+- **Fallback**: Analysis continues without blockchain data
+- **Note**: Deep Dive shows data source limitations
+- **Retry**: Try again after a few minutes
+
+#### Problem: Exchange detection not working
+- **Limited**: Only detects known exchange patterns
+- **Database**: Uses simplified pattern matching
+- **Improve**: Will be enhanced with comprehensive database
+- **Manual**: Check addresses manually on blockchain explorer
+
+### **Gemini API Debugging Commands**
+
+```bash
+# Test API key validity
+curl -H "Content-Type: application/json" \
+  -d '{"contents":[{"parts":[{"text":"Hello"}]}]}' \
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY"
+
+# Check rate limit status (look for X-RateLimit headers)
+curl -I "https://generativelanguage.googleapis.com/v1beta/models?key=YOUR_API_KEY"
+
+# Validate configuration
+npm run validate-gemini-config  # If script exists
+```
+
+### **Gemini Configuration Validation**
+
+```typescript
+// In browser console or Node.js
+import { validateGeminiConfigAtStartup } from './utils/geminiConfig';
+
+const result = validateGeminiConfigAtStartup();
+console.log('Valid:', result.valid);
+console.log('Errors:', result.errors);
+console.log('Warnings:', result.warnings);
+```
+
 ## 🛡️ Emergency Recovery
 
 ### **Complete Reset Procedure**
@@ -162,10 +288,13 @@ curl "https://api.coinbase.com/v2/exchange-rates?currency=BTC"
 ### **Critical Files**
 - `components/TradeGenerationEngine.tsx` - AI trading features
 - `pages/api/trade-generation.ts` - AI reasoning endpoint
+- `pages/api/whale-watch/analyze-gemini.ts` - Gemini AI analysis endpoint
+- `utils/geminiConfig.ts` - Gemini configuration and validation
 - `pages/index.tsx` - Main layout
 - `styles/globals.css` - Global styles + Bitcoin Sovereign design system
 - `.kiro/steering/bitcoin-sovereign-design.md` - Complete design guidelines
 - `BITCOIN-SOVEREIGN-DOCUMENTATION-UPDATE.md` - Documentation update summary
+- `.env.example` - Environment variable template with Gemini config
 
 ## 🎯 Prevention Tips
 
@@ -173,14 +302,39 @@ curl "https://api.coinbase.com/v2/exchange-rates?currency=BTC"
 2. **Use feature branches for changes**
 3. **Test on multiple devices** (320px - 1920px+)
 4. **Check console for errors**
-5. **Monitor API rate limits**
+5. **Monitor API rate limits** (especially Gemini: 15 RPM free tier)
 6. **Keep stable branch untouched**
 7. **Follow Bitcoin Sovereign design system** - Black, Orange, White only
 8. **Ensure WCAG 2.1 AA compliance** - Test color contrast and focus states
 9. **Use mobile-first approach** - Start with mobile, enhance for desktop
 10. **Reference design documentation** - Check `.kiro/steering/bitcoin-sovereign-design.md`
+11. **Validate Gemini config on startup** - Use `validateGeminiConfigAtStartup()`
+12. **Monitor Gemini costs** - Track token usage in Google Cloud Console
+13. **Use Flash model by default** - Reserve Pro for large transactions (>= 100 BTC)
+14. **Cache analysis results** - Avoid redundant API calls for same transaction
+
+## 📚 Gemini AI Resources
+
+### **Documentation**
+- [Gemini API Documentation](https://ai.google.dev/gemini-api/docs)
+- [Gemini Pricing](https://ai.google.dev/pricing)
+- [Rate Limits & Quotas](https://ai.google.dev/gemini-api/docs/quota)
+- [Google AI Studio](https://aistudio.google.com/app/apikey)
+
+### **Internal Documentation**
+- `utils/README-gemini-config.md` - Configuration guide
+- `.kiro/specs/gemini-model-upgrade/design.md` - Technical design
+- `.kiro/specs/gemini-model-upgrade/requirements.md` - Requirements
+- `.env.example` - Environment variable reference
+
+### **Support Channels**
+- Check console logs for detailed error messages
+- Review `utils/geminiConfig.ts` for validation logic
+- Test API key with curl commands above
+- Monitor Google Cloud Console for usage/errors
 
 ---
 
-*Last Updated: August 21, 2025*  
-*All systems operational* ✅
+*Last Updated: January 24, 2025*  
+*All systems operational* ✅  
+*Gemini 2.5 Integration: Ready for Implementation* 🚀
