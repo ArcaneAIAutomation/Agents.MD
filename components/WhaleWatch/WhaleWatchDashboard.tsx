@@ -34,6 +34,18 @@ export default function WhaleWatchDashboard() {
   const hasActiveAnalysis = (whaleData?.whales.some(w => w.analysisStatus === 'analyzing') || analyzingTx !== null);
 
   const fetchWhaleData = async () => {
+    // Guard clause: Prevent execution if any analysis is already in progress
+    if (analyzingTx !== null || whaleData?.whales.some(w => w.analysisStatus === 'analyzing')) {
+      console.log('⚠️ Cannot refresh while analysis is in progress');
+      return;
+    }
+    
+    // Guard clause: Prevent execution if already loading
+    if (loading) {
+      console.log('⚠️ Already loading whale data');
+      return;
+    }
+    
     try {
       setLoading(true);
       setError(null);
@@ -292,7 +304,9 @@ export default function WhaleWatchDashboard() {
             {/* Button */}
             <button
               onClick={fetchWhaleData}
-              className="btn-bitcoin-primary px-6 md:px-8 py-3 md:py-4 text-base md:text-lg font-bold rounded-lg transition-all w-full md:w-auto"
+              disabled={loading}
+              className="btn-bitcoin-primary px-6 md:px-8 py-3 md:py-4 text-base md:text-lg font-bold rounded-lg transition-all w-full md:w-auto disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
+              aria-label="Scan for whale transactions"
             >
               🔍 Scan for Whale Transactions
             </button>
@@ -330,9 +344,9 @@ export default function WhaleWatchDashboard() {
           </p>
         </div>
         
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3 md:space-x-4">
           {lastUpdate && (
-            <div className="text-right">
+            <div className="text-right hidden sm:block">
               <div className="text-xs text-bitcoin-white-60">Last Updated</div>
               <div className="text-sm font-medium text-bitcoin-white">
                 {lastUpdate.toLocaleTimeString()}
@@ -341,11 +355,12 @@ export default function WhaleWatchDashboard() {
           )}
           <button
             onClick={fetchWhaleData}
-            disabled={loading}
-            className="p-2 bg-bitcoin-orange text-bitcoin-black rounded-lg hover:bg-bitcoin-black hover:text-bitcoin-orange hover:border hover:border-bitcoin-orange transition-all disabled:opacity-50"
-            title="Refresh whale data"
+            disabled={loading || hasActiveAnalysis}
+            className="min-h-[48px] min-w-[48px] p-3 bg-bitcoin-orange text-bitcoin-black rounded-lg hover:bg-bitcoin-black hover:text-bitcoin-orange hover:border-2 hover:border-bitcoin-orange transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            title={hasActiveAnalysis ? "Cannot refresh while analysis is in progress" : "Refresh whale data"}
+            aria-label="Refresh whale data"
           >
-            <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-6 w-6 ${loading ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
