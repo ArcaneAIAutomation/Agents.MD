@@ -185,49 +185,109 @@ export default async function handler(
     const currentBtcPrice = await getCurrentBitcoinPrice();
     console.log(`✅ BTC price: $${currentBtcPrice.toLocaleString()}`);
 
-    // Build prompt
-    const sourceSummary = `Address: ${fromAddressData.address}, Balance: ${fromAddressData.finalBalance} BTC, Total Txs: ${fromAddressData.transactionCount}`;
-    const destSummary = `Address: ${toAddressData.address}, Balance: ${toAddressData.finalBalance} BTC, Total Txs: ${toAddressData.transactionCount}`;
+    // Build enhanced prompt with detailed transaction analysis
+    const recentTxDetails = fromAddressData.recentTransactions.map((tx: any, i: number) => 
+      `${i+1}. ${tx.time.substring(0,10)} - ${tx.totalBTC} BTC (${tx.inputs}→${tx.outputs})`
+    ).join('\n');
     
-    const prompt = `Analyze this Bitcoin whale transaction using real blockchain data.
+    const destTxDetails = toAddressData.recentTransactions.map((tx: any, i: number) => 
+      `${i+1}. ${tx.time.substring(0,10)} - ${tx.totalBTC} BTC (${tx.inputs}→${tx.outputs})`
+    ).join('\n');
+    
+    const prompt = `You are an elite cryptocurrency intelligence analyst. Analyze this Bitcoin whale transaction using REAL blockchain data.
 
-TRANSACTION:
+🔍 WHALE TRANSACTION:
 - Amount: ${whale.amount.toFixed(2)} BTC ($${(whale.amount * currentBtcPrice).toLocaleString()})
-- BTC Price: $${currentBtcPrice.toLocaleString()}
+- Current BTC Price: $${currentBtcPrice.toLocaleString()}
+- Timestamp: ${whale.timestamp}
+- Hash: ${whale.txHash.substring(0, 20)}...
 
-SOURCE: ${sourceSummary}
-DESTINATION: ${destSummary}
+📊 SOURCE ADDRESS INTELLIGENCE:
+- Address: ${fromAddressData.address}
+- Balance: ${fromAddressData.finalBalance} BTC
+- Total Transactions: ${fromAddressData.transactionCount}
+- Total Received: ${fromAddressData.totalReceived} BTC
+- Total Sent: ${fromAddressData.totalSent} BTC
+Recent Activity:
+${recentTxDetails || 'No recent transactions'}
 
-Provide JSON analysis with:
+📊 DESTINATION ADDRESS INTELLIGENCE:
+- Address: ${toAddressData.address}
+- Balance: ${toAddressData.finalBalance} BTC
+- Total Transactions: ${toAddressData.transactionCount}
+- Total Received: ${toAddressData.totalReceived} BTC
+- Total Sent: ${toAddressData.totalSent} BTC
+Recent Activity:
+${destTxDetails || 'No recent transactions'}
+
+🎯 DEEP DIVE ANALYSIS REQUIRED:
+
+Provide comprehensive JSON analysis:
 {
   "address_behavior": {
-    "source_classification": "exchange|whale|institutional|retail",
-    "source_pattern": "description",
-    "destination_classification": "exchange|whale|institutional|retail",
-    "destination_pattern": "description"
+    "source_classification": "exchange|whale|institutional|mixer|cold_storage|retail",
+    "source_pattern": "detailed behavior analysis with transaction frequency, timing patterns, and sophistication level",
+    "source_activity_level": "high|medium|low",
+    "destination_classification": "exchange|whale|institutional|mixer|cold_storage|retail",
+    "destination_pattern": "detailed behavior analysis",
+    "destination_activity_level": "high|medium|low",
+    "velocity_analysis": "how quickly funds typically move through these addresses"
+  },
+  "transaction_patterns": {
+    "timing_significance": "analysis of when this transaction occurred (market hours, price level, etc)",
+    "size_significance": "how this amount compares to typical transactions for these addresses",
+    "frequency_analysis": "transaction frequency patterns for both addresses",
+    "anomaly_detected": boolean,
+    "anomaly_description": "if anomaly detected, explain what's unusual"
   },
   "fund_flow_analysis": {
-    "origin_hypothesis": "where funds came from",
-    "destination_hypothesis": "where funds going",
-    "mixing_detected": boolean
+    "origin_hypothesis": "detailed hypothesis about where these funds originated",
+    "destination_hypothesis": "detailed hypothesis about final destination",
+    "intermediate_hops": "estimated number of hops before/after",
+    "mixing_detected": boolean,
+    "exchange_flow_direction": "deposit|withdrawal|internal|unknown",
+    "cluster_analysis": "broader transaction network patterns"
   },
   "market_prediction": {
-    "short_term_24h": "24h outlook",
-    "medium_term_7d": "7d outlook",
+    "short_term_24h": "specific 24h price prediction with reasoning",
+    "medium_term_7d": "specific 7d trend forecast with reasoning",
     "key_price_levels": {
       "support": [number, number, number],
       "resistance": [number, number, number]
-    }
+    },
+    "probability_further_movement": number,
+    "volume_impact": "expected impact on trading volume"
   },
   "strategic_intelligence": {
-    "intent": "transaction intent",
+    "intent": "likely reason for this specific transaction",
+    "sophistication_level": "high|medium|low with explanation",
     "sentiment_indicator": "bullish|bearish|neutral",
-    "trader_positioning": "recommendation",
-    "risk_reward_ratio": "ratio"
+    "manipulation_risk": "high|medium|low",
+    "trader_positioning": "specific actionable recommendation",
+    "risk_reward_ratio": "specific ratio like 1:3",
+    "position_sizing": "recommended position size as % of portfolio",
+    "entry_strategy": "specific entry points and timing",
+    "exit_strategy": "specific exit points and profit targets"
+  },
+  "historical_context": {
+    "similar_transactions": "description of similar past whale movements",
+    "historical_outcome": "what happened after similar transactions",
+    "pattern_match": "identified pattern type",
+    "market_cycle_position": "where we are in the market cycle"
   },
   "confidence": number,
-  "key_insights": ["insight1", "insight2", "insight3"]
-}`;
+  "key_insights": [
+    "specific actionable insight with numbers",
+    "specific actionable insight with numbers",
+    "specific actionable insight with numbers",
+    "specific actionable insight with numbers",
+    "specific actionable insight with numbers"
+  ],
+  "red_flags": ["any concerning patterns or risks"],
+  "opportunities": ["specific trading opportunities identified"]
+}
+
+Be extremely specific with numbers, prices, and actionable recommendations. Focus on what traders need to know RIGHT NOW.`;
 
     // Call OpenAI API
     const openaiApiKey = process.env.OPENAI_API_KEY;
