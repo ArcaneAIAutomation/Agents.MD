@@ -665,45 +665,80 @@ export default function WhaleWatchDashboard() {
         setWhaleData({ ...whaleData, whales: updatedWhales });
       }
       
-      console.log('🔬 Starting Deep Dive analysis (async)...');
-      console.log(`📡 API Endpoint: /api/whale-watch/deep-dive-start`);
+      console.log('🔬 Starting Deep Dive analysis (synchronous with extended timeout)...');
+      console.log(`📡 API Endpoint: /api/whale-watch/deep-dive-gemini`);
       console.log(`⏱️ Start time: ${new Date(startTime).toISOString()}`);
       
-      // Start the async Deep Dive job
-      const startResponse = await fetch('/api/whale-watch/deep-dive-start', {
+      // Simulate progress stages
+      const progressStages = [
+        'Fetching blockchain data...',
+        'Analyzing transaction history...',
+        'Tracing fund flows...',
+        'Identifying patterns...',
+        'Generating comprehensive analysis...',
+      ];
+      
+      let currentStage = 0;
+      const progressInterval = setInterval(() => {
+        if (currentStage < progressStages.length - 1) {
+          currentStage++;
+          setDeepDiveProgress(prev => ({ ...prev, [whale.txHash]: progressStages[currentStage] }));
+          console.log(`📊 Progress: Stage ${currentStage + 1}/${progressStages.length} - ${progressStages[currentStage]}`);
+        }
+      }, 3000);
+      
+      // Call Deep Dive API with extended timeout
+      const response = await fetch('/api/whale-watch/deep-dive-gemini', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(whale),
+        signal: AbortSignal.timeout(30000), // 30 second timeout
       });
       
-      if (!startResponse.ok) {
-        throw new Error(`Failed to start Deep Dive: ${startResponse.status}`);
+      clearInterval(progressInterval);
+      
+      if (!response.ok) {
+        throw new Error(`Deep Dive API error: ${response.status}`);
       }
       
-      const startData = await startResponse.json();
+      const data = await response.json();
       
-      if (!startData.success || !startData.jobId) {
-        throw new Error(startData.error || 'Failed to start Deep Dive');
+      if (data.success && data.analysis) {
+        console.log('✅ Deep Dive analysis completed');
+        const endTime = Date.now();
+        const duration = ((endTime - startTime) / 1000).toFixed(1);
+        console.log(`✅ Deep Dive completed in ${duration}s`);
+        
+        if (whaleData) {
+          const updatedWhales = whaleData.whales.map(w =>
+            w.txHash === whale.txHash
+              ? { 
+                  ...w, 
+                  analysis: data.analysis,
+                  blockchainData: data.blockchainData,
+                  metadata: data.metadata,
+                  analysisStatus: 'completed' as const,
+                  analysisProvider: 'gemini-deep-dive' as const
+                }
+              : w
+          );
+          setWhaleData({ ...whaleData, whales: updatedWhales });
+        }
+        
+        // Clear progress and start time
+        setDeepDiveProgress(prev => {
+          const newProgress = { ...prev };
+          delete newProgress[whale.txHash];
+          return newProgress;
+        });
+        setDeepDiveStartTime(prev => {
+          const newStartTime = { ...prev };
+          delete newStartTime[whale.txHash];
+          return newStartTime;
+        });
+      } else {
+        throw new Error(data.error || 'Failed to get Deep Dive analysis');
       }
-      
-      const jobId = startData.jobId;
-      console.log(`✅ Deep Dive job started: ${jobId}`);
-      
-      // Store job ID in whale data
-      if (whaleData) {
-        const updatedWhales = whaleData.whales.map(w =>
-          w.txHash === whale.txHash
-            ? { ...w, analysisJobId: jobId }
-            : w
-        );
-        setWhaleData({ ...whaleData, whales: updatedWhales });
-      }
-      
-      // Clear analyzing state immediately (polling will handle the rest)
-      setAnalyzingTx(null);
-      
-      // Start polling for results
-      pollDeepDiveResults(jobId, whale.txHash);
       
     } catch (error) {
       console.error('Failed to start Deep Dive analysis:', error);
@@ -734,175 +769,7 @@ export default function WhaleWatchDashboard() {
     }
   };
   
-  const pollDeepDiveResults = async (jobId: string, txHash: string) => {
-    console.log(`📊 Starting to poll Deep Dive job: ${jobId}`);
-    console.log(`⏱️ Polling every 15 seconds with 1500 second (25 minute) timeout`);
-    
-    const POLL_INTERVAL = 15000; // 15 seconds
-    const TOTAL_TIMEOUT = 1500000; // 1500 seconds (25 minutes)
-    const startTime = Date.now();
-    
-    // Progress stages for UI feedback
-    const progressStages = [
-      'Fetching blockchain data...',
-      'Analyzing transaction history...',
-      'Tracing fund flows...',
-      'Identifying patterns...',
-      'Generating comprehensive analysis...',
-    ];
-    
-    let currentStage = 0;
-    const progressInterval = setInterval(() => {
-      if (currentStage < progressStages.length - 1) {
-        currentStage++;
-        setDeepDiveProgress(prev => ({ ...prev, [txHash]: progressStages[currentStage] }));
-        console.log(`📊 Progress: Stage ${currentStage + 1}/${progressStages.length} - ${progressStages[currentStage]}`);
-      }
-    }, POLL_INTERVAL); // Update progress with each poll
-    
-    const poll = async () => {
-      try {
-        // Check if we've exceeded the total timeout
-        const elapsedTime = Date.now() - startTime;
-        if (elapsedTime > TOTAL_TIMEOUT) {
-          clearInterval(progressInterval);
-          console.error(`❌ Deep Dive analysis timed out after ${Math.round(elapsedTime / 1000)}s`);
-          
-          // Mark as failed due to timeout
-          setWhaleData(prev => {
-            if (!prev) return prev;
-            const updatedWhales = prev.whales.map(w =>
-              w.txHash === txHash
-                ? { ...w, analysisStatus: 'failed' as const }
-                : w
-            );
-            return { ...prev, whales: updatedWhales };
-          });
-          
-          // Clear progress
-          setDeepDiveProgress(prev => {
-            const newProgress = { ...prev };
-            delete newProgress[txHash];
-            return newProgress;
-          });
-          setDeepDiveStartTime(prev => {
-            const newStartTime = { ...prev };
-            delete newStartTime[txHash];
-            return newStartTime;
-          });
-          
-          return;
-        }
-        
-        const response = await fetch(`/api/whale-watch/deep-dive-status/${jobId}`);
-        
-        if (!response.ok) {
-          throw new Error(`Polling error: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        if (data.status === 'completed' && data.result) {
-          clearInterval(progressInterval);
-          const totalTime = Math.round((Date.now() - startTime) / 1000);
-          console.log(`✅ Deep Dive analysis completed in ${totalTime}s`);
-          
-          // Update whale with results
-          setWhaleData(prev => {
-            if (!prev) return prev;
-            const updatedWhales = prev.whales.map(w =>
-              w.txHash === txHash
-                ? {
-                    ...w,
-                    analysis: data.result.analysis,
-                    blockchainData: data.result.blockchainData,
-                    metadata: data.result.metadata,
-                    analysisStatus: 'completed' as const,
-                    analysisProvider: 'gemini-deep-dive' as const
-                  }
-                : w
-            );
-            return { ...prev, whales: updatedWhales };
-          });
-          
-          // Clear progress and start time
-          setDeepDiveProgress(prev => {
-            const newProgress = { ...prev };
-            delete newProgress[txHash];
-            return newProgress;
-          });
-          setDeepDiveStartTime(prev => {
-            const newStartTime = { ...prev };
-            delete newStartTime[txHash];
-            return newStartTime;
-          });
-          
-        } else if (data.status === 'failed') {
-          clearInterval(progressInterval);
-          console.error('❌ Deep Dive analysis failed');
-          
-          // Mark as failed
-          setWhaleData(prev => {
-            if (!prev) return prev;
-            const updatedWhales = prev.whales.map(w =>
-              w.txHash === txHash
-                ? { ...w, analysisStatus: 'failed' as const }
-                : w
-            );
-            return { ...prev, whales: updatedWhales };
-          });
-          
-          // Clear progress
-          setDeepDiveProgress(prev => {
-            const newProgress = { ...prev };
-            delete newProgress[txHash];
-            return newProgress;
-          });
-          setDeepDiveStartTime(prev => {
-            const newStartTime = { ...prev };
-            delete newStartTime[txHash];
-            return newStartTime;
-          });
-          
-        } else {
-          // Still processing, poll again in 15 seconds
-          const elapsedSeconds = Math.round(elapsedTime / 1000);
-          const remainingSeconds = Math.round((TOTAL_TIMEOUT - elapsedTime) / 1000);
-          console.log(`⏳ Still ${data.status}, polling again in 15s... (elapsed: ${elapsedSeconds}s, remaining: ${remainingSeconds}s)`);
-          setTimeout(poll, POLL_INTERVAL);
-        }
-      } catch (error) {
-        clearInterval(progressInterval);
-        console.error('❌ Polling error:', error);
-        
-        // Mark as failed
-        setWhaleData(prev => {
-          if (!prev) return prev;
-          const updatedWhales = prev.whales.map(w =>
-            w.txHash === txHash
-              ? { ...w, analysisStatus: 'failed' as const }
-              : w
-          );
-          return { ...prev, whales: updatedWhales };
-        });
-        
-        // Clear progress
-        setDeepDiveProgress(prev => {
-          const newProgress = { ...prev };
-          delete newProgress[txHash];
-          return newProgress;
-        });
-        setDeepDiveStartTime(prev => {
-          const newStartTime = { ...prev };
-          delete newStartTime[txHash];
-          return newStartTime;
-        });
-      }
-    };
-    
-    // Start polling
-    poll();
-  };
+
 
   const analyzeTransaction = async (whale: WhaleTransaction, provider: 'caesar' | 'gemini' = 'caesar') => {
     // Guard clause: Prevent execution if any analysis is already in progress
