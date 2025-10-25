@@ -1106,6 +1106,214 @@ h6 {
   text-shadow: 0 0 50px var(--bitcoin-orange-50);
 }
 
+/* ============================================
+   ACCESS GATE STYLING - BITCOIN SOVEREIGN
+   Password Protection & Early Access Forms
+   ============================================ */
+
+/* Access Gate Overlay - Full Screen */
+.access-gate-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--bitcoin-black);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+/* Access Gate Container */
+.access-gate-container {
+  max-width: 600px;
+  width: 100%;
+  background: var(--bitcoin-black);
+  border: 2px solid var(--bitcoin-orange);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 0 40px rgba(247, 147, 26, 0.3);
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Access Gate Header */
+.access-gate-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid var(--bitcoin-orange-20);
+}
+
+.access-gate-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.access-gate-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--bitcoin-white);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.access-gate-subtitle {
+  font-size: 1.125rem;
+  color: var(--bitcoin-orange);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Access Gate Content */
+.access-gate-content {
+  margin-bottom: 2rem;
+}
+
+.access-gate-description {
+  color: var(--bitcoin-white-80);
+  text-align: center;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+/* Access Gate Buttons */
+.access-gate-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Access Gate Form */
+.access-gate-form {
+  width: 100%;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  color: var(--bitcoin-white);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  background: var(--bitcoin-black);
+  border: 2px solid var(--bitcoin-orange-20);
+  border-radius: 8px;
+  padding: 0.875rem 1rem;
+  color: var(--bitcoin-white);
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--bitcoin-orange);
+  box-shadow: 0 0 0 3px rgba(247, 147, 26, 0.2);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: var(--bitcoin-white-60);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+}
+
+.form-error {
+  color: var(--bitcoin-orange);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.form-error::before {
+  content: '⚠';
+  font-size: 1rem;
+}
+
+/* Access Gate Success */
+.access-gate-success {
+  text-align: center;
+  padding: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Access Gate Footer */
+.access-gate-footer {
+  padding-top: 2rem;
+  border-top: 2px solid var(--bitcoin-orange-20);
+}
+
+/* Spinner Animation */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--bitcoin-black);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.spinner-large {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--bitcoin-orange-20);
+  border-top-color: var(--bitcoin-orange);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mobile Optimizations for Access Gate */
+@media (max-width: 768px) {
+  .access-gate-container {
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+  
+  .access-gate-title {
+    font-size: 1.5rem;
+  }
+  
+  .access-gate-subtitle {
+    font-size: 1rem;
+  }
+  
+  .form-input,
+  .form-textarea {
+    font-size: 1rem; /* Prevent iOS zoom */
+  }
+}
+
 /* STAT CARD - BLACK WITH THIN ORANGE BORDER */
 .stat-card {
   /* Black Background */
