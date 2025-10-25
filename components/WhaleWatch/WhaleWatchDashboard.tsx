@@ -812,46 +812,28 @@ export default function WhaleWatchDashboard() {
       
       const data = await response.json();
       
-      // Handle Gemini (instant response) vs Caesar (polling)
-      if (provider === 'gemini') {
-        // Gemini returns analysis immediately
-        if (data.success && data.analysis) {
-          console.log('✅ Gemini analysis completed instantly');
-          if (whaleData) {
-            const updatedWhales = whaleData.whales.map(w =>
-              w.txHash === whale.txHash
-                ? { 
-                    ...w, 
-                    analysis: data.analysis, 
-                    thinking: data.thinking, // Store thinking content
-                    thinkingEnabled: data.metadata?.thinkingEnabled, // Store thinking mode flag
-                    analysisStatus: 'completed' as const 
-                  }
-                : w
-            );
-            setWhaleData({ ...whaleData, whales: updatedWhales });
-          }
+      // Both Gemini and Caesar now use polling pattern
+      if (data.success && data.jobId) {
+        console.log(`✅ ${provider === 'gemini' ? 'Gemini' : 'Caesar'} job created: ${data.jobId}`);
+        
+        // Update whale with job ID (keep analyzing status)
+        if (whaleData) {
+          const updatedWhales = whaleData.whales.map(w =>
+            w.txHash === whale.txHash
+              ? { ...w, analysisJobId: data.jobId, analysisStatus: 'analyzing' as const }
+              : w
+          );
+          setWhaleData({ ...whaleData, whales: updatedWhales });
+        }
+        
+        // Poll for results (same pattern for both providers)
+        if (provider === 'gemini') {
+          pollGeminiAnalysis(whale.txHash, data.jobId);
         } else {
-          throw new Error(data.error || 'Failed to get Gemini analysis');
+          pollAnalysis(whale.txHash, data.jobId);
         }
       } else {
-        // Caesar requires polling
-        if (data.success && data.jobId) {
-          // Update whale with job ID (keep analyzing status)
-          if (whaleData) {
-            const updatedWhales = whaleData.whales.map(w =>
-              w.txHash === whale.txHash
-                ? { ...w, analysisJobId: data.jobId, analysisStatus: 'analyzing' as const }
-                : w
-            );
-            setWhaleData({ ...whaleData, whales: updatedWhales });
-          }
-          
-          // Poll for results
-          pollAnalysis(whale.txHash, data.jobId);
-        } else {
-          throw new Error(data.error || 'Failed to start Caesar analysis');
-        }
+        throw new Error(data.error || `Failed to start ${provider === 'gemini' ? 'Gemini' : 'Caesar'} analysis`);
       }
     } catch (error) {
       console.error('Failed to start analysis:', error);
@@ -869,13 +851,13 @@ export default function WhaleWatchDashboard() {
     }
   };
 
-  const pollAnalysis = async (txHash: string, jobId: string) => {
+  const pollGeminiAnalysis = async (txHash: string, jobId: string) => {
     const maxAttempts = 10; // 10 minutes max (10 attempts × 60 seconds = 600 seconds)
     let attempts = 0;
     
     const poll = async () => {
       if (attempts >= maxAttempts) {
-        console.error('❌ Analysis polling timeout after', attempts, 'attempts');
+        console.error('❌ Gemini analysis polling timeout after', attempts, 'attempts');
         // Mark as failed after timeout
         setWhaleData(prev => {
           if (!prev) return prev;
@@ -890,14 +872,98 @@ export default function WhaleWatchDashboard() {
       }
       attempts++;
       
-      console.log(`📊 Polling attempt ${attempts}/${maxAttempts} for job ${jobId}`);
+      console.log(`📊 Gemini polling attempt ${attempts}/${maxAttempts} for job ${jobId}`);
+      
+      try {
+        const response = await fetch(`/api/whale-watch/gemini-analysis/${jobId}`);
+        
+        if (!response.ok) {
+          console.error(`❌ Gemini polling HTTP error: ${response.status}`);
+          throw new Error(`Gemini polling error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.status === 'completed' && data.analysis) {
+          console.log('✅ Gemini analysis completed');
+          // Update whale with completed analysis
+          setWhaleData(prev => {
+            if (!prev) return prev;
+            const updatedWhales = prev.whales.map(w =>
+              w.txHash === txHash
+                ? { 
+                    ...w, 
+                    analysis: data.analysis,
+                    thinking: data.thinking,
+                    thinkingEnabled: data.metadata?.thinkingEnabled,
+                    metadata: data.metadata,
+                    analysisStatus: 'completed' as const 
+                  }
+                : w
+            );
+            return { ...prev, whales: updatedWhales };
+          });
+          return; // Stop polling
+        }
+        
+        if (data.status === 'failed') {
+          console.error('❌ Gemini analysis failed');
+          setWhaleData(prev => {
+            if (!prev) return prev;
+            const updatedWhales = prev.whales.map(w =>
+              w.txHash === txHash
+                ? { ...w, analysisStatus: 'failed' as const }
+                : w
+            );
+            return { ...prev, whales: updatedWhales };
+          });
+          return; // Stop polling
+        }
+        
+        // Still processing, poll again after 60 seconds
+        console.log(`⏳ Gemini job ${jobId} still ${data.status}, polling again in 60s...`);
+        setTimeout(poll, 60000); // 60 second interval
+        
+      } catch (error) {
+        console.error('❌ Gemini polling error:', error);
+        // Retry after 60 seconds
+        setTimeout(poll, 60000);
+      }
+    };
+    
+    // Start polling
+    poll();
+  };
+
+  const pollAnalysis = async (txHash: string, jobId: string) => {
+    const maxAttempts = 10; // 10 minutes max (10 attempts × 60 seconds = 600 seconds)
+    let attempts = 0;
+    
+    const poll = async () => {
+      if (attempts >= maxAttempts) {
+        console.error('❌ Caesar analysis polling timeout after', attempts, 'attempts');
+        // Mark as failed after timeout
+        setWhaleData(prev => {
+          if (!prev) return prev;
+          const updatedWhales = prev.whales.map(w =>
+            w.txHash === txHash
+              ? { ...w, analysisStatus: 'failed' as const }
+              : w
+          );
+          return { ...prev, whales: updatedWhales };
+        });
+        return;
+      }
+      attempts++;
+      
+      console.log(`📊 Caesar polling attempt ${attempts}/${maxAttempts} for job ${jobId}`);
       
       try {
         const response = await fetch(`/api/whale-watch/analysis/${jobId}`);
         
         if (!response.ok) {
-          console.error(`❌ Polling HTTP error: ${response.status}`);
-          throw new Error(`Polling error: ${response.status}`);
+          console.error(`❌ Caesar polling HTTP error: ${response.status}`);
+          throw new Error(`Caesar polling error: ${response.status}`);
         }
         
         const data = await response.json();

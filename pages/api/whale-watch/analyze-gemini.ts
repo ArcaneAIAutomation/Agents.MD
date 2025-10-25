@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { selectGeminiModel, getModelConfig, getGeminiConfig, type GeminiModel } from '../../../utils/geminiConfig';
+import { createJob } from '../../../utils/geminiJobStore';
+import { processGeminiJob } from '../../../utils/geminiWorker';
 
 /**
  * Gemini API Error Types for Classification
@@ -740,10 +742,45 @@ export default async function handler(
         timestamp: new Date().toISOString(),
       });
     }
-    
-    // Start timing for processing time calculation
-    const startTime = Date.now();
 
+    console.log(`🤖 Creating Gemini AI analysis job for transaction ${whale.txHash}`);
+    console.log(`📋 Whale data:`, JSON.stringify(whale, null, 2));
+    
+    // Create job immediately
+    const job = createJob(whale);
+    console.log(`✅ Job created: ${job.id}`);
+    console.log(`📊 Job status: ${job.status}`);
+    
+    // Start background processing (don't await - let it run async)
+    processGeminiJob(job.id).catch(error => {
+      console.error(`❌ Background job ${job.id} failed:`, error);
+    });
+    
+    // Return job ID immediately for polling (like Caesar)
+    return res.status(200).json({
+      success: true,
+      jobId: job.id,
+      status: job.status,
+      timestamp: new Date().toISOString(),
+    } as any);
+    
+  } catch (error) {
+    console.error('❌ Gemini job creation error:', error);
+    
+    return res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to create analysis job',
+      timestamp: new Date().toISOString(),
+    });
+  }
+}
+
+// Keep the old synchronous handler code below for reference, but it's no longer used
+// The new async pattern is: create job → return job ID → poll for results
+
+/*
+// OLD SYNCHRONOUS CODE (REPLACED WITH ASYNC JOB PATTERN ABOVE)
+async function oldSynchronousHandler() {
     console.log(`🤖 Starting Gemini AI analysis for transaction ${whale.txHash}`);
     console.log(`📋 Whale data:`, JSON.stringify(whale, null, 2));
 

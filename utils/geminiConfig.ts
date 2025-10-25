@@ -178,7 +178,10 @@ export function loadGeminiConfig(): GeminiConfig {
   const enableThinking = getBooleanEnvVar('GEMINI_ENABLE_THINKING', true);
   const proThresholdBTC = getNumericEnvVar('GEMINI_PRO_THRESHOLD_BTC', 100, 1, 10000);
   const maxRetries = getNumericEnvVar('GEMINI_MAX_RETRIES', 2, 0, 5);
-  const timeoutMs = getNumericEnvVar('GEMINI_TIMEOUT_MS', 15000, 1000, 60000);
+  // Note: Actual Gemini response times are 60s (Flash) to 600s (Pro Deep Dive)
+  // But Vercel has 30s limit, so we cap at 28s and will timeout
+  // TODO: Implement async polling for long-running analysis
+  const timeoutMs = getNumericEnvVar('GEMINI_TIMEOUT_MS', 28000, 1000, 60000);
   const maxRequestsPerMinute = getNumericEnvVar('GEMINI_MAX_REQUESTS_PER_MINUTE', 60, 1, 1000);
   
   // Load token limits
