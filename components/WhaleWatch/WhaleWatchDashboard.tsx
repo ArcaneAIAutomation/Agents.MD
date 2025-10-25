@@ -822,9 +822,31 @@ export default function WhaleWatchDashboard() {
       
       const data = await response.json();
       
-      // Both Gemini and Caesar now use polling pattern
-      if (data.success && data.jobId) {
-        console.log(`✅ ${provider === 'gemini' ? 'Gemini' : 'Caesar'} job created: ${data.jobId}`);
+      // GEMINI: Synchronous response (returns analysis immediately)
+      if (provider === 'gemini' && data.success && data.analysis) {
+        console.log(`✅ Gemini analysis completed synchronously`);
+        
+        // Update whale with completed analysis immediately
+        if (whaleData) {
+          const updatedWhales = whaleData.whales.map(w =>
+            w.txHash === whale.txHash
+              ? { 
+                  ...w, 
+                  analysis: data.analysis,
+                  thinking: data.thinking,
+                  thinkingEnabled: data.metadata?.thinkingEnabled,
+                  metadata: data.metadata,
+                  analysisStatus: 'completed' as const,
+                  analysisProvider: provider
+                }
+              : w
+          );
+          setWhaleData({ ...whaleData, whales: updatedWhales });
+        }
+      }
+      // CAESAR: Async response (returns jobId for polling)
+      else if (provider === 'caesar' && data.success && data.jobId) {
+        console.log(`✅ Caesar job created: ${data.jobId}`);
         
         // Update whale with job ID (keep analyzing status)
         if (whaleData) {
@@ -836,12 +858,8 @@ export default function WhaleWatchDashboard() {
           setWhaleData({ ...whaleData, whales: updatedWhales });
         }
         
-        // Poll for results (same pattern for both providers)
-        if (provider === 'gemini') {
-          pollGeminiAnalysis(whale.txHash, data.jobId);
-        } else {
-          pollAnalysis(whale.txHash, data.jobId);
-        }
+        // Poll for Caesar results
+        pollAnalysis(whale.txHash, data.jobId);
       } else {
         throw new Error(data.error || `Failed to start ${provider === 'gemini' ? 'Gemini' : 'Caesar'} analysis`);
       }

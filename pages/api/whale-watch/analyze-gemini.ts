@@ -1,7 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { selectGeminiModel, getModelConfig, getGeminiConfig, type GeminiModel } from '../../../utils/geminiConfig';
-import { createJob } from '../../../utils/geminiJobStore';
-import { processGeminiJob } from '../../../utils/geminiWorker';
 
 /**
  * Gemini API Error Types for Classification
@@ -704,6 +702,118 @@ function detectExchangeAddress(address: string): string | null {
   return null;
 }
 
+/**
+ * Build analysis prompt for Gemini
+ */
+function buildAnalysisPrompt(whale: any, currentBtcPrice: number, currentTransactionValue: number): string {
+  return `You are an expert cryptocurrency market analyst with deep knowledge of Bitcoin whale behavior, market psychology, and on-chain analytics. Conduct a comprehensive analysis of this Bitcoin whale transaction.
+
+**Current Market Context:**
+- Current Bitcoin Price: ${currentBtcPrice.toLocaleString()}
+- Transaction Value at Current Price: ${currentTransactionValue.toLocaleString()}
+- Transaction represents ${((whale.amount / 21000000) * 100).toFixed(4)}% of total Bitcoin supply
+
+**Transaction Details:**
+- Transaction Hash: ${whale.txHash}
+- Amount: ${whale.amount.toFixed(2)} BTC (Original: ${whale.amountUSD.toLocaleString()})
+- From Address: ${whale.fromAddress}
+- To Address: ${whale.toAddress}
+- Timestamp: ${whale.timestamp}
+- Initial Classification: ${whale.type}
+- Description: ${whale.description}
+
+**COMPREHENSIVE ANALYSIS REQUIRED:**
+
+Provide detailed analysis covering transaction patterns, market context, behavioral psychology, price levels, timeframes, risk/reward, and trading intelligence.
+
+**REQUIRED JSON OUTPUT FORMAT:**
+{
+  "transaction_type": "exchange_deposit | exchange_withdrawal | whale_to_whale | unknown",
+  "market_impact": "Bearish | Bullish | Neutral",
+  "confidence": number (0-100),
+  "reasoning": "string (2-3 detailed paragraphs)",
+  "key_findings": ["string", "string", "string", ...],
+  "trader_action": "string (specific actionable recommendation)"
+}`;
+}
+
+/**
+ * Build request body for Gemini API
+ */
+function buildRequestBody(prompt: string, enableThinking: boolean, modelConfig: any): any {
+  return {
+    contents: [{
+      parts: [{ text: prompt }]
+    }],
+    ...(enableThinking && {
+      systemInstruction: {
+        parts: [{
+          text: 'You are an expert cryptocurrency analyst. Show your step-by-step reasoning process before providing your final analysis.'
+        }]
+      }
+    }),
+    generationConfig: {
+      temperature: modelConfig.temperature,
+      topK: modelConfig.topK,
+      topP: modelConfig.topP,
+      maxOutputTokens: modelConfig.maxOutputTokens,
+      candidateCount: 1,
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: "object",
+        properties: {
+          transaction_type: {
+            type: "string",
+            enum: ["exchange_deposit", "exchange_withdrawal", "whale_to_whale", "unknown"]
+          },
+          market_impact: {
+            type: "string",
+            enum: ["Bearish", "Bullish", "Neutral"]
+          },
+          confidence: {
+            type: "number",
+            minimum: 0,
+            maximum: 100
+          },
+          reasoning: {
+            type: "string",
+            minLength: 100
+          },
+          key_findings: {
+            type: "array",
+            items: { type: "string" },
+            minItems: 3,
+            maxItems: 10
+          },
+          trader_action: {
+            type: "string",
+            minLength: 50
+          }
+        },
+        required: ["transaction_type", "market_impact", "confidence", "reasoning", "key_findings", "trader_action"]
+      }
+    },
+    safetySettings: [
+      {
+        category: "HARM_CATEGORY_HARASSMENT",
+        threshold: "BLOCK_ONLY_HIGH"
+      },
+      {
+        category: "HARM_CATEGORY_HATE_SPEECH",
+        threshold: "BLOCK_ONLY_HIGH"
+      },
+      {
+        category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+        threshold: "BLOCK_ONLY_HIGH"
+      },
+      {
+        category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+        threshold: "BLOCK_ONLY_HIGH"
+      }
+    ]
+  };
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<GeminiAnalysisResponse>
@@ -731,6 +841,8 @@ export default async function handler(
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
 
+  const startTime = Date.now();
+
   try {
     const whale: GeminiAnalysisRequest = req.body;
     
@@ -743,33 +855,144 @@ export default async function handler(
       });
     }
 
-    console.log(`🤖 Creating Gemini AI analysis job for transaction ${whale.txHash}`);
+    console.log(`🤖 Starting SYNCHRONOUS Gemini AI analysis for transaction ${whale.txHash}`);
     console.log(`📋 Whale data:`, JSON.stringify(whale, null, 2));
     
-    // Create job immediately
-    const job = createJob(whale);
-    console.log(`✅ Job created: ${job.id}`);
-    console.log(`📊 Job status: ${job.status}`);
+    // Load Gemini configuration
+    const geminiConfig = getGeminiConfig();
     
-    // Start background processing (don't await - let it run async)
-    processGeminiJob(job.id).catch(error => {
-      console.error(`❌ Background job ${job.id} failed:`, error);
-    });
+    // Select appropriate model based on transaction size
+    const selectedModel = selectGeminiModel(whale.amount, whale.modelPreference, geminiConfig);
+    console.log(`🎯 Selected model: ${selectedModel} (transaction: ${whale.amount} BTC)`);
     
-    // Return job ID immediately for polling (like Caesar)
+    // Get model-specific configuration
+    const modelConfig = getModelConfig(selectedModel, geminiConfig);
+    
+    // Fetch current Bitcoin price for market context
+    const currentBtcPrice = await getCurrentBitcoinPrice();
+    console.log(`💰 Current BTC price: ${currentBtcPrice.toLocaleString()}`);
+    
+    // Calculate current transaction value
+    const currentTransactionValue = whale.amount * currentBtcPrice;
+    
+    // Build the analysis prompt
+    const prompt = buildAnalysisPrompt(whale, currentBtcPrice, currentTransactionValue);
+    
+    // Call Gemini API
+    const geminiApiKey = geminiConfig.apiKey;
+    const enableThinking = whale.enableThinking ?? geminiConfig.enableThinking;
+    
+    console.log(`📡 Calling Gemini API: ${selectedModel}`);
+    console.log(`⏱️ Timeout: ${geminiConfig.timeoutMs}ms`);
+    console.log(`🧠 Thinking mode: ${enableThinking ? 'enabled' : 'disabled'}`);
+    
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${geminiApiKey}`;
+    
+    const requestBody = buildRequestBody(prompt, enableThinking, modelConfig);
+    
+    // Make the API call with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), geminiConfig.timeoutMs);
+    
+    let response;
+    try {
+      response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      throw fetchError;
+    }
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ Gemini API error: ${response.status} - ${errorText}`);
+      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+    }
+    
+    const geminiData = await response.json();
+    
+    // Extract response text
+    const responseText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!responseText) {
+      throw new Error('No response text from Gemini API');
+    }
+    
+    console.log(`📝 Response length: ${responseText.length} characters`);
+    
+    // Extract thinking content if enabled
+    let thinkingContent: string | undefined;
+    if (enableThinking) {
+      const jsonStartIndex = responseText.indexOf('{');
+      if (jsonStartIndex > 50) {
+        thinkingContent = responseText.substring(0, jsonStartIndex).trim();
+        console.log(`🧠 Extracted thinking content: ${thinkingContent.length} characters`);
+      }
+    }
+    
+    // Parse JSON response
+    let jsonText = responseText.trim();
+    const jsonStartIndex = jsonText.indexOf('{');
+    const jsonEndIndex = jsonText.lastIndexOf('}');
+    if (jsonStartIndex !== -1 && jsonEndIndex !== -1) {
+      jsonText = jsonText.substring(jsonStartIndex, jsonEndIndex + 1);
+    }
+    
+    const analysis = JSON.parse(jsonText);
+    console.log(`✅ Successfully parsed analysis JSON`);
+    
+    // Validate analysis response
+    const validationErrors = validateAnalysisResponse(analysis);
+    if (validationErrors.length > 0) {
+      console.warn(`⚠️ Analysis validation warnings:`, validationErrors);
+    }
+    
+    // Extract metadata
+    const tokenUsage = geminiData.usageMetadata || {};
+    const finishReason = geminiData.candidates?.[0]?.finishReason || 'UNKNOWN';
+    const safetyRatings = geminiData.candidates?.[0]?.safetyRatings || [];
+    
+    const processingTime = Date.now() - startTime;
+    
+    const metadata = {
+      model: selectedModel,
+      provider: 'Google Gemini',
+      timestamp: new Date().toISOString(),
+      processingTime,
+      thinkingEnabled: enableThinking,
+      tokenUsage: {
+        promptTokens: tokenUsage.promptTokenCount || 0,
+        completionTokens: tokenUsage.candidatesTokenCount || 0,
+        totalTokens: tokenUsage.totalTokenCount || 0,
+      },
+      finishReason,
+      safetyRatings,
+    };
+    
+    console.log(`✅ Analysis completed in ${processingTime}ms`);
+    console.log(`📊 Token usage: ${metadata.tokenUsage.totalTokens} total`);
+    
+    // Return complete analysis immediately (synchronous)
     return res.status(200).json({
       success: true,
-      jobId: job.id,
-      status: job.status,
+      analysis,
+      thinking: thinkingContent,
+      metadata,
       timestamp: new Date().toISOString(),
-    } as any);
+    });
     
   } catch (error) {
-    console.error('❌ Gemini job creation error:', error);
+    const processingTime = Date.now() - startTime;
+    console.error(`❌ Gemini analysis error after ${processingTime}ms:`, error);
     
     return res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to create analysis job',
+      error: error instanceof Error ? error.message : 'Failed to analyze transaction',
       timestamp: new Date().toISOString(),
     });
   }
