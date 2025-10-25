@@ -35,7 +35,8 @@ interface WhaleTransaction {
   analysisProvider?: 'caesar' | 'gemini' | 'gemini-deep-dive';
   thinkingEnabled?: boolean; // Indicates if thinking mode was used
   metadata?: AnalysisMetadata; // Analysis metadata
-  deepDiveStatus?: 'idle' | 'fetching' | 'analyzing' | 'tracing' | 'identifying' | 'generating' | 'completed' | 'failed';
+  deepDiveStatus?: 'idle' | 'analyzing' | 'completed' | 'failed';
+  deepDiveAnalysis?: any; // Deep dive analysis results
   blockchainData?: any; // Blockchain data from Deep Dive
 }
 
@@ -879,6 +880,80 @@ export default function WhaleWatchDashboard() {
     }
   };
 
+  const startDeepDive = async (whale: WhaleTransaction) => {
+    // Guard clause: Prevent execution if any analysis is already in progress
+    if (analyzingTx !== null || whaleData?.whales.some(w => w.analysisStatus === 'analyzing' || w.deepDiveStatus === 'analyzing')) {
+      console.log('⚠️ Analysis already in progress, ignoring Deep Dive request');
+      return;
+    }
+    
+    try {
+      console.log(`🔬 Starting Deep Dive analysis for ${whale.txHash.substring(0, 20)}...`);
+      
+      // Update whale status to analyzing
+      if (whaleData) {
+        const updatedWhales = whaleData.whales.map(w =>
+          w.txHash === whale.txHash
+            ? { ...w, deepDiveStatus: 'analyzing' as const }
+            : w
+        );
+        setWhaleData({ ...whaleData, whales: updatedWhales });
+      }
+      
+      const response = await fetch('/api/whale-watch/deep-dive', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          txHash: whale.txHash,
+          amount: whale.amount,
+          fromAddress: whale.fromAddress,
+          toAddress: whale.toAddress,
+          timestamp: whale.timestamp,
+          initialAnalysis: whale.analysis,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Deep Dive API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.analysis) {
+        console.log(`✅ Deep Dive analysis completed`);
+        
+        // Update whale with deep dive results
+        if (whaleData) {
+          const updatedWhales = whaleData.whales.map(w =>
+            w.txHash === whale.txHash
+              ? { 
+                  ...w, 
+                  deepDiveStatus: 'completed' as const,
+                  deepDiveAnalysis: data.analysis,
+                  blockchainData: data.blockchainData,
+                }
+              : w
+          );
+          setWhaleData({ ...whaleData, whales: updatedWhales });
+        }
+      } else {
+        throw new Error(data.error || 'Deep Dive analysis failed');
+      }
+    } catch (error) {
+      console.error('Failed to start Deep Dive:', error);
+      
+      // Mark as failed
+      if (whaleData) {
+        const updatedWhales = whaleData.whales.map(w =>
+          w.txHash === whale.txHash
+            ? { ...w, deepDiveStatus: 'failed' as const }
+            : w
+        );
+        setWhaleData({ ...whaleData, whales: updatedWhales });
+      }
+    }
+  };
+
   const pollGeminiAnalysis = async (txHash: string, jobId: string) => {
     const maxAttempts = 10; // 10 minutes max (10 attempts × 60 seconds = 600 seconds)
     let attempts = 0;
@@ -1611,6 +1686,173 @@ export default function WhaleWatchDashboard() {
                         </div>
                       )}
                     </div>
+                    
+                        {/* Deep Dive Button - Only show for completed Gemini analyses */}
+                        {whale.analysisProvider === 'gemini' && !whale.deepDiveAnalysis && (
+                          <div className="mt-4 pt-4 border-t border-bitcoin-orange-20">
+                            <button
+                              onClick={() => startDeepDive(whale)}
+                              disabled={isDisabled || whale.deepDiveStatus === 'analyzing'}
+                              className={`w-full btn-bitcoin-primary px-6 py-3 rounded-lg transition-all text-sm uppercase font-bold shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[48px] flex items-center justify-center gap-2 ${
+                                isDisabled || whale.deepDiveStatus === 'analyzing'
+                                  ? 'opacity-50 cursor-not-allowed'
+                                  : ''
+                              }`}
+                              title="Analyze blockchain history of both addresses for deeper insights"
+                            >
+                              <Search className="w-5 h-5" />
+                              <span className="flex flex-col items-start">
+                                <span>🔬 Deep Dive Analysis</span>
+                                <span className="text-xs font-normal opacity-80">Blockchain History + Advanced Intelligence</span>
+                              </span>
+                              {whale.deepDiveStatus === 'analyzing' && <Loader className="w-4 h-4 animate-spin" />}
+                            </button>
+                            <p className="text-xs text-bitcoin-white-60 text-center mt-2">
+                              Analyzes transaction history of both addresses using Gemini 2.5 Pro
+                            </p>
+                          </div>
+                        )}
+                        
+                        {/* Deep Dive Analysis Results */}
+                        {whale.deepDiveAnalysis && (
+                          <div className="mt-4 pt-4 border-t border-bitcoin-orange">
+                            <div className="bg-bitcoin-orange text-bitcoin-black rounded-lg p-4 mb-4">
+                              <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
+                                <Search className="w-5 h-5" />
+                                🔬 Deep Dive Analysis Complete
+                              </h4>
+                              <p className="text-sm opacity-90">
+                                Comprehensive blockchain history analysis with Gemini 2.5 Pro
+                              </p>
+                            </div>
+                            
+                            {/* Address Behavior */}
+                            {whale.deepDiveAnalysis.address_behavior && (
+                              <div className="mb-4 p-4 bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg">
+                                <h5 className="text-bitcoin-white font-bold mb-3 flex items-center gap-2">
+                                  <Activity className="w-5 h-5 text-bitcoin-orange" />
+                                  Address Behavior Analysis
+                                </h5>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div>
+                                    <p className="text-bitcoin-white-60 text-sm uppercase font-semibold mb-1">Source Address</p>
+                                    <p className="text-bitcoin-orange font-bold text-lg mb-2">
+                                      {whale.deepDiveAnalysis.address_behavior.source_classification}
+                                    </p>
+                                    <p className="text-bitcoin-white-80 text-sm">
+                                      {whale.deepDiveAnalysis.address_behavior.source_pattern}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <p className="text-bitcoin-white-60 text-sm uppercase font-semibold mb-1">Destination Address</p>
+                                    <p className="text-bitcoin-orange font-bold text-lg mb-2">
+                                      {whale.deepDiveAnalysis.address_behavior.destination_classification}
+                                    </p>
+                                    <p className="text-bitcoin-white-80 text-sm">
+                                      {whale.deepDiveAnalysis.address_behavior.destination_pattern}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Fund Flow Analysis */}
+                            {whale.deepDiveAnalysis.fund_flow_analysis && (
+                              <div className="mb-4 p-4 bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg">
+                                <h5 className="text-bitcoin-white font-bold mb-3 flex items-center gap-2">
+                                  <TrendingUp className="w-5 h-5 text-bitcoin-orange" />
+                                  Fund Flow Tracing
+                                </h5>
+                                <div className="space-y-3">
+                                  <div>
+                                    <p className="text-bitcoin-white-60 text-sm uppercase font-semibold mb-1">Origin Hypothesis</p>
+                                    <p className="text-bitcoin-white-80 text-sm">{whale.deepDiveAnalysis.fund_flow_analysis.origin_hypothesis}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-bitcoin-white-60 text-sm uppercase font-semibold mb-1">Destination Hypothesis</p>
+                                    <p className="text-bitcoin-white-80 text-sm">{whale.deepDiveAnalysis.fund_flow_analysis.destination_hypothesis}</p>
+                                  </div>
+                                  {whale.deepDiveAnalysis.fund_flow_analysis.mixing_detected && (
+                                    <div className="p-3 bg-bitcoin-orange-10 border border-bitcoin-orange-20 rounded">
+                                      <p className="text-bitcoin-orange font-bold flex items-center gap-2">
+                                        <AlertCircle className="w-4 h-4" />
+                                        ⚠️ Mixing Behavior Detected
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Market Prediction */}
+                            {whale.deepDiveAnalysis.market_prediction && (
+                              <div className="mb-4 p-4 bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg">
+                                <h5 className="text-bitcoin-white font-bold mb-3 flex items-center gap-2">
+                                  <TrendingUp className="w-5 h-5 text-bitcoin-orange" />
+                                  Market Prediction
+                                </h5>
+                                <div className="space-y-3">
+                                  <div>
+                                    <p className="text-bitcoin-white-60 text-sm uppercase font-semibold mb-1">24-Hour Outlook</p>
+                                    <p className="text-bitcoin-white-80 text-sm">{whale.deepDiveAnalysis.market_prediction.short_term_24h}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-bitcoin-white-60 text-sm uppercase font-semibold mb-1">7-Day Outlook</p>
+                                    <p className="text-bitcoin-white-80 text-sm">{whale.deepDiveAnalysis.market_prediction.medium_term_7d}</p>
+                                  </div>
+                                  {whale.deepDiveAnalysis.market_prediction.key_price_levels && (
+                                    <div className="grid grid-cols-2 gap-4 pt-3 border-t border-bitcoin-orange-20">
+                                      <div>
+                                        <p className="text-bitcoin-white-60 text-sm uppercase font-semibold mb-2">Support Levels</p>
+                                        {whale.deepDiveAnalysis.market_prediction.key_price_levels.support.map((level: number, i: number) => (
+                                          <p key={i} className="text-bitcoin-orange font-mono font-bold text-lg">
+                                            ${level.toLocaleString()}
+                                          </p>
+                                        ))}
+                                      </div>
+                                      <div>
+                                        <p className="text-bitcoin-white-60 text-sm uppercase font-semibold mb-2">Resistance Levels</p>
+                                        {whale.deepDiveAnalysis.market_prediction.key_price_levels.resistance.map((level: number, i: number) => (
+                                          <p key={i} className="text-bitcoin-orange font-mono font-bold text-lg">
+                                            ${level.toLocaleString()}
+                                          </p>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Strategic Intelligence */}
+                            {whale.deepDiveAnalysis.strategic_intelligence && (
+                              <div className="p-4 bg-bitcoin-orange text-bitcoin-black rounded-lg">
+                                <h5 className="font-bold mb-3 text-lg">💡 Strategic Intelligence</h5>
+                                <div className="space-y-2 text-sm">
+                                  <div><strong>Intent:</strong> {whale.deepDiveAnalysis.strategic_intelligence.intent}</div>
+                                  <div><strong>Sentiment:</strong> {whale.deepDiveAnalysis.strategic_intelligence.sentiment_indicator}</div>
+                                  <div><strong>Positioning:</strong> {whale.deepDiveAnalysis.strategic_intelligence.trader_positioning}</div>
+                                  <div><strong>Risk/Reward:</strong> {whale.deepDiveAnalysis.strategic_intelligence.risk_reward_ratio}</div>
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Key Insights */}
+                            {whale.deepDiveAnalysis.key_insights && whale.deepDiveAnalysis.key_insights.length > 0 && (
+                              <div className="mt-4 p-4 bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg">
+                                <h5 className="text-bitcoin-white font-bold mb-3">🎯 Key Insights</h5>
+                                <ul className="space-y-2">
+                                  {whale.deepDiveAnalysis.key_insights.map((insight: string, idx: number) => (
+                                    <li key={idx} className="text-bitcoin-white-80 text-sm flex items-start gap-2">
+                                      <span className="text-bitcoin-orange mt-1">•</span>
+                                      <span>{insight}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        )}
                     
                         {/* Display thinking section if available */}
                         {whale.thinking && whale.thinkingEnabled && (
