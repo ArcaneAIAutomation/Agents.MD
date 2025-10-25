@@ -433,16 +433,16 @@ const CryptoHerald: React.FC = () => {
               <div className="bg-bitcoin-black py-4 relative z-10">
                 <div className="text-center">
                   <div className="font-bold text-bitcoin-white mb-3 md:mb-4 text-xs sm:text-sm md:text-base">ADVANCED ANALYTICS:</div>
-                  <div className="text-bitcoin-white-60 flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 text-[10px] sm:text-xs md:text-sm leading-relaxed max-w-4xl mx-auto px-2">
-                    <span className="whitespace-nowrap px-2 py-1">🎯 Order Book</span>
-                    <span className="hidden sm:inline text-bitcoin-orange">•</span>
-                    <span className="whitespace-nowrap px-2 py-1">🐋 Whale Tracking</span>
-                    <span className="hidden sm:inline text-bitcoin-orange">•</span>
-                    <span className="whitespace-nowrap px-2 py-1">😱 Fear & Greed</span>
-                    <span className="hidden sm:inline text-bitcoin-orange">•</span>
-                    <span className="whitespace-nowrap px-2 py-1">🔮 AI Predictions</span>
-                    <span className="hidden sm:inline text-bitcoin-orange">•</span>
-                    <span className="whitespace-nowrap px-2 py-1">📈 Multi-Timeframe TA</span>
+                  <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 max-w-4xl mx-auto px-2">
+                    <span className="feature-badge md:bg-transparent md:border-0 md:text-bitcoin-white-60 md:p-0">🎯 Order Book</span>
+                    <span className="hidden md:inline text-bitcoin-orange">•</span>
+                    <span className="feature-badge md:bg-transparent md:border-0 md:text-bitcoin-white-60 md:p-0">🐋 Whale Tracking</span>
+                    <span className="hidden md:inline text-bitcoin-orange">•</span>
+                    <span className="feature-badge md:bg-transparent md:border-0 md:text-bitcoin-white-60 md:p-0">😱 Fear & Greed</span>
+                    <span className="hidden md:inline text-bitcoin-orange">•</span>
+                    <span className="feature-badge md:bg-transparent md:border-0 md:text-bitcoin-white-60 md:p-0">🔮 AI Predictions</span>
+                    <span className="hidden md:inline text-bitcoin-orange">•</span>
+                    <span className="feature-badge md:bg-transparent md:border-0 md:text-bitcoin-white-60 md:p-0">📈 Multi-Timeframe TA</span>
                   </div>
                 </div>
               </div>
