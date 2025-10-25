@@ -36,6 +36,7 @@ interface WhaleTransaction {
   thinkingEnabled?: boolean; // Indicates if thinking mode was used
   metadata?: AnalysisMetadata; // Analysis metadata
   deepDiveStatus?: 'idle' | 'analyzing' | 'completed' | 'failed';
+  deepDiveProvider?: 'gemini' | 'openai'; // Which AI provider was used for deep dive
   deepDiveAnalysis?: any; // Deep dive analysis results
   blockchainData?: any; // Blockchain data from Deep Dive
 }
@@ -880,7 +881,7 @@ export default function WhaleWatchDashboard() {
     }
   };
 
-  const startDeepDive = async (whale: WhaleTransaction) => {
+  const startDeepDive = async (whale: WhaleTransaction, provider: 'gemini' | 'openai' = 'gemini') => {
     // Guard clause: Prevent execution if any analysis is already in progress
     if (analyzingTx !== null || whaleData?.whales.some(w => w.analysisStatus === 'analyzing' || w.deepDiveStatus === 'analyzing')) {
       console.log('⚠️ Analysis already in progress, ignoring Deep Dive request');
@@ -888,19 +889,23 @@ export default function WhaleWatchDashboard() {
     }
     
     try {
-      console.log(`🔬 Starting Deep Dive analysis for ${whale.txHash.substring(0, 20)}...`);
+      console.log(`🔬 Starting ${provider === 'openai' ? 'OpenAI' : 'Gemini'} Deep Dive for ${whale.txHash.substring(0, 20)}...`);
       
       // Update whale status to analyzing
       if (whaleData) {
         const updatedWhales = whaleData.whales.map(w =>
           w.txHash === whale.txHash
-            ? { ...w, deepDiveStatus: 'analyzing' as const }
+            ? { ...w, deepDiveStatus: 'analyzing' as const, deepDiveProvider: provider }
             : w
         );
         setWhaleData({ ...whaleData, whales: updatedWhales });
       }
       
-      const response = await fetch('/api/whale-watch/deep-dive', {
+      const apiEndpoint = provider === 'openai' 
+        ? '/api/whale-watch/deep-dive-openai'
+        : '/api/whale-watch/deep-dive';
+      
+      const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -920,7 +925,7 @@ export default function WhaleWatchDashboard() {
       const data = await response.json();
       
       if (data.success && data.analysis) {
-        console.log(`✅ Deep Dive analysis completed`);
+        console.log(`✅ ${provider === 'openai' ? 'OpenAI' : 'Gemini'} Deep Dive completed`);
         
         // Update whale with deep dive results
         if (whaleData) {
@@ -929,8 +934,10 @@ export default function WhaleWatchDashboard() {
               ? { 
                   ...w, 
                   deepDiveStatus: 'completed' as const,
+                  deepDiveProvider: provider,
                   deepDiveAnalysis: data.analysis,
                   blockchainData: data.blockchainData,
+                  metadata: data.metadata,
                 }
               : w
           );
@@ -1687,28 +1694,50 @@ export default function WhaleWatchDashboard() {
                       )}
                     </div>
                     
-                        {/* Deep Dive Button - Only show for completed Gemini analyses */}
+                        {/* Deep Dive Buttons - Only show for completed Gemini analyses */}
                         {whale.analysisProvider === 'gemini' && !whale.deepDiveAnalysis && (
                           <div className="mt-4 pt-4 border-t border-bitcoin-orange-20">
-                            <button
-                              onClick={() => startDeepDive(whale)}
-                              disabled={isDisabled || whale.deepDiveStatus === 'analyzing'}
-                              className={`w-full btn-bitcoin-primary px-6 py-3 rounded-lg transition-all text-sm uppercase font-bold shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[48px] flex items-center justify-center gap-2 ${
-                                isDisabled || whale.deepDiveStatus === 'analyzing'
-                                  ? 'opacity-50 cursor-not-allowed'
-                                  : ''
-                              }`}
-                              title="Analyze blockchain history of both addresses for deeper insights"
-                            >
-                              <Search className="w-5 h-5" />
-                              <span className="flex flex-col items-start">
-                                <span>🔬 Deep Dive Analysis</span>
-                                <span className="text-xs font-normal opacity-80">Blockchain History + Advanced Intelligence</span>
-                              </span>
-                              {whale.deepDiveStatus === 'analyzing' && <Loader className="w-4 h-4 animate-spin" />}
-                            </button>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {/* Gemini Deep Dive */}
+                              <button
+                                onClick={() => startDeepDive(whale, 'gemini')}
+                                disabled={isDisabled || whale.deepDiveStatus === 'analyzing'}
+                                className={`btn-bitcoin-primary px-4 py-3 rounded-lg transition-all text-sm uppercase font-bold shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[48px] flex items-center justify-center gap-2 ${
+                                  isDisabled || whale.deepDiveStatus === 'analyzing'
+                                    ? 'opacity-50 cursor-not-allowed'
+                                    : ''
+                                }`}
+                                title="Analyze with Gemini 2.5 Flash"
+                              >
+                                <Search className="w-5 h-5" />
+                                <span className="flex flex-col items-start">
+                                  <span className="text-xs">🔬 Gemini Deep Dive</span>
+                                  <span className="text-[10px] font-normal opacity-80">Fast Analysis</span>
+                                </span>
+                                {whale.deepDiveStatus === 'analyzing' && whale.deepDiveProvider === 'gemini' && <Loader className="w-4 h-4 animate-spin" />}
+                              </button>
+                              
+                              {/* OpenAI Deep Dive */}
+                              <button
+                                onClick={() => startDeepDive(whale, 'openai')}
+                                disabled={isDisabled || whale.deepDiveStatus === 'analyzing'}
+                                className={`btn-bitcoin-secondary px-4 py-3 rounded-lg transition-all text-sm uppercase font-bold shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[48px] flex items-center justify-center gap-2 ${
+                                  isDisabled || whale.deepDiveStatus === 'analyzing'
+                                    ? 'opacity-50 cursor-not-allowed'
+                                    : ''
+                                }`}
+                                title="Analyze with GPT-4o"
+                              >
+                                <Search className="w-5 h-5" />
+                                <span className="flex flex-col items-start">
+                                  <span className="text-xs">🤖 OpenAI Deep Dive</span>
+                                  <span className="text-[10px] font-normal opacity-80">GPT-4o Analysis</span>
+                                </span>
+                                {whale.deepDiveStatus === 'analyzing' && whale.deepDiveProvider === 'openai' && <Loader className="w-4 h-4 animate-spin" />}
+                              </button>
+                            </div>
                             <p className="text-xs text-bitcoin-white-60 text-center mt-2">
-                              Analyzes transaction history of both addresses using Gemini 2.5 Pro
+                              Choose your AI provider for blockchain history analysis
                             </p>
                           </div>
                         )}
@@ -1719,11 +1748,16 @@ export default function WhaleWatchDashboard() {
                             <div className="bg-bitcoin-orange text-bitcoin-black rounded-lg p-4 mb-4">
                               <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
                                 <Search className="w-5 h-5" />
-                                🔬 Deep Dive Analysis Complete
+                                {whale.deepDiveProvider === 'openai' ? '🤖' : '🔬'} Deep Dive Analysis Complete
                               </h4>
                               <p className="text-sm opacity-90">
-                                Comprehensive blockchain history analysis with Gemini 2.5 Pro
+                                Comprehensive blockchain history analysis with {whale.deepDiveProvider === 'openai' ? 'GPT-4o' : 'Gemini 2.5 Flash'}
                               </p>
+                              {whale.metadata?.processingTime && (
+                                <p className="text-xs opacity-75 mt-1">
+                                  Completed in {(whale.metadata.processingTime / 1000).toFixed(1)}s
+                                </p>
+                              )}
                             </div>
                             
                             {/* Address Behavior */}
