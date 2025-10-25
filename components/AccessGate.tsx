@@ -21,13 +21,28 @@ export default function AccessGate({ onAccessGranted }: AccessGateProps) {
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  // Correct access code (stored in environment variable in production)
-  const CORRECT_CODE = process.env.NEXT_PUBLIC_ACCESS_CODE || 'BITCOIN2025';
+  // Valid access codes
+  const VALID_CODES = [
+    'BITCOIN2025', // Default code
+    'BTC-SOVEREIGN-K3QYMQ-01',
+    'BTC-SOVEREIGN-AKCJRG-02',
+    'BTC-SOVEREIGN-LMBLRN-03',
+    'BTC-SOVEREIGN-HZKEI2-04',
+    'BTC-SOVEREIGN-WVL0HN-05',
+    'BTC-SOVEREIGN-48YDHG-06',
+    'BTC-SOVEREIGN-6HSNX0-07',
+    'BTC-SOVEREIGN-N99A5R-08',
+    'BTC-SOVEREIGN-DCO2DG-09',
+    'BTC-SOVEREIGN-BYE9UX-10',
+  ];
 
   const handleCodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (accessCode.trim().toUpperCase() === CORRECT_CODE) {
+    const enteredCode = accessCode.trim().toUpperCase();
+    const isValid = VALID_CODES.some(code => code.toUpperCase() === enteredCode);
+    
+    if (isValid) {
       // Store access in sessionStorage
       sessionStorage.setItem('hasAccess', 'true');
       onAccessGranted();
