@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "validate:gemini": "node scripts/validate-gemini-config.js",
+    "send-access-codes": "node scripts/send-early-access-codes.js",
     "deploy": "pwsh -File deploy.ps1",
     "deploy:unix": "bash deploy.sh",
     "deploy:msg": "pwsh -File deploy.ps1 -CommitMessage",
@@ -21,12 +22,13 @@
     "sync": "pwsh -File sync-quick.ps1"
   },
   "dependencies": {
+    "dotenv": "^16.6.1",
+    "lucide-react": "^0.294.0",
     "next": "14.0.4",
+    "openai": "^4.20.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "recharts": "^2.10.3",
-    "lucide-react": "^0.294.0",
-    "openai": "^4.20.1"
+    "recharts": "^2.10.3"
   },
   "devDependencies": {
     "@types/node": "^20",
