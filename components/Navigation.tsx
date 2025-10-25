@@ -14,7 +14,10 @@ const Navigation = forwardRef<NavigationRef>((props, ref) => {
   // Expose openMenu function to parent components
   useImperativeHandle(ref, () => ({
     openMenu: () => {
-      setIsMenuOpen(true);
+      // Only open menu on mobile/tablet (< 1024px)
+      if (window.innerWidth < 1024) {
+        setIsMenuOpen(true);
+      }
     }
   }));
 
@@ -31,9 +34,28 @@ const Navigation = forwardRef<NavigationRef>((props, ref) => {
     };
   }, [router]);
 
-  // Prevent body scroll when menu is open
+  // Close menu on window resize to desktop
   useEffect(() => {
-    if (isMenuOpen) {
+    const handleResize = () => {
+      // Close menu if resized to desktop (>= 1024px)
+      if (window.innerWidth >= 1024 && isMenuOpen) {
+        setIsMenuOpen(false);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [isMenuOpen]);
+
+  // Prevent body scroll when menu is open (mobile/tablet only)
+  useEffect(() => {
+    // Only apply overflow lock on mobile/tablet (< 1024px)
+    const isMobileOrTablet = window.innerWidth < 1024;
+    
+    if (isMenuOpen && isMobileOrTablet) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
