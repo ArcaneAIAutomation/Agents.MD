@@ -118,7 +118,7 @@ ${accessCodes.map((code, index) => `${index + 1}. ${code}`).join('\n')}
 HOW TO ACCESS THE PLATFORM
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1. Visit: https://agents-md.vercel.app
+1. Visit: https://news.arcane.group
 2. Click "Enter Access Code"
 3. Enter any of your access codes above
 4. Enjoy full access to all features

@@ -9,6 +9,7 @@
     "lint": "next lint",
     "validate:gemini": "node scripts/validate-gemini-config.js",
     "send-access-codes": "node scripts/send-early-access-codes.js",
+    "send-platform-update": "node scripts/send-platform-update.js",
     "deploy": "pwsh -File deploy.ps1",
     "deploy:unix": "bash deploy.sh",
     "deploy:msg": "pwsh -File deploy.ps1 -CommitMessage",

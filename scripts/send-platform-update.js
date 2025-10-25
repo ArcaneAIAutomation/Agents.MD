@@ -1,39 +1,21 @@
 /**
- * Send Early Access Codes via Office 365
+ * Send Platform URL Update Notification
  * 
- * This script generates unique access codes and sends professional
- * welcome emails to approved early access users.
+ * Notifies users about the new platform URL: https://news.arcane.group
+ * 
+ * Usage: node scripts/send-platform-update.js
  */
 
-interface AzureTokenResponse {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
-}
-
-// Generate unique access codes
-function generateAccessCodes(count: number): string[] {
-  const codes: string[] = [];
-  const prefix = 'BTC-SOVEREIGN-';
-  
-  for (let i = 1; i <= count; i++) {
-    // Generate random alphanumeric string
-    const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const code = `${prefix}${randomPart}-${i.toString().padStart(2, '0')}`;
-    codes.push(code);
-  }
-  
-  return codes;
-}
+require('dotenv').config({ path: '.env.local' });
 
 // Get Azure AD access token
-async function getAzureAccessToken(): Promise<string> {
+async function getAzureAccessToken() {
   const tenantId = process.env.AZURE_TENANT_ID;
   const clientId = process.env.AZURE_CLIENT_ID;
   const clientSecret = process.env.AZURE_CLIENT_SECRET;
 
   if (!tenantId || !clientId || !clientSecret) {
-    throw new Error('Azure credentials not configured');
+    throw new Error('Azure credentials not configured in .env.local');
   }
 
   const tokenEndpoint = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`;
@@ -58,18 +40,12 @@ async function getAzureAccessToken(): Promise<string> {
     throw new Error(`Failed to get Azure access token: ${error}`);
   }
 
-  const data: AzureTokenResponse = await response.json();
+  const data = await response.json();
   return data.access_token;
 }
 
 // Send email via Microsoft Graph API
-async function sendEmailViaGraph(
-  accessToken: string,
-  from: string,
-  to: string,
-  subject: string,
-  body: string
-): Promise<void> {
+async function sendEmailViaGraph(accessToken, from, to, subject, body) {
   const graphEndpoint = `https://graph.microsoft.com/v1.0/users/${from}/sendMail`;
   
   const message = {
@@ -105,25 +81,42 @@ async function sendEmailViaGraph(
   }
 }
 
-// Create professional welcome email
-function createWelcomeEmail(recipientName: string, accessCodes: string[]): string {
+// Create platform update email
+function createUpdateEmail(recipientName) {
   return `
 Dear ${recipientName},
 
-Congratulations! Your application for early access to Bitcoin Sovereign Technology has been approved.
-
-We're excited to welcome you to our exclusive early access program. As a valued early adopter, you'll be among the first to experience our advanced cryptocurrency trading intelligence platform.
+We're writing to inform you of an important update to Bitcoin Sovereign Technology.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-YOUR EARLY ACCESS CODES
+PLATFORM URL UPDATE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-You have been granted ${accessCodes.length} unique access codes. Each code can be used to grant access to the platform:
+The platform has moved to a new, dedicated domain:
 
-${accessCodes.map((code, index) => `${index + 1}. ${code}`).join('\n')}
+🌐 NEW URL: https://news.arcane.group
+
+Please update your bookmarks and use this URL going forward.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-HOW TO ACCESS THE PLATFORM
+YOUR ACCESS CODES (UNCHANGED)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Your early access codes remain the same and will work on the new domain:
+
+1. BTC-SOVEREIGN-K3QYMQ-01
+2. BTC-SOVEREIGN-AKCJRG-02
+3. BTC-SOVEREIGN-LMBLRN-03
+4. BTC-SOVEREIGN-HZKEI2-04
+5. BTC-SOVEREIGN-WVL0HN-05
+6. BTC-SOVEREIGN-48YDHG-06
+7. BTC-SOVEREIGN-6HSNX0-07
+8. BTC-SOVEREIGN-N99A5R-08
+9. BTC-SOVEREIGN-DCO2DG-09
+10. BTC-SOVEREIGN-BYE9UX-10
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HOW TO ACCESS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 1. Visit: https://news.arcane.group
@@ -132,37 +125,43 @@ HOW TO ACCESS THE PLATFORM
 4. Enjoy full access to all features
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-PLATFORM FEATURES
+WHAT'S NEW
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✓ Crypto News Wire - Real-time cryptocurrency news aggregation
-✓ AI Trade Generation Engine - GPT-4o powered trading signals
+✓ Dedicated domain for better branding
+✓ Improved performance and reliability
+✓ Same great features you know and love
+✓ All your access codes continue to work
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PLATFORM FEATURES (UNCHANGED)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Crypto News Wire - Real-time cryptocurrency news
+✓ AI Trade Generation Engine - GPT-4o powered signals
 ✓ Bitcoin Market Report - Comprehensive BTC analysis
-✓ Ethereum Market Report - Smart contract platform insights
-✓ Bitcoin Whale Watch - Track large BTC transactions with Caesar AI
-✓ Regulatory Watch - Monitor crypto regulatory developments
+✓ Ethereum Market Report - Smart contract insights
+✓ Bitcoin Whale Watch - Track large transactions
+✓ Regulatory Watch - Monitor regulatory developments
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 IMPORTANT NOTES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-• Access codes are case-insensitive
-• Each code can be used multiple times
-• Share codes with trusted colleagues if desired
-• Access persists during your browser session
-• Platform is optimized for mobile and desktop
+• The old URL (agents-md.vercel.app) will redirect to the new domain
+• Your access codes remain valid and unchanged
+• No action required except updating your bookmarks
+• All features and functionality remain the same
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SUPPORT & FEEDBACK
+SUPPORT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-We value your feedback as an early access user. If you encounter any issues or have suggestions for improvement, please don't hesitate to reach out.
+If you have any questions or encounter any issues with the new domain, please don't hesitate to reach out.
 
-Your insights will help shape the future of Bitcoin Sovereign Technology.
+Thank you for being part of our early access program!
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Thank you for being part of our early access program. We look forward to your feedback and hope you find the platform valuable for your cryptocurrency trading and analysis needs.
 
 Best regards,
 
@@ -178,16 +177,7 @@ For support, please contact: support@arcane.group
 // Main execution
 async function main() {
   try {
-    console.log('🔐 Generating Early Access Codes...\n');
-    
-    // Generate 10 unique access codes
-    const accessCodes = generateAccessCodes(10);
-    
-    console.log('Generated Access Codes:');
-    accessCodes.forEach((code, index) => {
-      console.log(`${index + 1}. ${code}`);
-    });
-    console.log('');
+    console.log('📧 Sending Platform URL Update Notifications...\n');
     
     // Get Azure access token
     console.log('🔑 Authenticating with Azure AD...');
@@ -203,33 +193,36 @@ async function main() {
     
     // Send emails to each recipient
     for (const recipient of recipients) {
-      console.log(`📧 Sending welcome email to ${recipient.email}...`);
+      console.log(`📧 Sending update notification to ${recipient.email}...`);
       
-      const emailBody = createWelcomeEmail(recipient.name, accessCodes);
+      const emailBody = createUpdateEmail(recipient.name);
       
       await sendEmailViaGraph(
         accessToken,
         fromEmail,
         recipient.email,
-        'Welcome to Bitcoin Sovereign Technology - Early Access Approved',
+        'Important: Bitcoin Sovereign Technology - New Platform URL',
         emailBody
       );
       
       console.log(`✅ Email sent successfully to ${recipient.email}\n`);
+      
+      // Small delay between emails to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
     
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('✅ ALL EMAILS SENT SUCCESSFULLY');
+    console.log('✅ ALL UPDATE NOTIFICATIONS SENT SUCCESSFULLY');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('');
     console.log('Summary:');
-    console.log(`• Generated: ${accessCodes.length} access codes`);
-    console.log(`• Sent to: ${recipients.length} recipients`);
+    console.log(`• New URL: https://news.arcane.group`);
+    console.log(`• Notified: ${recipients.length} recipients`);
     console.log(`• Status: Complete`);
     console.log('');
     
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('❌ Error:', error.message);
     process.exit(1);
   }
 }

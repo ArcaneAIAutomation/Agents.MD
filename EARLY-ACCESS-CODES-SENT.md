@@ -47,7 +47,7 @@
 ## How to Use Access Codes
 
 ### For Recipients
-1. Visit: https://agents-md.vercel.app
+1. Visit: https://news.arcane.group
 2. Click "Enter Access Code"
 3. Enter any of the codes above
 4. Enjoy full access to all features
