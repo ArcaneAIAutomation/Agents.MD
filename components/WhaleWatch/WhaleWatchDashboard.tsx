@@ -67,9 +67,19 @@ export default function WhaleWatchDashboard() {
       ? 'Gemini 2.5 Pro' 
       : model.includes('gemini-2.5-flash')
       ? 'Gemini 2.5 Flash'
+      : model.includes('gemini-exp')
+      ? 'Gemini Experimental'
       : model.includes('gemini')
       ? 'Gemini AI'
-      : 'Caesar AI';
+      : model.includes('gpt-4')
+      ? 'GPT-4'
+      : model.includes('gpt-3.5')
+      ? 'GPT-3.5'
+      : model.includes('claude')
+      ? 'Claude AI'
+      : model.includes('caesar')
+      ? 'Caesar AI'
+      : 'AI Analysis';
     
     return (
       <div className="flex items-center gap-2 flex-wrap">
@@ -1391,7 +1401,11 @@ export default function WhaleWatchDashboard() {
                         <div className="flex items-center">
                           <RefreshCw className="h-5 w-5 text-bitcoin-orange animate-spin mr-2" />
                           <span className="text-bitcoin-white font-medium">
-                            {whale.analysisProvider === 'gemini' ? '⚡ Gemini 2.5 Flash is analyzing...' : '🤖 Caesar AI is researching...'}
+                            {whale.analysisProvider === 'gemini' 
+                              ? '⚡ Gemini 2.5 Flash is analyzing...' 
+                              : whale.analysisProvider === 'caesar'
+                              ? '🤖 Caesar AI is researching...'
+                              : '🤖 AI Analysis in progress...'}
                           </span>
                         </div>
                         {whale.analysisProvider === 'gemini' ? (
@@ -1403,13 +1417,22 @@ export default function WhaleWatchDashboard() {
                               Gemini 2.5 Flash • Advanced reasoning • Typically completes in 2-5 seconds
                             </p>
                           </>
-                        ) : (
+                        ) : whale.analysisProvider === 'caesar' ? (
                           <>
                             <p className="text-bitcoin-white-80 text-sm text-center">
                               This typically takes 5-7 minutes with deep research (max 10 minutes)
                             </p>
                             <p className="text-bitcoin-white-60 text-xs text-center">
                               Checking status every 60 seconds • Analyzing market data, news, and historical patterns
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-bitcoin-white-80 text-sm text-center">
+                              AI-powered analysis in progress
+                            </p>
+                            <p className="text-bitcoin-white-60 text-xs text-center">
+                              Processing transaction data and market context
                             </p>
                           </>
                         )}
@@ -1500,6 +1523,11 @@ export default function WhaleWatchDashboard() {
                             {whale.analysisProvider === 'caesar' && (
                               <p className="text-xs text-bitcoin-white-60 font-mono">
                                 Caesar AI • Deep Research • Web Sources
+                              </p>
+                            )}
+                            {!whale.analysisProvider && whale.metadata?.provider && (
+                              <p className="text-xs text-bitcoin-white-60 font-mono">
+                                {whale.metadata.provider} • {whale.metadata.model || 'AI Analysis'}
                               </p>
                             )}
                             
