@@ -214,9 +214,13 @@ export default async function handler(
   const startTime = Date.now();
 
   try {
+    console.log(`🔬 Deep Dive API called`);
+    console.log(`📋 Request body:`, JSON.stringify(req.body).substring(0, 200));
+    
     const whale: DeepDiveRequest = req.body;
 
     if (!whale.txHash || !whale.fromAddress || !whale.toAddress) {
+      console.error(`❌ Missing required fields`);
       return res.status(400).json({
         success: false,
         error: 'Missing required fields: txHash, fromAddress, toAddress',
@@ -226,6 +230,8 @@ export default async function handler(
 
     console.log(`🔬 Starting Deep Dive analysis for ${whale.txHash.substring(0, 20)}...`);
     console.log(`⏱️ Start time: ${new Date().toISOString()}`);
+    console.log(`📍 From: ${whale.fromAddress.substring(0, 20)}...`);
+    console.log(`📍 To: ${whale.toAddress.substring(0, 20)}...`);
 
     // Fetch REAL blockchain data (REQUIRED - no fallbacks)
     console.log(`📡 Fetching real blockchain data from blockchain.info...`);
@@ -278,20 +284,49 @@ export default async function handler(
     }
 
     // Get current BTC price
-    const currentBtcPrice = await getCurrentBitcoinPrice();
+    console.log(`💰 Fetching current BTC price...`);
+    let currentBtcPrice: number;
+    try {
+      currentBtcPrice = await getCurrentBitcoinPrice();
+      console.log(`✅ BTC price: $${currentBtcPrice.toLocaleString()}`);
+    } catch (error) {
+      console.error(`❌ Failed to get BTC price:`, error);
+      throw new Error(`Failed to get current BTC price: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
 
-    // Load Gemini configuration (use Flash for speed - still very capable)
-    const geminiConfig = getGeminiConfig();
-    const selectedModel = 'gemini-2.5-flash'; // Use Flash for speed (2-5s vs 10-15s for Pro)
-    const modelConfig = getModelConfig(selectedModel, geminiConfig);
+    // Load Gemini configuration
+    console.log(`⚙️ Loading Gemini configuration...`);
+    let geminiConfig: any;
+    let selectedModel: string;
+    let modelConfig: any;
+    
+    try {
+      geminiConfig = getGeminiConfig();
+      selectedModel = 'gemini-2.5-flash';
+      modelConfig = getModelConfig(selectedModel, geminiConfig);
+      console.log(`✅ Gemini config loaded, using ${selectedModel}`);
+    } catch (error) {
+      console.error(`❌ Failed to load Gemini config:`, error);
+      throw new Error(`Gemini configuration error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
 
-    console.log(`🎯 Using ${selectedModel} for deep analysis (optimized for speed)`);
-
-    // Build deep dive prompt with REAL blockchain data
-    const prompt = buildDeepDivePrompt(whale, fromAddressData, toAddressData, currentBtcPrice);
+    // Build deep dive prompt
+    console.log(`📝 Building analysis prompt...`);
+    let prompt: string;
+    try {
+      prompt = buildDeepDivePrompt(whale, fromAddressData, toAddressData, currentBtcPrice);
+      console.log(`✅ Prompt built, length: ${prompt.length} characters`);
+    } catch (error) {
+      console.error(`❌ Failed to build prompt:`, error);
+      throw new Error(`Prompt building error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
 
     // Call Gemini API
     const geminiApiKey = geminiConfig.apiKey;
+    if (!geminiApiKey) {
+      throw new Error('GEMINI_API_KEY not configured');
+    }
+    
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${geminiApiKey}`;
 
     const requestBody = {
@@ -302,7 +337,7 @@ export default async function handler(
         temperature: 0.7,
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 4096, // Reduced from 32768 for faster response
+        maxOutputTokens: 4096,
         responseMimeType: "application/json",
       },
     };
@@ -311,7 +346,7 @@ export default async function handler(
     const geminiStart = Date.now();
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout (tighter)
+    const timeoutId = setTimeout(() => controller.abort(), 20000);
 
     let response;
     try {
@@ -325,7 +360,7 @@ export default async function handler(
       clearTimeout(timeoutId);
       
       const geminiTime = Date.now() - geminiStart;
-      console.log(`✅ Gemini API responded in ${geminiTime}ms`);
+      console.log(`✅ Gemini API responded in ${geminiTime}ms with status ${response.status}`);
     } catch (fetchError) {
       clearTimeout(timeoutId);
       const geminiTime = Date.now() - geminiStart;
@@ -335,22 +370,38 @@ export default async function handler(
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`❌ Gemini API error: ${response.status} - ${errorText}`);
-      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+      console.error(`❌ Gemini API error: ${response.status} - ${errorText.substring(0, 200)}`);
+      throw new Error(`Gemini API error: ${response.status}`);
     }
 
-    const geminiData = await response.json();
-    const responseText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+    console.log(`📥 Parsing Gemini response...`);
+    let geminiData: any;
+    try {
+      geminiData = await response.json();
+      console.log(`✅ Response parsed successfully`);
+    } catch (error) {
+      console.error(`❌ Failed to parse Gemini response:`, error);
+      throw new Error(`Failed to parse Gemini response`);
+    }
 
+    const responseText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!responseText) {
+      console.error(`❌ No response text in Gemini data`);
       throw new Error('No response from Gemini API');
     }
 
-    // Parse JSON response
-    const analysis = JSON.parse(responseText);
+    console.log(`📊 Parsing analysis JSON...`);
+    let analysis: any;
+    try {
+      analysis = JSON.parse(responseText);
+      console.log(`✅ Analysis parsed successfully`);
+    } catch (error) {
+      console.error(`❌ Failed to parse analysis JSON:`, error);
+      console.error(`Response text:`, responseText.substring(0, 200));
+      throw new Error(`Failed to parse analysis JSON`);
+    }
 
     const processingTime = Date.now() - startTime;
-
     console.log(`✅ Deep Dive analysis completed in ${processingTime}ms`);
 
     return res.status(200).json({
