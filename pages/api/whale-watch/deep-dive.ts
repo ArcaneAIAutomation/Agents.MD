@@ -29,47 +29,62 @@ interface DeepDiveResponse {
 /**
  * Fetch transaction history for an address using blockchain.info API
  */
-async function fetchAddressHistory(address: string, limit: number = 10): Promise<any> {
+async function fetchAddressHistory(address: string, limit: number = 5): Promise<any> {
   try {
     console.log(`📡 Fetching transaction history for ${address.substring(0, 20)}...`);
     
-    // Use blockchain.info API (no auth required)
+    // Use blockchain.info API with shorter timeout
     const response = await fetch(
       `https://blockchain.info/rawaddr/${address}?limit=${limit}`,
-      { signal: AbortSignal.timeout(10000) }
+      { signal: AbortSignal.timeout(5000) } // Reduced to 5 seconds
     );
     
     if (!response.ok) {
-      throw new Error(`Blockchain API error: ${response.status}`);
+      console.warn(`⚠️ Blockchain API returned ${response.status}, using fallback data`);
+      // Return minimal data instead of failing
+      return {
+        address: address.substring(0, 20) + '...',
+        totalReceived: 0,
+        totalSent: 0,
+        finalBalance: 0,
+        transactionCount: 0,
+        recentTransactions: [],
+        dataAvailable: false,
+      };
     }
     
     const data = await response.json();
     
-    // Extract relevant transaction data
+    // Extract relevant transaction data (simplified)
     const transactions = (data.txs || []).slice(0, limit).map((tx: any) => ({
-      hash: tx.hash,
+      hash: tx.hash?.substring(0, 16) + '...',
       time: new Date(tx.time * 1000).toISOString(),
-      size: tx.size,
       inputs: tx.inputs?.length || 0,
       outputs: tx.out?.length || 0,
-      totalInput: tx.inputs?.reduce((sum: number, input: any) => sum + (input.prev_out?.value || 0), 0) / 100000000,
-      totalOutput: tx.out?.reduce((sum: number, output: any) => sum + (output.value || 0), 0) / 100000000,
+      totalBTC: (tx.out?.reduce((sum: number, output: any) => sum + (output.value || 0), 0) / 100000000).toFixed(2),
     }));
     
     return {
       address: address.substring(0, 20) + '...',
-      totalReceived: (data.total_received || 0) / 100000000,
-      totalSent: (data.total_sent || 0) / 100000000,
-      finalBalance: (data.final_balance || 0) / 100000000,
+      totalReceived: ((data.total_received || 0) / 100000000).toFixed(2),
+      totalSent: ((data.total_sent || 0) / 100000000).toFixed(2),
+      finalBalance: ((data.final_balance || 0) / 100000000).toFixed(2),
       transactionCount: data.n_tx || 0,
       recentTransactions: transactions,
+      dataAvailable: true,
     };
   } catch (error) {
     console.error(`❌ Failed to fetch address history:`, error);
+    // Return fallback data instead of failing
     return {
       address: address.substring(0, 20) + '...',
-      error: error instanceof Error ? error.message : 'Failed to fetch data',
+      totalReceived: 'N/A',
+      totalSent: 'N/A',
+      finalBalance: 'N/A',
+      transactionCount: 0,
       recentTransactions: [],
+      dataAvailable: false,
+      error: error instanceof Error ? error.message : 'Timeout',
     };
   }
 }
@@ -99,40 +114,12 @@ ${JSON.stringify(toAddressData, null, 2)}
 
 **DEEP DIVE ANALYSIS REQUIREMENTS:**
 
-1. **Address Behavior Patterns:**
-   - Analyze transaction frequency and patterns for both addresses
-   - Identify accumulation vs distribution behavior
-   - Detect mixing or tumbling patterns
-   - Classify address types (exchange, whale, institutional, retail)
-   - Calculate velocity of funds (how quickly BTC moves)
+Analyze the blockchain data and provide:
 
-2. **Fund Flow Tracing:**
-   - Trace the origin of funds (where did the BTC come from?)
-   - Predict destination strategy (where is the BTC going?)
-   - Identify intermediate hops or layering
-   - Detect potential exchange deposits/withdrawals
-   - Map the broader transaction cluster
-
-3. **Historical Context:**
-   - Compare current transaction to address's historical patterns
-   - Identify anomalies or unusual behavior
-   - Calculate 30-day volume trends
-   - Analyze timing patterns (time of day, day of week)
-   - Detect correlation with market events
-
-4. **Market Intelligence:**
-   - Predict short-term price impact (24-48 hours)
-   - Predict medium-term trend (1-2 weeks)
-   - Identify key support/resistance levels
-   - Calculate probability of further large movements
-   - Assess market sentiment implications
-
-5. **Strategic Intelligence:**
-   - Determine likely intent behind the transaction
-   - Assess sophistication level of the actors
-   - Identify potential market manipulation signals
-   - Evaluate risk/reward for traders
-   - Provide actionable trading recommendations
+1. **Address Behavior:** Classify both addresses (exchange/whale/institutional) and identify patterns
+2. **Fund Flow:** Trace origin and destination, detect mixing behavior
+3. **Market Impact:** Predict 24h and 7-day price movements with specific levels
+4. **Strategic Intelligence:** Intent, sentiment, and trading recommendations
 
 **REQUIRED JSON OUTPUT:**
 {
@@ -213,16 +200,21 @@ export default async function handler(
     }
 
     console.log(`🔬 Starting Deep Dive analysis for ${whale.txHash.substring(0, 20)}...`);
+    console.log(`⏱️ Start time: ${new Date().toISOString()}`);
 
-    // Fetch blockchain data for both addresses (parallel)
+    // Fetch blockchain data for both addresses (parallel, reduced to 5 txs each)
+    console.log(`📡 Fetching blockchain data...`);
+    const blockchainStart = Date.now();
+    
     const [fromAddressData, toAddressData] = await Promise.all([
-      fetchAddressHistory(whale.fromAddress, 10),
-      fetchAddressHistory(whale.toAddress, 10),
+      fetchAddressHistory(whale.fromAddress, 5),
+      fetchAddressHistory(whale.toAddress, 5),
     ]);
 
-    console.log(`✅ Blockchain data fetched`);
-    console.log(`📊 Source: ${fromAddressData.transactionCount} total txs, ${fromAddressData.recentTransactions.length} recent`);
-    console.log(`📊 Destination: ${toAddressData.transactionCount} total txs, ${toAddressData.recentTransactions.length} recent`);
+    const blockchainTime = Date.now() - blockchainStart;
+    console.log(`✅ Blockchain data fetched in ${blockchainTime}ms`);
+    console.log(`📊 Source: ${fromAddressData.transactionCount} total txs, ${fromAddressData.recentTransactions.length} recent, available: ${fromAddressData.dataAvailable}`);
+    console.log(`📊 Destination: ${toAddressData.transactionCount} total txs, ${toAddressData.recentTransactions.length} recent, available: ${toAddressData.dataAvailable}`);
 
     // Get current BTC price
     const currentBtcPrice = await getCurrentBitcoinPrice();
@@ -246,30 +238,43 @@ export default async function handler(
         parts: [{ text: prompt }]
       }],
       generationConfig: {
-        temperature: modelConfig.temperature,
-        topK: modelConfig.topK,
-        topP: modelConfig.topP,
-        maxOutputTokens: modelConfig.maxOutputTokens,
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 4096, // Reduced from 32768 for faster response
         responseMimeType: "application/json",
       },
     };
 
     console.log(`📡 Calling Gemini API...`);
+    const geminiStart = Date.now();
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout (tighter)
 
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
+    let response;
+    try {
+      response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      const geminiTime = Date.now() - geminiStart;
+      console.log(`✅ Gemini API responded in ${geminiTime}ms`);
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      const geminiTime = Date.now() - geminiStart;
+      console.error(`❌ Gemini API fetch failed after ${geminiTime}ms:`, fetchError);
+      throw new Error(`Gemini API timeout after ${geminiTime}ms`);
+    }
 
     if (!response.ok) {
       const errorText = await response.text();
+      console.error(`❌ Gemini API error: ${response.status} - ${errorText}`);
       throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
     }
 
