@@ -27,90 +27,82 @@ interface DeepDiveResponse {
 }
 
 /**
- * Fetch transaction history for an address using blockchain.info API
+ * Fetch REAL transaction history for an address using blockchain.info API
+ * Returns real data or throws error - NO FALLBACKS
  */
-async function fetchAddressHistory(address: string, limit: number = 5): Promise<any> {
-  try {
-    console.log(`📡 Fetching transaction history for ${address.substring(0, 20)}...`);
-    
-    // Use blockchain.info API with shorter timeout
-    const response = await fetch(
-      `https://blockchain.info/rawaddr/${address}?limit=${limit}`,
-      { signal: AbortSignal.timeout(5000) } // Reduced to 5 seconds
-    );
-    
-    if (!response.ok) {
-      console.warn(`⚠️ Blockchain API returned ${response.status}, using fallback data`);
-      // Return minimal data instead of failing
-      return {
-        address: address.substring(0, 20) + '...',
-        totalReceived: 0,
-        totalSent: 0,
-        finalBalance: 0,
-        transactionCount: 0,
-        recentTransactions: [],
-        dataAvailable: false,
-      };
-    }
-    
-    const data = await response.json();
-    
-    // Extract relevant transaction data (simplified)
-    const transactions = (data.txs || []).slice(0, limit).map((tx: any) => ({
-      hash: tx.hash?.substring(0, 16) + '...',
-      time: new Date(tx.time * 1000).toISOString(),
-      inputs: tx.inputs?.length || 0,
-      outputs: tx.out?.length || 0,
-      totalBTC: (tx.out?.reduce((sum: number, output: any) => sum + (output.value || 0), 0) / 100000000).toFixed(2),
-    }));
-    
+async function fetchAddressHistory(address: string, limit: number = 3): Promise<any> {
+  console.log(`📡 Fetching REAL transaction history for ${address.substring(0, 20)}...`);
+  
+  // Use blockchain.info API with 5-second timeout
+  const response = await fetch(
+    `https://blockchain.info/rawaddr/${address}?limit=${limit}`,
+    { signal: AbortSignal.timeout(5000) }
+  );
+  
+  if (!response.ok) {
+    console.error(`❌ Blockchain API returned ${response.status}`);
+    // Return structure indicating no data available
     return {
       address: address.substring(0, 20) + '...',
-      totalReceived: ((data.total_received || 0) / 100000000).toFixed(2),
-      totalSent: ((data.total_sent || 0) / 100000000).toFixed(2),
-      finalBalance: ((data.final_balance || 0) / 100000000).toFixed(2),
-      transactionCount: data.n_tx || 0,
-      recentTransactions: transactions,
-      dataAvailable: true,
-    };
-  } catch (error) {
-    console.error(`❌ Failed to fetch address history:`, error);
-    // Return fallback data instead of failing
-    return {
-      address: address.substring(0, 20) + '...',
-      totalReceived: 'N/A',
-      totalSent: 'N/A',
-      finalBalance: 'N/A',
+      totalReceived: 0,
+      totalSent: 0,
+      finalBalance: 0,
       transactionCount: 0,
       recentTransactions: [],
       dataAvailable: false,
-      error: error instanceof Error ? error.message : 'Timeout',
+      error: `API returned ${response.status}`,
     };
   }
+  
+  const data = await response.json();
+  
+  // Verify we got real data
+  if (!data || !data.txs || data.txs.length === 0) {
+    console.warn(`⚠️ No transaction data returned for address`);
+    return {
+      address: address.substring(0, 20) + '...',
+      totalReceived: ((data?.total_received || 0) / 100000000).toFixed(2),
+      totalSent: ((data?.total_sent || 0) / 100000000).toFixed(2),
+      finalBalance: ((data?.final_balance || 0) / 100000000).toFixed(2),
+      transactionCount: data?.n_tx || 0,
+      recentTransactions: [],
+      dataAvailable: false,
+      error: 'No transactions found',
+    };
+  }
+  
+  // Extract REAL transaction data
+  const transactions = data.txs.slice(0, limit).map((tx: any) => ({
+    hash: tx.hash?.substring(0, 16) + '...',
+    time: new Date(tx.time * 1000).toISOString(),
+    inputs: tx.inputs?.length || 0,
+    outputs: tx.out?.length || 0,
+    totalBTC: (tx.out?.reduce((sum: number, output: any) => sum + (output.value || 0), 0) / 100000000).toFixed(2),
+  }));
+  
+  console.log(`✅ Got ${transactions.length} real transactions for address`);
+  
+  return {
+    address: address.substring(0, 20) + '...',
+    totalReceived: ((data.total_received || 0) / 100000000).toFixed(2),
+    totalSent: ((data.total_sent || 0) / 100000000).toFixed(2),
+    finalBalance: ((data.final_balance || 0) / 100000000).toFixed(2),
+    transactionCount: data.n_tx || 0,
+    recentTransactions: transactions,
+    dataAvailable: true,
+  };
 }
 
 /**
- * Build deep dive analysis prompt
+ * Build deep dive analysis prompt with REAL blockchain data
  */
 function buildDeepDivePrompt(
   whale: DeepDiveRequest,
   fromAddressData: any,
   toAddressData: any,
-  currentBtcPrice: number,
-  blockchainDataAvailable: boolean
+  currentBtcPrice: number
 ): string {
-  const dataContext = blockchainDataAvailable 
-    ? `**SOURCE ADDRESS DATA:**
-${JSON.stringify(fromAddressData, null, 2)}
-
-**DESTINATION ADDRESS DATA:**
-${JSON.stringify(toAddressData, null, 2)}`
-    : `**NOTE:** Blockchain historical data temporarily unavailable. Analyze based on transaction details and market context.
-
-**SOURCE ADDRESS:** ${whale.fromAddress.substring(0, 20)}...
-**DESTINATION ADDRESS:** ${whale.toAddress.substring(0, 20)}...`;
-
-  return `You are an expert cryptocurrency market analyst. Analyze this Bitcoin whale transaction and provide actionable trading intelligence.
+  return `You are an expert cryptocurrency market analyst and blockchain forensics specialist. Analyze this Bitcoin whale transaction using the REAL blockchain data provided.
 
 **TRANSACTION DETAILS:**
 - Hash: ${whale.txHash.substring(0, 20)}...
@@ -118,14 +110,41 @@ ${JSON.stringify(toAddressData, null, 2)}`
 - Time: ${whale.timestamp}
 - Current BTC Price: $${currentBtcPrice.toLocaleString()}
 
-${dataContext}
+**REAL SOURCE ADDRESS BLOCKCHAIN DATA:**
+${JSON.stringify(fromAddressData, null, 2)}
 
-**ANALYSIS REQUIRED:**
+**REAL DESTINATION ADDRESS BLOCKCHAIN DATA:**
+${JSON.stringify(toAddressData, null, 2)}
 
-1. **Address Classification:** Identify likely address types (exchange, whale, institutional, retail)
-2. **Transaction Intent:** Why did this transaction happen? (accumulation, distribution, transfer, etc.)
-3. **Market Impact:** Predict 24h and 7-day price movements with 3 support and 3 resistance levels
-4. **Trading Strategy:** Provide specific recommendations with risk/reward ratios
+**DEEP DIVE ANALYSIS REQUIRED:**
+
+Using the REAL blockchain transaction history above, provide:
+
+1. **Address Behavior Analysis:**
+   - Classify both addresses based on their transaction patterns
+   - Identify accumulation vs distribution behavior
+   - Detect any mixing or sophisticated trading patterns
+   - Assess sophistication level of the actors
+
+2. **Fund Flow Intelligence:**
+   - Trace likely origin of funds based on source address history
+   - Predict destination strategy based on destination address patterns
+   - Identify if this is exchange-related activity
+   - Detect any unusual or anomalous behavior
+
+3. **Market Impact Prediction:**
+   - 24-hour price outlook with specific reasoning
+   - 7-day trend forecast based on similar historical patterns
+   - Provide 3 specific support levels and 3 resistance levels
+   - Calculate probability of further large movements
+
+4. **Strategic Trading Intelligence:**
+   - Determine likely intent behind this transaction
+   - Assess market sentiment implications (bullish/bearish/neutral)
+   - Provide specific trader positioning recommendations
+   - Calculate risk/reward ratios for potential trades
+
+Base your analysis ONLY on the real blockchain data provided. Be specific and actionable.
 
 **REQUIRED JSON OUTPUT:**
 {
@@ -208,43 +227,54 @@ export default async function handler(
     console.log(`🔬 Starting Deep Dive analysis for ${whale.txHash.substring(0, 20)}...`);
     console.log(`⏱️ Start time: ${new Date().toISOString()}`);
 
-    // Try to fetch blockchain data (optional - will use fallback if fails)
-    console.log(`📡 Attempting to fetch blockchain data...`);
+    // Fetch REAL blockchain data (REQUIRED - no fallbacks)
+    console.log(`📡 Fetching real blockchain data from blockchain.info...`);
     const blockchainStart = Date.now();
     
     let fromAddressData: any;
     let toAddressData: any;
-    let blockchainDataAvailable = false;
     
     try {
+      // Fetch with timeout - fail if takes too long
       [fromAddressData, toAddressData] = await Promise.race([
         Promise.all([
-          fetchAddressHistory(whale.fromAddress, 3), // Reduced to 3 for speed
+          fetchAddressHistory(whale.fromAddress, 3),
           fetchAddressHistory(whale.toAddress, 3),
         ]),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Blockchain fetch timeout')), 8000)) // 8s max
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Blockchain API timeout after 8 seconds')), 8000)
+        )
       ]) as any;
       
-      blockchainDataAvailable = fromAddressData.dataAvailable || toAddressData.dataAvailable;
       const blockchainTime = Date.now() - blockchainStart;
       console.log(`✅ Blockchain data fetched in ${blockchainTime}ms`);
-      console.log(`📊 Source: ${fromAddressData.transactionCount} total txs, available: ${fromAddressData.dataAvailable}`);
-      console.log(`📊 Destination: ${toAddressData.transactionCount} total txs, available: ${toAddressData.dataAvailable}`);
+      
+      // VERIFY we got real data (not fallback)
+      if (!fromAddressData.dataAvailable && !toAddressData.dataAvailable) {
+        throw new Error('Blockchain API returned no data for both addresses. Cannot proceed without real data.');
+      }
+      
+      console.log(`📊 Source: ${fromAddressData.transactionCount} total txs, ${fromAddressData.recentTransactions.length} recent`);
+      console.log(`📊 Destination: ${toAddressData.transactionCount} total txs, ${toAddressData.recentTransactions.length} recent`);
+      
+      // Warn if partial data
+      if (!fromAddressData.dataAvailable) {
+        console.warn(`⚠️ Source address data unavailable, analysis will be limited`);
+      }
+      if (!toAddressData.dataAvailable) {
+        console.warn(`⚠️ Destination address data unavailable, analysis will be limited`);
+      }
+      
     } catch (error) {
       const blockchainTime = Date.now() - blockchainStart;
-      console.warn(`⚠️ Blockchain data fetch failed after ${blockchainTime}ms, using analysis without historical data`);
+      console.error(`❌ Failed to fetch blockchain data after ${blockchainTime}ms:`, error);
       
-      // Use minimal fallback data
-      fromAddressData = {
-        address: whale.fromAddress.substring(0, 20) + '...',
-        dataAvailable: false,
-        recentTransactions: [],
-      };
-      toAddressData = {
-        address: whale.toAddress.substring(0, 20) + '...',
-        dataAvailable: false,
-        recentTransactions: [],
-      };
+      // FAIL FAST - Don't proceed without real data
+      throw new Error(
+        `Cannot perform Deep Dive analysis: Blockchain data unavailable. ` +
+        `This could be due to: (1) Blockchain.info API timeout, (2) Rate limiting, or (3) Network issues. ` +
+        `Please try again in a moment.`
+      );
     }
 
     // Get current BTC price
@@ -257,8 +287,8 @@ export default async function handler(
 
     console.log(`🎯 Using ${selectedModel} for deep analysis (optimized for speed)`);
 
-    // Build deep dive prompt (works with or without blockchain data)
-    const prompt = buildDeepDivePrompt(whale, fromAddressData, toAddressData, currentBtcPrice, blockchainDataAvailable);
+    // Build deep dive prompt with REAL blockchain data
+    const prompt = buildDeepDivePrompt(whale, fromAddressData, toAddressData, currentBtcPrice);
 
     // Call Gemini API
     const geminiApiKey = geminiConfig.apiKey;
