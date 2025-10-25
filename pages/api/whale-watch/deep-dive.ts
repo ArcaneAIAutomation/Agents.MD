@@ -94,7 +94,7 @@ async function fetchAddressHistory(address: string, limit: number = 3): Promise<
 }
 
 /**
- * Build deep dive analysis prompt with REAL blockchain data
+ * Build deep dive analysis prompt with REAL blockchain data (optimized for speed)
  */
 function buildDeepDivePrompt(
   whale: DeepDiveRequest,
@@ -102,49 +102,27 @@ function buildDeepDivePrompt(
   toAddressData: any,
   currentBtcPrice: number
 ): string {
-  return `You are an expert cryptocurrency market analyst and blockchain forensics specialist. Analyze this Bitcoin whale transaction using the REAL blockchain data provided.
+  // Summarize blockchain data to reduce token count
+  const sourceSummary = `Address: ${fromAddressData.address}, Balance: ${fromAddressData.finalBalance} BTC, Total Txs: ${fromAddressData.transactionCount}, Recent: ${fromAddressData.recentTransactions.length} txs`;
+  const destSummary = `Address: ${toAddressData.address}, Balance: ${toAddressData.finalBalance} BTC, Total Txs: ${toAddressData.transactionCount}, Recent: ${toAddressData.recentTransactions.length} txs`;
+  
+  return `Analyze this Bitcoin whale transaction using blockchain data.
 
-**TRANSACTION DETAILS:**
-- Hash: ${whale.txHash.substring(0, 20)}...
+TRANSACTION:
 - Amount: ${whale.amount.toFixed(2)} BTC ($${(whale.amount * currentBtcPrice).toLocaleString()})
-- Time: ${whale.timestamp}
-- Current BTC Price: $${currentBtcPrice.toLocaleString()}
+- BTC Price: $${currentBtcPrice.toLocaleString()}
 
-**REAL SOURCE ADDRESS BLOCKCHAIN DATA:**
-${JSON.stringify(fromAddressData, null, 2)}
+SOURCE: ${sourceSummary}
+DESTINATION: ${destSummary}
 
-**REAL DESTINATION ADDRESS BLOCKCHAIN DATA:**
-${JSON.stringify(toAddressData, null, 2)}
+Provide concise analysis with:
+1. Address types (exchange/whale/institutional)
+2. Transaction intent (accumulation/distribution)
+3. Market impact (24h and 7d outlook)
+4. 3 support and 3 resistance levels
+5. Trading recommendation with risk/reward
 
-**DEEP DIVE ANALYSIS REQUIRED:**
-
-Using the REAL blockchain transaction history above, provide:
-
-1. **Address Behavior Analysis:**
-   - Classify both addresses based on their transaction patterns
-   - Identify accumulation vs distribution behavior
-   - Detect any mixing or sophisticated trading patterns
-   - Assess sophistication level of the actors
-
-2. **Fund Flow Intelligence:**
-   - Trace likely origin of funds based on source address history
-   - Predict destination strategy based on destination address patterns
-   - Identify if this is exchange-related activity
-   - Detect any unusual or anomalous behavior
-
-3. **Market Impact Prediction:**
-   - 24-hour price outlook with specific reasoning
-   - 7-day trend forecast based on similar historical patterns
-   - Provide 3 specific support levels and 3 resistance levels
-   - Calculate probability of further large movements
-
-4. **Strategic Trading Intelligence:**
-   - Determine likely intent behind this transaction
-   - Assess market sentiment implications (bullish/bearish/neutral)
-   - Provide specific trader positioning recommendations
-   - Calculate risk/reward ratios for potential trades
-
-Base your analysis ONLY on the real blockchain data provided. Be specific and actionable.
+Be specific and actionable.
 
 **REQUIRED JSON OUTPUT:**
 {
@@ -337,16 +315,17 @@ export default async function handler(
         temperature: 0.7,
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 4096,
+        maxOutputTokens: 2048, // Reduced for faster response
         responseMimeType: "application/json",
       },
     };
 
     console.log(`📡 Calling Gemini API...`);
+    console.log(`📝 Prompt length: ${prompt.length} characters`);
     const geminiStart = Date.now();
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 20000);
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // Reduced to 15s
 
     let response;
     try {
