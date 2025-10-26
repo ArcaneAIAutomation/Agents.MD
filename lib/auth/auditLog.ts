@@ -6,7 +6,7 @@
  */
 
 import { NextApiRequest } from 'next';
-import { sql } from '@vercel/postgres';
+import { query } from '../db';
 
 /**
  * Authentication event types
@@ -79,25 +79,11 @@ export async function logAuthEvent(
       const ipAddress = entry.ipAddress || (req ? getClientIP(req) : null);
       const userAgent = entry.userAgent || (req ? getUserAgent(req) : null);
 
-      await sql`
-        INSERT INTO auth_logs (
-          user_id,
-          event_type,
-          ip_address,
-          user_agent,
-          success,
-          error_message,
-          timestamp
-        ) VALUES (
-          ${entry.userId || null},
-          ${entry.eventType},
-          ${ipAddress},
-          ${userAgent},
-          ${entry.success},
-          ${entry.errorMessage || null},
-          NOW()
-        )
-      `;
+      await query(
+        `INSERT INTO auth_logs (user_id, event_type, ip_address, user_agent, success, error_message, timestamp) 
+         VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
+        [entry.userId || null, entry.eventType, ipAddress, userAgent, entry.success, entry.errorMessage || null]
+      );
 
       // Log to console in development
       if (process.env.NODE_ENV === 'development') {
@@ -270,20 +256,14 @@ export async function getUserAuthLogs(
   limit: number = 10
 ): Promise<any[]> {
   try {
-    const result = await sql`
-      SELECT 
-        id,
-        event_type,
-        ip_address,
-        user_agent,
-        success,
-        error_message,
-        timestamp
-      FROM auth_logs
-      WHERE user_id = ${userId}
-      ORDER BY timestamp DESC
-      LIMIT ${limit}
-    `;
+    const result = await query(
+      `SELECT id, event_type, ip_address, user_agent, success, error_message, timestamp 
+       FROM auth_logs 
+       WHERE user_id = $1 
+       ORDER BY timestamp DESC 
+       LIMIT $2`,
+      [userId, limit]
+    );
 
     return result.rows;
   } catch (error) {
@@ -304,17 +284,14 @@ export async function getRecentFailedAttempts(
   minutes: number = 15
 ): Promise<number> {
   try {
-    const result = await sql`
-      SELECT COUNT(*) as count
-      FROM auth_logs
-      WHERE 
-        event_type = 'failed_login'
-        AND (
-          error_message LIKE ${`%${identifier}%`}
-          OR ip_address = ${identifier}
-        )
-        AND timestamp > NOW() - INTERVAL '${minutes} minutes'
-    `;
+    const result = await query(
+      `SELECT COUNT(*) as count 
+       FROM auth_logs 
+       WHERE event_type = 'failed_login' 
+       AND (error_message LIKE $1 OR ip_address = $2) 
+       AND timestamp > NOW() - INTERVAL '1 minute' * $3`,
+      [`%${identifier}%`, identifier, minutes]
+    );
 
     return parseInt(result.rows[0]?.count || '0', 10);
   } catch (error) {
@@ -332,10 +309,10 @@ export async function getRecentFailedAttempts(
  */
 export async function cleanupOldLogs(daysToKeep: number = 90): Promise<number> {
   try {
-    const result = await sql`
-      DELETE FROM auth_logs
-      WHERE timestamp < NOW() - INTERVAL '${daysToKeep} days'
-    `;
+    const result = await query(
+      `DELETE FROM auth_logs WHERE timestamp < NOW() - INTERVAL '1 day' * $1`,
+      [daysToKeep]
+    );
 
     const deletedCount = result.rowCount || 0;
     
