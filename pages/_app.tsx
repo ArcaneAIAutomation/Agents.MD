@@ -5,11 +5,15 @@ import AccessGate from '../components/AccessGate'
 import { AuthProvider, useAuth } from '../components/auth/AuthProvider'
 
 // Inner component that uses auth context
-function AppContent({ Component, pageProps }: AppProps) {
+function AppContent({ Component, pageProps, router }: AppProps & { router: any }) {
   const { isAuthenticated, isLoading } = useAuth();
 
-  // Show loading state while checking authentication
-  if (isLoading) {
+  // Public pages that don't require authentication
+  const publicPages = ['/test-register'];
+  const isPublicPage = publicPages.includes(router.pathname);
+
+  // Show loading state while checking authentication (skip for public pages)
+  if (isLoading && !isPublicPage) {
     return (
       <div className="min-h-screen bg-bitcoin-black flex items-center justify-center">
         <div className="text-center">
@@ -20,12 +24,12 @@ function AppContent({ Component, pageProps }: AppProps) {
     );
   }
 
-  // Show access gate if not authenticated
-  if (!isAuthenticated) {
+  // Show access gate if not authenticated (skip for public pages)
+  if (!isAuthenticated && !isPublicPage) {
     return <AccessGate onAccessGranted={() => {}} />;
   }
 
-  // Show app if authenticated
+  // Show app if authenticated or on public page
   return (
     <MobileErrorBoundary
       onError={(error) => {
@@ -44,7 +48,7 @@ function AppContent({ Component, pageProps }: AppProps) {
 export default function App(props: AppProps) {
   return (
     <AuthProvider>
-      <AppContent {...props} />
+      <AppContent {...props} router={props.router} />
     </AuthProvider>
   );
 }
