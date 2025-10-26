@@ -238,11 +238,11 @@ export const loginRateLimiter = createRateLimiter('login', {
 
 /**
  * Rate limiter for registration endpoint
- * TEMPORARY: Increased to 50 attempts for testing
+ * TEMPORARY: Disabled for testing (set to 1000 attempts)
  * TODO: Reduce back to 5 attempts after testing complete
  */
 export const registrationRateLimiter = createRateLimiter('register', {
-  maxAttempts: 50, // TEMPORARY: Increased from 5 for testing
+  maxAttempts: 1000, // TEMPORARY: Effectively disabled for testing
   windowMs: 15 * 60 * 1000,
   message: 'Too many registration attempts. Please try again in 15 minutes.'
 });
