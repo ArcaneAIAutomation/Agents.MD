@@ -9,7 +9,8 @@ function AppContent({ Component, pageProps, router }: AppProps & { router: any }
   const { isAuthenticated, isLoading } = useAuth();
 
   // Public pages that don't require authentication
-  const publicPages = ['/test-register'];
+  // Note: Empty array means all pages require authentication
+  const publicPages: string[] = [];
   const isPublicPage = publicPages.includes(router.pathname);
 
   // Show loading state while checking authentication (skip for public pages)
