@@ -9,8 +9,7 @@
   "regions": ["iad1"],
   "functions": {
     "pages/api/**/*.ts": {
-      "maxDuration": 30,
-      "memory": 1024
+      "maxDuration": 30
     }
   },
   "crons": [
