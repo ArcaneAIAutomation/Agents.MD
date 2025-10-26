@@ -7,9 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "validate:gemini": "node scripts/validate-gemini-config.js",
     "send-access-codes": "node scripts/send-early-access-codes.js",
     "send-platform-update": "node scripts/send-platform-update.js",
+    "cleanup-sessions": "npx tsx scripts/cleanup-sessions.ts",
     "deploy": "pwsh -File deploy.ps1",
     "deploy:unix": "bash deploy.sh",
     "deploy:msg": "pwsh -File deploy.ps1 -CommitMessage",
@@ -23,23 +27,35 @@
     "sync": "pwsh -File sync-quick.ps1"
   },
   "dependencies": {
+    "@vercel/kv": "^3.0.0",
+    "@vercel/postgres": "^0.10.0",
+    "bcryptjs": "^3.0.2",
     "dotenv": "^16.6.1",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.294.0",
     "next": "14.0.4",
     "openai": "^4.20.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "recharts": "^2.10.3"
+    "recharts": "^2.10.3",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jest": "^29.5.12",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
+    "@types/pg": "^8.15.5",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
+    "jest": "^29.7.0",
+    "pg": "^8.16.3",
     "postcss": "^8",
     "tailwindcss": "^3.3.0",
+    "ts-jest": "^29.1.2",
     "typescript": "^5"
   }
 }

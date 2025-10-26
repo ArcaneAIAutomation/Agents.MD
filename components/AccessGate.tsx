@@ -1,18 +1,26 @@
-import { useState } from 'react';
-import { Lock, Mail, Send, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Lock, Mail, Send, CheckCircle, AlertCircle } from 'lucide-react';
+import { useAuth } from './auth/AuthProvider';
+import RegistrationForm from './auth/RegistrationForm';
+import LoginForm from './auth/LoginForm';
 
 interface AccessGateProps {
-  onAccessGranted: () => void;
+  onAccessGranted?: () => void;
 }
 
 export default function AccessGate({ onAccessGranted }: AccessGateProps) {
-  const [mode, setMode] = useState<'initial' | 'code' | 'apply'>('initial');
-  const [accessCode, setAccessCode] = useState('');
-  const [codeError, setCodeError] = useState('');
+  const { isAuthenticated, isLoading: authLoading, error: authError, clearError } = useAuth();
+  
+  // Mode state: 'initial', 'register', 'login', 'request-access'
+  const [mode, setMode] = useState<'initial' | 'register' | 'login' | 'request-access'>('initial');
+  
+  // Success/error messages
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
+  // Request access form state
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  
-  // Application form state
   const [formData, setFormData] = useState({
     email: '',
     telegram: '',
@@ -21,34 +29,75 @@ export default function AccessGate({ onAccessGranted }: AccessGateProps) {
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  // Valid access codes
-  const VALID_CODES = [
-    'BITCOIN2025', // Default code
-    'BTC-SOVEREIGN-K3QYMQ-01',
-    'BTC-SOVEREIGN-AKCJRG-02',
-    'BTC-SOVEREIGN-LMBLRN-03',
-    'BTC-SOVEREIGN-HZKEI2-04',
-    'BTC-SOVEREIGN-WVL0HN-05',
-    'BTC-SOVEREIGN-48YDHG-06',
-    'BTC-SOVEREIGN-6HSNX0-07',
-    'BTC-SOVEREIGN-N99A5R-08',
-    'BTC-SOVEREIGN-DCO2DG-09',
-    'BTC-SOVEREIGN-BYE9UX-10',
-  ];
-
-  const handleCodeSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const enteredCode = accessCode.trim().toUpperCase();
-    const isValid = VALID_CODES.some(code => code.toUpperCase() === enteredCode);
-    
-    if (isValid) {
-      // Store access in sessionStorage
-      sessionStorage.setItem('hasAccess', 'true');
+  // Hide AccessGate if user is authenticated
+  useEffect(() => {
+    if (isAuthenticated && onAccessGranted) {
       onAccessGranted();
-    } else {
-      setCodeError('Invalid access code. Please try again or apply for early access.');
     }
+  }, [isAuthenticated, onAccessGranted]);
+
+  // Clear error message after 5 seconds
+  useEffect(() => {
+    if (errorMessage) {
+      const timer = setTimeout(() => {
+        setErrorMessage(null);
+        clearError();
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage, clearError]);
+
+  // Clear success message after 5 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
+  // Don't render if authenticated
+  if (isAuthenticated) {
+    return null;
+  }
+
+  // Handle successful registration
+  const handleRegistrationSuccess = () => {
+    setSuccessMessage('Account created successfully! Welcome to Bitcoin Sovereign Technology.');
+    // Authentication is handled by AuthProvider, which will hide the AccessGate
+  };
+
+  // Handle registration error
+  const handleRegistrationError = (error: string) => {
+    setErrorMessage(error);
+  };
+
+  // Handle successful login
+  const handleLoginSuccess = () => {
+    setSuccessMessage('Welcome back! Redirecting to platform...');
+    // Authentication is handled by AuthProvider, which will hide the AccessGate
+  };
+
+  // Handle login error
+  const handleLoginError = (error: string) => {
+    setErrorMessage(error);
+  };
+
+  // Switch to login mode
+  const switchToLogin = () => {
+    setMode('login');
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    clearError();
+  };
+
+  // Switch to register mode
+  const switchToRegister = () => {
+    setMode('register');
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    clearError();
   };
 
   const validateForm = () => {
@@ -123,223 +172,287 @@ export default function AccessGate({ onAccessGranted }: AccessGateProps) {
   };
 
   return (
-    <div className="access-gate-overlay">
-      <div className="access-gate-container">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-bitcoin-black">
+      <div className="w-full max-w-6xl mx-auto px-4 py-8 overflow-y-auto max-h-screen">
         {/* Logo/Header */}
-        <div className="access-gate-header">
-          <div className="access-gate-logo">
-            <Lock className="w-16 h-16 text-bitcoin-orange" style={{ filter: 'drop-shadow(0 0 20px rgba(247, 147, 26, 0.5))' }} />
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-bitcoin-black border-2 border-bitcoin-orange">
+            <Lock className="w-10 h-10 text-bitcoin-orange" style={{ filter: 'drop-shadow(0 0 20px rgba(247, 147, 26, 0.5))' }} />
           </div>
-          <h1 className="access-gate-title">
+          <h1 className="text-4xl md:text-5xl font-bold text-bitcoin-white mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>
             Bitcoin Sovereign Technology
           </h1>
-          <p className="access-gate-subtitle">
-            Early Access Required
+          <p className="text-lg text-bitcoin-white-60">
+            Secure Authentication Required
           </p>
         </div>
 
-        {/* Initial Mode - Choose Option */}
-        {mode === 'initial' && (
-          <div className="access-gate-content">
-            <p className="access-gate-description">
-              This platform is currently in early access. Choose an option below to continue:
-            </p>
-            
-            <div className="access-gate-buttons">
-              <button
-                onClick={() => setMode('code')}
-                className="btn-bitcoin-primary btn-bitcoin-full"
-              >
-                <Lock className="w-5 h-5" />
-                Enter Access Code
-              </button>
-              
-              <button
-                onClick={() => setMode('apply')}
-                className="btn-bitcoin-secondary btn-bitcoin-full"
-              >
-                <Mail className="w-5 h-5" />
-                Apply for Early Access
-              </button>
+        {/* Success Message */}
+        {successMessage && (
+          <div className="mb-6 p-4 bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg max-w-2xl mx-auto">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-bitcoin-orange flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-bitcoin-white-80">{successMessage}</p>
             </div>
           </div>
         )}
 
-        {/* Code Entry Mode */}
-        {mode === 'code' && (
-          <div className="access-gate-content">
-            <form onSubmit={handleCodeSubmit} className="access-gate-form">
-              <div className="form-group">
-                <label htmlFor="accessCode" className="form-label">
-                  Early Access Code
-                </label>
-                <input
-                  id="accessCode"
-                  type="text"
-                  value={accessCode}
-                  onChange={(e) => {
-                    setAccessCode(e.target.value);
-                    setCodeError('');
-                  }}
-                  placeholder="Enter your access code"
-                  className="form-input"
-                  autoFocus
-                />
-                {codeError && (
-                  <p className="form-error">{codeError}</p>
-                )}
-              </div>
+        {/* Error Message */}
+        {(errorMessage || authError) && (
+          <div className="mb-6 p-4 bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg max-w-2xl mx-auto">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-bitcoin-orange flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-bitcoin-white-80">{errorMessage || authError}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Initial Mode - Choose Option */}
+        {mode === 'initial' && (
+          <div className="max-w-md mx-auto">
+            <div className="bg-bitcoin-black border border-bitcoin-orange rounded-xl p-8">
+              <p className="text-center text-bitcoin-white-80 mb-6">
+                Choose an option to access the platform:
+              </p>
               
-              <div className="access-gate-buttons">
+              <div className="space-y-4">
                 <button
-                  type="submit"
-                  className="btn-bitcoin-primary btn-bitcoin-full"
+                  onClick={switchToRegister}
+                  className="w-full bg-bitcoin-orange text-bitcoin-black border-2 border-bitcoin-orange font-bold uppercase tracking-wider px-6 py-4 rounded-lg transition-all hover:bg-bitcoin-black hover:text-bitcoin-orange hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[48px] flex items-center justify-center gap-3"
+                  disabled={authLoading}
+                >
+                  <Lock className="w-5 h-5" />
+                  Register with Access Code
+                </button>
+                
+                <button
+                  onClick={switchToLogin}
+                  className="w-full bg-transparent text-bitcoin-orange border-2 border-bitcoin-orange font-semibold uppercase tracking-wider px-6 py-4 rounded-lg transition-all hover:bg-bitcoin-orange hover:text-bitcoin-black hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:scale-105 active:scale-95 min-h-[48px] flex items-center justify-center gap-3"
+                  disabled={authLoading}
                 >
                   <CheckCircle className="w-5 h-5" />
-                  Verify Code
+                  I Already Have an Account
                 </button>
                 
                 <button
-                  type="button"
-                  onClick={() => {
-                    setMode('initial');
-                    setAccessCode('');
-                    setCodeError('');
-                  }}
-                  className="btn-bitcoin-secondary btn-bitcoin-full"
+                  onClick={() => setMode('request-access')}
+                  className="w-full bg-transparent text-bitcoin-white-60 border-2 border-bitcoin-orange-20 font-semibold uppercase tracking-wider px-6 py-4 rounded-lg transition-all hover:border-bitcoin-orange hover:text-bitcoin-orange hover:shadow-[0_0_20px_rgba(247,147,26,0.2)] hover:scale-105 active:scale-95 min-h-[48px] flex items-center justify-center gap-3"
+                  disabled={authLoading}
                 >
-                  Back
+                  <Mail className="w-5 h-5" />
+                  Request Early Access
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         )}
 
-        {/* Application Mode */}
-        {mode === 'apply' && !submitted && (
-          <div className="access-gate-content">
-            <p className="access-gate-description">
-              Fill out the form below to request early access. We'll review your application and get back to you soon.
-            </p>
-            
-            <form onSubmit={handleApplicationSubmit} className="access-gate-form">
-              <div className="form-group">
-                <label htmlFor="email" className="form-label">
-                  Email Address <span className="text-bitcoin-orange">*</span>
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder="your.email@example.com"
-                  className="form-input"
-                  required
-                />
-                {formErrors.email && (
-                  <p className="form-error">{formErrors.email}</p>
-                )}
-              </div>
+        {/* Registration Mode */}
+        {mode === 'register' && (
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-bitcoin-black border border-bitcoin-orange rounded-xl p-8">
+              <RegistrationForm
+                onSuccess={handleRegistrationSuccess}
+                onError={handleRegistrationError}
+                onSwitchToLogin={switchToLogin}
+              />
               
-              <div className="form-group">
-                <label htmlFor="telegram" className="form-label">
-                  Telegram Handle <span className="text-bitcoin-orange">*</span>
-                </label>
-                <input
-                  id="telegram"
-                  type="text"
-                  value={formData.telegram}
-                  onChange={(e) => handleInputChange('telegram', e.target.value)}
-                  placeholder="@yourusername"
-                  className="form-input"
-                  required
-                />
-                {formErrors.telegram && (
-                  <p className="form-error">{formErrors.telegram}</p>
-                )}
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="twitter" className="form-label">
-                  Twitter/X Account <span className="text-bitcoin-orange">*</span>
-                </label>
-                <input
-                  id="twitter"
-                  type="text"
-                  value={formData.twitter}
-                  onChange={(e) => handleInputChange('twitter', e.target.value)}
-                  placeholder="@yourusername"
-                  className="form-input"
-                  required
-                />
-                {formErrors.twitter && (
-                  <p className="form-error">{formErrors.twitter}</p>
-                )}
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="message" className="form-label">
-                  Message to Developers <span className="text-bitcoin-white-60">(Optional)</span>
-                </label>
-                <textarea
-                  id="message"
-                  value={formData.message}
-                  onChange={(e) => handleInputChange('message', e.target.value)}
-                  placeholder="Tell us why you'd like early access..."
-                  className="form-textarea"
-                  rows={4}
-                />
-              </div>
-              
-              {formErrors.submit && (
-                <p className="form-error">{formErrors.submit}</p>
-              )}
-              
-              <div className="access-gate-buttons">
+              {/* Back Button */}
+              <div className="mt-6 text-center">
                 <button
-                  type="submit"
-                  disabled={submitting}
-                  className="btn-bitcoin-primary btn-bitcoin-full"
+                  onClick={() => {
+                    setMode('initial');
+                    setErrorMessage(null);
+                    setSuccessMessage(null);
+                    clearError();
+                  }}
+                  className="text-sm text-bitcoin-white-60 hover:text-bitcoin-orange transition-colors"
+                  disabled={authLoading}
                 >
-                  {submitting ? (
-                    <>
-                      <div className="spinner"></div>
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-5 h-5" />
-                      Submit Application
-                    </>
+                  ← Back to Options
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Login Mode */}
+        {mode === 'login' && (
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-bitcoin-black border border-bitcoin-orange rounded-xl p-8">
+              <LoginForm
+                onSuccess={handleLoginSuccess}
+                onError={handleLoginError}
+                onSwitchToRegister={switchToRegister}
+              />
+              
+              {/* Back Button */}
+              <div className="mt-6 text-center">
+                <button
+                  onClick={() => {
+                    setMode('initial');
+                    setErrorMessage(null);
+                    setSuccessMessage(null);
+                    clearError();
+                  }}
+                  className="text-sm text-bitcoin-white-60 hover:text-bitcoin-orange transition-colors"
+                  disabled={authLoading}
+                >
+                  ← Back to Options
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Request Access Mode */}
+        {mode === 'request-access' && !submitted && (
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-bitcoin-black border border-bitcoin-orange rounded-xl p-8">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-bitcoin-white mb-2">
+                  Request Early Access
+                </h2>
+                <p className="text-sm text-bitcoin-white-60">
+                  Fill out the form below and we'll review your application
+                </p>
+              </div>
+              
+              <form onSubmit={handleApplicationSubmit} className="space-y-5">
+                <div>
+                  <label htmlFor="email" className="block text-sm font-semibold text-bitcoin-white-80 mb-2">
+                    Email Address <span className="text-bitcoin-orange">*</span>
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    placeholder="your.email@example.com"
+                    className="w-full px-4 py-3 bg-bitcoin-black text-bitcoin-white border-2 border-bitcoin-orange-20 rounded-lg transition-all duration-300 focus:outline-none focus:border-bitcoin-orange"
+                    required
+                    disabled={submitting}
+                  />
+                  {formErrors.email && (
+                    <div className="flex items-center gap-1 mt-2 text-bitcoin-orange text-sm">
+                      <AlertCircle className="w-4 h-4" />
+                      <span>{formErrors.email}</span>
+                    </div>
                   )}
-                </button>
+                </div>
                 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMode('initial');
-                    setFormData({ email: '', telegram: '', twitter: '', message: '' });
-                    setFormErrors({});
-                  }}
-                  className="btn-bitcoin-secondary btn-bitcoin-full"
-                  disabled={submitting}
-                >
-                  Back
-                </button>
-              </div>
-            </form>
+                <div>
+                  <label htmlFor="telegram" className="block text-sm font-semibold text-bitcoin-white-80 mb-2">
+                    Telegram Handle <span className="text-bitcoin-orange">*</span>
+                  </label>
+                  <input
+                    id="telegram"
+                    type="text"
+                    value={formData.telegram}
+                    onChange={(e) => handleInputChange('telegram', e.target.value)}
+                    placeholder="@yourusername"
+                    className="w-full px-4 py-3 bg-bitcoin-black text-bitcoin-white border-2 border-bitcoin-orange-20 rounded-lg transition-all duration-300 focus:outline-none focus:border-bitcoin-orange"
+                    required
+                    disabled={submitting}
+                  />
+                  {formErrors.telegram && (
+                    <div className="flex items-center gap-1 mt-2 text-bitcoin-orange text-sm">
+                      <AlertCircle className="w-4 h-4" />
+                      <span>{formErrors.telegram}</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div>
+                  <label htmlFor="twitter" className="block text-sm font-semibold text-bitcoin-white-80 mb-2">
+                    Twitter/X Account <span className="text-bitcoin-orange">*</span>
+                  </label>
+                  <input
+                    id="twitter"
+                    type="text"
+                    value={formData.twitter}
+                    onChange={(e) => handleInputChange('twitter', e.target.value)}
+                    placeholder="@yourusername"
+                    className="w-full px-4 py-3 bg-bitcoin-black text-bitcoin-white border-2 border-bitcoin-orange-20 rounded-lg transition-all duration-300 focus:outline-none focus:border-bitcoin-orange"
+                    required
+                    disabled={submitting}
+                  />
+                  {formErrors.twitter && (
+                    <div className="flex items-center gap-1 mt-2 text-bitcoin-orange text-sm">
+                      <AlertCircle className="w-4 h-4" />
+                      <span>{formErrors.twitter}</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div>
+                  <label htmlFor="message" className="block text-sm font-semibold text-bitcoin-white-80 mb-2">
+                    Message to Developers <span className="text-bitcoin-white-60">(Optional)</span>
+                  </label>
+                  <textarea
+                    id="message"
+                    value={formData.message}
+                    onChange={(e) => handleInputChange('message', e.target.value)}
+                    placeholder="Tell us why you'd like early access..."
+                    className="w-full px-4 py-3 bg-bitcoin-black text-bitcoin-white border-2 border-bitcoin-orange-20 rounded-lg transition-all duration-300 focus:outline-none focus:border-bitcoin-orange resize-none"
+                    rows={4}
+                    disabled={submitting}
+                  />
+                </div>
+                
+                {formErrors.submit && (
+                  <div className="flex items-center gap-1 text-bitcoin-orange text-sm">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>{formErrors.submit}</span>
+                  </div>
+                )}
+                
+                <div className="space-y-3">
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full bg-bitcoin-orange text-bitcoin-black border-2 border-bitcoin-orange font-bold uppercase tracking-wider px-6 py-4 rounded-lg transition-all hover:bg-bitcoin-black hover:text-bitcoin-orange hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[48px] flex items-center justify-center gap-3"
+                  >
+                    {submitting ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-bitcoin-black border-t-transparent rounded-full animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-5 h-5" />
+                        Submit Application
+                      </>
+                    )}
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode('initial');
+                      setFormData({ email: '', telegram: '', twitter: '', message: '' });
+                      setFormErrors({});
+                    }}
+                    className="w-full bg-transparent text-bitcoin-orange border-2 border-bitcoin-orange font-semibold uppercase tracking-wider px-6 py-3 rounded-lg transition-all hover:bg-bitcoin-orange hover:text-bitcoin-black hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:scale-105 active:scale-95 min-h-[48px]"
+                    disabled={submitting}
+                  >
+                    Back
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
 
-        {/* Success Message */}
-        {mode === 'apply' && submitted && (
-          <div className="access-gate-content">
-            <div className="access-gate-success">
-              <CheckCircle className="w-20 h-20 text-bitcoin-orange mb-4" style={{ filter: 'drop-shadow(0 0 30px rgba(247, 147, 26, 0.5))' }} />
-              <h2 className="text-2xl font-bold text-bitcoin-white mb-4">
+        {/* Success Message for Request Access */}
+        {mode === 'request-access' && submitted && (
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-bitcoin-black border border-bitcoin-orange rounded-xl p-8 text-center">
+              <CheckCircle className="w-20 h-20 text-bitcoin-orange mx-auto mb-6" style={{ filter: 'drop-shadow(0 0 30px rgba(247, 147, 26, 0.5))' }} />
+              <h2 className="text-3xl font-bold text-bitcoin-white mb-4">
                 Application Submitted!
               </h2>
-              <p className="text-bitcoin-white-80 mb-6 text-center max-w-md">
+              <p className="text-bitcoin-white-80 mb-6 max-w-md mx-auto">
                 Thank you for your interest in Bitcoin Sovereign Technology. We've received your application and will review it shortly. 
                 You'll receive an email at <span className="text-bitcoin-orange font-mono">{formData.email}</span> with further instructions.
               </p>
@@ -349,7 +462,7 @@ export default function AccessGate({ onAccessGranted }: AccessGateProps) {
                   setSubmitted(false);
                   setFormData({ email: '', telegram: '', twitter: '', message: '' });
                 }}
-                className="btn-bitcoin-secondary"
+                className="bg-transparent text-bitcoin-orange border-2 border-bitcoin-orange font-semibold uppercase tracking-wider px-6 py-3 rounded-lg transition-all hover:bg-bitcoin-orange hover:text-bitcoin-black hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:scale-105 active:scale-95 min-h-[48px]"
               >
                 Back to Options
               </button>
@@ -358,9 +471,9 @@ export default function AccessGate({ onAccessGranted }: AccessGateProps) {
         )}
 
         {/* Footer */}
-        <div className="access-gate-footer">
-          <p className="text-xs text-bitcoin-white-60 text-center">
-            © 2024 Bitcoin Sovereign Technology • Early Access Platform
+        <div className="mt-12 text-center">
+          <p className="text-xs text-bitcoin-white-60">
+            © 2025 Bitcoin Sovereign Technology • Secure Authentication Platform
           </p>
         </div>
       </div>

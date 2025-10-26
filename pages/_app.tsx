@@ -2,24 +2,13 @@ import type { AppProps } from 'next/app'
 import '../styles/globals.css'
 import { MobileErrorBoundary } from '../components/MobileErrorStates'
 import AccessGate from '../components/AccessGate'
-import { useState, useEffect } from 'react'
+import { AuthProvider, useAuth } from '../components/auth/AuthProvider'
 
-export default function App({ Component, pageProps }: AppProps) {
-  const [hasAccess, setHasAccess] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+// Inner component that uses auth context
+function AppContent({ Component, pageProps }: AppProps) {
+  const { isAuthenticated, isLoading } = useAuth();
 
-  useEffect(() => {
-    // Check if user has access in sessionStorage
-    const accessGranted = sessionStorage.getItem('hasAccess') === 'true';
-    setHasAccess(accessGranted);
-    setIsLoading(false);
-  }, []);
-
-  const handleAccessGranted = () => {
-    setHasAccess(true);
-  };
-
-  // Show loading state briefly
+  // Show loading state while checking authentication
   if (isLoading) {
     return (
       <div className="min-h-screen bg-bitcoin-black flex items-center justify-center">
@@ -31,12 +20,12 @@ export default function App({ Component, pageProps }: AppProps) {
     );
   }
 
-  // Show access gate if no access
-  if (!hasAccess) {
-    return <AccessGate onAccessGranted={handleAccessGranted} />;
+  // Show access gate if not authenticated
+  if (!isAuthenticated) {
+    return <AccessGate onAccessGranted={() => {}} />;
   }
 
-  // Show app if access granted
+  // Show app if authenticated
   return (
     <MobileErrorBoundary
       onError={(error) => {
@@ -48,5 +37,14 @@ export default function App({ Component, pageProps }: AppProps) {
         <Component {...pageProps} />
       </div>
     </MobileErrorBoundary>
-  )
+  );
+}
+
+// Main App component wrapped with AuthProvider
+export default function App(props: AppProps) {
+  return (
+    <AuthProvider>
+      <AppContent {...props} />
+    </AuthProvider>
+  );
 }
