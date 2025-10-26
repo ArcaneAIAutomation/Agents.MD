@@ -35,6 +35,18 @@ Advanced cryptocurrency trading intelligence platform powered by AI agents and r
 - **Official sources** including FCA, EBA, and regulatory bodies
 - **Automated updates** every 5 minutes
 
+### 🔐 Secure User Authentication
+- **One-time access code redemption** - Exclusive access control with single-use codes
+- **JWT-based session management** - Secure, httpOnly cookies with 7-day or 30-day sessions
+- **Password security** - bcrypt hashing with 12 salt rounds and strength validation
+- **Rate limiting** - Protection against brute force attacks (5 attempts per 15 minutes)
+- **Email integration** - Welcome emails via Office 365 with professional branding
+- **Comprehensive audit logging** - Track all authentication events with IP and user agent
+- **CSRF protection** - Token validation on all state-changing requests
+- **Input sanitization** - XSS and SQL injection prevention
+- **Session cleanup** - Automated removal of expired sessions
+- **Bitcoin Sovereign design** - Clean authentication forms with black and orange aesthetic
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -78,6 +90,118 @@ Advanced cryptocurrency trading intelligence platform powered by AI agents and r
 
 5. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
+
+## 🔐 Authentication System
+
+The platform features a comprehensive, secure authentication system that protects access to trading intelligence and market data.
+
+### Access Control
+
+**One-Time Access Codes**
+- Platform access is controlled through exclusive, single-use access codes
+- Each code can only be redeemed once during registration
+- Codes are tracked in Vercel Postgres with redemption status and timestamps
+- Administrators can view all codes and their redemption status via API
+
+### User Registration
+
+**Secure Account Creation**
+1. Users provide a valid access code, email, and password
+2. Access code is verified and marked as redeemed
+3. Password is hashed with bcrypt (12 salt rounds)
+4. User account is created in Vercel Postgres database
+5. JWT token is generated and stored in httpOnly secure cookie
+6. Welcome email is sent via Office 365 with platform details
+
+**Password Requirements**
+- Minimum 8 characters
+- At least 1 uppercase letter
+- At least 1 lowercase letter
+- At least 1 number
+- Real-time strength indicator during registration
+
+### User Login
+
+**Secure Authentication**
+- Email and password verification
+- Rate limiting: 5 failed attempts per email per 15 minutes
+- "Remember Me" option extends session from 7 to 30 days
+- JWT tokens stored in httpOnly, secure, sameSite cookies
+- Session records maintained in database for tracking
+
+### Session Management
+
+**JWT-Based Sessions**
+- Default session duration: 7 days
+- Extended session duration: 30 days (with "Remember Me")
+- Automatic session validation on protected routes
+- Session invalidation on logout
+- Expired session cleanup via automated cron job
+
+### Security Features
+
+**Multi-Layer Protection**
+- **CSRF Protection**: Token validation on all state-changing requests
+- **Rate Limiting**: Prevents brute force attacks using Vercel KV
+- **Input Sanitization**: XSS and SQL injection prevention
+- **Audit Logging**: All authentication events logged with IP, user agent, and timestamp
+- **Password Hashing**: bcrypt with 12 salt rounds
+- **Secure Cookies**: httpOnly, secure, sameSite flags enabled
+- **Email Verification**: Welcome emails confirm successful registration
+
+### Database Schema
+
+**Users Table**
+- Unique email addresses
+- Hashed passwords (never stored in plain text)
+- Creation and update timestamps
+
+**Access Codes Table**
+- Unique access codes
+- Redemption status and timestamps
+- User association for tracking
+
+**Sessions Table**
+- Token hashes for validation
+- Expiration timestamps
+- User associations
+
+**Auth Logs Table**
+- Event types (login, logout, register, failed_login)
+- IP addresses and user agents
+- Success/failure status
+- Timestamps for audit trail
+
+### API Endpoints
+
+**Authentication Routes**
+- `POST /api/auth/register` - Create new user account
+- `POST /api/auth/login` - Authenticate user
+- `POST /api/auth/logout` - Invalidate session
+- `GET /api/auth/me` - Get current user info
+
+**Admin Routes**
+- `GET /api/admin/access-codes` - List all access codes and redemption status
+
+### Frontend Components
+
+**Authentication UI**
+- `AccessGate` - Main authentication gate with mode switching
+- `RegistrationForm` - User registration with validation
+- `LoginForm` - User login with "Remember Me" option
+- `AuthProvider` - Global authentication state management
+
+All authentication components follow the Bitcoin Sovereign design system with pure black backgrounds, thin orange borders, and high-contrast white text.
+
+### Documentation
+
+For detailed authentication documentation, see:
+- **Deployment Guide**: `docs/DEPLOYMENT.md`
+- **User Guide**: `docs/USER-GUIDE.md`
+- **Database Setup**: `docs/DATABASE-SETUP-GUIDE.md`
+- **CSRF Protection**: `docs/CSRF-PROTECTION-GUIDE.md`
+- **Session Cleanup**: `docs/SESSION-CLEANUP-GUIDE.md`
+- **Admin API**: `docs/ADMIN-ACCESS-CODES-API.md`
 
 ## 📖 Usage
 
@@ -338,11 +462,32 @@ npm start
 
 ## 🔒 Security
 
+### Authentication Security
+- **JWT-based authentication** with httpOnly, secure, sameSite cookies
+- **Password hashing** with bcrypt (12 salt rounds minimum)
+- **Rate limiting** on authentication endpoints (5 attempts per 15 minutes)
+- **CSRF protection** with token validation on state-changing requests
+- **Input sanitization** to prevent XSS and SQL injection attacks
+- **Session management** with automatic cleanup of expired sessions
+- **Audit logging** for all authentication events with IP tracking
+
+### API Security
 - **API rate limiting** to prevent abuse
 - **CORS configuration** for secure API access
-- **Environment variable protection**
-- **Input validation** for all user inputs
+- **Environment variable protection** (never commit secrets)
+- **Input validation** with Zod schemas for all user inputs
 - **HTTPS enforcement** in production
+- **Security headers** (CSP, X-Frame-Options, HSTS)
+
+### Database Security
+- **Parameterized queries** to prevent SQL injection
+- **Connection pooling** with secure TLS connections
+- **Encrypted passwords** (never stored in plain text)
+- **Access control** with least privilege principle
+- **Automated backups** for data recovery
+
+### Reporting Security Issues
+Please review our [Security Policy](SECURITY.md) for information on reporting vulnerabilities. **Never commit API keys or sensitive data to the repository.**
 
 ## 📱 Mobile Responsiveness
 
@@ -380,17 +525,62 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ```
 Agents.MD/
 ├── 📁 components/           # React components
-│   ├── BTCTradingChart.tsx  # Main trading chart component
+│   ├── auth/               # Authentication components
+│   │   ├── AuthProvider.tsx    # Global auth state
+│   │   ├── LoginForm.tsx       # User login form
+│   │   └── RegistrationForm.tsx # User registration form
+│   ├── AccessGate.tsx      # Authentication gate
+│   ├── BTCTradingChart.tsx # Main trading chart component
 │   ├── BTCMarketAnalysis.tsx # Market analysis dashboard
-│   └── TradingChart.tsx     # Base chart component
+│   └── TradingChart.tsx    # Base chart component
 ├── 📁 pages/               # Next.js pages and API routes
 │   ├── api/                # Backend API endpoints
+│   │   ├── auth/           # Authentication endpoints
+│   │   │   ├── register.ts     # User registration
+│   │   │   ├── login.ts        # User login
+│   │   │   ├── logout.ts       # User logout
+│   │   │   └── me.ts           # Current user info
+│   │   ├── admin/          # Admin endpoints
+│   │   │   └── access-codes.ts # Access code management
 │   │   ├── btc-analysis.ts # Bitcoin analysis API
 │   │   ├── crypto-herald.ts # News aggregation API
 │   │   └── historical-prices.ts # Price history API
 │   └── index.tsx           # Main dashboard page
+├── 📁 lib/                 # Core libraries
+│   ├── auth/               # Authentication utilities
+│   │   ├── jwt.ts              # JWT token management
+│   │   ├── password.ts         # Password hashing
+│   │   └── auditLog.ts         # Event logging
+│   ├── email/              # Email integration
+│   │   ├── office365.ts        # Office 365 client
+│   │   └── templates/          # Email templates
+│   ├── security/           # Security utilities
+│   │   └── sanitize.ts         # Input sanitization
+│   ├── validation/         # Input validation
+│   │   └── auth.ts             # Auth schemas
+│   └── db.ts               # Database utilities
+├── 📁 middleware/          # API middleware
+│   ├── auth.ts             # Authentication middleware
+│   ├── csrf.ts             # CSRF protection
+│   └── rateLimit.ts        # Rate limiting
+├── 📁 migrations/          # Database migrations
+│   └── 001_initial_schema.sql # Initial database schema
+├── 📁 scripts/             # Utility scripts
+│   ├── cleanup-sessions.ts     # Session cleanup cron
+│   └── import-access-codes.ts  # Import access codes
+├── 📁 __tests__/           # Test suites
+│   ├── api/                # API endpoint tests
+│   ├── lib/                # Library tests
+│   ├── e2e/                # End-to-end tests
+│   └── security/           # Security tests
 ├── 📁 styles/              # CSS and styling
 ├── 📁 docs/                # Documentation
+│   ├── DEPLOYMENT.md           # Deployment guide
+│   ├── USER-GUIDE.md           # User documentation
+│   ├── DATABASE-SETUP-GUIDE.md # Database setup
+│   ├── CSRF-PROTECTION-GUIDE.md # CSRF guide
+│   ├── SESSION-CLEANUP-GUIDE.md # Session cleanup
+│   └── ADMIN-ACCESS-CODES-API.md # Admin API docs
 ├── 📁 .github/             # GitHub templates and workflows
 ├── .env.example            # Environment variables template
 ├── README.md               # This file
@@ -401,7 +591,7 @@ Agents.MD/
 
 ### Environment Variables
 
-Required API keys (add to `.env.local`):
+Required API keys and configuration (add to `.env.local`):
 
 | Variable | Description | Required | Get From |
 |----------|-------------|----------|----------|
@@ -409,6 +599,16 @@ Required API keys (add to `.env.local`):
 | `COINMARKETCAP_API_KEY` | Market data | ✅ | [CoinMarketCap Pro](https://pro.coinmarketcap.com/account) |
 | `NEWS_API_KEY` | News aggregation | ✅ | [NewsAPI](https://newsapi.org/account) |
 | `COINGECKO_API_KEY` | Alternative market data | ⚪ | [CoinGecko](https://www.coingecko.com/en/api/pricing) |
+| `DATABASE_URL` | Vercel Postgres connection | ✅ | [Vercel Dashboard](https://vercel.com/dashboard) |
+| `JWT_SECRET` | JWT token signing secret | ✅ | Generate: `openssl rand -base64 32` |
+| `KV_URL` | Vercel KV for rate limiting | ✅ | [Vercel Dashboard](https://vercel.com/dashboard) |
+| `KV_REST_API_URL` | Vercel KV REST API | ✅ | [Vercel Dashboard](https://vercel.com/dashboard) |
+| `KV_REST_API_TOKEN` | Vercel KV API token | ✅ | [Vercel Dashboard](https://vercel.com/dashboard) |
+| `OFFICE365_CLIENT_ID` | Office 365 email client ID | ✅ | [Azure Portal](https://portal.azure.com) |
+| `OFFICE365_CLIENT_SECRET` | Office 365 email secret | ✅ | [Azure Portal](https://portal.azure.com) |
+| `OFFICE365_TENANT_ID` | Office 365 tenant ID | ✅ | [Azure Portal](https://portal.azure.com) |
+| `OFFICE365_FROM_EMAIL` | Email sender address | ✅ | Your Office 365 email |
+| `CRON_SECRET` | Cron job authentication | ✅ | Generate: `openssl rand -base64 32` |
 
 ### Feature Flags
 
@@ -466,15 +666,26 @@ npm run type-check   # Run TypeScript checks
 - **Inter Font** - Geometric sans-serif for UI and headlines
 - **Roboto Mono** - Monospaced font for data and technical displays
 - **Lucide React** - Modern icon library (styled in orange/white)
+- **React Context** - Global authentication state management
 
 ### Backend & APIs
 - **Next.js API Routes** - Serverless API endpoints
+- **Vercel Postgres** - PostgreSQL database for user accounts and access codes
+- **Vercel KV** - Redis for rate limiting and session management
 - **Real-time Data Sources**:
   - Binance API (Order book, klines, funding)
   - Coinbase API (Price feeds)
   - CoinGecko API (Market data)
   - NewsAPI (Cryptocurrency news)
   - Alternative.me (Fear & Greed Index)
+
+### Authentication & Security
+- **JWT (jsonwebtoken)** - Secure token-based authentication
+- **bcrypt** - Password hashing with 12 salt rounds
+- **Zod** - Runtime type validation and input sanitization
+- **Microsoft Graph API** - Office 365 email integration
+- **Custom Middleware** - Authentication, rate limiting, CSRF protection
+- **Audit Logging** - Comprehensive event tracking
 
 ### AI & Analysis
 - **OpenAI GPT-4** - Market analysis and predictions

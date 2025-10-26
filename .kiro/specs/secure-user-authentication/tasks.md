@@ -26,7 +26,8 @@ All core authentication features have been implemented and tested:
 - [-] Deploy to production and verify
 
 
-- [ ] Update main README.md with authentication overview
+- [-] Update main README.md with authentication overview
+
 
 
 **Next Steps:**
@@ -621,7 +622,10 @@ All core authentication features have been implemented and tested:
   - Test email delivery
   - _Requirements: All_
 
-- [x] 22. Deploy to production
+- [-] 22. Deploy to production
+
+
+
 
 
 
@@ -650,8 +654,10 @@ All core authentication features have been implemented and tested:
   - Update AccessGate to use only new auth system
   - Clean up unused code and comments
   - _Requirements: 10.4_
+- [x] 23.1 Update main README.md
 
-- [ ] 23.1 Update main README.md
+- [x] 23.1 Update main README.md
+
   - Update README.md with new authentication system overview
   - Add link to authentication documentation
   - Document new user registration process
