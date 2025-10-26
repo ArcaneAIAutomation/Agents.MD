@@ -36,15 +36,17 @@ const passwordSchema = z
 
 /**
  * Access code validation schema
- * Format: 8 alphanumeric characters
+ * Format: Alphanumeric characters with optional hyphens
+ * Examples: BITCOIN2025, BTC-SOVEREIGN-K3QYMQ-01
  */
 const accessCodeSchema = z
   .string()
   .trim()
   .toUpperCase()
   .min(1, 'Access code is required')
-  .length(8, 'Access code must be exactly 8 characters')
-  .regex(/^[A-Z0-9]+$/, 'Access code must contain only uppercase letters and numbers');
+  .min(8, 'Access code must be at least 8 characters')
+  .max(50, 'Access code must be less than 50 characters')
+  .regex(/^[A-Z0-9-]+$/, 'Access code must contain only uppercase letters, numbers, and hyphens');
 
 /**
  * Registration request validation schema
