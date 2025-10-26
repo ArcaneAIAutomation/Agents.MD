@@ -1,7 +1,8 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { Menu, X, Home, Newspaper, Bot, Bitcoin, Coins, Fish, Scale } from 'lucide-react';
+import { Menu, X, Home, Newspaper, Bot, Bitcoin, Coins, Fish, Scale, LogOut } from 'lucide-react';
+import { useAuth } from './auth/AuthProvider';
 
 export interface NavigationRef {
   openMenu: () => void;
@@ -10,6 +11,18 @@ export interface NavigationRef {
 const Navigation = forwardRef<NavigationRef>((props, ref) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
+  const { user, logout } = useAuth();
+  
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setIsMenuOpen(false);
+      router.push('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   // Expose openMenu function to parent components
   useImperativeHandle(ref, () => ({
@@ -114,6 +127,18 @@ const Navigation = forwardRef<NavigationRef>((props, ref) => {
                   </Link>
                 );
               })}
+              
+              {/* Logout Button */}
+              {user && (
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 text-sm font-semibold uppercase tracking-wider transition-all rounded flex items-center gap-2 text-bitcoin-white-60 hover:text-bitcoin-orange hover:border-b-2 hover:border-bitcoin-orange ml-4"
+                  title={`Logout (${user.email})`}
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="hidden xl:inline">Logout</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -238,6 +263,33 @@ const Navigation = forwardRef<NavigationRef>((props, ref) => {
                   </Link>
                 );
               })}
+              
+              {/* Logout Button - Mobile Menu */}
+              {user && (
+                <button
+                  onClick={handleLogout}
+                  className="block w-full transition-all duration-300 rounded-xl bg-bitcoin-black text-bitcoin-white border border-bitcoin-orange-20 hover:border-bitcoin-orange hover:shadow-[0_0_20px_rgba(247,147,26,0.3)]"
+                >
+                  <div className="p-4 flex items-center gap-4 min-h-[80px]">
+                    <div className="flex-shrink-0 w-14 h-14 rounded-lg flex items-center justify-center bg-bitcoin-black border-2 border-bitcoin-orange-20 text-bitcoin-orange hover:border-bitcoin-orange hover:scale-105 transition-all duration-300">
+                      <LogOut className="h-7 w-7" strokeWidth={2.5} />
+                    </div>
+                    <div className="flex-1 min-w-0 text-left">
+                      <div className="font-bold text-lg tracking-tight text-bitcoin-white">
+                        Logout
+                      </div>
+                      <div className="text-sm mt-1 text-bitcoin-white-60 truncate">
+                        {user.email}
+                      </div>
+                    </div>
+                    <div className="flex-shrink-0 text-bitcoin-orange">
+                      <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </button>
+              )}
             </div>
           </div>
 
