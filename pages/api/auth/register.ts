@@ -7,7 +7,7 @@
  */
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import { sql } from '@vercel/postgres';
+import { query } from '../../../lib/db';
 import { registrationRateLimiter, withRateLimit } from '../../../middleware/rateLimit';
 import { validateRegistration, formatValidationErrors } from '../../../lib/validation/auth';
 import { hashPassword } from '../../../lib/auth/password';
@@ -80,11 +80,10 @@ async function registerHandler(
     // ========================================================================
     // SUBTASK 3.1: Verify access code exists and is not redeemed
     // ========================================================================
-    const codeResult = await sql`
-      SELECT id, code, redeemed, redeemed_by, redeemed_at
-      FROM access_codes
-      WHERE code = ${normalizedCode}
-    `;
+    const codeResult = await query(
+      'SELECT id, code, redeemed, redeemed_by, redeemed_at FROM access_codes WHERE code = $1',
+      [normalizedCode]
+    );
 
     // Check if code exists
     if (codeResult.rows.length === 0) {
@@ -109,11 +108,10 @@ async function registerHandler(
     // ========================================================================
     // SUBTASK 3.2: Check email uniqueness
     // ========================================================================
-    const emailResult = await sql`
-      SELECT id, email
-      FROM users
-      WHERE email = ${normalizedEmail}
-    `;
+    const emailResult = await query(
+      'SELECT id, email FROM users WHERE email = $1',
+      [normalizedEmail]
+    );
 
     if (emailResult.rows.length > 0) {
       logFailedRegistration(normalizedEmail, 'Email already exists', req);
@@ -131,23 +129,18 @@ async function registerHandler(
     const passwordHash = await hashPassword(password);
 
     // Insert new user record
-    const userResult = await sql`
-      INSERT INTO users (email, password_hash, created_at, updated_at)
-      VALUES (${normalizedEmail}, ${passwordHash}, NOW(), NOW())
-      RETURNING id, email, created_at
-    `;
+    const userResult = await query(
+      'INSERT INTO users (email, password_hash, created_at, updated_at) VALUES ($1, $2, NOW(), NOW()) RETURNING id, email, created_at',
+      [normalizedEmail, passwordHash]
+    );
 
     const newUser = userResult.rows[0];
 
     // Mark access code as redeemed
-    await sql`
-      UPDATE access_codes
-      SET 
-        redeemed = true,
-        redeemed_by = ${newUser.id},
-        redeemed_at = NOW()
-      WHERE id = ${accessCodeRecord.id}
-    `;
+    await query(
+      'UPDATE access_codes SET redeemed = true, redeemed_by = $1, redeemed_at = NOW() WHERE id = $2',
+      [newUser.id, accessCodeRecord.id]
+    );
 
     // ========================================================================
     // SUBTASK 3.4: Generate JWT and set cookie

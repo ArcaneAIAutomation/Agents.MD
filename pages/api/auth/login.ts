@@ -9,7 +9,7 @@
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { sql } from '@vercel/postgres';
+import { query } from '../../../lib/db';
 import { validateLogin } from '../../../lib/validation/auth';
 import { verifyPassword } from '../../../lib/auth/password';
 import { generateToken } from '../../../lib/auth/jwt';
@@ -78,12 +78,10 @@ async function loginHandler(
     // ========================================================================
     // STEP 2: Query user by email (Subtask 4.1)
     // ========================================================================
-    const userResult = await sql`
-      SELECT id, email, password_hash, created_at
-      FROM users
-      WHERE email = ${email.toLowerCase()}
-      LIMIT 1
-    `;
+    const userResult = await query(
+      'SELECT id, email, password_hash, created_at FROM users WHERE email = $1 LIMIT 1',
+      [email.toLowerCase()]
+    );
 
     // Return generic 401 error if user not found (don't reveal which field is wrong)
     if (userResult.rows.length === 0) {
@@ -135,10 +133,10 @@ async function loginHandler(
     // ========================================================================
     // STEP 6: Insert session record into sessions table (Subtask 4.2)
     // ========================================================================
-    await sql`
-      INSERT INTO sessions (user_id, token_hash, expires_at)
-      VALUES (${user.id}, ${tokenHash}, ${expiresAt.toISOString()})
-    `;
+    await query(
+      'INSERT INTO sessions (user_id, token_hash, expires_at) VALUES ($1, $2, $3)',
+      [user.id, tokenHash, expiresAt.toISOString()]
+    );
 
     // ========================================================================
     // STEP 7: Set httpOnly, secure, sameSite cookie (Subtask 4.2)

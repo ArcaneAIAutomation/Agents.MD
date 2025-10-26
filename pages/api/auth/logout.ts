@@ -9,7 +9,7 @@
  */
 
 import type { NextApiResponse } from 'next';
-import { sql } from '@vercel/postgres';
+import { query } from '../../../lib/db';
 import { withAuth, AuthenticatedRequest } from '../../../middleware/auth';
 import { logLogout } from '../../../lib/auth/auditLog';
 import crypto from 'crypto';
@@ -68,11 +68,10 @@ async function logoutHandler(
     // ========================================================================
     const tokenHash = hashToken(token);
 
-    const deleteResult = await sql`
-      DELETE FROM sessions
-      WHERE user_id = ${userId}
-        AND token_hash = ${tokenHash}
-    `;
+    const deleteResult = await query(
+      'DELETE FROM sessions WHERE user_id = $1 AND token_hash = $2',
+      [userId, tokenHash]
+    );
 
     // Log if session wasn't found (might have already expired)
     if (deleteResult.rowCount === 0) {
