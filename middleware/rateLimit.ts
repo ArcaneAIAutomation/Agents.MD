@@ -7,13 +7,26 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 
-// Try to import Vercel KV, but handle gracefully if not configured
-let kv: any;
-try {
-  const kvModule = require('@vercel/kv');
-  kv = kvModule.kv;
-} catch (error) {
-  console.warn('Vercel KV not available, rate limiting will use in-memory fallback');
+// Check if Vercel KV is properly configured (requires Upstash HTTPS URL)
+let kv: any = null;
+const kvUrl = process.env.KV_REST_API_URL;
+const isUpstashUrl = kvUrl && kvUrl.startsWith('https://');
+
+if (isUpstashUrl) {
+  try {
+    const kvModule = require('@vercel/kv');
+    kv = kvModule.kv;
+    console.log('✅ Vercel KV initialized with Upstash Redis');
+  } catch (error) {
+    console.warn('⚠️ Vercel KV module not available, using in-memory fallback');
+    kv = null;
+  }
+} else {
+  if (kvUrl) {
+    console.warn(`⚠️ KV_REST_API_URL is not an Upstash URL (must start with https://). Using in-memory fallback. Current: ${kvUrl?.substring(0, 20)}...`);
+  } else {
+    console.warn('⚠️ KV_REST_API_URL not configured. Using in-memory fallback for rate limiting.');
+  }
   kv = null;
 }
 

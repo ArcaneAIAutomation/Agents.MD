@@ -5,6 +5,11 @@
 ```
 Agents.MD/
 ├── components/              # React components (PascalCase naming)
+│   ├── auth/                   # Authentication components
+│   │   ├── AuthProvider.tsx    # Authentication context provider
+│   │   ├── LoginForm.tsx       # User login form
+│   │   ├── RegistrationForm.tsx # User registration form
+│   │   └── AccessGate.tsx      # Authentication gate wrapper
 │   ├── BTCTradingChart.tsx     # Bitcoin-specific trading charts
 │   ├── ETHTradingChart.tsx     # Ethereum-specific trading charts
 │   ├── TradingChart.tsx        # Base chart component
@@ -18,6 +23,16 @@ Agents.MD/
 │   └── Layout.tsx              # Page layout wrapper
 ├── pages/                   # Next.js pages and API routes
 │   ├── api/                    # Backend API endpoints
+│   │   ├── auth/               # Authentication endpoints
+│   │   │   ├── register.ts     # User registration
+│   │   │   ├── login.ts        # User login
+│   │   │   ├── logout.ts       # User logout
+│   │   │   ├── me.ts           # Current user info
+│   │   │   └── csrf-token.ts   # CSRF token generation
+│   │   ├── admin/              # Admin endpoints
+│   │   │   └── access-codes.ts # Access code management
+│   │   ├── cron/               # Scheduled jobs
+│   │   │   └── cleanup-sessions.ts # Session cleanup (daily)
 │   │   ├── btc-analysis.ts     # Bitcoin market analysis
 │   │   ├── eth-analysis.ts     # Ethereum market analysis
 │   │   ├── crypto-herald.ts    # News aggregation
@@ -29,7 +44,7 @@ Agents.MD/
 │   │       ├── detect.ts       # Whale transaction detection
 │   │       ├── analyze.ts      # Start Caesar AI analysis
 │   │       └── analysis/[jobId].ts # Poll analysis results
-│   ├── _app.tsx               # App configuration
+│   ├── _app.tsx               # App configuration (wrapped with AuthProvider)
 │   ├── _document.tsx          # HTML document structure
 │   └── index.tsx              # Main dashboard page
 ├── hooks/                   # Custom React hooks (camelCase)
@@ -44,6 +59,34 @@ Agents.MD/
 │   └── icons/                  # Icon assets
 │       ├── caesar-api-placeholder.svg # Caesar API icon
 │       └── README.md           # Icon replacement instructions
+├── lib/                     # Core library functions
+│   ├── auth/                   # Authentication utilities
+│   │   ├── jwt.ts              # JWT token generation/verification
+│   │   ├── password.ts         # Password hashing with bcrypt
+│   │   └── auditLog.ts         # Authentication event logging
+│   ├── email/                  # Email utilities
+│   │   ├── office365.ts        # Office 365 email client
+│   │   └── templates/          # Email templates
+│   │       └── welcome.ts      # Welcome email template
+│   ├── security/               # Security utilities
+│   │   └── sanitize.ts         # Input sanitization
+│   ├── validation/             # Input validation
+│   │   └── auth.ts             # Zod schemas for auth
+│   └── db.ts                   # Database connection and queries
+├── middleware/              # Next.js middleware
+│   ├── auth.ts                 # Authentication middleware
+│   ├── rateLimit.ts            # Rate limiting middleware
+│   └── csrf.ts                 # CSRF protection middleware
+├── migrations/              # Database migrations
+│   ├── 001_initial_schema.sql  # Initial auth schema
+│   └── 001_initial_schema_clean.sql # Clean migration (no validation)
+├── scripts/                 # Utility scripts
+│   ├── run-migrations.ts       # Run database migrations
+│   ├── simple-migrate.ts       # Simple migration runner
+│   ├── check-database-status.ts # Database status checker
+│   ├── import-access-codes.ts  # Import access codes
+│   ├── cleanup-sessions.ts     # Session cleanup script
+│   └── quick-verify-production.ps1 # Production verification
 ├── utils/                   # Utility functions
 │   ├── accessibilityTesting.ts # Mobile accessibility testing
 │   ├── contrastValidation.ts   # Color contrast validation

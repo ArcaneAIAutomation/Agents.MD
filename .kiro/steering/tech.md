@@ -33,6 +33,16 @@
   - **Kraken API** - Live trading data and order book analysis
   - **Caesar API** - Advanced market analysis and whale transaction intelligence (✅ Live)
 
+## Authentication & Security
+- **Supabase PostgreSQL** - Production database with connection pooling (port 6543)
+- **JWT Tokens** - Secure authentication with httpOnly cookies
+- **bcrypt** - Password hashing with 12 salt rounds
+- **Zod** - Runtime type validation and input sanitization
+- **Rate Limiting** - In-memory fallback (Upstash Redis recommended for scale)
+- **CSRF Protection** - SameSite=Strict cookies
+- **Audit Logging** - Comprehensive authentication event tracking
+- **Session Management** - Database-backed sessions with configurable expiration
+
 ## Development Tools
 - **ESLint** - Code linting with Next.js config and accessibility rules
 - **Prettier** - Code formatting with consistent styling
