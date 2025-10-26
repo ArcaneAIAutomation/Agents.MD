@@ -7,26 +7,40 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 
-// Check if Vercel KV is properly configured (requires Upstash HTTPS URL)
+// FORCE in-memory rate limiting - Vercel KV disabled
+// Vercel KV requires Upstash Redis (https:// URLs only)
+// Current Redis Cloud URL (redis://) is incompatible
+// 
+// To enable Vercel KV:
+//   1. Remove or comment out the line below
+//   2. Set KV_REST_API_URL to Upstash HTTPS URL
+//   3. Set KV_REST_API_TOKEN
 let kv: any = null;
-const kvUrl = process.env.KV_REST_API_URL;
-const isUpstashUrl = kvUrl && kvUrl.startsWith('https://');
+const FORCE_IN_MEMORY = true; // Set to false to enable Vercel KV
 
-if (isUpstashUrl) {
-  try {
-    const kvModule = require('@vercel/kv');
-    kv = kvModule.kv;
-    console.log('✅ Vercel KV initialized with Upstash Redis');
-  } catch (error) {
-    console.warn('⚠️ Vercel KV module not available, using in-memory fallback');
+if (!FORCE_IN_MEMORY) {
+  const kvUrl = process.env.KV_REST_API_URL;
+  const isUpstashUrl = kvUrl && kvUrl.startsWith('https://');
+
+  if (isUpstashUrl) {
+    try {
+      const kvModule = require('@vercel/kv');
+      kv = kvModule.kv;
+      console.log('✅ Vercel KV initialized with Upstash Redis');
+    } catch (error) {
+      console.warn('⚠️ Vercel KV module not available, using in-memory fallback');
+      kv = null;
+    }
+  } else {
+    if (kvUrl) {
+      console.warn(`⚠️ KV_REST_API_URL is not an Upstash URL (must start with https://). Using in-memory fallback. Current: ${kvUrl?.substring(0, 20)}...`);
+    } else {
+      console.warn('⚠️ KV_REST_API_URL not configured. Using in-memory fallback for rate limiting.');
+    }
     kv = null;
   }
 } else {
-  if (kvUrl) {
-    console.warn(`⚠️ KV_REST_API_URL is not an Upstash URL (must start with https://). Using in-memory fallback. Current: ${kvUrl?.substring(0, 20)}...`);
-  } else {
-    console.warn('⚠️ KV_REST_API_URL not configured. Using in-memory fallback for rate limiting.');
-  }
+  console.log('ℹ️ Rate limiting: Using in-memory fallback (FORCE_IN_MEMORY = true)');
   kv = null;
 }
 
