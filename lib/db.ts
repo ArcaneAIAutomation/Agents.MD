@@ -147,7 +147,7 @@ export async function query<T extends QueryResultRow = any>(
       const result = await pool.query<T>({
         text,
         values: params,
-        rowMode: 'array' as any, // Type assertion to fix TypeScript issue
+        // rowMode removed - return objects instead of arrays for proper field access
       });
       const duration = Date.now() - start;
       
