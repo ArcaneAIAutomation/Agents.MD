@@ -6,7 +6,19 @@
  */
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import { kv } from '@vercel/kv';
+
+// Try to import Vercel KV, but handle gracefully if not configured
+let kv: any;
+try {
+  const kvModule = require('@vercel/kv');
+  kv = kvModule.kv;
+} catch (error) {
+  console.warn('Vercel KV not available, rate limiting will use in-memory fallback');
+  kv = null;
+}
+
+// In-memory fallback for rate limiting (not ideal for production, but works)
+const inMemoryStore = new Map<string, { count: number; resetTime: number }>();
 
 /**
  * Rate limit configuration options
@@ -86,14 +98,24 @@ export function rateLimit(config: RateLimitConfig = {}) {
       const now = Date.now();
       const windowStart = now - finalConfig.windowMs;
 
-      // Get attempts from KV store
+      // Get attempts from KV store or in-memory fallback
       let attempts: number[] = [];
       try {
-        const stored = await kv.get<number[]>(key);
-        attempts = stored || [];
+        if (kv) {
+          const stored = await kv.get<number[]>(key);
+          attempts = stored || [];
+        } else {
+          // Use in-memory fallback
+          const stored = inMemoryStore.get(key);
+          if (stored && stored.resetTime > now) {
+            attempts = Array(stored.count).fill(stored.resetTime);
+          } else {
+            inMemoryStore.delete(key);
+          }
+        }
       } catch (error) {
-        console.error('Rate limit: Failed to get attempts from KV:', error);
-        // If KV is unavailable, allow the request (fail open)
+        console.error('Rate limit: Failed to get attempts:', error);
+        // If storage is unavailable, allow the request (fail open)
         return next();
       }
 
@@ -120,12 +142,30 @@ export function rateLimit(config: RateLimitConfig = {}) {
       // Add current attempt
       recentAttempts.push(now);
 
-      // Store updated attempts in KV with expiration
+      // Store updated attempts in KV or in-memory fallback
       try {
-        const expirationSeconds = Math.ceil(finalConfig.windowMs / 1000);
-        await kv.set(key, recentAttempts, { ex: expirationSeconds });
+        if (kv) {
+          const expirationSeconds = Math.ceil(finalConfig.windowMs / 1000);
+          await kv.set(key, recentAttempts, { ex: expirationSeconds });
+        } else {
+          // Use in-memory fallback
+          inMemoryStore.set(key, {
+            count: recentAttempts.length,
+            resetTime: now + finalConfig.windowMs
+          });
+          
+          // Clean up old entries periodically
+          if (Math.random() < 0.01) { // 1% chance
+            const cutoff = Date.now();
+            for (const [k, v] of inMemoryStore.entries()) {
+              if (v.resetTime < cutoff) {
+                inMemoryStore.delete(k);
+              }
+            }
+          }
+        }
       } catch (error) {
-        console.error('Rate limit: Failed to store attempts in KV:', error);
+        console.error('Rate limit: Failed to store attempts:', error);
         // Continue even if storage fails (fail open)
       }
 

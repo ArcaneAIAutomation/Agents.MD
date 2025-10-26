@@ -88,9 +88,9 @@ export function getPool(): Pool {
 
     pool = new Pool({
       connectionString,
-      ssl: process.env.NODE_ENV === 'production' ? {
+      ssl: {
         rejectUnauthorized: false
-      } : undefined,
+      },
       max: 20, // Maximum number of clients in the pool
       idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
       connectionTimeoutMillis: 10000, // Timeout after 10 seconds
