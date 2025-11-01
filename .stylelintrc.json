@@ -1,0 +1,51 @@
+{
+  "extends": "stylelint-config-standard",
+  "rules": {
+    "color-named": "never",
+    "color-no-hex": null,
+    "declaration-property-value-disallowed-list": {
+      "/^(background|color|border|outline|text-shadow|box-shadow)$/": [
+        "/green/i",
+        "/red/i",
+        "/blue/i",
+        "/purple/i",
+        "/yellow(?!.*orange)/i",
+        "/gray/i",
+        "/grey/i",
+        "/#00d4aa/i",
+        "/#059669/i",
+        "/#10b981/i",
+        "/#ff6b6b/i",
+        "/#dc2626/i",
+        "/#ef4444/i",
+        "/#1e4dd8/i",
+        "/#2563eb/i",
+        "/#3b82f6/i",
+        "/#8b5cf6/i",
+        "/#fbbf24/i",
+        "/#6b7280/i",
+        "/#9ca3af/i"
+      ]
+    },
+    "custom-property-pattern": "^bitcoin-",
+    "selector-class-pattern": null,
+    "at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": [
+          "tailwind",
+          "apply",
+          "variants",
+          "responsive",
+          "screen"
+        ]
+      }
+    ]
+  },
+  "ignoreFiles": [
+    "node_modules/**",
+    ".next/**",
+    "build/**",
+    "dist/**"
+  ]
+}

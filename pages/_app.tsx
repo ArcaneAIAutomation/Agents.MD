@@ -3,6 +3,8 @@ import '../styles/globals.css'
 import { MobileErrorBoundary } from '../components/MobileErrorStates'
 import AccessGate from '../components/AccessGate'
 import { AuthProvider, useAuth } from '../components/auth/AuthProvider'
+import { useEffect } from 'react'
+import { initCSSValidation } from '../utils/cssValidation'
 
 // Inner component that uses auth context
 function AppContent({ Component, pageProps, router }: AppProps & { router: any }) {
@@ -47,6 +49,11 @@ function AppContent({ Component, pageProps, router }: AppProps & { router: any }
 
 // Main App component wrapped with AuthProvider
 export default function App(props: AppProps) {
+  // Initialize CSS validation system on mount
+  useEffect(() => {
+    initCSSValidation();
+  }, []);
+
   return (
     <AuthProvider>
       <AppContent {...props} router={props.router} />
