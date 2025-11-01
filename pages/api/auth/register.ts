@@ -143,65 +143,65 @@ async function registerHandler(
     );
 
     // ========================================================================
-    // SUBTASK 3.4: Generate JWT and set cookie
+    // SUBTASK 3.4: Generate verification token and send email
     // ========================================================================
     
-    // Generate JWT token with 7-day expiration
-    const token = generateToken(
-      {
-        userId: newUser.id,
-        email: newUser.email
-      },
-      '7d'
+    // Generate verification token
+    const { generateVerificationToken, hashVerificationToken, getVerificationExpiry, generateVerificationUrl } = await import('../../../lib/auth/verification');
+    const verificationToken = generateVerificationToken();
+    const hashedToken = hashVerificationToken(verificationToken);
+    const tokenExpiry = getVerificationExpiry(24); // 24 hours
+
+    // Update user with verification token
+    await query(
+      'UPDATE users SET verification_token = $1, verification_token_expires = $2, verification_sent_at = NOW() WHERE id = $3',
+      [hashedToken, tokenExpiry.toISOString(), newUser.id]
     );
 
-    // Set httpOnly, secure, sameSite cookie
-    const isProduction = process.env.NODE_ENV === 'production';
-    res.setHeader('Set-Cookie', [
-      `auth_token=${token}; HttpOnly; Path=/; Max-Age=${7 * 24 * 60 * 60}; SameSite=Strict${isProduction ? '; Secure' : ''}`
-    ]);
+    // Generate verification URL
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://news.arcane.group';
+    const verificationUrl = generateVerificationUrl(appUrl, verificationToken);
 
     // ========================================================================
-    // SUBTASK 3.5: Log registration event and return response
+    // SUBTASK 3.5: Send verification email
     // ========================================================================
     
-    // Log successful registration (non-blocking)
-    logRegistration(newUser.id, newUser.email, req);
-
-    // ========================================================================
-    // TASK 12.2: Send welcome email (non-blocking)
-    // ========================================================================
-    
-    // Send welcome email asynchronously (doesn't block registration)
+    // Send verification email asynchronously
     try {
-      const platformUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://news.arcane.group';
-      const welcomeEmailHtml = generateWelcomeEmail({
+      const { generateVerificationEmail } = await import('../../../lib/email/templates/verification');
+      const verificationEmailHtml = generateVerificationEmail({
         email: newUser.email,
-        platformUrl
+        verificationUrl,
+        expiresInHours: 24
       });
 
       // Send email without waiting for result
       sendEmailAsync({
         to: newUser.email,
-        subject: 'Welcome to Bitcoin Sovereign Technology',
-        body: welcomeEmailHtml,
+        subject: 'Verify Your Email - Bitcoin Sovereign Technology',
+        body: verificationEmailHtml,
         contentType: 'HTML'
       });
 
-      console.log(`Welcome email queued for ${newUser.email}`);
+      console.log(`Verification email queued for ${newUser.email}`);
     } catch (emailError) {
       // Log error but don't block registration
-      console.error('Failed to queue welcome email:', emailError);
+      console.error('Failed to queue verification email:', emailError);
     }
 
-    // Return success response with user data (no password)
+    // Log successful registration (non-blocking)
+    logRegistration(newUser.id, newUser.email, req);
+
+    // Return success response WITHOUT auto-login (user must verify email first)
     return res.status(201).json({
       success: true,
-      message: 'Registration successful',
+      message: 'Registration successful. Please check your email to verify your account.',
+      requiresVerification: true,
       user: {
         id: newUser.id,
         email: newUser.email,
-        createdAt: newUser.created_at
+        createdAt: newUser.created_at,
+        emailVerified: false
       }
     });
 

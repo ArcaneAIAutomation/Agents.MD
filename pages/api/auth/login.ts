@@ -79,7 +79,7 @@ async function loginHandler(
     // STEP 2: Query user by email (Subtask 4.1)
     // ========================================================================
     const userResult = await query(
-      'SELECT id, email, password_hash, created_at FROM users WHERE email = $1 LIMIT 1',
+      'SELECT id, email, password_hash, email_verified, created_at FROM users WHERE email = $1 LIMIT 1',
       [email.toLowerCase()]
     );
 
@@ -93,6 +93,16 @@ async function loginHandler(
     }
 
     const user = userResult.rows[0];
+
+    // Check if email is verified
+    if (!user.email_verified) {
+      logFailedLogin(email, 'Email not verified', req);
+      return res.status(403).json({
+        success: false,
+        message: 'Please verify your email address before logging in.',
+        requiresVerification: true
+      });
+    }
 
     // ========================================================================
     // STEP 3: Compare password with bcrypt (Subtask 4.1)

@@ -95,6 +95,8 @@ tmp/
 **/api-keys.*
 **/secrets.*
 **/.env*
+production-secrets.txt
+vercel-env-vars.txt
 
 # Development and testing files
 test-*.js
