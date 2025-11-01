@@ -163,34 +163,34 @@ async function registerHandler(
     const verificationUrl = generateVerificationUrl(appUrl, verificationToken);
 
     // ========================================================================
-    // SUBTASK 3.5: Send verification email
+    // SUBTASK 3.5: Send welcome email with verification link
     // ========================================================================
     
-    // Send verification email asynchronously
+    // Send welcome email with verification link asynchronously
     try {
-      const { generateVerificationEmail } = await import('../../../lib/email/templates/verification');
-      const verificationEmailHtml = generateVerificationEmail({
+      const welcomeEmailHtml = generateWelcomeEmail({
         email: newUser.email,
+        platformUrl: appUrl,
         verificationUrl,
         expiresInHours: 24
       });
 
       // Send email and log result
-      console.log(`📧 Attempting to send verification email to: ${newUser.email}`);
+      console.log(`📧 Attempting to send welcome email to: ${newUser.email}`);
       console.log(`📧 Verification URL: ${verificationUrl}`);
       console.log(`📧 Sender: ${process.env.SENDER_EMAIL}`);
       
       const emailResult = await sendEmail({
         to: newUser.email,
-        subject: 'Verify Your Email - Bitcoin Sovereign Technology',
-        body: verificationEmailHtml,
+        subject: 'Welcome to Bitcoin Sovereign Technology - Verify Your Email',
+        body: welcomeEmailHtml,
         contentType: 'HTML'
       });
 
       if (emailResult.success) {
-        console.log(`✅ Verification email sent successfully to ${newUser.email}`);
+        console.log(`✅ Welcome email sent successfully to ${newUser.email}`);
       } else {
-        console.error(`❌ Failed to send verification email to ${newUser.email}:`, emailResult.error);
+        console.error(`❌ Failed to send welcome email to ${newUser.email}:`, emailResult.error);
         // Log to database for monitoring
         await query(
           `INSERT INTO auth_logs (user_id, event_type, success, error_message, timestamp)
@@ -200,7 +200,7 @@ async function registerHandler(
       }
     } catch (emailError) {
       // Log error but don't block registration
-      console.error('❌ Exception sending verification email:', emailError);
+      console.error('❌ Exception sending welcome email:', emailError);
     }
 
     // Log successful registration (non-blocking)

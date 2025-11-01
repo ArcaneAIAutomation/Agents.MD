@@ -16,6 +16,7 @@
     "test:auto:skip-build": "pwsh -File scripts/test-automation.ps1 -SkipBuild",
     "validate:setup": "pwsh -File scripts/validate-setup.ps1",
     "validate:gemini": "node scripts/validate-gemini-config.js",
+    "test:email": "npx tsx scripts/test-email.ts",
     "send-access-codes": "node scripts/send-early-access-codes.js",
     "send-platform-update": "node scripts/send-platform-update.js",
     "cleanup-sessions": "npx tsx scripts/cleanup-sessions.ts",

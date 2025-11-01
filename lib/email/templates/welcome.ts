@@ -14,6 +14,8 @@
 interface WelcomeEmailData {
   email: string;
   platformUrl?: string;
+  verificationUrl?: string;
+  expiresInHours?: number;
 }
 
 /**
@@ -182,7 +184,7 @@ export function generateWelcomeEmail(data: WelcomeEmailData): string {
       <h2 class="greeting">Welcome to the Platform</h2>
       
       <p class="message">
-        Your account has been successfully created. You now have access to the most advanced cryptocurrency trading intelligence platform available.
+        Your account has been successfully created. ${data.verificationUrl ? 'To complete your registration and access the platform, please verify your email address using the button below.' : 'You now have access to the most advanced cryptocurrency trading intelligence platform available.'}
       </p>
 
       <!-- Account Info -->
@@ -199,10 +201,32 @@ export function generateWelcomeEmail(data: WelcomeEmailData): string {
         </div>
       </div>
 
+      ${data.verificationUrl ? `
+      <!-- Email Verification Required -->
+      <div class="info-box" style="border-color: #F7931A; background-color: rgba(247, 147, 26, 0.1);">
+        <h3 class="info-title" style="color: #F7931A;">⚠️ Action Required: Verify Your Email</h3>
+        <p class="message" style="margin-bottom: 20px;">
+          Before you can access the platform, please verify your email address by clicking the button below.
+        </p>
+        <div style="text-align: center;">
+          <a href="${data.verificationUrl}" class="button" style="background-color: #F7931A; color: #000000;">
+            Verify Email Address
+          </a>
+        </div>
+        <p class="message" style="margin-top: 20px; font-size: 14px; color: rgba(255, 255, 255, 0.6);">
+          This verification link will expire in ${data.expiresInHours || 24} hours.
+        </p>
+        <p class="message" style="font-size: 14px; color: rgba(255, 255, 255, 0.6);">
+          If the button doesn't work, copy and paste this link into your browser:<br>
+          <span style="color: #F7931A; word-break: break-all;">${data.verificationUrl}</span>
+        </p>
+      </div>
+      ` : `
       <!-- CTA Button -->
       <div style="text-align: center;">
         <a href="${platformUrl}" class="button">Access Platform</a>
       </div>
+      `}
 
       <div class="divider"></div>
 
@@ -317,7 +341,7 @@ BITCOIN SOVEREIGN TECHNOLOGY
 
 WELCOME TO THE PLATFORM
 
-Your account has been successfully created. You now have access to the most advanced cryptocurrency trading intelligence platform available.
+Your account has been successfully created. ${data.verificationUrl ? 'To complete your registration and access the platform, please verify your email address using the link below.' : 'You now have access to the most advanced cryptocurrency trading intelligence platform available.'}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 YOUR ACCOUNT DETAILS
@@ -325,8 +349,20 @@ YOUR ACCOUNT DETAILS
 
 ₿ Email: ${data.email}
 ₿ Platform: Bitcoin Sovereign Technology
-₿ Status: Active
+₿ Status: ${data.verificationUrl ? 'Pending Verification' : 'Active'}
 
+${data.verificationUrl ? `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ ACTION REQUIRED: VERIFY YOUR EMAIL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before you can access the platform, please verify your email address by clicking the link below:
+
+${data.verificationUrl}
+
+This verification link will expire in ${data.expiresInHours || 24} hours.
+
+` : ''}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 WHAT YOU GET
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
