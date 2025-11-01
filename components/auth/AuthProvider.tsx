@@ -22,12 +22,15 @@ interface AuthContextValue {
   isLoading: boolean;
   error: string | null;
   csrfToken: string | null;
+  pendingVerificationEmail: string | null;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   logout: () => Promise<void>;
   register: (data: RegistrationFormData) => Promise<void>;
   checkAuth: () => Promise<void>;
   clearError: () => void;
   fetchCsrfToken: () => Promise<string | null>;
+  resendVerification: (email: string) => Promise<void>;
+  clearPendingVerification: () => void;
 }
 
 // Create the context with undefined default value
@@ -44,6 +47,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [csrfToken, setCsrfToken] = useState<string | null>(null);
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
 
   // Computed property for authentication status
   const isAuthenticated = user !== null;
@@ -230,7 +234,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const responseData = await response.json();
 
       if (response.ok && responseData.success) {
-        setUser(responseData.user);
+        // Check if email verification is required
+        if (responseData.requiresVerification) {
+          setPendingVerificationEmail(data.email);
+          setUser(null); // Don't set user until verified
+        } else {
+          setUser(responseData.user);
+        }
         setError(null);
       } else {
         setError(responseData.message || 'Registration failed. Please try again.');
@@ -250,6 +260,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setError(null);
   };
 
+  // Resend verification email
+  const resendVerification = async (email: string): Promise<void> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const response = await fetch('/api/auth/resend-verification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Failed to resend verification email');
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to resend verification email';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Clear pending verification
+  const clearPendingVerification = (): void => {
+    setPendingVerificationEmail(null);
+  };
+
   // Context value
   const value: AuthContextValue = {
     user,
@@ -257,12 +300,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isLoading,
     error,
     csrfToken,
+    pendingVerificationEmail,
     login,
     logout,
     register,
     checkAuth,
     clearError,
     fetchCsrfToken,
+    resendVerification,
+    clearPendingVerification,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

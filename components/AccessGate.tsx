@@ -3,13 +3,22 @@ import { Lock, Mail, Send, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuth } from './auth/AuthProvider';
 import RegistrationForm from './auth/RegistrationForm';
 import LoginForm from './auth/LoginForm';
+import EmailVerificationPending from './auth/EmailVerificationPending';
 
 interface AccessGateProps {
   onAccessGranted?: () => void;
 }
 
 export default function AccessGate({ onAccessGranted }: AccessGateProps) {
-  const { isAuthenticated, isLoading: authLoading, error: authError, clearError } = useAuth();
+  const { 
+    isAuthenticated, 
+    isLoading: authLoading, 
+    error: authError, 
+    clearError,
+    pendingVerificationEmail,
+    resendVerification,
+    clearPendingVerification
+  } = useAuth();
   
   // Mode state: 'initial', 'register', 'login', 'request-access'
   const [mode, setMode] = useState<'initial' | 'register' | 'login' | 'request-access'>('initial');
@@ -62,10 +71,30 @@ export default function AccessGate({ onAccessGranted }: AccessGateProps) {
     return null;
   }
 
+  // Show verification pending if email is waiting for verification
+  if (pendingVerificationEmail) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-bitcoin-black">
+        <div className="w-full max-w-6xl mx-auto px-4 py-8 overflow-y-auto max-h-screen">
+          <EmailVerificationPending
+            email={pendingVerificationEmail}
+            onResend={async () => {
+              await resendVerification(pendingVerificationEmail);
+            }}
+            onBackToLogin={() => {
+              clearPendingVerification();
+              setMode('login');
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
   // Handle successful registration
   const handleRegistrationSuccess = () => {
-    setSuccessMessage('Account created successfully! Welcome to Bitcoin Sovereign Technology.');
-    // Authentication is handled by AuthProvider, which will hide the AccessGate
+    // Show verification pending screen (handled by pendingVerificationEmail state)
+    setMode('initial'); // Reset mode to show verification pending
   };
 
   // Handle registration error
