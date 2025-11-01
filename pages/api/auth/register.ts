@@ -14,7 +14,7 @@ import { hashPassword } from '../../../lib/auth/password';
 import { generateToken } from '../../../lib/auth/jwt';
 import { logRegistration, logFailedRegistration } from '../../../lib/auth/auditLog';
 import { normalizeEmail, normalizeAccessCode } from '../../../lib/db';
-import { sendEmailAsync } from '../../../lib/email/office365';
+import { sendEmail } from '../../../lib/email/office365';
 import { generateWelcomeEmail } from '../../../lib/email/templates/welcome';
 
 /**
@@ -175,18 +175,32 @@ async function registerHandler(
         expiresInHours: 24
       });
 
-      // Send email without waiting for result
-      sendEmailAsync({
+      // Send email and log result
+      console.log(`📧 Attempting to send verification email to: ${newUser.email}`);
+      console.log(`📧 Verification URL: ${verificationUrl}`);
+      console.log(`📧 Sender: ${process.env.SENDER_EMAIL}`);
+      
+      const emailResult = await sendEmail({
         to: newUser.email,
         subject: 'Verify Your Email - Bitcoin Sovereign Technology',
         body: verificationEmailHtml,
         contentType: 'HTML'
       });
 
-      console.log(`Verification email queued for ${newUser.email}`);
+      if (emailResult.success) {
+        console.log(`✅ Verification email sent successfully to ${newUser.email}`);
+      } else {
+        console.error(`❌ Failed to send verification email to ${newUser.email}:`, emailResult.error);
+        // Log to database for monitoring
+        await query(
+          `INSERT INTO auth_logs (user_id, event_type, success, error_message, timestamp)
+           VALUES ($1, $2, $3, $4, NOW())`,
+          [newUser.id, 'security_alert', false, `Email send failed: ${emailResult.error}`]
+        );
+      }
     } catch (emailError) {
       // Log error but don't block registration
-      console.error('Failed to queue verification email:', emailError);
+      console.error('❌ Exception sending verification email:', emailError);
     }
 
     // Log successful registration (non-blocking)
