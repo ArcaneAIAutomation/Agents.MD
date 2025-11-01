@@ -18,6 +18,7 @@
     "validate:gemini": "node scripts/validate-gemini-config.js",
     "test:email": "npx tsx scripts/test-email.ts",
     "release-code": "npx tsx scripts/release-access-code.ts",
+    "migrate:email-verification": "npx tsx scripts/run-email-verification-migration.ts",
     "send-access-codes": "node scripts/send-early-access-codes.js",
     "send-platform-update": "node scripts/send-platform-update.js",
     "cleanup-sessions": "npx tsx scripts/cleanup-sessions.ts",
