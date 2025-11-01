@@ -223,6 +223,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           accessCode: data.accessCode,
           email: data.email,
           password: data.password,
+          confirmPassword: data.confirmPassword,
         }),
       });
 
