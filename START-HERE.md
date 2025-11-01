@@ -1,244 +1,426 @@
-# 🚀 Start Here - Production Deployment
+# 🚀 START HERE - Agents.MD Testing Guide
 
-**Welcome!** You've upgraded your Vercel membership and are ready to complete your production deployment.
+## Welcome! 👋
 
----
-
-## 📊 Current Status
-
-### ✅ What's Already Done (80%)
-- ✅ All authentication code deployed to main branch
-- ✅ Vercel auto-deployment triggered
-- ✅ Homepage accessible at https://news.arcane.group
-- ✅ 5 automation scripts created
-- ✅ Comprehensive documentation written
-- ✅ Vercel Pro membership activated
-
-### ⏳ What's Needed (20% - 30 minutes)
-- ⏳ Create Postgres database
-- ⏳ Create KV store
-- ⏳ Configure environment variables
-- ⏳ Run database migrations
-- ⏳ Import access codes
-- ⏳ Redeploy application
+This guide will help you test the Agents.MD platform in **3 simple steps**.
 
 ---
 
-## 🎯 Your Mission
+## Step 1: Validate Setup (1 minute)
 
-Complete the production setup in **30 minutes** by following the step-by-step checklist.
+Run the setup validation script:
 
----
+```bash
+npm run validate:setup
+```
 
-## 📋 Three Ways to Proceed
+This checks:
+- ✅ Environment configuration
+- ✅ API keys
+- ✅ Dependencies
+- ✅ Database connection
+- ✅ File structure
 
-### Option 1: Quick Checklist (Recommended)
-**Best for**: Quick setup with minimal reading
+**Expected Output:**
+```
+✨ Perfect! Setup is complete and ready for testing!
+```
 
-📄 **Open**: `SETUP-CHECKLIST.md`
-
-This is a simple checkbox list. Just follow each step and check off as you go.
-
-**Time**: 30 minutes
-
----
-
-### Option 2: Detailed Guide
-**Best for**: First-time setup or if you want detailed explanations
-
-📄 **Open**: `VERCEL-PRO-SETUP-GUIDE.md`
-
-This includes screenshots, troubleshooting, and detailed explanations for each step.
-
-**Time**: 45 minutes
+**If validation fails:**
+- Review error messages
+- Update `.env.local` with valid API keys
+- Run `npm install` if needed
+- Re-run validation
 
 ---
 
-### Option 3: Automated Verification
-**Best for**: After you've completed setup
+## Step 2: Quick Test (30 seconds)
 
-📄 **Run**: `.\scripts\quick-verify-production.ps1`
+Run the quick test:
 
-This automatically tests your deployment and tells you what's working and what needs fixing.
+```bash
+npm run test:quick
+```
 
-**Time**: 2 minutes
+This validates:
+- ✅ Critical configuration
+- ✅ Database connection
+- ✅ API key formats
 
----
-
-## 🚀 Quick Start (30 Minutes)
-
-### Step 1: Create Databases (8 minutes)
-1. Go to https://vercel.com/dashboard
-2. Select your project > Storage
-3. Create Postgres database (5 min)
-4. Create KV store (3 min)
-5. Copy connection strings
-
-### Step 2: Configure Variables (10 minutes)
-1. Go to Settings > Environment Variables
-2. Add 17 required variables
-3. Generate secrets with `openssl rand -base64 32`
-4. Save all variables
-
-### Step 3: Setup Database (7 minutes)
-1. Set DATABASE_URL locally
-2. Run `npm run migrate:prod` (5 min)
-3. Run `npm run import:codes` (2 min)
-
-### Step 4: Deploy & Verify (5 minutes)
-1. Redeploy in Vercel Dashboard (3 min)
-2. Run verification script (2 min)
-3. Test in browser
-
----
-
-## 📚 Documentation Index
-
-| Document | Purpose | When to Use |
-|----------|---------|-------------|
-| **START-HERE.md** | This file - Overview | Start here |
-| **SETUP-CHECKLIST.md** | Quick checkbox list | During setup |
-| **VERCEL-PRO-SETUP-GUIDE.md** | Detailed step-by-step | Need more details |
-| **PRODUCTION-DEPLOYMENT-STATUS.md** | Current status | Check progress |
-| **DEPLOYMENT-SUMMARY.md** | What was automated | Understand automation |
-| **docs/DEPLOYMENT.md** | Full deployment guide | Deep dive |
-
----
-
-## 🛠️ Automation Scripts
-
-| Script | Purpose | Command |
-|--------|---------|---------|
-| **quick-verify-production.ps1** | Fast verification | `.\scripts\quick-verify-production.ps1` |
-| **test-all-access-codes.ps1** | Test 11 codes | `.\scripts\test-all-access-codes.ps1` |
-| **monitor-production.ps1** | Monitor for 1 hour | `.\scripts\monitor-production.ps1 -DurationMinutes 60` |
-| **check-environment-variables.ps1** | Validate env vars | `.\scripts\check-environment-variables.ps1` |
-
----
-
-## ✅ Success Checklist
-
-After setup, you should have:
-- [ ] Postgres database created
-- [ ] KV store created
-- [ ] 17 environment variables configured
-- [ ] Database migrations completed
-- [ ] 11 access codes imported
-- [ ] Application redeployed
-- [ ] Verification tests passing (85%+)
-- [ ] Registration working in browser
-- [ ] Login working in browser
-
----
-
-## 🎯 What You'll Accomplish
-
-By the end of this setup:
-
-1. **Secure Authentication System**
-   - Users can register with one-time access codes
-   - Secure login with JWT tokens
-   - Rate limiting prevents brute force attacks
-   - Welcome emails sent automatically
-
-2. **Production Database**
-   - Vercel Postgres with 4 tables
-   - 11 access codes ready to use
-   - Session management active
-   - Audit logging enabled
-
-3. **Fully Functional Platform**
-   - https://news.arcane.group accessible
-   - Authentication required for access
-   - Bitcoin Sovereign design applied
-   - Mobile-responsive interface
-
----
-
-## 🆘 If You Get Stuck
-
-### Quick Fixes
-
-**Issue**: Can't find Vercel Dashboard  
-**Solution**: Go to https://vercel.com/dashboard
-
-**Issue**: Don't see Storage tab  
-**Solution**: Make sure you're in your project, not the main dashboard
-
-**Issue**: Environment variables not saving  
-**Solution**: Make sure to select "Production" environment before saving
-
-**Issue**: Migrations failing  
-**Solution**: Verify DATABASE_URL format includes `?sslmode=require`
-
-### Get Help
-
-1. Check `VERCEL-PRO-SETUP-GUIDE.md` for detailed troubleshooting
-2. Review `PRODUCTION-DEPLOYMENT-STATUS.md` for common issues
-3. Run `.\scripts\check-environment-variables.ps1` to see what's missing
-
----
-
-## 💡 Pro Tips
-
-1. **Copy-Paste Carefully**: Environment variable names must be exact
-2. **Save Credentials**: Keep DATABASE_URL and secrets in a password manager
-3. **Test Incrementally**: Run verification after each major step
-4. **Monitor Logs**: Check Vercel logs if something doesn't work
-5. **Use Incognito**: Test authentication in incognito/private window
-
----
-
-## 🎉 Ready to Start?
-
-### Recommended Path:
-
-1. **Open** `SETUP-CHECKLIST.md`
-2. **Follow** each step and check off boxes
-3. **Run** verification script when done
-4. **Test** in browser
-5. **Celebrate** 🎉
-
-**Estimated Time**: 30 minutes  
-**Difficulty**: Easy (step-by-step)  
-**Support**: Full documentation available
-
----
-
-## 📞 Quick Reference
-
-### Vercel Dashboard
-https://vercel.com/dashboard
-
-### Your Production URL
-https://news.arcane.group
-
-### Key Commands
-```powershell
-# Verify deployment
-.\scripts\quick-verify-production.ps1
-
-# Test access codes
-.\scripts\test-all-access-codes.ps1
-
-# Monitor production
-.\scripts\monitor-production.ps1 -DurationMinutes 60
+**Expected Output:**
+```
+✅ All quick tests passed! ✨
 ```
 
 ---
 
-## 🚀 Let's Go!
+## Step 3: Full Test Suite (5 minutes)
 
-**Next Step**: Open `SETUP-CHECKLIST.md` and start with Step 1
+Run the complete automated test suite:
 
-You're 80% done already. Just 30 minutes to complete! 💪
+```bash
+npm run test:auto
+```
+
+This tests:
+- ✅ Environment validation
+- ✅ Dependencies
+- ✅ Database
+- ✅ Application build
+- ✅ API endpoints (10+)
+- ✅ Authentication flow
+- ✅ Gemini AI integration
+
+**Expected Output:**
+```
+Pass Rate: 92%
+Status: SUCCESS ✅
+```
+
+**Test report saved to:** `test-results-YYYYMMDD-HHMMSS.txt`
 
 ---
 
-**Status**: 🟢 Ready to Start  
-**Your Progress**: 80% Complete  
-**Time Remaining**: ~30 minutes  
-**Difficulty**: ⭐⭐☆☆☆ (Easy)
+## What's Next?
 
-**Good luck! You've got this! 🚀**
+### ✅ If All Tests Pass
 
+**You're ready to test manually!**
+
+1. **Start the dev server:**
+   ```bash
+   npm run dev
+   ```
+
+2. **Open in browser:**
+   ```
+   http://localhost:3000
+   ```
+
+3. **Follow the manual testing guide:**
+   - [SETUP-CHECKLIST.md](./SETUP-CHECKLIST.md) - Complete checklist
+   - [TEST-GUIDE.md](./TEST-GUIDE.md) - Detailed testing instructions
+   - [TESTING-README.md](./TESTING-README.md) - Testing documentation
+
+### ❌ If Tests Fail
+
+**Don't worry! Here's how to fix common issues:**
+
+#### Database Connection Failed
+```bash
+# Check database status
+npx tsx scripts/check-database-status.ts
+
+# Verify DATABASE_URL in .env.local
+# Format: postgres://user:pass@host:6543/postgres
+```
+
+#### Gemini API Key Invalid
+```bash
+# Validate Gemini configuration
+npm run validate:gemini
+
+# Key format: AIzaSy[33 characters]
+# Get key from: https://aistudio.google.com/app/apikey
+```
+
+#### Dependencies Missing
+```bash
+# Reinstall dependencies
+rm -rf node_modules
+npm install
+```
+
+#### Build Failed
+```bash
+# Clear cache and rebuild
+rm -rf .next
+npm run build
+```
+
+---
+
+## Quick Reference
+
+### Test Commands
+| Command | Description | Duration |
+|---------|-------------|----------|
+| `npm run validate:setup` | Full setup validation | 1min |
+| `npm run test:quick` | Quick validation | 30s |
+| `npm run test:auto` | Full test suite | 5min |
+| `npm run test:auto:prod` | Test production | 5min |
+
+### Development Commands
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server |
+| `npm run build` | Build for production |
+| `npm run start` | Start production server |
+| `npm run lint` | Run linter |
+
+### Database Commands
+| Command | Description |
+|---------|-------------|
+| `npx tsx scripts/check-database-status.ts` | Check database |
+| `npx tsx scripts/simple-migrate.ts` | Run migrations |
+| `npx tsx scripts/cleanup-sessions.ts` | Clean sessions |
+
+### Deployment Commands
+| Command | Description |
+|---------|-------------|
+| `npm run deploy` | Deploy to production |
+| `npm run quick-deploy` | Quick deploy |
+| `npm run status` | Git status |
+
+---
+
+## Testing Workflow
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    TESTING WORKFLOW                         │
+└─────────────────────────────────────────────────────────────┘
+
+1. npm run validate:setup
+   ↓
+   ✅ Setup validated
+   ↓
+2. npm run test:quick
+   ↓
+   ✅ Quick tests passed
+   ↓
+3. npm run test:auto
+   ↓
+   ✅ Full tests passed
+   ↓
+4. npm run dev
+   ↓
+   ✅ Dev server running
+   ↓
+5. Manual Testing
+   ↓
+   ✅ All features work
+   ↓
+6. npm run deploy
+   ↓
+   ✅ Deployed to production
+   ↓
+7. Monitor & Verify
+   ↓
+   ✅ Production working
+```
+
+---
+
+## Key Features to Test
+
+### 🔐 Authentication
+- Registration with access code
+- Login/Logout
+- Session management
+- Rate limiting
+
+### 🐋 Whale Watch
+- Transaction detection
+- Standard AI analysis
+- Deep Dive analysis
+- AI reasoning process
+
+### 📊 Market Analysis
+- Bitcoin analysis
+- Ethereum analysis
+- Technical indicators
+- AI trade signals
+
+### 📰 News Feed
+- Crypto Herald
+- Real-time updates
+- Auto-refresh
+
+### 📱 Mobile Experience
+- Responsive design
+- Touch optimization
+- Performance
+
+---
+
+## Documentation
+
+### Quick Start
+- **[START-HERE.md](./START-HERE.md)** ← You are here
+- **[SETUP-CHECKLIST.md](./SETUP-CHECKLIST.md)** - Complete checklist
+
+### Testing Guides
+- **[TESTING-README.md](./TESTING-README.md)** - Testing overview
+- **[TEST-GUIDE.md](./TEST-GUIDE.md)** - Detailed manual testing
+
+### Technical Documentation
+- **[AUTHENTICATION-SUCCESS.md](./AUTHENTICATION-SUCCESS.md)** - Auth system
+- **[FINAL-SETUP-GUIDE.md](./FINAL-SETUP-GUIDE.md)** - Setup guide
+- **[.kiro/steering/](./kiro/steering/)** - Development guidelines
+
+---
+
+## Support
+
+### Getting Help
+
+**If you encounter issues:**
+
+1. **Check the documentation:**
+   - [TESTING-README.md](./TESTING-README.md) - Troubleshooting section
+   - [TEST-GUIDE.md](./TEST-GUIDE.md) - Common issues
+
+2. **Review test reports:**
+   - Check `test-results-*.txt` files
+   - Look for specific error messages
+
+3. **Check logs:**
+   - Vercel Dashboard: https://vercel.com/dashboard
+   - Supabase Dashboard: https://supabase.com/dashboard
+   - Browser console (F12)
+
+4. **Common fixes:**
+   ```bash
+   # Reinstall dependencies
+   npm install
+   
+   # Clear cache
+   rm -rf .next
+   
+   # Check environment
+   npm run validate:setup
+   
+   # Test database
+   npx tsx scripts/check-database-status.ts
+   ```
+
+---
+
+## Environment Setup
+
+### Required API Keys
+
+**Critical (Must have):**
+- `OPENAI_API_KEY` - OpenAI GPT-4o
+- `GEMINI_API_KEY` - Google Gemini AI
+- `DATABASE_URL` - Supabase PostgreSQL
+- `JWT_SECRET` - Authentication
+- `CRON_SECRET` - Scheduled jobs
+
+**Recommended (Should have):**
+- `KV_REST_API_URL` - Redis for rate limiting
+- `KV_REST_API_TOKEN` - Redis authentication
+- `SENDER_EMAIL` - Email notifications
+- `AZURE_TENANT_ID` - Azure AD
+- `AZURE_CLIENT_ID` - Azure AD
+- `AZURE_CLIENT_SECRET` - Azure AD
+
+**Optional (Nice to have):**
+- `COINMARKETCAP_API_KEY` - Market data
+- `NEWS_API_KEY` - News aggregation
+- `KRAKEN_API_KEY` - Exchange data
+- `COINGECKO_API_KEY` - Market data
+
+### Getting API Keys
+
+**OpenAI:**
+- https://platform.openai.com/api-keys
+- Format: `sk-proj-...`
+
+**Gemini:**
+- https://aistudio.google.com/app/apikey
+- Format: `AIzaSy[33 chars]`
+
+**Supabase:**
+- https://supabase.com/dashboard
+- Create Postgres database
+- Copy connection string
+
+**Redis Cloud:**
+- https://redis.com/try-free/
+- Create database
+- Copy connection URL
+
+---
+
+## Success Criteria
+
+### Automated Tests
+- ✅ Pass rate >= 80%
+- ✅ No critical errors
+- ✅ Database connected
+- ✅ API endpoints working
+
+### Manual Tests
+- ✅ Authentication works
+- ✅ Whale Watch works
+- ✅ Market data loads
+- ✅ News feed loads
+- ✅ Mobile responsive
+
+### Performance
+- ✅ Lighthouse score >= 80
+- ✅ Load time < 3 seconds
+- ✅ No console errors
+
+### Security
+- ✅ All headers present
+- ✅ HTTPS enforced
+- ✅ Rate limiting active
+- ✅ Passwords hashed
+
+---
+
+## Ready to Start?
+
+### Run These Commands Now:
+
+```bash
+# 1. Validate setup
+npm run validate:setup
+
+# 2. Quick test
+npm run test:quick
+
+# 3. Full test suite
+npm run test:auto
+
+# 4. Start dev server
+npm run dev
+```
+
+### Then Open:
+```
+http://localhost:3000
+```
+
+### And Follow:
+- [SETUP-CHECKLIST.md](./SETUP-CHECKLIST.md) for complete testing checklist
+- [TEST-GUIDE.md](./TEST-GUIDE.md) for detailed testing instructions
+
+---
+
+## Questions?
+
+**Check these resources:**
+- [TESTING-README.md](./TESTING-README.md) - Complete testing guide
+- [SETUP-CHECKLIST.md](./SETUP-CHECKLIST.md) - Step-by-step checklist
+- [TEST-GUIDE.md](./TEST-GUIDE.md) - Detailed manual testing
+- [.kiro/steering/](./kiro/steering/) - Development guidelines
+
+---
+
+**Last Updated**: January 26, 2025  
+**Version**: 2.0.0  
+**Status**: Ready for Testing ✅
+
+---
+
+# 🎯 Your Next Step
+
+```bash
+npm run validate:setup
+```
+
+**Let's get started! 🚀**

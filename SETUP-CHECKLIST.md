@@ -1,241 +1,424 @@
-# Production Setup Checklist
+# 🚀 Agents.MD - Setup & Testing Checklist
 
-**Quick Reference**: Follow this checklist to complete your production deployment.
+## Pre-Testing Setup
 
----
-
-## ☑️ Pre-Setup (Already Done)
-- [x] Upgraded Vercel membership
-- [x] Code deployed to main branch
-- [x] Automation scripts created
-- [x] Documentation complete
-
----
-
-## 📝 Setup Steps (30 minutes)
-
-### Step 1: Create Postgres Database (5 min)
-- [ ] Go to Vercel Dashboard > Storage
-- [ ] Click "Create Database" > Select "Postgres"
-- [ ] Name: `agents-md-auth-production`
-- [ ] Region: `iad1` (US East) or closest to you
-- [ ] Click "Create" and wait 2-3 minutes
-- [ ] Copy `DATABASE_URL` from .env.local tab
-- [ ] Save DATABASE_URL securely
-
-**DATABASE_URL Format:**
-```
-postgres://default:password@host.postgres.vercel-storage.com:5432/verceldb?sslmode=require
+### ✅ Step 1: Environment Configuration
+```bash
+# Validate your setup
+npm run validate:setup
 ```
 
+**What it checks:**
+- [ ] .env.local file exists and is configured
+- [ ] All required API keys are set
+- [ ] API key formats are valid
+- [ ] No placeholder values remain
+- [ ] Dependencies are installed
+- [ ] Database connection works
+- [ ] Redis/KV connection works (optional)
+- [ ] Git is configured correctly
+- [ ] Vercel is linked (optional)
+
+**If validation fails:**
+1. Review error messages
+2. Update .env.local with valid API keys
+3. Run `npm install` if dependencies are missing
+4. Check database connection string
+5. Re-run validation
+
 ---
 
-### Step 2: Create KV Store (3 min)
-- [ ] Still in Storage, click "Create Database" again
-- [ ] Select "KV" (Redis)
-- [ ] Name: `agents-md-rate-limit-production`
-- [ ] Region: Same as Postgres
-- [ ] Click "Create" and wait 1-2 minutes
-- [ ] Copy these 3 values from .env.local tab:
-  - [ ] `KV_REST_API_URL`
-  - [ ] `KV_REST_API_TOKEN`
-  - [ ] `KV_REST_API_READ_ONLY_TOKEN`
-- [ ] Save all 3 values securely
-
----
-
-### Step 3: Generate Secrets (2 min)
-Open PowerShell and run:
-```powershell
-# Generate JWT_SECRET
-openssl rand -base64 32
-
-# Generate CRON_SECRET
-openssl rand -base64 32
+### ✅ Step 2: Quick Validation (30 seconds)
+```bash
+# Fast check of critical components
+npm run test:quick
 ```
 
-- [ ] Copy JWT_SECRET
-- [ ] Copy CRON_SECRET
-- [ ] Save both securely
+**What it tests:**
+- [ ] Environment file exists
+- [ ] Critical API keys configured
+- [ ] Dependencies installed
+- [ ] Database connection
+- [ ] Gemini API key format
+
+**Expected Result:** All tests pass ✅
 
 ---
 
-### Step 4: Configure Environment Variables (10 min)
-Go to: Vercel Dashboard > Settings > Environment Variables
-
-Add these 17 variables (click "Add New" for each):
-
-#### Database (1 variable)
-- [ ] `DATABASE_URL` = [from Step 1]
-
-#### Authentication (4 variables)
-- [ ] `JWT_SECRET` = [from Step 3]
-- [ ] `JWT_EXPIRATION` = `7d`
-- [ ] `JWT_REMEMBER_ME_EXPIRATION` = `30d`
-
-#### Rate Limiting (5 variables)
-- [ ] `KV_REST_API_URL` = [from Step 2]
-- [ ] `KV_REST_API_TOKEN` = [from Step 2]
-- [ ] `KV_REST_API_READ_ONLY_TOKEN` = [from Step 2]
-- [ ] `AUTH_RATE_LIMIT_MAX_ATTEMPTS` = `5`
-- [ ] `AUTH_RATE_LIMIT_WINDOW_MS` = `900000`
-
-#### Cron Security (1 variable)
-- [ ] `CRON_SECRET` = [from Step 3]
-
-#### Email - Office 365 (5 variables)
-- [ ] `SENDER_EMAIL` = `no-reply@arcane.group`
-- [ ] `AZURE_TENANT_ID` = [your Azure tenant ID]
-- [ ] `AZURE_CLIENT_ID` = [your Azure client ID]
-- [ ] `AZURE_CLIENT_SECRET` = [your Azure client secret]
-- [ ] `ENABLE_WELCOME_EMAIL` = `true`
-
-#### Application (2 variables)
-- [ ] `NEXT_PUBLIC_APP_URL` = `https://news.arcane.group`
-- [ ] `NEXTAUTH_URL` = `https://news.arcane.group`
-
-**Total: 17 variables** ✅
-
----
-
-### Step 5: Run Database Migrations (5 min)
-Open PowerShell in project directory:
-
-```powershell
-# Set DATABASE_URL (replace with your actual URL)
-$env:DATABASE_URL = "postgres://default:password@host.postgres.vercel-storage.com:5432/verceldb?sslmode=require"
-
-# Run migrations
-npm run migrate:prod
+### ✅ Step 3: Full Automated Testing (5 minutes)
+```bash
+# Complete test suite
+npm run test:auto
 ```
 
-- [ ] Migrations completed successfully
-- [ ] Saw "Created table: users"
-- [ ] Saw "Created table: access_codes"
-- [ ] Saw "Created table: sessions"
-- [ ] Saw "Created table: auth_logs"
+**What it tests:**
+- [ ] Environment validation
+- [ ] Dependency check
+- [ ] Database connection
+- [ ] Application build
+- [ ] API endpoints (10+ endpoints)
+- [ ] Authentication flow
+- [ ] Gemini AI integration
+- [ ] Generates test report
 
-**Verify in Vercel Dashboard:**
-- [ ] Go to Storage > Your Database > Query
-- [ ] Run: `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';`
-- [ ] See 4 tables: users, access_codes, sessions, auth_logs
+**Expected Result:** Pass rate >= 80%
 
 ---
 
-### Step 6: Import Access Codes (2 min)
-With DATABASE_URL still set:
+## Manual Testing Checklist
 
-```powershell
-npm run import:codes
+### 🔐 Authentication System
+
+#### Registration
+- [ ] Navigate to https://news.arcane.group
+- [ ] Click "Register"
+- [ ] Enter access code: `BITCOIN2025`
+- [ ] Enter email: `test-$(date +%s)@example.com`
+- [ ] Enter password: `SecurePass123!`
+- [ ] Confirm password
+- [ ] Click "Register"
+- [ ] ✅ Should see success message
+- [ ] ✅ Should be redirected to dashboard
+
+#### Login
+- [ ] Navigate to login page
+- [ ] Enter registered email
+- [ ] Enter password
+- [ ] Check "Remember Me"
+- [ ] Click "Login"
+- [ ] ✅ Should be logged in
+- [ ] ✅ Session should persist
+
+#### Logout
+- [ ] Click "Logout"
+- [ ] ✅ Should be logged out
+- [ ] ✅ Should be redirected to login
+
+#### Rate Limiting
+- [ ] Try wrong password 5 times
+- [ ] ✅ Should be rate limited
+- [ ] ✅ Should show error message
+
+---
+
+### 🐋 Whale Watch Feature
+
+#### Detection
+- [ ] Navigate to Whale Watch
+- [ ] Set threshold: `50 BTC`
+- [ ] Click "Detect Whales"
+- [ ] ✅ Should show transaction list
+- [ ] ✅ Each transaction has all fields
+
+#### Standard Analysis (< 100 BTC)
+- [ ] Select transaction < 100 BTC
+- [ ] Click "Analyze with AI"
+- [ ] ✅ Should complete in ~3 seconds
+- [ ] ✅ Should show analysis results
+- [ ] ✅ Should display confidence score
+- [ ] ✅ Should show key findings
+
+#### Deep Dive Analysis (>= 100 BTC)
+- [ ] Select transaction >= 100 BTC
+- [ ] Click "Deep Dive Analysis"
+- [ ] ✅ Should show "Deep Dive" badge
+- [ ] ✅ Should complete in ~10-15 seconds
+- [ ] ✅ Should show comprehensive analysis
+- [ ] ✅ Should include blockchain history
+
+#### AI Reasoning
+- [ ] Expand "AI Reasoning Process"
+- [ ] ✅ Should show step-by-step thinking
+- [ ] ✅ Should be collapsible
+
+#### Analysis Lock
+- [ ] Start an analysis
+- [ ] Try to start another
+- [ ] ✅ Should be blocked
+- [ ] ✅ UI should be greyed out
+- [ ] ✅ Should show message
+
+---
+
+### 📊 Market Analysis
+
+#### Bitcoin Analysis
+- [ ] Navigate to Bitcoin Market Report
+- [ ] ✅ Current price displayed
+- [ ] ✅ 24h change shown
+- [ ] ✅ Technical indicators visible
+- [ ] ✅ AI analysis generated
+- [ ] ✅ Trading zones displayed
+
+#### Ethereum Analysis
+- [ ] Navigate to Ethereum Market Report
+- [ ] ✅ Current price displayed
+- [ ] ✅ 24h change shown
+- [ ] ✅ Technical indicators visible
+- [ ] ✅ AI analysis generated
+
+#### Trade Generation
+- [ ] Navigate to AI Trade Generation
+- [ ] Select BTC
+- [ ] Select 1h timeframe
+- [ ] Click "Generate Signal"
+- [ ] ✅ Should show trade signal
+- [ ] ✅ Should show entry/exit prices
+- [ ] ✅ Should show risk/reward
+
+---
+
+### 📰 News Feed
+
+#### Crypto Herald
+- [ ] Navigate to Crypto News Wire
+- [ ] ✅ Should show 15 stories
+- [ ] ✅ Each story has headline
+- [ ] ✅ Each story has source
+- [ ] ✅ Each story has timestamp
+- [ ] ✅ Links work correctly
+- [ ] ✅ Auto-refresh works
+
+---
+
+### 📱 Mobile Experience
+
+#### Responsive Design
+- [ ] Test on iPhone SE (375px)
+- [ ] Test on iPhone 14 (390px)
+- [ ] Test on iPad Mini (768px)
+- [ ] Test on iPad Pro (1024px)
+- [ ] ✅ All content readable
+- [ ] ✅ No horizontal scroll
+- [ ] ✅ Touch targets >= 48px
+- [ ] ✅ Text doesn't overflow
+
+#### Mobile Navigation
+- [ ] Open hamburger menu
+- [ ] ✅ Full-screen overlay appears
+- [ ] ✅ All menu items visible
+- [ ] ✅ Easy to tap
+- [ ] ✅ Closes correctly
+
+#### Mobile Performance
+- [ ] Test on 3G (DevTools)
+- [ ] ✅ Loads in < 5 seconds
+- [ ] ✅ Images optimized
+- [ ] ✅ Animations smooth
+
+---
+
+## Performance Testing
+
+### Lighthouse Audit
+- [ ] Open Chrome DevTools
+- [ ] Go to Lighthouse tab
+- [ ] Select "Mobile"
+- [ ] Generate report
+- [ ] ✅ Performance >= 80
+- [ ] ✅ Accessibility >= 90
+- [ ] ✅ Best Practices >= 90
+- [ ] ✅ SEO >= 90
+
+### Load Testing
+```bash
+ab -n 100 -c 10 https://news.arcane.group/
+```
+- [ ] ✅ No errors
+- [ ] ✅ Average response < 500ms
+- [ ] ✅ All requests successful
+
+---
+
+## Security Testing
+
+### Headers Check
+```bash
+curl -I https://news.arcane.group/
+```
+- [ ] ✅ X-Content-Type-Options: nosniff
+- [ ] ✅ X-Frame-Options: DENY
+- [ ] ✅ X-XSS-Protection: 1; mode=block
+- [ ] ✅ Strict-Transport-Security
+- [ ] ✅ Content-Security-Policy
+
+### Authentication Security
+- [ ] ✅ Passwords are hashed
+- [ ] ✅ JWT tokens are httpOnly
+- [ ] ✅ CSRF protection enabled
+- [ ] ✅ Rate limiting active
+- [ ] ✅ SQL injection prevented
+
+---
+
+## Database Testing
+
+### Connection Test
+```bash
+npx tsx scripts/check-database-status.ts
+```
+- [ ] ✅ Connection successful
+- [ ] ✅ Tables exist
+- [ ] ✅ Indexes created
+
+### Migration Test
+```bash
+npx tsx scripts/simple-migrate.ts
+```
+- [ ] ✅ Migrations run successfully
+- [ ] ✅ No errors
+
+### Session Cleanup Test
+```bash
+npx tsx scripts/cleanup-sessions.ts
+```
+- [ ] ✅ Cleanup runs successfully
+- [ ] ✅ Expired sessions removed
+
+---
+
+## Deployment Checklist
+
+### Pre-Deployment
+- [ ] All tests pass
+- [ ] No console errors
+- [ ] No TypeScript errors
+- [ ] No ESLint errors
+- [ ] Git working directory clean
+- [ ] On main branch
+- [ ] All changes committed
+
+### Deployment
+```bash
+npm run deploy
+```
+- [ ] ✅ Build succeeds
+- [ ] ✅ Deployment succeeds
+- [ ] ✅ Preview URL works
+- [ ] ✅ Production URL works
+
+### Post-Deployment
+- [ ] Test production URL
+- [ ] Check Vercel logs
+- [ ] Monitor for errors
+- [ ] Verify all features work
+- [ ] Test authentication
+- [ ] Test Whale Watch
+- [ ] Test market data
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+#### ❌ Database Connection Failed
+**Fix:**
+1. Check DATABASE_URL in .env.local
+2. Verify Supabase is running
+3. Test: `npx tsx scripts/check-database-status.ts`
+
+#### ❌ Gemini API Key Invalid
+**Fix:**
+1. Verify format: `AIzaSy[33 chars]`
+2. Check key is active
+3. Test: `npm run validate:gemini`
+
+#### ❌ Build Failed
+**Fix:**
+1. Clear cache: `rm -rf .next`
+2. Reinstall: `npm install`
+3. Check TypeScript errors
+
+#### ❌ Rate Limit Exceeded
+**Fix:**
+1. Wait 15 minutes
+2. Or clear Redis cache
+3. Check KV configuration
+
+---
+
+## Success Criteria
+
+### Minimum Requirements
+- ✅ All automated tests pass (>= 80%)
+- ✅ Authentication works
+- ✅ Whale Watch works
+- ✅ Market data loads
+- ✅ News feed loads
+- ✅ Mobile responsive
+- ✅ No console errors
+- ✅ No security issues
+
+### Recommended
+- ✅ Pass rate >= 90%
+- ✅ Lighthouse score >= 80
+- ✅ Load test successful
+- ✅ All manual tests pass
+- ✅ Documentation complete
+
+---
+
+## Next Steps
+
+### After Testing
+1. ✅ Review test results
+2. ✅ Fix any issues found
+3. ✅ Update documentation
+4. ✅ Deploy to production
+5. ✅ Monitor for 24 hours
+
+### Ongoing
+- Run tests before each deployment
+- Monitor production logs
+- Update tests as features change
+- Keep documentation current
+
+---
+
+## Quick Commands Reference
+
+```bash
+# Validation
+npm run validate:setup          # Full setup validation
+npm run test:quick              # Quick test (30s)
+npm run test:auto               # Full test suite (5min)
+npm run test:auto:prod          # Test production
+
+# Database
+npx tsx scripts/check-database-status.ts
+npx tsx scripts/simple-migrate.ts
+npx tsx scripts/cleanup-sessions.ts
+
+# Deployment
+npm run deploy                  # Deploy to production
+npm run quick-deploy            # Quick deploy
+npm run status                  # Git status
+npm run log                     # Recent commits
+
+# Development
+npm run dev                     # Start dev server
+npm run build                   # Build for production
+npm run start                   # Start production server
 ```
 
-- [ ] Saw "Imported 11 access codes successfully"
-
-**Verify in Vercel Dashboard:**
-- [ ] Go to Storage > Your Database > Query
-- [ ] Run: `SELECT COUNT(*) FROM access_codes;`
-- [ ] Result: 11
-
 ---
 
-### Step 7: Redeploy Application (3 min)
-- [ ] Go to Vercel Dashboard > Deployments
-- [ ] Find latest deployment
-- [ ] Click "..." menu
-- [ ] Click "Redeploy"
-- [ ] Wait for "Ready" status (2-5 minutes)
-- [ ] Check build logs for errors
+**Last Updated**: January 26, 2025  
+**Version**: 2.0.0  
+**Status**: Ready for Testing ✅
 
----
-
-### Step 8: Verify Deployment (5 min)
-
-Run verification script:
-```powershell
-.\scripts\quick-verify-production.ps1 -ProductionUrl "https://news.arcane.group"
+**Start Here:**
+```bash
+npm run validate:setup
 ```
 
-**Expected Results:**
-- [ ] Homepage Accessible (200 OK)
-- [ ] Health Check Endpoint (200 OK) or (404 - acceptable)
-- [ ] Registration Rejects Invalid Code (400)
-- [ ] Login Rejects Invalid Credentials (401)
-- [ ] Security Headers Present
-- [ ] HTTPS Enabled
-- [ ] Fast Response Time
-- [ ] **Pass Rate: 85%+**
-
-**Test in Browser:**
-- [ ] Open https://news.arcane.group in incognito
-- [ ] See Access Gate
-- [ ] Click "I have an access code"
-- [ ] Enter CODE0001
-- [ ] Enter test email and password
-- [ ] Submit form
-- [ ] Successfully logged in
-
-**Test All Access Codes:**
-```powershell
-.\scripts\test-all-access-codes.ps1 -ProductionUrl "https://news.arcane.group"
+If validation passes, proceed with:
+```bash
+npm run test:quick
+npm run test:auto
 ```
 
-- [ ] All 11 codes work
+Then review [TEST-GUIDE.md](./TEST-GUIDE.md) for detailed manual testing instructions.
 
----
-
-## ✅ Success Criteria
-
-After completing all steps:
-- [ ] All 17 environment variables configured
-- [ ] Postgres database created and migrated
-- [ ] KV store created and configured
-- [ ] 11 access codes imported
-- [ ] Application redeployed
-- [ ] Verification tests passing (85%+)
-- [ ] Registration working
-- [ ] Login working
-- [ ] No critical errors in logs
-
----
-
-## 🎉 You're Done!
-
-Once all checkboxes are checked, your production deployment is complete!
-
-**Next Steps:**
-1. Monitor production for 24 hours
-2. Test all features thoroughly
-3. Notify users about new authentication system
-4. Document any issues encountered
-
----
-
-## 🆘 Need Help?
-
-- **Detailed Guide**: See `VERCEL-PRO-SETUP-GUIDE.md`
-- **Troubleshooting**: See `PRODUCTION-DEPLOYMENT-STATUS.md`
-- **Full Documentation**: See `docs/DEPLOYMENT.md`
-
----
-
-## 📞 Quick Commands
-
-```powershell
-# Verify deployment
-.\scripts\quick-verify-production.ps1
-
-# Test access codes
-.\scripts\test-all-access-codes.ps1
-
-# Monitor for 1 hour
-.\scripts\monitor-production.ps1 -DurationMinutes 60
-```
-
----
-
-**Estimated Time**: 30 minutes  
-**Difficulty**: Easy  
-**Status**: Ready to start!
-
-**Begin with Step 1: Create Postgres Database** 🚀
-
+**Good luck! 🚀**
