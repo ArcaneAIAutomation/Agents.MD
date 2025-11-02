@@ -407,7 +407,7 @@ export default function Home() {
                   <div className="space-y-2">
                     <div className="flex items-start gap-2">
                       <span className="text-bitcoin-orange mt-1">▸</span>
-                      <span className="text-sm text-bitcoin-white-60">Ultra-fast inference (< 3 seconds)</span>
+                      <span className="text-sm text-bitcoin-white-60">Ultra-fast inference (&lt; 3 seconds)</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <span className="text-bitcoin-orange mt-1">▸</span>
