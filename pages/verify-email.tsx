@@ -113,10 +113,22 @@ export default function VerifyEmailPage() {
               )}
 
               <div className="bg-bitcoin-orange-10 border border-bitcoin-orange-20 rounded-lg p-4 mb-6">
-                <p className="text-sm text-bitcoin-white-80">
-                  ✅ Your account is now active<br />
-                  ✅ You can log in with your credentials<br />
-                  ✅ Full platform access granted
+                <p className="text-sm text-bitcoin-white-80 text-left">
+                  <strong className="text-bitcoin-orange">✅ Your Account is Now Active!</strong><br /><br />
+                  <strong>What's Next:</strong><br />
+                  1. Click the "Go to Login" button below<br />
+                  2. Enter your email address: <span className="text-bitcoin-orange font-mono">{email}</span><br />
+                  3. Enter the password you created during registration<br />
+                  4. Click "Login" to access the platform<br /><br />
+                  <strong className="text-bitcoin-orange">✅ Full Platform Access Granted</strong>
+                </p>
+              </div>
+
+              <div className="bg-bitcoin-black border border-bitcoin-orange rounded-lg p-4 mb-6">
+                <p className="text-xs text-bitcoin-white-60 text-center">
+                  <strong className="text-bitcoin-white">Security Note:</strong><br />
+                  Your email has been verified and your account is now secure.<br />
+                  You can now access all platform features.
                 </p>
               </div>
 
@@ -128,7 +140,7 @@ export default function VerifyEmailPage() {
                 onClick={() => router.push('/')}
                 className="w-full bg-bitcoin-orange text-bitcoin-black border-2 border-bitcoin-orange font-bold uppercase tracking-wider px-6 py-4 rounded-lg transition-all hover:bg-bitcoin-black hover:text-bitcoin-orange hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[48px] flex items-center justify-center gap-3"
               >
-                <span>Go to Login</span>
+                <span>Go to Login Now</span>
                 <ArrowRight className="w-5 h-5" />
               </button>
             </div>
@@ -139,11 +151,29 @@ export default function VerifyEmailPage() {
             <div className="text-center">
               <CheckCircle className="w-16 h-16 text-bitcoin-orange mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-bitcoin-white mb-3">
-                Already Verified
+                Email Already Verified
               </h2>
               <p className="text-bitcoin-white-80 mb-6">
                 {message}
               </p>
+
+              {email && (
+                <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4 mb-6">
+                  <p className="text-sm text-bitcoin-white-60 mb-1">Your Email:</p>
+                  <p className="text-bitcoin-orange font-mono font-semibold">{email}</p>
+                </div>
+              )}
+
+              <div className="bg-bitcoin-orange-10 border border-bitcoin-orange-20 rounded-lg p-4 mb-6">
+                <p className="text-sm text-bitcoin-white-80 text-left">
+                  <strong className="text-bitcoin-orange">✅ Your Account is Active</strong><br /><br />
+                  <strong>To Access the Platform:</strong><br />
+                  1. Click the "Go to Login" button below<br />
+                  2. Enter your email address{email && `: ${email}`}<br />
+                  3. Enter your password<br />
+                  4. Click "Login" to access your account
+                </p>
+              </div>
 
               <p className="text-sm text-bitcoin-white-60 mb-4">
                 Redirecting to login in {countdown} seconds...
@@ -153,7 +183,7 @@ export default function VerifyEmailPage() {
                 onClick={() => router.push('/')}
                 className="w-full bg-bitcoin-orange text-bitcoin-black border-2 border-bitcoin-orange font-bold uppercase tracking-wider px-6 py-4 rounded-lg transition-all hover:bg-bitcoin-black hover:text-bitcoin-orange hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[48px] flex items-center justify-center gap-3"
               >
-                <span>Go to Login</span>
+                <span>Go to Login Now</span>
                 <ArrowRight className="w-5 h-5" />
               </button>
             </div>
