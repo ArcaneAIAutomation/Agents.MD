@@ -22,6 +22,8 @@
     "test:verification-flow": "npx tsx scripts/test-verification-flow.ts",
     "diagnose:verification": "npx tsx scripts/diagnose-verification-issue.ts",
     "emergency:verify": "npx tsx scripts/emergency-verify-user.ts",
+    "check:verification": "npx tsx scripts/check-verification-status.ts",
+    "manual:verify": "npx tsx scripts/manual-verify-user.ts",
     "send-access-codes": "node scripts/send-early-access-codes.js",
     "send-platform-update": "node scripts/send-platform-update.js",
     "cleanup-sessions": "npx tsx scripts/cleanup-sessions.ts",

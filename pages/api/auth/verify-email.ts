@@ -94,8 +94,10 @@ export default async function handler(
 
     // Mark email as verified and clear verification token
     console.log(`🔄 Updating database for user: ${user.email}`);
+    console.log(`   User ID: ${user.id}`);
     console.log(`   Setting email_verified = TRUE`);
     console.log(`   Clearing verification_token`);
+    console.log(`   Database: ${process.env.DATABASE_URL?.split('@')[1]?.split('/')[0] || 'unknown'}`);
     
     const updateResult = await query(
       `UPDATE users 
@@ -110,6 +112,8 @@ export default async function handler(
 
     if (updateResult.rows.length === 0) {
       console.error(`❌ Failed to update user: ${user.email}`);
+      console.error(`   User ID: ${user.id}`);
+      console.error(`   This should never happen - user exists but update failed`);
       throw new Error('Failed to update user verification status');
     }
 
@@ -118,6 +122,25 @@ export default async function handler(
     console.log(`   User ID: ${updatedUser.id}`);
     console.log(`   Email: ${updatedUser.email}`);
     console.log(`   Email Verified: ${updatedUser.email_verified}`);
+    
+    // Verify the update actually worked by querying again
+    const verifyResult = await query(
+      'SELECT id, email, email_verified FROM users WHERE id = $1',
+      [user.id]
+    );
+    
+    if (verifyResult.rows.length > 0) {
+      const verifiedUser = verifyResult.rows[0];
+      console.log(`🔍 Verification check:`);
+      console.log(`   Email Verified in DB: ${verifiedUser.email_verified}`);
+      
+      if (!verifiedUser.email_verified) {
+        console.error(`❌ CRITICAL: Database update did not persist!`);
+        console.error(`   User ID: ${user.id}`);
+        console.error(`   Email: ${user.email}`);
+        console.error(`   This indicates a database transaction or connection issue`);
+      }
+    }
 
     // Log verification event
     logAuthEvent({

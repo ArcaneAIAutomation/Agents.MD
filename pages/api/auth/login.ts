@@ -97,11 +97,65 @@ async function loginHandler(
     // Check if email is verified
     if (!user.email_verified) {
       logFailedLogin(email, 'Email not verified', req);
+      
+      // AUTO-RESEND VERIFICATION EMAIL
+      try {
+        console.log(`🔄 Auto-resending verification email to unverified user: ${user.email}`);
+        
+        // Import verification utilities
+        const { generateVerificationToken, hashVerificationToken, getVerificationExpiry, generateVerificationUrl } = await import('../../../lib/auth/verification');
+        const { generateWelcomeEmail } = await import('../../../lib/email/templates/welcome');
+        
+        // Generate new verification token
+        const verificationToken = generateVerificationToken();
+        const hashedToken = hashVerificationToken(verificationToken);
+        const tokenExpiry = getVerificationExpiry(24); // 24 hours
+        
+        // Update user with new verification token
+        await query(
+          `UPDATE users 
+           SET verification_token = $1,
+               verification_token_expires = $2,
+               verification_sent_at = NOW()
+           WHERE id = $3`,
+          [hashedToken, tokenExpiry.toISOString(), user.id]
+        );
+        
+        // Generate verification URL
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://news.arcane.group';
+        const verificationUrl = generateVerificationUrl(appUrl, verificationToken);
+        
+        // Send verification email
+        const welcomeEmailHtml = generateWelcomeEmail({
+          email: user.email,
+          platformUrl: appUrl,
+          verificationUrl,
+          expiresInHours: 24
+        });
+        
+        const { sendEmail } = await import('../../../lib/email/office365');
+        const emailResult = await sendEmail({
+          to: user.email,
+          subject: 'Verify Your Email - Bitcoin Sovereign Technology',
+          body: welcomeEmailHtml,
+          contentType: 'HTML'
+        });
+        
+        if (emailResult.success) {
+          console.log(`✅ Auto-resent verification email to ${user.email}`);
+        } else {
+          console.error(`❌ Failed to auto-resend verification email:`, emailResult.error);
+        }
+      } catch (autoResendError) {
+        console.error('❌ Exception auto-resending verification email:', autoResendError);
+      }
+      
       return res.status(403).json({
         success: false,
-        message: 'Please verify your email address before logging in.',
+        message: 'Please verify your email address before logging in. We just sent you a new verification email - check your inbox!',
         requiresVerification: true,
-        email: user.email
+        email: user.email,
+        verificationEmailSent: true
       });
     }
 
