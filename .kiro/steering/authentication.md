@@ -1,15 +1,19 @@
 # Authentication System - Steering Guide
 
 **Status**: ✅ **DEPLOYED AND OPERATIONAL**  
-**Version**: 1.0.0  
-**Last Updated**: January 26, 2025  
-**Deployment**: Production (https://news.arcane.group)
+**Version**: 2.1.0  
+**Last Updated**: January 27, 2025  
+**Deployment**: Production (https://news.arcane.group)  
+**Email Verification**: ✅ WORKING
 
 ---
 
 ## Overview
 
-Bitcoin Sovereign Technology uses a secure, database-backed authentication system with JWT tokens, access code registration, and comprehensive security features. The system is production-ready and operational with 86% test pass rate.
+Bitcoin Sovereign Technology uses a secure, database-backed authentication system with JWT tokens, access code registration, email verification, and comprehensive security features. The system is production-ready and fully operational.
+
+### Recent Fix (January 27, 2025)
+**Email Verification Issue Resolved**: The `/verify-email` page was being blocked by the authentication gate. Fixed by adding it to the public pages list in `pages/_app.tsx`. Users can now successfully verify their emails and login.
 
 ---
 
