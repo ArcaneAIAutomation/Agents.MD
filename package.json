@@ -26,6 +26,7 @@
     "manual:verify": "npx tsx scripts/manual-verify-user.ts",
     "test:persistence": "npx tsx scripts/test-verification-persistence.ts",
     "verify:database": "npx tsx scripts/verify-database-config.ts",
+    "delete:user": "npx tsx scripts/delete-user.ts",
     "send-access-codes": "node scripts/send-early-access-codes.js",
     "send-platform-update": "node scripts/send-platform-update.js",
     "cleanup-sessions": "npx tsx scripts/cleanup-sessions.ts",
