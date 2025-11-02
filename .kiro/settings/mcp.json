@@ -68,7 +68,10 @@
       ],
       "env": {},
       "disabled": false,
-      "autoApprove": []
+      "autoApprove": [
+        "sequentialthinking",
+        "sequentialthinking"
+      ]
     },
     "github": {
       "command": "npx",
