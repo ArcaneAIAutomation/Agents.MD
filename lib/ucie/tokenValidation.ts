@@ -2,9 +2,10 @@
  * Token Validation Utilities for UCIE
  * Validates token symbols and provides suggestions
  * Uses database-first approach with CoinGecko API fallback
+ * 
+ * NOTE: Database functions are only available server-side (API routes)
+ * Client-side code should call API endpoints instead
  */
-
-import { query } from '../db';
 
 interface ValidationResult {
   valid: boolean;
@@ -50,9 +51,18 @@ export function sanitizeSymbol(input: string): string {
 
 /**
  * Check if token exists in database (primary method)
+ * SERVER-SIDE ONLY - Must be called from API routes
  */
 export async function checkTokenInDatabase(symbol: string): Promise<TokenInfo | null> {
+  // This function can only be used server-side
+  if (typeof window !== 'undefined') {
+    throw new Error('checkTokenInDatabase can only be called server-side');
+  }
+
   try {
+    // Dynamic import to avoid bundling pg in client code
+    const { query } = await import('../db');
+    
     const result = await query(
       `SELECT 
         coingecko_id as id,
@@ -244,9 +254,18 @@ export async function validateToken(symbol: string): Promise<ValidationResult> {
 
 /**
  * Get similar token suggestions from database
+ * SERVER-SIDE ONLY - Must be called from API routes
  */
 async function getSimilarTokensFromDatabase(symbol: string): Promise<string[]> {
+  // This function can only be used server-side
+  if (typeof window !== 'undefined') {
+    return [];
+  }
+
   try {
+    // Dynamic import to avoid bundling pg in client code
+    const { query } = await import('../db');
+    
     const result = await query(
       `SELECT symbol 
       FROM ucie_tokens 
