@@ -2,15 +2,16 @@
  * Resend Verification Email API Endpoint
  * POST /api/auth/resend-verification
  * 
- * Resends verification email to user
+ * Sends a new verification email to users who haven't verified their email
  */
 
 import { NextApiRequest, NextApiResponse } from 'next';
 import { query } from '../../../lib/db';
 import { generateVerificationToken, hashVerificationToken, getVerificationExpiry, generateVerificationUrl } from '../../../lib/auth/verification';
-import { sendEmailAsync } from '../../../lib/email/office365';
-import { generateVerificationEmail } from '../../../lib/email/templates/verification';
-import { loginRateLimiter, withRateLimit } from '../../../middleware/rateLimit';
+import { sendEmail } from '../../../lib/email/office365';
+import { generateWelcomeEmail } from '../../../lib/email/templates/welcome';
+import { withRateLimit, loginRateLimiter } from '../../../middleware/rateLimit';
+import { normalizeEmail } from '../../../lib/db';
 
 interface ResendVerificationRequest {
   email: string;
@@ -21,7 +22,7 @@ interface ResendVerificationResponse {
   message: string;
 }
 
-async function handler(
+async function resendVerificationHandler(
   req: NextApiRequest,
   res: NextApiResponse<ResendVerificationResponse>
 ) {
@@ -34,25 +35,26 @@ async function handler(
   }
 
   try {
-    const { email }: ResendVerificationRequest = req.body;
+    const { email } = req.body as ResendVerificationRequest;
 
-    if (!email) {
+    // Validate email
+    if (!email || typeof email !== 'string') {
       return res.status(400).json({
         success: false,
         message: 'Email address is required'
       });
     }
 
+    const normalizedEmail = normalizeEmail(email);
+
     // Find user by email
     const userResult = await query(
-      `SELECT id, email, email_verified, verification_sent_at 
-       FROM users 
-       WHERE email = $1`,
-      [email.toLowerCase()]
+      'SELECT id, email, email_verified FROM users WHERE email = $1',
+      [normalizedEmail]
     );
 
+    // Don't reveal if user exists or not (security)
     if (userResult.rows.length === 0) {
-      // Don't reveal if email exists or not (security)
       return res.status(200).json({
         success: true,
         message: 'If an account exists with this email, a verification link has been sent.'
@@ -63,29 +65,16 @@ async function handler(
 
     // Check if already verified
     if (user.email_verified) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email is already verified. You can log in now.'
+      return res.status(200).json({
+        success: true,
+        message: 'This email is already verified. You can log in now.'
       });
-    }
-
-    // Rate limit: Don't allow resending more than once per 2 minutes
-    if (user.verification_sent_at) {
-      const lastSent = new Date(user.verification_sent_at);
-      const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
-      
-      if (lastSent > twoMinutesAgo) {
-        return res.status(429).json({
-          success: false,
-          message: 'Please wait a few minutes before requesting another verification email.'
-        });
-      }
     }
 
     // Generate new verification token
     const verificationToken = generateVerificationToken();
     const hashedToken = hashVerificationToken(verificationToken);
-    const tokenExpiry = getVerificationExpiry(24);
+    const tokenExpiry = getVerificationExpiry(24); // 24 hours
 
     // Update user with new verification token
     await query(
@@ -102,24 +91,46 @@ async function handler(
     const verificationUrl = generateVerificationUrl(appUrl, verificationToken);
 
     // Send verification email
-    const verificationEmailHtml = generateVerificationEmail({
-      email: user.email,
-      verificationUrl,
-      expiresInHours: 24
-    });
+    try {
+      const welcomeEmailHtml = generateWelcomeEmail({
+        email: user.email,
+        platformUrl: appUrl,
+        verificationUrl,
+        expiresInHours: 24
+      });
 
-    sendEmailAsync({
-      to: user.email,
-      subject: 'Verify Your Email - Bitcoin Sovereign Technology',
-      body: verificationEmailHtml,
-      contentType: 'HTML'
-    });
+      console.log(`📧 Resending verification email to: ${user.email}`);
+      console.log(`📧 Verification URL: ${verificationUrl}`);
 
-    console.log(`Verification email resent to ${user.email}`);
+      const emailResult = await sendEmail({
+        to: user.email,
+        subject: 'Verify Your Email - Bitcoin Sovereign Technology',
+        body: welcomeEmailHtml,
+        contentType: 'HTML'
+      });
+
+      if (emailResult.success) {
+        console.log(`✅ Verification email resent successfully to ${user.email}`);
+      } else {
+        console.error(`❌ Failed to resend verification email to ${user.email}:`, emailResult.error);
+        
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to send verification email. Please try again later.'
+        });
+      }
+    } catch (emailError) {
+      console.error('❌ Exception resending verification email:', emailError);
+      
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send verification email. Please try again later.'
+      });
+    }
 
     return res.status(200).json({
       success: true,
-      message: 'Verification email sent. Please check your inbox.'
+      message: 'Verification email sent! Please check your inbox.'
     });
 
   } catch (error) {
@@ -132,5 +143,8 @@ async function handler(
   }
 }
 
-// Export with rate limiting (same as login)
-export default withRateLimit(loginRateLimiter, handler);
+/**
+ * Export handler with rate limiting middleware
+ * 5 attempts per email per 15 minutes (same as login)
+ */
+export default withRateLimit(loginRateLimiter, resendVerificationHandler);

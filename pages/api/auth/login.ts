@@ -100,7 +100,8 @@ async function loginHandler(
       return res.status(403).json({
         success: false,
         message: 'Please verify your email address before logging in.',
-        requiresVerification: true
+        requiresVerification: true,
+        email: user.email
       });
     }
 
