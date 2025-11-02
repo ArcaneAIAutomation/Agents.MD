@@ -78,15 +78,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   // Check authentication status and fetch CSRF token on mount
+  // DISABLED: No automatic auth check - users must login every time
   useEffect(() => {
     const initialize = async () => {
       await fetchCsrfToken();
-      await checkAuth();
+      // Do NOT check auth automatically - force fresh login every time
+      setIsLoading(false);
+      setUser(null);
     };
     initialize();
   }, []);
 
   // Check if user is authenticated by calling /api/auth/me
+  // This is now only called manually, not automatically on mount
   const checkAuth = async (): Promise<void> => {
     try {
       setIsLoading(true);
@@ -98,6 +102,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         headers: {
           'Content-Type': 'application/json',
         },
+        // Add cache control to prevent caching
+        cache: 'no-store'
       });
 
       if (response.ok) {
@@ -183,19 +189,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       const data = await response.json();
 
-      if (response.ok && data.success) {
-        setUser(null);
-        setError(null);
-      } else {
-        setError(data.message || 'Logout failed. Please try again.');
-        throw new Error(data.message || 'Logout failed');
+      // Always clear user state, even if API call fails
+      setUser(null);
+      setError(null);
+      
+      // Clear any cached data
+      if (typeof window !== 'undefined') {
+        // Clear session storage
+        sessionStorage.clear();
+        // Clear local storage (if any auth data is stored there)
+        localStorage.removeItem('auth_user');
+        localStorage.removeItem('auth_token');
+      }
+
+      if (!response.ok || !data.success) {
+        console.warn('Logout API call failed, but user state cleared:', data.message);
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Logout failed. Please try again.';
-      setError(errorMessage);
-      throw err;
+      // Even on error, ensure user is logged out locally
+      setUser(null);
+      setError(null);
+      console.error('Logout error, but user state cleared:', err);
     } finally {
       setIsLoading(false);
+      // Force a page reload to ensure clean state
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
     }
   };
 

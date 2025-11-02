@@ -79,12 +79,15 @@ async function logoutHandler(
     }
 
     // ========================================================================
-    // STEP 3: Clear httpOnly cookie (Subtask 5.1)
+    // STEP 3: Clear httpOnly cookie and clear client-side state (Subtask 5.1)
     // ========================================================================
     const isProduction = process.env.NODE_ENV === 'production';
 
+    // Clear the cookie immediately
     res.setHeader('Set-Cookie', [
-      `auth_token=; HttpOnly; Secure=${isProduction}; SameSite=Strict; Path=/; Max-Age=0`
+      `auth_token=; HttpOnly; Secure=${isProduction}; SameSite=Strict; Path=/; Max-Age=0`,
+      // Also set an expired cookie to ensure it's removed
+      `auth_token=deleted; HttpOnly; Secure=${isProduction}; SameSite=Strict; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT`
     ]);
 
     // ========================================================================
@@ -95,6 +98,11 @@ async function logoutHandler(
     // ========================================================================
     // STEP 5: Return success response (Subtask 5.1)
     // ========================================================================
+    // Add cache control headers to prevent caching
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
     return res.status(200).json({
       success: true,
       message: 'Logout successful'

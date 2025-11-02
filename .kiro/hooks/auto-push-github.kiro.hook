@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Auto Push to GitHub",
+  "description": "Automatically commits and pushes changes to GitHub when files are modified in the workspace",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Files have been modified in the workspace. Please:\n1. Stage all changes using: git add .\n2. Create a commit with a descriptive message about what changed\n3. Push to the main branch using: git push origin main\n\nMake sure to check git status first and provide a clear commit message that describes the changes made."
+  }
+}

@@ -176,8 +176,9 @@ async function loginHandler(
     // ========================================================================
     // STEP 4: Generate JWT token (Subtask 4.2)
     // ========================================================================
-    // 7 days for normal login, 30 days if rememberMe is checked
-    const expiresIn = rememberMe ? '30d' : '7d';
+    // SESSION-ONLY: Token expires in 1 hour for security
+    // Cookie expires when browser closes (no Max-Age set)
+    const expiresIn = '1h';
     const token = generateToken(
       {
         userId: user.id,
@@ -191,8 +192,8 @@ async function loginHandler(
     // ========================================================================
     const tokenHash = hashToken(token);
 
-    // Calculate expiration date
-    const expirationMs = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
+    // Calculate expiration date (1 hour from now)
+    const expirationMs = 60 * 60 * 1000; // 1 hour
     const expiresAt = new Date(Date.now() + expirationMs);
 
     // ========================================================================
@@ -206,11 +207,12 @@ async function loginHandler(
     // ========================================================================
     // STEP 7: Set httpOnly, secure, sameSite cookie (Subtask 4.2)
     // ========================================================================
+    // SESSION-ONLY COOKIE: No Max-Age means cookie expires when browser closes
+    // This ensures users must login every time they access the site
     const isProduction = process.env.NODE_ENV === 'production';
-    const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 7 * 24 * 60 * 60; // seconds
 
     res.setHeader('Set-Cookie', [
-      `auth_token=${token}; HttpOnly; Secure=${isProduction}; SameSite=Strict; Path=/; Max-Age=${maxAge}`
+      `auth_token=${token}; HttpOnly; Secure=${isProduction}; SameSite=Strict; Path=/`
     ]);
 
     // ========================================================================
@@ -221,6 +223,11 @@ async function loginHandler(
     // ========================================================================
     // STEP 9: Return success response with user data (Subtask 4.3)
     // ========================================================================
+    // Add cache control headers to prevent caching
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
     return res.status(200).json({
       success: true,
       message: 'Login successful',

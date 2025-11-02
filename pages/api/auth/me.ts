@@ -75,6 +75,11 @@ async function handler(
       });
     }
 
+    // Add cache control headers to prevent caching
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
     // Return user data (excluding password_hash)
     return res.status(200).json({
       success: true,

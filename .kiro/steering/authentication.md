@@ -1,19 +1,28 @@
 # Authentication System - Steering Guide
 
 **Status**: ✅ **DEPLOYED AND OPERATIONAL**  
-**Version**: 2.1.0  
+**Version**: 2.0.0 (Session-Only)  
 **Last Updated**: January 27, 2025  
 **Deployment**: Production (https://news.arcane.group)  
-**Email Verification**: ✅ WORKING
+**Email Verification**: ✅ WORKING  
+**Authentication Mode**: 🔐 **SESSION-ONLY (No Persistence)**
 
 ---
 
 ## Overview
 
-Bitcoin Sovereign Technology uses a secure, database-backed authentication system with JWT tokens, access code registration, email verification, and comprehensive security features. The system is production-ready and fully operational.
+Bitcoin Sovereign Technology uses a **session-only authentication system** with pure database verification. Users must login every time they access the website - no persistent authentication across browser sessions.
 
-### Recent Fix (January 27, 2025)
-**Email Verification Issue Resolved**: The `/verify-email` page was being blocked by the authentication gate. Fixed by adding it to the public pages list in `pages/_app.tsx`. Users can now successfully verify their emails and login.
+### Recent Overhaul (January 27, 2025)
+**Session-Only Authentication Implemented**: Complete system overhaul to implement:
+- ✅ Session-only cookies (expire when browser closes)
+- ✅ 1-hour token expiration (instead of 7-30 days)
+- ✅ Database verification on every request
+- ✅ No automatic authentication check
+- ✅ Enhanced logout with state clearing
+- ✅ Cache prevention headers
+
+**Key Change**: Users must login every time they open the browser. No persistent sessions.
 
 ---
 
@@ -21,11 +30,15 @@ Bitcoin Sovereign Technology uses a secure, database-backed authentication syste
 
 ### **Technology Stack**
 - **Database**: Supabase PostgreSQL (connection pooling on port 6543)
-- **Authentication**: JWT tokens with httpOnly secure cookies
+- **Authentication**: JWT tokens with httpOnly secure cookies (SESSION-ONLY)
+- **Token Expiration**: 1 hour (short-lived for security)
+- **Cookie Persistence**: None (expires when browser closes)
+- **Session Verification**: Database check on every request
 - **Password Hashing**: bcrypt (12 salt rounds)
 - **Rate Limiting**: In-memory fallback (upgrade to Upstash Redis recommended)
 - **Session Storage**: Database-backed (sessions table)
 - **Audit Logging**: Comprehensive event logging (auth_logs table)
+- **Cache Prevention**: No-cache headers on all auth endpoints
 
 ### **Database Schema**
 ```sql

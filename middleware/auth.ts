@@ -51,10 +51,10 @@ export function withAuth(handler: NextApiHandler): NextApiHandler {
         decoded = verifyToken(token);
       } catch (error) {
         // Clear invalid cookie
-        res.setHeader(
-          'Set-Cookie',
-          'auth_token=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0'
-        );
+        const isProduction = process.env.NODE_ENV === 'production';
+        res.setHeader('Set-Cookie', [
+          `auth_token=; Path=/; HttpOnly; Secure=${isProduction}; SameSite=Strict; Max-Age=0`
+        ]);
 
         const errorMessage = error instanceof Error ? error.message : 'Invalid token';
         
@@ -71,6 +71,49 @@ export function withAuth(handler: NextApiHandler): NextApiHandler {
         return res.status(401).json({
           success: false,
           message: 'Invalid token payload. Please log in again.'
+        });
+      }
+
+      // CRITICAL: Verify session exists in database
+      const crypto = require('crypto');
+      const { query } = require('../lib/db');
+      
+      const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+      
+      const sessionResult = await query(
+        'SELECT id, user_id, expires_at FROM sessions WHERE token_hash = $1 AND user_id = $2',
+        [tokenHash, decoded.userId]
+      );
+
+      // If session doesn't exist in database, reject
+      if (sessionResult.rows.length === 0) {
+        const isProduction = process.env.NODE_ENV === 'production';
+        res.setHeader('Set-Cookie', [
+          `auth_token=; Path=/; HttpOnly; Secure=${isProduction}; SameSite=Strict; Max-Age=0`
+        ]);
+        
+        return res.status(401).json({
+          success: false,
+          message: 'Session not found. Please log in again.'
+        });
+      }
+
+      const session = sessionResult.rows[0];
+      
+      // Check if session has expired
+      const expiresAt = new Date(session.expires_at);
+      if (expiresAt < new Date()) {
+        // Delete expired session
+        await query('DELETE FROM sessions WHERE id = $1', [session.id]);
+        
+        const isProduction = process.env.NODE_ENV === 'production';
+        res.setHeader('Set-Cookie', [
+          `auth_token=; Path=/; HttpOnly; Secure=${isProduction}; SameSite=Strict; Max-Age=0`
+        ]);
+        
+        return res.status(401).json({
+          success: false,
+          message: 'Your session has expired. Please log in again.'
         });
       }
 

@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Source to Docs Sync",
+  "description": "Monitors all source files (TypeScript, JavaScript, CSS) and related configuration files. When changes are detected, prompts the agent to review and update relevant documentation in README.md or the /docs folder to keep documentation synchronized with code changes.",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Source files have been modified. Please review the changes and update the documentation accordingly:\n\n1. Analyze the changed files to understand what functionality was added, modified, or removed\n2. Check if README.md needs updates (installation steps, usage examples, features list, etc.)\n3. Check if any files in the /docs folder need updates (API documentation, guides, architecture docs, etc.)\n4. Update relevant documentation to reflect the code changes\n5. Ensure code examples in docs are still accurate\n6. Update any outdated screenshots, diagrams, or references\n7. Maintain consistency with the Bitcoin Sovereign Technology design system and project standards\n\nFocus on keeping documentation clear, accurate, and helpful for developers and users."
+  }
+}

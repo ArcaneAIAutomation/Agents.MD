@@ -32,6 +32,8 @@
     "send-platform-update": "node scripts/send-platform-update.js",
     "cleanup-sessions": "npx tsx scripts/cleanup-sessions.ts",
     "migrate:ucie-cache": "npx tsx scripts/run-ucie-cache-migration.ts",
+    "migrate:ucie": "npx tsx scripts/run-ucie-migration.ts",
+    "migrate:ucie:ps1": "pwsh -File scripts/run-ucie-migration.ps1",
     "deploy": "pwsh -File deploy.ps1",
     "deploy:unix": "bash deploy.sh",
     "deploy:msg": "pwsh -File deploy.ps1 -CommitMessage",
