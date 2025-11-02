@@ -158,12 +158,17 @@ export function useProgressiveLoading({
     setCurrentPhase(1);
     setOverallProgress(0);
 
+    const allData: any = {};
+
     // Load phases sequentially
     for (let i = 0; i < phases.length; i++) {
       const phase = phases[i];
       setCurrentPhase(phase.phase);
       
-      await fetchPhaseData(phase);
+      const phaseData = await fetchPhaseData(phase);
+      if (phaseData) {
+        Object.assign(allData, phaseData);
+      }
       
       // Update overall progress
       const progress = ((i + 1) / phases.length) * 100;
@@ -174,11 +179,11 @@ export function useProgressiveLoading({
 
     // All phases complete callback
     if (onAllComplete) {
-      onAllComplete(aggregatedData);
+      onAllComplete(allData);
     }
 
     console.log('🎉 All phases completed!');
-  }, [phases, fetchPhaseData, onAllComplete, aggregatedData]);
+  }, [phases, fetchPhaseData, onAllComplete]);
 
   // Start loading on mount
   useEffect(() => {

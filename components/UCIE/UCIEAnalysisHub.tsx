@@ -84,6 +84,21 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
   const requestStrategy = useAdaptiveRequestStrategy();
   const haptic = useHaptic();
 
+  // Define tabs array BEFORE using it
+  const tabs: Tab[] = [
+    { id: 'overview', label: 'Overview', icon: <TrendingUp className="w-4 h-4" />, phase: 1 },
+    { id: 'market', label: 'Market Data', icon: <DollarSign className="w-4 h-4" />, phase: 1 },
+    { id: 'research', label: 'AI Research', icon: <Brain className="w-4 h-4" />, phase: 4 },
+    { id: 'onchain', label: 'On-Chain', icon: <Activity className="w-4 h-4" />, phase: 3 },
+    { id: 'social', label: 'Social', icon: <Share2 className="w-4 h-4" />, phase: 2 },
+    { id: 'news', label: 'News', icon: <Newspaper className="w-4 h-4" />, phase: 2 },
+    { id: 'technical', label: 'Technical', icon: <BarChart3 className="w-4 h-4" />, phase: 3 },
+    { id: 'predictions', label: 'Predictions', icon: <Target className="w-4 h-4" />, phase: 4 },
+    { id: 'risk', label: 'Risk', icon: <Shield className="w-4 h-4" />, phase: 3 },
+    { id: 'derivatives', label: 'Derivatives', icon: <AlertTriangle className="w-4 h-4" />, phase: 3 },
+    { id: 'defi', label: 'DeFi', icon: <Coins className="w-4 h-4" />, phase: 3 },
+  ];
+
   // Swipe gestures for tab navigation (mobile only)
   const currentTabIndex = tabs.findIndex(t => t.id === activeTab);
   
@@ -129,20 +144,6 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
       setError(`Phase ${phase} failed: ${errorMsg}`);
     },
   });
-
-  const tabs: Tab[] = [
-    { id: 'overview', label: 'Overview', icon: <TrendingUp className="w-4 h-4" />, phase: 1 },
-    { id: 'market', label: 'Market Data', icon: <DollarSign className="w-4 h-4" />, phase: 1 },
-    { id: 'research', label: 'AI Research', icon: <Brain className="w-4 h-4" />, phase: 4 },
-    { id: 'onchain', label: 'On-Chain', icon: <Activity className="w-4 h-4" />, phase: 3 },
-    { id: 'social', label: 'Social', icon: <Share2 className="w-4 h-4" />, phase: 2 },
-    { id: 'news', label: 'News', icon: <Newspaper className="w-4 h-4" />, phase: 2 },
-    { id: 'technical', label: 'Technical', icon: <BarChart3 className="w-4 h-4" />, phase: 3 },
-    { id: 'predictions', label: 'Predictions', icon: <Target className="w-4 h-4" />, phase: 4 },
-    { id: 'risk', label: 'Risk', icon: <Shield className="w-4 h-4" />, phase: 3 },
-    { id: 'derivatives', label: 'Derivatives', icon: <AlertTriangle className="w-4 h-4" />, phase: 3 },
-    { id: 'defi', label: 'DeFi', icon: <Coins className="w-4 h-4" />, phase: 3 },
-  ];
 
   // Real-time updates (adaptive based on connection and device)
   useEffect(() => {
