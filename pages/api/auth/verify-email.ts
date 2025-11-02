@@ -92,102 +92,26 @@ export default async function handler(
       });
     }
 
-    // Mark email as verified and clear verification token
+    // Update database - simple and direct
     console.log(`🔄 Updating database for user: ${user.email}`);
-    console.log(`   User ID: ${user.id}`);
-    console.log(`   Setting email_verified = TRUE`);
-    console.log(`   Clearing verification_token`);
-    console.log(`   Database: ${process.env.DATABASE_URL?.split('@')[1]?.split('/')[0] || 'unknown'}`);
     
-    // DIRECT UPDATE - Simplified for reliability
-    // Multiple attempts with verification after each
-    let updatedUser: any = null;
-    let updateSuccess = false;
-    
-    for (let attempt = 1; attempt <= 3; attempt++) {
-      try {
-        console.log(`   📝 Update attempt ${attempt}/3...`);
-        
-        // Execute UPDATE query
-        const updateResult = await query(
-          `UPDATE users 
-           SET email_verified = TRUE,
-               verification_token = NULL,
-               verification_token_expires = NULL,
-               updated_at = NOW()
-           WHERE id = $1
-           RETURNING id, email, email_verified`,
-          [user.id]
-        );
+    const updateResult = await query(
+      `UPDATE users 
+       SET email_verified = TRUE,
+           verification_token = NULL,
+           verification_token_expires = NULL,
+           updated_at = NOW()
+       WHERE id = $1
+       RETURNING id, email, email_verified`,
+      [user.id]
+    );
 
-        if (updateResult.rows.length === 0) {
-          console.error(`   ❌ Attempt ${attempt}: No rows returned from UPDATE`);
-          continue;
-        }
-
-        updatedUser = updateResult.rows[0];
-        console.log(`   ✅ Attempt ${attempt}: UPDATE executed`);
-        console.log(`      Returned email_verified: ${updatedUser.email_verified}`);
-        
-        // Wait a moment for database to settle
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        // Verify the update persisted
-        const verifyResult = await query(
-          'SELECT id, email, email_verified FROM users WHERE id = $1',
-          [user.id]
-        );
-        
-        if (verifyResult.rows.length === 0) {
-          console.error(`   ❌ Attempt ${attempt}: User disappeared from database!`);
-          continue;
-        }
-        
-        const verifiedUser = verifyResult.rows[0];
-        console.log(`   🔍 Attempt ${attempt}: Verification check`);
-        console.log(`      Database email_verified: ${verifiedUser.email_verified}`);
-        
-        if (verifiedUser.email_verified === true) {
-          console.log(`   ✅ Attempt ${attempt}: SUCCESS - Update persisted!`);
-          updatedUser = verifiedUser;
-          updateSuccess = true;
-          break;
-        } else {
-          console.error(`   ❌ Attempt ${attempt}: Update did NOT persist`);
-          console.error(`      Expected: true, Got: ${verifiedUser.email_verified}`);
-          
-          // Wait before retry
-          if (attempt < 3) {
-            const delay = attempt * 500; // 500ms, 1000ms
-            console.log(`      ⏳ Waiting ${delay}ms before retry...`);
-            await new Promise(resolve => setTimeout(resolve, delay));
-          }
-        }
-      } catch (attemptError) {
-        console.error(`   ❌ Attempt ${attempt}: Error during update:`, attemptError);
-        if (attempt < 3) {
-          await new Promise(resolve => setTimeout(resolve, attempt * 500));
-        }
-      }
-    }
-    
-    if (!updateSuccess || !updatedUser) {
-      console.error(`❌ CRITICAL: All 3 update attempts failed!`);
-      console.error(`   User ID: ${user.id}`);
-      console.error(`   Email: ${user.email}`);
-      console.error(`   This indicates a serious database issue`);
-      
-      // Return error to user
-      return res.status(500).json({
-        success: false,
-        message: 'Unable to verify email due to database error. Please contact support with your email address.'
-      });
+    if (updateResult.rows.length === 0) {
+      throw new Error('Failed to update user');
     }
 
-    console.log(`✅ Email verification successful after ${updateSuccess ? 'update' : 'unknown'} attempts`);
-    console.log(`   User ID: ${updatedUser.id}`);
-    console.log(`   Email: ${updatedUser.email}`);
-    console.log(`   Email Verified: ${updatedUser.email_verified}`);
+    const updatedUser = updateResult.rows[0];
+    console.log(`✅ User verified: ${updatedUser.email}`);
 
     // Log verification event
     logAuthEvent({
