@@ -31,7 +31,7 @@ export interface RegulatoryAction {
 
 export interface HoweyTestAssessment {
   score: number; // 0-100 (higher = more likely to be a security)
-  isLikelySecur ity: boolean;
+  isLikelySecurity: boolean;
   confidence: number;
   factors: {
     investmentOfMoney: { score: number; reasoning: string };
