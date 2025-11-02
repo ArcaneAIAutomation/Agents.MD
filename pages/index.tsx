@@ -297,6 +297,282 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Technology & Intelligence Section */}
+        <div className="container mx-auto px-4 py-16 md:py-24">
+          <div className="max-w-6xl mx-auto">
+            {/* Section Header */}
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-extrabold text-bitcoin-white mb-4" style={{ letterSpacing: '-0.02em' }}>
+                Advanced Intelligence Architecture
+              </h2>
+              <p className="text-xl text-bitcoin-orange font-mono font-bold mb-4" style={{ textShadow: '0 0 20px rgba(247, 147, 26, 0.3)' }}>
+                Multi-Layer AI • Real-Time Analysis • Predictive Modeling
+              </p>
+              <p className="text-lg text-bitcoin-white-60 max-w-3xl mx-auto">
+                Our platform combines cutting-edge AI models with sophisticated mathematical analysis 
+                to deliver institutional-grade cryptocurrency intelligence.
+              </p>
+            </div>
+
+            {/* AI Stack */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+              {/* GPT-4o Analysis Engine */}
+              <div className="bitcoin-block">
+                <div className="border-b-2 border-bitcoin-orange px-6 py-4 bg-bitcoin-black">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-3xl">🧠</span>
+                    <span className="bg-bitcoin-orange text-bitcoin-black text-xs px-3 py-1 rounded font-bold">
+                      GPT-4o
+                    </span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-bitcoin-white">
+                    Neural Market Analysis
+                  </h3>
+                </div>
+                <div className="p-6">
+                  <p className="text-bitcoin-white-80 mb-4 leading-relaxed">
+                    OpenAI's most advanced model processes multi-dimensional market data, 
+                    generating trade signals with step-by-step reasoning and confidence scoring.
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2">
+                      <span className="text-bitcoin-orange mt-1">▸</span>
+                      <span className="text-sm text-bitcoin-white-60">Natural language market interpretation</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-bitcoin-orange mt-1">▸</span>
+                      <span className="text-sm text-bitcoin-white-60">Pattern recognition across timeframes</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-bitcoin-orange mt-1">▸</span>
+                      <span className="text-sm text-bitcoin-white-60">Risk-adjusted position sizing</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Caesar Research AI */}
+              <div className="bitcoin-block">
+                <div className="border-b-2 border-bitcoin-orange px-6 py-4 bg-bitcoin-black">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-3xl">🔬</span>
+                    <span className="bg-bitcoin-orange text-bitcoin-black text-xs px-3 py-1 rounded font-bold">
+                      Caesar AI
+                    </span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-bitcoin-white">
+                    Deep Research Engine
+                  </h3>
+                </div>
+                <div className="p-6">
+                  <p className="text-bitcoin-white-80 mb-4 leading-relaxed">
+                    Specialized research AI that analyzes whale transactions, providing context 
+                    and market impact assessment with cited sources and confidence metrics.
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2">
+                      <span className="text-bitcoin-orange mt-1">▸</span>
+                      <span className="text-sm text-bitcoin-white-60">Multi-source intelligence gathering</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-bitcoin-orange mt-1">▸</span>
+                      <span className="text-sm text-bitcoin-white-60">Transaction context analysis</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-bitcoin-orange mt-1">▸</span>
+                      <span className="text-sm text-bitcoin-white-60">Market impact prediction</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Gemini Flash Analysis */}
+              <div className="bitcoin-block">
+                <div className="border-b-2 border-bitcoin-orange px-6 py-4 bg-bitcoin-black">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-3xl">⚡</span>
+                    <span className="bg-bitcoin-orange text-bitcoin-black text-xs px-3 py-1 rounded font-bold">
+                      Gemini 2.5
+                    </span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-bitcoin-white">
+                    Real-Time Processing
+                  </h3>
+                </div>
+                <div className="p-6">
+                  <p className="text-bitcoin-white-80 mb-4 leading-relaxed">
+                    Google's Gemini 2.5 Flash provides sub-3-second whale transaction analysis 
+                    with thinking mode transparency, showing AI reasoning in real-time.
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2">
+                      <span className="text-bitcoin-orange mt-1">▸</span>
+                      <span className="text-sm text-bitcoin-white-60">Ultra-fast inference (< 3 seconds)</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-bitcoin-orange mt-1">▸</span>
+                      <span className="text-sm text-bitcoin-white-60">Transparent reasoning process</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-bitcoin-orange mt-1">▸</span>
+                      <span className="text-sm text-bitcoin-white-60">Adaptive model selection</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Technical Analysis Engine */}
+              <div className="bitcoin-block">
+                <div className="border-b-2 border-bitcoin-orange px-6 py-4 bg-bitcoin-black">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-3xl">📊</span>
+                    <span className="bg-bitcoin-orange text-bitcoin-black text-xs px-3 py-1 rounded font-bold">
+                      Multi-Indicator
+                    </span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-bitcoin-white">
+                    Mathematical Analysis
+                  </h3>
+                </div>
+                <div className="p-6">
+                  <p className="text-bitcoin-white-80 mb-4 leading-relaxed">
+                    Proprietary algorithms combine 10+ technical indicators across 4 timeframes, 
+                    identifying supply/demand zones and momentum shifts with precision.
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2">
+                      <span className="text-bitcoin-orange mt-1">▸</span>
+                      <span className="text-sm text-bitcoin-white-60">RSI, MACD, Bollinger Bands, ATR</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-bitcoin-orange mt-1">▸</span>
+                      <span className="text-sm text-bitcoin-white-60">Multi-timeframe confluence detection</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-bitcoin-orange mt-1">▸</span>
+                      <span className="text-sm text-bitcoin-white-60">Volume-weighted price analysis</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Data Sources */}
+            <div className="bitcoin-block mb-12">
+              <div className="border-b-2 border-bitcoin-orange px-6 py-4 bg-bitcoin-black">
+                <h3 className="text-2xl font-bold text-bitcoin-white">
+                  Multi-Source Data Aggregation
+                </h3>
+                <p className="text-sm text-bitcoin-white-60 italic mt-1">
+                  Real-time feeds from leading exchanges and data providers
+                </p>
+              </div>
+              <div className="p-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center p-4 border border-bitcoin-orange-20 rounded-lg hover:border-bitcoin-orange transition-all">
+                    <div className="font-mono text-lg font-bold text-bitcoin-orange mb-1">Kraken</div>
+                    <div className="text-xs text-bitcoin-white-60">Live Trading Data</div>
+                  </div>
+                  <div className="text-center p-4 border border-bitcoin-orange-20 rounded-lg hover:border-bitcoin-orange transition-all">
+                    <div className="font-mono text-lg font-bold text-bitcoin-orange mb-1">CoinGecko</div>
+                    <div className="text-xs text-bitcoin-white-60">Market Data</div>
+                  </div>
+                  <div className="text-center p-4 border border-bitcoin-orange-20 rounded-lg hover:border-bitcoin-orange transition-all">
+                    <div className="font-mono text-lg font-bold text-bitcoin-orange mb-1">NewsAPI</div>
+                    <div className="text-xs text-bitcoin-white-60">News Aggregation</div>
+                  </div>
+                  <div className="text-center p-4 border border-bitcoin-orange-20 rounded-lg hover:border-bitcoin-orange transition-all">
+                    <div className="font-mono text-lg font-bold text-bitcoin-orange mb-1">Blockchain.com</div>
+                    <div className="text-xs text-bitcoin-white-60">On-Chain Data</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Predictive Capabilities */}
+            <div className="bitcoin-block-orange mb-12">
+              <div className="p-8">
+                <h3 className="text-3xl font-bold text-bitcoin-black mb-6 text-center">
+                  Predictive Intelligence Framework
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="text-center">
+                    <div className="text-5xl font-bold text-bitcoin-black font-mono mb-2">
+                      4
+                    </div>
+                    <div className="text-sm text-bitcoin-black font-semibold uppercase tracking-wider mb-2">
+                      Timeframes
+                    </div>
+                    <div className="text-xs text-bitcoin-black opacity-80">
+                      15m • 1h • 4h • 1d
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-5xl font-bold text-bitcoin-black font-mono mb-2">
+                      10+
+                    </div>
+                    <div className="text-sm text-bitcoin-black font-semibold uppercase tracking-wider mb-2">
+                      Indicators
+                    </div>
+                    <div className="text-xs text-bitcoin-black opacity-80">
+                      Technical & Fundamental
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-5xl font-bold text-bitcoin-black font-mono mb-2">
+                      3
+                    </div>
+                    <div className="text-sm text-bitcoin-black font-semibold uppercase tracking-wider mb-2">
+                      AI Models
+                    </div>
+                    <div className="text-xs text-bitcoin-black opacity-80">
+                      GPT-4o • Caesar • Gemini
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Mathematical Approach */}
+            <div className="bitcoin-block">
+              <div className="border-b-2 border-bitcoin-orange px-6 py-4 bg-bitcoin-black">
+                <h3 className="text-2xl font-bold text-bitcoin-white">
+                  Quantitative Analysis Methodology
+                </h3>
+                <p className="text-sm text-bitcoin-white-60 italic mt-1">
+                  Proprietary algorithms combining statistical analysis with machine learning
+                </p>
+              </div>
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="text-lg font-bold text-bitcoin-orange mb-3">Price Action Analysis</h4>
+                    <p className="text-sm text-bitcoin-white-60 mb-3 leading-relaxed">
+                      Multi-dimensional vector analysis of price movements, identifying support/resistance 
+                      zones through volume-weighted calculations and order book depth analysis.
+                    </p>
+                    <div className="font-mono text-xs text-bitcoin-white-60 bg-bitcoin-black border border-bitcoin-orange-20 rounded p-3">
+                      <div>Δ = (P<sub>t</sub> - P<sub>t-1</sub>) / P<sub>t-1</sub></div>
+                      <div className="mt-1">σ = √(Σ(x - μ)² / n)</div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-bitcoin-orange mb-3">Momentum Indicators</h4>
+                    <p className="text-sm text-bitcoin-white-60 mb-3 leading-relaxed">
+                      Exponential moving averages and rate-of-change calculations detect trend strength 
+                      and potential reversals across multiple timeframes with adaptive thresholds.
+                    </p>
+                    <div className="font-mono text-xs text-bitcoin-white-60 bg-bitcoin-black border border-bitcoin-orange-20 rounded p-3">
+                      <div>EMA = P<sub>t</sub> × k + EMA<sub>y</sub> × (1 - k)</div>
+                      <div className="mt-1">RSI = 100 - (100 / (1 + RS))</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Platform Capabilities */}
         <div className="container mx-auto px-4 py-16">
           <div className="bitcoin-block">
