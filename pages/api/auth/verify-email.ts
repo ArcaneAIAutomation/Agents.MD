@@ -93,81 +93,101 @@ export default async function handler(
     }
 
     // Mark email as verified and clear verification token
-    // Use explicit transaction to ensure update persists
     console.log(`🔄 Updating database for user: ${user.email}`);
     console.log(`   User ID: ${user.id}`);
     console.log(`   Setting email_verified = TRUE`);
     console.log(`   Clearing verification_token`);
     console.log(`   Database: ${process.env.DATABASE_URL?.split('@')[1]?.split('/')[0] || 'unknown'}`);
     
-    // Import transaction helper
-    const { transaction } = await import('../../../lib/db');
+    // DIRECT UPDATE - Simplified for reliability
+    // Multiple attempts with verification after each
+    let updatedUser: any = null;
+    let updateSuccess = false;
     
-    // Execute update in a transaction to ensure it commits
-    const updatedUser = await transaction(async (client) => {
-      console.log(`   🔒 Starting database transaction...`);
-      
-      // Update user verification status
-      const updateResult = await client.query(
-        `UPDATE users 
-         SET email_verified = TRUE,
-             verification_token = NULL,
-             verification_token_expires = NULL,
-             updated_at = NOW()
-         WHERE id = $1
-         RETURNING id, email, email_verified`,
-        [user.id]
-      );
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        console.log(`   📝 Update attempt ${attempt}/3...`);
+        
+        // Execute UPDATE query
+        const updateResult = await query(
+          `UPDATE users 
+           SET email_verified = TRUE,
+               verification_token = NULL,
+               verification_token_expires = NULL,
+               updated_at = NOW()
+           WHERE id = $1
+           RETURNING id, email, email_verified`,
+          [user.id]
+        );
 
-      if (updateResult.rows.length === 0) {
-        console.error(`❌ Failed to update user: ${user.email}`);
-        throw new Error('Failed to update user verification status');
+        if (updateResult.rows.length === 0) {
+          console.error(`   ❌ Attempt ${attempt}: No rows returned from UPDATE`);
+          continue;
+        }
+
+        updatedUser = updateResult.rows[0];
+        console.log(`   ✅ Attempt ${attempt}: UPDATE executed`);
+        console.log(`      Returned email_verified: ${updatedUser.email_verified}`);
+        
+        // Wait a moment for database to settle
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Verify the update persisted
+        const verifyResult = await query(
+          'SELECT id, email, email_verified FROM users WHERE id = $1',
+          [user.id]
+        );
+        
+        if (verifyResult.rows.length === 0) {
+          console.error(`   ❌ Attempt ${attempt}: User disappeared from database!`);
+          continue;
+        }
+        
+        const verifiedUser = verifyResult.rows[0];
+        console.log(`   🔍 Attempt ${attempt}: Verification check`);
+        console.log(`      Database email_verified: ${verifiedUser.email_verified}`);
+        
+        if (verifiedUser.email_verified === true) {
+          console.log(`   ✅ Attempt ${attempt}: SUCCESS - Update persisted!`);
+          updatedUser = verifiedUser;
+          updateSuccess = true;
+          break;
+        } else {
+          console.error(`   ❌ Attempt ${attempt}: Update did NOT persist`);
+          console.error(`      Expected: true, Got: ${verifiedUser.email_verified}`);
+          
+          // Wait before retry
+          if (attempt < 3) {
+            const delay = attempt * 500; // 500ms, 1000ms
+            console.log(`      ⏳ Waiting ${delay}ms before retry...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+        }
+      } catch (attemptError) {
+        console.error(`   ❌ Attempt ${attempt}: Error during update:`, attemptError);
+        if (attempt < 3) {
+          await new Promise(resolve => setTimeout(resolve, attempt * 500));
+        }
       }
+    }
+    
+    if (!updateSuccess || !updatedUser) {
+      console.error(`❌ CRITICAL: All 3 update attempts failed!`);
+      console.error(`   User ID: ${user.id}`);
+      console.error(`   Email: ${user.email}`);
+      console.error(`   This indicates a serious database issue`);
+      
+      // Return error to user
+      return res.status(500).json({
+        success: false,
+        message: 'Unable to verify email due to database error. Please contact support with your email address.'
+      });
+    }
 
-      const updated = updateResult.rows[0];
-      console.log(`   ✅ Update executed: email_verified = ${updated.email_verified}`);
-      
-      // Verify the update within the same transaction
-      const verifyResult = await client.query(
-        'SELECT id, email, email_verified FROM users WHERE id = $1',
-        [user.id]
-      );
-      
-      if (verifyResult.rows.length === 0 || !verifyResult.rows[0].email_verified) {
-        console.error(`❌ Verification check failed within transaction`);
-        throw new Error('Verification update did not persist within transaction');
-      }
-      
-      console.log(`   ✅ Verification confirmed within transaction`);
-      console.log(`   🔓 Committing transaction...`);
-      
-      return updated;
-    });
-
-    console.log(`✅ Database transaction committed successfully`);
+    console.log(`✅ Email verification successful after ${updateSuccess ? 'update' : 'unknown'} attempts`);
     console.log(`   User ID: ${updatedUser.id}`);
     console.log(`   Email: ${updatedUser.email}`);
     console.log(`   Email Verified: ${updatedUser.email_verified}`);
-    
-    // Final verification check after transaction commit
-    const finalCheck = await query(
-      'SELECT id, email, email_verified FROM users WHERE id = $1',
-      [user.id]
-    );
-    
-    if (finalCheck.rows.length > 0) {
-      const finalUser = finalCheck.rows[0];
-      console.log(`🔍 Post-transaction verification check:`);
-      console.log(`   Email Verified in DB: ${finalUser.email_verified}`);
-      
-      if (!finalUser.email_verified) {
-        console.error(`❌ CRITICAL: Transaction committed but update not visible!`);
-        console.error(`   This indicates a serious database replication or connection issue`);
-        throw new Error('Verification update did not persist after transaction commit');
-      } else {
-        console.log(`   ✅ Verification persisted successfully`);
-      }
-    }
 
     // Log verification event
     logAuthEvent({
