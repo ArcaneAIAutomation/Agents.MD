@@ -93,52 +93,79 @@ export default async function handler(
     }
 
     // Mark email as verified and clear verification token
+    // Use explicit transaction to ensure update persists
     console.log(`🔄 Updating database for user: ${user.email}`);
     console.log(`   User ID: ${user.id}`);
     console.log(`   Setting email_verified = TRUE`);
     console.log(`   Clearing verification_token`);
     console.log(`   Database: ${process.env.DATABASE_URL?.split('@')[1]?.split('/')[0] || 'unknown'}`);
     
-    const updateResult = await query(
-      `UPDATE users 
-       SET email_verified = TRUE,
-           verification_token = NULL,
-           verification_token_expires = NULL,
-           updated_at = NOW()
-       WHERE id = $1
-       RETURNING id, email, email_verified`,
-      [user.id]
-    );
+    // Import transaction helper
+    const { transaction } = await import('../../../lib/db');
+    
+    // Execute update in a transaction to ensure it commits
+    const updatedUser = await transaction(async (client) => {
+      console.log(`   🔒 Starting database transaction...`);
+      
+      // Update user verification status
+      const updateResult = await client.query(
+        `UPDATE users 
+         SET email_verified = TRUE,
+             verification_token = NULL,
+             verification_token_expires = NULL,
+             updated_at = NOW()
+         WHERE id = $1
+         RETURNING id, email, email_verified`,
+        [user.id]
+      );
 
-    if (updateResult.rows.length === 0) {
-      console.error(`❌ Failed to update user: ${user.email}`);
-      console.error(`   User ID: ${user.id}`);
-      console.error(`   This should never happen - user exists but update failed`);
-      throw new Error('Failed to update user verification status');
-    }
+      if (updateResult.rows.length === 0) {
+        console.error(`❌ Failed to update user: ${user.email}`);
+        throw new Error('Failed to update user verification status');
+      }
 
-    const updatedUser = updateResult.rows[0];
-    console.log(`✅ Database updated successfully`);
+      const updated = updateResult.rows[0];
+      console.log(`   ✅ Update executed: email_verified = ${updated.email_verified}`);
+      
+      // Verify the update within the same transaction
+      const verifyResult = await client.query(
+        'SELECT id, email, email_verified FROM users WHERE id = $1',
+        [user.id]
+      );
+      
+      if (verifyResult.rows.length === 0 || !verifyResult.rows[0].email_verified) {
+        console.error(`❌ Verification check failed within transaction`);
+        throw new Error('Verification update did not persist within transaction');
+      }
+      
+      console.log(`   ✅ Verification confirmed within transaction`);
+      console.log(`   🔓 Committing transaction...`);
+      
+      return updated;
+    });
+
+    console.log(`✅ Database transaction committed successfully`);
     console.log(`   User ID: ${updatedUser.id}`);
     console.log(`   Email: ${updatedUser.email}`);
     console.log(`   Email Verified: ${updatedUser.email_verified}`);
     
-    // Verify the update actually worked by querying again
-    const verifyResult = await query(
+    // Final verification check after transaction commit
+    const finalCheck = await query(
       'SELECT id, email, email_verified FROM users WHERE id = $1',
       [user.id]
     );
     
-    if (verifyResult.rows.length > 0) {
-      const verifiedUser = verifyResult.rows[0];
-      console.log(`🔍 Verification check:`);
-      console.log(`   Email Verified in DB: ${verifiedUser.email_verified}`);
+    if (finalCheck.rows.length > 0) {
+      const finalUser = finalCheck.rows[0];
+      console.log(`🔍 Post-transaction verification check:`);
+      console.log(`   Email Verified in DB: ${finalUser.email_verified}`);
       
-      if (!verifiedUser.email_verified) {
-        console.error(`❌ CRITICAL: Database update did not persist!`);
-        console.error(`   User ID: ${user.id}`);
-        console.error(`   Email: ${user.email}`);
-        console.error(`   This indicates a database transaction or connection issue`);
+      if (!finalUser.email_verified) {
+        console.error(`❌ CRITICAL: Transaction committed but update not visible!`);
+        console.error(`   This indicates a serious database replication or connection issue`);
+        throw new Error('Verification update did not persist after transaction commit');
+      } else {
+        console.log(`   ✅ Verification persisted successfully`);
       }
     }
 
