@@ -92,8 +92,8 @@ export default async function handler(
       });
     }
 
-    // Update database - simple and direct
-    console.log(`🔄 Updating database for user: ${user.email}`);
+    // Update database
+    console.log(`🔄 Updating database for user: ${user.email} (ID: ${user.id})`);
     
     const updateResult = await query(
       `UPDATE users 
@@ -107,11 +107,36 @@ export default async function handler(
     );
 
     if (updateResult.rows.length === 0) {
-      throw new Error('Failed to update user');
+      console.error(`❌ UPDATE returned no rows for user ID: ${user.id}`);
+      throw new Error('Failed to update user - no rows returned');
     }
 
     const updatedUser = updateResult.rows[0];
-    console.log(`✅ User verified: ${updatedUser.email}`);
+    console.log(`✅ UPDATE returned: email_verified = ${updatedUser.email_verified}`);
+    
+    // CRITICAL: Verify the update actually persisted
+    const verifyCheck = await query(
+      'SELECT id, email, email_verified FROM users WHERE id = $1',
+      [user.id]
+    );
+    
+    if (verifyCheck.rows.length === 0) {
+      console.error(`❌ CRITICAL: User ${user.id} disappeared after UPDATE!`);
+      throw new Error('User not found after update');
+    }
+    
+    const verifiedUser = verifyCheck.rows[0];
+    console.log(`🔍 Verification check: email_verified = ${verifiedUser.email_verified}`);
+    
+    if (verifiedUser.email_verified !== true) {
+      console.error(`❌ CRITICAL: UPDATE did not persist! Expected true, got ${verifiedUser.email_verified}`);
+      console.error(`   User ID: ${user.id}`);
+      console.error(`   Email: ${user.email}`);
+      console.error(`   Database: ${process.env.DATABASE_URL?.split('@')[1]?.split('/')[0]}`);
+      throw new Error('Email verification update did not persist in database');
+    }
+    
+    console.log(`✅ Verification confirmed: ${verifiedUser.email} is now verified`);
 
     // Log verification event
     logAuthEvent({
