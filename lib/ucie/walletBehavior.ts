@@ -79,6 +79,52 @@ const KNOWN_EXCHANGES: Record<string, string> = {
 };
 
 /**
+ * Simple wallet type classification (for quick checks)
+ */
+export function classifyWalletType(address: string, balance: number): WalletClassification {
+  const reasons: string[] = [];
+  let type: WalletType = 'unknown';
+  let confidence = 0;
+
+  // Check if it's a known exchange
+  const exchangeName = KNOWN_EXCHANGES[address.toLowerCase()];
+  if (exchangeName) {
+    return {
+      address,
+      type: 'exchange',
+      confidence: 100,
+      reasons: [`Known ${exchangeName} address`],
+      activityLevel: 'very_high',
+      pattern: 'neutral'
+    };
+  }
+
+  // Classify based on balance
+  if (balance > 10000000) {
+    type = 'whale';
+    confidence = 80;
+    reasons.push(`Large balance: ${balance.toLocaleString()}`);
+  } else if (balance > 100000) {
+    type = 'smart_money';
+    confidence = 60;
+    reasons.push(`Significant balance: ${balance.toLocaleString()}`);
+  } else {
+    type = 'retail';
+    confidence = 50;
+    reasons.push(`Retail-sized balance: ${balance.toLocaleString()}`);
+  }
+
+  return {
+    address,
+    type,
+    confidence,
+    reasons,
+    activityLevel: 'medium',
+    pattern: 'unknown'
+  };
+}
+
+/**
  * Classify wallet type based on behavior patterns
  */
 export function classifyWallet(

@@ -41,15 +41,16 @@ class BlockchainExplorerClient {
     this.chain = chain;
     this.apiKey = apiKey;
     
+    // Use V2 API endpoints
     switch (chain) {
       case 'ethereum':
-        this.baseUrl = 'https://api.etherscan.io/api';
+        this.baseUrl = 'https://api.etherscan.io/v2/api';
         break;
       case 'bsc':
-        this.baseUrl = 'https://api.bscscan.com/api';
+        this.baseUrl = 'https://api.bscscan.com/v2/api';
         break;
       case 'polygon':
-        this.baseUrl = 'https://api.polygonscan.com/api';
+        this.baseUrl = 'https://api.polygonscan.com/v2/api';
         break;
     }
   }
@@ -57,6 +58,19 @@ class BlockchainExplorerClient {
   private async makeRequest(params: Record<string, string>): Promise<any> {
     const url = new URL(this.baseUrl);
     url.searchParams.append('apikey', this.apiKey);
+    
+    // Add chainid for V2 API
+    switch (this.chain) {
+      case 'ethereum':
+        url.searchParams.append('chainid', '1');
+        break;
+      case 'bsc':
+        url.searchParams.append('chainid', '56');
+        break;
+      case 'polygon':
+        url.searchParams.append('chainid', '137');
+        break;
+    }
     
     Object.entries(params).forEach(([key, value]) => {
       url.searchParams.append(key, value);

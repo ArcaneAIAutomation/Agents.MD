@@ -1,0 +1,253 @@
+name: UCIE Deployment Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'components/UCIE/**'
+      - 'pages/api/ucie/**'
+      - 'pages/ucie/**'
+      - 'lib/ucie/**'
+      - 'hooks/useUCIE*.ts'
+      - '.github/workflows/ucie-deploy.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'components/UCIE/**'
+      - 'pages/api/ucie/**'
+      - 'pages/ucie/**'
+      - 'lib/ucie/**'
+      - 'hooks/useUCIE*.ts'
+
+jobs:
+  # Job 1: Lint and Type Check
+  lint-and-typecheck:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run TypeScript type check
+        run: npx tsc --noEmit
+
+  # Job 2: Security Tests
+  security-tests:
+    name: Security Tests
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run security tests
+        run: npm test -- __tests__/security/ucie-security.test.ts --passWithNoTests
+
+  # Job 3: Unit Tests
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test -- __tests__/ucie/ --passWithNoTests
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        if: always()
+        with:
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: ucie-unit-tests
+
+  # Job 4: Build Test
+  build-test:
+    name: Build Test
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck, security-tests]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Check build output
+        run: |
+          if [ ! -d ".next" ]; then
+            echo "Build failed: .next directory not found"
+            exit 1
+          fi
+          echo "✅ Build successful"
+
+  # Job 5: Deploy to Vercel (Production)
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [security-tests, unit-tests, build-test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://news.arcane.group
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: ./
+
+      - name: Comment deployment URL
+        uses: actions/github-script@v7
+        if: github.event_name == 'push'
+        with:
+          script: |
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: '🚀 UCIE deployed to production: https://news.arcane.group'
+            })
+
+  # Job 6: Deploy to Vercel (Preview)
+  deploy-preview:
+    name: Deploy Preview
+    runs-on: ubuntu-latest
+    needs: [security-tests, unit-tests, build-test]
+    if: github.event_name == 'pull_request'
+    environment:
+      name: preview
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel (Preview)
+        uses: amondnet/vercel-action@v25
+        id: vercel-deploy
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./
+
+      - name: Comment preview URL
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🔍 UCIE Preview deployed: ${{ steps.vercel-deploy.outputs.preview-url }}`
+            })
+
+  # Job 7: Post-Deployment Smoke Tests
+  smoke-tests:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Wait for deployment
+        run: sleep 30
+
+      - name: Test UCIE health endpoint
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://news.arcane.group/api/ucie/health)
+          if [ $response -eq 200 ]; then
+            echo "✅ Health check passed"
+          else
+            echo "❌ Health check failed with status $response"
+            exit 1
+          fi
+
+      - name: Test UCIE search endpoint
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://news.arcane.group/api/ucie/search?q=BTC)
+          if [ $response -eq 200 ]; then
+            echo "✅ Search endpoint passed"
+          else
+            echo "❌ Search endpoint failed with status $response"
+            exit 1
+          fi
+
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: '⚠️ UCIE smoke tests failed! Check deployment logs.'
+            })
+
+  # Job 8: Notify Success
+  notify-success:
+    name: Notify Success
+    runs-on: ubuntu-latest
+    needs: [deploy-production, smoke-tests]
+    if: success()
+    steps:
+      - name: Send success notification
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: '✅ UCIE deployment successful! All tests passed.'
+            })
