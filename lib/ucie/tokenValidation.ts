@@ -1,7 +1,10 @@
 /**
  * Token Validation Utilities for UCIE
  * Validates token symbols and provides suggestions
+ * Uses database-first approach with CoinGecko API fallback
  */
+
+import { query } from '../db';
 
 interface ValidationResult {
   valid: boolean;
@@ -16,6 +19,8 @@ interface TokenInfo {
   name: string;
   exists: boolean;
   exchanges?: string[];
+  marketCapRank?: number;
+  currentPrice?: number;
 }
 
 /**
@@ -44,9 +49,47 @@ export function sanitizeSymbol(input: string): string {
 }
 
 /**
- * Check if token exists on CoinGecko
+ * Check if token exists in database (primary method)
  */
-export async function checkTokenExists(symbol: string): Promise<TokenInfo | null> {
+export async function checkTokenInDatabase(symbol: string): Promise<TokenInfo | null> {
+  try {
+    const result = await query(
+      `SELECT 
+        coingecko_id as id,
+        symbol,
+        name,
+        market_cap_rank,
+        current_price_usd
+      FROM ucie_tokens 
+      WHERE UPPER(symbol) = UPPER($1) 
+        AND is_active = TRUE
+      LIMIT 1`,
+      [symbol]
+    );
+
+    if (result.rows.length > 0) {
+      const token = result.rows[0];
+      return {
+        id: token.id,
+        symbol: token.symbol.toUpperCase(),
+        name: token.name,
+        exists: true,
+        marketCapRank: token.market_cap_rank,
+        currentPrice: token.current_price_usd ? parseFloat(token.current_price_usd) : undefined
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error checking token in database:', error);
+    return null;
+  }
+}
+
+/**
+ * Check if token exists on CoinGecko (fallback method)
+ */
+export async function checkTokenOnCoinGecko(symbol: string): Promise<TokenInfo | null> {
   try {
     const apiKey = process.env.COINGECKO_API_KEY;
     const baseUrl = 'https://api.coingecko.com/api/v3';
@@ -57,7 +100,8 @@ export async function checkTokenExists(symbol: string): Promise<TokenInfo | null
       : `${baseUrl}/search?query=${encodeURIComponent(symbol)}`;
 
     const response = await fetch(searchUrl, {
-      headers: { 'Accept': 'application/json' }
+      headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(5000)
     });
 
     if (!response.ok) {
@@ -82,9 +126,31 @@ export async function checkTokenExists(symbol: string): Promise<TokenInfo | null
 
     return null;
   } catch (error) {
-    console.error('Error checking token existence:', error);
+    console.error('Error checking token on CoinGecko:', error);
     return null;
   }
+}
+
+/**
+ * Check if token exists (database first, API fallback)
+ */
+export async function checkTokenExists(symbol: string): Promise<TokenInfo | null> {
+  // Try database first (fast)
+  const dbResult = await checkTokenInDatabase(symbol);
+  if (dbResult) {
+    console.log(`Token ${symbol} found in database`);
+    return dbResult;
+  }
+
+  // Fallback to CoinGecko API (slower)
+  console.log(`Token ${symbol} not in database, checking CoinGecko...`);
+  const apiResult = await checkTokenOnCoinGecko(symbol);
+  
+  if (apiResult) {
+    console.log(`Token ${symbol} found on CoinGecko`);
+  }
+  
+  return apiResult;
 }
 
 /**
@@ -177,9 +243,32 @@ export async function validateToken(symbol: string): Promise<ValidationResult> {
 }
 
 /**
- * Get similar token suggestions
+ * Get similar token suggestions from database
  */
-async function getSimilarTokens(symbol: string): Promise<string[]> {
+async function getSimilarTokensFromDatabase(symbol: string): Promise<string[]> {
+  try {
+    const result = await query(
+      `SELECT symbol 
+      FROM ucie_tokens 
+      WHERE UPPER(symbol) LIKE UPPER($1) 
+        OR UPPER(name) LIKE UPPER($2)
+        AND is_active = TRUE
+      ORDER BY market_cap_rank ASC NULLS LAST
+      LIMIT 5`,
+      [`%${symbol}%`, `%${symbol}%`]
+    );
+
+    return result.rows.map(row => row.symbol.toUpperCase());
+  } catch (error) {
+    console.error('Error getting similar tokens from database:', error);
+    return [];
+  }
+}
+
+/**
+ * Get similar token suggestions from CoinGecko
+ */
+async function getSimilarTokensFromCoinGecko(symbol: string): Promise<string[]> {
   try {
     const apiKey = process.env.COINGECKO_API_KEY;
     const baseUrl = 'https://api.coingecko.com/api/v3';
@@ -206,6 +295,20 @@ async function getSimilarTokens(symbol: string): Promise<string[]> {
   } catch (error) {
     return [];
   }
+}
+
+/**
+ * Get similar token suggestions (database first, API fallback)
+ */
+async function getSimilarTokens(symbol: string): Promise<string[]> {
+  // Try database first
+  const dbSuggestions = await getSimilarTokensFromDatabase(symbol);
+  if (dbSuggestions.length > 0) {
+    return dbSuggestions;
+  }
+
+  // Fallback to CoinGecko
+  return await getSimilarTokensFromCoinGecko(symbol);
 }
 
 /**

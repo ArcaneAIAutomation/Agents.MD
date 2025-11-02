@@ -16,6 +16,10 @@
     {
       "path": "/api/cron/cleanup-sessions",
       "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/update-tokens",
+      "schedule": "0 3 * * *"
     }
   ],
   "env": {
