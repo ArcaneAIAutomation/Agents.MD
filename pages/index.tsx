@@ -53,6 +53,18 @@ export default function Home() {
 
   const features = [
     {
+      title: 'Universal Crypto Intelligence',
+      icon: '🧠',
+      path: '/ucie',
+      description: 'Comprehensive multi-asset analysis with 10 integrated intelligence modules',
+      stats: ['10 Modules', 'Any Token', 'AI Powered'],
+      benefits: [
+        'Analyze any cryptocurrency or token',
+        'Technical, on-chain, sentiment & DeFi data',
+        'Caesar AI research integration'
+      ]
+    },
+    {
       title: 'Crypto News Wire',
       icon: '📰',
       path: '/crypto-news',
