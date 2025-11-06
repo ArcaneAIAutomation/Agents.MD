@@ -58,7 +58,7 @@ export function useProgressiveLoading({
       label: 'Deep Analysis (AI Research, Predictions)',
       endpoints: ['/api/ucie/research', '/api/ucie/predictions'],
       priority: 'deep',
-      targetTime: 15000,
+      targetTime: 630000, // 10.5 minutes (630 seconds) - Caesar API needs 10 min polling
       progress: 0,
       complete: false,
     },
@@ -74,13 +74,24 @@ export function useProgressiveLoading({
     const phaseData: any = {};
     let completedEndpoints = 0;
 
+    console.log(`🚀 Starting Phase ${phase.phase}: ${phase.label} (timeout: ${phase.targetTime}ms)`);
+
     try {
       // Fetch all endpoints for this phase in parallel
       const promises = phase.endpoints.map(async (endpoint) => {
         try {
           const url = `${endpoint}/${encodeURIComponent(symbol)}`;
+          
+          // For long-running endpoints (Phase 4), use a longer timeout
+          const timeoutMs = phase.phase === 4 ? 630000 : phase.targetTime; // 10.5 min for Phase 4
+          
+          // Log Caesar API calls specifically
+          if (endpoint.includes('research')) {
+            console.log(`🔍 Calling Caesar API for ${symbol} (timeout: ${timeoutMs}ms = ${timeoutMs/1000}s)`);
+          }
+          
           const response = await fetch(url, {
-            signal: AbortSignal.timeout(phase.targetTime),
+            signal: AbortSignal.timeout(timeoutMs),
           });
 
           if (!response.ok) {
