@@ -84,7 +84,7 @@ function setCacheData(symbol: string, data: any): void {
 }
 
 /**
- * Fetch from CryptoCompare
+ * Fetch from CryptoCompare (with extended timeout)
  */
 async function fetchCryptoCompareData(symbol: string) {
   try {
@@ -92,32 +92,46 @@ async function fetchCryptoCompareData(symbol: string) {
     if (!symbols) throw new Error(`Unsupported symbol: ${symbol}`);
 
     console.log(`🔍 Fetching CryptoCompare data for ${symbols.cryptocompare}...`);
-    const response = await fetch(`${APIS.cryptocompare}/pricemultifull?fsyms=${symbols.cryptocompare}&tsyms=USD`, {
-      signal: AbortSignal.timeout(5000),
-      headers: { 'User-Agent': 'UCIE/1.0' }
+    
+    // Use simpler endpoint with longer timeout
+    const response = await fetch(`${APIS.cryptocompare}/price?fsym=${symbols.cryptocompare}&tsyms=USD`, {
+      signal: AbortSignal.timeout(10000), // Increased to 10 seconds
+      headers: { 
+        'User-Agent': 'UCIE/1.0',
+        'Accept': 'application/json'
+      }
     });
 
-    if (!response.ok) throw new Error(`CryptoCompare HTTP ${response.status}`);
+    if (!response.ok) {
+      console.warn(`⚠️ CryptoCompare HTTP ${response.status}, trying fallback...`);
+      throw new Error(`HTTP ${response.status}`);
+    }
 
     const data = await response.json();
-    const coinData = data.RAW[symbols.cryptocompare]?.USD;
     
-    if (!coinData) throw new Error('No data returned');
+    if (!data.USD) {
+      throw new Error('No USD price data returned');
+    }
     
-    console.log(`✅ CryptoCompare: ${coinData.PRICE}`);
+    const price = data.USD;
+    console.log(`✅ CryptoCompare: ${price}`);
 
+    // Return basic price data (simple endpoint doesn't have volume/change)
     return {
       exchange: 'CryptoCompare',
-      price: coinData.PRICE,
-      volume24h: coinData.VOLUME24HOURTO,
-      change24h: coinData.CHANGEPCT24HOUR,
-      high24h: coinData.HIGH24HOUR,
-      low24h: coinData.LOW24HOUR,
+      price: price,
       success: true
     };
   } catch (error) {
-    console.error(`❌ CryptoCompare failed:`, error instanceof Error ? error.message : 'Unknown error');
-    return { exchange: 'CryptoCompare', success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+    console.error(`❌ CryptoCompare failed: ${errorMsg}`);
+    
+    // Return failure but don't crash - we have 3 other sources
+    return { 
+      exchange: 'CryptoCompare', 
+      success: false, 
+      error: errorMsg 
+    };
   }
 }
 
@@ -359,11 +373,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       fetchCryptoCompareData(symbolUpper)
     ]);
 
-    // Aggregate prices
+    // Aggregate prices (CryptoCompare is optional - we have 3 other sources)
     const priceAggregation = aggregatePrices([cmcData, krakenData, coinbaseData, cryptocompareData]);
 
     if (!priceAggregation) {
-      throw new Error('Failed to fetch price data from any source');
+      // If all sources failed, return detailed error
+      const failedSources = [cmcData, krakenData, coinbaseData, cryptocompareData]
+        .filter(s => !s.success)
+        .map(s => `${s.exchange}: ${s.error}`);
+      
+      throw new Error(`All price sources failed: ${failedSources.join(', ')}`);
+    }
+
+    // Log source status
+    const successCount = [cmcData, krakenData, coinbaseData, cryptocompareData].filter(s => s.success).length;
+    console.log(`✅ Price aggregation successful: ${successCount}/4 sources working`);
+    
+    if (successCount < 2) {
+      console.warn(`⚠️ Only ${successCount} source(s) working - data quality may be reduced`);
     }
 
     // Build comprehensive response with rich CoinMarketCap data

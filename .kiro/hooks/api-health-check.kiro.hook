@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "API Health Check",
+  "description": "Monitors .env.local for changes and runs lightweight API tests on all configured APIs to verify they are active and working. Reports back with detailed status and error reasons if any fail.",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "The .env.local file has been modified. Please run a comprehensive but lightweight API health check on all configured APIs including:\n\n1. **Caesar API** (if CAESAR_API_KEY is set)\n   - Test endpoint: GET /research with a simple health check query\n   - Verify authentication works\n   - Check response time\n\n2. **CoinGecko API** (if COINGECKO_API_KEY is set)\n   - Test simple price endpoint\n   - Verify rate limits are not exceeded\n   - Check response format\n\n3. **CoinMarketCap API** (if COINMARKETCAP_API_KEY is set)\n   - Test cryptocurrency listings endpoint\n   - Verify API key validity\n   - Check response time\n\n4. **NewsAPI** (if NEWS_API_KEY is set)\n   - Test news headlines endpoint\n   - Verify API key works\n   - Check for rate limit status\n\n5. **OpenAI API** (if OPENAI_API_KEY is set)\n   - Test simple completion endpoint\n   - Verify API key validity\n   - Check model availability\n\n6. **Database Connection** (if DATABASE_URL is set)\n   - Test PostgreSQL connection\n   - Verify SSL configuration\n   - Check connection pool status\n\nFor each API, report:\n- ✅ Status (Working/Failed)\n- ⏱️ Response time\n- 📊 Rate limit status (if available)\n- ❌ Error details if failed (authentication, network, timeout, rate limit, etc.)\n- 💡 Suggested fixes for any failures\n\nCreate a formatted report showing the health status of all configured APIs and highlight any issues that need attention."
+  }
+}

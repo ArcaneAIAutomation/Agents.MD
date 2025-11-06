@@ -121,7 +121,7 @@ export function rateLimit(config: RateLimitConfig = {}) {
           const stored = await kv.get<number[]>(key);
           attempts = stored || [];
         } else {
-          // Use in-memory fallback
+          // Use in-memory fallback (no error - this is expected)
           const stored = inMemoryStore.get(key);
           if (stored && stored.resetTime > now) {
             attempts = Array(stored.count).fill(stored.resetTime);
@@ -130,8 +130,9 @@ export function rateLimit(config: RateLimitConfig = {}) {
           }
         }
       } catch (error) {
-        console.error('Rate limit: Failed to get attempts:', error);
-        // If storage is unavailable, allow the request (fail open)
+        // Silently fall back to allowing the request if storage fails
+        // This ensures rate limiting issues don't block legitimate users
+        console.warn('⚠️ Rate limit storage unavailable, allowing request');
         return next();
       }
 
