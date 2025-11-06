@@ -17,26 +17,26 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 
-// API endpoints
+// API endpoints (NO BINANCE - location restricted)
 const APIS = {
-  binance: 'https://api.binance.com/api/v3',
   kraken: 'https://api.kraken.com/0/public',
   coinbase: 'https://api.exchange.coinbase.com',
-  coinmarketcap: 'https://pro-api.coinmarketcap.com/v1'
+  coinmarketcap: 'https://pro-api.coinmarketcap.com/v1',
+  cryptocompare: 'https://min-api.cryptocompare.com/data'
 };
 
-// Symbol mapping for different exchanges
-const SYMBOL_MAP: Record<string, { binance: string; kraken: string; coinbase: string; cmc: string; cmcId: number }> = {
-  'BTC': { binance: 'BTCUSDT', kraken: 'XXBTZUSD', coinbase: 'BTC-USD', cmc: 'BTC', cmcId: 1 },
-  'ETH': { binance: 'ETHUSDT', kraken: 'XETHZUSD', coinbase: 'ETH-USD', cmc: 'ETH', cmcId: 1027 },
-  'XRP': { binance: 'XRPUSDT', kraken: 'XXRPZUSD', coinbase: 'XRP-USD', cmc: 'XRP', cmcId: 52 },
-  'SOL': { binance: 'SOLUSDT', kraken: 'SOLUSD', coinbase: 'SOL-USD', cmc: 'SOL', cmcId: 5426 },
-  'ADA': { binance: 'ADAUSDT', kraken: 'ADAUSD', coinbase: 'ADA-USD', cmc: 'ADA', cmcId: 2010 },
-  'DOGE': { binance: 'DOGEUSDT', kraken: 'XDGUSD', coinbase: 'DOGE-USD', cmc: 'DOGE', cmcId: 74 },
-  'DOT': { binance: 'DOTUSDT', kraken: 'DOTUSD', coinbase: 'DOT-USD', cmc: 'DOT', cmcId: 6636 },
-  'MATIC': { binance: 'MATICUSDT', kraken: 'MATICUSD', coinbase: 'MATIC-USD', cmc: 'MATIC', cmcId: 3890 },
-  'LINK': { binance: 'LINKUSDT', kraken: 'LINKUSD', coinbase: 'LINK-USD', cmc: 'LINK', cmcId: 1975 },
-  'UNI': { binance: 'UNIUSDT', kraken: 'UNIUSD', coinbase: 'UNI-USD', cmc: 'UNI', cmcId: 7083 }
+// Symbol mapping for different exchanges (NO BINANCE)
+const SYMBOL_MAP: Record<string, { kraken: string; coinbase: string; cryptocompare: string; cmc: string; cmcId: number }> = {
+  'BTC': { kraken: 'XXBTZUSD', coinbase: 'BTC-USD', cryptocompare: 'BTC', cmc: 'BTC', cmcId: 1 },
+  'ETH': { kraken: 'XETHZUSD', coinbase: 'ETH-USD', cryptocompare: 'ETH', cmc: 'ETH', cmcId: 1027 },
+  'XRP': { kraken: 'XXRPZUSD', coinbase: 'XRP-USD', cryptocompare: 'XRP', cmc: 'XRP', cmcId: 52 },
+  'SOL': { kraken: 'SOLUSD', coinbase: 'SOL-USD', cryptocompare: 'SOL', cmc: 'SOL', cmcId: 5426 },
+  'ADA': { kraken: 'ADAUSD', coinbase: 'ADA-USD', cryptocompare: 'ADA', cmc: 'ADA', cmcId: 2010 },
+  'DOGE': { kraken: 'XDGUSD', coinbase: 'DOGE-USD', cryptocompare: 'DOGE', cmc: 'DOGE', cmcId: 74 },
+  'DOT': { kraken: 'DOTUSD', coinbase: 'DOT-USD', cryptocompare: 'DOT', cmc: 'DOT', cmcId: 6636 },
+  'MATIC': { kraken: 'MATICUSD', coinbase: 'MATIC-USD', cryptocompare: 'MATIC', cmc: 'MATIC', cmcId: 3890 },
+  'LINK': { kraken: 'LINKUSD', coinbase: 'LINK-USD', cryptocompare: 'LINK', cmc: 'LINK', cmcId: 1975 },
+  'UNI': { kraken: 'UNIUSD', coinbase: 'UNI-USD', cryptocompare: 'UNI', cmc: 'UNI', cmcId: 7083 }
 };
 
 // In-memory cache
@@ -84,36 +84,40 @@ function setCacheData(symbol: string, data: any): void {
 }
 
 /**
- * Fetch from Binance
+ * Fetch from CryptoCompare
  */
-async function fetchBinanceData(symbol: string) {
+async function fetchCryptoCompareData(symbol: string) {
   try {
     const symbols = SYMBOL_MAP[symbol];
     if (!symbols) throw new Error(`Unsupported symbol: ${symbol}`);
 
-    console.log(`🔍 Fetching Binance data for ${symbols.binance}...`);
-    const response = await fetch(`${APIS.binance}/ticker/24hr?symbol=${symbols.binance}`, {
+    console.log(`🔍 Fetching CryptoCompare data for ${symbols.cryptocompare}...`);
+    const response = await fetch(`${APIS.cryptocompare}/pricemultifull?fsyms=${symbols.cryptocompare}&tsyms=USD`, {
       signal: AbortSignal.timeout(5000),
       headers: { 'User-Agent': 'UCIE/1.0' }
     });
 
-    if (!response.ok) throw new Error(`Binance HTTP ${response.status}`);
+    if (!response.ok) throw new Error(`CryptoCompare HTTP ${response.status}`);
 
     const data = await response.json();
-    console.log(`✅ Binance: ${data.lastPrice}`);
+    const coinData = data.RAW[symbols.cryptocompare]?.USD;
+    
+    if (!coinData) throw new Error('No data returned');
+    
+    console.log(`✅ CryptoCompare: ${coinData.PRICE}`);
 
     return {
-      exchange: 'Binance',
-      price: parseFloat(data.lastPrice),
-      volume24h: parseFloat(data.volume),
-      change24h: parseFloat(data.priceChangePercent),
-      high24h: parseFloat(data.highPrice),
-      low24h: parseFloat(data.lowPrice),
+      exchange: 'CryptoCompare',
+      price: coinData.PRICE,
+      volume24h: coinData.VOLUME24HOURTO,
+      change24h: coinData.CHANGEPCT24HOUR,
+      high24h: coinData.HIGH24HOUR,
+      low24h: coinData.LOW24HOUR,
       success: true
     };
   } catch (error) {
-    console.error(`❌ Binance failed:`, error instanceof Error ? error.message : 'Unknown error');
-    return { exchange: 'Binance', success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    console.error(`❌ CryptoCompare failed:`, error instanceof Error ? error.message : 'Unknown error');
+    return { exchange: 'CryptoCompare', success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
 
@@ -345,18 +349,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json(cachedData);
     }
 
-    console.log(`🚀 Fetching market data for ${symbolUpper} from multiple sources...`);
+    console.log(`🚀 Fetching market data for ${symbolUpper} from multiple sources (NO BINANCE)...`);
 
     // Fetch from all sources in parallel (CoinMarketCap is PRIMARY)
-    const [cmcData, binanceData, krakenData, coinbaseData] = await Promise.all([
+    const [cmcData, krakenData, coinbaseData, cryptocompareData] = await Promise.all([
       fetchCoinMarketCapData(symbolUpper),
-      fetchBinanceData(symbolUpper),
       fetchKrakenData(symbolUpper),
-      fetchCoinbaseData(symbolUpper)
+      fetchCoinbaseData(symbolUpper),
+      fetchCryptoCompareData(symbolUpper)
     ]);
 
     // Aggregate prices
-    const priceAggregation = aggregatePrices([cmcData, binanceData, krakenData, coinbaseData]);
+    const priceAggregation = aggregatePrices([cmcData, krakenData, coinbaseData, cryptocompareData]);
 
     if (!priceAggregation) {
       throw new Error('Failed to fetch price data from any source');
@@ -379,13 +383,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       marketData: {
         // Price changes across multiple timeframes
         change1h: cmcData.success ? cmcData.change1h : null,
-        change24h: cmcData.success ? cmcData.change24h : binanceData.success ? binanceData.change24h : null,
+        change24h: cmcData.success ? cmcData.change24h : cryptocompareData.success ? cryptocompareData.change24h : null,
         change7d: cmcData.success ? cmcData.change7d : null,
         change30d: cmcData.success ? cmcData.change30d : null,
         change60d: cmcData.success ? cmcData.change60d : null,
         change90d: cmcData.success ? cmcData.change90d : null,
         // Volume data
-        volume24h: cmcData.success ? cmcData.volume24h : binanceData.success ? binanceData.volume24h : null,
+        volume24h: cmcData.success ? cmcData.volume24h : cryptocompareData.success ? cryptocompareData.volume24h : null,
         volumeChange24h: cmcData.success ? cmcData.volumeChange24h : null,
         // Market cap data
         marketCap: cmcData.success ? cmcData.marketCap : null,
@@ -398,8 +402,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // Ranking
         rank: cmcData.success ? cmcData.rank : null,
         // 24h high/low from exchanges
-        high24h: binanceData.success ? binanceData.high24h : null,
-        low24h: binanceData.success ? binanceData.low24h : null
+        high24h: cryptocompareData.success ? cryptocompareData.high24h : krakenData.success ? krakenData.high24h : null,
+        low24h: cryptocompareData.success ? cryptocompareData.low24h : krakenData.success ? krakenData.low24h : null
       },
       // Project metadata (for Caesar AI context)
       metadata: cmcData.success ? {
@@ -412,21 +416,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         category: cmcData.category || null,
         platform: cmcData.platform || null
       } : null,
-      // Raw source data
+      // Raw source data (NO BINANCE)
       sources: {
         coinmarketcap: cmcData,
-        binance: binanceData,
         kraken: krakenData,
-        coinbase: coinbaseData
+        coinbase: coinbaseData,
+        cryptocompare: cryptocompareData
       },
       dataQuality: {
         totalSources: 4,
-        successfulSources: [cmcData, binanceData, krakenData, coinbaseData].filter(s => s.success).length,
-        failedSources: [cmcData, binanceData, krakenData, coinbaseData].filter(s => !s.success).map(s => s.exchange),
+        successfulSources: [cmcData, krakenData, coinbaseData, cryptocompareData].filter(s => s.success).length,
+        failedSources: [cmcData, krakenData, coinbaseData, cryptocompareData].filter(s => !s.success).map(s => s.exchange),
         confidence: priceAggregation.confidence,
         spread: priceAggregation.spread,
         primarySource: 'CoinMarketCap',
-        primarySourceStatus: cmcData.success ? 'OPERATIONAL' : 'FAILED'
+        primarySourceStatus: cmcData.success ? 'OPERATIONAL' : 'FAILED',
+        note: 'Binance excluded (location restricted)'
       },
       cached: false,
       timestamp: new Date().toISOString()
