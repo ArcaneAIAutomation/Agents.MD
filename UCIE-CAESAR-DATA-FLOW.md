@@ -583,9 +583,9 @@ Phase 3: Fetch Technical Data (5s) [Coming Soon]
          ↓
 Phase 4: Send All Data to Caesar (2s)
          ↓
-Caesar AI Analyzes (30-120s)
+Caesar AI Analyzes (5-10 minutes)
          ↓
-Poll for Results Every 2s
+Poll for Results Every 30s
          ↓
 Receive Structured JSON Analysis
          ↓
@@ -603,8 +603,8 @@ Display Detailed Caesar Analysis
 - **Phase 1 (Market Data):** ~3-5 seconds
 - **Phase 2 (News Data):** ~8-10 seconds
 - **Phase 3 (Technical):** ~5 seconds (coming soon)
-- **Phase 4 (Caesar AI):** ~30-120 seconds
-- **Total Time:** ~50-145 seconds (0.8-2.4 minutes)
+- **Phase 4 (Caesar AI):** ~5-10 minutes (deep research)
+- **Total Time:** ~5-10 minutes (comprehensive analysis)
 
 ---
 

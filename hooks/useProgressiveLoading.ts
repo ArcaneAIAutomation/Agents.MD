@@ -83,7 +83,7 @@ export function useProgressiveLoading({
       label: 'Caesar AI Deep Research',
       endpoints: [`/api/ucie-research`], // POST endpoint, handled separately
       priority: 'deep',
-      targetTime: 120000, // 2 minutes for Caesar polling
+      targetTime: 600000, // 10 minutes for Caesar polling
       progress: 0,
       complete: false,
     },
@@ -110,11 +110,11 @@ export function useProgressiveLoading({
           const url = endpoint;
           
           // For long-running endpoints (Phase 4), use a longer timeout
-          const timeoutMs = phase.phase === 4 ? 120000 : phase.targetTime; // 2 min for Phase 4 (Caesar polling)
+          const timeoutMs = phase.phase === 4 ? 600000 : phase.targetTime; // 10 min for Phase 4 (Caesar polling)
           
           // Log Caesar API calls specifically
           if (endpoint.includes('research')) {
-            console.log(`🔍 Calling Caesar API for ${symbol} (timeout: ${timeoutMs}ms = ${timeoutMs/1000}s)`);
+            console.log(`🔍 Calling Caesar API for ${symbol} (timeout: ${timeoutMs}ms = ${timeoutMs/60000} minutes)`);
           }
           
           // For Phase 4 (Caesar research), use POST with all accumulated data
@@ -149,12 +149,12 @@ export function useProgressiveLoading({
             }
             
             console.log(`✅ Caesar job created: ${createData.jobId}`);
-            console.log(`⏳ Polling for results (max 2 minutes)...`);
+            console.log(`⏳ Polling for results (max 10 minutes)...`);
             
-            // Poll for results (max 60 attempts, 2 seconds apart = 2 minutes)
+            // Poll for results (max 20 attempts, 30 seconds apart = 10 minutes)
             let attempts = 0;
-            const maxAttempts = 60;
-            const pollInterval = 2000; // 2 seconds
+            const maxAttempts = 20;
+            const pollInterval = 30000; // 30 seconds
             
             while (attempts < maxAttempts) {
               await new Promise(resolve => setTimeout(resolve, pollInterval));
@@ -180,7 +180,7 @@ export function useProgressiveLoading({
               const pollData = await pollResponse.json();
               
               if (pollData.status === 'completed' && pollData.analysis) {
-                console.log(`✅ Caesar analysis complete after ${attempts} attempts (${attempts * 2}s)`);
+                console.log(`✅ Caesar analysis complete after ${attempts} attempts (${(attempts * 30) / 60} minutes)`);
                 return { endpoint, data: pollData };
               }
               
@@ -191,7 +191,7 @@ export function useProgressiveLoading({
               console.log(`⏳ Status: ${pollData.status}, continuing to poll...`);
             }
             
-            throw new Error('Caesar research timed out after 2 minutes');
+            throw new Error('Caesar research timed out after 10 minutes');
           }
           
           const response = await fetch(fetchUrl, fetchOptions);

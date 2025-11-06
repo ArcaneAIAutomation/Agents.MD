@@ -49,8 +49,8 @@
 
 **Automatic Polling in Frontend**
 - `useProgressiveLoading` hook handles polling
-- Polls every 2 seconds
-- Max 60 attempts (2 minutes)
+- Polls every 30 seconds
+- Max 20 attempts (10 minutes)
 - Progress tracking during polling
 
 ---
@@ -224,8 +224,8 @@ const analysis = data['ucie-research']?.analysis;
 - Phase 1 (Market Data): ~3-5 seconds
 - Phase 2 (News Data): ~8-10 seconds
 - Phase 3 (Technical): ~5 seconds (coming soon)
-- Phase 4 (Caesar AI): ~30-120 seconds
-- **Total**: ~50-145 seconds (0.8-2.4 minutes)
+- Phase 4 (Caesar AI): ~5-10 minutes (deep research)
+- **Total**: ~5-10 minutes (comprehensive analysis)
 
 ### Data Quality
 - Market Data: 4-source validation
