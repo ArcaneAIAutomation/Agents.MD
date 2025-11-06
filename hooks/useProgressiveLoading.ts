@@ -53,37 +53,37 @@ export function useProgressiveLoading({
   const [phases, setPhases] = useState<LoadingPhase[]>([
     {
       phase: 1,
-      label: 'Critical Data (Price, Volume, Risk)',
-      endpoints: ['/api/ucie/market-data', '/api/ucie/risk'],
+      label: 'Critical Data (Market Data from CoinMarketCap + Exchanges)',
+      endpoints: [`/api/ucie-market-data?symbol=${symbol}`],
       priority: 'critical',
-      targetTime: 1000,
+      targetTime: 5000, // 5 seconds for multi-source data
       progress: 0,
       complete: false,
     },
     {
       phase: 2,
-      label: 'Important Data (News, Sentiment)',
-      endpoints: ['/api/ucie/news', '/api/ucie/sentiment'],
+      label: 'News & Sentiment Analysis',
+      endpoints: [`/api/ucie-news?symbol=${symbol}&limit=10`],
       priority: 'important',
-      targetTime: 3000,
+      targetTime: 8000, // 8 seconds for news aggregation
       progress: 0,
       complete: false,
     },
     {
       phase: 3,
-      label: 'Enhanced Data (Technical, On-Chain, DeFi)',
-      endpoints: ['/api/ucie/technical', '/api/ucie/on-chain', '/api/ucie/defi'],
+      label: 'Technical Analysis (Coming Soon)',
+      endpoints: [], // Will add ucie-technical endpoint
       priority: 'enhanced',
-      targetTime: 7000,
+      targetTime: 5000,
       progress: 0,
       complete: false,
     },
     {
       phase: 4,
-      label: 'Deep Analysis (AI Research, Predictions)',
-      endpoints: ['/api/ucie/research', '/api/ucie/predictions'],
+      label: 'Caesar AI Deep Research',
+      endpoints: [`/api/ucie-research`], // POST endpoint, handled separately
       priority: 'deep',
-      targetTime: 630000, // 10.5 minutes (630 seconds) - Caesar API needs 10 min polling
+      targetTime: 120000, // 2 minutes for Caesar polling
       progress: 0,
       complete: false,
     },
@@ -106,26 +106,36 @@ export function useProgressiveLoading({
       // Fetch all endpoints for this phase in parallel
       const promises = phase.endpoints.map(async (endpoint) => {
         try {
-          const url = `${endpoint}/${encodeURIComponent(symbol)}`;
+          // New flat endpoints already have query parameters, don't append symbol
+          const url = endpoint;
           
           // For long-running endpoints (Phase 4), use a longer timeout
-          const timeoutMs = phase.phase === 4 ? 630000 : phase.targetTime; // 10.5 min for Phase 4
+          const timeoutMs = phase.phase === 4 ? 120000 : phase.targetTime; // 2 min for Phase 4 (Caesar polling)
           
           // Log Caesar API calls specifically
           if (endpoint.includes('research')) {
             console.log(`🔍 Calling Caesar API for ${symbol} (timeout: ${timeoutMs}ms = ${timeoutMs/1000}s)`);
           }
           
-          // For Phase 4, send session ID to retrieve context from database
+          // For Phase 4 (Caesar research), use POST with all accumulated data
           let fetchUrl = url;
-          if (phase.phase === 4) {
-            fetchUrl = `${url}?sessionId=${sessionId}`;
-            console.log(`📤 Sending session ID to ${endpoint} to retrieve context from database`);
-          }
-          
-          const fetchOptions: RequestInit = {
+          let fetchOptions: RequestInit = {
             signal: AbortSignal.timeout(timeoutMs),
           };
+          
+          if (phase.phase === 4 && endpoint.includes('research')) {
+            // POST request with market data and news data from previous phases
+            fetchOptions.method = 'POST';
+            fetchOptions.headers = { 'Content-Type': 'application/json' };
+            fetchOptions.body = JSON.stringify({
+              symbol,
+              marketData: previousData['market-data'] || previousData['ucie-market-data'] || null,
+              newsData: previousData['news'] || previousData['ucie-news'] || null,
+              technicalData: previousData['technical'] || null,
+              userQuery: `Provide comprehensive analysis for ${symbol}`
+            });
+            console.log(`📤 Sending comprehensive data to Caesar for ${symbol}`);
+          }
           
           const response = await fetch(fetchUrl, fetchOptions);
 
@@ -157,8 +167,10 @@ export function useProgressiveLoading({
       // Aggregate results
       results.forEach((result) => {
         if (result.status === 'fulfilled' && result.value.data) {
-          const endpointName = result.value.endpoint.split('/').pop();
-          phaseData[endpointName!] = result.value.data;
+          // Extract endpoint name from URL (handle query parameters)
+          const endpointPath = result.value.endpoint.split('?')[0]; // Remove query params
+          const endpointName = endpointPath.split('/').pop() || 'unknown';
+          phaseData[endpointName] = result.value.data;
         }
       });
 
