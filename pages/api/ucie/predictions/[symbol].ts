@@ -36,57 +36,134 @@ const cache = new Map<string, { data: any; timestamp: number }>();
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
 /**
- * Fetch historical price data (mock implementation)
+ * Get CoinGecko ID from symbol
  */
-async function fetchHistoricalPrices(symbol: string): Promise<HistoricalPrice[]> {
-  // TODO: Fetch real historical data from CoinGecko, CoinMarketCap, etc.
-  // For now, generate mock data
+async function getCoinGeckoId(symbol: string): Promise<string> {
+  const symbolMap: Record<string, string> = {
+    'BTC': 'bitcoin',
+    'ETH': 'ethereum',
+    'USDT': 'tether',
+    'BNB': 'binancecoin',
+    'SOL': 'solana',
+    'XRP': 'ripple',
+    'USDC': 'usd-coin',
+    'ADA': 'cardano',
+    'AVAX': 'avalanche-2',
+    'DOGE': 'dogecoin',
+    'DOT': 'polkadot',
+    'MATIC': 'matic-network',
+    'LINK': 'chainlink',
+    'UNI': 'uniswap',
+    'ATOM': 'cosmos',
+    'LTC': 'litecoin',
+    'BCH': 'bitcoin-cash',
+    'XLM': 'stellar',
+    'ALGO': 'algorand',
+    'VET': 'vechain'
+  };
   
-  const prices: HistoricalPrice[] = [];
-  const now = Date.now();
-  const basePrice = symbol === 'BTC' ? 95000 : symbol === 'ETH' ? 3500 : 1;
-  
-  // Generate 365 days of historical data
-  for (let i = 365; i >= 0; i--) {
-    const timestamp = now - i * 24 * 60 * 60 * 1000;
-    const randomFactor = 0.95 + Math.random() * 0.1; // ±5% variation
-    const trendFactor = 1 + (365 - i) / 3650; // Slight upward trend
-    
-    const price = basePrice * randomFactor * trendFactor;
-    const high = price * (1 + Math.random() * 0.02);
-    const low = price * (1 - Math.random() * 0.02);
-    const open = low + Math.random() * (high - low);
-    const close = low + Math.random() * (high - low);
-    const volume = 1000000000 + Math.random() * 500000000;
-    
-    prices.push({
-      timestamp,
-      open,
-      high,
-      low,
-      close,
-      volume
-    });
-  }
-  
-  return prices;
+  return symbolMap[symbol.toUpperCase()] || symbol.toLowerCase();
 }
 
 /**
- * Fetch current market conditions (mock implementation)
+ * Fetch real historical price data from CoinGecko
+ */
+async function fetchHistoricalPrices(symbol: string): Promise<HistoricalPrice[]> {
+  try {
+    const coinGeckoId = await getCoinGeckoId(symbol);
+    const days = 365;
+    
+    const apiKey = process.env.COINGECKO_API_KEY;
+    const baseUrl = apiKey 
+      ? 'https://pro-api.coingecko.com/api/v3'
+      : 'https://api.coingecko.com/api/v3';
+    
+    const headers = apiKey ? { 'x-cg-pro-api-key': apiKey } : {};
+    
+    const response = await fetch(
+      `${baseUrl}/coins/${coinGeckoId}/market_chart?vs_currency=usd&days=${days}&interval=daily`,
+      { headers, signal: AbortSignal.timeout(10000) }
+    );
+    
+    if (!response.ok) {
+      throw new Error(`CoinGecko API error: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    
+    // Transform CoinGecko data to OHLCV format
+    const prices: HistoricalPrice[] = data.prices.map((price: number[], index: number) => {
+      const timestamp = price[0];
+      const close = price[1];
+      const volume = data.total_volumes[index]?.[1] || 0;
+      
+      // Estimate OHLC from daily close price (±2% range)
+      const high = close * 1.02;
+      const low = close * 0.98;
+      const open = low + (high - low) * 0.5;
+      
+      return {
+        timestamp,
+        open,
+        high,
+        low,
+        close,
+        volume
+      };
+    });
+    
+    console.log(`✅ Fetched ${prices.length} days of real historical data for ${symbol}`);
+    return prices;
+    
+  } catch (error) {
+    console.error(`❌ Failed to fetch historical prices for ${symbol}:`, error);
+    throw new Error(`Unable to fetch historical price data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * Fetch real market conditions from other UCIE endpoints
  */
 async function fetchMarketConditions(symbol: string): Promise<MarketConditions> {
-  // TODO: Fetch real market conditions from technical analysis, sentiment, etc.
-  // For now, generate mock data
-  
-  return {
-    volatility: 40 + Math.random() * 30, // 40-70
-    trend: Math.random() > 0.5 ? 'bullish' : Math.random() > 0.5 ? 'bearish' : 'neutral',
-    momentum: -20 + Math.random() * 40, // -20 to +20
-    sentiment: -10 + Math.random() * 30, // -10 to +20
-    technicalScore: 50 + Math.random() * 30, // 50-80
-    fundamentalScore: 55 + Math.random() * 25 // 55-80
-  };
+  try {
+    // Fetch technical analysis data
+    const technicalPromise = fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/ucie/technical/${symbol}`, {
+      signal: AbortSignal.timeout(5000)
+    }).then(r => r.ok ? r.json() : null).catch(() => null);
+    
+    // Fetch sentiment data
+    const sentimentPromise = fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/ucie/sentiment/${symbol}`, {
+      signal: AbortSignal.timeout(5000)
+    }).then(r => r.ok ? r.json() : null).catch(() => null);
+    
+    const [technical, sentiment] = await Promise.all([technicalPromise, sentimentPromise]);
+    
+    // Extract real market conditions
+    const volatility = technical?.data?.volatility?.current || 50;
+    const trend = technical?.data?.trend?.direction || 'neutral';
+    const rsi = technical?.data?.indicators?.rsi || 50;
+    const momentum = rsi - 50; // Convert RSI to momentum (-50 to +50)
+    const sentimentScore = sentiment?.data?.overallScore || 0;
+    const technicalScore = technical?.data?.consensus?.score || 50;
+    
+    // Calculate fundamental score from available data
+    const fundamentalScore = (technicalScore + sentimentScore) / 2;
+    
+    console.log(`✅ Fetched real market conditions for ${symbol}`);
+    
+    return {
+      volatility,
+      trend: trend as 'bullish' | 'bearish' | 'neutral',
+      momentum,
+      sentiment: sentimentScore,
+      technicalScore,
+      fundamentalScore
+    };
+    
+  } catch (error) {
+    console.error(`❌ Failed to fetch market conditions for ${symbol}:`, error);
+    throw new Error(`Unable to fetch market conditions: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 /**

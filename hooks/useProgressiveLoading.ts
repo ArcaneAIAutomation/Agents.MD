@@ -69,7 +69,7 @@ export function useProgressiveLoading({
   const [aggregatedData, setAggregatedData] = useState<any>({});
   const [overallProgress, setOverallProgress] = useState(0);
 
-  const fetchPhaseData = useCallback(async (phase: LoadingPhase) => {
+  const fetchPhaseData = useCallback(async (phase: LoadingPhase, previousData: any = {}) => {
     const startTime = Date.now();
     const phaseData: any = {};
     let completedEndpoints = 0;
@@ -88,11 +88,23 @@ export function useProgressiveLoading({
           // Log Caesar API calls specifically
           if (endpoint.includes('research')) {
             console.log(`🔍 Calling Caesar API for ${symbol} (timeout: ${timeoutMs}ms = ${timeoutMs/1000}s)`);
+            console.log(`📊 Sending context data from ${Object.keys(previousData).length} previous endpoints`);
           }
           
-          const response = await fetch(url, {
+          // For Phase 4, send context data from previous phases
+          let fetchUrl = url;
+          let fetchOptions: RequestInit = {
             signal: AbortSignal.timeout(timeoutMs),
-          });
+          };
+          
+          if (phase.phase === 4 && Object.keys(previousData).length > 0) {
+            // Add context data as query parameter (URL-encoded JSON)
+            const contextParam = encodeURIComponent(JSON.stringify(previousData));
+            fetchUrl = `${url}?context=${contextParam}`;
+            console.log(`📤 Sending ${contextParam.length} bytes of context data to ${endpoint}`);
+          }
+          
+          const response = await fetch(fetchUrl, fetchOptions);
 
           if (!response.ok) {
             throw new Error(`${endpoint} failed: ${response.statusText}`);
@@ -171,12 +183,13 @@ export function useProgressiveLoading({
 
     const allData: any = {};
 
-    // Load phases sequentially
+    // Load phases sequentially, passing accumulated data to each phase
     for (let i = 0; i < phases.length; i++) {
       const phase = phases[i];
       setCurrentPhase(phase.phase);
       
-      const phaseData = await fetchPhaseData(phase);
+      // Pass all previously collected data to this phase
+      const phaseData = await fetchPhaseData(phase, allData);
       if (phaseData) {
         Object.assign(allData, phaseData);
       }

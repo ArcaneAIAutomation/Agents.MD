@@ -42,10 +42,62 @@ export interface UCIECaesarStatus {
 }
 
 /**
- * Create a comprehensive research query for a cryptocurrency token
+ * Create a comprehensive research query for a cryptocurrency token with context
  */
-export function generateCryptoResearchQuery(symbol: string): string {
-  return `Analyze ${symbol} cryptocurrency comprehensively:
+export function generateCryptoResearchQuery(symbol: string, contextData?: any): string {
+  // Build context section if data is available
+  let contextSection = '';
+  
+  if (contextData && Object.keys(contextData).length > 0) {
+    contextSection = `\n**REAL-TIME MARKET CONTEXT:**\n\n`;
+    
+    // Market Data
+    if (contextData['market-data'] || contextData.marketData) {
+      const market = contextData['market-data'] || contextData.marketData;
+      contextSection += `**Current Market Data:**\n`;
+      contextSection += `- Price: $${market.price?.toLocaleString() || 'N/A'}\n`;
+      contextSection += `- 24h Volume: $${market.volume24h?.toLocaleString() || 'N/A'}\n`;
+      contextSection += `- Market Cap: $${market.marketCap?.toLocaleString() || 'N/A'}\n`;
+      contextSection += `- 24h Change: ${market.priceChange24h?.toFixed(2) || 'N/A'}%\n\n`;
+    }
+    
+    // Sentiment
+    if (contextData.sentiment) {
+      contextSection += `**Social Sentiment:**\n`;
+      contextSection += `- Overall Score: ${contextData.sentiment.overallScore || 'N/A'}/100\n`;
+      contextSection += `- Trend: ${contextData.sentiment.trend || 'N/A'}\n`;
+      contextSection += `- 24h Mentions: ${contextData.sentiment.mentions24h || 'N/A'}\n\n`;
+    }
+    
+    // Technical Analysis
+    if (contextData.technical) {
+      contextSection += `**Technical Analysis:**\n`;
+      contextSection += `- RSI: ${contextData.technical.indicators?.rsi || 'N/A'}\n`;
+      contextSection += `- MACD Signal: ${contextData.technical.macd?.signal || 'N/A'}\n`;
+      contextSection += `- Trend: ${contextData.technical.trend?.direction || 'N/A'}\n\n`;
+    }
+    
+    // On-Chain Data
+    if (contextData['on-chain'] || contextData.onChain) {
+      const onChain = contextData['on-chain'] || contextData.onChain;
+      contextSection += `**On-Chain Metrics:**\n`;
+      contextSection += `- Active Addresses: ${onChain.activeAddresses || 'N/A'}\n`;
+      contextSection += `- Transaction Volume: ${onChain.transactionVolume || 'N/A'}\n`;
+      contextSection += `- Whale Transactions: ${onChain.whaleTransactions?.length || 0}\n\n`;
+    }
+    
+    // News
+    if (contextData.news && contextData.news.articles) {
+      contextSection += `**Recent News (Top 5):**\n`;
+      contextData.news.articles.slice(0, 5).forEach((article: any, i: number) => {
+        contextSection += `${i + 1}. ${article.title}\n`;
+      });
+      contextSection += `\n`;
+    }
+  }
+  
+  return `Analyze ${symbol} cryptocurrency comprehensively using this real-time data:
+${contextSection}
 
 1. **Technology and Innovation**
    - Core technology and blockchain architecture
@@ -110,16 +162,18 @@ Ensure all fields are populated with substantive information. The confidence fie
  * 
  * @param symbol - Token symbol (e.g., "BTC", "ETH")
  * @param computeUnits - Compute units to allocate (1-10, default 5 for deep analysis)
+ * @param contextData - Real-time context data from previous analysis phases
  * @returns Research job with ID for polling
  */
 export async function createCryptoResearch(
   symbol: string,
-  computeUnits: number = 5
+  computeUnits: number = 5,
+  contextData?: any
 ): Promise<{ jobId: string; status: ResearchStatus }> {
   try {
     console.log(`🔍 Creating Caesar research job for ${symbol} with ${computeUnits} CU`);
     
-    const query = generateCryptoResearchQuery(symbol);
+    const query = generateCryptoResearchQuery(symbol, contextData);
     const systemPrompt = generateSystemPrompt();
     
     const job = await Caesar.createResearch({
@@ -304,17 +358,23 @@ export async function getCaesarResearchStatus(jobId: string): Promise<UCIECaesar
  * @param symbol - Token symbol
  * @param computeUnits - Compute units (default 5)
  * @param maxWaitTime - Maximum wait time in seconds (default 600)
+ * @param contextData - Real-time context data from previous analysis phases
  * @returns Parsed research data
  */
 export async function performCryptoResearch(
   symbol: string,
   computeUnits: number = 5,
-  maxWaitTime: number = 600
+  maxWaitTime: number = 600,
+  contextData?: any
 ): Promise<UCIECaesarResearch> {
   console.log(`🚀 Starting complete research workflow for ${symbol}`);
   
-  // Step 1: Create research job
-  const { jobId } = await createCryptoResearch(symbol, computeUnits);
+  if (contextData && Object.keys(contextData).length > 0) {
+    console.log(`📊 Using context data from ${Object.keys(contextData).length} sources`);
+  }
+  
+  // Step 1: Create research job with context
+  const { jobId } = await createCryptoResearch(symbol, computeUnits, contextData);
   
   // Step 2: Poll until completion
   const completedJob = await pollCaesarResearch(jobId, maxWaitTime);

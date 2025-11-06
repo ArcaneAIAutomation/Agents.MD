@@ -110,7 +110,7 @@ export default async function handler(
 
   try {
     // Extract and validate symbol
-    const { symbol } = req.query;
+    const { symbol, context } = req.query;
     
     if (!symbol || typeof symbol !== 'string') {
       return res.status(400).json({
@@ -145,14 +145,26 @@ export default async function handler(
     // No cache, perform fresh research
     console.log(`🚀 Starting fresh Caesar research for ${normalizedSymbol}`);
     
-    // Perform complete research workflow
+    // Parse context data if provided
+    let contextData: any = {};
+    if (context && typeof context === 'string') {
+      try {
+        contextData = JSON.parse(decodeURIComponent(context));
+        console.log(`📊 Received context data with ${Object.keys(contextData).length} data points`);
+      } catch (error) {
+        console.warn('⚠️ Failed to parse context data:', error);
+      }
+    }
+    
+    // Perform complete research workflow with context
     // - Create research job (5 compute units for deep analysis)
     // - Poll for completion (max 10 minutes = 600 seconds)
     // - Parse and structure results
     const researchData = await performCryptoResearch(
       normalizedSymbol,
       5,  // compute units
-      600 // max wait time (10 minutes)
+      600, // max wait time (10 minutes)
+      contextData // pass context from previous phases
     );
 
     // Cache the results

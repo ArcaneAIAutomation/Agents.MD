@@ -18,7 +18,8 @@ import type { PriceAggregation, ExchangePrice, ArbitrageOpportunity } from '../.
 
 interface MarketDataPanelProps {
   symbol: string;
-  aggregation: PriceAggregation;
+  aggregation?: PriceAggregation;
+  data?: any; // Alternative prop name for compatibility
   marketCap?: number;
   circulatingSupply?: number;
   totalSupply?: number;
@@ -29,7 +30,8 @@ interface MarketDataPanelProps {
 
 export default function MarketDataPanel({
   symbol,
-  aggregation,
+  aggregation: aggregationProp,
+  data,
   marketCap,
   circulatingSupply,
   totalSupply,
@@ -39,6 +41,9 @@ export default function MarketDataPanel({
 }: MarketDataPanelProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
+
+  // Use either aggregation or data prop (for compatibility)
+  const aggregation = aggregationProp || data?.priceAggregation || data;
 
   // Auto-refresh functionality
   useEffect(() => {
@@ -121,48 +126,62 @@ export default function MarketDataPanel({
       </div>
 
       {/* Key Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* VWAP */}
-        <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-lg p-4 hover:border-bitcoin-orange transition-all">
-          <p className="text-xs font-semibold uppercase tracking-widest text-bitcoin-white-60 mb-1">
-            VWAP
-          </p>
-          <p className="font-mono text-2xl font-bold text-bitcoin-orange">
-            {formatPrice(aggregation.vwap)}
-          </p>
-        </div>
+      {aggregation ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* VWAP */}
+          {aggregation.vwap !== undefined && (
+            <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-lg p-4 hover:border-bitcoin-orange transition-all">
+              <p className="text-xs font-semibold uppercase tracking-widest text-bitcoin-white-60 mb-1">
+                VWAP
+              </p>
+              <p className="font-mono text-2xl font-bold text-bitcoin-orange">
+                {formatPrice(aggregation.vwap)}
+              </p>
+            </div>
+          )}
 
-        {/* Average Price */}
-        <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-lg p-4 hover:border-bitcoin-orange transition-all">
-          <p className="text-xs font-semibold uppercase tracking-widest text-bitcoin-white-60 mb-1">
-            Avg Price
-          </p>
-          <p className="font-mono text-2xl font-bold text-bitcoin-white">
-            {formatPrice(aggregation.averagePrice)}
-          </p>
-        </div>
+          {/* Average Price */}
+          {aggregation.averagePrice !== undefined && (
+            <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-lg p-4 hover:border-bitcoin-orange transition-all">
+              <p className="text-xs font-semibold uppercase tracking-widest text-bitcoin-white-60 mb-1">
+                Avg Price
+              </p>
+              <p className="font-mono text-2xl font-bold text-bitcoin-white">
+                {formatPrice(aggregation.averagePrice)}
+              </p>
+            </div>
+          )}
 
-        {/* 24h Volume */}
-        <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-lg p-4 hover:border-bitcoin-orange transition-all">
-          <p className="text-xs font-semibold uppercase tracking-widest text-bitcoin-white-60 mb-1">
-            24h Volume
-          </p>
-          <p className="font-mono text-2xl font-bold text-bitcoin-white">
-            {formatLargeNumber(aggregation.totalVolume24h)}
-          </p>
-        </div>
+          {/* 24h Volume */}
+          {aggregation.totalVolume24h !== undefined && (
+            <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-lg p-4 hover:border-bitcoin-orange transition-all">
+              <p className="text-xs font-semibold uppercase tracking-widest text-bitcoin-white-60 mb-1">
+                24h Volume
+              </p>
+              <p className="font-mono text-2xl font-bold text-bitcoin-white">
+                {formatLargeNumber(aggregation.totalVolume24h)}
+              </p>
+            </div>
+          )}
 
-        {/* 24h Change */}
-        <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-lg p-4 hover:border-bitcoin-orange transition-all">
-          <p className="text-xs font-semibold uppercase tracking-widest text-bitcoin-white-60 mb-1">
-            24h Change
-          </p>
-          <div className={`flex items-center gap-2 font-mono text-2xl font-bold ${getChangeColor(aggregation.averageChange24h)}`}>
-            {getChangeIcon(aggregation.averageChange24h)}
-            <span>{aggregation.averageChange24h.toFixed(2)}%</span>
-          </div>
+          {/* 24h Change */}
+          {aggregation.averageChange24h !== undefined && (
+            <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-lg p-4 hover:border-bitcoin-orange transition-all">
+              <p className="text-xs font-semibold uppercase tracking-widest text-bitcoin-white-60 mb-1">
+                24h Change
+              </p>
+              <div className={`flex items-center gap-2 font-mono text-2xl font-bold ${getChangeColor(aggregation.averageChange24h)}`}>
+                {getChangeIcon(aggregation.averageChange24h)}
+                <span>{aggregation.averageChange24h.toFixed(2)}%</span>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
+      ) : (
+        <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-8 text-center">
+          <p className="text-bitcoin-white-60">No market data available</p>
+        </div>
+      )}
 
       {/* Additional Metrics (if provided) */}
       {(marketCap || circulatingSupply || totalSupply) && (

@@ -190,19 +190,49 @@ export default async function handler(
       });
     }
     
-    // Prepare risk scoring inputs
+    // Fetch real market data
+    let marketData: any = null;
+    try {
+      const marketResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/ucie/market-data/${symbolUpper}`, {
+        signal: AbortSignal.timeout(5000)
+      });
+      if (marketResponse.ok) {
+        const marketJson = await marketResponse.json();
+        marketData = marketJson.data;
+      }
+    } catch (error) {
+      console.warn(`⚠️ Failed to fetch market data for risk assessment:`, error);
+    }
+    
+    // Fetch real on-chain data
+    let onChainData: any = null;
+    try {
+      const onChainResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/ucie/on-chain/${symbolUpper}`, {
+        signal: AbortSignal.timeout(5000)
+      });
+      if (onChainResponse.ok) {
+        const onChainJson = await onChainResponse.json();
+        onChainData = onChainJson.data;
+      }
+    } catch (error) {
+      console.warn(`⚠️ Failed to fetch on-chain data for risk assessment:`, error);
+    }
+    
+    // Prepare risk scoring inputs with REAL data
     const riskInputs: RiskInputs = {
       annualizedVolatility: volatility?.annualized30d || 0.5,
       volatilityPercentile: volatility?.percentile || 50,
-      dailyVolume: 1_000_000, // TODO: Fetch from market data API
-      marketCap: 100_000_000, // TODO: Fetch from market data API
-      bidAskSpread: 0.005,
-      top10HolderPercentage: 0.5, // TODO: Fetch from on-chain data
-      giniCoefficient: 0.7, // TODO: Fetch from on-chain data
-      regulatoryStatus: 'Uncertain',
-      exchangeDelistings: 0,
-      marketCapUSD: 100_000_000 // TODO: Fetch from market data API
+      dailyVolume: marketData?.volume24h || 0,
+      marketCap: marketData?.marketCap || 0,
+      bidAskSpread: marketData?.bidAskSpread || 0.005,
+      top10HolderPercentage: onChainData?.holderConcentration?.top10Percentage || 0,
+      giniCoefficient: onChainData?.holderConcentration?.giniCoefficient || 0,
+      regulatoryStatus: 'Uncertain', // TODO: Add regulatory data source
+      exchangeDelistings: 0, // TODO: Track exchange delistings
+      marketCapUSD: marketData?.marketCap || 0
     };
+    
+    console.log(`✅ Risk assessment using real data: volume=$${riskInputs.dailyVolume}, mcap=$${riskInputs.marketCap}`);
     
     // Calculate risk score
     const riskScore = calculateRiskScore(riskInputs);
