@@ -145,13 +145,13 @@ export async function createCryptoResearch(
  * 
  * @param jobId - Research job ID
  * @param maxWaitTime - Maximum wait time in seconds (default 600 = 10 minutes)
- * @param pollInterval - Polling interval in milliseconds (default 3000 = 3 seconds)
+ * @param pollInterval - Polling interval in milliseconds (default 60000 = 60 seconds)
  * @returns Completed research job
  */
 export async function pollCaesarResearch(
   jobId: string,
   maxWaitTime: number = 600,
-  pollInterval: number = 3000
+  pollInterval: number = 60000
 ): Promise<ResearchJob> {
   const maxAttempts = Math.floor((maxWaitTime * 1000) / pollInterval);
   const startTime = Date.now();

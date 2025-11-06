@@ -184,11 +184,21 @@ export default async function handler(
 /**
  * API Configuration
  * Increase timeout for long-running research jobs
+ * 
+ * Note: Vercel serverless function timeout limits:
+ * - Hobby: 10 seconds
+ * - Pro: 60 seconds
+ * - Enterprise: 900 seconds (15 minutes)
+ * 
+ * For 10-minute polling with 60-second intervals, ensure you have Pro or Enterprise plan.
+ * The function will poll Caesar API every 60 seconds for up to 10 minutes.
  */
 export const config = {
   api: {
     responseLimit: false,
-    // Vercel serverless function timeout: 10 seconds (Hobby), 60 seconds (Pro)
-    // We need to handle long research jobs with polling
-  }
+    bodyParser: {
+      sizeLimit: '1mb',
+    },
+  },
+  maxDuration: 600, // 10 minutes (requires Vercel Pro or Enterprise)
 };
