@@ -221,11 +221,11 @@ const analysis = data['ucie-research']?.analysis;
 ## Performance Metrics
 
 ### Response Times
-- Phase 1 (Market Data): ~3-5 seconds
-- Phase 2 (News Data): ~8-10 seconds
-- Phase 3 (Technical): ~5 seconds (coming soon)
+- Phase 1 (Market Data): ~10 seconds (multi-source validation)
+- Phase 2 (News Data): ~10 seconds (news aggregation)
+- Phase 3 (Technical Analysis): ~30 seconds (OpenAI GPT-4o)
 - Phase 4 (Caesar AI): ~5-10 minutes (deep research)
-- **Total**: ~5-10 minutes (comprehensive analysis)
+- **Total**: ~6-11 minutes (comprehensive analysis)
 
 ### Data Quality
 - Market Data: 4-source validation

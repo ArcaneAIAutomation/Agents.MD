@@ -56,7 +56,7 @@ export function useProgressiveLoading({
       label: 'Critical Data (Market Data from CoinMarketCap + Exchanges)',
       endpoints: [`/api/ucie-market-data?symbol=${symbol}`],
       priority: 'critical',
-      targetTime: 5000, // 5 seconds for multi-source data
+      targetTime: 10000, // 10 seconds for multi-source data
       progress: 0,
       complete: false,
     },
@@ -65,16 +65,16 @@ export function useProgressiveLoading({
       label: 'News & Sentiment Analysis',
       endpoints: [`/api/ucie-news?symbol=${symbol}&limit=10`],
       priority: 'important',
-      targetTime: 8000, // 8 seconds for news aggregation
+      targetTime: 10000, // 10 seconds for news aggregation
       progress: 0,
       complete: false,
     },
     {
       phase: 3,
-      label: 'Technical Analysis (Coming Soon)',
-      endpoints: [], // Will add ucie-technical endpoint
+      label: 'Technical Analysis (OpenAI GPT-4o)',
+      endpoints: [`/api/ucie-technical`], // POST endpoint with OpenAI
       priority: 'enhanced',
-      targetTime: 5000,
+      targetTime: 30000, // 30 seconds for OpenAI analysis
       progress: 0,
       complete: false,
     },
@@ -117,11 +117,23 @@ export function useProgressiveLoading({
             console.log(`🔍 Calling Caesar API for ${symbol} (timeout: ${timeoutMs}ms = ${timeoutMs/60000} minutes)`);
           }
           
-          // For Phase 4 (Caesar research), use POST with all accumulated data
+          // For Phase 3 (OpenAI technical) and Phase 4 (Caesar research), use POST with accumulated data
           let fetchUrl = url;
           let fetchOptions: RequestInit = {
             signal: AbortSignal.timeout(timeoutMs),
           };
+          
+          if (phase.phase === 3 && endpoint.includes('technical')) {
+            // POST request with market data and news data for OpenAI analysis
+            fetchOptions.method = 'POST';
+            fetchOptions.headers = { 'Content-Type': 'application/json' };
+            fetchOptions.body = JSON.stringify({
+              symbol,
+              marketData: previousData['market-data'] || previousData['ucie-market-data'] || null,
+              newsData: previousData['news'] || previousData['ucie-news'] || null,
+            });
+            console.log(`📤 Sending data to OpenAI for technical analysis of ${symbol}`);
+          }
           
           if (phase.phase === 4 && endpoint.includes('research')) {
             // POST request with market data and news data from previous phases

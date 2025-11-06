@@ -579,7 +579,7 @@ Phase 1: Fetch Market Data (5s)
          ↓
 Phase 2: Fetch News Data (8s)
          ↓
-Phase 3: Fetch Technical Data (5s) [Coming Soon]
+Phase 3: Fetch Technical Data (30s) [OpenAI GPT-4o]
          ↓
 Phase 4: Send All Data to Caesar (2s)
          ↓
@@ -600,11 +600,11 @@ Display Detailed Caesar Analysis
 
 ## Performance Metrics
 
-- **Phase 1 (Market Data):** ~3-5 seconds
-- **Phase 2 (News Data):** ~8-10 seconds
-- **Phase 3 (Technical):** ~5 seconds (coming soon)
+- **Phase 1 (Market Data):** ~10 seconds (multi-source validation)
+- **Phase 2 (News Data):** ~10 seconds (news aggregation)
+- **Phase 3 (Technical Analysis):** ~30 seconds (OpenAI GPT-4o)
 - **Phase 4 (Caesar AI):** ~5-10 minutes (deep research)
-- **Total Time:** ~5-10 minutes (comprehensive analysis)
+- **Total Time:** ~6-11 minutes (comprehensive analysis)
 
 ---
 
