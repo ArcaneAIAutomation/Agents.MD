@@ -20,6 +20,8 @@ import {
   handleResearchError,
   UCIECaesarResearch
 } from '../../../../lib/ucie/caesarClient';
+import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
+import { getAggregatedPhaseData } from '../../../../lib/ucie/phaseDataStorage';
 
 /**
  * API Response Types
@@ -40,49 +42,9 @@ interface ErrorResponse {
 type ApiResponse = SuccessResponse | ErrorResponse;
 
 /**
- * In-memory cache for research results
- * Key: symbol, Value: { data, timestamp }
+ * Cache TTL: 24 hours (in seconds)
  */
-const researchCache = new Map<string, { data: UCIECaesarResearch; timestamp: number }>();
-
-/**
- * Cache TTL: 24 hours (in milliseconds)
- */
-const CACHE_TTL = 24 * 60 * 60 * 1000;
-
-/**
- * Get cached research if available and not expired
- */
-function getCachedResearch(symbol: string): UCIECaesarResearch | null {
-  const cached = researchCache.get(symbol.toUpperCase());
-  
-  if (!cached) {
-    return null;
-  }
-  
-  const now = Date.now();
-  const age = now - cached.timestamp;
-  
-  if (age > CACHE_TTL) {
-    // Cache expired, remove it
-    researchCache.delete(symbol.toUpperCase());
-    return null;
-  }
-  
-  console.log(`✅ Cache hit for ${symbol} (age: ${Math.floor(age / 1000)}s)`);
-  return cached.data;
-}
-
-/**
- * Store research in cache
- */
-function setCachedResearch(symbol: string, data: UCIECaesarResearch): void {
-  researchCache.set(symbol.toUpperCase(), {
-    data,
-    timestamp: Date.now()
-  });
-  console.log(`💾 Cached research for ${symbol}`);
-}
+const CACHE_TTL = 24 * 60 * 60; // 24 hours
 
 /**
  * Validate token symbol
@@ -109,8 +71,8 @@ export default async function handler(
   }
 
   try {
-    // Extract and validate symbol
-    const { symbol, context } = req.query;
+    // Extract and validate symbol and session ID
+    const { symbol, sessionId } = req.query;
     
     if (!symbol || typeof symbol !== 'string') {
       return res.status(400).json({
@@ -131,8 +93,8 @@ export default async function handler(
 
     console.log(`🔍 Caesar research request for ${normalizedSymbol}`);
 
-    // Check cache first
-    const cachedData = getCachedResearch(normalizedSymbol);
+    // Check database cache first
+    const cachedData = await getCachedAnalysis(normalizedSymbol, 'research');
     if (cachedData) {
       return res.status(200).json({
         success: true,
@@ -145,15 +107,17 @@ export default async function handler(
     // No cache, perform fresh research
     console.log(`🚀 Starting fresh Caesar research for ${normalizedSymbol}`);
     
-    // Parse context data if provided
+    // Retrieve context data from database if session ID provided
     let contextData: any = {};
-    if (context && typeof context === 'string') {
+    if (sessionId && typeof sessionId === 'string') {
       try {
-        contextData = JSON.parse(decodeURIComponent(context));
-        console.log(`📊 Received context data with ${Object.keys(contextData).length} data points`);
+        contextData = await getAggregatedPhaseData(sessionId, normalizedSymbol, 4);
+        console.log(`📊 Retrieved context data from ${Object.keys(contextData).length} previous phases`);
       } catch (error) {
-        console.warn('⚠️ Failed to parse context data:', error);
+        console.warn('⚠️ Failed to retrieve context data from database:', error);
       }
+    } else {
+      console.warn('⚠️ No session ID provided, Caesar will not have context from previous phases');
     }
     
     // Perform complete research workflow with context
@@ -167,8 +131,8 @@ export default async function handler(
       contextData // pass context from previous phases
     );
 
-    // Cache the results
-    setCachedResearch(normalizedSymbol, researchData);
+    // Cache the results in database (24 hours)
+    await setCachedAnalysis(normalizedSymbol, 'research', researchData, CACHE_TTL, 100);
 
     // Return success response
     return res.status(200).json({

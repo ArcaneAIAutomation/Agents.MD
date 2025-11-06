@@ -1,5 +1,30 @@
 import { useState, useEffect, useCallback } from 'react';
 
+/**
+ * Generate or retrieve session ID from browser storage (client-side only)
+ */
+function getOrCreateSessionId(): string {
+  if (typeof window === 'undefined') {
+    return 'server-side-' + Date.now();
+  }
+  
+  let sessionId = sessionStorage.getItem('ucie_session_id');
+  if (!sessionId) {
+    // Generate UUID v4 without external library
+    sessionId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+    sessionStorage.setItem('ucie_session_id', sessionId);
+    console.log(`🆔 Created new session: ${sessionId}`);
+  } else {
+    console.log(`🆔 Using existing session: ${sessionId}`);
+  }
+  
+  return sessionId;
+}
+
 export interface LoadingPhase {
   phase: number;
   label: string;
@@ -68,6 +93,7 @@ export function useProgressiveLoading({
   const [currentPhase, setCurrentPhase] = useState(1);
   const [aggregatedData, setAggregatedData] = useState<any>({});
   const [overallProgress, setOverallProgress] = useState(0);
+  const [sessionId] = useState(() => getOrCreateSessionId());
 
   const fetchPhaseData = useCallback(async (phase: LoadingPhase, previousData: any = {}) => {
     const startTime = Date.now();
@@ -91,18 +117,35 @@ export function useProgressiveLoading({
             console.log(`📊 Sending context data from ${Object.keys(previousData).length} previous endpoints`);
           }
           
-          // For Phase 4, send context data from previous phases
+          // Store phase data in database before Phase 4
+          if (phase.phase > 1 && Object.keys(previousData).length > 0) {
+            try {
+              await fetch('/api/ucie/store-phase-data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  sessionId,
+                  symbol,
+                  phaseNumber: phase.phase - 1,
+                  data: previousData
+                })
+              });
+              console.log(`💾 Stored Phase ${phase.phase - 1} data in database`);
+            } catch (error) {
+              console.warn(`⚠️ Failed to store Phase ${phase.phase - 1} data:`, error);
+            }
+          }
+          
+          // For Phase 4, send session ID to retrieve context from database
           let fetchUrl = url;
-          let fetchOptions: RequestInit = {
+          if (phase.phase === 4) {
+            fetchUrl = `${url}?sessionId=${sessionId}`;
+            console.log(`📤 Sending session ID to ${endpoint} to retrieve context from database`);
+          }
+          
+          const fetchOptions: RequestInit = {
             signal: AbortSignal.timeout(timeoutMs),
           };
-          
-          if (phase.phase === 4 && Object.keys(previousData).length > 0) {
-            // Add context data as query parameter (URL-encoded JSON)
-            const contextParam = encodeURIComponent(JSON.stringify(previousData));
-            fetchUrl = `${url}?context=${contextParam}`;
-            console.log(`📤 Sending ${contextParam.length} bytes of context data to ${endpoint}`);
-          }
           
           const response = await fetch(fetchUrl, fetchOptions);
 
