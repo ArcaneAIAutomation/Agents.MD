@@ -189,7 +189,7 @@ async function fetchCryptoCompareData(symbol: string, limit: number) {
     const response = await fetch(
       `${APIS.cryptocompare}/news/?lang=EN&sortOrder=latest&categories=${symbol}`,
       {
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(15000), // Increased to 15s
         headers: { 'User-Agent': 'UCIE/1.0' }
       }
     );
@@ -323,6 +323,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const overallSentiment = calculateOverallSentiment(uniqueArticles);
 
     // Build response
+    const successfulSources = [newsAPIData, cryptoCompareData].filter(s => s.success);
+    const failedSources = [newsAPIData, cryptoCompareData].filter(s => !s.success);
+    
     const response = {
       success: true,
       symbol: symbolUpper,
@@ -334,8 +337,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
       dataQuality: {
         totalArticles: uniqueArticles.length,
-        successfulSources: [newsAPIData, cryptoCompareData].filter(s => s.success).length,
-        failedSources: [newsAPIData, cryptoCompareData].filter(s => !s.success).map(s => s.source)
+        successfulSources: successfulSources.length,
+        failedSources: failedSources.map(s => s.source),
+        warnings: failedSources.length > 0 ? [`${failedSources.length} source(s) failed but ${successfulSources.length} succeeded`] : []
       },
       cached: false,
       timestamp: new Date().toISOString()
