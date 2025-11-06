@@ -319,10 +319,11 @@ export default async function handler(
   const tokenContract = TOKEN_CONTRACTS[symbolUpper];
   
   if (!tokenContract) {
-    return res.status(404).json({
-      success: false,
+    // ✅ Return graceful fallback instead of 404
+    return res.status(200).json({
+      success: true,
       symbol: symbolUpper,
-      chain: 'ethereum',
+      chain: 'unknown',
       tokenInfo: null,
       holderDistribution: {
         topHolders: [],
@@ -355,9 +356,9 @@ export default async function handler(
         isVerified: false,
         vulnerabilities: [],
         redFlags: [],
-        warnings: [],
+        warnings: ['On-chain data not available for this token'],
         strengths: [],
-        auditStatus: 'not_audited'
+        auditStatus: 'not_available'
       },
       walletBehavior: {
         smartMoneyAccumulating: false,
@@ -367,7 +368,7 @@ export default async function handler(
       },
       dataQuality: 0,
       timestamp: new Date().toISOString(),
-      error: `Token ${symbolUpper} not supported for on-chain analysis`
+      message: `On-chain analysis not available for ${symbolUpper}. This token may not have a smart contract or is not supported on Ethereum/BSC/Polygon networks.`
     });
   }
 

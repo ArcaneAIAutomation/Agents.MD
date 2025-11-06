@@ -77,7 +77,7 @@ export async function fetchNewsAPI(symbol: string): Promise<NewsArticle[]> {
     const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&sortBy=publishedAt&language=en&pageSize=20&apiKey=${apiKey}`;
     
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const timeoutId = setTimeout(() => controller.abort(), 20000); // Increased from 10s to 20s
     
     const response = await fetch(url, {
       signal: controller.signal,
@@ -122,7 +122,7 @@ export async function fetchCryptoCompareNews(symbol: string): Promise<NewsArticl
     const url = `https://min-api.cryptocompare.com/data/v2/news/?lang=EN&categories=${symbol}`;
     
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const timeoutId = setTimeout(() => controller.abort(), 20000); // Increased from 10s to 20s
     
     const headers: HeadersInit = {
       'User-Agent': 'UCIE/1.0'

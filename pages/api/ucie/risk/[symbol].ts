@@ -144,8 +144,11 @@ export default async function handler(
     });
   }
   
+  // Normalize symbol to uppercase
+  const symbolUpper = symbol.toUpperCase();
+  
   // Check cache first
-  const cachedData = getCachedData(symbol);
+  const cachedData = getCachedData(symbolUpper);
   if (cachedData) {
     return res.status(200).json({
       ...cachedData,
@@ -194,7 +197,7 @@ export default async function handler(
     let marketData: any = null;
     try {
       const marketResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/ucie/market-data/${symbolUpper}`, {
-        signal: AbortSignal.timeout(5000)
+        signal: AbortSignal.timeout(15000) // Increased from 5s to 15s
       });
       if (marketResponse.ok) {
         const marketJson = await marketResponse.json();
@@ -208,7 +211,7 @@ export default async function handler(
     let onChainData: any = null;
     try {
       const onChainResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/ucie/on-chain/${symbolUpper}`, {
-        signal: AbortSignal.timeout(5000)
+        signal: AbortSignal.timeout(15000) // Increased from 5s to 15s
       });
       if (onChainResponse.ok) {
         const onChainJson = await onChainResponse.json();
@@ -263,7 +266,7 @@ export default async function handler(
     };
     
     // Cache the response
-    setCachedData(symbol, response);
+    setCachedData(symbolUpper, response);
     
     // Return response
     return res.status(200).json(response);

@@ -128,12 +128,12 @@ async function fetchMarketConditions(symbol: string): Promise<MarketConditions> 
   try {
     // Fetch technical analysis data
     const technicalPromise = fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/ucie/technical/${symbol}`, {
-      signal: AbortSignal.timeout(5000)
+      signal: AbortSignal.timeout(20000) // Increased from 5s to 20s
     }).then(r => r.ok ? r.json() : null).catch(() => null);
     
     // Fetch sentiment data
     const sentimentPromise = fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/ucie/sentiment/${symbol}`, {
-      signal: AbortSignal.timeout(5000)
+      signal: AbortSignal.timeout(20000) // Increased from 5s to 20s
     }).then(r => r.ok ? r.json() : null).catch(() => null);
     
     const [technical, sentiment] = await Promise.all([technicalPromise, sentimentPromise]);

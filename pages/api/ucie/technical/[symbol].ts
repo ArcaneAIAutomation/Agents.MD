@@ -256,44 +256,73 @@ export default async function handler(
 }
 
 /**
+ * Get CoinGecko ID from symbol
+ */
+function getCoinGeckoId(symbol: string): string {
+  const symbolMap: Record<string, string> = {
+    'BTC': 'bitcoin',
+    'ETH': 'ethereum',
+    'USDT': 'tether',
+    'BNB': 'binancecoin',
+    'SOL': 'solana',
+    'XRP': 'ripple',
+    'USDC': 'usd-coin',
+    'ADA': 'cardano',
+    'DOGE': 'dogecoin',
+    'TRX': 'tron',
+    'DOT': 'polkadot',
+    'MATIC': 'matic-network',
+    'LINK': 'chainlink',
+    'UNI': 'uniswap',
+    'AVAX': 'avalanche-2',
+    'ATOM': 'cosmos',
+    'LTC': 'litecoin',
+    'BCH': 'bitcoin-cash',
+    'XLM': 'stellar',
+    'ALGO': 'algorand',
+    'VET': 'vechain',
+    'ICP': 'internet-computer',
+    'FIL': 'filecoin',
+    'AAVE': 'aave',
+    'MKR': 'maker',
+    'SAND': 'the-sandbox',
+    'MANA': 'decentraland',
+    'AXS': 'axie-infinity',
+    'FTM': 'fantom',
+    'EGLD': 'elrond-erd-2',
+    'THETA': 'theta-token',
+    'XTZ': 'tezos',
+    'EOS': 'eos',
+    'FLOW': 'flow',
+    'KLAY': 'klay-token',
+    'CHZ': 'chiliz'
+  };
+  
+  return symbolMap[symbol.toUpperCase()] || symbol.toLowerCase();
+}
+
+/**
  * Fetch historical OHLCV data
  */
 async function fetchHistoricalData(symbol: string): Promise<OHLCVData[]> {
-  // Try Binance first (most reliable for OHLCV data)
+  // Try CoinGecko first (best OHLCV data with correct ID mapping)
   try {
-    const binanceSymbol = `${symbol}USDT`;
-    const response = await fetch(
-      `https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=1h&limit=200`,
-      {
-        headers: {
-          'Accept': 'application/json'
-        }
-      }
-    );
-
-    if (response.ok) {
-      const data = await response.json();
-      return data.map((candle: any) => ({
-        timestamp: candle[0],
-        open: parseFloat(candle[1]),
-        high: parseFloat(candle[2]),
-        low: parseFloat(candle[3]),
-        close: parseFloat(candle[4]),
-        volume: parseFloat(candle[5])
-      }));
+    const coinGeckoId = getCoinGeckoId(symbol);
+    const apiKey = process.env.COINGECKO_API_KEY;
+    const baseUrl = apiKey 
+      ? 'https://pro-api.coingecko.com/api/v3'
+      : 'https://api.coingecko.com/api/v3';
+    
+    const headers: HeadersInit = { 'Accept': 'application/json' };
+    if (apiKey) {
+      headers['x-cg-pro-api-key'] = apiKey;
     }
-  } catch (error) {
-    console.warn('Binance fetch failed, trying CoinGecko:', error);
-  }
-
-  // Fallback to CoinGecko
-  try {
+    
     const response = await fetch(
-      `https://api.coingecko.com/api/v3/coins/${symbol.toLowerCase()}/ohlc?vs_currency=usd&days=7`,
+      `${baseUrl}/coins/${coinGeckoId}/ohlc?vs_currency=usd&days=365`,
       {
-        headers: {
-          'Accept': 'application/json'
-        }
+        headers,
+        signal: AbortSignal.timeout(15000) // Increased from 10s to 15s
       }
     );
 
@@ -309,7 +338,19 @@ async function fetchHistoricalData(symbol: string): Promise<OHLCVData[]> {
       }));
     }
   } catch (error) {
-    console.error('CoinGecko fetch failed:', error);
+    console.warn('CoinGecko fetch failed, trying CoinMarketCap:', error);
+  }
+
+  // Fallback to CoinMarketCap (if available)
+  try {
+    const cmcApiKey = process.env.COINMARKETCAP_API_KEY;
+    if (cmcApiKey) {
+      // CoinMarketCap historical data would go here
+      // For now, we'll skip to avoid complexity
+      console.warn('CoinMarketCap historical data not implemented yet');
+    }
+  } catch (error) {
+    console.error('CoinMarketCap fetch failed:', error);
   }
 
   throw new Error('Failed to fetch historical data from all sources');

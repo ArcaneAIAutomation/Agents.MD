@@ -114,26 +114,6 @@ export function useProgressiveLoading({
           // Log Caesar API calls specifically
           if (endpoint.includes('research')) {
             console.log(`🔍 Calling Caesar API for ${symbol} (timeout: ${timeoutMs}ms = ${timeoutMs/1000}s)`);
-            console.log(`📊 Sending context data from ${Object.keys(previousData).length} previous endpoints`);
-          }
-          
-          // Store phase data in database before Phase 4
-          if (phase.phase > 1 && Object.keys(previousData).length > 0) {
-            try {
-              await fetch('/api/ucie/store-phase-data', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  sessionId,
-                  symbol,
-                  phaseNumber: phase.phase - 1,
-                  data: previousData
-                })
-              });
-              console.log(`💾 Stored Phase ${phase.phase - 1} data in database`);
-            } catch (error) {
-              console.warn(`⚠️ Failed to store Phase ${phase.phase - 1} data:`, error);
-            }
           }
           
           // For Phase 4, send session ID to retrieve context from database
@@ -183,6 +163,31 @@ export function useProgressiveLoading({
       });
 
       const elapsedTime = Date.now() - startTime;
+      
+      // Store phase data in database AFTER phase completes
+      if (phase.phase < 4 && Object.keys(phaseData).length > 0) {
+        try {
+          console.log(`💾 Storing Phase ${phase.phase} data in database...`);
+          const storeResponse = await fetch('/api/ucie/store-phase-data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId,
+              symbol,
+              phaseNumber: phase.phase,
+              data: phaseData
+            })
+          });
+          
+          if (storeResponse.ok) {
+            console.log(`✅ Phase ${phase.phase} data stored in database`);
+          } else {
+            console.warn(`⚠️ Failed to store Phase ${phase.phase} data: ${storeResponse.status}`);
+          }
+        } catch (error) {
+          console.warn(`⚠️ Failed to store Phase ${phase.phase} data:`, error);
+        }
+      }
       
       // Mark phase as complete
       setPhases(prev => prev.map(p => 

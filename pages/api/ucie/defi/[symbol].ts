@@ -123,8 +123,14 @@ export default async function handler(
   }
 
   try {
-    // Check if token is a DeFi protocol
-    const isDefi = await isDeFiProtocol(normalizedSymbol);
+    // Check if token is a DeFi protocol (with error handling)
+    let isDefi = false;
+    try {
+      isDefi = await isDeFiProtocol(normalizedSymbol);
+    } catch (error) {
+      console.warn(`isDeFiProtocol check failed for ${normalizedSymbol}:`, error);
+      // Continue with isDefi = false
+    }
 
     if (!isDefi) {
       const response = {
@@ -134,7 +140,7 @@ export default async function handler(
         utilityAnalysis: null,
         developmentAnalysis: null,
         peerComparison: null,
-        summary: 'This token is not identified as a DeFi protocol.',
+        summary: `${normalizedSymbol} is not identified as a DeFi protocol.`,
         dataQuality: 0,
         timestamp: new Date().toISOString(),
       };
