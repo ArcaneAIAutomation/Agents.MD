@@ -7,11 +7,12 @@
  * Endpoint: GET /api/ucie-market-data?symbol=BTC
  * 
  * Features:
- * - Multi-source data fetching (CoinGecko, CoinMarketCap, Binance, Kraken)
+ * - Multi-source data fetching (CoinMarketCap PRIMARY, Binance, Kraken, Coinbase)
  * - 30-second cache TTL
  * - Graceful fallback mechanisms
  * - Real-time price aggregation
  * - Comprehensive market metrics
+ * - Rich context for Caesar AI analysis
  */
 
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -21,21 +22,21 @@ const APIS = {
   binance: 'https://api.binance.com/api/v3',
   kraken: 'https://api.kraken.com/0/public',
   coinbase: 'https://api.exchange.coinbase.com',
-  coingecko: 'https://api.coingecko.com/api/v3'
+  coinmarketcap: 'https://pro-api.coinmarketcap.com/v1'
 };
 
 // Symbol mapping for different exchanges
-const SYMBOL_MAP: Record<string, { binance: string; kraken: string; coinbase: string; coingecko: string }> = {
-  'BTC': { binance: 'BTCUSDT', kraken: 'XXBTZUSD', coinbase: 'BTC-USD', coingecko: 'bitcoin' },
-  'ETH': { binance: 'ETHUSDT', kraken: 'XETHZUSD', coinbase: 'ETH-USD', coingecko: 'ethereum' },
-  'XRP': { binance: 'XRPUSDT', kraken: 'XXRPZUSD', coinbase: 'XRP-USD', coingecko: 'ripple' },
-  'SOL': { binance: 'SOLUSDT', kraken: 'SOLUSD', coinbase: 'SOL-USD', coingecko: 'solana' },
-  'ADA': { binance: 'ADAUSDT', kraken: 'ADAUSD', coinbase: 'ADA-USD', coingecko: 'cardano' },
-  'DOGE': { binance: 'DOGEUSDT', kraken: 'XDGUSD', coinbase: 'DOGE-USD', coingecko: 'dogecoin' },
-  'DOT': { binance: 'DOTUSDT', kraken: 'DOTUSD', coinbase: 'DOT-USD', coingecko: 'polkadot' },
-  'MATIC': { binance: 'MATICUSDT', kraken: 'MATICUSD', coinbase: 'MATIC-USD', coingecko: 'matic-network' },
-  'LINK': { binance: 'LINKUSDT', kraken: 'LINKUSD', coinbase: 'LINK-USD', coingecko: 'chainlink' },
-  'UNI': { binance: 'UNIUSDT', kraken: 'UNIUSD', coinbase: 'UNI-USD', coingecko: 'uniswap' }
+const SYMBOL_MAP: Record<string, { binance: string; kraken: string; coinbase: string; cmc: string; cmcId: number }> = {
+  'BTC': { binance: 'BTCUSDT', kraken: 'XXBTZUSD', coinbase: 'BTC-USD', cmc: 'BTC', cmcId: 1 },
+  'ETH': { binance: 'ETHUSDT', kraken: 'XETHZUSD', coinbase: 'ETH-USD', cmc: 'ETH', cmcId: 1027 },
+  'XRP': { binance: 'XRPUSDT', kraken: 'XXRPZUSD', coinbase: 'XRP-USD', cmc: 'XRP', cmcId: 52 },
+  'SOL': { binance: 'SOLUSDT', kraken: 'SOLUSD', coinbase: 'SOL-USD', cmc: 'SOL', cmcId: 5426 },
+  'ADA': { binance: 'ADAUSDT', kraken: 'ADAUSD', coinbase: 'ADA-USD', cmc: 'ADA', cmcId: 2010 },
+  'DOGE': { binance: 'DOGEUSDT', kraken: 'XDGUSD', coinbase: 'DOGE-USD', cmc: 'DOGE', cmcId: 74 },
+  'DOT': { binance: 'DOTUSDT', kraken: 'DOTUSD', coinbase: 'DOT-USD', cmc: 'DOT', cmcId: 6636 },
+  'MATIC': { binance: 'MATICUSDT', kraken: 'MATICUSD', coinbase: 'MATIC-USD', cmc: 'MATIC', cmcId: 3890 },
+  'LINK': { binance: 'LINKUSDT', kraken: 'LINKUSD', coinbase: 'LINK-USD', cmc: 'LINK', cmcId: 1975 },
+  'UNI': { binance: 'UNIUSDT', kraken: 'UNIUSD', coinbase: 'UNI-USD', cmc: 'UNI', cmcId: 7083 }
 };
 
 // In-memory cache
@@ -183,47 +184,96 @@ async function fetchCoinbaseData(symbol: string) {
 }
 
 /**
- * Fetch from CoinGecko (comprehensive market data)
+ * Fetch from CoinMarketCap (PRIMARY comprehensive market data)
  */
-async function fetchCoinGeckoData(symbol: string) {
+async function fetchCoinMarketCapData(symbol: string) {
   try {
     const symbols = SYMBOL_MAP[symbol];
     if (!symbols) throw new Error(`Unsupported symbol: ${symbol}`);
 
-    console.log(`🔍 Fetching CoinGecko data for ${symbols.coingecko}...`);
-    const response = await fetch(
-      `${APIS.coingecko}/coins/${symbols.coingecko}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=true`,
+    if (!process.env.COINMARKETCAP_API_KEY) {
+      throw new Error('CoinMarketCap API key not configured');
+    }
+
+    console.log(`🔍 Fetching CoinMarketCap data for ${symbols.cmc} (ID: ${symbols.cmcId})...`);
+    
+    // Fetch latest quotes
+    const quotesResponse = await fetch(
+      `${APIS.coinmarketcap}/cryptocurrency/quotes/latest?id=${symbols.cmcId}&convert=USD`,
       {
         signal: AbortSignal.timeout(8000),
         headers: {
-          'User-Agent': 'UCIE/1.0',
-          ...(process.env.COINGECKO_API_KEY ? { 'x-cg-pro-api-key': process.env.COINGECKO_API_KEY } : {})
+          'X-CMC_PRO_API_KEY': process.env.COINMARKETCAP_API_KEY,
+          'Accept': 'application/json'
         }
       }
     );
 
-    if (!response.ok) throw new Error(`CoinGecko HTTP ${response.status}`);
+    if (!quotesResponse.ok) throw new Error(`CoinMarketCap HTTP ${quotesResponse.status}`);
 
-    const data = await response.json();
-    console.log(`✅ CoinGecko: ${data.market_data.current_price.usd}`);
+    const quotesData = await quotesResponse.json();
+    const coinData = quotesData.data[symbols.cmcId];
+    const quote = coinData.quote.USD;
+
+    console.log(`✅ CoinMarketCap: ${quote.price}`);
+
+    // Fetch metadata for additional context
+    let metadata = null;
+    try {
+      const metadataResponse = await fetch(
+        `${APIS.coinmarketcap}/cryptocurrency/info?id=${symbols.cmcId}`,
+        {
+          signal: AbortSignal.timeout(5000),
+          headers: {
+            'X-CMC_PRO_API_KEY': process.env.COINMARKETCAP_API_KEY,
+            'Accept': 'application/json'
+          }
+        }
+      );
+      
+      if (metadataResponse.ok) {
+        const metadataData = await metadataResponse.json();
+        metadata = metadataData.data[symbols.cmcId];
+      }
+    } catch (metaError) {
+      console.warn('⚠️ CoinMarketCap metadata fetch failed (non-critical)');
+    }
 
     return {
-      exchange: 'CoinGecko',
-      price: data.market_data.current_price.usd,
-      volume24h: data.market_data.total_volume.usd,
-      change24h: data.market_data.price_change_percentage_24h,
-      change7d: data.market_data.price_change_percentage_7d,
-      high24h: data.market_data.high_24h.usd,
-      low24h: data.market_data.low_24h.usd,
-      marketCap: data.market_data.market_cap.usd,
-      circulatingSupply: data.market_data.circulating_supply,
-      totalSupply: data.market_data.total_supply,
-      sparkline: data.market_data.sparkline_7d?.price || [],
+      exchange: 'CoinMarketCap',
+      price: quote.price,
+      volume24h: quote.volume_24h,
+      volumeChange24h: quote.volume_change_24h,
+      change1h: quote.percent_change_1h,
+      change24h: quote.percent_change_24h,
+      change7d: quote.percent_change_7d,
+      change30d: quote.percent_change_30d,
+      change60d: quote.percent_change_60d,
+      change90d: quote.percent_change_90d,
+      marketCap: quote.market_cap,
+      marketCapDominance: quote.market_cap_dominance,
+      fullyDilutedMarketCap: quote.fully_diluted_market_cap,
+      circulatingSupply: coinData.circulating_supply,
+      totalSupply: coinData.total_supply,
+      maxSupply: coinData.max_supply,
+      rank: coinData.cmc_rank,
+      // Metadata (if available)
+      ...(metadata && {
+        description: metadata.description,
+        website: metadata.urls?.website?.[0],
+        technicalDoc: metadata.urls?.technical_doc?.[0],
+        twitter: metadata.urls?.twitter?.[0],
+        reddit: metadata.urls?.reddit?.[0],
+        tags: metadata.tags,
+        category: metadata.category,
+        platform: metadata.platform
+      }),
+      lastUpdated: quote.last_updated,
       success: true
     };
   } catch (error) {
-    console.error(`❌ CoinGecko failed:`, error instanceof Error ? error.message : 'Unknown error');
-    return { exchange: 'CoinGecko', success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    console.error(`❌ CoinMarketCap failed:`, error instanceof Error ? error.message : 'Unknown error');
+    return { exchange: 'CoinMarketCap', success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
 
@@ -297,22 +347,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log(`🚀 Fetching market data for ${symbolUpper} from multiple sources...`);
 
-    // Fetch from all sources in parallel
-    const [binanceData, krakenData, coinbaseData, coingeckoData] = await Promise.all([
+    // Fetch from all sources in parallel (CoinMarketCap is PRIMARY)
+    const [cmcData, binanceData, krakenData, coinbaseData] = await Promise.all([
+      fetchCoinMarketCapData(symbolUpper),
       fetchBinanceData(symbolUpper),
       fetchKrakenData(symbolUpper),
-      fetchCoinbaseData(symbolUpper),
-      fetchCoinGeckoData(symbolUpper)
+      fetchCoinbaseData(symbolUpper)
     ]);
 
     // Aggregate prices
-    const priceAggregation = aggregatePrices([binanceData, krakenData, coinbaseData, coingeckoData]);
+    const priceAggregation = aggregatePrices([cmcData, binanceData, krakenData, coinbaseData]);
 
     if (!priceAggregation) {
       throw new Error('Failed to fetch price data from any source');
     }
 
-    // Build comprehensive response
+    // Build comprehensive response with rich CoinMarketCap data
     const response = {
       success: true,
       symbol: symbolUpper,
@@ -325,30 +375,59 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         spread: priceAggregation.spread,
         confidence: priceAggregation.confidence
       },
+      // Rich market data from CoinMarketCap (PRIMARY)
       marketData: {
-        volume24h: coingeckoData.success ? coingeckoData.volume24h : binanceData.success ? binanceData.volume24h : null,
-        change24h: coingeckoData.success ? coingeckoData.change24h : binanceData.success ? binanceData.change24h : null,
-        change7d: coingeckoData.success ? coingeckoData.change7d : null,
-        high24h: coingeckoData.success ? coingeckoData.high24h : binanceData.success ? binanceData.high24h : null,
-        low24h: coingeckoData.success ? coingeckoData.low24h : binanceData.success ? binanceData.low24h : null,
-        marketCap: coingeckoData.success ? coingeckoData.marketCap : null,
-        circulatingSupply: coingeckoData.success ? coingeckoData.circulatingSupply : null,
-        totalSupply: coingeckoData.success ? coingeckoData.totalSupply : null
+        // Price changes across multiple timeframes
+        change1h: cmcData.success ? cmcData.change1h : null,
+        change24h: cmcData.success ? cmcData.change24h : binanceData.success ? binanceData.change24h : null,
+        change7d: cmcData.success ? cmcData.change7d : null,
+        change30d: cmcData.success ? cmcData.change30d : null,
+        change60d: cmcData.success ? cmcData.change60d : null,
+        change90d: cmcData.success ? cmcData.change90d : null,
+        // Volume data
+        volume24h: cmcData.success ? cmcData.volume24h : binanceData.success ? binanceData.volume24h : null,
+        volumeChange24h: cmcData.success ? cmcData.volumeChange24h : null,
+        // Market cap data
+        marketCap: cmcData.success ? cmcData.marketCap : null,
+        marketCapDominance: cmcData.success ? cmcData.marketCapDominance : null,
+        fullyDilutedMarketCap: cmcData.success ? cmcData.fullyDilutedMarketCap : null,
+        // Supply data
+        circulatingSupply: cmcData.success ? cmcData.circulatingSupply : null,
+        totalSupply: cmcData.success ? cmcData.totalSupply : null,
+        maxSupply: cmcData.success ? cmcData.maxSupply : null,
+        // Ranking
+        rank: cmcData.success ? cmcData.rank : null,
+        // 24h high/low from exchanges
+        high24h: binanceData.success ? binanceData.high24h : null,
+        low24h: binanceData.success ? binanceData.low24h : null
       },
+      // Project metadata (for Caesar AI context)
+      metadata: cmcData.success ? {
+        description: cmcData.description || null,
+        website: cmcData.website || null,
+        technicalDoc: cmcData.technicalDoc || null,
+        twitter: cmcData.twitter || null,
+        reddit: cmcData.reddit || null,
+        tags: cmcData.tags || [],
+        category: cmcData.category || null,
+        platform: cmcData.platform || null
+      } : null,
+      // Raw source data
       sources: {
+        coinmarketcap: cmcData,
         binance: binanceData,
         kraken: krakenData,
-        coinbase: coinbaseData,
-        coingecko: coingeckoData
+        coinbase: coinbaseData
       },
       dataQuality: {
         totalSources: 4,
-        successfulSources: [binanceData, krakenData, coinbaseData, coingeckoData].filter(s => s.success).length,
-        failedSources: [binanceData, krakenData, coinbaseData, coingeckoData].filter(s => !s.success).map(s => s.exchange),
+        successfulSources: [cmcData, binanceData, krakenData, coinbaseData].filter(s => s.success).length,
+        failedSources: [cmcData, binanceData, krakenData, coinbaseData].filter(s => !s.success).map(s => s.exchange),
         confidence: priceAggregation.confidence,
-        spread: priceAggregation.spread
+        spread: priceAggregation.spread,
+        primarySource: 'CoinMarketCap',
+        primarySourceStatus: cmcData.success ? 'OPERATIONAL' : 'FAILED'
       },
-      sparkline: coingeckoData.success ? coingeckoData.sparkline : [],
       cached: false,
       timestamp: new Date().toISOString()
     };
