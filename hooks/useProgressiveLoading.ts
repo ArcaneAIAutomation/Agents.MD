@@ -135,6 +135,63 @@ export function useProgressiveLoading({
               userQuery: `Provide comprehensive analysis for ${symbol}`
             });
             console.log(`📤 Sending comprehensive data to Caesar for ${symbol}`);
+            
+            // Create Caesar research job
+            const createResponse = await fetch(fetchUrl, fetchOptions);
+            if (!createResponse.ok) {
+              throw new Error(`${endpoint} failed: ${createResponse.statusText}`);
+            }
+            
+            const createData = await createResponse.json();
+            
+            if (!createData.success || !createData.jobId) {
+              throw new Error('Failed to create Caesar research job');
+            }
+            
+            console.log(`✅ Caesar job created: ${createData.jobId}`);
+            console.log(`⏳ Polling for results (max 2 minutes)...`);
+            
+            // Poll for results (max 60 attempts, 2 seconds apart = 2 minutes)
+            let attempts = 0;
+            const maxAttempts = 60;
+            const pollInterval = 2000; // 2 seconds
+            
+            while (attempts < maxAttempts) {
+              await new Promise(resolve => setTimeout(resolve, pollInterval));
+              attempts++;
+              
+              // Update progress based on polling attempts
+              const pollingProgress = (attempts / maxAttempts) * 100;
+              setPhases(prev => prev.map(p => 
+                p.phase === phase.phase 
+                  ? { ...p, progress: pollingProgress }
+                  : p
+              ));
+              
+              console.log(`🔄 Polling attempt ${attempts}/${maxAttempts}...`);
+              
+              const pollResponse = await fetch(`${endpoint}?jobId=${createData.jobId}`);
+              
+              if (!pollResponse.ok) {
+                console.warn(`⚠️ Poll failed: ${pollResponse.status}`);
+                continue;
+              }
+              
+              const pollData = await pollResponse.json();
+              
+              if (pollData.status === 'completed' && pollData.analysis) {
+                console.log(`✅ Caesar analysis complete after ${attempts} attempts (${attempts * 2}s)`);
+                return { endpoint, data: pollData };
+              }
+              
+              if (pollData.status === 'failed') {
+                throw new Error('Caesar research job failed');
+              }
+              
+              console.log(`⏳ Status: ${pollData.status}, continuing to poll...`);
+            }
+            
+            throw new Error('Caesar research timed out after 2 minutes');
           }
           
           const response = await fetch(fetchUrl, fetchOptions);

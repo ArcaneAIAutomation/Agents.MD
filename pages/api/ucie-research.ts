@@ -224,8 +224,77 @@ Be specific, cite data points, and provide actionable intelligence.`.trim();
  */
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<ResearchResponse>
+  res: NextApiResponse<ResearchResponse | any>
 ) {
+  // Handle GET requests for polling results
+  if (req.method === 'GET') {
+    const { jobId } = req.query;
+
+    if (!jobId || typeof jobId !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required parameter: jobId',
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    try {
+      console.log(`🔍 Polling Caesar job: ${jobId}`);
+      
+      // Get job status and results from Caesar
+      const job = await Caesar.getResearch(jobId);
+      
+      console.log(`📊 Job status: ${job.status}`);
+
+      // If job is completed, parse the transformed_content (JSON)
+      if (job.status === 'completed' && job.transformed_content) {
+        try {
+          const analysis = JSON.parse(job.transformed_content);
+          
+          return res.status(200).json({
+            success: true,
+            status: job.status,
+            analysis, // Structured JSON from Caesar
+            sources: job.results, // Citation sources
+            rawContent: job.content, // Raw text synthesis
+            timestamp: new Date().toISOString(),
+          });
+        } catch (parseError) {
+          console.error('❌ Failed to parse Caesar response as JSON:', parseError);
+          
+          // Fallback: return raw content if JSON parsing fails
+          return res.status(200).json({
+            success: true,
+            status: job.status,
+            analysis: null,
+            rawContent: job.content,
+            sources: job.results,
+            error: 'Failed to parse structured analysis, returning raw content',
+            timestamp: new Date().toISOString(),
+          });
+        }
+      }
+
+      // Job still processing or failed
+      return res.status(200).json({
+        success: true,
+        status: job.status,
+        analysis: null,
+        timestamp: new Date().toISOString(),
+      });
+
+    } catch (error) {
+      console.error('❌ Failed to poll Caesar job:', error);
+      
+      return res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get research results',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }
+
+  // Handle POST requests for creating new research jobs
   if (req.method !== 'POST') {
     return res.status(405).json({
       success: false,
