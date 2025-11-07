@@ -272,6 +272,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           processingTime: 'Real-time fetch',
           note: `${articles.length} live crypto stories from external APIs only`
         }
+      },
+      attribution: {
+        marketData: {
+          provider: 'CoinGecko',
+          url: 'https://www.coingecko.com?utm_source=bitcoin-sovereign-tech&utm_medium=referral',
+          message: 'Market ticker data powered by CoinGecko'
+        }
       }
     };
 

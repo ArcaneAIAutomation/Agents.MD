@@ -43,6 +43,11 @@ export interface MarketDataResponse {
   sources: string[];
   cached: boolean;
   timestamp: string;
+  attribution?: {
+    provider: string;
+    url: string;
+    message: string;
+  };
   error?: string;
 }
 
@@ -195,6 +200,11 @@ export default async function handler(
       sources,
       cached: false,
       timestamp: new Date().toISOString(),
+      attribution: {
+        provider: 'CoinGecko',
+        url: 'https://www.coingecko.com?utm_source=bitcoin-sovereign-tech&utm_medium=referral',
+        message: 'Market data powered by CoinGecko'
+      },
     };
 
     // Cache the response
