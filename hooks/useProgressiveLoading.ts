@@ -277,8 +277,8 @@ export function useProgressiveLoading({
           : p
       ));
 
-      // Update aggregated data
-      setAggregatedData((prev: any) => ({ ...prev, ...phaseData }));
+      // Note: aggregatedData is set after all phases complete with transformation
+      // Don't set it here to avoid partial updates
 
       // Callback
       if (onPhaseComplete) {
@@ -305,6 +305,61 @@ export function useProgressiveLoading({
     }
   }, [symbol, onPhaseComplete, onError]);
 
+  // Transform UCIE data to match frontend expectations
+  const transformUCIEData = useCallback((rawData: any) => {
+    console.log('🔄 Transforming UCIE data for frontend...');
+    
+    const caesarAnalysis = rawData['ucie-research']?.analysis;
+    const marketData = rawData['ucie-market-data'];
+    const newsData = rawData['ucie-news'];
+    const technicalData = rawData['ucie-technical']?.analysis;
+    
+    const transformed = {
+      // Keep original data structure (for panels that expect it)
+      'market-data': marketData,
+      'ucie-market-data': marketData,
+      marketData: marketData, // Alias for easier access
+      
+      news: newsData,
+      'ucie-news': newsData,
+      
+      technical: technicalData,
+      'ucie-technical': { analysis: technicalData },
+      
+      research: rawData['ucie-research'],
+      'ucie-research': rawData['ucie-research'],
+      
+      // Transform Caesar analysis for Overview tab
+      consensus: caesarAnalysis?.trading_recommendation ? {
+        overallScore: caesarAnalysis.trading_recommendation.confidence,
+        recommendation: caesarAnalysis.trading_recommendation.action.toUpperCase(),
+        confidence: caesarAnalysis.trading_recommendation.confidence
+      } : null,
+      
+      executiveSummary: caesarAnalysis ? {
+        oneLineSummary: caesarAnalysis.executive_summary,
+        topFindings: [
+          caesarAnalysis.price_analysis?.price_action_summary,
+          caesarAnalysis.news_sentiment_impact?.sentiment_price_correlation,
+          caesarAnalysis.technical_outlook?.technical_summary,
+          caesarAnalysis.volume_analysis?.volume_price_correlation
+        ].filter(Boolean).slice(0, 5),
+        opportunities: caesarAnalysis.risk_assessment?.key_opportunities || [],
+        risks: caesarAnalysis.risk_assessment?.key_risks || []
+      } : null,
+      
+      // Add Caesar analysis for direct access
+      caesarAnalysis: caesarAnalysis
+    };
+    
+    console.log('✅ Data transformation complete');
+    console.log('  • consensus:', transformed.consensus ? 'Created' : 'N/A');
+    console.log('  • executiveSummary:', transformed.executiveSummary ? 'Created' : 'N/A');
+    console.log('  • caesarAnalysis:', caesarAnalysis ? 'Available' : 'N/A');
+    
+    return transformed;
+  }, []);
+
   const loadAllPhases = useCallback(async () => {
     setLoading(true);
     setCurrentPhase(1);
@@ -328,15 +383,19 @@ export function useProgressiveLoading({
       setOverallProgress(progress);
     }
 
+    // Transform data for frontend
+    const transformedData = transformUCIEData(allData);
+    setAggregatedData(transformedData);
+
     setLoading(false);
 
-    // All phases complete callback
+    // All phases complete callback with transformed data
     if (onAllComplete) {
-      onAllComplete(allData);
+      onAllComplete(transformedData);
     }
 
     console.log('🎉 All phases completed!');
-  }, [phases, fetchPhaseData, onAllComplete]);
+  }, [phases, fetchPhaseData, onAllComplete, transformUCIEData]);
 
   // Start loading on mount
   useEffect(() => {
