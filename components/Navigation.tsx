@@ -157,24 +157,23 @@ const Navigation = forwardRef<NavigationRef>((props, ref) => {
               </span>
             </Link>
 
-            {/* Hamburger Button - Enhanced with Rotation Animation */}
+            {/* Menu Button - Mobile Optimized */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 text-bitcoin-orange hover:text-bitcoin-white transition-all duration-300 hover:scale-110 active:scale-95 min-h-[48px] min-w-[48px] flex items-center justify-center relative"
+              className="bg-bitcoin-orange text-bitcoin-black px-4 py-2 rounded-lg font-bold text-sm uppercase tracking-wider hover:bg-bitcoin-white transition-all hover:shadow-[0_0_20px_rgba(247,147,26,0.5)] active:scale-95 min-h-[48px] flex items-center gap-2"
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={isMenuOpen}
-              style={{
-                transform: isMenuOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-              }}
             >
               {isMenuOpen ? (
-                <X className="h-8 w-8" strokeWidth={2.5} />
+                <>
+                  <X className="h-5 w-5" strokeWidth={2.5} />
+                  <span>Close</span>
+                </>
               ) : (
-                <div className="flex flex-col gap-1.5">
-                  <span className="block w-7 h-0.5 bg-bitcoin-orange transition-all duration-300"></span>
-                  <span className="block w-7 h-0.5 bg-bitcoin-orange transition-all duration-300"></span>
-                  <span className="block w-7 h-0.5 bg-bitcoin-orange transition-all duration-300"></span>
-                </div>
+                <>
+                  <Menu className="h-5 w-5" strokeWidth={2.5} />
+                  <span>Menu</span>
+                </>
               )}
             </button>
           </div>

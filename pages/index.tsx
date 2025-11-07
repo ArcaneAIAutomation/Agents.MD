@@ -344,17 +344,9 @@ export default function Home() {
             <p className="text-xl md:text-2xl text-bitcoin-white-80 mb-4">
               The Most Comprehensive Cryptocurrency Intelligence Platform
             </p>
-            <p className="text-base md:text-lg text-bitcoin-white-60 mb-8 max-w-3xl mx-auto">
+            <p className="text-base md:text-lg text-bitcoin-white-60 max-w-3xl mx-auto">
               Powered by GPT-4o, Gemini AI, Caesar Research Engine, and 17+ premium data sources including CoinGecko, Blockchain.com, Kraken, LunarCrush, CoinGlass, DeFiLlama, and more
             </p>
-            
-            <button
-              onClick={handleOpenMenu}
-              className="inline-flex items-center gap-3 bg-bitcoin-orange text-bitcoin-black px-8 py-4 rounded-lg font-bold text-lg uppercase tracking-wider hover:bg-bitcoin-black hover:text-bitcoin-orange border-2 border-bitcoin-orange transition-all hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95"
-            >
-              Explore Intelligence Modules
-              <ArrowRight className="w-5 h-5" />
-            </button>
           </div>
 
           {/* Platform Stats */}
@@ -519,16 +511,6 @@ export default function Home() {
                       ))}
                     </ul>
                   </div>
-
-                  <div className="px-6 py-4 border-t border-bitcoin-orange-20">
-                    <button
-                      onClick={handleOpenMenu}
-                      className="w-full bg-transparent text-bitcoin-orange border-2 border-bitcoin-orange font-semibold uppercase tracking-wider px-4 py-2 rounded-lg transition-all hover:bg-bitcoin-orange hover:text-bitcoin-black hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] flex items-center justify-center gap-2"
-                    >
-                      Access Module
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
                 </div>
               ))}
             </div>
@@ -635,16 +617,9 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-black text-bitcoin-black mb-4">
               Experience the Most Comprehensive Crypto Intelligence
             </h2>
-            <p className="text-lg text-bitcoin-black mb-8 opacity-90">
+            <p className="text-lg text-bitcoin-black opacity-90">
               17+ data sources • 4 AI models • Real-time processing • Enterprise security
             </p>
-            <button
-              onClick={handleOpenMenu}
-              className="inline-flex items-center gap-3 bg-bitcoin-black text-bitcoin-orange px-8 py-4 rounded-lg font-bold text-lg uppercase tracking-wider hover:bg-bitcoin-white hover:text-bitcoin-black border-2 border-bitcoin-black transition-all hover:scale-105 active:scale-95"
-            >
-              Open Intelligence Menu
-              <ArrowRight className="w-5 h-5" />
-            </button>
           </div>
         </div>
         
