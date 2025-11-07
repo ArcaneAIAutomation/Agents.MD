@@ -65,7 +65,7 @@ export function useProgressiveLoading({
       label: 'News & Sentiment Analysis',
       endpoints: [`/api/ucie-news?symbol=${symbol}&limit=10`],
       priority: 'important',
-      targetTime: 10000, // 10 seconds for news aggregation
+      targetTime: 25000, // 25 seconds for news aggregation (increased for reliability)
       progress: 0,
       complete: false,
     },

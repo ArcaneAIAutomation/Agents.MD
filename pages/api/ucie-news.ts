@@ -132,7 +132,7 @@ async function fetchNewsAPIData(symbol: string, limit: number) {
     const response = await fetch(
       `${APIS.newsapi}/everything?q=${encodeURIComponent(searchQuery)}&sortBy=publishedAt&pageSize=${limit}&language=en&apiKey=${process.env.NEWS_API_KEY}`,
       {
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(20000), // Increased to 20 seconds
         headers: { 'User-Agent': 'UCIE/1.0' }
       }
     );
@@ -189,7 +189,7 @@ async function fetchCryptoCompareData(symbol: string, limit: number) {
     const response = await fetch(
       `${APIS.cryptocompare}/news/?lang=EN&sortOrder=latest&categories=${symbol}`,
       {
-        signal: AbortSignal.timeout(15000), // Increased to 15s
+        signal: AbortSignal.timeout(20000), // Increased to 20s
         headers: { 'User-Agent': 'UCIE/1.0' }
       }
     );
@@ -300,11 +300,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log(`🚀 Fetching news for ${symbolUpper} (limit: ${limitNum})...`);
 
-    // Fetch from both sources in parallel
-    const [newsAPIData, cryptoCompareData] = await Promise.all([
+    // Fetch from both sources in parallel with Promise.allSettled (more resilient)
+    const results = await Promise.allSettled([
       fetchNewsAPIData(symbolUpper, limitNum),
       fetchCryptoCompareData(symbolUpper, limitNum)
     ]);
+
+    // Extract successful results
+    const newsAPIData = results[0].status === 'fulfilled' ? results[0].value : { success: false, articles: [], source: 'NewsAPI' };
+    const cryptoCompareData = results[1].status === 'fulfilled' ? results[1].value : { success: false, articles: [], source: 'CryptoCompare' };
 
     // Combine and deduplicate articles
     const allArticles = [...newsAPIData.articles, ...cryptoCompareData.articles];
