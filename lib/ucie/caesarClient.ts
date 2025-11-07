@@ -143,18 +143,34 @@ Provide detailed, factual analysis with source citations for all claims.`;
  * Generate system prompt for structured JSON output
  */
 export function generateSystemPrompt(): string {
-  return `Return your analysis as a valid JSON object with the following structure:
+  return `You MUST return your analysis as a valid JSON object with this EXACT structure:
+
 {
-  "technologyOverview": "Detailed overview of the technology...",
-  "teamLeadership": "Information about the team and leadership...",
-  "partnerships": "Details about partnerships and ecosystem...",
-  "marketPosition": "Analysis of market position and competitors...",
-  "riskFactors": ["Risk 1", "Risk 2", "Risk 3"],
-  "recentDevelopments": "Summary of recent developments...",
+  "technologyOverview": "Comprehensive 3-5 paragraph analysis of the blockchain technology, consensus mechanism, unique features, scalability solutions, and technical innovations. Include specific technical details.",
+  "teamLeadership": "Detailed 2-3 paragraph overview of founding team members with names, backgrounds, previous experience, and track record. Include key advisors and development team size.",
+  "partnerships": "Comprehensive 2-3 paragraph analysis of major partnerships, exchange listings, ecosystem integrations, institutional backing, and community size. Include specific partnership names and dates.",
+  "marketPosition": "Detailed 3-4 paragraph analysis of market capitalization rank, competitive landscape, unique value proposition, adoption metrics, and comparison with top competitors. Include specific numbers and rankings.",
+  "riskFactors": [
+    "Specific regulatory risk with details",
+    "Technical vulnerability or concern with explanation",
+    "Market risk factor with context",
+    "Team or governance concern with details",
+    "Security incident or controversy with specifics"
+  ],
+  "recentDevelopments": "Comprehensive 2-3 paragraph summary of developments in the last 30 days including protocol upgrades, partnerships, announcements, and sentiment shifts. Include specific dates and details.",
   "confidence": 85
 }
 
-Ensure all fields are populated with substantive information. The confidence field should be a number from 0-100 indicating your confidence in the analysis based on source quality and data availability.`;
+CRITICAL REQUIREMENTS:
+1. ALL fields must be populated with substantive, detailed information (minimum 200 words per text field)
+2. DO NOT use placeholder text like "No information available" or "Information unavailable"
+3. If you lack specific information, provide general industry context and note the limitation
+4. riskFactors array must contain 3-7 specific, detailed risk items
+5. confidence must be a number from 0-100 based on source quality
+6. Use proper JSON formatting with escaped quotes
+7. Provide factual, verifiable information with source citations in the text
+
+Return ONLY the JSON object, no additional text before or after.`;
 }
 
 /**
@@ -219,31 +235,42 @@ export async function pollCaesarResearch(
       
       console.log(`📊 Poll attempt ${attempt}/${maxAttempts}: status=${job.status}, elapsed=${elapsed}s`);
       
-      // Check if completed
+      // Check if completed - STOP POLLING IMMEDIATELY
       if (job.status === 'completed') {
-        console.log(`✅ Caesar research completed after ${elapsed}s`);
-        return job;
+        console.log(`✅ Caesar research completed after ${elapsed}s - STOPPING POLL`);
+        console.log(`📄 Job has ${job.results?.length || 0} sources`);
+        console.log(`📝 Content length: ${job.content?.length || 0} chars`);
+        console.log(`🔄 Transformed content length: ${job.transformed_content?.length || 0} chars`);
+        return job; // RETURN IMMEDIATELY - DO NOT CONTINUE POLLING
       }
       
       // Check if failed
       if (job.status === 'failed') {
+        console.error(`❌ Research job failed: ${jobId}`);
         throw new Error(`Research job failed: ${jobId}`);
       }
       
       // Check if cancelled or expired
       if (job.status === 'cancelled' || job.status === 'expired') {
+        console.error(`❌ Research job ${job.status}: ${jobId}`);
         throw new Error(`Research job ${job.status}: ${jobId}`);
       }
       
-      // Wait before next poll
-      await new Promise(resolve => setTimeout(resolve, pollInterval));
+      // Only wait if NOT completed (status is queued, pending, or researching)
+      if (attempt < maxAttempts) {
+        console.log(`⏳ Status: ${job.status}, waiting ${pollInterval}ms before next poll...`);
+        await new Promise(resolve => setTimeout(resolve, pollInterval));
+      }
       
     } catch (error) {
       if (error instanceof Error && error.message.includes('Research job')) {
         throw error; // Re-throw job-specific errors
       }
       console.error(`⚠️ Poll attempt ${attempt} failed:`, error);
-      // Continue polling on network errors
+      // Continue polling on network errors (but not if we've exceeded max attempts)
+      if (attempt >= maxAttempts) {
+        throw new Error(`Polling failed after ${maxAttempts} attempts: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
     }
   }
   
@@ -258,15 +285,32 @@ export async function pollCaesarResearch(
  */
 export function parseCaesarResearch(job: ResearchJob): UCIECaesarResearch {
   try {
+    console.log(`🔍 Parsing Caesar research job ${job.id}`);
+    console.log(`📊 Job status: ${job.status}`);
+    console.log(`📄 Content available: ${!!job.content}`);
+    console.log(`🔄 Transformed content available: ${!!job.transformed_content}`);
+    console.log(`📚 Sources count: ${job.results?.length || 0}`);
+    
     // Parse transformed_content (JSON) if available
     let parsedData: any = {};
     
     if (job.transformed_content) {
       try {
+        console.log(`🔄 Attempting to parse transformed_content as JSON...`);
         parsedData = JSON.parse(job.transformed_content);
+        console.log(`✅ Successfully parsed JSON with keys:`, Object.keys(parsedData));
       } catch (parseError) {
-        console.warn('⚠️ Failed to parse transformed_content as JSON, using raw content');
+        console.warn('⚠️ Failed to parse transformed_content as JSON, will use raw content');
+        console.warn('Parse error:', parseError);
+        // If JSON parsing fails, try to extract sections from raw content
+        if (job.content) {
+          parsedData = extractSectionsFromRawContent(job.content);
+        }
       }
+    } else if (job.content) {
+      // No transformed_content, extract from raw content
+      console.log(`📝 No transformed_content, extracting from raw content...`);
+      parsedData = extractSectionsFromRawContent(job.content);
     }
     
     // Extract sources from results
@@ -277,20 +321,49 @@ export function parseCaesarResearch(job: ResearchJob): UCIECaesarResearch {
       citationIndex: result.citation_index
     }));
     
-    // Build structured response
+    console.log(`📚 Extracted ${sources.length} sources`);
+    
+    // Build structured response with fallbacks
     const research: UCIECaesarResearch = {
-      technologyOverview: parsedData.technologyOverview || job.content || 'No technology overview available',
-      teamLeadership: parsedData.teamLeadership || 'No team information available',
-      partnerships: parsedData.partnerships || 'No partnership information available',
-      marketPosition: parsedData.marketPosition || 'No market position data available',
-      riskFactors: parsedData.riskFactors || [],
-      recentDevelopments: parsedData.recentDevelopments || 'No recent developments available',
+      technologyOverview: parsedData.technologyOverview || 
+                          parsedData.technology || 
+                          extractSection(job.content, 'Technology') ||
+                          job.content || 
+                          'No technology overview available',
+      teamLeadership: parsedData.teamLeadership || 
+                      parsedData.team || 
+                      extractSection(job.content, 'Team') ||
+                      'No team information available',
+      partnerships: parsedData.partnerships || 
+                    parsedData.ecosystem || 
+                    extractSection(job.content, 'Partnership') ||
+                    'No partnership information available',
+      marketPosition: parsedData.marketPosition || 
+                      parsedData.market || 
+                      extractSection(job.content, 'Market') ||
+                      'No market position data available',
+      riskFactors: Array.isArray(parsedData.riskFactors) ? parsedData.riskFactors : 
+                   Array.isArray(parsedData.risks) ? parsedData.risks :
+                   extractRiskFactors(job.content),
+      recentDevelopments: parsedData.recentDevelopments || 
+                          parsedData.developments || 
+                          extractSection(job.content, 'Recent') ||
+                          'No recent developments available',
       sources,
-      confidence: parsedData.confidence || 0,
+      confidence: typeof parsedData.confidence === 'number' ? parsedData.confidence : 
+                  sources.length > 0 ? Math.min(85, 50 + (sources.length * 5)) : 0,
       rawContent: job.content || undefined
     };
     
-    console.log(`✅ Parsed Caesar research: ${sources.length} sources, confidence ${research.confidence}%`);
+    console.log(`✅ Parsed Caesar research successfully:`);
+    console.log(`   - Technology: ${research.technologyOverview.substring(0, 100)}...`);
+    console.log(`   - Team: ${research.teamLeadership.substring(0, 100)}...`);
+    console.log(`   - Partnerships: ${research.partnerships.substring(0, 100)}...`);
+    console.log(`   - Market: ${research.marketPosition.substring(0, 100)}...`);
+    console.log(`   - Risk Factors: ${research.riskFactors.length} items`);
+    console.log(`   - Recent Developments: ${research.recentDevelopments.substring(0, 100)}...`);
+    console.log(`   - Sources: ${sources.length}`);
+    console.log(`   - Confidence: ${research.confidence}%`);
     
     return research;
     
@@ -298,6 +371,81 @@ export function parseCaesarResearch(job: ResearchJob): UCIECaesarResearch {
     console.error('❌ Failed to parse Caesar research:', error);
     throw new Error(`Failed to parse research results: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
+}
+
+/**
+ * Extract sections from raw content using pattern matching
+ */
+function extractSectionsFromRawContent(content: string): any {
+  const sections: any = {};
+  
+  // Try to extract sections based on common patterns
+  const technologyMatch = content.match(/(?:Technology|Innovation|Technical)[\s\S]*?(?=\n\n(?:Team|Partnership|Market|Risk|Recent|$))/i);
+  if (technologyMatch) sections.technologyOverview = technologyMatch[0].trim();
+  
+  const teamMatch = content.match(/(?:Team|Leadership)[\s\S]*?(?=\n\n(?:Partnership|Market|Risk|Recent|$))/i);
+  if (teamMatch) sections.teamLeadership = teamMatch[0].trim();
+  
+  const partnershipMatch = content.match(/(?:Partnership|Ecosystem|Collaboration)[\s\S]*?(?=\n\n(?:Market|Risk|Recent|$))/i);
+  if (partnershipMatch) sections.partnerships = partnershipMatch[0].trim();
+  
+  const marketMatch = content.match(/(?:Market|Position|Competitor)[\s\S]*?(?=\n\n(?:Risk|Recent|$))/i);
+  if (marketMatch) sections.marketPosition = marketMatch[0].trim();
+  
+  const developmentsMatch = content.match(/(?:Recent|Development|News)[\s\S]*?$/i);
+  if (developmentsMatch) sections.recentDevelopments = developmentsMatch[0].trim();
+  
+  return sections;
+}
+
+/**
+ * Extract a specific section from content
+ */
+function extractSection(content: string | null | undefined, keyword: string): string | null {
+  if (!content) return null;
+  
+  const regex = new RegExp(`(?:${keyword}[^\\n]*\\n)([\\s\\S]*?)(?=\\n\\n[A-Z]|$)`, 'i');
+  const match = content.match(regex);
+  
+  return match ? match[1].trim() : null;
+}
+
+/**
+ * Extract risk factors from content
+ */
+function extractRiskFactors(content: string | null | undefined): string[] {
+  if (!content) return [];
+  
+  const risks: string[] = [];
+  
+  // Look for bullet points or numbered lists in risk section
+  const riskSection = extractSection(content, 'Risk');
+  if (riskSection) {
+    const lines = riskSection.split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.match(/^[-•*\d.]/)) {
+        const cleaned = trimmed.replace(/^[-•*\d.]\s*/, '').trim();
+        if (cleaned.length > 10) {
+          risks.push(cleaned);
+        }
+      }
+    }
+  }
+  
+  // If no risks found, look for common risk keywords
+  if (risks.length === 0 && content) {
+    const riskKeywords = ['regulatory', 'volatility', 'security', 'competition', 'adoption'];
+    for (const keyword of riskKeywords) {
+      const regex = new RegExp(`([^.]*${keyword}[^.]*\\.)`, 'gi');
+      const matches = content.match(regex);
+      if (matches) {
+        risks.push(...matches.slice(0, 2)); // Add up to 2 matches per keyword
+      }
+    }
+  }
+  
+  return risks.slice(0, 10); // Limit to 10 risk factors
 }
 
 /**
