@@ -108,8 +108,8 @@ const Navigation = forwardRef<NavigationRef>((props, ref) => {
               </span>
             </Link>
 
-            {/* Desktop Menu Items */}
-            <div className="flex items-center gap-2">
+            {/* Desktop Menu Items - Scalable Design */}
+            <div className="flex items-center gap-1.5 xl:gap-2">
               {menuItems.slice(1).map((item) => {
                 const IconComponent = item.icon;
                 const active = isActive(item.path);
@@ -117,15 +117,16 @@ const Navigation = forwardRef<NavigationRef>((props, ref) => {
                   <Link
                     key={item.path}
                     href={item.path}
-                    className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-300 rounded-lg flex items-center gap-2 border-2 ${
+                    className={`px-2 xl:px-3 py-2 text-[10px] xl:text-xs font-bold uppercase tracking-wide xl:tracking-wider transition-all duration-300 rounded-lg flex items-center gap-1.5 border-2 whitespace-nowrap ${
                       active
                         ? 'bg-bitcoin-orange text-bitcoin-black border-bitcoin-orange shadow-[0_0_20px_rgba(247,147,26,0.5)]'
                         : 'bg-transparent text-bitcoin-white-80 border-bitcoin-orange-20 hover:bg-bitcoin-orange hover:text-bitcoin-black hover:border-bitcoin-orange hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:scale-105'
                     }`}
+                    title={item.name}
                   >
-                    <IconComponent className="h-4 w-4" />
-                    <span className="hidden xl:inline whitespace-nowrap">{item.name}</span>
-                    <span className="xl:hidden">{item.emoji}</span>
+                    <IconComponent className="h-3.5 w-3.5 xl:h-4 xl:w-4 flex-shrink-0" />
+                    <span className="hidden 2xl:inline">{item.name}</span>
+                    <span className="2xl:hidden">{item.emoji}</span>
                   </Link>
                 );
               })}
@@ -134,11 +135,12 @@ const Navigation = forwardRef<NavigationRef>((props, ref) => {
               {user && (
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-300 rounded-lg flex items-center gap-2 border-2 bg-transparent text-bitcoin-white-80 border-bitcoin-orange-20 hover:bg-bitcoin-orange hover:text-bitcoin-black hover:border-bitcoin-orange hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:scale-105 ml-2"
+                  className="px-2 xl:px-3 py-2 text-[10px] xl:text-xs font-bold uppercase tracking-wide xl:tracking-wider transition-all duration-300 rounded-lg flex items-center gap-1.5 border-2 bg-transparent text-bitcoin-white-80 border-bitcoin-orange-20 hover:bg-bitcoin-orange hover:text-bitcoin-black hover:border-bitcoin-orange hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:scale-105 ml-1 xl:ml-2 whitespace-nowrap"
                   title={`Logout (${user.email})`}
                 >
-                  <LogOut className="h-4 w-4" />
-                  <span className="hidden xl:inline">Logout</span>
+                  <LogOut className="h-3.5 w-3.5 xl:h-4 xl:w-4 flex-shrink-0" />
+                  <span className="hidden 2xl:inline">Logout</span>
+                  <span className="2xl:hidden">🚪</span>
                 </button>
               )}
             </div>
