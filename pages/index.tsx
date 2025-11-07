@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import Navigation from '../components/Navigation'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Zap, Brain, TrendingUp, Shield, Database, Cpu, Activity, Globe, Lock } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 
 export default function Home() {
@@ -51,6 +51,52 @@ export default function Home() {
     }
   };
 
+  const platformStats = [
+    { label: 'AI Models', value: '3+', icon: Brain },
+    { label: 'Data Sources', value: '10+', icon: Database },
+    { label: 'Live APIs', value: '24/7', icon: Activity },
+    { label: 'Secure Auth', value: '100%', icon: Lock }
+  ];
+
+  const technologies = [
+    {
+      name: 'GPT-4o AI',
+      description: 'Advanced language model for market analysis and trade generation',
+      icon: Brain,
+      color: 'text-bitcoin-orange'
+    },
+    {
+      name: 'Caesar AI Research',
+      description: 'Deep research engine for whale transaction analysis',
+      icon: Cpu,
+      color: 'text-bitcoin-orange'
+    },
+    {
+      name: 'Multi-Source Aggregation',
+      description: 'CoinGecko, CoinMarketCap, Kraken, NewsAPI integration',
+      icon: Database,
+      color: 'text-bitcoin-orange'
+    },
+    {
+      name: 'Real-Time Processing',
+      description: 'Live market data with 30-second refresh cycles',
+      icon: Zap,
+      color: 'text-bitcoin-orange'
+    },
+    {
+      name: 'Advanced Algorithms',
+      description: 'Price aggregation, sentiment analysis, technical indicators',
+      icon: TrendingUp,
+      color: 'text-bitcoin-orange'
+    },
+    {
+      name: 'Enterprise Security',
+      description: 'JWT authentication, bcrypt hashing, session management',
+      icon: Shield,
+      color: 'text-bitcoin-orange'
+    }
+  ];
+
   const features = [
     {
       title: 'Universal Crypto Intelligence',
@@ -62,7 +108,8 @@ export default function Home() {
         'Analyze any cryptocurrency or token',
         'Technical, on-chain, sentiment & DeFi data',
         'Caesar AI research integration'
-      ]
+      ],
+      highlight: 'NEW'
     },
     {
       title: 'Crypto News Wire',
@@ -86,7 +133,8 @@ export default function Home() {
         'AI-powered trade recommendations',
         'Confidence scoring and reasoning',
         'Automated stop-loss & take-profit levels'
-      ]
+      ],
+      highlight: 'AI'
     },
     {
       title: 'Bitcoin Market Report',
@@ -122,27 +170,17 @@ export default function Home() {
         'Real-time whale transaction detection',
         'AI research on market impact',
         'Exchange flow analysis'
-      ]
-    },
-    {
-      title: 'Regulatory Watch',
-      icon: '⚖️',
-      path: '/regulatory-watch',
-      description: 'Monitor cryptocurrency regulatory developments and compliance updates',
-      stats: ['NEXO.COM', 'UK Focus', 'Live Updates'],
-      benefits: [
-        'Latest regulatory news',
-        'Compliance monitoring',
-        'Market impact assessment'
-      ]
+      ],
+      highlight: 'AI'
     }
   ];
 
   return (
     <>
       <Head>
-        <title>Bitcoin Sovereign Technology - Real-Time Market Intelligence</title>
-        <meta name="description" content="Advanced cryptocurrency trading intelligence platform with AI-powered analysis, whale tracking, and real-time market data" />
+        <title>Bitcoin Sovereign Technology - AI-Powered Crypto Intelligence</title>
+        <meta name="description" content="Advanced cryptocurrency intelligence platform powered by GPT-4o and Caesar AI. Real-time market data, whale tracking, and multi-source analysis." />
+        <meta name="keywords" content="bitcoin, cryptocurrency, AI trading, market analysis, whale tracking, GPT-4o, Caesar AI" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -199,456 +237,326 @@ export default function Home() {
                 <div className="w-2 h-2 bg-bitcoin-orange rounded-full animate-pulse"></div>
                 <span className="text-xs text-bitcoin-white-60 uppercase tracking-wider">Live</span>
               </div>
+              
+              {/* CoinGecko Attribution - Mobile Compact */}
+              <div className="md:hidden">
+                <a 
+                  href="https://www.coingecko.com?utm_source=bitcoin-sovereign-tech&utm_medium=referral"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-bitcoin-white-60 hover:text-bitcoin-orange transition-colors"
+                  aria-label="Price data by CoinGecko"
+                >
+                  via CG
+                </a>
+              </div>
+              
+              {/* CoinGecko Attribution - Desktop */}
+              <div className="hidden md:block">
+                <a 
+                  href="https://www.coingecko.com?utm_source=bitcoin-sovereign-tech&utm_medium=referral"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-bitcoin-white-60 hover:text-bitcoin-orange transition-colors whitespace-nowrap"
+                  aria-label="Price data by CoinGecko"
+                >
+                  via CoinGecko
+                </a>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Hero Section */}
-        <div className="container mx-auto px-4 py-16 md:py-24">
-          <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-extrabold text-bitcoin-white mb-6 leading-tight" style={{ letterSpacing: '-0.03em' }}>
+        <div className="container mx-auto px-4 py-12 md:py-20">
+          <div className="text-center max-w-4xl mx-auto mb-16">
+            <h1 className="text-4xl md:text-6xl font-black text-bitcoin-white mb-6" style={{ textShadow: '0 0 40px rgba(247, 147, 26, 0.3)' }}>
               Bitcoin Sovereign Technology
             </h1>
-            <p className="text-2xl md:text-3xl text-bitcoin-orange font-mono mb-6 font-bold" style={{ textShadow: '0 0 30px rgba(247, 147, 26, 0.3)' }}>
-              Real-Time Market Intelligence
+            <p className="text-xl md:text-2xl text-bitcoin-white-80 mb-4">
+              AI-Powered Cryptocurrency Intelligence Platform
             </p>
-            <p className="text-lg md:text-xl text-bitcoin-white-80 mb-12 leading-relaxed max-w-3xl mx-auto">
-              Advanced cryptocurrency trading intelligence powered by AI. Real-time market analysis, 
-              whale tracking, and automated trade generation for professional traders and crypto enthusiasts.
+            <p className="text-lg text-bitcoin-white-60 mb-8">
+              Real-time market analysis • GPT-4o AI • Caesar Research Engine • Multi-source data aggregation
             </p>
             
-            {/* Key Stats with Orange Glow */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-12">
-              <div className="bitcoin-block-subtle p-6 hover:border-bitcoin-orange transition-all">
-                <div className="text-4xl md:text-5xl font-bold text-bitcoin-orange font-mono mb-2" style={{ textShadow: '0 0 30px rgba(247, 147, 26, 0.5)' }}>
-                  24/7
+            {/* CTA Button */}
+            <button
+              onClick={handleOpenMenu}
+              className="inline-flex items-center gap-3 bg-bitcoin-orange text-bitcoin-black px-8 py-4 rounded-lg font-bold text-lg uppercase tracking-wider hover:bg-bitcoin-black hover:text-bitcoin-orange border-2 border-bitcoin-orange transition-all hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95"
+            >
+              Explore Features
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Platform Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+            {platformStats.map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <div key={index} className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-6 text-center hover:border-bitcoin-orange transition-all hover:shadow-[0_0_20px_rgba(247,147,26,0.2)]">
+                  <Icon className="w-8 h-8 text-bitcoin-orange mx-auto mb-3" />
+                  <div className="font-mono text-3xl font-bold text-bitcoin-orange mb-2" style={{ textShadow: '0 0 20px rgba(247, 147, 26, 0.4)' }}>
+                    {stat.value}
+                  </div>
+                  <div className="text-sm text-bitcoin-white-60 uppercase tracking-wider">
+                    {stat.label}
+                  </div>
                 </div>
-                <div className="text-sm text-bitcoin-white-60 uppercase tracking-wider font-semibold">Live Monitoring</div>
-              </div>
-              <div className="bitcoin-block-subtle p-6 hover:border-bitcoin-orange transition-all">
-                <div className="text-4xl md:text-5xl font-bold text-bitcoin-orange font-mono mb-2" style={{ textShadow: '0 0 30px rgba(247, 147, 26, 0.5)' }}>
-                  6
-                </div>
-                <div className="text-sm text-bitcoin-white-60 uppercase tracking-wider font-semibold">AI Features</div>
-              </div>
-              <div className="bitcoin-block-subtle p-6 hover:border-bitcoin-orange transition-all">
-                <div className="text-3xl md:text-4xl font-bold text-bitcoin-orange font-mono mb-2" style={{ textShadow: '0 0 30px rgba(247, 147, 26, 0.5)' }}>
-                  GPT-4o
-                </div>
-                <div className="text-sm text-bitcoin-white-60 uppercase tracking-wider font-semibold">AI Engine</div>
-              </div>
-              <div className="bitcoin-block-subtle p-6 hover:border-bitcoin-orange transition-all">
-                <div className="text-3xl md:text-4xl font-bold text-bitcoin-orange font-mono mb-2" style={{ textShadow: '0 0 30px rgba(247, 147, 26, 0.5)' }}>
-                  Caesar
-                </div>
-                <div className="text-sm text-bitcoin-white-60 uppercase tracking-wider font-semibold">Research AI</div>
-              </div>
+              );
+            })}
+          </div>
+
+          {/* Technology Stack */}
+          <div className="mb-16">
+            <h2 className="text-3xl md:text-4xl font-black text-bitcoin-white text-center mb-8">
+              Powered By Advanced Technology
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {technologies.map((tech, index) => {
+                const Icon = tech.icon;
+                return (
+                  <div key={index} className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-6 hover:border-bitcoin-orange transition-all hover:shadow-[0_0_20px_rgba(247,147,26,0.2)]">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0">
+                        <Icon className={`w-8 h-8 ${tech.color}`} />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-bitcoin-white mb-2">
+                          {tech.name}
+                        </h3>
+                        <p className="text-sm text-bitcoin-white-60">
+                          {tech.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-        </div>
 
-        {/* Features Grid - Informational Only */}
-        <div className="container mx-auto px-4 py-8 md:py-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-bitcoin-white text-center mb-4">
-            Intelligence Features
-          </h2>
-          <p className="text-center text-bitcoin-white-60 mb-12 max-w-2xl mx-auto">
-            Access all features through the menu. Each feature provides real-time data and AI-powered analysis.
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature) => (
-              <div key={feature.path} className="bitcoin-block transition-all h-full">
-                {/* Header */}
-                <div className="border-b-2 border-bitcoin-orange px-6 py-4 bg-bitcoin-black">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-4xl">{feature.icon}</span>
-                    <div className="flex flex-wrap gap-2 justify-end">
-                      {feature.stats.map((stat, idx) => (
-                        <span key={idx} className="bg-bitcoin-orange text-bitcoin-black text-xs px-2 py-1 rounded font-bold whitespace-nowrap">
+          {/* Features Grid */}
+          <div className="mb-16">
+            <h2 className="text-3xl md:text-4xl font-black text-bitcoin-white text-center mb-8">
+              Intelligence Modules
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {features.map((feature, index) => (
+                <div key={index} className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg overflow-hidden hover:border-bitcoin-orange transition-all hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] group">
+                  {/* Header */}
+                  <div className="border-b-2 border-bitcoin-orange bg-bitcoin-black px-6 py-4 relative">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-4xl">{feature.icon}</span>
+                      {feature.highlight && (
+                        <span className="bg-bitcoin-orange text-bitcoin-black text-xs font-bold px-2 py-1 rounded uppercase">
+                          {feature.highlight}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-xl font-bold text-bitcoin-white mb-2">
+                      {feature.title}
+                    </h3>
+                    <p className="text-sm text-bitcoin-white-60 italic">
+                      {feature.description}
+                    </p>
+                  </div>
+
+                  {/* Stats */}
+                  <div className="px-6 py-4 border-b border-bitcoin-orange-20">
+                    <div className="flex flex-wrap gap-2">
+                      {feature.stats.map((stat, statIndex) => (
+                        <span key={statIndex} className="bg-bitcoin-orange-10 text-bitcoin-orange text-xs font-semibold px-3 py-1 rounded-full border border-bitcoin-orange-20">
                           {stat}
                         </span>
                       ))}
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold text-bitcoin-white">
-                    {feature.title}
-                  </h3>
-                </div>
-
-                {/* Content */}
-                <div className="p-6">
-                  <p className="text-bitcoin-white-80 mb-4 leading-relaxed">
-                    {feature.description}
-                  </p>
 
                   {/* Benefits */}
-                  <div className="space-y-2 mb-6">
-                    {feature.benefits.map((benefit, idx) => (
-                      <div key={idx} className="flex items-start gap-2">
-                        <span className="text-bitcoin-orange mt-1 flex-shrink-0">✓</span>
-                        <span className="text-sm text-bitcoin-white-60">{benefit}</span>
-                      </div>
-                    ))}
+                  <div className="px-6 py-4">
+                    <ul className="space-y-2">
+                      {feature.benefits.map((benefit, benefitIndex) => (
+                        <li key={benefitIndex} className="flex items-start gap-2 text-sm text-bitcoin-white-80">
+                          <span className="text-bitcoin-orange mt-1">●</span>
+                          <span>{benefit}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
 
-                  {/* Access via Menu Indicator - Now Clickable */}
-                  <div className="mt-auto pt-4 border-t border-bitcoin-orange-20">
+                  {/* Access Button */}
+                  <div className="px-6 py-4 border-t border-bitcoin-orange-20">
                     <button
                       onClick={handleOpenMenu}
-                      className="w-full flex items-center justify-center gap-2 text-bitcoin-orange hover:text-bitcoin-white transition-all duration-300 py-2 px-4 rounded-lg hover:bg-bitcoin-orange-10 active:scale-95 min-h-[48px]"
-                      aria-label={`Open menu to access ${feature.title}`}
+                      className="w-full bg-transparent text-bitcoin-orange border-2 border-bitcoin-orange font-semibold uppercase tracking-wider px-4 py-2 rounded-lg transition-all hover:bg-bitcoin-orange hover:text-bitcoin-black hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] flex items-center justify-center gap-2"
                     >
-                      <span className="text-sm font-semibold uppercase tracking-wider">Access via Menu</span>
+                      Access Module
                       <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Technology & Intelligence Section */}
-        <div className="container mx-auto px-4 py-16 md:py-24">
-          <div className="max-w-6xl mx-auto">
-            {/* Section Header */}
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-extrabold text-bitcoin-white mb-4" style={{ letterSpacing: '-0.02em' }}>
-                Advanced Intelligence Architecture
-              </h2>
-              <p className="text-xl text-bitcoin-orange font-mono font-bold mb-4" style={{ textShadow: '0 0 20px rgba(247, 147, 26, 0.3)' }}>
-                Multi-Layer AI • Real-Time Analysis • Predictive Modeling
-              </p>
-              <p className="text-lg text-bitcoin-white-60 max-w-3xl mx-auto">
-                Our platform combines cutting-edge AI models with sophisticated mathematical analysis 
-                to deliver institutional-grade cryptocurrency intelligence.
-              </p>
-            </div>
-
-            {/* AI Stack */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-              {/* GPT-4o Analysis Engine */}
-              <div className="bitcoin-block">
-                <div className="border-b-2 border-bitcoin-orange px-6 py-4 bg-bitcoin-black">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-3xl">🧠</span>
-                    <span className="bg-bitcoin-orange text-bitcoin-black text-xs px-3 py-1 rounded font-bold">
-                      GPT-4o
-                    </span>
-                  </div>
-                  <h3 className="text-2xl font-bold text-bitcoin-white">
-                    Neural Market Analysis
-                  </h3>
-                </div>
-                <div className="p-6">
-                  <p className="text-bitcoin-white-80 mb-4 leading-relaxed">
-                    OpenAI's most advanced model processes multi-dimensional market data, 
-                    generating trade signals with step-by-step reasoning and confidence scoring.
-                  </p>
-                  <div className="space-y-2">
-                    <div className="flex items-start gap-2">
-                      <span className="text-bitcoin-orange mt-1">▸</span>
-                      <span className="text-sm text-bitcoin-white-60">Natural language market interpretation</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-bitcoin-orange mt-1">▸</span>
-                      <span className="text-sm text-bitcoin-white-60">Pattern recognition across timeframes</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-bitcoin-orange mt-1">▸</span>
-                      <span className="text-sm text-bitcoin-white-60">Risk-adjusted position sizing</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Caesar Research AI */}
-              <div className="bitcoin-block">
-                <div className="border-b-2 border-bitcoin-orange px-6 py-4 bg-bitcoin-black">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-3xl">🔬</span>
-                    <span className="bg-bitcoin-orange text-bitcoin-black text-xs px-3 py-1 rounded font-bold">
-                      Caesar AI
-                    </span>
-                  </div>
-                  <h3 className="text-2xl font-bold text-bitcoin-white">
-                    Deep Research Engine
-                  </h3>
-                </div>
-                <div className="p-6">
-                  <p className="text-bitcoin-white-80 mb-4 leading-relaxed">
-                    Specialized research AI that analyzes whale transactions, providing context 
-                    and market impact assessment with cited sources and confidence metrics.
-                  </p>
-                  <div className="space-y-2">
-                    <div className="flex items-start gap-2">
-                      <span className="text-bitcoin-orange mt-1">▸</span>
-                      <span className="text-sm text-bitcoin-white-60">Multi-source intelligence gathering</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-bitcoin-orange mt-1">▸</span>
-                      <span className="text-sm text-bitcoin-white-60">Transaction context analysis</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-bitcoin-orange mt-1">▸</span>
-                      <span className="text-sm text-bitcoin-white-60">Market impact prediction</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Gemini Flash Analysis */}
-              <div className="bitcoin-block">
-                <div className="border-b-2 border-bitcoin-orange px-6 py-4 bg-bitcoin-black">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-3xl">⚡</span>
-                    <span className="bg-bitcoin-orange text-bitcoin-black text-xs px-3 py-1 rounded font-bold">
-                      Gemini 2.5
-                    </span>
-                  </div>
-                  <h3 className="text-2xl font-bold text-bitcoin-white">
-                    Real-Time Processing
-                  </h3>
-                </div>
-                <div className="p-6">
-                  <p className="text-bitcoin-white-80 mb-4 leading-relaxed">
-                    Google's Gemini 2.5 Flash provides sub-3-second whale transaction analysis 
-                    with thinking mode transparency, showing AI reasoning in real-time.
-                  </p>
-                  <div className="space-y-2">
-                    <div className="flex items-start gap-2">
-                      <span className="text-bitcoin-orange mt-1">▸</span>
-                      <span className="text-sm text-bitcoin-white-60">Ultra-fast inference (&lt; 3 seconds)</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-bitcoin-orange mt-1">▸</span>
-                      <span className="text-sm text-bitcoin-white-60">Transparent reasoning process</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-bitcoin-orange mt-1">▸</span>
-                      <span className="text-sm text-bitcoin-white-60">Adaptive model selection</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Technical Analysis Engine */}
-              <div className="bitcoin-block">
-                <div className="border-b-2 border-bitcoin-orange px-6 py-4 bg-bitcoin-black">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-3xl">📊</span>
-                    <span className="bg-bitcoin-orange text-bitcoin-black text-xs px-3 py-1 rounded font-bold">
-                      Multi-Indicator
-                    </span>
-                  </div>
-                  <h3 className="text-2xl font-bold text-bitcoin-white">
-                    Mathematical Analysis
-                  </h3>
-                </div>
-                <div className="p-6">
-                  <p className="text-bitcoin-white-80 mb-4 leading-relaxed">
-                    Proprietary algorithms combine 10+ technical indicators across 4 timeframes, 
-                    identifying supply/demand zones and momentum shifts with precision.
-                  </p>
-                  <div className="space-y-2">
-                    <div className="flex items-start gap-2">
-                      <span className="text-bitcoin-orange mt-1">▸</span>
-                      <span className="text-sm text-bitcoin-white-60">RSI, MACD, Bollinger Bands, ATR</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-bitcoin-orange mt-1">▸</span>
-                      <span className="text-sm text-bitcoin-white-60">Multi-timeframe confluence detection</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-bitcoin-orange mt-1">▸</span>
-                      <span className="text-sm text-bitcoin-white-60">Volume-weighted price analysis</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Data Sources */}
-            <div className="bitcoin-block mb-12">
-              <div className="border-b-2 border-bitcoin-orange px-6 py-4 bg-bitcoin-black">
-                <h3 className="text-2xl font-bold text-bitcoin-white">
-                  Multi-Source Data Aggregation
+          {/* Key Differentiators */}
+          <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-8 mb-16">
+            <h2 className="text-3xl md:text-4xl font-black text-bitcoin-white text-center mb-8">
+              Why Bitcoin Sovereign Technology?
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-xl font-bold text-bitcoin-orange mb-4 flex items-center gap-2">
+                  <Brain className="w-6 h-6" />
+                  AI-First Approach
                 </h3>
-                <p className="text-sm text-bitcoin-white-60 italic mt-1">
-                  Real-time feeds from leading exchanges and data providers
-                </p>
+                <ul className="space-y-3 text-bitcoin-white-80">
+                  <li className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-1">●</span>
+                    <span><strong>GPT-4o Integration:</strong> Advanced language model for market analysis and trade generation</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-1">●</span>
+                    <span><strong>Caesar AI Research:</strong> Deep research engine for whale transaction context</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-1">●</span>
+                    <span><strong>Sentiment Analysis:</strong> AI-powered news sentiment scoring</span>
+                  </li>
+                </ul>
               </div>
-              <div className="p-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center p-4 border border-bitcoin-orange-20 rounded-lg hover:border-bitcoin-orange transition-all">
-                    <div className="font-mono text-lg font-bold text-bitcoin-orange mb-1">Kraken</div>
-                    <div className="text-xs text-bitcoin-white-60">Live Trading Data</div>
-                  </div>
-                  <div className="text-center p-4 border border-bitcoin-orange-20 rounded-lg hover:border-bitcoin-orange transition-all">
-                    <div className="font-mono text-lg font-bold text-bitcoin-orange mb-1">CoinGecko</div>
-                    <div className="text-xs text-bitcoin-white-60">Market Data</div>
-                  </div>
-                  <div className="text-center p-4 border border-bitcoin-orange-20 rounded-lg hover:border-bitcoin-orange transition-all">
-                    <div className="font-mono text-lg font-bold text-bitcoin-orange mb-1">NewsAPI</div>
-                    <div className="text-xs text-bitcoin-white-60">News Aggregation</div>
-                  </div>
-                  <div className="text-center p-4 border border-bitcoin-orange-20 rounded-lg hover:border-bitcoin-orange transition-all">
-                    <div className="font-mono text-lg font-bold text-bitcoin-orange mb-1">Blockchain.com</div>
-                    <div className="text-xs text-bitcoin-white-60">On-Chain Data</div>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            {/* Predictive Capabilities */}
-            <div className="bitcoin-block-orange mb-12">
-              <div className="p-8">
-                <h3 className="text-3xl font-bold text-bitcoin-black mb-6 text-center">
-                  Predictive Intelligence Framework
+              <div>
+                <h3 className="text-xl font-bold text-bitcoin-orange mb-4 flex items-center gap-2">
+                  <Database className="w-6 h-6" />
+                  Multi-Source Intelligence
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="text-center">
-                    <div className="text-5xl font-bold text-bitcoin-black font-mono mb-2">
-                      4
-                    </div>
-                    <div className="text-sm text-bitcoin-black font-semibold uppercase tracking-wider mb-2">
-                      Timeframes
-                    </div>
-                    <div className="text-xs text-bitcoin-black opacity-80">
-                      15m • 1h • 4h • 1d
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-5xl font-bold text-bitcoin-black font-mono mb-2">
-                      10+
-                    </div>
-                    <div className="text-sm text-bitcoin-black font-semibold uppercase tracking-wider mb-2">
-                      Indicators
-                    </div>
-                    <div className="text-xs text-bitcoin-black opacity-80">
-                      Technical & Fundamental
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-5xl font-bold text-bitcoin-black font-mono mb-2">
-                      3
-                    </div>
-                    <div className="text-sm text-bitcoin-black font-semibold uppercase tracking-wider mb-2">
-                      AI Models
-                    </div>
-                    <div className="text-xs text-bitcoin-black opacity-80">
-                      GPT-4o • Caesar • Gemini
-                    </div>
-                  </div>
-                </div>
+                <ul className="space-y-3 text-bitcoin-white-80">
+                  <li className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-1">●</span>
+                    <span><strong>10+ Data Sources:</strong> CoinGecko, CoinMarketCap, Kraken, NewsAPI, CryptoCompare</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-1">●</span>
+                    <span><strong>Price Aggregation:</strong> Multi-exchange price comparison and arbitrage detection</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-1">●</span>
+                    <span><strong>Fallback Systems:</strong> Redundant data sources ensure 24/7 uptime</span>
+                  </li>
+                </ul>
               </div>
-            </div>
 
-            {/* Mathematical Approach */}
-            <div className="bitcoin-block">
-              <div className="border-b-2 border-bitcoin-orange px-6 py-4 bg-bitcoin-black">
-                <h3 className="text-2xl font-bold text-bitcoin-white">
-                  Quantitative Analysis Methodology
+              <div>
+                <h3 className="text-xl font-bold text-bitcoin-orange mb-4 flex items-center gap-2">
+                  <Zap className="w-6 h-6" />
+                  Real-Time Processing
                 </h3>
-                <p className="text-sm text-bitcoin-white-60 italic mt-1">
-                  Proprietary algorithms combining statistical analysis with machine learning
-                </p>
+                <ul className="space-y-3 text-bitcoin-white-80">
+                  <li className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-1">●</span>
+                    <span><strong>Live Market Data:</strong> 30-second refresh cycles for price and volume</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-1">●</span>
+                    <span><strong>Instant Whale Alerts:</strong> Real-time detection of large transactions (50+ BTC)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-1">●</span>
+                    <span><strong>News Aggregation:</strong> 15+ stories updated continuously</span>
+                  </li>
+                </ul>
               </div>
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="text-lg font-bold text-bitcoin-orange mb-3">Price Action Analysis</h4>
-                    <p className="text-sm text-bitcoin-white-60 mb-3 leading-relaxed">
-                      Multi-dimensional vector analysis of price movements, identifying support/resistance 
-                      zones through volume-weighted calculations and order book depth analysis.
-                    </p>
-                    <div className="font-mono text-xs text-bitcoin-white-60 bg-bitcoin-black border border-bitcoin-orange-20 rounded p-3">
-                      <div>Δ = (P<sub>t</sub> - P<sub>t-1</sub>) / P<sub>t-1</sub></div>
-                      <div className="mt-1">σ = √(Σ(x - μ)² / n)</div>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-bold text-bitcoin-orange mb-3">Momentum Indicators</h4>
-                    <p className="text-sm text-bitcoin-white-60 mb-3 leading-relaxed">
-                      Exponential moving averages and rate-of-change calculations detect trend strength 
-                      and potential reversals across multiple timeframes with adaptive thresholds.
-                    </p>
-                    <div className="font-mono text-xs text-bitcoin-white-60 bg-bitcoin-black border border-bitcoin-orange-20 rounded p-3">
-                      <div>EMA = P<sub>t</sub> × k + EMA<sub>y</sub> × (1 - k)</div>
-                      <div className="mt-1">RSI = 100 - (100 / (1 + RS))</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Platform Capabilities */}
-        <div className="container mx-auto px-4 py-16">
-          <div className="bitcoin-block">
-            <div className="border-b-2 border-bitcoin-orange px-6 py-4 bg-bitcoin-black">
-              <h3 className="text-2xl font-bold text-bitcoin-white">
-                Platform Capabilities
-              </h3>
-              <p className="text-sm text-bitcoin-white-60 italic mt-1">
-                Powered by cutting-edge AI and real-time blockchain data
-              </p>
-            </div>
-            <div className="p-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center p-4 bitcoin-block-subtle">
-                  <div className="text-bitcoin-orange text-2xl mb-2">⚡</div>
-                  <div className="text-bitcoin-white font-bold text-sm">Real-Time Data</div>
-                  <div className="text-bitcoin-white-60 text-xs mt-1">Live market feeds</div>
-                </div>
-                <div className="text-center p-4 bitcoin-block-subtle">
-                  <div className="text-bitcoin-orange text-2xl mb-2">🧠</div>
-                  <div className="text-bitcoin-white font-bold text-sm">AI Analysis</div>
-                  <div className="text-bitcoin-white-60 text-xs mt-1">GPT-4o & Caesar</div>
-                </div>
-                <div className="text-center p-4 bitcoin-block-subtle">
-                  <div className="text-bitcoin-orange text-2xl mb-2">🔒</div>
-                  <div className="text-bitcoin-white font-bold text-sm">Privacy First</div>
-                  <div className="text-bitcoin-white-60 text-xs mt-1">No tracking</div>
-                </div>
-                <div className="text-center p-4 bitcoin-block-subtle">
-                  <div className="text-bitcoin-orange text-2xl mb-2">📱</div>
-                  <div className="text-bitcoin-white font-bold text-sm">Mobile Ready</div>
-                  <div className="text-bitcoin-white-60 text-xs mt-1">Fully responsive</div>
-                </div>
+              <div>
+                <h3 className="text-xl font-bold text-bitcoin-orange mb-4 flex items-center gap-2">
+                  <Shield className="w-6 h-6" />
+                  Enterprise Security
+                </h3>
+                <ul className="space-y-3 text-bitcoin-white-80">
+                  <li className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-1">●</span>
+                    <span><strong>JWT Authentication:</strong> Secure token-based authentication system</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-1">●</span>
+                    <span><strong>bcrypt Hashing:</strong> Industry-standard password encryption (12 rounds)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-1">●</span>
+                    <span><strong>Session Management:</strong> Database-backed sessions with audit logging</span>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Footer */}
-        <div className="border-t-2 border-bitcoin-orange mt-16 bg-bitcoin-black">
-          <div className="container mx-auto px-4 py-8">
-            <div className="text-center">
-              <p className="text-sm text-bitcoin-white-60">
-                © 2024 Bitcoin Sovereign Technology • Real-Time Market Intelligence Platform
-              </p>
-              <p className="text-xs mt-2 italic text-bitcoin-white-60">
-                Powered by AI & Live Blockchain Data
-              </p>
-              
-              {/* Privacy Notice */}
-              <div className="mt-6 pt-4 border-t border-bitcoin-orange-20">
-                <div className="inline-flex items-center space-x-2 bg-bitcoin-black border border-bitcoin-orange-20 rounded-full px-4 py-2 hover:border-bitcoin-orange transition-all">
-                  <span className="text-xs font-mono text-bitcoin-white-80">
-                    🍪 Zero Cookies • No Tracking • Privacy First
-                  </span>
-                </div>
-                <p className="text-xs text-bitcoin-white-60 mt-2 max-w-2xl mx-auto">
-                  Your privacy matters. We don't use cookies, tracking, or store any personal data. All market data is fetched fresh on each visit.
-                </p>
-              </div>
-            </div>
+          {/* Call to Action */}
+          <div className="text-center bg-bitcoin-orange rounded-lg p-8 md:p-12">
+            <h2 className="text-3xl md:text-4xl font-black text-bitcoin-black mb-4">
+              Ready to Experience the Future?
+            </h2>
+            <p className="text-lg text-bitcoin-black mb-8 opacity-90">
+              Access all intelligence modules through our unified menu system
+            </p>
+            <button
+              onClick={handleOpenMenu}
+              className="inline-flex items-center gap-3 bg-bitcoin-black text-bitcoin-orange px-8 py-4 rounded-lg font-bold text-lg uppercase tracking-wider hover:bg-bitcoin-white hover:text-bitcoin-black border-2 border-bitcoin-black transition-all hover:scale-105 active:scale-95"
+            >
+              Open Menu
+              <ArrowRight className="w-5 h-5" />
+            </button>
           </div>
         </div>
+        
+        {/* Footer with CoinGecko Attribution */}
+        <footer className="mt-12 pt-8 border-t border-bitcoin-orange-20">
+          <div className="container mx-auto px-4">
+            <div className="text-center py-6">
+              <p className="text-xs text-bitcoin-white-60 mb-3">
+                Cryptocurrency market data powered by
+              </p>
+              <a 
+                href="https://www.coingecko.com?utm_source=bitcoin-sovereign-tech&utm_medium=referral"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity"
+                aria-label="CoinGecko - Cryptocurrency Data"
+              >
+                <svg 
+                  width="120" 
+                  height="30" 
+                  viewBox="0 0 276 60" 
+                  fill="none" 
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-auto"
+                >
+                  <path d="M30 0C13.4315 0 0 13.4315 0 30C0 46.5685 13.4315 60 30 60C46.5685 60 60 46.5685 60 30C60 13.4315 46.5685 0 30 0Z" fill="#8DC63F"/>
+                  <path d="M30 15C21.7157 15 15 21.7157 15 30C15 38.2843 21.7157 45 30 45C38.2843 45 45 38.2843 45 30C45 21.7157 38.2843 15 30 15Z" fill="white"/>
+                  <circle cx="25" cy="27" r="3" fill="#8DC63F"/>
+                  <circle cx="35" cy="27" r="3" fill="#8DC63F"/>
+                  <path d="M25 35C25 35 27.5 37 30 37C32.5 37 35 35 35 35" stroke="#8DC63F" strokeWidth="2" strokeLinecap="round"/>
+                  <text x="70" y="40" fill="#8DC63F" fontSize="24" fontFamily="Inter, sans-serif" fontWeight="700">
+                    CoinGecko
+                  </text>
+                </svg>
+              </a>
+            </div>
+            
+            {/* Additional Footer Info */}
+            <div className="text-center py-6 border-t border-bitcoin-orange-20">
+              <p className="text-xs text-bitcoin-white-60">
+                © 2025 Bitcoin Sovereign Technology. All rights reserved.
+              </p>
+              <p className="text-xs text-bitcoin-white-60 mt-2">
+                Powered by GPT-4o, Caesar AI, and multi-source data aggregation
+              </p>
+            </div>
+          </div>
+        </footer>
       </div>
     </>
-  );
+  )
 }
