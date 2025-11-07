@@ -51,8 +51,8 @@ export default function Home() {
   };
 
   const platformStats = [
-    { label: 'AI Models', value: '3+', icon: Brain, description: 'GPT-4o, Caesar AI, Sentiment Analysis' },
-    { label: 'Data Sources', value: '15+', icon: Database, description: 'Market, News, Social, DeFi, Derivatives' },
+    { label: 'AI Models', value: '4+', icon: Brain, description: 'GPT-4o, Gemini, Caesar AI, Sentiment' },
+    { label: 'Data Sources', value: '17+', icon: Database, description: 'Market, News, Social, DeFi, Blockchain' },
     { label: 'Live APIs', value: '24/7', icon: Activity, description: 'Real-time data aggregation' },
     { label: 'Secure Auth', value: '100%', icon: Lock, description: 'JWT + bcrypt encryption' }
   ];
@@ -65,6 +65,7 @@ export default function Home() {
         { name: 'CoinGecko', description: 'Primary market data & price feeds', status: 'Live' },
         { name: 'CoinMarketCap Pro', description: 'Premium market intelligence', status: 'Live' },
         { name: 'Kraken Exchange', description: 'Order book & trading data', status: 'Live' },
+        { name: 'Blockchain.com API', description: 'Blockchain data & statistics', status: 'Live' },
         { name: 'Alpha Vantage', description: 'Financial data & sentiment', status: 'Live' }
       ]
     },
@@ -102,6 +103,7 @@ export default function Home() {
       icon: Brain,
       sources: [
         { name: 'OpenAI GPT-4o', description: 'Advanced market analysis', status: 'Live' },
+        { name: 'Google Gemini', description: 'Multi-modal AI intelligence', status: 'Live' },
         { name: 'Caesar AI', description: 'Deep research engine', status: 'Live' }
       ]
     }
@@ -116,6 +118,13 @@ export default function Home() {
       stats: ['Real-time Analysis', 'Trade Signals', 'Risk Management']
     },
     {
+      name: 'Google Gemini AI',
+      description: 'Multi-modal AI for advanced pattern recognition and market intelligence',
+      icon: Brain,
+      color: 'text-bitcoin-orange',
+      stats: ['Multi-Modal', 'Pattern Recognition', 'Deep Analysis']
+    },
+    {
       name: 'Caesar AI Research',
       description: 'Deep research engine for whale transaction analysis and market intelligence',
       icon: Cpu,
@@ -123,11 +132,11 @@ export default function Home() {
       stats: ['5-7 Min Analysis', 'Source Citations', 'Market Impact']
     },
     {
-      name: '15+ Data Sources',
-      description: 'Multi-API aggregation from market data, news, social, DeFi, and derivatives',
+      name: '17+ Data Sources',
+      description: 'Multi-API aggregation from market data, news, social, DeFi, blockchain, and derivatives',
       icon: Database,
       color: 'text-bitcoin-orange',
-      stats: ['Price Feeds', 'News Streams', 'Social Metrics']
+      stats: ['Price Feeds', 'Blockchain Data', 'Social Metrics']
     },
     {
       name: 'Real-Time Processing',
@@ -240,9 +249,9 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Bitcoin Sovereign Technology - 15+ Data Sources | AI-Powered Crypto Intelligence</title>
-        <meta name="description" content="Advanced cryptocurrency intelligence platform powered by GPT-4o and Caesar AI. 15+ data sources including CoinGecko, Kraken, LunarCrush, CoinGlass, and DeFiLlama." />
-        <meta name="keywords" content="bitcoin, cryptocurrency, AI trading, market analysis, whale tracking, GPT-4o, Caesar AI, LunarCrush, CoinGlass, DeFiLlama" />
+        <title>Bitcoin Sovereign Technology - 17+ Data Sources | 4 AI Models | Crypto Intelligence</title>
+        <meta name="description" content="Advanced cryptocurrency intelligence platform powered by GPT-4o, Gemini, and Caesar AI. 17+ data sources including CoinGecko, Blockchain.com, Kraken, LunarCrush, CoinGlass, and DeFiLlama." />
+        <meta name="keywords" content="bitcoin, cryptocurrency, AI trading, market analysis, whale tracking, GPT-4o, Gemini AI, Caesar AI, Blockchain.com, LunarCrush, CoinGlass, DeFiLlama" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -327,7 +336,7 @@ export default function Home() {
         <div className="container mx-auto px-4 py-12 md:py-20">
           <div className="text-center max-w-5xl mx-auto mb-16">
             <div className="inline-block bg-bitcoin-orange text-bitcoin-black px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider mb-6">
-              15+ Data Sources • 3 AI Models • Real-Time Intelligence
+              17+ Data Sources • 4 AI Models • Real-Time Intelligence
             </div>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-bitcoin-white mb-6" style={{ textShadow: '0 0 40px rgba(247, 147, 26, 0.3)' }}>
               Bitcoin Sovereign Technology
@@ -336,7 +345,7 @@ export default function Home() {
               The Most Comprehensive Cryptocurrency Intelligence Platform
             </p>
             <p className="text-base md:text-lg text-bitcoin-white-60 mb-8 max-w-3xl mx-auto">
-              Powered by GPT-4o AI, Caesar Research Engine, and 15+ premium data sources including CoinGecko, Kraken, LunarCrush, CoinGlass, DeFiLlama, and more
+              Powered by GPT-4o, Gemini AI, Caesar Research Engine, and 17+ premium data sources including CoinGecko, Blockchain.com, Kraken, LunarCrush, CoinGlass, DeFiLlama, and more
             </p>
             
             <button
@@ -372,7 +381,7 @@ export default function Home() {
           {/* Data Sources Showcase */}
           <div className="mb-16">
             <h2 className="text-3xl md:text-4xl font-black text-bitcoin-white text-center mb-4">
-              15+ Premium Data Sources
+              17+ Premium Data Sources
             </h2>
             <p className="text-center text-bitcoin-white-60 mb-12 max-w-3xl mx-auto">
               We aggregate data from the industry's leading providers to deliver the most comprehensive cryptocurrency intelligence available
@@ -534,12 +543,16 @@ export default function Home() {
               <div>
                 <h3 className="text-xl font-bold text-bitcoin-orange mb-4 flex items-center gap-2">
                   <Brain className="w-6 h-6" />
-                  Triple AI Integration
+                  Quad AI Integration
                 </h3>
                 <ul className="space-y-3 text-bitcoin-white-80">
                   <li className="flex items-start gap-2">
                     <span className="text-bitcoin-orange mt-1">●</span>
                     <span><strong>GPT-4o:</strong> Advanced language model for market analysis, trade generation, and sentiment scoring</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-1">●</span>
+                    <span><strong>Google Gemini:</strong> Multi-modal AI for advanced pattern recognition and deep market intelligence</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-bitcoin-orange mt-1">●</span>
@@ -555,12 +568,12 @@ export default function Home() {
               <div>
                 <h3 className="text-xl font-bold text-bitcoin-orange mb-4 flex items-center gap-2">
                   <Database className="w-6 h-6" />
-                  15+ Premium Data Sources
+                  17+ Premium Data Sources
                 </h3>
                 <ul className="space-y-3 text-bitcoin-white-80">
                   <li className="flex items-start gap-2">
                     <span className="text-bitcoin-orange mt-1">●</span>
-                    <span><strong>Market Data:</strong> CoinGecko, CoinMarketCap Pro, Kraken, Alpha Vantage</span>
+                    <span><strong>Market Data:</strong> CoinGecko, CoinMarketCap Pro, Kraken, Blockchain.com, Alpha Vantage</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-bitcoin-orange mt-1">●</span>
@@ -623,7 +636,7 @@ export default function Home() {
               Experience the Most Comprehensive Crypto Intelligence
             </h2>
             <p className="text-lg text-bitcoin-black mb-8 opacity-90">
-              15+ data sources • 3 AI models • Real-time processing • Enterprise security
+              17+ data sources • 4 AI models • Real-time processing • Enterprise security
             </p>
             <button
               onClick={handleOpenMenu}
@@ -646,6 +659,8 @@ export default function Home() {
               <div className="flex flex-wrap justify-center gap-4 text-xs text-bitcoin-white-60">
                 <span>CoinGecko</span>
                 <span>•</span>
+                <span>Blockchain.com</span>
+                <span>•</span>
                 <span>CoinMarketCap</span>
                 <span>•</span>
                 <span>Kraken</span>
@@ -659,6 +674,8 @@ export default function Home() {
                 <span>NewsAPI</span>
                 <span>•</span>
                 <span>OpenAI</span>
+                <span>•</span>
+                <span>Gemini AI</span>
                 <span>•</span>
                 <span>Caesar AI</span>
               </div>
@@ -702,7 +719,7 @@ export default function Home() {
                 © 2025 Bitcoin Sovereign Technology. All rights reserved.
               </p>
               <p className="text-xs text-bitcoin-white-60 mt-2">
-                Powered by GPT-4o, Caesar AI, and 15+ premium data sources
+                Powered by GPT-4o, Gemini AI, Caesar AI, and 17+ premium data sources
               </p>
             </div>
           </div>
