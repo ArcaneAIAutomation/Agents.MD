@@ -77,13 +77,84 @@ export function generateCryptoResearchQuery(symbol: string, contextData?: any): 
       contextSection += `- Trend: ${contextData.technical.trend?.direction || 'N/A'}\n\n`;
     }
     
-    // On-Chain Data
+    // On-Chain Data (Blockchain Intelligence)
     if (contextData['on-chain'] || contextData.onChain) {
       const onChain = contextData['on-chain'] || contextData.onChain;
-      contextSection += `**On-Chain Metrics:**\n`;
-      contextSection += `- Active Addresses: ${onChain.activeAddresses || 'N/A'}\n`;
-      contextSection += `- Transaction Volume: ${onChain.transactionVolume || 'N/A'}\n`;
-      contextSection += `- Whale Transactions: ${onChain.whaleTransactions?.length || 0}\n\n`;
+      contextSection += `**Blockchain Intelligence (On-Chain Data):**\n`;
+      
+      // Token Info
+      if (onChain.tokenInfo) {
+        contextSection += `- Token Contract: ${onChain.tokenInfo.address}\n`;
+        contextSection += `- Blockchain: ${onChain.chain || 'N/A'}\n`;
+        contextSection += `- Total Supply: ${onChain.tokenInfo.totalSupply?.toLocaleString() || 'N/A'}\n`;
+        contextSection += `- Circulating Supply: ${onChain.tokenInfo.circulatingSupply?.toLocaleString() || 'N/A'}\n`;
+      }
+      
+      // Holder Distribution & Concentration
+      if (onChain.holderDistribution) {
+        const conc = onChain.holderDistribution.concentration;
+        contextSection += `\n**Holder Distribution:**\n`;
+        contextSection += `- Top 10 Holders: ${conc?.top10Percentage?.toFixed(2) || 'N/A'}% of supply\n`;
+        contextSection += `- Top 50 Holders: ${conc?.top50Percentage?.toFixed(2) || 'N/A'}% of supply\n`;
+        contextSection += `- Gini Coefficient: ${conc?.giniCoefficient?.toFixed(3) || 'N/A'} (0=equal, 1=concentrated)\n`;
+        contextSection += `- Distribution Score: ${conc?.distributionScore?.toFixed(0) || 'N/A'}/100 (higher=better)\n`;
+        
+        if (onChain.holderDistribution.topHolders?.length > 0) {
+          contextSection += `- Total Unique Holders: ${onChain.holderDistribution.topHolders.length}\n`;
+        }
+      }
+      
+      // Whale Activity
+      if (onChain.whaleActivity) {
+        const whale = onChain.whaleActivity.summary;
+        contextSection += `\n**Whale Activity (Large Transactions):**\n`;
+        contextSection += `- Total Whale Transactions: ${whale?.totalTransactions || 0}\n`;
+        contextSection += `- Total Value: $${whale?.totalValueUSD?.toLocaleString() || 'N/A'}\n`;
+        contextSection += `- Exchange Deposits: ${whale?.exchangeDeposits || 0} (selling pressure)\n`;
+        contextSection += `- Exchange Withdrawals: ${whale?.exchangeWithdrawals || 0} (accumulation)\n`;
+        contextSection += `- Largest Transaction: $${whale?.largestTransaction?.toLocaleString() || 'N/A'}\n`;
+      }
+      
+      // Exchange Flows
+      if (onChain.exchangeFlows) {
+        const flows = onChain.exchangeFlows;
+        contextSection += `\n**Exchange Flows (24h):**\n`;
+        contextSection += `- Inflow to Exchanges: $${flows.inflow24h?.toLocaleString() || 'N/A'}\n`;
+        contextSection += `- Outflow from Exchanges: $${flows.outflow24h?.toLocaleString() || 'N/A'}\n`;
+        contextSection += `- Net Flow: $${flows.netFlow?.toLocaleString() || 'N/A'}\n`;
+        contextSection += `- Trend: ${flows.trend || 'N/A'} (accumulation=bullish, distribution=bearish)\n`;
+      }
+      
+      // Wallet Behavior Analysis
+      if (onChain.walletBehavior) {
+        const behavior = onChain.walletBehavior;
+        contextSection += `\n**Wallet Behavior Analysis:**\n`;
+        contextSection += `- Smart Money Accumulating: ${behavior.smartMoneyAccumulating ? 'YES ✓' : 'NO'}\n`;
+        contextSection += `- Whale Activity: ${behavior.whaleActivity || 'N/A'}\n`;
+        contextSection += `- Retail Sentiment: ${behavior.retailSentiment || 'N/A'}\n`;
+        contextSection += `- Analysis Confidence: ${behavior.confidence || 0}%\n`;
+      }
+      
+      // Smart Contract Security
+      if (onChain.smartContract) {
+        const contract = onChain.smartContract;
+        contextSection += `\n**Smart Contract Security:**\n`;
+        contextSection += `- Security Score: ${contract.score || 0}/100\n`;
+        contextSection += `- Contract Verified: ${contract.isVerified ? 'YES ✓' : 'NO'}\n`;
+        contextSection += `- Audit Status: ${contract.auditStatus || 'N/A'}\n`;
+        
+        if (contract.vulnerabilities?.length > 0) {
+          contextSection += `- Vulnerabilities: ${contract.vulnerabilities.length} found\n`;
+        }
+        if (contract.redFlags?.length > 0) {
+          contextSection += `- Red Flags: ${contract.redFlags.join(', ')}\n`;
+        }
+        if (contract.warnings?.length > 0) {
+          contextSection += `- Warnings: ${contract.warnings.join(', ')}\n`;
+        }
+      }
+      
+      contextSection += `\n`;
     }
     
     // News
@@ -99,11 +170,18 @@ export function generateCryptoResearchQuery(symbol: string, contextData?: any): 
   return `Analyze ${symbol} cryptocurrency comprehensively using this real-time data:
 ${contextSection}
 
+**CRITICAL: Pay special attention to the blockchain intelligence data above, including:**
+- Holder concentration and distribution patterns
+- Whale activity and exchange flows
+- Smart money accumulation signals
+- Smart contract security assessment
+
 1. **Technology and Innovation**
    - Core technology and blockchain architecture
    - Unique features and innovations
    - Technical advantages over competitors
    - Development roadmap and progress
+   - Smart contract security and audit status
 
 2. **Team and Leadership**
    - Founding team background and experience
@@ -124,6 +202,7 @@ ${contextSection}
    - Unique value proposition
 
 5. **Risk Factors and Concerns**
+   - **BLOCKCHAIN RISKS**: Analyze holder concentration, whale manipulation risk, smart contract vulnerabilities
    - Regulatory risks and compliance issues
    - Technical vulnerabilities or concerns
    - Market risks and volatility factors
@@ -135,8 +214,16 @@ ${contextSection}
    - Recent partnerships or integrations
    - Protocol upgrades or changes
    - Community sentiment shifts
+   - **WHALE ACTIVITY**: Recent large transactions and their market impact
 
-Provide detailed, factual analysis with source citations for all claims.`;
+7. **Blockchain Intelligence Summary**
+   - Interpret the on-chain data: Is smart money accumulating or distributing?
+   - What do exchange flows tell us about market sentiment?
+   - Are there concentration risks from top holders?
+   - Is the smart contract secure and audited?
+   - What is the overall blockchain health score?
+
+Provide detailed, factual analysis with source citations for all claims. **Integrate blockchain intelligence throughout your analysis, not just in a separate section.**`;
 }
 
 /**
