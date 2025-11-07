@@ -95,35 +95,36 @@ const Navigation = forwardRef<NavigationRef>((props, ref) => {
   return (
     <>
       {/* Desktop Navigation */}
-      <nav className="hidden lg:block bg-bitcoin-black border-b border-bitcoin-orange-20">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
+      <nav className="hidden lg:block bg-bitcoin-black border-b-2 border-bitcoin-orange-20">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <Link href="/" className="flex items-center space-x-2 group">
-              <span className="text-2xl font-bold text-bitcoin-orange group-hover:text-bitcoin-white transition-colors">
+            <Link href="/" className="flex items-center space-x-3 group">
+              <span className="text-3xl font-black text-bitcoin-orange group-hover:text-bitcoin-white transition-all duration-300" style={{ textShadow: '0 0 20px rgba(247, 147, 26, 0.5)' }}>
                 ₿
               </span>
-              <span className="text-xl font-bold text-bitcoin-white group-hover:text-bitcoin-orange transition-colors">
+              <span className="text-xl font-black text-bitcoin-white group-hover:text-bitcoin-orange transition-all duration-300">
                 Bitcoin Sovereign
               </span>
             </Link>
 
             {/* Desktop Menu Items */}
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center gap-2">
               {menuItems.slice(1).map((item) => {
                 const IconComponent = item.icon;
+                const active = isActive(item.path);
                 return (
                   <Link
                     key={item.path}
                     href={item.path}
-                    className={`px-4 py-2 text-sm font-semibold uppercase tracking-wider transition-all rounded flex items-center gap-2 ${
-                      isActive(item.path)
-                        ? 'text-bitcoin-orange border-b-2 border-bitcoin-orange'
-                        : 'text-bitcoin-white-60 hover:text-bitcoin-orange hover:border-b-2 hover:border-bitcoin-orange'
+                    className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-300 rounded-lg flex items-center gap-2 border-2 ${
+                      active
+                        ? 'bg-bitcoin-orange text-bitcoin-black border-bitcoin-orange shadow-[0_0_20px_rgba(247,147,26,0.5)]'
+                        : 'bg-transparent text-bitcoin-white-80 border-bitcoin-orange-20 hover:bg-bitcoin-orange hover:text-bitcoin-black hover:border-bitcoin-orange hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:scale-105'
                     }`}
                   >
                     <IconComponent className="h-4 w-4" />
-                    <span className="hidden xl:inline">{item.name}</span>
+                    <span className="hidden xl:inline whitespace-nowrap">{item.name}</span>
                     <span className="xl:hidden">{item.emoji}</span>
                   </Link>
                 );
@@ -133,7 +134,7 @@ const Navigation = forwardRef<NavigationRef>((props, ref) => {
               {user && (
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 text-sm font-semibold uppercase tracking-wider transition-all rounded flex items-center gap-2 text-bitcoin-white-60 hover:text-bitcoin-orange hover:border-b-2 hover:border-bitcoin-orange ml-4"
+                  className="px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-300 rounded-lg flex items-center gap-2 border-2 bg-transparent text-bitcoin-white-80 border-bitcoin-orange-20 hover:bg-bitcoin-orange hover:text-bitcoin-black hover:border-bitcoin-orange hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:scale-105 ml-2"
                   title={`Logout (${user.email})`}
                 >
                   <LogOut className="h-4 w-4" />
@@ -146,32 +147,32 @@ const Navigation = forwardRef<NavigationRef>((props, ref) => {
       </nav>
 
       {/* Mobile/Tablet Navigation */}
-      <nav className="lg:hidden bg-bitcoin-black border-b border-bitcoin-orange-20">
+      <nav className="lg:hidden bg-bitcoin-black border-b-2 border-bitcoin-orange-20">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center space-x-2">
-              <span className="text-2xl font-bold text-bitcoin-orange">₿</span>
-              <span className="text-lg font-bold text-bitcoin-white">
+            <Link href="/" className="flex items-center space-x-2 group">
+              <span className="text-2xl font-black text-bitcoin-orange group-hover:text-bitcoin-white transition-all" style={{ textShadow: '0 0 15px rgba(247, 147, 26, 0.5)' }}>₿</span>
+              <span className="text-lg font-black text-bitcoin-white group-hover:text-bitcoin-orange transition-all">
                 Bitcoin Sovereign
               </span>
             </Link>
 
-            {/* Menu Button - Mobile Optimized */}
+            {/* Menu Button - Mobile Optimized with Pop */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="bg-bitcoin-orange text-bitcoin-black px-4 py-2 rounded-lg font-bold text-sm uppercase tracking-wider hover:bg-bitcoin-white transition-all hover:shadow-[0_0_20px_rgba(247,147,26,0.5)] active:scale-95 min-h-[48px] flex items-center gap-2"
+              className="bg-bitcoin-orange text-bitcoin-black px-5 py-2.5 rounded-lg font-black text-sm uppercase tracking-wider hover:bg-bitcoin-white transition-all duration-300 shadow-[0_0_15px_rgba(247,147,26,0.4)] hover:shadow-[0_0_25px_rgba(247,147,26,0.6)] active:scale-95 min-h-[48px] flex items-center gap-2 border-2 border-bitcoin-orange"
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={isMenuOpen}
             >
               {isMenuOpen ? (
                 <>
-                  <X className="h-5 w-5" strokeWidth={2.5} />
+                  <X className="h-5 w-5" strokeWidth={3} />
                   <span>Close</span>
                 </>
               ) : (
                 <>
-                  <Menu className="h-5 w-5" strokeWidth={2.5} />
+                  <Menu className="h-5 w-5" strokeWidth={3} />
                   <span>Menu</span>
                 </>
               )}
