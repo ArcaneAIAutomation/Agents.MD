@@ -97,7 +97,7 @@ const Navigation = forwardRef<NavigationRef>((props, ref) => {
       {/* Desktop Navigation */}
       <nav className="hidden lg:block bg-bitcoin-black border-b-2 border-bitcoin-orange-20">
         <div className="container mx-auto px-6">
-          <div className="flex items-center justify-between h-20">
+          <div className="flex items-center justify-between h-24">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-3 group">
               <span className="text-3xl font-black text-bitcoin-orange group-hover:text-bitcoin-white transition-all duration-300" style={{ textShadow: '0 0 20px rgba(247, 147, 26, 0.5)' }}>
@@ -108,8 +108,8 @@ const Navigation = forwardRef<NavigationRef>((props, ref) => {
               </span>
             </Link>
 
-            {/* Desktop Menu Items - Scalable Design */}
-            <div className="flex items-center gap-1.5 xl:gap-2">
+            {/* Desktop Menu Items - Larger Buttons with Text */}
+            <div className="flex items-center gap-2">
               {menuItems.slice(1).map((item) => {
                 const IconComponent = item.icon;
                 const active = isActive(item.path);
@@ -117,16 +117,14 @@ const Navigation = forwardRef<NavigationRef>((props, ref) => {
                   <Link
                     key={item.path}
                     href={item.path}
-                    className={`px-2 xl:px-3 py-2 text-[10px] xl:text-xs font-bold uppercase tracking-wide xl:tracking-wider transition-all duration-300 rounded-lg flex items-center gap-1.5 border-2 whitespace-nowrap ${
+                    className={`px-4 py-3 text-xs font-bold uppercase tracking-wide transition-all duration-300 rounded-lg flex flex-col items-center justify-center gap-1 border-2 min-w-[90px] ${
                       active
                         ? 'bg-bitcoin-orange text-bitcoin-black border-bitcoin-orange shadow-[0_0_20px_rgba(247,147,26,0.5)]'
                         : 'bg-transparent text-bitcoin-white-80 border-bitcoin-orange-20 hover:bg-bitcoin-orange hover:text-bitcoin-black hover:border-bitcoin-orange hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:scale-105'
                     }`}
-                    title={item.name}
                   >
-                    <IconComponent className="h-3.5 w-3.5 xl:h-4 xl:w-4 flex-shrink-0" />
-                    <span className="hidden 2xl:inline">{item.name}</span>
-                    <span className="2xl:hidden">{item.emoji}</span>
+                    <IconComponent className="h-4 w-4 flex-shrink-0" />
+                    <span className="text-[10px] leading-tight text-center">{item.name}</span>
                   </Link>
                 );
               })}
@@ -135,12 +133,11 @@ const Navigation = forwardRef<NavigationRef>((props, ref) => {
               {user && (
                 <button
                   onClick={handleLogout}
-                  className="px-2 xl:px-3 py-2 text-[10px] xl:text-xs font-bold uppercase tracking-wide xl:tracking-wider transition-all duration-300 rounded-lg flex items-center gap-1.5 border-2 bg-transparent text-bitcoin-white-80 border-bitcoin-orange-20 hover:bg-bitcoin-orange hover:text-bitcoin-black hover:border-bitcoin-orange hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:scale-105 ml-1 xl:ml-2 whitespace-nowrap"
+                  className="px-4 py-3 text-xs font-bold uppercase tracking-wide transition-all duration-300 rounded-lg flex flex-col items-center justify-center gap-1 border-2 bg-transparent text-bitcoin-white-80 border-bitcoin-orange-20 hover:bg-bitcoin-orange hover:text-bitcoin-black hover:border-bitcoin-orange hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:scale-105 ml-2 min-w-[90px]"
                   title={`Logout (${user.email})`}
                 >
-                  <LogOut className="h-3.5 w-3.5 xl:h-4 xl:w-4 flex-shrink-0" />
-                  <span className="hidden 2xl:inline">Logout</span>
-                  <span className="2xl:hidden">🚪</span>
+                  <LogOut className="h-4 w-4 flex-shrink-0" />
+                  <span className="text-[10px] leading-tight">Logout</span>
                 </button>
               )}
             </div>
