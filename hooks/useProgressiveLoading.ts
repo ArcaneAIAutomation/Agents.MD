@@ -53,37 +53,49 @@ export function useProgressiveLoading({
   const [phases, setPhases] = useState<LoadingPhase[]>([
     {
       phase: 1,
-      label: 'Critical Data (Market Data from CoinMarketCap + Exchanges)',
-      endpoints: [`/api/ucie-market-data?symbol=${symbol}`],
+      label: 'Critical Data (Market Data)',
+      endpoints: [`/api/ucie/market-data/${symbol}`],
       priority: 'critical',
-      targetTime: 10000, // 10 seconds for multi-source data
+      targetTime: 10000, // 10 seconds
       progress: 0,
       complete: false,
     },
     {
       phase: 2,
-      label: 'News & Sentiment Analysis',
-      endpoints: [`/api/ucie-news?symbol=${symbol}&limit=10`],
+      label: 'Important Data (News & Sentiment)',
+      endpoints: [
+        `/api/ucie/news/${symbol}`,
+        `/api/ucie/sentiment/${symbol}`
+      ],
       priority: 'important',
-      targetTime: 25000, // 25 seconds for news aggregation (increased for reliability)
+      targetTime: 15000, // 15 seconds
       progress: 0,
       complete: false,
     },
     {
       phase: 3,
-      label: 'Technical Analysis (OpenAI GPT-4o)',
-      endpoints: [`/api/ucie-technical`], // POST endpoint with OpenAI
+      label: 'Enhanced Data (Technical, On-Chain, Risk, Derivatives, DeFi)',
+      endpoints: [
+        `/api/ucie/technical/${symbol}`,
+        `/api/ucie/on-chain/${symbol}`,
+        `/api/ucie/risk/${symbol}`,
+        `/api/ucie/derivatives/${symbol}`,
+        `/api/ucie/defi/${symbol}`
+      ],
       priority: 'enhanced',
-      targetTime: 30000, // 30 seconds for OpenAI analysis
+      targetTime: 20000, // 20 seconds
       progress: 0,
       complete: false,
     },
     {
       phase: 4,
-      label: 'Caesar AI Deep Research',
-      endpoints: [`/api/ucie-research`], // POST endpoint, handled separately
+      label: 'Deep Analysis (Caesar AI Research & Predictions)',
+      endpoints: [
+        `/api/ucie/research/${symbol}`,
+        `/api/ucie/predictions/${symbol}`
+      ],
       priority: 'deep',
-      targetTime: 600000, // 10 minutes for Caesar polling
+      targetTime: 600000, // 10 minutes for Caesar
       progress: 0,
       complete: false,
     },
@@ -106,107 +118,20 @@ export function useProgressiveLoading({
       // Fetch all endpoints for this phase in parallel
       const promises = phase.endpoints.map(async (endpoint) => {
         try {
-          // New flat endpoints already have query parameters, don't append symbol
           const url = endpoint;
           
           // For long-running endpoints (Phase 4), use a longer timeout
-          const timeoutMs = phase.phase === 4 ? 600000 : phase.targetTime; // 10 min for Phase 4 (Caesar polling)
+          const timeoutMs = phase.phase === 4 ? 600000 : phase.targetTime;
           
-          // Log Caesar API calls specifically
-          if (endpoint.includes('research')) {
-            console.log(`🔍 Calling Caesar API for ${symbol} (timeout: ${timeoutMs}ms = ${timeoutMs/60000} minutes)`);
-          }
+          // Log API calls
+          console.log(`📡 Fetching: ${endpoint}`);
           
-          // For Phase 3 (OpenAI technical) and Phase 4 (Caesar research), use POST with accumulated data
-          let fetchUrl = url;
           let fetchOptions: RequestInit = {
             signal: AbortSignal.timeout(timeoutMs),
           };
           
-          if (phase.phase === 3 && endpoint.includes('technical')) {
-            // POST request with market data and news data for OpenAI analysis
-            fetchOptions.method = 'POST';
-            fetchOptions.headers = { 'Content-Type': 'application/json' };
-            fetchOptions.body = JSON.stringify({
-              symbol,
-              marketData: previousData['market-data'] || previousData['ucie-market-data'] || null,
-              newsData: previousData['news'] || previousData['ucie-news'] || null,
-            });
-            console.log(`📤 Sending data to OpenAI for technical analysis of ${symbol}`);
-          }
-          
-          if (phase.phase === 4 && endpoint.includes('research')) {
-            // POST request with market data and news data from previous phases
-            fetchOptions.method = 'POST';
-            fetchOptions.headers = { 'Content-Type': 'application/json' };
-            fetchOptions.body = JSON.stringify({
-              symbol,
-              marketData: previousData['market-data'] || previousData['ucie-market-data'] || null,
-              newsData: previousData['news'] || previousData['ucie-news'] || null,
-              technicalData: previousData['technical'] || null,
-              userQuery: `Provide comprehensive analysis for ${symbol}`
-            });
-            console.log(`📤 Sending comprehensive data to Caesar for ${symbol}`);
-            
-            // Create Caesar research job
-            const createResponse = await fetch(fetchUrl, fetchOptions);
-            if (!createResponse.ok) {
-              throw new Error(`${endpoint} failed: ${createResponse.statusText}`);
-            }
-            
-            const createData = await createResponse.json();
-            
-            if (!createData.success || !createData.jobId) {
-              throw new Error('Failed to create Caesar research job');
-            }
-            
-            console.log(`✅ Caesar job created: ${createData.jobId}`);
-            console.log(`⏳ Polling for results (max 10 minutes)...`);
-            
-            // Poll for results (max 20 attempts, 30 seconds apart = 10 minutes)
-            let attempts = 0;
-            const maxAttempts = 20;
-            const pollInterval = 30000; // 30 seconds
-            
-            while (attempts < maxAttempts) {
-              await new Promise(resolve => setTimeout(resolve, pollInterval));
-              attempts++;
-              
-              // Update progress based on polling attempts
-              const pollingProgress = (attempts / maxAttempts) * 100;
-              setPhases(prev => prev.map(p => 
-                p.phase === phase.phase 
-                  ? { ...p, progress: pollingProgress }
-                  : p
-              ));
-              
-              console.log(`🔄 Polling attempt ${attempts}/${maxAttempts}...`);
-              
-              const pollResponse = await fetch(`${endpoint}?jobId=${createData.jobId}`);
-              
-              if (!pollResponse.ok) {
-                console.warn(`⚠️ Poll failed: ${pollResponse.status}`);
-                continue;
-              }
-              
-              const pollData = await pollResponse.json();
-              
-              if (pollData.status === 'completed' && pollData.analysis) {
-                console.log(`✅ Caesar analysis complete after ${attempts} attempts (${(attempts * 30) / 60} minutes)`);
-                return { endpoint, data: pollData };
-              }
-              
-              if (pollData.status === 'failed') {
-                throw new Error('Caesar research job failed');
-              }
-              
-              console.log(`⏳ Status: ${pollData.status}, continuing to poll...`);
-            }
-            
-            throw new Error('Caesar research timed out after 10 minutes');
-          }
-          
-          const response = await fetch(fetchUrl, fetchOptions);
+          // Simple GET request for all endpoints (they handle their own logic)
+          const response = await fetch(url, fetchOptions);
 
           if (!response.ok) {
             throw new Error(`${endpoint} failed: ${response.statusText}`);
@@ -224,10 +149,16 @@ export function useProgressiveLoading({
               : p
           ));
 
-          return { endpoint, data: data.success ? data.data : data };
+          // Extract endpoint name for data key
+          const endpointName = endpoint.split('/').filter(Boolean).slice(-2, -1)[0]; // Get 'market-data', 'news', etc.
+          
+          console.log(`✅ ${endpointName} completed`);
+
+          return { endpoint, endpointName, data: data.data || data };
         } catch (error: any) {
-          console.warn(`${endpoint} error:`, error.message);
-          return { endpoint, data: null, error: error.message };
+          const endpointName = endpoint.split('/').filter(Boolean).slice(-2, -1)[0];
+          console.warn(`❌ ${endpointName} error:`, error.message);
+          return { endpoint, endpointName, data: null, error: error.message };
         }
       });
 
@@ -236,10 +167,9 @@ export function useProgressiveLoading({
       // Aggregate results
       results.forEach((result) => {
         if (result.status === 'fulfilled' && result.value.data) {
-          // Extract endpoint name from URL (handle query parameters)
-          const endpointPath = result.value.endpoint.split('?')[0]; // Remove query params
-          const endpointName = endpointPath.split('/').pop() || 'unknown';
+          const endpointName = result.value.endpointName;
           phaseData[endpointName] = result.value.data;
+          console.log(`📦 Stored ${endpointName} data`);
         }
       });
 
@@ -308,57 +238,130 @@ export function useProgressiveLoading({
   // Transform UCIE data to match frontend expectations
   const transformUCIEData = useCallback((rawData: any) => {
     console.log('🔄 Transforming UCIE data for frontend...');
-    
-    const caesarAnalysis = rawData['ucie-research']?.analysis;
-    const marketData = rawData['ucie-market-data'];
-    const newsData = rawData['ucie-news'];
-    const technicalData = rawData['ucie-technical']?.analysis;
+    console.log('📊 Raw data keys:', Object.keys(rawData));
     
     const transformed = {
-      // Keep original data structure (for panels that expect it)
-      'market-data': marketData,
-      'ucie-market-data': marketData,
-      marketData: marketData, // Alias for easier access
+      // Phase 1: Market Data
+      'market-data': rawData['market-data'],
+      marketData: rawData['market-data'],
       
-      news: newsData,
-      'ucie-news': newsData,
+      // Phase 2: News & Sentiment
+      news: rawData['news'],
+      sentiment: rawData['sentiment'],
       
-      technical: technicalData,
-      'ucie-technical': { analysis: technicalData },
+      // Phase 3: Enhanced Data
+      technical: rawData['technical'],
+      onChain: rawData['on-chain'],
+      'on-chain': rawData['on-chain'],
+      risk: rawData['risk'],
+      derivatives: rawData['derivatives'],
+      defi: rawData['defi'],
       
-      research: rawData['ucie-research'],
-      'ucie-research': rawData['ucie-research'],
+      // Phase 4: Deep Analysis
+      research: rawData['research'],
+      predictions: rawData['predictions'],
       
-      // Transform Caesar analysis for Overview tab
-      consensus: caesarAnalysis?.trading_recommendation ? {
-        overallScore: caesarAnalysis.trading_recommendation.confidence,
-        recommendation: caesarAnalysis.trading_recommendation.action.toUpperCase(),
-        confidence: caesarAnalysis.trading_recommendation.confidence
-      } : null,
+      // Generate consensus from available data
+      consensus: generateConsensus(rawData),
       
-      executiveSummary: caesarAnalysis ? {
-        oneLineSummary: caesarAnalysis.executive_summary,
-        topFindings: [
-          caesarAnalysis.price_analysis?.price_action_summary,
-          caesarAnalysis.news_sentiment_impact?.sentiment_price_correlation,
-          caesarAnalysis.technical_outlook?.technical_summary,
-          caesarAnalysis.volume_analysis?.volume_price_correlation
-        ].filter(Boolean).slice(0, 5),
-        opportunities: caesarAnalysis.risk_assessment?.key_opportunities || [],
-        risks: caesarAnalysis.risk_assessment?.key_risks || []
-      } : null,
-      
-      // Add Caesar analysis for direct access
-      caesarAnalysis: caesarAnalysis
+      // Generate executive summary
+      executiveSummary: generateExecutiveSummary(rawData)
     };
     
     console.log('✅ Data transformation complete');
-    console.log('  • consensus:', transformed.consensus ? 'Created' : 'N/A');
-    console.log('  • executiveSummary:', transformed.executiveSummary ? 'Created' : 'N/A');
-    console.log('  • caesarAnalysis:', caesarAnalysis ? 'Available' : 'N/A');
+    console.log('  • Market Data:', transformed.marketData ? '✓' : '✗');
+    console.log('  • News:', transformed.news ? '✓' : '✗');
+    console.log('  • Sentiment:', transformed.sentiment ? '✓' : '✗');
+    console.log('  • Technical:', transformed.technical ? '✓' : '✗');
+    console.log('  • On-Chain:', transformed.onChain ? '✓' : '✗');
+    console.log('  • Risk:', transformed.risk ? '✓' : '✗');
+    console.log('  • Derivatives:', transformed.derivatives ? '✓' : '✗');
+    console.log('  • DeFi:', transformed.defi ? '✓' : '✗');
+    console.log('  • Research:', transformed.research ? '✓' : '✗');
+    console.log('  • Predictions:', transformed.predictions ? '✓' : '✗');
     
     return transformed;
   }, []);
+  
+  // Generate consensus from multiple data sources
+  function generateConsensus(data: any) {
+    const signals: number[] = [];
+    
+    // Technical signals
+    if (data.technical?.recommendation) {
+      const rec = data.technical.recommendation.toLowerCase();
+      if (rec.includes('strong buy')) signals.push(100);
+      else if (rec.includes('buy')) signals.push(75);
+      else if (rec.includes('hold')) signals.push(50);
+      else if (rec.includes('sell')) signals.push(25);
+    }
+    
+    // Sentiment signals
+    if (data.sentiment?.overallScore !== undefined) {
+      signals.push((data.sentiment.overallScore + 100) / 2);
+    }
+    
+    // Risk signals (inverse)
+    if (data.risk?.overallScore !== undefined) {
+      signals.push(100 - data.risk.overallScore);
+    }
+    
+    if (signals.length === 0) return null;
+    
+    const overallScore = Math.round(signals.reduce((a, b) => a + b, 0) / signals.length);
+    
+    let recommendation: string;
+    if (overallScore >= 80) recommendation = 'STRONG_BUY';
+    else if (overallScore >= 60) recommendation = 'BUY';
+    else if (overallScore >= 40) recommendation = 'HOLD';
+    else if (overallScore >= 20) recommendation = 'SELL';
+    else recommendation = 'STRONG_SELL';
+    
+    return {
+      overallScore,
+      recommendation,
+      confidence: signals.length >= 3 ? 85 : 70
+    };
+  }
+  
+  // Generate executive summary from available data
+  function generateExecutiveSummary(data: any) {
+    const topFindings: string[] = [];
+    const opportunities: string[] = [];
+    const risks: string[] = [];
+    
+    if (data['market-data']?.price) {
+      topFindings.push(`Current price: $${data['market-data'].price.toLocaleString()}`);
+    }
+    
+    if (data.sentiment?.overallScore !== undefined) {
+      topFindings.push(`Sentiment: ${data.sentiment.overallScore > 0 ? 'Positive' : 'Negative'} (${data.sentiment.overallScore})`);
+    }
+    
+    if (data.technical?.recommendation) {
+      topFindings.push(`Technical: ${data.technical.recommendation}`);
+    }
+    
+    if (data.risk?.keyRisks) {
+      risks.push(...data.risk.keyRisks.slice(0, 3));
+    }
+    
+    if (data.predictions?.priceTargets) {
+      opportunities.push(`Price targets: ${data.predictions.priceTargets.join(', ')}`);
+    }
+    
+    const consensus = generateConsensus(data);
+    const oneLineSummary = consensus 
+      ? `${data.symbol || 'Token'} shows ${consensus.recommendation} signals with ${consensus.confidence}% confidence.`
+      : 'Analysis in progress...';
+    
+    return {
+      topFindings,
+      opportunities,
+      risks,
+      oneLineSummary
+    };
+  }
 
   const loadAllPhases = useCallback(async () => {
     setLoading(true);
