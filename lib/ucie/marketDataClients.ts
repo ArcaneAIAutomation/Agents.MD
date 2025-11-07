@@ -77,11 +77,62 @@ export interface MarketData {
   low24h: number;
   timestamp: string;
   source: string;
+  // Extended data (optional, CoinGecko specific)
+  extended?: {
+    // DEX data
+    dexVolume24h?: number;
+    topDEXes?: string[];
+    // Community data
+    communityData?: {
+      twitterFollowers: number;
+      redditSubscribers: number;
+      telegramUsers: number;
+      facebookLikes: number;
+    };
+    // Developer data
+    developerData?: {
+      githubStars: number;
+      githubForks: number;
+      githubSubscribers: number;
+      commits4Weeks: number;
+      pullRequests: number;
+      contributors: number;
+    };
+    // Additional metrics
+    athPrice?: number;
+    athDate?: string | null;
+    atlPrice?: number;
+    atlDate?: string | null;
+    marketCapRank?: number;
+    fullyDilutedValuation?: number;
+    // Categories
+    categories?: string[];
+    // Platform info
+    platform?: Record<string, string>;
+    contractAddress?: string | null;
+  };
 }
 
 /**
  * CoinGecko API Client
  * Primary market data source with comprehensive coverage
+ * 
+ * STRENGTHS (Free Demo API):
+ * - DEX tokens (Uniswap, PancakeSwap, SushiSwap, etc.)
+ * - DeFi protocols and metrics
+ * - Community data (social media, Reddit, Telegram)
+ * - Developer activity (GitHub commits, stars, forks)
+ * - Market data across 600+ exchanges
+ * - Historical data (OHLC, market cap)
+ * - Trending coins and categories
+ * - Global DeFi data
+ * - NFT data
+ * - Exchange rates for 50+ fiat currencies
+ * 
+ * FREE API LIMITS:
+ * - 30 calls/minute (Demo plan)
+ * - 10,000 calls/month
+ * - No API key required (but recommended for higher limits)
  */
 export class CoinGeckoClient {
   private baseUrl = 'https://api.coingecko.com/api/v3';
@@ -128,9 +179,13 @@ export class CoinGeckoClient {
     }
   }
 
+  /**
+   * Get comprehensive market data including DEX tokens
+   * Includes: price, volume, market cap, supply, community, developer data
+   */
   async getMarketData(symbol: string): Promise<MarketData> {
-    const coinId = this.symbolToCoinId(symbol);
-    const data = await this.fetch(`/coins/${coinId}?localization=false&tickers=false&community_data=false&developer_data=false`);
+    const coinId = await this.symbolToCoinId(symbol);
+    const data = await this.fetch(`/coins/${coinId}?localization=false&tickers=true&market_data=true&community_data=true&developer_data=true&sparkline=false`);
     
     return {
       symbol: symbol.toUpperCase(),
@@ -145,12 +200,54 @@ export class CoinGeckoClient {
       low24h: data.market_data.low_24h.usd,
       timestamp: new Date().toISOString(),
       source: 'coingecko',
+      // Extended data (CoinGecko specific)
+      extended: {
+        // DEX data
+        dexVolume24h: this.calculateDEXVolume(data.tickers),
+        topDEXes: this.getTopDEXes(data.tickers),
+        
+        // Community data
+        communityData: {
+          twitterFollowers: data.community_data?.twitter_followers || 0,
+          redditSubscribers: data.community_data?.reddit_subscribers || 0,
+          telegramUsers: data.community_data?.telegram_channel_user_count || 0,
+          facebookLikes: data.community_data?.facebook_likes || 0,
+        },
+        
+        // Developer data
+        developerData: {
+          githubStars: data.developer_data?.stars || 0,
+          githubForks: data.developer_data?.forks || 0,
+          githubSubscribers: data.developer_data?.subscribers || 0,
+          commits4Weeks: data.developer_data?.commit_count_4_weeks || 0,
+          pullRequests: data.developer_data?.pull_requests_merged || 0,
+          contributors: data.developer_data?.pull_request_contributors || 0,
+        },
+        
+        // Additional metrics
+        athPrice: data.market_data.ath?.usd || 0,
+        athDate: data.market_data.ath_date?.usd || null,
+        atlPrice: data.market_data.atl?.usd || 0,
+        atlDate: data.market_data.atl_date?.usd || null,
+        marketCapRank: data.market_cap_rank || 0,
+        fullyDilutedValuation: data.market_data.fully_diluted_valuation?.usd || 0,
+        
+        // Categories (DeFi, DEX, etc.)
+        categories: data.categories || [],
+        
+        // Platform info (for tokens)
+        platform: data.platforms || {},
+        contractAddress: data.contract_address || null,
+      }
     };
   }
 
+  /**
+   * Get simple price data (faster, uses less API quota)
+   */
   async getPrice(symbol: string): Promise<PriceData> {
-    const coinId = this.symbolToCoinId(symbol);
-    const data = await this.fetch(`/simple/price?ids=${coinId}&vs_currencies=usd&include_24hr_vol=true&include_24hr_change=true`);
+    const coinId = await this.symbolToCoinId(symbol);
+    const data = await this.fetch(`/simple/price?ids=${coinId}&vs_currencies=usd&include_24hr_vol=true&include_24hr_change=true&include_market_cap=true`);
     
     const coinData = data[coinId];
     return {
@@ -163,7 +260,143 @@ export class CoinGeckoClient {
     };
   }
 
-  private symbolToCoinId(symbol: string): string {
+  /**
+   * Get DEX-specific data for a token
+   * Returns trading pairs, volumes, and prices across DEXes
+   */
+  async getDEXData(symbol: string): Promise<any> {
+    const coinId = await this.symbolToCoinId(symbol);
+    const data = await this.fetch(`/coins/${coinId}/tickers?include_exchange_logo=false&depth=true`);
+    
+    const dexTickers = data.tickers.filter((ticker: any) => 
+      this.isDEX(ticker.market?.name || ticker.market?.identifier)
+    );
+    
+    return {
+      symbol: symbol.toUpperCase(),
+      dexes: dexTickers.map((ticker: any) => ({
+        dex: ticker.market.name,
+        pair: ticker.base + '/' + ticker.target,
+        price: ticker.last,
+        volume24h: ticker.volume,
+        volumeUSD: ticker.converted_volume?.usd || 0,
+        spread: ticker.bid_ask_spread_percentage,
+        trustScore: ticker.trust_score,
+        lastTraded: ticker.last_traded_at,
+      })),
+      totalDEXVolume: dexTickers.reduce((sum: number, t: any) => 
+        sum + (t.converted_volume?.usd || 0), 0
+      ),
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * Get trending coins (includes many DEX tokens)
+   */
+  async getTrendingCoins(): Promise<any> {
+    const data = await this.fetch('/search/trending');
+    return {
+      coins: data.coins.map((item: any) => ({
+        id: item.item.id,
+        symbol: item.item.symbol,
+        name: item.item.name,
+        marketCapRank: item.item.market_cap_rank,
+        priceUSD: item.item.price_btc * 50000, // Approximate
+        score: item.item.score,
+      })),
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * Get global DeFi data
+   */
+  async getGlobalDeFiData(): Promise<any> {
+    const data = await this.fetch('/global/decentralized_finance_defi');
+    return {
+      defiMarketCap: data.data.defi_market_cap,
+      ethMarketCap: data.data.eth_market_cap,
+      defiToEthRatio: data.data.defi_to_eth_ratio,
+      tradingVolume24h: data.data.trading_volume_24h,
+      defiDominance: data.data.defi_dominance,
+      topCoinDefiDominance: data.data.top_coin_defi_dominance,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * Search for coins by name or symbol (great for finding DEX tokens)
+   */
+  async searchCoins(query: string): Promise<any> {
+    const data = await this.fetch(`/search?query=${encodeURIComponent(query)}`);
+    return {
+      coins: data.coins.map((coin: any) => ({
+        id: coin.id,
+        symbol: coin.symbol,
+        name: coin.name,
+        marketCapRank: coin.market_cap_rank,
+        thumb: coin.thumb,
+      })),
+      exchanges: data.exchanges,
+      categories: data.categories,
+    };
+  }
+
+  /**
+   * Calculate total DEX volume from tickers
+   */
+  private calculateDEXVolume(tickers: any[]): number {
+    if (!tickers) return 0;
+    
+    return tickers
+      .filter(ticker => this.isDEX(ticker.market?.name || ticker.market?.identifier))
+      .reduce((sum, ticker) => sum + (ticker.converted_volume?.usd || 0), 0);
+  }
+
+  /**
+   * Get top DEXes by volume
+   */
+  private getTopDEXes(tickers: any[]): string[] {
+    if (!tickers) return [];
+    
+    const dexVolumes = new Map<string, number>();
+    
+    tickers
+      .filter(ticker => this.isDEX(ticker.market?.name || ticker.market?.identifier))
+      .forEach(ticker => {
+        const dex = ticker.market.name;
+        const volume = ticker.converted_volume?.usd || 0;
+        dexVolumes.set(dex, (dexVolumes.get(dex) || 0) + volume);
+      });
+    
+    return Array.from(dexVolumes.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([dex]) => dex);
+  }
+
+  /**
+   * Check if exchange is a DEX
+   */
+  private isDEX(exchangeName: string): boolean {
+    const dexKeywords = [
+      'uniswap', 'pancakeswap', 'sushiswap', 'curve', 'balancer',
+      'dex', 'swap', '1inch', 'kyber', 'bancor', 'quickswap',
+      'trader joe', 'spookyswap', 'spiritswap', 'raydium', 'orca',
+      'serum', 'jupiter', 'osmosis', 'astroport', 'terraswap'
+    ];
+    
+    const lowerName = exchangeName.toLowerCase();
+    return dexKeywords.some(keyword => lowerName.includes(keyword));
+  }
+
+  /**
+   * Convert symbol to CoinGecko coin ID
+   * Uses search API for unknown symbols (great for DEX tokens)
+   */
+  private async symbolToCoinId(symbol: string): Promise<string> {
+    // Common mappings for speed
     const mapping: Record<string, string> = {
       'BTC': 'bitcoin',
       'ETH': 'ethereum',
@@ -175,8 +408,37 @@ export class CoinGeckoClient {
       'ADA': 'cardano',
       'DOGE': 'dogecoin',
       'TRX': 'tron',
+      'MATIC': 'matic-network',
+      'DOT': 'polkadot',
+      'AVAX': 'avalanche-2',
+      'LINK': 'chainlink',
+      'UNI': 'uniswap',
+      'AAVE': 'aave',
+      'SUSHI': 'sushi',
+      'CAKE': 'pancakeswap-token',
+      'CRV': 'curve-dao-token',
     };
-    return mapping[symbol.toUpperCase()] || symbol.toLowerCase();
+    
+    const upperSymbol = symbol.toUpperCase();
+    
+    // Return if we have a mapping
+    if (mapping[upperSymbol]) {
+      return mapping[upperSymbol];
+    }
+    
+    // For unknown symbols (likely DEX tokens), search CoinGecko
+    try {
+      const searchResults = await this.searchCoins(symbol);
+      if (searchResults.coins.length > 0) {
+        // Return the first match (usually most relevant)
+        return searchResults.coins[0].id;
+      }
+    } catch (error) {
+      console.warn(`Failed to search for ${symbol}, using lowercase as fallback`);
+    }
+    
+    // Fallback to lowercase symbol
+    return symbol.toLowerCase();
   }
 }
 
