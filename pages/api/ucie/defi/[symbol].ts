@@ -216,44 +216,9 @@ export default async function handler(
       developmentAnalysis = analyzeDevelopmentActivity(githubData);
     }
 
-    // Peer Comparison (simplified - would need more protocols)
+    // Peer Comparison - DISABLED (requires real peer protocol data)
+    // TODO: Implement real peer comparison using DeFiLlama API for similar protocols
     let peerComparison = null;
-    if (metrics && tvlAnalysis && revenueAnalysis && utilityAnalysis && developmentAnalysis) {
-      // Mock peer data for demonstration
-      const mockPeers: PeerProtocol[] = [
-        {
-          symbol: 'PEER1',
-          name: 'Peer Protocol 1',
-          category: metrics.category,
-          tvl: metrics.tvl * 1.5,
-          revenue24h: revenueAnalysis.current.revenue24h * 1.3,
-          utilityScore: utilityAnalysis.utilityScore * 0.9,
-          developmentScore: developmentAnalysis.metrics.healthScore * 1.1,
-        },
-        {
-          symbol: 'PEER2',
-          name: 'Peer Protocol 2',
-          category: metrics.category,
-          tvl: metrics.tvl * 0.8,
-          revenue24h: revenueAnalysis.current.revenue24h * 0.7,
-          utilityScore: utilityAnalysis.utilityScore * 1.2,
-          developmentScore: developmentAnalysis.metrics.healthScore * 0.8,
-        },
-      ];
-
-      peerComparison = analyzePeerComparison(
-        {
-          symbol: normalizedSymbol,
-          name: normalizedSymbol,
-          category: metrics.category,
-          tvl: metrics.tvl,
-          revenue24h: revenueAnalysis.current.revenue24h,
-          utilityScore: utilityAnalysis.utilityScore,
-          developmentScore: developmentAnalysis.metrics.healthScore,
-        },
-        mockPeers
-      );
-    }
 
     // Generate summary
     const summary = generateSummary(
