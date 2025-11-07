@@ -5,11 +5,7 @@ import { useBTCData, useETHData } from '../hooks/useMarketData'
 
 // Navigation menu items
 const navigationItems = [
-  { href: '/', label: 'Dashboard', description: 'Market Overview' },
-  { href: '#btc-analysis', label: 'Bitcoin', description: 'BTC Analysis' },
-  { href: '#eth-analysis', label: 'Ethereum', description: 'ETH Analysis' },
-  { href: '#crypto-herald', label: 'News', description: 'Market News' },
-  { href: '#trading-signals', label: 'Signals', description: 'AI Trading' }
+  { href: '/', label: 'Back to Dashboard', description: 'Market Overview' }
 ]
 
 export default function Header() {
