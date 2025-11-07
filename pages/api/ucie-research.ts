@@ -144,7 +144,9 @@ function buildSystemPrompt(): string {
 
 Analyze the provided comprehensive market data, news sentiment, and technical indicators to generate actionable trading intelligence.
 
-Return ONLY valid JSON (no markdown, no code blocks, no explanatory text - just raw JSON):
+CRITICAL: Return ONLY valid JSON. Do NOT wrap in markdown code blocks. Do NOT add any text before or after the JSON. Just pure JSON starting with { and ending with }.
+
+Return this exact JSON structure:
 {
   "market_position": {
     "rank": "number",
@@ -249,7 +251,23 @@ export default async function handler(
       // If job is completed, parse the transformed_content (JSON)
       if (job.status === 'completed' && job.transformed_content) {
         try {
-          const analysis = JSON.parse(job.transformed_content);
+          // Clean the response - remove markdown code blocks if present
+          let cleanedContent = job.transformed_content.trim();
+          
+          // Remove markdown code blocks (```json ... ``` or ``` ... ```)
+          if (cleanedContent.startsWith('```')) {
+            cleanedContent = cleanedContent
+              .replace(/^```(?:json)?\s*\n?/i, '') // Remove opening ```json or ```
+              .replace(/\n?```\s*$/i, '');          // Remove closing ```
+          }
+          
+          // Log the cleaned content for debugging
+          console.log(`📝 Cleaned content length: ${cleanedContent.length} chars`);
+          console.log(`📝 First 100 chars: ${cleanedContent.substring(0, 100)}`);
+          
+          const analysis = JSON.parse(cleanedContent);
+          
+          console.log(`✅ Successfully parsed Caesar analysis`);
           
           return res.status(200).json({
             success: true,
@@ -261,6 +279,7 @@ export default async function handler(
           });
         } catch (parseError) {
           console.error('❌ Failed to parse Caesar response as JSON:', parseError);
+          console.error('❌ Raw transformed_content:', job.transformed_content?.substring(0, 500));
           
           // Fallback: return raw content if JSON parsing fails
           return res.status(200).json({
@@ -270,6 +289,7 @@ export default async function handler(
             rawContent: job.content,
             sources: job.results,
             error: 'Failed to parse structured analysis, returning raw content',
+            parseError: parseError instanceof Error ? parseError.message : 'Unknown error',
             timestamp: new Date().toISOString(),
           });
         }
@@ -316,6 +336,13 @@ export default async function handler(
     }
 
     console.log(`🤖 Starting Caesar research for ${researchData.symbol}...`);
+    console.log(`📊 Data received:`, {
+      hasMarketData: !!researchData.marketData,
+      hasNewsData: !!researchData.newsData,
+      hasTechnicalData: !!researchData.technicalData,
+      marketDataKeys: researchData.marketData ? Object.keys(researchData.marketData) : [],
+      newsDataKeys: researchData.newsData ? Object.keys(researchData.newsData) : [],
+    });
 
     // Build comprehensive research query
     const query = buildResearchQuery(researchData);
@@ -324,6 +351,7 @@ export default async function handler(
     console.log(`📤 Sending request to Caesar API...`);
     console.log(`Query length: ${query.length} chars`);
     console.log(`System prompt length: ${systemPrompt.length} chars`);
+    console.log(`Query preview:`, query.substring(0, 500));
 
     // Create Caesar research job (2 CU for balanced speed/depth)
     const job = await Caesar.createResearch({
