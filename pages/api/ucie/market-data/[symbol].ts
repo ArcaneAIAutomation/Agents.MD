@@ -19,8 +19,8 @@ import { aggregateExchangePrices, type PriceAggregation } from '../../../../lib/
 import { coinGeckoClient, coinMarketCapClient, type MarketData } from '../../../../lib/ucie/marketDataClients';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 
-// Cache TTL: 30 seconds
-const CACHE_TTL = 30; // seconds
+// Cache TTL: 15 minutes (for OpenAI/Caesar analysis)
+const CACHE_TTL = 15 * 60; // 900 seconds
 
 export interface MarketDataResponse {
   success: boolean;

@@ -39,8 +39,8 @@ export interface RiskAssessmentResponse {
   error?: string;
 }
 
-// Cache TTL: 1 hour
-const CACHE_TTL = 60 * 60; // seconds
+// Cache TTL: 15 minutes (for OpenAI/Caesar analysis)
+const CACHE_TTL = 15 * 60; // 900 seconds
 
 /**
  * Calculate data quality score based on available metrics

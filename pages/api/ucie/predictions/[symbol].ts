@@ -32,8 +32,8 @@ interface PredictionsResponse {
   cached?: boolean;
 }
 
-// Cache TTL: 1 hour
-const CACHE_TTL = 60 * 60; // seconds
+// Cache TTL: 15 minutes (for OpenAI/Caesar analysis)
+const CACHE_TTL = 15 * 60; // 900 seconds
 
 /**
  * Get CoinGecko ID from symbol

@@ -11,8 +11,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { calculateTechnicalIndicators } from '../../../../lib/ucie/technicalAnalysis';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 
-// Cache TTL: 1 minute (technical analysis should be fresh)
-const CACHE_TTL = 1 * 60;
+// Cache TTL: 15 minutes (for OpenAI/Caesar analysis)
+const CACHE_TTL = 15 * 60; // 900 seconds
 
 export default async function handler(
   req: NextApiRequest,

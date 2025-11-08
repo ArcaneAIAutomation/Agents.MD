@@ -42,9 +42,9 @@ interface ErrorResponse {
 type ApiResponse = SuccessResponse | ErrorResponse;
 
 /**
- * Cache TTL: 24 hours (in seconds)
+ * Cache TTL: 15 minutes (for OpenAI/Caesar analysis)
  */
-const CACHE_TTL = 24 * 60 * 60; // 24 hours
+const CACHE_TTL = 15 * 60; // 900 seconds
 
 /**
  * Validate token symbol

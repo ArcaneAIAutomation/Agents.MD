@@ -12,8 +12,8 @@ import { fetchBitcoinOnChainData } from '../../../../lib/ucie/bitcoinOnChain';
 import { fetchEthereumOnChainData } from '../../../../lib/ucie/ethereumOnChain';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 
-// Cache TTL: 5 minutes
-const CACHE_TTL = 5 * 60;
+// Cache TTL: 15 minutes (for OpenAI/Caesar analysis)
+const CACHE_TTL = 15 * 60; // 900 seconds
 
 export default async function handler(
   req: NextApiRequest,

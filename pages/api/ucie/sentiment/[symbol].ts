@@ -54,8 +54,8 @@ interface ErrorResponse {
   symbol?: string;
 }
 
-// Cache TTL: 5 minutes
-const CACHE_TTL = 5 * 60; // seconds
+// Cache TTL: 15 minutes (for OpenAI/Caesar analysis)
+const CACHE_TTL = 15 * 60; // 900 seconds
 
 // ============================================================================
 // Data Quality Calculation
