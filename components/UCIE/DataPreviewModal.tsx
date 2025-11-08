@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, CheckCircle, XCircle, AlertCircle, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import DataSourceExpander from './DataSourceExpander';
 
 interface DataPreviewModalProps {
   symbol: string;
@@ -242,6 +243,12 @@ export default function DataPreviewModal({
                   </p>
                 </div>
               </div>
+
+              {/* Data Source Expander */}
+              <DataSourceExpander
+                collectedData={preview.collectedData}
+                apiStatus={preview.apiStatus}
+              />
 
               {/* What Happens Next */}
               <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
