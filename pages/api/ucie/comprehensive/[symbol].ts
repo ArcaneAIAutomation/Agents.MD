@@ -154,7 +154,10 @@ export default async function handler(
   }
   
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+    // Use production URL for API calls (serverless functions need absolute URLs)
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://news.arcane.group';
+    
+    console.log(`🔍 Comprehensive analysis fetching from: ${baseUrl}`);
     
     // Fetch all data sources in parallel with timeouts
     const [
@@ -171,12 +174,19 @@ export default async function handler(
       fetchWithTimeout(`${baseUrl}/api/ucie/risk/${symbolUpper}`, 8000)
     ]);
     
-    // Extract successful results
+    // Extract successful results with logging
     const marketData = marketDataResult.status === 'fulfilled' ? marketDataResult.value : null;
     const technical = technicalResult.status === 'fulfilled' ? technicalResult.value : null;
     const sentiment = sentimentResult.status === 'fulfilled' ? sentimentResult.value : null;
     const news = newsResult.status === 'fulfilled' ? newsResult.value : null;
     const risk = riskResult.status === 'fulfilled' ? riskResult.value : null;
+    
+    // Log failures for debugging
+    if (marketDataResult.status === 'rejected') console.error('Market data failed:', marketDataResult.reason);
+    if (technicalResult.status === 'rejected') console.error('Technical failed:', technicalResult.reason);
+    if (sentimentResult.status === 'rejected') console.error('Sentiment failed:', sentimentResult.reason);
+    if (newsResult.status === 'rejected') console.error('News failed:', newsResult.reason);
+    if (riskResult.status === 'rejected') console.error('Risk failed:', riskResult.reason);
     
     // Calculate data completeness (how many sources succeeded)
     const sourcesAvailable = {
