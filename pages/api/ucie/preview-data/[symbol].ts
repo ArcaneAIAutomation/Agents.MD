@@ -362,10 +362,10 @@ function calculateAPIStatus(collectedData: any) {
     failed.push('Sentiment');
   }
 
-  // Technical - Check for actual indicators
+  // Technical - Check for actual indicators (success field may not exist)
   if (
-    collectedData.technical?.success === true &&
-    collectedData.technical?.indicators &&
+    collectedData.technical &&
+    collectedData.technical.indicators &&
     Object.keys(collectedData.technical.indicators).length > 0
   ) {
     working.push('Technical');
