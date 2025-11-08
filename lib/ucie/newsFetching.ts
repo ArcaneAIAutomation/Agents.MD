@@ -169,8 +169,15 @@ export async function fetchCryptoCompareNews(symbol: string): Promise<NewsArticl
 
 /**
  * Fetch news from all sources and deduplicate
+ * ✅ IMPROVED: Returns source status for better error visibility
  */
-export async function fetchAllNews(symbol: string): Promise<NewsArticle[]> {
+export async function fetchAllNews(symbol: string): Promise<{
+  articles: NewsArticle[];
+  sources: {
+    NewsAPI: { success: boolean; articles: number; error?: string };
+    CryptoCompare: { success: boolean; articles: number; error?: string };
+  };
+}> {
   const [newsAPIArticles, cryptoCompareArticles] = await Promise.allSettled([
     fetchNewsAPI(symbol),
     fetchCryptoCompareNews(symbol)
@@ -178,12 +185,40 @@ export async function fetchAllNews(symbol: string): Promise<NewsArticle[]> {
   
   const allArticles: NewsArticle[] = [];
   
+  // Track source status
+  const sources = {
+    NewsAPI: { success: false, articles: 0, error: undefined as string | undefined },
+    CryptoCompare: { success: false, articles: 0, error: undefined as string | undefined }
+  };
+  
   if (newsAPIArticles.status === 'fulfilled') {
     allArticles.push(...newsAPIArticles.value);
+    sources.NewsAPI = {
+      success: true,
+      articles: newsAPIArticles.value.length,
+      error: undefined
+    };
+  } else {
+    sources.NewsAPI = {
+      success: false,
+      articles: 0,
+      error: newsAPIArticles.reason?.message || 'Failed to fetch'
+    };
   }
   
   if (cryptoCompareArticles.status === 'fulfilled') {
     allArticles.push(...cryptoCompareArticles.value);
+    sources.CryptoCompare = {
+      success: true,
+      articles: cryptoCompareArticles.value.length,
+      error: undefined
+    };
+  } else {
+    sources.CryptoCompare = {
+      success: false,
+      articles: 0,
+      error: cryptoCompareArticles.reason?.message || 'Failed to fetch'
+    };
   }
   
   // Deduplicate by title similarity
@@ -203,8 +238,11 @@ export async function fetchAllNews(symbol: string): Promise<NewsArticle[]> {
     return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
   });
   
-  // Return top 20
-  return deduplicated.slice(0, 20);
+  // Return top 20 with source status
+  return {
+    articles: deduplicated.slice(0, 20),
+    sources
+  };
 }
 
 /**

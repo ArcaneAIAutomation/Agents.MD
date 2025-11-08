@@ -31,6 +31,10 @@ interface NewsResponse {
     averageImpact: number;
     majorNews: AssessedNewsArticle[];
   };
+  sources: {
+    NewsAPI: { success: boolean; articles: number; error?: string };
+    CryptoCompare: { success: boolean; articles: number; error?: string };
+  };
   dataQuality: number;
   timestamp: string;
   cached: boolean;
@@ -92,8 +96,12 @@ export default async function handler(
 
     console.log(`[UCIE News] Fetching news for ${symbolUpper}`);
 
-    // Fetch news from all sources
-    const articles = await fetchAllNews(symbolUpper);
+    // Fetch news from all sources (now returns source status)
+    const { articles, sources } = await fetchAllNews(symbolUpper);
+
+    console.log(`[UCIE News] Fetched ${articles.length} articles`);
+    console.log(`[UCIE News] NewsAPI: ${sources.NewsAPI.success ? `✅ ${sources.NewsAPI.articles} articles` : `❌ ${sources.NewsAPI.error}`}`);
+    console.log(`[UCIE News] CryptoCompare: ${sources.CryptoCompare.success ? `✅ ${sources.CryptoCompare.articles} articles` : `❌ ${sources.CryptoCompare.error}`}`);
 
     if (articles.length === 0) {
       const response: NewsResponse = {
@@ -108,9 +116,13 @@ export default async function handler(
           averageImpact: 50,
           majorNews: []
         },
+        sources,
         dataQuality: 0,
         timestamp: new Date().toISOString(),
-        cached: false
+        cached: false,
+        error: 'No news articles found. ' + 
+          (sources.NewsAPI.error ? `NewsAPI: ${sources.NewsAPI.error}. ` : '') +
+          (sources.CryptoCompare.error ? `CryptoCompare: ${sources.CryptoCompare.error}.` : '')
       };
 
       return res.status(200).json(response);
@@ -131,6 +143,7 @@ export default async function handler(
       symbol: symbolUpper,
       articles: assessedArticles,
       summary,
+      sources,
       dataQuality,
       timestamp: new Date().toISOString(),
       cached: false
