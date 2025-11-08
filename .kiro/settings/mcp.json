@@ -129,7 +129,7 @@
       "env": {
         "LUNARCRUSH_API_KEY": "r1pe78gm2tohk3mwp36cqj7hvmhhln82d856ck5"
       },
-      "disabled": false,
+      "disabled": true,
       "autoApprove": [
         "get_coin_data",
         "get_market_data",
@@ -137,7 +137,6 @@
         "search_coins"
       ]
     },
-
     "sqlite": {
       "command": "npx",
       "args": [
