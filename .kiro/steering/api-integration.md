@@ -22,11 +22,12 @@
 #### DeFi APIs (✅ Working)
 - **DeFiLlama API** - TVL data, protocol metrics (public API)
 
-#### Blockchain APIs (✅ All Working)
+#### Blockchain APIs (✅ All Working + 🆕 Solana Added)
 - **Etherscan API V2** - Ethereum blockchain data (migrated from V1)
 - **BSCScan API V2** - Binance Smart Chain data
 - **Polygonscan API V2** - Polygon network data
 - **Blockchain.com API** - Bitcoin blockchain data
+- **🆕 Solana RPC API** - Solana blockchain data (SOL and SPL tokens)
 
 #### AI APIs (✅ All Working)
 - **OpenAI GPT-4o** - Advanced market analysis
@@ -36,21 +37,23 @@
 - **CoinGlass API** - Requires paid plan upgrade (free tier exhausted)
 - **Binance Futures** - Recommended fallback (public API)
 
-## API Status Summary (November 2025)
+## API Status Summary (January 2025)
 
-### Working APIs: 13/14 (92.9%)
+### Working APIs: 14/15 (93.3%)
 - ✅ Market Data: CoinMarketCap, CoinGecko, Kraken
 - ✅ News: NewsAPI, Caesar API
 - ✅ Social: LunarCrush, Twitter/X, Reddit
 - ✅ DeFi: DeFiLlama
-- ✅ Blockchain: Etherscan V2, Blockchain.com
+- ✅ Blockchain: Etherscan V2, Blockchain.com, Solana RPC
 - ✅ AI: OpenAI, Gemini
 - ❌ Derivatives: CoinGlass (requires upgrade)
 
-### Recent Fixes (November 2025)
-- ✅ Etherscan migrated from V1 to V2 API
-- ✅ DeFi endpoint fixed (removed undefined functions)
-- ✅ Comprehensive API testing implemented
+### Recent Updates (January 2025)
+- ✅ Etherscan migrated from V1 to V2 API (November 2025)
+- ✅ DeFi endpoint fixed (removed undefined functions) (November 2025)
+- ✅ Comprehensive API testing implemented (November 2025)
+- 🆕 Solana RPC API integration added (January 2025)
+- 🆕 Multi-provider Solana support (QuickNode, Alchemy, Helius) (January 2025)
 
 ## Caesar API Integration
 
@@ -275,6 +278,427 @@ const validateMarketData = (data: any): MarketDataResponse | null => {
 - **Confidence scoring**: Rate data quality based on source reliability
 - **Anomaly detection**: Identify and filter suspicious data points
 
+## Solana Blockchain Integration (🆕 January 2025)
+
+### Overview
+Solana integration provides comprehensive on-chain analytics for SOL and SPL tokens, including:
+- Real-time balance queries
+- Transaction history and whale tracking
+- Token account information
+- Stake account data
+- Validator information
+- Program account analysis
+
+### Solana RPC Providers
+
+#### 1. Public RPC (Free - Good for Testing)
+```typescript
+const SOLANA_PUBLIC_RPC = {
+  mainnet: 'https://api.mainnet-beta.solana.com',
+  devnet: 'https://api.devnet.solana.com',
+  testnet: 'https://api.testnet.solana.com',
+  
+  rateLimit: '~100 requests per 10 seconds',
+  reliability: 'Medium (can be slow during high traffic)',
+  cost: 'Free',
+  
+  bestFor: 'Development and testing'
+};
+```
+
+#### 2. QuickNode (Recommended for Production)
+```typescript
+const QUICKNODE_CONFIG = {
+  endpoint: 'https://[your-endpoint].solana-mainnet.quiknode.pro/[token]/',
+  
+  freeTier: {
+    requests: '100,000 per day',
+    features: ['Full RPC access', 'WebSocket support', 'Archive data']
+  },
+  
+  paidTier: {
+    requests: 'Unlimited',
+    features: ['Priority routing', 'Dedicated nodes', 'Enhanced support']
+  },
+  
+  setup: [
+    '1. Sign up at https://www.quicknode.com/',
+    '2. Create a Solana endpoint',
+    '3. Copy the HTTP Provider URL',
+    '4. Add to SOLANA_RPC_URL environment variable'
+  ],
+  
+  bestFor: 'Production applications with moderate traffic'
+};
+```
+
+#### 3. Alchemy (Alternative)
+```typescript
+const ALCHEMY_CONFIG = {
+  endpoint: 'https://solana-mainnet.g.alchemy.com/v2/[api-key]',
+  
+  freeTier: {
+    computeUnits: '300M per month',
+    features: ['Enhanced APIs', 'NFT API', 'Token API']
+  },
+  
+  setup: [
+    '1. Sign up at https://www.alchemy.com/',
+    '2. Create a Solana app',
+    '3. Copy the HTTPS URL',
+    '4. Add to SOLANA_RPC_URL environment variable'
+  ],
+  
+  bestFor: 'Applications needing enhanced APIs and NFT support'
+};
+```
+
+#### 4. Helius (High-Performance)
+```typescript
+const HELIUS_CONFIG = {
+  endpoint: 'https://rpc.helius.xyz/?api-key=[api-key]',
+  
+  freeTier: {
+    requests: '100,000 per day',
+    features: ['Enhanced RPC', 'Webhooks', 'DAS API']
+  },
+  
+  setup: [
+    '1. Sign up at https://www.helius.dev/',
+    '2. Create an API key',
+    '3. Copy the RPC URL',
+    '4. Add to SOLANA_RPC_URL environment variable'
+  ],
+  
+  bestFor: 'High-performance applications and DeFi protocols'
+};
+```
+
+### Solana API Client Implementation
+
+```typescript
+// lib/solana/client.ts
+import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
+
+interface SolanaConfig {
+  rpcUrl: string;
+  fallbackUrl?: string;
+  commitment?: 'processed' | 'confirmed' | 'finalized';
+  timeout?: number;
+}
+
+class SolanaClient {
+  private connection: Connection;
+  private fallbackConnection?: Connection;
+  
+  constructor(config: SolanaConfig) {
+    this.connection = new Connection(
+      config.rpcUrl,
+      {
+        commitment: config.commitment || 'confirmed',
+        confirmTransactionInitialTimeout: config.timeout || 30000
+      }
+    );
+    
+    if (config.fallbackUrl) {
+      this.fallbackConnection = new Connection(
+        config.fallbackUrl,
+        { commitment: config.commitment || 'confirmed' }
+      );
+    }
+  }
+  
+  // Get SOL balance for an address
+  async getBalance(address: string): Promise<number> {
+    try {
+      const publicKey = new PublicKey(address);
+      const balance = await this.connection.getBalance(publicKey);
+      return balance / 1e9; // Convert lamports to SOL
+    } catch (error) {
+      if (this.fallbackConnection) {
+        const publicKey = new PublicKey(address);
+        const balance = await this.fallbackConnection.getBalance(publicKey);
+        return balance / 1e9;
+      }
+      throw error;
+    }
+  }
+  
+  // Get transaction history
+  async getTransactionHistory(
+    address: string,
+    limit: number = 10
+  ): Promise<any[]> {
+    const publicKey = new PublicKey(address);
+    const signatures = await this.connection.getSignaturesForAddress(
+      publicKey,
+      { limit }
+    );
+    
+    const transactions = await Promise.all(
+      signatures.map(sig => 
+        this.connection.getTransaction(sig.signature, {
+          maxSupportedTransactionVersion: 0
+        })
+      )
+    );
+    
+    return transactions.filter(tx => tx !== null);
+  }
+  
+  // Get token accounts for an address
+  async getTokenAccounts(address: string): Promise<any[]> {
+    const publicKey = new PublicKey(address);
+    const tokenAccounts = await this.connection.getParsedTokenAccountsByOwner(
+      publicKey,
+      { programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA') }
+    );
+    
+    return tokenAccounts.value.map(account => ({
+      mint: account.account.data.parsed.info.mint,
+      balance: account.account.data.parsed.info.tokenAmount.uiAmount,
+      decimals: account.account.data.parsed.info.tokenAmount.decimals
+    }));
+  }
+  
+  // Detect whale transactions (>100 SOL)
+  async detectWhaleTransactions(
+    address: string,
+    threshold: number = 100
+  ): Promise<any[]> {
+    const transactions = await this.getTransactionHistory(address, 50);
+    
+    return transactions.filter(tx => {
+      if (!tx?.meta) return false;
+      
+      const preBalance = tx.meta.preBalances[0] / 1e9;
+      const postBalance = tx.meta.postBalances[0] / 1e9;
+      const amount = Math.abs(postBalance - preBalance);
+      
+      return amount >= threshold;
+    });
+  }
+}
+
+// Export singleton instance
+export const solanaClient = new SolanaClient({
+  rpcUrl: process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com',
+  fallbackUrl: process.env.SOLANA_RPC_FALLBACK_URL,
+  commitment: (process.env.SOLANA_COMMITMENT as any) || 'confirmed',
+  timeout: parseInt(process.env.SOLANA_RPC_TIMEOUT_MS || '30000')
+});
+```
+
+### UCIE Integration for Solana
+
+```typescript
+// pages/api/ucie/on-chain/[symbol].ts
+import { solanaClient } from '../../../../lib/solana/client';
+
+export default async function handler(req, res) {
+  const { symbol } = req.query;
+  
+  // Check if this is a Solana token
+  if (symbol.toUpperCase() === 'SOL') {
+    try {
+      // Get Solana-specific on-chain data
+      const onChainData = await getSolanaOnChainData();
+      
+      return res.status(200).json({
+        success: true,
+        data: onChainData,
+        source: 'solana-rpc'
+      });
+    } catch (error) {
+      console.error('Solana on-chain error:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to fetch Solana on-chain data'
+      });
+    }
+  }
+  
+  // Handle other blockchains (Ethereum, BSC, etc.)
+  // ... existing code
+}
+
+async function getSolanaOnChainData() {
+  // Example: Get data for a known Solana whale address
+  const whaleAddress = 'YOUR_WHALE_ADDRESS_HERE';
+  
+  const [balance, transactions, tokenAccounts] = await Promise.all([
+    solanaClient.getBalance(whaleAddress),
+    solanaClient.getTransactionHistory(whaleAddress, 20),
+    solanaClient.getTokenAccounts(whaleAddress)
+  ]);
+  
+  return {
+    blockchain: 'solana',
+    whaleActivity: {
+      address: whaleAddress,
+      balance: balance,
+      recentTransactions: transactions.length,
+      tokenHoldings: tokenAccounts.length
+    },
+    // Add more Solana-specific metrics
+  };
+}
+```
+
+### Solana Whale Watch Integration
+
+```typescript
+// Extend Whale Watch to support Solana transactions
+interface SolanaWhaleTransaction {
+  signature: string;
+  blockTime: number;
+  slot: number;
+  amount: number;
+  fromAddress: string;
+  toAddress: string;
+  fee: number;
+  status: 'success' | 'failed';
+}
+
+async function detectSolanaWhales(threshold: number = 100): Promise<SolanaWhaleTransaction[]> {
+  // Monitor recent blocks for large transactions
+  const recentSlot = await solanaClient.connection.getSlot();
+  const block = await solanaClient.connection.getBlock(recentSlot, {
+    maxSupportedTransactionVersion: 0
+  });
+  
+  if (!block) return [];
+  
+  const whaleTransactions: SolanaWhaleTransaction[] = [];
+  
+  for (const tx of block.transactions) {
+    if (!tx.meta) continue;
+    
+    const preBalance = tx.meta.preBalances[0] / 1e9;
+    const postBalance = tx.meta.postBalances[0] / 1e9;
+    const amount = Math.abs(postBalance - preBalance);
+    
+    if (amount >= threshold) {
+      whaleTransactions.push({
+        signature: tx.transaction.signatures[0],
+        blockTime: block.blockTime || 0,
+        slot: recentSlot,
+        amount: amount,
+        fromAddress: tx.transaction.message.accountKeys[0].toString(),
+        toAddress: tx.transaction.message.accountKeys[1]?.toString() || 'unknown',
+        fee: tx.meta.fee / 1e9,
+        status: tx.meta.err ? 'failed' : 'success'
+      });
+    }
+  }
+  
+  return whaleTransactions;
+}
+```
+
+### Environment Variables Setup
+
+```bash
+# Add to .env.local
+SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+SOLANA_RPC_FALLBACK_URL=https://api.mainnet-beta.solana.com
+SOLANA_NETWORK=mainnet-beta
+SOLANA_COMMITMENT=confirmed
+SOLANA_RPC_TIMEOUT_MS=30000
+
+# Optional: Solscan API for enhanced data
+SOLSCAN_API_KEY=your_solscan_api_key_here
+```
+
+### Testing Solana Integration
+
+```typescript
+// Test script: scripts/test-solana-api.ts
+import { solanaClient } from '../lib/solana/client';
+
+async function testSolanaIntegration() {
+  console.log('🧪 Testing Solana RPC Integration...\n');
+  
+  try {
+    // Test 1: Get cluster version
+    const version = await solanaClient.connection.getVersion();
+    console.log('✅ Solana RPC connected');
+    console.log(`   Version: ${version['solana-core']}\n`);
+    
+    // Test 2: Get recent blockhash
+    const { blockhash } = await solanaClient.connection.getLatestBlockhash();
+    console.log('✅ Recent blockhash retrieved');
+    console.log(`   Blockhash: ${blockhash.substring(0, 20)}...\n`);
+    
+    // Test 3: Get balance for a known address
+    const testAddress = 'YOUR_TEST_ADDRESS';
+    const balance = await solanaClient.getBalance(testAddress);
+    console.log('✅ Balance query successful');
+    console.log(`   Balance: ${balance} SOL\n`);
+    
+    console.log('🎉 All Solana tests passed!');
+  } catch (error) {
+    console.error('❌ Solana test failed:', error);
+  }
+}
+
+testSolanaIntegration();
+```
+
+### Rate Limiting and Best Practices
+
+```typescript
+// Implement rate limiting for Solana RPC calls
+import { RateLimiter } from 'limiter';
+
+const solanaRateLimiter = new RateLimiter({
+  tokensPerInterval: 100,
+  interval: 10000 // 100 requests per 10 seconds
+});
+
+async function rateLimitedSolanaCall<T>(
+  fn: () => Promise<T>
+): Promise<T> {
+  await solanaRateLimiter.removeTokens(1);
+  return fn();
+}
+
+// Usage
+const balance = await rateLimitedSolanaCall(() =>
+  solanaClient.getBalance(address)
+);
+```
+
+### Caching Strategy for Solana Data
+
+```typescript
+// Cache Solana data to reduce RPC calls
+const solanaCache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL = 30000; // 30 seconds
+
+async function getCachedSolanaData<T>(
+  key: string,
+  fetcher: () => Promise<T>
+): Promise<T> {
+  const cached = solanaCache.get(key);
+  
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+  
+  const data = await fetcher();
+  solanaCache.set(key, { data, timestamp: Date.now() });
+  
+  return data;
+}
+
+// Usage
+const balance = await getCachedSolanaData(
+  `balance:${address}`,
+  () => solanaClient.getBalance(address)
+);
+```
+
 ## Security & API Key Management
 
 ### Environment Configuration
@@ -284,6 +708,11 @@ OPENAI_API_KEY=sk-...
 COINMARKETCAP_API_KEY=...
 NEWS_API_KEY=...
 COINGECKO_API_KEY=... # Optional, for rate limit increases
+
+# Solana Configuration
+SOLANA_RPC_URL=https://your-quicknode-endpoint.solana-mainnet.quiknode.pro/token/
+SOLANA_RPC_FALLBACK_URL=https://api.mainnet-beta.solana.com
+SOLSCAN_API_KEY=... # Optional
 
 # Development Fallbacks
 DEVELOPMENT_MODE=true

@@ -30,6 +30,7 @@ import RiskAssessmentPanel from './RiskAssessmentPanel';
 import DerivativesPanel from './DerivativesPanel';
 import DeFiMetricsPanel from './DeFiMetricsPanel';
 import IntelligenceReportGenerator from './IntelligenceReportGenerator';
+import DataPreviewModal from './DataPreviewModal';
 import { useProgressiveLoading } from '../../hooks/useProgressiveLoading';
 import { useUCIEMobile, useAdaptiveRequestStrategy } from '../../hooks/useUCIEMobile';
 import { useSwipeGesture } from '../../hooks/useSwipeGesture';
@@ -78,6 +79,10 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
   const [realTimeEnabled, setRealTimeEnabled] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [collapsedSections, setCollapsedSections] = useState<Set<TabId>>(new Set());
+  
+  // Data Preview Modal State
+  const [showPreview, setShowPreview] = useState(true); // Show preview on mount
+  const [proceedWithAnalysis, setProceedWithAnalysis] = useState(false);
 
   // Mobile capabilities
   const mobileCapabilities = useUCIEMobile();
@@ -117,7 +122,7 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
     },
   });
 
-  // Progressive loading
+  // Progressive loading - only start if user proceeded with analysis
   const {
     phases: loadingPhases,
     loading,
@@ -127,6 +132,7 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
     refresh: refreshAnalysis,
   } = useProgressiveLoading({
     symbol,
+    enabled: proceedWithAnalysis, // Only load if user clicked Continue
     onPhaseComplete: (phase, data) => {
       console.log(`Phase ${phase} completed with data:`, data);
       setLastUpdate(new Date());
@@ -144,6 +150,20 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
       setError(`Phase ${phase} failed: ${errorMsg}`);
     },
   });
+
+  // Handle preview modal actions
+  const handlePreviewContinue = () => {
+    setShowPreview(false);
+    setProceedWithAnalysis(true);
+    haptic.buttonPress();
+  };
+
+  const handlePreviewCancel = () => {
+    setShowPreview(false);
+    if (onBack) {
+      onBack();
+    }
+  };
 
   // Real-time updates (adaptive based on connection and device)
   useEffect(() => {
@@ -465,6 +485,20 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
       </div>
     );
   };
+
+  // Show Data Preview Modal first
+  if (showPreview) {
+    return (
+      <>
+        <DataPreviewModal
+          symbol={symbol}
+          isOpen={showPreview}
+          onContinue={handlePreviewContinue}
+          onCancel={handlePreviewCancel}
+        />
+      </>
+    );
+  }
 
   if (loading) {
     return (

@@ -39,6 +39,7 @@ export interface LoadingPhase {
 
 interface ProgressiveLoadingOptions {
   symbol: string;
+  enabled?: boolean; // Only start loading if enabled (default: true)
   onPhaseComplete?: (phase: number, data: any) => void;
   onAllComplete?: (allData: any) => void;
   onError?: (phase: number, error: string) => void;
@@ -46,6 +47,7 @@ interface ProgressiveLoadingOptions {
 
 export function useProgressiveLoading({
   symbol,
+  enabled = true, // Default to true for backward compatibility
   onPhaseComplete,
   onAllComplete,
   onError
@@ -400,10 +402,12 @@ export function useProgressiveLoading({
     console.log('🎉 All phases completed!');
   }, [phases, fetchPhaseData, onAllComplete, transformUCIEData]);
 
-  // Start loading on mount
+  // Start loading on mount (only if enabled)
   useEffect(() => {
-    loadAllPhases();
-  }, [symbol]); // Only re-run when symbol changes
+    if (enabled) {
+      loadAllPhases();
+    }
+  }, [symbol, enabled]); // Re-run when symbol or enabled changes
 
   const refresh = useCallback(() => {
     setPhases(prev => prev.map(p => ({ ...p, progress: 0, complete: false, data: undefined, error: undefined })));
