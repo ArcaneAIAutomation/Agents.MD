@@ -15,6 +15,7 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
+import { setCachedAnalysis, getCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -113,6 +114,80 @@ export default async function handler(
     const collectionTime = Date.now() - startTime;
 
     console.log(`✅ Data collection completed in ${collectionTime}ms`);
+
+    // ✅ CRITICAL: Store collected data in database for OpenAI and Caesar access
+    console.log(`💾 Storing API responses in database...`);
+    const storagePromises = [];
+
+    if (collectedData.marketData?.success) {
+      storagePromises.push(
+        setCachedAnalysis(
+          normalizedSymbol,
+          'market-data',
+          collectedData.marketData,
+          1800, // 30 minutes TTL
+          collectedData.marketData.dataQuality || 0
+        ).catch(err => console.error('Failed to cache market data:', err))
+      );
+    }
+
+    if (collectedData.sentiment?.success) {
+      storagePromises.push(
+        setCachedAnalysis(
+          normalizedSymbol,
+          'sentiment',
+          collectedData.sentiment,
+          300, // 5 minutes TTL
+          collectedData.sentiment.dataQuality || 0
+        ).catch(err => console.error('Failed to cache sentiment:', err))
+      );
+    }
+
+    if (collectedData.technical?.success) {
+      storagePromises.push(
+        setCachedAnalysis(
+          normalizedSymbol,
+          'technical',
+          collectedData.technical,
+          60, // 1 minute TTL
+          collectedData.technical.dataQuality || 0
+        ).catch(err => console.error('Failed to cache technical:', err))
+      );
+    }
+
+    if (collectedData.news?.success) {
+      storagePromises.push(
+        setCachedAnalysis(
+          normalizedSymbol,
+          'news',
+          collectedData.news,
+          300, // 5 minutes TTL
+          collectedData.news.dataQuality || 0
+        ).catch(err => console.error('Failed to cache news:', err))
+      );
+    }
+
+    if (collectedData.onChain?.success) {
+      storagePromises.push(
+        setCachedAnalysis(
+          normalizedSymbol,
+          'on-chain',
+          collectedData.onChain,
+          300, // 5 minutes TTL
+          collectedData.onChain.dataQuality || 0
+        ).catch(err => console.error('Failed to cache on-chain:', err))
+      );
+    }
+
+    // Store all in parallel (non-blocking)
+    Promise.allSettled(storagePromises).then(results => {
+      const successful = results.filter(r => r.status === 'fulfilled').length;
+      const failed = results.filter(r => r.status === 'rejected').length;
+      console.log(`💾 Stored ${successful}/${storagePromises.length} API responses in database`);
+      if (failed > 0) {
+        console.warn(`⚠️ Failed to store ${failed} responses`);
+      }
+    });
 
     // Calculate data quality
     const apiStatus = calculateAPIStatus(collectedData);
