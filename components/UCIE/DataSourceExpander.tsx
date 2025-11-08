@@ -195,13 +195,63 @@ function renderMarketData(data: any) {
 function renderSentimentData(data: any) {
   const sentiment = data.sentiment;
   const sources = data.sources;
+  const distribution = sentiment?.distribution;
+  
+  // Determine trend based on score
+  const getTrend = (score: number) => {
+    if (score > 5) return 'Bullish';
+    if (score < -5) return 'Bearish';
+    return 'Neutral';
+  };
+  
+  const trend = getTrend(sentiment?.overallScore || 0);
+  const trendColor = trend === 'Bullish' ? 'text-bitcoin-orange' : 
+                     trend === 'Bearish' ? 'text-bitcoin-white-60' : 
+                     'text-bitcoin-white';
   
   return (
     <div className="space-y-3">
-      <DataRow label="Overall Score" value={`${sentiment?.overallScore || 'N/A'}/100`} />
-      <DataRow label="Trend" value={sentiment?.trend || 'N/A'} />
-      <DataRow label="24h Mentions" value={sentiment?.mentions24h?.toLocaleString() || 'N/A'} />
+      <DataRow 
+        label="Overall Score" 
+        value={sentiment?.overallScore !== undefined ? `${sentiment.overallScore}/100` : 'N/A'} 
+      />
+      <div className="flex justify-between items-center py-2 border-b border-bitcoin-orange-20">
+        <span className="text-sm text-bitcoin-white-60">Trend</span>
+        <span className={`text-sm font-mono font-semibold ${trendColor}`}>{trend}</span>
+      </div>
+      <DataRow 
+        label="Confidence" 
+        value={sentiment?.confidence ? `${sentiment.confidence}%` : 'N/A'} 
+      />
       <DataRow label="Data Quality" value={`${data.dataQuality || 0}%`} />
+      
+      {distribution && (
+        <div className="mt-3 pt-3 border-t border-bitcoin-orange-20">
+          <p className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-2">
+            Sentiment Distribution
+          </p>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-bitcoin-white-80">Positive</span>
+              <span className="text-sm font-mono font-semibold text-bitcoin-orange">
+                {distribution.positive?.toFixed(1)}%
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-bitcoin-white-80">Neutral</span>
+              <span className="text-sm font-mono font-semibold text-bitcoin-white">
+                {distribution.neutral?.toFixed(1)}%
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-bitcoin-white-80">Negative</span>
+              <span className="text-sm font-mono font-semibold text-bitcoin-white-60">
+                {distribution.negative?.toFixed(1)}%
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
       
       {sources && (
         <div className="mt-3 pt-3 border-t border-bitcoin-orange-20">
@@ -311,35 +361,129 @@ function renderNewsData(data: any) {
 }
 
 function renderOnChainData(data: any) {
+  const networkMetrics = data.networkMetrics;
+  const whaleActivity = data.whaleActivity;
+  const mempoolAnalysis = data.mempoolAnalysis;
+  
+  // Format large numbers for readability
+  const formatHashRate = (hashRate: number) => {
+    const exaHash = hashRate / 1e18;
+    return `${exaHash.toFixed(2)} EH/s`;
+  };
+  
+  const formatDifficulty = (difficulty: number) => {
+    const trillion = difficulty / 1e12;
+    return `${trillion.toFixed(2)}T`;
+  };
+  
   return (
     <div className="space-y-3">
       <DataRow label="Data Quality" value={`${data.dataQuality || 0}%`} />
       
-      {data.holderDistribution?.concentration && (
+      {networkMetrics && (
         <>
-          <DataRow 
-            label="Top 10 Holders" 
-            value={`${data.holderDistribution.concentration.top10Percentage?.toFixed(2)}%`} 
-          />
-          <DataRow 
-            label="Distribution Score" 
-            value={`${data.holderDistribution.concentration.distributionScore}/100`} 
-          />
+          <div className="mt-3 pt-3 border-t border-bitcoin-orange-20">
+            <p className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-2">
+              Network Health
+            </p>
+            <div className="space-y-2">
+              <DataRow 
+                label="Hash Rate" 
+                value={formatHashRate(networkMetrics.hashRate)} 
+              />
+              <DataRow 
+                label="Mining Difficulty" 
+                value={formatDifficulty(networkMetrics.difficulty)} 
+              />
+              <DataRow 
+                label="Average Block Time" 
+                value={`${networkMetrics.blockTime?.toFixed(2)} min`} 
+              />
+              <DataRow 
+                label="Circulating Supply" 
+                value={`${networkMetrics.totalCirculating?.toLocaleString()} BTC`} 
+              />
+            </div>
+          </div>
         </>
       )}
       
-      {data.whaleActivity && (
-        <div className="p-3 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded">
-          <p className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-1">
-            Whale Activity
+      {whaleActivity?.summary && (
+        <div className="mt-3 pt-3 border-t border-bitcoin-orange-20">
+          <p className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-2">
+            Whale Activity (Last Hour)
           </p>
-          <p className="text-lg font-mono font-bold text-bitcoin-orange">
-            Detected
-          </p>
+          <div className="space-y-2">
+            <DataRow 
+              label="Large Transactions" 
+              value={whaleActivity.summary.totalTransactions?.toString() || '0'} 
+            />
+            <DataRow 
+              label="Total Value" 
+              value={`$${whaleActivity.summary.totalValueUSD?.toLocaleString(undefined, {maximumFractionDigits: 0}) || '0'}`} 
+            />
+            <DataRow 
+              label="Total BTC Moved" 
+              value={`${whaleActivity.summary.totalValueBTC?.toFixed(2) || '0'} BTC`} 
+            />
+            <DataRow 
+              label="Largest Transaction" 
+              value={`$${whaleActivity.summary.largestTransaction?.toLocaleString(undefined, {maximumFractionDigits: 0}) || '0'}`} 
+            />
+          </div>
+          
+          {whaleActivity.transactions && whaleActivity.transactions.length > 0 && (
+            <div className="mt-3">
+              <p className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-2">
+                Recent Whale Transactions
+              </p>
+              <div className="space-y-2">
+                {whaleActivity.transactions.slice(0, 3).map((tx: any, index: number) => (
+                  <div key={index} className="p-2 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded">
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="text-xs text-bitcoin-white-60">
+                        {tx.valueBTC?.toFixed(2)} BTC
+                      </span>
+                      <span className="text-xs font-mono font-semibold text-bitcoin-orange">
+                        ${tx.valueUSD?.toLocaleString(undefined, {maximumFractionDigits: 0})}
+                      </span>
+                    </div>
+                    <div className="text-xs text-bitcoin-white-60 font-mono truncate">
+                      {tx.hash?.substring(0, 16)}...
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
       
-      {!data.holderDistribution && !data.whaleActivity && (
+      {mempoolAnalysis && (
+        <div className="mt-3 pt-3 border-t border-bitcoin-orange-20">
+          <p className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-2">
+            Mempool Status
+          </p>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-bitcoin-white-60">Congestion</span>
+              <span className={`text-sm font-semibold uppercase ${
+                mempoolAnalysis.congestion === 'low' ? 'text-bitcoin-orange' :
+                mempoolAnalysis.congestion === 'medium' ? 'text-bitcoin-white' :
+                'text-bitcoin-white-60'
+              }`}>
+                {mempoolAnalysis.congestion}
+              </span>
+            </div>
+            <DataRow 
+              label="Recommended Fee" 
+              value={`${mempoolAnalysis.recommendedFee} sat/vB`} 
+            />
+          </div>
+        </div>
+      )}
+      
+      {!networkMetrics && !whaleActivity && !mempoolAnalysis && (
         <p className="text-sm text-bitcoin-white-60 italic">
           Limited on-chain data available
         </p>
