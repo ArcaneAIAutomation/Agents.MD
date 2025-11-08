@@ -95,11 +95,11 @@ export default async function handler(
     console.log(`🔍 Caesar research request for ${normalizedSymbol}`);
 
     // Check database cache first
-    const cachedData = await getCachedAnalysis(normalizedSymbol, 'research');
-    if (cachedData) {
+    const cachedResearch = await getCachedAnalysis(normalizedSymbol, 'research');
+    if (cachedResearch) {
       return res.status(200).json({
         success: true,
-        data: cachedData,
+        data: cachedResearch,
         cached: true,
         timestamp: new Date().toISOString()
       });
@@ -110,21 +110,21 @@ export default async function handler(
     
     // ✅ Retrieve ALL cached data from database for Caesar context
     console.log(`📊 Retrieving all cached data for Caesar AI...`);
-    const cachedData = await getAllCachedDataForCaesar(normalizedSymbol);
+    const allCachedData = await getAllCachedDataForCaesar(normalizedSymbol);
     
     // Build comprehensive context for Caesar
     let contextData: any = {
       // OpenAI summary of collected data
-      openaiSummary: cachedData.openaiSummary?.summaryText || null,
-      dataQuality: cachedData.openaiSummary?.dataQuality || 0,
-      apiStatus: cachedData.openaiSummary?.apiStatus || null,
+      openaiSummary: allCachedData.openaiSummary?.summaryText || null,
+      dataQuality: allCachedData.openaiSummary?.dataQuality || 0,
+      apiStatus: allCachedData.openaiSummary?.apiStatus || null,
       
       // All cached analysis data
-      marketData: cachedData.marketData,
-      sentiment: cachedData.sentiment,
-      technical: cachedData.technical,
-      news: cachedData.news,
-      onChain: cachedData.onChain
+      marketData: allCachedData.marketData,
+      sentiment: allCachedData.sentiment,
+      technical: allCachedData.technical,
+      news: allCachedData.news,
+      onChain: allCachedData.onChain
     };
     
     // Also retrieve phase data if session ID provided
