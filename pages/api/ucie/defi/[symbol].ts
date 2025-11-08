@@ -125,7 +125,8 @@ export default async function handler(
         timestamp: new Date().toISOString(),
       };
 
-      setCachedData(cacheKey, response);
+      // Cache in database
+      await setCachedAnalysis(normalizedSymbol, 'defi', response, CACHE_TTL, 0);
 
       return res.status(200).json({
         success: true,
@@ -133,32 +134,16 @@ export default async function handler(
       });
     }
 
-    // Fetch DeFi metrics in parallel
-    const [
-      defiMetrics,
-      githubRepos,
-    ] = await Promise.allSettled([
-      fetchDeFiMetrics(normalizedSymbol),
-      searchGitHubRepos(normalizedSymbol),
-    ]);
-
-    // Extract results
-    const metrics = defiMetrics.status === 'fulfilled' ? defiMetrics.value : null;
-    const repoNames = githubRepos.status === 'fulfilled' ? githubRepos.value : [];
-
-    // Fetch GitHub data for found repos
-    let githubData = [];
-    if (repoNames.length > 0) {
-      const repoPromises = repoNames.slice(0, 3).map(async (repoName) => {
-        const [owner, repo] = repoName.split('/');
-        return fetchGitHubRepo(owner, repo);
-      });
-
-      const repoResults = await Promise.allSettled(repoPromises);
-      githubData = repoResults
-        .filter((r): r is PromiseFulfilledResult<any> => r.status === 'fulfilled' && r.value !== null)
-        .map(r => r.value);
+    // Fetch DeFi metrics
+    let metrics = null;
+    try {
+      metrics = await fetchDeFiMetrics(normalizedSymbol);
+    } catch (error) {
+      console.warn(`fetchDeFiMetrics failed for ${normalizedSymbol}:`, error);
     }
+
+    // GitHub data disabled for now (requires GitHub API implementation)
+    const githubData: any[] = [];
 
     // Analyze TVL
     let tvlAnalysis = null;
