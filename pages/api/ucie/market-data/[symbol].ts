@@ -17,15 +17,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { aggregateExchangePrices, type PriceAggregation } from '../../../../lib/ucie/priceAggregation';
 import { coinGeckoClient, coinMarketCapClient, type MarketData } from '../../../../lib/ucie/marketDataClients';
+import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 
-// In-memory cache
-interface CacheEntry {
-  data: MarketDataResponse;
-  timestamp: number;
-}
-
-const cache = new Map<string, CacheEntry>();
-const CACHE_TTL = 30000; // 30 seconds
+// Cache TTL: 30 seconds
+const CACHE_TTL = 30; // seconds
 
 export interface MarketDataResponse {
   success: boolean;
@@ -51,38 +46,7 @@ export interface MarketDataResponse {
   error?: string;
 }
 
-/**
- * Get cached data if available and fresh
- */
-function getCachedData(symbol: string): MarketDataResponse | null {
-  const cached = cache.get(symbol.toUpperCase());
-  
-  if (!cached) {
-    return null;
-  }
-
-  const age = Date.now() - cached.timestamp;
-  
-  if (age > CACHE_TTL) {
-    cache.delete(symbol.toUpperCase());
-    return null;
-  }
-
-  return {
-    ...cached.data,
-    cached: true,
-  };
-}
-
-/**
- * Set cache data
- */
-function setCacheData(symbol: string, data: MarketDataResponse): void {
-  cache.set(symbol.toUpperCase(), {
-    data,
-    timestamp: Date.now(),
-  });
-}
+// Cache functions removed - now using database cache via cacheUtils
 
 /**
  * Fetch comprehensive market data with fallback
@@ -144,10 +108,13 @@ export default async function handler(
 
   const symbolUpper = symbol.toUpperCase();
 
-  // Check cache first
-  const cachedData = getCachedData(symbolUpper);
+  // Check database cache first
+  const cachedData = await getCachedAnalysis(symbolUpper, 'market-data');
   if (cachedData) {
-    return res.status(200).json(cachedData);
+    return res.status(200).json({
+      ...cachedData,
+      cached: true,
+    });
   }
 
   try {
@@ -207,8 +174,8 @@ export default async function handler(
       },
     };
 
-    // Cache the response
-    setCacheData(symbolUpper, response);
+    // Cache the response in database
+    await setCachedAnalysis(symbolUpper, 'market-data', response, CACHE_TTL, overallQuality);
 
     return res.status(200).json(response);
 

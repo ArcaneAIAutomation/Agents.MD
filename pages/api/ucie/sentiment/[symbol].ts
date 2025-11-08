@@ -26,6 +26,7 @@ import {
   trackInfluencers,
   type InfluencerMetrics,
 } from '../../../../lib/ucie/influencerTracking';
+import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 
 // ============================================================================
 // Type Definitions
@@ -53,40 +54,8 @@ interface ErrorResponse {
   symbol?: string;
 }
 
-// ============================================================================
-// Cache Configuration
-// ============================================================================
-
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-const cache = new Map<string, { data: SentimentResponse; timestamp: number }>();
-
-/**
- * Get cached sentiment data if available and fresh
- */
-function getCachedData(symbol: string): SentimentResponse | null {
-  const cached = cache.get(symbol.toUpperCase());
-  
-  if (!cached) return null;
-  
-  const age = Date.now() - cached.timestamp;
-  
-  if (age > CACHE_TTL) {
-    cache.delete(symbol.toUpperCase());
-    return null;
-  }
-  
-  return { ...cached.data, cached: true };
-}
-
-/**
- * Cache sentiment data
- */
-function setCachedData(symbol: string, data: SentimentResponse): void {
-  cache.set(symbol.toUpperCase(), {
-    data: { ...data, cached: false },
-    timestamp: Date.now(),
-  });
-}
+// Cache TTL: 5 minutes
+const CACHE_TTL = 5 * 60; // seconds
 
 // ============================================================================
 // Data Quality Calculation
@@ -157,10 +126,13 @@ export default async function handler(
 
     const normalizedSymbol = symbol.toUpperCase();
 
-    // Check cache first
-    const cachedData = getCachedData(normalizedSymbol);
+    // Check database cache first
+    const cachedData = await getCachedAnalysis(normalizedSymbol, 'sentiment');
     if (cachedData) {
-      return res.status(200).json(cachedData);
+      return res.status(200).json({
+        ...cachedData,
+        cached: true,
+      });
     }
 
     // Fetch social sentiment data from all sources
@@ -205,8 +177,8 @@ export default async function handler(
       cached: false,
     };
 
-    // Cache the response
-    setCachedData(normalizedSymbol, response);
+    // Cache the response in database
+    await setCachedAnalysis(normalizedSymbol, 'sentiment', response, CACHE_TTL, dataQuality);
 
     // Return response
     return res.status(200).json(response);

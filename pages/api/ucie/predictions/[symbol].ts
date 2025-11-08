@@ -10,6 +10,7 @@ import { generatePricePredictions, type PredictionResult, type HistoricalPrice }
 import { detectPatterns, matchHistoricalPatterns, type PatternMatchingResult } from '../../../../lib/ucie/patternMatching';
 import { generateMultiTimeframeScenarios, type ScenarioAnalysis, type MarketConditions } from '../../../../lib/ucie/scenarioAnalysis';
 import { calculateModelPerformance, storePrediction, type ModelPerformance } from '../../../../lib/ucie/modelAccuracy';
+import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 
 interface PredictionsResponse {
   success: boolean;
@@ -31,9 +32,8 @@ interface PredictionsResponse {
   cached?: boolean;
 }
 
-// In-memory cache (1 hour TTL)
-const cache = new Map<string, { data: any; timestamp: number }>();
-const CACHE_TTL = 60 * 60 * 1000; // 1 hour
+// Cache TTL: 1 hour
+const CACHE_TTL = 60 * 60; // seconds
 
 /**
  * Get CoinGecko ID from symbol
@@ -194,14 +194,12 @@ export default async function handler(
 
     const symbolUpper = symbol.toUpperCase();
 
-    // Check cache
-    const cacheKey = `predictions:${symbolUpper}`;
-    const cached = cache.get(cacheKey);
-    
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    // Check database cache
+    const cachedData = await getCachedAnalysis(symbolUpper, 'predictions');
+    if (cachedData) {
       return res.status(200).json({
         success: true,
-        data: cached.data,
+        data: cachedData,
         cached: true
       });
     }
@@ -290,11 +288,8 @@ export default async function handler(
       lastUpdated: new Date().toISOString()
     };
 
-    // Cache the response
-    cache.set(cacheKey, {
-      data: responseData,
-      timestamp: Date.now()
-    });
+    // Cache the response in database
+    await setCachedAnalysis(symbolUpper, 'predictions', responseData, CACHE_TTL, predictions.dataQuality);
 
     // Return response
     return res.status(200).json({

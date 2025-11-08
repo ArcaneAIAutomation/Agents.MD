@@ -21,6 +21,10 @@ import {
   analyzeWalletBehavior,
   type WalletClassification
 } from '../../../../lib/ucie/walletBehavior';
+import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
+
+// Cache TTL: 5 minutes
+const CACHE_TTL = 5 * 60; // seconds
 
 interface OnChainAnalyticsResponse {
   success: boolean;
@@ -314,6 +318,15 @@ export default async function handler(
   }
 
   const symbolUpper = symbol.toUpperCase();
+
+  // Check database cache first
+  const cachedData = await getCachedAnalysis(symbolUpper, 'on-chain');
+  if (cachedData) {
+    return res.status(200).json({
+      ...cachedData,
+      timestamp: new Date().toISOString() // Update timestamp
+    });
+  }
   
   // Get token contract address and chain
   const tokenContract = TOKEN_CONTRACTS[symbolUpper];
@@ -457,7 +470,10 @@ export default async function handler(
       timestamp: new Date().toISOString()
     };
 
-    // Cache for 5 minutes
+    // Cache the response in database
+    await setCachedAnalysis(symbolUpper, 'on-chain', response, CACHE_TTL, dataQuality);
+
+    // Set HTTP cache headers
     res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
     
     return res.status(200).json(response);

@@ -75,6 +75,19 @@ export default function Header() {
               {ethChange >= 0 ? '+' : ''}{ethChange}%
             </span>
           </div>
+          
+          {/* CoinGecko Attribution - Mobile */}
+          <div className="flex-shrink-0">
+            <a 
+              href="https://www.coingecko.com?utm_source=bitcoin-sovereign-tech&utm_medium=referral"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10px] text-bitcoin-white-60 hover:text-bitcoin-orange transition-colors whitespace-nowrap"
+              aria-label="Data by CoinGecko"
+            >
+              via CG
+            </a>
+          </div>
         </div>
       </div>
 

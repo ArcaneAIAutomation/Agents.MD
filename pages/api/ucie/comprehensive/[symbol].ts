@@ -160,6 +160,7 @@ export default async function handler(
     console.log(`🔍 Comprehensive analysis fetching from: ${baseUrl}`);
     
     // Fetch all data sources in parallel with timeouts
+    // News has longer timeout (70s) due to multiple source aggregation
     const [
       marketDataResult,
       technicalResult,
@@ -170,7 +171,7 @@ export default async function handler(
       fetchWithTimeout(`${baseUrl}/api/ucie/market-data/${symbolUpper}`, 8000),
       fetchWithTimeout(`${baseUrl}/api/ucie/technical/${symbolUpper}`, 8000),
       fetchWithTimeout(`${baseUrl}/api/ucie/sentiment/${symbolUpper}`, 8000),
-      fetchWithTimeout(`${baseUrl}/api/ucie/news/${symbolUpper}`, 8000),
+      fetchWithTimeout(`${baseUrl}/api/ucie/news/${symbolUpper}`, 70000), // 70 seconds for news
       fetchWithTimeout(`${baseUrl}/api/ucie/risk/${symbolUpper}`, 8000)
     ]);
     

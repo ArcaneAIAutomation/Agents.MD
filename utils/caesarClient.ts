@@ -159,27 +159,46 @@ export const Caesar = {
   /**
    * Poll a research job until completed (with timeout)
    * Returns the completed job or throws on timeout/failure
+   * 
+   * Default: 10 attempts at 60-second intervals = 10 minutes max
    */
   pollUntilComplete: async (
     jobId: string,
-    maxAttempts = 60,
-    intervalMs = 2000
+    maxAttempts = 10,
+    intervalMs = 60000
   ): Promise<ResearchJob> => {
+    console.log(`🔄 Starting Caesar polling: jobId=${jobId}, maxAttempts=${maxAttempts}, interval=${intervalMs}ms`);
+    
     for (let i = 0; i < maxAttempts; i++) {
+      console.log(`📡 Caesar poll attempt ${i + 1}/${maxAttempts} for job ${jobId}`);
+      
       const job = await Caesar.getResearch(jobId);
       
+      console.log(`📊 Caesar job status: ${job.status}`);
+      
       if (job.status === 'completed') {
+        console.log(`✅ Caesar job ${jobId} completed successfully`);
         return job;
       }
       
       if (job.status === 'failed') {
+        console.error(`❌ Caesar job ${jobId} failed`);
         throw new Error(`Research job ${jobId} failed`);
       }
       
-      // Wait before next poll
-      await new Promise(resolve => setTimeout(resolve, intervalMs));
+      if (job.status === 'cancelled') {
+        console.error(`❌ Caesar job ${jobId} was cancelled`);
+        throw new Error(`Research job ${jobId} was cancelled`);
+      }
+      
+      // Wait before next poll (unless this is the last attempt)
+      if (i < maxAttempts - 1) {
+        console.log(`⏳ Waiting ${intervalMs / 1000}s before next poll...`);
+        await new Promise(resolve => setTimeout(resolve, intervalMs));
+      }
     }
     
+    console.error(`⏰ Caesar job ${jobId} timed out after ${maxAttempts} attempts (${(maxAttempts * intervalMs) / 60000} minutes)`);
     throw new Error(`Research job ${jobId} timed out after ${maxAttempts} attempts`);
   },
 };

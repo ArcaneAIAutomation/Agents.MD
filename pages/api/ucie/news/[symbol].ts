@@ -17,6 +17,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { fetchAllNews } from '../../../../lib/ucie/newsFetching';
 import { assessMultipleNews, generateNewsSummary, AssessedNewsArticle } from '../../../../lib/ucie/newsImpactAssessment';
+import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 
 interface NewsResponse {
   success: boolean;
@@ -42,9 +43,8 @@ interface ErrorResponse {
   symbol?: string;
 }
 
-// In-memory cache
-const cache = new Map<string, { data: NewsResponse; timestamp: number }>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+// Cache TTL: 5 minutes
+const CACHE_TTL = 5 * 60; // seconds
 
 export default async function handler(
   req: NextApiRequest,
@@ -80,14 +80,12 @@ export default async function handler(
   }
 
   try {
-    // Check cache first
-    const cacheKey = `news-${symbolUpper}`;
-    const cached = cache.get(cacheKey);
-    
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    // Check database cache first
+    const cachedData = await getCachedAnalysis(symbolUpper, 'news');
+    if (cachedData) {
       console.log(`[UCIE News] Cache hit for ${symbolUpper}`);
       return res.status(200).json({
-        ...cached.data,
+        ...cachedData,
         cached: true
       });
     }
@@ -138,14 +136,8 @@ export default async function handler(
       cached: false
     };
 
-    // Cache the response
-    cache.set(cacheKey, {
-      data: response,
-      timestamp: Date.now()
-    });
-
-    // Clean up old cache entries
-    cleanupCache();
+    // Cache the response in database
+    await setCachedAnalysis(symbolUpper, 'news', response, CACHE_TTL, dataQuality);
 
     console.log(`[UCIE News] Successfully fetched and assessed ${assessedArticles.length} articles for ${symbolUpper}`);
 

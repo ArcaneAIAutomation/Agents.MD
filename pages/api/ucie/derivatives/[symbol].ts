@@ -22,20 +22,15 @@ import { analyzeFundingRates } from '../../../../lib/ucie/fundingRateAnalysis';
 import { analyzeOpenInterest } from '../../../../lib/ucie/openInterestTracking';
 import { analyzeLiquidations } from '../../../../lib/ucie/liquidationDetection';
 import { analyzeLongShortRatios } from '../../../../lib/ucie/longShortAnalysis';
+import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 
 import type { FundingRateAnalysis } from '../../../../lib/ucie/fundingRateAnalysis';
 import type { OpenInterestAnalysis } from '../../../../lib/ucie/openInterestTracking';
 import type { LiquidationAnalysis } from '../../../../lib/ucie/liquidationDetection';
 import type { LongShortAnalysis } from '../../../../lib/ucie/longShortAnalysis';
 
-// In-memory cache
-interface CacheEntry {
-  data: DerivativesDataResponse;
-  timestamp: number;
-}
-
-const cache = new Map<string, CacheEntry>();
-const CACHE_TTL = 300000; // 5 minutes
+// Cache TTL: 5 minutes
+const CACHE_TTL = 5 * 60; // seconds
 
 export interface DerivativesDataResponse {
   success: boolean;
@@ -52,38 +47,7 @@ export interface DerivativesDataResponse {
   error?: string;
 }
 
-/**
- * Get cached data if available and fresh
- */
-function getCachedData(symbol: string): DerivativesDataResponse | null {
-  const cached = cache.get(symbol.toUpperCase());
-  
-  if (!cached) {
-    return null;
-  }
-
-  const age = Date.now() - cached.timestamp;
-  
-  if (age > CACHE_TTL) {
-    cache.delete(symbol.toUpperCase());
-    return null;
-  }
-
-  return {
-    ...cached.data,
-    cached: true,
-  };
-}
-
-/**
- * Set cache data
- */
-function setCacheData(symbol: string, data: DerivativesDataResponse): void {
-  cache.set(symbol.toUpperCase(), {
-    data,
-    timestamp: Date.now(),
-  });
-}
+// Cache functions removed - now using database cache via cacheUtils
 
 /**
  * Calculate overall risk level
@@ -197,10 +161,13 @@ export default async function handler(
 
   const symbolUpper = symbol.toUpperCase();
 
-  // Check cache first
-  const cachedData = getCachedData(symbolUpper);
+  // Check database cache first
+  const cachedData = await getCachedAnalysis(symbolUpper, 'derivatives');
   if (cachedData) {
-    return res.status(200).json(cachedData);
+    return res.status(200).json({
+      ...cachedData,
+      cached: true
+    });
   }
 
   try {
@@ -344,8 +311,8 @@ export default async function handler(
       timestamp: new Date().toISOString()
     };
 
-    // Cache the response
-    setCacheData(symbolUpper, response);
+    // Cache the response in database
+    await setCachedAnalysis(symbolUpper, 'derivatives', response, CACHE_TTL, dataQuality);
 
     // Return success
     return res.status(200).json(response);

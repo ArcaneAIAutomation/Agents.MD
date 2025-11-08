@@ -119,6 +119,23 @@
       },
       "disabled": true,
       "autoApprove": []
+    },
+    "lunarcrush": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@lunarcrush/mcp-server"
+      ],
+      "env": {
+        "LUNARCRUSH_API_KEY": "r1pe78gm2tohk3mwp36cqj7hvmhhln82d856ck5"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "get_coin_data",
+        "get_market_data",
+        "get_social_data",
+        "search_coins"
+      ]
     }
   }
 }

@@ -34,6 +34,7 @@ import {
   identifySimilarProtocols,
   PeerProtocol,
 } from '../../../../lib/ucie/peerComparison';
+import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 
 // ============================================================================
 // Types
@@ -56,28 +57,13 @@ interface DeFiMetricsResponse {
   cached?: boolean;
 }
 
-// ============================================================================
-// Cache Configuration
-// ============================================================================
+// Cache TTL: 1 hour
+const CACHE_TTL = 3600; // seconds
 
-const CACHE_TTL = 3600; // 1 hour in seconds
-const cache = new Map<string, { data: any; timestamp: number }>();
-
-function getCachedData(key: string): any | null {
-  const cached = cache.get(key);
-  if (!cached) return null;
-
-  const age = Date.now() - cached.timestamp;
-  if (age > CACHE_TTL * 1000) {
-    cache.delete(key);
-    return null;
-  }
-
-  return cached.data;
-}
-
+// Cache functions removed - now using database cache via cacheUtils
 function setCachedData(key: string, data: any): void {
-  cache.set(key, {
+  // Deprecated - keeping for compatibility but not used
+  return;
     data,
     timestamp: Date.now(),
   });
@@ -110,10 +96,9 @@ export default async function handler(
   }
 
   const normalizedSymbol = symbol.toUpperCase();
-  const cacheKey = `defi:${normalizedSymbol}`;
 
-  // Check cache
-  const cachedData = getCachedData(cacheKey);
+  // Check database cache
+  const cachedData = await getCachedAnalysis(normalizedSymbol, 'defi');
   if (cachedData) {
     return res.status(200).json({
       success: true,
@@ -252,8 +237,8 @@ export default async function handler(
       timestamp: new Date().toISOString(),
     };
 
-    // Cache the response
-    setCachedData(cacheKey, response);
+    // Cache the response in database
+    await setCachedAnalysis(normalizedSymbol, 'defi', response, CACHE_TTL, dataQuality);
 
     return res.status(200).json({
       success: true,
