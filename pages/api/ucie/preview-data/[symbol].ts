@@ -109,7 +109,7 @@ export default async function handler(
   try {
     // Collect data from all effective APIs in parallel
     const startTime = Date.now();
-    const collectedData = await collectDataFromAPIs(normalizedSymbol);
+    const collectedData = await collectDataFromAPIs(normalizedSymbol, req);
     const collectionTime = Date.now() - startTime;
 
     console.log(`✅ Data collection completed in ${collectionTime}ms`);
@@ -159,11 +159,17 @@ export default async function handler(
 /**
  * Collect data from all effective APIs
  * ✅ FIX #3: Added detailed error logging for diagnostics
+ * ✅ FIX #4: Use request host instead of environment variable (CRITICAL FIX)
  */
-async function collectDataFromAPIs(symbol: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+async function collectDataFromAPIs(symbol: string, req: NextApiRequest) {
+  // ✅ CRITICAL FIX: Construct base URL from request headers
+  // This works in any environment without needing NEXT_PUBLIC_BASE_URL
+  const protocol = req.headers['x-forwarded-proto'] || 'https';
+  const host = req.headers['host'];
+  const baseUrl = `${protocol}://${host}`;
   
   console.log(`🔍 Collecting data for ${symbol}...`);
+  console.log(`🌐 Using base URL: ${baseUrl}`);
   
   const results = await Promise.allSettled([
     fetchWithTimeout(
