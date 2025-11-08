@@ -11,8 +11,6 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import {
   fetchDeFiMetrics,
   isDeFiProtocol,
-  searchGitHubRepos,
-  fetchGitHubRepo,
 } from '../../../../lib/ucie/defiClients';
 import { analyzeTVL } from '../../../../lib/ucie/tvlAnalysis';
 import {
