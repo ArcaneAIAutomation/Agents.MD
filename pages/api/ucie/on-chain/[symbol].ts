@@ -22,6 +22,7 @@ import {
   type WalletClassification
 } from '../../../../lib/ucie/walletBehavior';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
+import { fetchBitcoinOnChainData } from '../../../../lib/ucie/bitcoinOnChain';
 
 // Cache TTL: 5 minutes
 const CACHE_TTL = 5 * 60; // seconds
@@ -326,6 +327,73 @@ export default async function handler(
       ...cachedData,
       timestamp: new Date().toISOString() // Update timestamp
     });
+  }
+  
+  // ✅ SPECIAL CASE: Bitcoin on-chain data
+  if (symbolUpper === 'BTC') {
+    try {
+      const btcData = await fetchBitcoinOnChainData();
+      
+      // Cache the response
+      await setCachedAnalysis(symbolUpper, 'on-chain', btcData, CACHE_TTL, btcData.dataQuality);
+      
+      // Set HTTP cache headers
+      res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+      
+      return res.status(200).json(btcData);
+    } catch (error) {
+      console.error('Bitcoin on-chain error:', error);
+      return res.status(500).json({
+        success: false,
+        symbol: 'BTC',
+        chain: 'bitcoin',
+        tokenInfo: null,
+        holderDistribution: {
+          topHolders: [],
+          concentration: {
+            giniCoefficient: 0,
+            top10Percentage: 0,
+            top50Percentage: 0,
+            top100Percentage: 0,
+            distributionScore: 0
+          }
+        },
+        whaleActivity: {
+          transactions: [],
+          summary: {
+            totalTransactions: 0,
+            totalValueUSD: 0,
+            exchangeDeposits: 0,
+            exchangeWithdrawals: 0,
+            largestTransaction: 0
+          }
+        },
+        exchangeFlows: {
+          inflow24h: 0,
+          outflow24h: 0,
+          netFlow: 0,
+          trend: 'neutral'
+        },
+        smartContract: {
+          score: 0,
+          isVerified: false,
+          vulnerabilities: [],
+          redFlags: [],
+          warnings: [],
+          strengths: [],
+          auditStatus: 'not_audited'
+        },
+        walletBehavior: {
+          smartMoneyAccumulating: false,
+          whaleActivity: 'neutral',
+          retailSentiment: 'neutral',
+          confidence: 0
+        },
+        dataQuality: 0,
+        timestamp: new Date().toISOString(),
+        error: error instanceof Error ? error.message : 'Failed to fetch Bitcoin on-chain data'
+      });
+    }
   }
   
   // Get token contract address and chain
