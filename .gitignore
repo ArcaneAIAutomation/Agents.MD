@@ -110,3 +110,10 @@ live-data-demonstration.js
 # Documentation drafts
 *-DRAFT.md
 *-WIP.md
+
+# SQLite cache database
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
