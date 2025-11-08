@@ -58,10 +58,13 @@ The platform embodies **Bitcoin Sovereign Technology** principles with a pure bl
 
 ## Recently Launched
 
-- **Secure User Authentication**: Complete authentication system with access codes, JWT tokens, and session management (✅ Live - January 26, 2025)
-- **Whale Watch Dashboard**: Live Bitcoin whale transaction tracking with Caesar AI analysis (✅ Live)
+- **Secure User Authentication**: Complete authentication system with access codes, JWT tokens, and session management (✅ Live - January 2025)
+- **Whale Watch Dashboard**: Live Bitcoin whale transaction tracking with Gemini AI analysis (✅ Live)
+- **Gemini AI Integration**: Fast whale transaction analysis with thinking mode (✅ Live - November 2025)
 - **Caesar API Integration**: Advanced market analysis and research capabilities (✅ Live)
-- **Analysis Lock System**: API protection preventing multiple simultaneous analyses (✅ Live)
+- **Social Sentiment Analysis**: LunarCrush, Twitter/X, and Reddit integration (✅ Live - November 2025)
+- **Etherscan V2 Migration**: Updated to latest Ethereum blockchain API (✅ Live - November 2025)
+- **Comprehensive API Coverage**: 13/14 data sources operational (92.9% uptime) (✅ Live - November 2025)
 
 ## Upcoming Features
 
