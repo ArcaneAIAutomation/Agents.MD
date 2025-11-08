@@ -59,7 +59,22 @@ export default async function handler(
       return res.status(200).json({
         success: true,
         valid: false,
-        error: 'Invalid token symbol format. Use 1-10 alphanumeric characters (e.g., BTC, ETH, SOL).',
+        error: 'Invalid token symbol format. Use 1-10 alphanumeric characters (e.g., BTC, ETH).',
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // ✅ RESTRICTION: Only allow BTC and ETH for perfection
+    const SUPPORTED_SYMBOLS = ['BTC', 'ETH'];
+    const symbolUpper = sanitized.toUpperCase();
+    
+    if (!SUPPORTED_SYMBOLS.includes(symbolUpper)) {
+      return res.status(200).json({
+        success: true,
+        valid: false,
+        symbol: symbolUpper,
+        error: 'Currently supporting BTC and ETH only. We\'re perfecting these two assets before expanding!',
+        suggestions: ['BTC', 'ETH'],
         timestamp: new Date().toISOString()
       });
     }

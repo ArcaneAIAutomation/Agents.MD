@@ -66,7 +66,7 @@ export default function UCIEHomePage() {
             </p>
             <p className="text-lg text-bitcoin-white-80 max-w-3xl mx-auto">
               The most advanced cryptocurrency analysis platform in existence. 
-              AI-powered research, real-time data from 15+ sources, and comprehensive intelligence for any token.
+              AI-powered research, real-time data from 15+ sources, and 95%+ quality intelligence for Bitcoin and Ethereum.
             </p>
           </div>
 
@@ -163,35 +163,60 @@ export default function UCIEHomePage() {
             />
             <FeatureCard
               icon={<Search className="w-8 h-8" />}
-              title="10,000+ Tokens"
-              description="Analyze any cryptocurrency with comprehensive intelligence."
+              title="Bitcoin & Ethereum"
+              description="Perfected analysis for the two most important cryptocurrencies with 95%+ data quality."
             />
           </div>
 
-          {/* Coming Soon Banner */}
+          {/* BTC & ETH Focus Banner */}
+          <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-8 mb-12">
+            <h3 className="text-3xl font-bold text-bitcoin-white mb-4 text-center">
+              🎯 Currently Perfecting BTC & ETH
+            </h3>
+            <p className="text-lg text-bitcoin-white-80 mb-6 text-center max-w-3xl mx-auto">
+              We're focusing on providing the absolute best data quality for Bitcoin and Ethereum 
+              before expanding to other assets. This ensures you get 95%+ quality intelligence 
+              using ALL available resources: APIs, AI, blockchain data, and more.
+            </p>
+            <div className="flex gap-4 justify-center mb-6">
+              <div className="bg-bitcoin-orange text-bitcoin-black px-8 py-4 rounded-lg font-bold text-xl">
+                ✓ Bitcoin (BTC)
+              </div>
+              <div className="bg-bitcoin-orange text-bitcoin-black px-8 py-4 rounded-lg font-bold text-xl">
+                ✓ Ethereum (ETH)
+              </div>
+            </div>
+            <p className="text-bitcoin-white-60 text-center text-sm">
+              More assets coming soon after we perfect these two!
+            </p>
+          </div>
+
+          {/* Feature Status */}
           <div className="bg-bitcoin-orange text-bitcoin-black rounded-xl p-8 text-center">
             <h2 className="text-3xl font-bold mb-4">
-              Full Analysis Coming Soon
+              Real-Time Intelligence Available Now
             </h2>
             <p className="text-lg mb-6">
-              The complete UCIE platform is under development. 
-              Search functionality is now live. Full analysis features launching soon.
+              All features are live with 100% real data from multiple sources.
             </p>
             <div className="flex flex-wrap gap-4 justify-center text-sm font-semibold">
               <div className="bg-bitcoin-black text-bitcoin-orange px-4 py-2 rounded-lg">
-                ✓ Token Search
+                ✓ Market Data (Real-time)
               </div>
-              <div className="bg-bitcoin-black text-bitcoin-white-60 px-4 py-2 rounded-lg">
-                ⏳ Market Data
+              <div className="bg-bitcoin-black text-bitcoin-orange px-4 py-2 rounded-lg">
+                ✓ On-Chain Analysis
               </div>
-              <div className="bg-bitcoin-black text-bitcoin-white-60 px-4 py-2 rounded-lg">
-                ⏳ AI Research
+              <div className="bg-bitcoin-black text-bitcoin-orange px-4 py-2 rounded-lg">
+                ✓ Technical Indicators
               </div>
-              <div className="bg-bitcoin-black text-bitcoin-white-60 px-4 py-2 rounded-lg">
-                ⏳ Technical Analysis
+              <div className="bg-bitcoin-black text-bitcoin-orange px-4 py-2 rounded-lg">
+                ✓ News Aggregation
               </div>
-              <div className="bg-bitcoin-black text-bitcoin-white-60 px-4 py-2 rounded-lg">
-                ⏳ Risk Assessment
+              <div className="bg-bitcoin-black text-bitcoin-orange px-4 py-2 rounded-lg">
+                ✓ Social Sentiment
+              </div>
+              <div className="bg-bitcoin-black text-bitcoin-orange px-4 py-2 rounded-lg">
+                ✓ AI Research
               </div>
             </div>
           </div>

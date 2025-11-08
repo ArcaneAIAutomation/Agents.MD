@@ -18,7 +18,7 @@ interface UCIESearchBarProps {
 export default function UCIESearchBar({
   onTokenSelect,
   recentSearches = [],
-  popularTokens = ['BTC', 'ETH', 'SOL', 'XRP', 'ADA'],
+  popularTokens = ['BTC', 'ETH'], // ✅ RESTRICTED: Only BTC & ETH for perfection
   className = ''
 }: UCIESearchBarProps) {
   const [query, setQuery] = useState('');
@@ -153,7 +153,7 @@ export default function UCIESearchBar({
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setShowDropdown(true)}
           onKeyDown={handleKeyDown}
-          placeholder="Search any cryptocurrency (BTC, ETH, SOL...)"
+          placeholder="Search Bitcoin (BTC) or Ethereum (ETH)"
           className="w-full bg-bitcoin-black text-bitcoin-white border-2 border-bitcoin-orange rounded-lg pl-12 pr-12 py-3 md:py-4 text-base md:text-lg font-medium placeholder-bitcoin-white-60 focus:outline-none focus:border-bitcoin-orange focus:shadow-[0_0_20px_rgba(247,147,26,0.3)] transition-all min-h-[48px]"
           aria-label="Search cryptocurrency"
           aria-autocomplete="list"
