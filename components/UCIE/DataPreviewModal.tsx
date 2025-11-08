@@ -191,7 +191,7 @@ export default function DataPreviewModal({
                         Price
                       </p>
                       <p className="text-xl font-mono font-bold text-bitcoin-orange">
-                        ${preview.collectedData.marketData.priceAggregation.aggregatedPrice?.toLocaleString() || 'N/A'}
+                        ${preview.collectedData.marketData.priceAggregation.averagePrice?.toLocaleString() || 'N/A'}
                       </p>
                     </div>
                     <div>
@@ -199,16 +199,16 @@ export default function DataPreviewModal({
                         24h Change
                       </p>
                       <p className={`text-xl font-mono font-bold flex items-center gap-1 ${
-                        (preview.collectedData.marketData.priceAggregation.aggregatedChange24h || 0) > 0
+                        (preview.collectedData.marketData.priceAggregation.averageChange24h || 0) > 0
                           ? 'text-bitcoin-orange'
-                          : (preview.collectedData.marketData.priceAggregation.aggregatedChange24h || 0) < 0
+                          : (preview.collectedData.marketData.priceAggregation.averageChange24h || 0) < 0
                           ? 'text-bitcoin-white-60'
                           : 'text-bitcoin-white'
                       }`}>
-                        {(preview.collectedData.marketData.priceAggregation.aggregatedChange24h || 0) > 0 && <TrendingUp size={20} />}
-                        {(preview.collectedData.marketData.priceAggregation.aggregatedChange24h || 0) < 0 && <TrendingDown size={20} />}
-                        {(preview.collectedData.marketData.priceAggregation.aggregatedChange24h || 0) === 0 && <Minus size={20} />}
-                        {preview.collectedData.marketData.priceAggregation.aggregatedChange24h?.toFixed(2) || 'N/A'}%
+                        {(preview.collectedData.marketData.priceAggregation.averageChange24h || 0) > 0 && <TrendingUp size={20} />}
+                        {(preview.collectedData.marketData.priceAggregation.averageChange24h || 0) < 0 && <TrendingDown size={20} />}
+                        {(preview.collectedData.marketData.priceAggregation.averageChange24h || 0) === 0 && <Minus size={20} />}
+                        {preview.collectedData.marketData.priceAggregation.averageChange24h?.toFixed(2) || 'N/A'}%
                       </p>
                     </div>
                     <div>
@@ -216,7 +216,7 @@ export default function DataPreviewModal({
                         Volume 24h
                       </p>
                       <p className="text-xl font-mono font-bold text-bitcoin-white">
-                        ${((preview.collectedData.marketData.priceAggregation.aggregatedVolume24h || 0) / 1e9)?.toFixed(2) || 'N/A'}B
+                        ${((preview.collectedData.marketData.priceAggregation.totalVolume24h || 0) / 1e9)?.toFixed(2) || 'N/A'}B
                       </p>
                     </div>
                     <div>
@@ -224,7 +224,7 @@ export default function DataPreviewModal({
                         Market Cap
                       </p>
                       <p className="text-xl font-mono font-bold text-bitcoin-white">
-                        ${((preview.collectedData.marketData.priceAggregation.aggregatedMarketCap || 0) / 1e9)?.toFixed(2) || 'N/A'}B
+                        ${((preview.collectedData.marketData.marketData?.marketCap || 0) / 1e9)?.toFixed(2) || 'N/A'}B
                       </p>
                     </div>
                   </div>

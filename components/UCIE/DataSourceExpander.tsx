@@ -167,10 +167,10 @@ function renderMarketData(data: any) {
   
   return (
     <div className="space-y-3">
-      <DataRow label="Aggregated Price" value={`$${agg?.aggregatedPrice?.toLocaleString() || 'N/A'}`} />
-      <DataRow label="24h Volume" value={`$${agg?.aggregatedVolume24h?.toLocaleString() || 'N/A'}`} />
-      <DataRow label="Market Cap" value={`$${agg?.aggregatedMarketCap?.toLocaleString() || 'N/A'}`} />
-      <DataRow label="24h Change" value={`${agg?.aggregatedChange24h?.toFixed(2) || 'N/A'}%`} />
+      <DataRow label="Aggregated Price" value={agg?.averagePrice ? `$${agg.averagePrice.toLocaleString()}` : '$N/A'} />
+      <DataRow label="24h Volume" value={agg?.totalVolume24h ? `$${agg.totalVolume24h.toLocaleString()}` : '$N/A'} />
+      <DataRow label="Market Cap" value={data.marketData?.marketCap ? `$${data.marketData.marketCap.toLocaleString()}` : '$N/A'} />
+      <DataRow label="24h Change" value={agg?.averageChange24h ? `${agg.averageChange24h.toFixed(2)}%` : 'N/A%'} />
       <DataRow label="Data Quality" value={`${data.dataQuality || 0}%`} />
       
       {agg?.prices && agg.prices.length > 0 && (
@@ -181,7 +181,7 @@ function renderMarketData(data: any) {
           <div className="space-y-1">
             {agg.prices.map((price: any, index: number) => (
               <div key={index} className="flex justify-between text-sm">
-                <span className="text-bitcoin-white-80">{price.source}</span>
+                <span className="text-bitcoin-white-80">{price.exchange || price.source}</span>
                 <span className="text-bitcoin-orange font-mono">${price.price?.toLocaleString()}</span>
               </div>
             ))}
