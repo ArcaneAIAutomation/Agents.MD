@@ -49,23 +49,38 @@ export interface MarketDataResponse {
 // Cache functions removed - now using database cache via cacheUtils
 
 /**
- * Fetch comprehensive market data with fallback
+ * Fetch comprehensive market data with improved fallback
+ * ✅ IMPROVED: Better error handling and CoinMarketCap priority for reliability
  */
 async function fetchMarketData(symbol: string): Promise<MarketData | null> {
-  // Try CoinGecko first
+  const errors: string[] = [];
+  
+  // Try CoinMarketCap FIRST (more reliable, paid API)
   try {
-    return await coinGeckoClient.getMarketData(symbol);
+    console.log(`📊 Trying CoinMarketCap for ${symbol}...`);
+    const data = await coinMarketCapClient.getMarketData(symbol);
+    console.log(`✅ CoinMarketCap success for ${symbol}`);
+    return data;
   } catch (error) {
-    console.warn(`CoinGecko failed for ${symbol}:`, error instanceof Error ? error.message : 'Unknown error');
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+    console.warn(`❌ CoinMarketCap failed for ${symbol}:`, errorMsg);
+    errors.push(`CoinMarketCap: ${errorMsg}`);
   }
 
-  // Fallback to CoinMarketCap
+  // Fallback to CoinGecko (free API, may be rate-limited)
   try {
-    return await coinMarketCapClient.getMarketData(symbol);
+    console.log(`📊 Trying CoinGecko for ${symbol}...`);
+    const data = await coinGeckoClient.getMarketData(symbol);
+    console.log(`✅ CoinGecko success for ${symbol}`);
+    return data;
   } catch (error) {
-    console.warn(`CoinMarketCap failed for ${symbol}:`, error instanceof Error ? error.message : 'Unknown error');
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+    console.warn(`❌ CoinGecko failed for ${symbol}:`, errorMsg);
+    errors.push(`CoinGecko: ${errorMsg}`);
   }
 
+  // Log all failures
+  console.error(`❌ All market data sources failed for ${symbol}:`, errors.join(', '));
   return null;
 }
 
