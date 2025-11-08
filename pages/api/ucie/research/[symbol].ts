@@ -108,18 +108,64 @@ export default async function handler(
     // No cache, perform fresh research
     console.log(`🚀 Starting fresh Caesar research for ${normalizedSymbol}`);
     
-    // ✅ Retrieve ALL cached data from database for Caesar context
-    console.log(`📊 Retrieving all cached data for Caesar AI...`);
+    // ✅ CRITICAL: Retrieve ALL cached data from Supabase database
+    // Caesar MUST use ONLY database data - fail immediately if not available
+    console.log(`📊 Retrieving all cached data from Supabase for Caesar AI...`);
     const allCachedData = await getAllCachedDataForCaesar(normalizedSymbol);
     
-    // Build comprehensive context for Caesar
+    // ✅ VALIDATION: Check if we have sufficient data from database
+    const hasOpenAISummary = !!allCachedData.openaiSummary;
+    const hasMarketData = !!allCachedData.marketData;
+    const hasSentiment = !!allCachedData.sentiment;
+    const hasTechnical = !!allCachedData.technical;
+    const hasNews = !!allCachedData.news;
+    const hasOnChain = !!allCachedData.onChain;
+    
+    const availableDataSources = [
+      hasOpenAISummary && 'OpenAI Summary',
+      hasMarketData && 'Market Data',
+      hasSentiment && 'Sentiment',
+      hasTechnical && 'Technical',
+      hasNews && 'News',
+      hasOnChain && 'On-Chain'
+    ].filter(Boolean);
+    
+    console.log(`📦 Database data availability:`);
+    console.log(`   OpenAI Summary: ${hasOpenAISummary ? '✅' : '❌'}`);
+    console.log(`   Market Data: ${hasMarketData ? '✅' : '❌'}`);
+    console.log(`   Sentiment: ${hasSentiment ? '✅' : '❌'}`);
+    console.log(`   Technical: ${hasTechnical ? '✅' : '❌'}`);
+    console.log(`   News: ${hasNews ? '✅' : '❌'}`);
+    console.log(`   On-Chain: ${hasOnChain ? '✅' : '❌'}`);
+    console.log(`   Total: ${availableDataSources.length}/6 sources available`);
+    
+    // ✅ FAIL IMMEDIATELY if critical data is missing
+    if (!hasOpenAISummary) {
+      console.error(`❌ CRITICAL: OpenAI summary not found in database for ${normalizedSymbol}`);
+      return res.status(400).json({
+        success: false,
+        error: 'OpenAI summary not available in database. Please run data collection first by clicking the BTC/ETH button and waiting for the preview modal.'
+      });
+    }
+    
+    if (availableDataSources.length < 3) {
+      console.error(`❌ CRITICAL: Insufficient data in database (${availableDataSources.length}/6 sources)`);
+      return res.status(400).json({
+        success: false,
+        error: `Insufficient data in database. Only ${availableDataSources.length}/6 sources available. Please run data collection first.`
+      });
+    }
+    
+    console.log(`✅ Sufficient data available in database for Caesar analysis`);
+    
+    // Build comprehensive context for Caesar from database data ONLY
     let contextData: any = {
-      // OpenAI summary of collected data
+      // OpenAI summary of collected data (from database)
       openaiSummary: allCachedData.openaiSummary?.summaryText || null,
       dataQuality: allCachedData.openaiSummary?.dataQuality || 0,
       apiStatus: allCachedData.openaiSummary?.apiStatus || null,
       
-      // All cached analysis data
+      // All cached analysis data (from database)
       marketData: allCachedData.marketData,
       sentiment: allCachedData.sentiment,
       technical: allCachedData.technical,

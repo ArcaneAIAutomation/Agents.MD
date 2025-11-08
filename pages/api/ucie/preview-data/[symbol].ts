@@ -119,8 +119,9 @@ export default async function handler(
 
     console.log(`✅ Data collection completed in ${collectionTime}ms`);
 
-    // ✅ CRITICAL: Store collected data in database for OpenAI and Caesar access
-    console.log(`💾 Storing API responses in database...`);
+    // ✅ CRITICAL: Store collected data in database FIRST (BLOCKING)
+    // OpenAI summary must wait for this to complete so it can read from database
+    console.log(`💾 Storing API responses in database (BLOCKING - OpenAI will wait)...`);
     const storagePromises = [];
 
     if (collectedData.marketData?.success) {
@@ -131,7 +132,10 @@ export default async function handler(
           collectedData.marketData,
           15 * 60, // 15 minutes TTL (standardized)
           collectedData.marketData.dataQuality || 0
-        ).catch(err => console.error('Failed to cache market data:', err))
+        ).catch(err => {
+          console.error('❌ Failed to cache market data:', err);
+          return { status: 'failed', type: 'market-data' };
+        })
       );
     }
 
@@ -143,7 +147,10 @@ export default async function handler(
           collectedData.sentiment,
           15 * 60, // 15 minutes TTL (standardized)
           collectedData.sentiment.dataQuality || 0
-        ).catch(err => console.error('Failed to cache sentiment:', err))
+        ).catch(err => {
+          console.error('❌ Failed to cache sentiment:', err);
+          return { status: 'failed', type: 'sentiment' };
+        })
       );
     }
 
@@ -155,7 +162,10 @@ export default async function handler(
           collectedData.technical,
           15 * 60, // 15 minutes TTL (standardized)
           collectedData.technical.dataQuality || 0
-        ).catch(err => console.error('Failed to cache technical:', err))
+        ).catch(err => {
+          console.error('❌ Failed to cache technical:', err);
+          return { status: 'failed', type: 'technical' };
+        })
       );
     }
 
@@ -167,7 +177,10 @@ export default async function handler(
           collectedData.news,
           15 * 60, // 15 minutes TTL (standardized)
           collectedData.news.dataQuality || 0
-        ).catch(err => console.error('Failed to cache news:', err))
+        ).catch(err => {
+          console.error('❌ Failed to cache news:', err);
+          return { status: 'failed', type: 'news' };
+        })
       );
     }
 
@@ -179,19 +192,26 @@ export default async function handler(
           collectedData.onChain,
           15 * 60, // 15 minutes TTL (standardized)
           collectedData.onChain.dataQuality || 0
-        ).catch(err => console.error('Failed to cache on-chain:', err))
+        ).catch(err => {
+          console.error('❌ Failed to cache on-chain:', err);
+          return { status: 'failed', type: 'on-chain' };
+        })
       );
     }
 
-    // Store all in parallel (non-blocking)
-    Promise.allSettled(storagePromises).then(results => {
-      const successful = results.filter(r => r.status === 'fulfilled').length;
-      const failed = results.filter(r => r.status === 'rejected').length;
-      console.log(`💾 Stored ${successful}/${storagePromises.length} API responses in database`);
-      if (failed > 0) {
-        console.warn(`⚠️ Failed to store ${failed} responses`);
-      }
-    });
+    // ✅ WAIT for all storage to complete BEFORE generating OpenAI summary
+    console.log(`⏳ Waiting for ${storagePromises.length} database writes to complete...`);
+    const storageResults = await Promise.allSettled(storagePromises);
+    const successful = storageResults.filter(r => r.status === 'fulfilled').length;
+    const failed = storageResults.filter(r => r.status === 'rejected').length;
+    console.log(`✅ Stored ${successful}/${storagePromises.length} API responses in database`);
+    if (failed > 0) {
+      console.warn(`⚠️ Failed to store ${failed} responses`);
+    }
+    
+    // Small delay to ensure database consistency (2 seconds)
+    console.log(`⏳ Waiting 2 seconds for database consistency...`);
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Calculate data quality
     const apiStatus = calculateAPIStatus(collectedData);
@@ -436,62 +456,33 @@ function calculateAPIStatus(collectedData: any) {
 
 /**
  * Generate OpenAI summary of collected data
- * ✅ FIXED: Retrieve from database and use correct data structure paths
+ * ✅ CRITICAL: ONLY uses data from Supabase database (ucie_analysis_cache)
+ * This ensures OpenAI summary is based on the same data Caesar will use
  */
 async function generateOpenAISummary(
   symbol: string,
   collectedData: any,
   apiStatus: any
 ): Promise<string> {
-  // ✅ Try to get cached data from database if not in memory
-  let marketData = collectedData.marketData;
-  let sentimentData = collectedData.sentiment;
-  let technicalData = collectedData.technical;
-  let newsData = collectedData.news;
-  let onChainData = collectedData.onChain;
+  console.log(`📊 OpenAI Summary: Reading ALL data from Supabase database...`);
+  
+  // ✅ ALWAYS read from database (ignore in-memory collectedData)
+  // This ensures OpenAI uses the same data source as Caesar
+  const marketData = await getCachedAnalysis(symbol, 'market-data');
+  const sentimentData = await getCachedAnalysis(symbol, 'sentiment');
+  const technicalData = await getCachedAnalysis(symbol, 'technical');
+  const newsData = await getCachedAnalysis(symbol, 'news');
+  const onChainData = await getCachedAnalysis(symbol, 'on-chain');
 
-  // Check database for missing data
-  if (!marketData?.success) {
-    const cached = await getCachedAnalysis(symbol, 'market-data');
-    if (cached) {
-      console.log('📦 Using cached market data from database for OpenAI');
-      marketData = cached;
-    }
-  }
-
-  if (!sentimentData?.success) {
-    const cached = await getCachedAnalysis(symbol, 'sentiment');
-    if (cached) {
-      console.log('📦 Using cached sentiment data from database for OpenAI');
-      sentimentData = cached;
-    }
-  }
-
-  if (!technicalData?.success) {
-    const cached = await getCachedAnalysis(symbol, 'technical');
-    if (cached) {
-      console.log('📦 Using cached technical data from database for OpenAI');
-      technicalData = cached;
-    }
-  }
-
-  if (!newsData?.success) {
-    const cached = await getCachedAnalysis(symbol, 'news');
-    if (cached) {
-      console.log('📦 Using cached news data from database for OpenAI');
-      newsData = cached;
-    }
-  }
-
-  if (!onChainData?.success) {
-    const cached = await getCachedAnalysis(symbol, 'on-chain');
-    if (cached) {
-      console.log('📦 Using cached on-chain data from database for OpenAI');
-      onChainData = cached;
-    }
-  }
-
-  // Build context from collected data
+  // Log what we retrieved
+  console.log(`📦 Database retrieval results:`);
+  console.log(`   Market Data: ${marketData ? '✅ Found' : '❌ Not found'}`);
+  console.log(`   Sentiment: ${sentimentData ? '✅ Found' : '❌ Not found'}`);
+  console.log(`   Technical: ${technicalData ? '✅ Found' : '❌ Not found'}`);
+  console.log(`   News: ${newsData ? '✅ Found' : '❌ Not found'}`);
+  console.log(`   On-Chain: ${onChainData ? '✅ Found' : '❌ Not found'}`);
+  
+  // Build context from database data
   let context = `Cryptocurrency: ${symbol}\n\n`;
   context += `Data Collection Status:\n`;
   context += `- APIs Working: ${apiStatus.working.length}/${apiStatus.total}\n`;
