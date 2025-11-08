@@ -51,6 +51,25 @@ export function generateCryptoResearchQuery(symbol: string, contextData?: any): 
   if (contextData && Object.keys(contextData).length > 0) {
     contextSection = `\n**REAL-TIME MARKET CONTEXT:**\n\n`;
     
+    // ✅ OpenAI Summary (PRIORITY - Most important context)
+    if (contextData.openaiSummary) {
+      contextSection += `**=== OPENAI ANALYSIS SUMMARY ===**\n`;
+      contextSection += `${contextData.openaiSummary}\n\n`;
+      contextSection += `**Data Quality Score:** ${contextData.dataQuality || 0}%\n`;
+      
+      if (contextData.apiStatus) {
+        const status = contextData.apiStatus;
+        contextSection += `**Data Sources:** ${status.working?.length || 0}/${status.total || 5} working (${status.successRate || 0}% success rate)\n`;
+        if (status.working && status.working.length > 0) {
+          contextSection += `**Working APIs:** ${status.working.join(', ')}\n`;
+        }
+        if (status.failed && status.failed.length > 0) {
+          contextSection += `**Failed APIs:** ${status.failed.join(', ')}\n`;
+        }
+      }
+      contextSection += `\n`;
+    }
+    
     // Market Data
     if (contextData['market-data'] || contextData.marketData) {
       const market = contextData['market-data'] || contextData.marketData;
