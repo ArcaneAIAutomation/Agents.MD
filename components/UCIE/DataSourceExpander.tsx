@@ -311,42 +311,273 @@ function renderSentimentData(data: any) {
 
 function renderTechnicalData(data: any) {
   const indicators = data.indicators;
+  const signals = data.signals;
+  const timeframe = data.timeframe || '1h';
+  
+  // Helper to get signal color
+  const getSignalColor = (signal: string) => {
+    if (signal === 'bullish' || signal === 'buy' || signal === 'overbought') return 'text-bitcoin-orange';
+    if (signal === 'bearish' || signal === 'sell' || signal === 'oversold') return 'text-bitcoin-white-60';
+    return 'text-bitcoin-white';
+  };
   
   return (
     <div className="space-y-3">
+      <DataRow label="Timeframe" value={timeframe.toUpperCase()} />
       <DataRow label="Data Quality" value={`${data.dataQuality || 0}%`} />
+      
+      {signals && (
+        <div className="mt-3 pt-3 border-t border-bitcoin-orange-20">
+          <p className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-2">
+            Overall Signal
+          </p>
+          <div className="p-3 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded">
+            <div className="flex justify-between items-center mb-2">
+              <span className={`text-xl font-bold uppercase ${getSignalColor(signals.overall)}`}>
+                {signals.overall}
+              </span>
+              <span className="text-sm text-bitcoin-white-60">
+                {signals.confidence}% confidence
+              </span>
+            </div>
+            <div className="flex gap-4 text-sm">
+              <span className="text-bitcoin-orange">Buy: {signals.buySignals || 0}</span>
+              <span className="text-bitcoin-white">Neutral: {signals.neutralSignals || 0}</span>
+              <span className="text-bitcoin-white-60">Sell: {signals.sellSignals || 0}</span>
+            </div>
+            {signals.reasons && signals.reasons.length > 0 && (
+              <div className="mt-2 pt-2 border-t border-bitcoin-orange-20">
+                <p className="text-xs text-bitcoin-white-60 mb-1">Key Signals:</p>
+                {signals.reasons.map((reason: string, i: number) => (
+                  <p key={i} className="text-xs text-bitcoin-white-80">• {reason}</p>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       
       {indicators && (
         <>
+          {/* RSI - Relative Strength Index */}
           {indicators.rsi && (
-            <div className="p-3 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded">
-              <p className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-1">RSI</p>
-              <p className="text-lg font-mono font-bold text-bitcoin-orange">
-                {indicators.rsi.value?.toFixed(2)} - {indicators.rsi.signal}
+            <div className="mt-3 pt-3 border-t border-bitcoin-orange-20">
+              <p className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-2">
+                RSI (Relative Strength Index)
               </p>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">Value</span>
+                  <span className={`text-lg font-mono font-bold ${getSignalColor(indicators.rsi.signal)}`}>
+                    {indicators.rsi.value?.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">Signal</span>
+                  <span className={`text-sm font-semibold uppercase ${getSignalColor(indicators.rsi.signal)}`}>
+                    {indicators.rsi.signal}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">Strength</span>
+                  <span className="text-sm text-bitcoin-white">{indicators.rsi.strength}</span>
+                </div>
+                <div className="text-xs text-bitcoin-white-60 italic mt-2">
+                  RSI measures momentum: &lt;30 oversold, &gt;70 overbought
+                </div>
+              </div>
             </div>
           )}
           
+          {/* MACD - Moving Average Convergence Divergence */}
           {indicators.macd && (
-            <div className="p-3 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded">
-              <p className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-1">MACD</p>
-              <p className="text-lg font-mono font-bold text-bitcoin-orange">
-                {indicators.macd.signal}
+            <div className="mt-3 pt-3 border-t border-bitcoin-orange-20">
+              <p className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-2">
+                MACD (Trend Momentum)
               </p>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">Trend</span>
+                  <span className={`text-lg font-semibold uppercase ${getSignalColor(indicators.macd.trend)}`}>
+                    {indicators.macd.trend}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">MACD Line</span>
+                  <span className="text-sm font-mono text-bitcoin-white">
+                    {indicators.macd.value?.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">Signal Line</span>
+                  <span className="text-sm font-mono text-bitcoin-white">
+                    {indicators.macd.signal?.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">Histogram</span>
+                  <span className={`text-sm font-mono ${indicators.macd.histogram > 0 ? 'text-bitcoin-orange' : 'text-bitcoin-white-60'}`}>
+                    {indicators.macd.histogram?.toFixed(2)}
+                  </span>
+                </div>
+                {indicators.macd.crossover && indicators.macd.crossover !== 'none' && (
+                  <div className="p-2 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded mt-2">
+                    <p className="text-xs text-bitcoin-orange font-semibold">
+                      🎯 {indicators.macd.crossover.replace('_', ' ').toUpperCase()}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
           
-          {indicators.trend && (
-            <div className="p-3 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded">
-              <p className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-1">Trend</p>
-              <p className="text-lg font-mono font-bold text-bitcoin-orange">
-                {indicators.trend.direction} ({indicators.trend.strength})
+          {/* EMA - Exponential Moving Averages */}
+          {indicators.ema && (
+            <div className="mt-3 pt-3 border-t border-bitcoin-orange-20">
+              <p className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-2">
+                EMA (Moving Averages)
               </p>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">Trend</span>
+                  <span className={`text-sm font-semibold uppercase ${getSignalColor(indicators.ema.trend)}`}>
+                    {indicators.ema.trend}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">EMA 9</span>
+                  <span className="text-sm font-mono text-bitcoin-white">
+                    ${indicators.ema.ema9?.toLocaleString(undefined, {maximumFractionDigits: 0})}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">EMA 21</span>
+                  <span className="text-sm font-mono text-bitcoin-white">
+                    ${indicators.ema.ema21?.toLocaleString(undefined, {maximumFractionDigits: 0})}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">EMA 50</span>
+                  <span className="text-sm font-mono text-bitcoin-white">
+                    ${indicators.ema.ema50?.toLocaleString(undefined, {maximumFractionDigits: 0})}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">EMA 200</span>
+                  <span className="text-sm font-mono text-bitcoin-white">
+                    ${indicators.ema.ema200?.toLocaleString(undefined, {maximumFractionDigits: 0})}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">Alignment</span>
+                  <span className="text-sm text-bitcoin-white">{indicators.ema.alignment}</span>
+                </div>
+              </div>
             </div>
           )}
           
-          {indicators.volatility && (
-            <DataRow label="Volatility" value={indicators.volatility.current} />
+          {/* Bollinger Bands */}
+          {indicators.bollingerBands && (
+            <div className="mt-3 pt-3 border-t border-bitcoin-orange-20">
+              <p className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-2">
+                Bollinger Bands
+              </p>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">Upper Band</span>
+                  <span className="text-sm font-mono text-bitcoin-white">
+                    ${indicators.bollingerBands.upper?.toLocaleString(undefined, {maximumFractionDigits: 0})}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">Middle Band</span>
+                  <span className="text-sm font-mono text-bitcoin-orange">
+                    ${indicators.bollingerBands.middle?.toLocaleString(undefined, {maximumFractionDigits: 0})}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">Lower Band</span>
+                  <span className="text-sm font-mono text-bitcoin-white">
+                    ${indicators.bollingerBands.lower?.toLocaleString(undefined, {maximumFractionDigits: 0})}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">Position</span>
+                  <span className="text-sm text-bitcoin-white uppercase">
+                    {indicators.bollingerBands.position?.replace('_', ' ')}
+                  </span>
+                </div>
+                {indicators.bollingerBands.squeeze && (
+                  <div className="p-2 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded mt-2">
+                    <p className="text-xs text-bitcoin-orange font-semibold">
+                      ⚠️ SQUEEZE DETECTED - Volatility breakout likely
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {/* Stochastic Oscillator */}
+          {indicators.stochastic && (
+            <div className="mt-3 pt-3 border-t border-bitcoin-orange-20">
+              <p className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-2">
+                Stochastic Oscillator
+              </p>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">%K Line</span>
+                  <span className="text-sm font-mono text-bitcoin-white">
+                    {indicators.stochastic.k?.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">%D Line</span>
+                  <span className="text-sm font-mono text-bitcoin-white">
+                    {indicators.stochastic.d?.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">Signal</span>
+                  <span className={`text-sm font-semibold uppercase ${getSignalColor(indicators.stochastic.signal)}`}>
+                    {indicators.stochastic.signal}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* ATR - Average True Range */}
+          {indicators.atr && (
+            <div className="mt-3 pt-3 border-t border-bitcoin-orange-20">
+              <p className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-2">
+                ATR (Volatility Measure)
+              </p>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">Value</span>
+                  <span className="text-sm font-mono text-bitcoin-white">
+                    ${indicators.atr.value?.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">Volatility</span>
+                  <span className={`text-sm font-semibold uppercase ${
+                    indicators.atr.volatility === 'high' ? 'text-bitcoin-orange' :
+                    indicators.atr.volatility === 'low' ? 'text-bitcoin-white-60' :
+                    'text-bitcoin-white'
+                  }`}>
+                    {indicators.atr.volatility}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-bitcoin-white-60">% of Price</span>
+                  <span className="text-sm font-mono text-bitcoin-white">
+                    {indicators.atr.percentOfPrice?.toFixed(2)}%
+                  </span>
+                </div>
+              </div>
+            </div>
           )}
         </>
       )}
