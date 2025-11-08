@@ -65,6 +65,7 @@ export default async function handler(
     if (cachedData) {
       console.log(`[UCIE Technical] Cache hit for ${cacheKey}`);
       return res.status(200).json({
+        success: true,
         ...cachedData,
         cached: true
       });
@@ -90,6 +91,7 @@ export default async function handler(
     console.log(`[UCIE Technical] ${symbolUpper} signal: ${technicalData.signals.overall} (${technicalData.signals.confidence}% confidence)`);
 
     return res.status(200).json({
+      success: true,
       ...technicalData,
       cached: false
     });

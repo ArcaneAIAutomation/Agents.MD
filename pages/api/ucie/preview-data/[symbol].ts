@@ -362,12 +362,21 @@ function calculateAPIStatus(collectedData: any) {
     failed.push('Sentiment');
   }
 
-  // Technical - Check for actual indicators (success field may not exist)
-  if (
-    collectedData.technical &&
-    collectedData.technical.indicators &&
-    Object.keys(collectedData.technical.indicators).length > 0
-  ) {
+  // Technical - Check for actual indicators with proper validation
+  const hasTechnical = collectedData.technical?.success === true &&
+                       collectedData.technical?.indicators &&
+                       typeof collectedData.technical.indicators === 'object' &&
+                       Object.keys(collectedData.technical.indicators).length >= 6; // Should have at least 6 indicators
+  
+  console.log(`🔍 Technical validation:`, {
+    exists: !!collectedData.technical,
+    success: collectedData.technical?.success,
+    hasIndicators: !!collectedData.technical?.indicators,
+    indicatorCount: collectedData.technical?.indicators ? Object.keys(collectedData.technical.indicators).length : 0,
+    hasTechnical
+  });
+  
+  if (hasTechnical) {
     working.push('Technical');
   } else {
     failed.push('Technical');
