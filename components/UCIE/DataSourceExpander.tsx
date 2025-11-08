@@ -196,28 +196,59 @@ function renderSentimentData(data: any) {
   const sentiment = data.sentiment;
   const sources = data.sources;
   const distribution = sentiment?.distribution;
+  const trends24h = sentiment?.trends?.['24h'] || [];
   
-  // Determine trend based on score
+  // Get recent trend (last 3 hours average)
+  const recentTrend = trends24h.slice(-3);
+  const recentAvgScore = recentTrend.length > 0 
+    ? recentTrend.reduce((sum: number, t: any) => sum + (t.score || 0), 0) / recentTrend.length
+    : sentiment?.overallScore || 0;
+  
+  // Determine trend based on recent average score
   const getTrend = (score: number) => {
     if (score > 5) return 'Bullish';
     if (score < -5) return 'Bearish';
     return 'Neutral';
   };
   
-  const trend = getTrend(sentiment?.overallScore || 0);
-  const trendColor = trend === 'Bullish' ? 'text-bitcoin-orange' : 
-                     trend === 'Bearish' ? 'text-bitcoin-white-60' : 
+  const getTrendDescription = (score: number) => {
+    if (score > 10) return 'Strongly Bullish';
+    if (score > 5) return 'Bullish';
+    if (score > 0) return 'Slightly Bullish';
+    if (score === 0) return 'Neutral';
+    if (score > -5) return 'Slightly Bearish';
+    if (score > -10) return 'Bearish';
+    return 'Strongly Bearish';
+  };
+  
+  const trend = getTrend(recentAvgScore);
+  const trendDescription = getTrendDescription(recentAvgScore);
+  const trendColor = recentAvgScore > 0 ? 'text-bitcoin-orange' : 
+                     recentAvgScore < 0 ? 'text-bitcoin-white-60' : 
                      'text-bitcoin-white';
+  
+  // Calculate momentum (comparing last hour to previous hour)
+  const lastHour = trends24h.slice(-1)[0];
+  const prevHour = trends24h.slice(-2, -1)[0];
+  const momentum = lastHour && prevHour ? lastHour.score - prevHour.score : 0;
+  const momentumText = momentum > 0 ? '↑ Improving' : momentum < 0 ? '↓ Declining' : '→ Stable';
+  const momentumColor = momentum > 0 ? 'text-bitcoin-orange' : momentum < 0 ? 'text-bitcoin-white-60' : 'text-bitcoin-white';
   
   return (
     <div className="space-y-3">
+      <div className="flex justify-between items-center py-2 border-b border-bitcoin-orange-20">
+        <span className="text-sm text-bitcoin-white-60">Current Sentiment</span>
+        <span className={`text-sm font-mono font-semibold ${trendColor}`}>
+          {trendDescription}
+        </span>
+      </div>
       <DataRow 
-        label="Overall Score" 
-        value={sentiment?.overallScore !== undefined ? `${sentiment.overallScore}/100` : 'N/A'} 
+        label="Sentiment Score (3h avg)" 
+        value={recentAvgScore !== undefined ? `${recentAvgScore.toFixed(1)}/100` : 'N/A'} 
       />
       <div className="flex justify-between items-center py-2 border-b border-bitcoin-orange-20">
-        <span className="text-sm text-bitcoin-white-60">Trend</span>
-        <span className={`text-sm font-mono font-semibold ${trendColor}`}>{trend}</span>
+        <span className="text-sm text-bitcoin-white-60">Momentum</span>
+        <span className={`text-sm font-mono font-semibold ${momentumColor}`}>{momentumText}</span>
       </div>
       <DataRow 
         label="Confidence" 
@@ -367,8 +398,22 @@ function renderOnChainData(data: any) {
   
   // Format large numbers for readability
   const formatHashRate = (hashRate: number) => {
-    const exaHash = hashRate / 1e18;
-    return `${exaHash.toFixed(2)} EH/s`;
+    // Hash rate is in H/s, convert to EH/s (1 EH/s = 1e18 H/s)
+    // But the API returns it in a different unit, so we need to check the actual value
+    // If hashRate is ~945922301220, it's likely in GH/s, so divide by 1e9 to get EH/s
+    if (hashRate > 1e15) {
+      // Value is in H/s
+      const exaHash = hashRate / 1e18;
+      return `${exaHash.toFixed(2)} EH/s`;
+    } else if (hashRate > 1e12) {
+      // Value is in TH/s
+      const exaHash = hashRate / 1e6;
+      return `${exaHash.toFixed(2)} EH/s`;
+    } else {
+      // Value is in GH/s (most likely based on API data)
+      const exaHash = hashRate / 1e9;
+      return `${exaHash.toFixed(2)} EH/s`;
+    }
   };
   
   const formatDifficulty = (difficulty: number) => {
