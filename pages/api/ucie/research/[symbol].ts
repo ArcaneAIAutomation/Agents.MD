@@ -22,6 +22,7 @@ import {
 } from '../../../../lib/ucie/caesarClient';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 import { getAggregatedPhaseData } from '../../../../lib/ucie/phaseDataStorage';
+import { getAllCachedDataForCaesar } from '../../../../lib/ucie/openaiSummaryStorage';
 
 /**
  * API Response Types
@@ -107,18 +108,38 @@ export default async function handler(
     // No cache, perform fresh research
     console.log(`🚀 Starting fresh Caesar research for ${normalizedSymbol}`);
     
-    // Retrieve context data from database if session ID provided
-    let contextData: any = {};
+    // ✅ Retrieve ALL cached data from database for Caesar context
+    console.log(`📊 Retrieving all cached data for Caesar AI...`);
+    const cachedData = await getAllCachedDataForCaesar(normalizedSymbol);
+    
+    // Build comprehensive context for Caesar
+    let contextData: any = {
+      // OpenAI summary of collected data
+      openaiSummary: cachedData.openaiSummary?.summaryText || null,
+      dataQuality: cachedData.openaiSummary?.dataQuality || 0,
+      apiStatus: cachedData.openaiSummary?.apiStatus || null,
+      
+      // All cached analysis data
+      marketData: cachedData.marketData,
+      sentiment: cachedData.sentiment,
+      technical: cachedData.technical,
+      news: cachedData.news,
+      onChain: cachedData.onChain
+    };
+    
+    // Also retrieve phase data if session ID provided
     if (sessionId && typeof sessionId === 'string') {
       try {
-        contextData = await getAggregatedPhaseData(sessionId, normalizedSymbol, 4);
-        console.log(`📊 Retrieved context data from ${Object.keys(contextData).length} previous phases`);
+        const phaseData = await getAggregatedPhaseData(sessionId, normalizedSymbol, 4);
+        contextData.phaseData = phaseData;
+        console.log(`📊 Retrieved phase data from ${Object.keys(phaseData).length} previous phases`);
       } catch (error) {
-        console.warn('⚠️ Failed to retrieve context data from database:', error);
+        console.warn('⚠️ Failed to retrieve phase data from database:', error);
       }
-    } else {
-      console.warn('⚠️ No session ID provided, Caesar will not have context from previous phases');
     }
+    
+    const contextSources = Object.keys(contextData).filter(k => contextData[k] !== null).length;
+    console.log(`✅ Caesar AI context prepared with ${contextSources} data sources`);
     
     // Perform complete research workflow with context
     // - Create research job (5 compute units for deep analysis)
@@ -128,7 +149,7 @@ export default async function handler(
       normalizedSymbol,
       5,  // compute units
       600, // max wait time (10 minutes)
-      contextData // pass context from previous phases
+      contextData // pass ALL context data (OpenAI summary + cached data + phase data)
     );
 
     // Cache the results in database (24 hours)

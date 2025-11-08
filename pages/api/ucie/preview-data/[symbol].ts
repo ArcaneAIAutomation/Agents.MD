@@ -16,6 +16,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
 import { setCachedAnalysis, getCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
+import { storeOpenAISummary } from '../../../../lib/ucie/openaiSummaryStorage';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -50,36 +51,37 @@ interface ApiResponse {
 /**
  * Most Effective UCIE APIs (Based on audit)
  * ✅ FIX #2: Increased timeouts to reduce timeout failures
+ * ✅ FIX #6: Increased News timeout to 30 seconds (OpenAI processing takes time)
  */
 const EFFECTIVE_APIS = {
   marketData: {
     endpoint: '/api/ucie/market-data',
     priority: 1,
-    timeout: 10000, // ✅ Increased from 5000ms
+    timeout: 10000, // 10 seconds
     required: true
   },
   sentiment: {
     endpoint: '/api/ucie/sentiment',
     priority: 2,
-    timeout: 10000, // ✅ Increased from 5000ms
+    timeout: 10000, // 10 seconds
     required: false
   },
   technical: {
     endpoint: '/api/ucie/technical',
     priority: 2,
-    timeout: 10000, // ✅ Increased from 5000ms
+    timeout: 10000, // 10 seconds
     required: false
   },
   news: {
     endpoint: '/api/ucie/news',
     priority: 2,
-    timeout: 15000, // ✅ Increased from 10000ms
+    timeout: 30000, // ✅ 30 seconds (OpenAI batch processing)
     required: false
   },
   onChain: {
     endpoint: '/api/ucie/on-chain',
     priority: 3,
-    timeout: 10000, // ✅ Increased from 5000ms
+    timeout: 10000, // 10 seconds
     required: false
   }
 };
@@ -208,6 +210,28 @@ export default async function handler(
     const summaryTime = Date.now() - summaryStartTime;
 
     console.log(`✅ Summary generated in ${summaryTime}ms`);
+    
+    // ✅ Store OpenAI summary in database for Caesar AI access
+    try {
+      await storeOpenAISummary(
+        normalizedSymbol,
+        summary,
+        dataQuality,
+        apiStatus,
+        {
+          marketData: collectedData.marketData?.success === true,
+          sentiment: collectedData.sentiment?.success === true,
+          technical: collectedData.technical?.success === true,
+          news: collectedData.news?.success === true,
+          onChain: collectedData.onChain?.success === true
+        },
+        15 * 60 // 15 minutes TTL
+      );
+      console.log(`💾 Stored OpenAI summary in database for Caesar AI`);
+    } catch (error) {
+      console.error(`⚠️ Failed to store OpenAI summary:`, error);
+      // Non-blocking - continue even if storage fails
+    }
 
     // Build preview response
     const preview: DataPreview = {
