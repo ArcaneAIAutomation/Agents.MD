@@ -137,32 +137,7 @@
         "search_coins"
       ]
     },
-    "time": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-time"
-      ],
-      "env": {},
-      "disabled": false,
-      "autoApprove": [
-        "get_current_time",
-        "convert_time",
-        "get_timezone"
-      ]
-    },
-    "everything": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-everything"
-      ],
-      "env": {},
-      "disabled": false,
-      "autoApprove": [
-        "search"
-      ]
-    },
+
     "sqlite": {
       "command": "npx",
       "args": [
@@ -171,7 +146,7 @@
         "C:\\OriK.Projects\\Agents.MD\\Agents.MD\\data\\cache.db"
       ],
       "env": {},
-      "disabled": false,
+      "disabled": true,
       "autoApprove": [
         "query",
         "list_tables",
