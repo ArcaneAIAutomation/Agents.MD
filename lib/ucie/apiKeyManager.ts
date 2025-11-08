@@ -172,7 +172,7 @@ export const API_SERVICES: Record<string, APIKeyConfig> = {
       currency: 'USD',
     },
     healthCheck: {
-      endpoint: 'https://api.etherscan.io/api?module=stats&action=ethprice',
+      endpoint: 'https://api.etherscan.io/v2/api?module=stats&action=ethprice&chainid=1',
       method: 'GET',
       expectedStatus: 200,
     },

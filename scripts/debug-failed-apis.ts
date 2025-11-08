@@ -51,7 +51,7 @@ async function debugEtherscan() {
   console.log('API Key:', process.env.ETHERSCAN_API_KEY ? '✅ Configured' : '❌ Missing');
   
   try {
-    const url = `https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${process.env.ETHERSCAN_API_KEY}`;
+    const url = `https://api.etherscan.io/v2/api?module=stats&action=ethprice&chainid=1&apikey=${process.env.ETHERSCAN_API_KEY}`;
     console.log('URL:', url.replace(process.env.ETHERSCAN_API_KEY || '', '***'));
     
     const response = await fetch(url, {
