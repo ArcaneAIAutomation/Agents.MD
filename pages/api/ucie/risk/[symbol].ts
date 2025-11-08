@@ -23,6 +23,7 @@ import {
   estimateAssetMetrics,
   PortfolioImpactAnalysis 
 } from '../../../../lib/ucie/portfolioImpact';
+import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 
 export interface RiskAssessmentResponse {
   success: boolean;
@@ -38,36 +39,8 @@ export interface RiskAssessmentResponse {
   error?: string;
 }
 
-// In-memory cache (1 hour TTL)
-const cache = new Map<string, { data: RiskAssessmentResponse; timestamp: number }>();
-const CACHE_TTL = 60 * 60 * 1000; // 1 hour in milliseconds
-
-/**
- * Get cached data if available and not expired
- */
-function getCachedData(symbol: string): RiskAssessmentResponse | null {
-  const cached = cache.get(symbol.toUpperCase());
-  
-  if (!cached) return null;
-  
-  const now = Date.now();
-  if (now - cached.timestamp > CACHE_TTL) {
-    cache.delete(symbol.toUpperCase());
-    return null;
-  }
-  
-  return cached.data;
-}
-
-/**
- * Store data in cache
- */
-function setCachedData(symbol: string, data: RiskAssessmentResponse): void {
-  cache.set(symbol.toUpperCase(), {
-    data,
-    timestamp: Date.now()
-  });
-}
+// Cache TTL: 1 hour
+const CACHE_TTL = 60 * 60; // seconds
 
 /**
  * Calculate data quality score based on available metrics
@@ -147,8 +120,8 @@ export default async function handler(
   // Normalize symbol to uppercase
   const symbolUpper = symbol.toUpperCase();
   
-  // Check cache first
-  const cachedData = getCachedData(symbolUpper);
+  // Check database cache first
+  const cachedData = await getCachedAnalysis(symbolUpper, 'risk');
   if (cachedData) {
     return res.status(200).json({
       ...cachedData,
@@ -157,7 +130,7 @@ export default async function handler(
   }
   
   try {
-    // Fetch all risk metrics in parallel
+    // Fetch all risk metrics in parallel with reduced iterations for speed
     const [
       volatilityMetrics,
       correlationMetrics,
@@ -165,7 +138,7 @@ export default async function handler(
     ] = await Promise.allSettled([
       getVolatilityMetrics(symbol),
       calculateCorrelationMetrics(symbol),
-      getMaxDrawdownMetrics(symbol, 10000) // 10,000 Monte Carlo iterations
+      getMaxDrawdownMetrics(symbol, 500) // Reduced from 10,000 to 500 for serverless performance
     ]);
     
     // Extract successful results
@@ -176,8 +149,8 @@ export default async function handler(
     // Calculate data quality score
     const dataQualityScore = calculateDataQuality(volatility, correlation, maxDrawdown);
     
-    // If we don't have enough data, return error
-    if (dataQualityScore < 50) {
+    // If we don't have enough data, return error (lowered threshold from 50% to 20%)
+    if (dataQualityScore < 20) {
       return res.status(503).json({
         success: false,
         symbol: symbol.toUpperCase(),
@@ -197,7 +170,7 @@ export default async function handler(
     let marketData: any = null;
     try {
       const marketResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/ucie/market-data/${symbolUpper}`, {
-        signal: AbortSignal.timeout(15000) // Increased from 5s to 15s
+        signal: AbortSignal.timeout(8000) // Reduced to 8s for faster failure
       });
       if (marketResponse.ok) {
         const marketJson = await marketResponse.json();
@@ -211,7 +184,7 @@ export default async function handler(
     let onChainData: any = null;
     try {
       const onChainResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/ucie/on-chain/${symbolUpper}`, {
-        signal: AbortSignal.timeout(15000) // Increased from 5s to 15s
+        signal: AbortSignal.timeout(8000) // Reduced to 8s for faster failure
       });
       if (onChainResponse.ok) {
         const onChainJson = await onChainResponse.json();
@@ -265,8 +238,8 @@ export default async function handler(
       cacheStatus: 'miss'
     };
     
-    // Cache the response
-    setCachedData(symbolUpper, response);
+    // Cache the response in database
+    await setCachedAnalysis(symbolUpper, 'risk', response, CACHE_TTL, dataQualityScore);
     
     // Return response
     return res.status(200).json(response);
