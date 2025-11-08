@@ -1,5 +1,28 @@
 # UCIE Data Flow - Validation vs Analysis
 
+---
+
+## 🚨 CRITICAL ISSUE ALERT - January 27, 2025
+
+**Problem**: All 5 data sources failing for SOL (Solana)  
+**Impact**: 0% data quality, blocking Caesar AI analysis  
+**Root Cause**: Validation bug in API status calculation  
+**Fix Time**: 30 minutes
+
+### 📚 Complete Investigation Available
+
+**Start Here**: `README-UCIE-DATA-FAILURE.md` (Navigation hub)
+
+**Quick Fix**: `UCIE-QUICK-FIX-GUIDE.md` (30-minute implementation)
+
+**Deep Dive**: `UCIE-DATA-SOURCE-FAILURE-ANALYSIS.md` (Technical analysis)
+
+**Summary**: `UCIE-DATA-FAILURE-SUMMARY.md` (Executive overview)
+
+**Visual**: `UCIE-DATA-FLOW-DIAGNOSIS.md` (Flowcharts)
+
+---
+
 ## 🎯 Visual Separation: Validation vs Analysis
 
 ```

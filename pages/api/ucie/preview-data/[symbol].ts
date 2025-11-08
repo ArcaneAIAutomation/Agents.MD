@@ -48,36 +48,37 @@ interface ApiResponse {
 
 /**
  * Most Effective UCIE APIs (Based on audit)
+ * ✅ FIX #2: Increased timeouts to reduce timeout failures
  */
 const EFFECTIVE_APIS = {
   marketData: {
     endpoint: '/api/ucie/market-data',
     priority: 1,
-    timeout: 5000,
+    timeout: 10000, // ✅ Increased from 5000ms
     required: true
   },
   sentiment: {
     endpoint: '/api/ucie/sentiment',
     priority: 2,
-    timeout: 5000,
+    timeout: 10000, // ✅ Increased from 5000ms
     required: false
   },
   technical: {
     endpoint: '/api/ucie/technical',
     priority: 2,
-    timeout: 5000,
+    timeout: 10000, // ✅ Increased from 5000ms
     required: false
   },
   news: {
     endpoint: '/api/ucie/news',
     priority: 2,
-    timeout: 10000, // Increased timeout for news
+    timeout: 15000, // ✅ Increased from 10000ms
     required: false
   },
   onChain: {
     endpoint: '/api/ucie/on-chain',
     priority: 3,
-    timeout: 5000,
+    timeout: 10000, // ✅ Increased from 5000ms
     required: false
   }
 };
@@ -157,32 +158,60 @@ export default async function handler(
 
 /**
  * Collect data from all effective APIs
+ * ✅ FIX #3: Added detailed error logging for diagnostics
  */
 async function collectDataFromAPIs(symbol: string) {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  
+  console.log(`🔍 Collecting data for ${symbol}...`);
   
   const results = await Promise.allSettled([
     fetchWithTimeout(
       `${baseUrl}${EFFECTIVE_APIS.marketData.endpoint}/${symbol}`,
       EFFECTIVE_APIS.marketData.timeout
-    ),
+    ).catch(err => {
+      console.error(`❌ Market Data failed:`, err.message);
+      throw err;
+    }),
     fetchWithTimeout(
       `${baseUrl}${EFFECTIVE_APIS.sentiment.endpoint}/${symbol}`,
       EFFECTIVE_APIS.sentiment.timeout
-    ),
+    ).catch(err => {
+      console.error(`❌ Sentiment failed:`, err.message);
+      throw err;
+    }),
     fetchWithTimeout(
       `${baseUrl}${EFFECTIVE_APIS.technical.endpoint}/${symbol}`,
       EFFECTIVE_APIS.technical.timeout
-    ),
+    ).catch(err => {
+      console.error(`❌ Technical failed:`, err.message);
+      throw err;
+    }),
     fetchWithTimeout(
       `${baseUrl}${EFFECTIVE_APIS.news.endpoint}/${symbol}`,
       EFFECTIVE_APIS.news.timeout
-    ),
+    ).catch(err => {
+      console.error(`❌ News failed:`, err.message);
+      throw err;
+    }),
     fetchWithTimeout(
       `${baseUrl}${EFFECTIVE_APIS.onChain.endpoint}/${symbol}`,
       EFFECTIVE_APIS.onChain.timeout
-    )
+    ).catch(err => {
+      console.error(`❌ On-Chain failed:`, err.message);
+      throw err;
+    })
   ]);
+
+  // ✅ FIX #3: Log results for each API
+  const apiNames = ['Market Data', 'Sentiment', 'Technical', 'News', 'On-Chain'];
+  results.forEach((result, index) => {
+    if (result.status === 'fulfilled') {
+      console.log(`✅ ${apiNames[index]}: Success`);
+    } else {
+      console.log(`❌ ${apiNames[index]}: ${result.reason?.message || 'Failed'}`);
+    }
+  });
 
   return {
     marketData: results[0].status === 'fulfilled' ? results[0].value : null,
@@ -216,26 +245,72 @@ async function fetchWithTimeout(url: string, timeout: number) {
 }
 
 /**
- * Calculate API status
+ * Calculate API status with proper data validation
+ * ✅ FIX #1: Validate actual data existence, not just success flags
  */
 function calculateAPIStatus(collectedData: any) {
-  const apis = Object.keys(collectedData);
   const working: string[] = [];
   const failed: string[] = [];
 
-  for (const api of apis) {
-    if (collectedData[api] && collectedData[api].success !== false) {
-      working.push(api);
-    } else {
-      failed.push(api);
-    }
+  // Market Data - Check for actual price data
+  if (
+    collectedData.marketData?.success === true &&
+    collectedData.marketData?.priceAggregation?.prices?.length > 0
+  ) {
+    working.push('Market Data');
+  } else {
+    failed.push('Market Data');
+  }
+
+  // Sentiment - Check for actual sentiment data
+  if (
+    collectedData.sentiment?.success === true &&
+    (collectedData.sentiment?.sentiment?.overallScore > 0 ||
+     collectedData.sentiment?.sources?.lunarCrush === true ||
+     collectedData.sentiment?.sources?.twitter === true ||
+     collectedData.sentiment?.sources?.reddit === true)
+  ) {
+    working.push('Sentiment');
+  } else {
+    failed.push('Sentiment');
+  }
+
+  // Technical - Check for actual indicators
+  if (
+    collectedData.technical?.success === true &&
+    collectedData.technical?.indicators &&
+    Object.keys(collectedData.technical.indicators).length > 0
+  ) {
+    working.push('Technical');
+  } else {
+    failed.push('Technical');
+  }
+
+  // News - Check for actual articles
+  if (
+    collectedData.news?.success === true &&
+    collectedData.news?.articles?.length > 0
+  ) {
+    working.push('News');
+  } else {
+    failed.push('News');
+  }
+
+  // On-Chain - Check for actual data quality
+  if (
+    collectedData.onChain?.success === true &&
+    collectedData.onChain?.dataQuality > 0
+  ) {
+    working.push('On-Chain');
+  } else {
+    failed.push('On-Chain');
   }
 
   return {
     working,
     failed,
-    total: apis.length,
-    successRate: Math.round((working.length / apis.length) * 100)
+    total: 5,
+    successRate: Math.round((working.length / 5) * 100)
   };
 }
 
