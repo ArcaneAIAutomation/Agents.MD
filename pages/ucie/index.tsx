@@ -2,49 +2,17 @@ import React, { useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
-import UCIESearchBar from '../../components/UCIE/UCIESearchBar';
-import { useTokenSearch } from '../../hooks/useTokenSearch';
-import { Search, TrendingUp, Zap, Shield, Brain, BarChart3 } from 'lucide-react';
+import { TrendingUp, Zap, Shield, Brain, BarChart3, ArrowRight } from 'lucide-react';
+import { Bitcoin, Coins } from 'lucide-react';
 
 export default function UCIEHomePage() {
   const router = useRouter();
-  const [selectedToken, setSelectedToken] = useState<string | null>(null);
-  const [validating, setValidating] = useState(false);
-  const [validationResult, setValidationResult] = useState<any>(null);
-  
-  const { recentSearches, popularTokens, addRecentSearch } = useTokenSearch();
+  const [loading, setLoading] = useState<string | null>(null);
 
-  const handleTokenSelect = async (symbol: string) => {
-    setSelectedToken(symbol);
-    setValidating(true);
-    setValidationResult(null);
-    
-    // Add to recent searches
-    addRecentSearch(symbol);
-
-    try {
-      // Validate token
-      const response = await fetch(`/api/ucie/validate?symbol=${encodeURIComponent(symbol)}`);
-      const data = await response.json();
-      
-      setValidationResult(data);
-      
-      if (data.valid) {
-        // Navigate to analysis page
-        setTimeout(() => {
-          router.push(`/ucie/analyze/${encodeURIComponent(symbol.toUpperCase())}`);
-        }, 1000);
-      }
-    } catch (error) {
-      console.error('Validation error:', error);
-      setValidationResult({
-        success: false,
-        valid: false,
-        error: 'Validation failed. Please try again.'
-      });
-    } finally {
-      setValidating(false);
-    }
+  const handleAnalyze = (symbol: 'BTC' | 'ETH') => {
+    setLoading(symbol);
+    // Navigate to analysis page
+    router.push(`/ucie/analyze/${symbol}`);
   };
 
   return (
@@ -70,69 +38,78 @@ export default function UCIEHomePage() {
             </p>
           </div>
 
-          {/* Search Bar */}
+          {/* Analysis Selection Buttons */}
           <div className="mb-12">
-            <UCIESearchBar
-              onTokenSelect={handleTokenSelect}
-              recentSearches={recentSearches}
-              popularTokens={popularTokens}
-            />
-          </div>
-
-          {/* Validation Result */}
-          {validating && (
-            <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-8 mb-12 text-center">
-              <div className="inline-block w-12 h-12 border-4 border-bitcoin-orange border-t-transparent rounded-full animate-spin mb-4"></div>
-              <p className="text-bitcoin-white text-lg">
-                Validating {selectedToken}...
-              </p>
-            </div>
-          )}
-
-          {validationResult && !validating && (
-            <div className={`border-2 rounded-xl p-8 mb-12 ${
-              validationResult.valid 
-                ? 'bg-bitcoin-black border-bitcoin-orange' 
-                : 'bg-bitcoin-black border-bitcoin-orange-20'
-            }`}>
-              {validationResult.valid ? (
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-bitcoin-orange rounded-full mb-4">
-                    <Search className="w-8 h-8 text-bitcoin-black" strokeWidth={2.5} />
+            <h2 className="text-2xl md:text-3xl font-bold text-bitcoin-white text-center mb-8">
+              Select Asset for Comprehensive Analysis
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              {/* Bitcoin Button */}
+              <button
+                onClick={() => handleAnalyze('BTC')}
+                disabled={loading !== null}
+                className="group bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-8 transition-all hover:bg-bitcoin-orange hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[200px] flex flex-col items-center justify-center"
+              >
+                {loading === 'BTC' ? (
+                  <div className="flex flex-col items-center">
+                    <div className="w-16 h-16 border-4 border-bitcoin-orange border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <p className="text-bitcoin-white text-lg font-semibold">Loading Bitcoin Analysis...</p>
                   </div>
-                  <h3 className="text-2xl font-bold text-bitcoin-white mb-2">
-                    Token Validated: {validationResult.symbol}
-                  </h3>
-                  <p className="text-bitcoin-white-80 mb-6">
-                    Redirecting to comprehensive analysis...
-                  </p>
-                  <div className="inline-block w-8 h-8 border-4 border-bitcoin-orange border-t-transparent rounded-full animate-spin"></div>
-                </div>
-              ) : (
-                <div className="text-center">
-                  <h3 className="text-xl font-bold text-bitcoin-white mb-2">
-                    {validationResult.error || 'Token not found'}
-                  </h3>
-                  {validationResult.suggestions && validationResult.suggestions.length > 0 && (
-                    <div className="mt-4">
-                      <p className="text-bitcoin-white-60 mb-3">Did you mean:</p>
-                      <div className="flex flex-wrap gap-2 justify-center">
-                        {validationResult.suggestions.map((suggestion: string) => (
-                          <button
-                            key={suggestion}
-                            onClick={() => handleTokenSelect(suggestion)}
-                            className="bg-transparent text-bitcoin-orange border-2 border-bitcoin-orange font-semibold px-4 py-2 rounded-lg transition-all hover:bg-bitcoin-orange hover:text-bitcoin-black min-h-[44px]"
-                          >
-                            {suggestion}
-                          </button>
-                        ))}
-                      </div>
+                ) : (
+                  <>
+                    <div className="w-20 h-20 mb-4 text-bitcoin-orange group-hover:text-bitcoin-black transition-colors">
+                      <Bitcoin className="w-full h-full" strokeWidth={1.5} />
                     </div>
-                  )}
-                </div>
-              )}
+                    <h3 className="text-3xl font-bold text-bitcoin-white group-hover:text-bitcoin-black mb-2 transition-colors">
+                      Bitcoin
+                    </h3>
+                    <p className="text-xl font-mono text-bitcoin-orange group-hover:text-bitcoin-black mb-4 transition-colors">
+                      BTC
+                    </p>
+                    <div className="flex items-center gap-2 text-bitcoin-white-80 group-hover:text-bitcoin-black transition-colors">
+                      <span className="text-sm font-semibold">Start Analysis</span>
+                      <ArrowRight className="w-5 h-5" strokeWidth={2.5} />
+                    </div>
+                  </>
+                )}
+              </button>
+
+              {/* Ethereum Button */}
+              <button
+                onClick={() => handleAnalyze('ETH')}
+                disabled={loading !== null}
+                className="group bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-8 transition-all hover:bg-bitcoin-orange hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[200px] flex flex-col items-center justify-center"
+              >
+                {loading === 'ETH' ? (
+                  <div className="flex flex-col items-center">
+                    <div className="w-16 h-16 border-4 border-bitcoin-orange border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <p className="text-bitcoin-white text-lg font-semibold">Loading Ethereum Analysis...</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="w-20 h-20 mb-4 text-bitcoin-orange group-hover:text-bitcoin-black transition-colors">
+                      <Coins className="w-full h-full" strokeWidth={1.5} />
+                    </div>
+                    <h3 className="text-3xl font-bold text-bitcoin-white group-hover:text-bitcoin-black mb-2 transition-colors">
+                      Ethereum
+                    </h3>
+                    <p className="text-xl font-mono text-bitcoin-orange group-hover:text-bitcoin-black mb-4 transition-colors">
+                      ETH
+                    </p>
+                    <div className="flex items-center gap-2 text-bitcoin-white-80 group-hover:text-bitcoin-black transition-colors">
+                      <span className="text-sm font-semibold">Start Analysis</span>
+                      <ArrowRight className="w-5 h-5" strokeWidth={2.5} />
+                    </div>
+                  </>
+                )}
+              </button>
             </div>
-          )}
+
+            <p className="text-center text-bitcoin-white-60 mt-6 text-sm">
+              Click to launch comprehensive real-time analysis with 95%+ data quality
+            </p>
+          </div>
 
           {/* Features Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
@@ -162,7 +139,7 @@ export default function UCIEHomePage() {
               description="Live price updates, whale transactions, and breaking news alerts."
             />
             <FeatureCard
-              icon={<Search className="w-8 h-8" />}
+              icon={<Bitcoin className="w-8 h-8" />}
               title="Bitcoin & Ethereum"
               description="Perfected analysis for the two most important cryptocurrencies with 95%+ data quality."
             />
