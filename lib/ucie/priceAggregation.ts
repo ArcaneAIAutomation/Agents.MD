@@ -16,7 +16,6 @@
 import {
   coinGeckoClient,
   coinMarketCapClient,
-  binanceClient,
   krakenClient,
   coinbaseClient,
   type PriceData,
@@ -209,10 +208,10 @@ export async function aggregateExchangePrices(symbol: string): Promise<PriceAggr
   const startTime = Date.now();
   
   // Fetch from all exchanges in parallel with 2-second timeout
+  // NOTE: Binance removed due to consistent 451 errors (geo-blocking)
   const fetchPromises = [
     fetchExchangePrice(symbol, () => coinGeckoClient.getPrice(symbol), 'CoinGecko'),
     fetchExchangePrice(symbol, () => coinMarketCapClient.getPrice(symbol), 'CoinMarketCap'),
-    fetchExchangePrice(symbol, () => binanceClient.getPrice(symbol), 'Binance'),
     fetchExchangePrice(symbol, () => krakenClient.getPrice(symbol), 'Kraken'),
     fetchExchangePrice(symbol, () => coinbaseClient.getPrice(symbol), 'Coinbase'),
   ];

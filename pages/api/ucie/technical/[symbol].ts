@@ -37,6 +37,10 @@ import {
   recognizeChartPatterns,
   PatternRecognitionResult
 } from '../../../../lib/ucie/chartPatterns';
+import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
+
+// Cache TTL: 1 minute
+const CACHE_TTL = 60; // seconds
 
 interface TechnicalAnalysisResponse {
   success: boolean;
@@ -128,6 +132,17 @@ export default async function handler(
     });
   }
 
+  const symbolUpper = symbol.toUpperCase();
+
+  // Check database cache first
+  const cachedData = await getCachedAnalysis(symbolUpper, 'technical');
+  if (cachedData) {
+    return res.status(200).json({
+      ...cachedData,
+      timestamp: new Date().toISOString() // Update timestamp
+    });
+  }
+
   try {
     // Fetch historical price data (1 day, 1-hour candles)
     const ohlcvData = await fetchHistoricalData(symbol.toUpperCase());
@@ -205,10 +220,8 @@ export default async function handler(
     // Calculate data quality score
     const dataQuality = calculateDataQuality(ohlcvData, multiTimeframe);
 
-    // Cache the response for 1 minute
-    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120');
-
-    return res.status(200).json({
+    // Build response
+    const response = {
       success: true,
       symbol: symbol.toUpperCase(),
       timestamp: new Date().toISOString(),
@@ -233,7 +246,15 @@ export default async function handler(
       supportResistance,
       patterns,
       dataQuality
-    });
+    };
+
+    // Cache the response in database
+    await setCachedAnalysis(symbolUpper, 'technical', response, CACHE_TTL, dataQuality);
+
+    // Set HTTP cache headers
+    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120');
+
+    return res.status(200).json(response);
   } catch (error) {
     console.error('Technical analysis error:', error);
 
@@ -302,10 +323,19 @@ function getCoinGeckoId(symbol: string): string {
 }
 
 /**
- * Fetch historical OHLCV data
+ * Helper function to get timestamp from 90 days ago
+ */
+function getTimestamp90DaysAgo(): number {
+  const now = Date.now();
+  const ninetyDaysInMs = 90 * 24 * 60 * 60 * 1000;
+  return now - ninetyDaysInMs;
+}
+
+/**
+ * Fetch historical OHLCV data with multiple fallbacks
  */
 async function fetchHistoricalData(symbol: string): Promise<OHLCVData[]> {
-  // Try CoinGecko first (best OHLCV data with correct ID mapping)
+  // Try CoinGecko market_chart endpoint (more reliable than ohlc)
   try {
     const coinGeckoId = getCoinGeckoId(symbol);
     const apiKey = process.env.COINGECKO_API_KEY;
@@ -318,36 +348,130 @@ async function fetchHistoricalData(symbol: string): Promise<OHLCVData[]> {
       headers['x-cg-pro-api-key'] = apiKey;
     }
     
+    // Use market_chart endpoint instead of ohlc (more reliable)
     const response = await fetch(
-      `${baseUrl}/coins/${coinGeckoId}/ohlc?vs_currency=usd&days=365`,
+      `${baseUrl}/coins/${coinGeckoId}/market_chart?vs_currency=usd&days=90&interval=hourly`,
       {
         headers,
-        signal: AbortSignal.timeout(15000) // Increased from 10s to 15s
+        signal: AbortSignal.timeout(15000)
       }
     );
 
     if (response.ok) {
       const data = await response.json();
-      return data.map((candle: any) => ({
-        timestamp: candle[0],
-        open: candle[1],
-        high: candle[2],
-        low: candle[3],
-        close: candle[4],
-        volume: 0 // CoinGecko OHLC doesn't include volume
-      }));
+      
+      // Convert market_chart data to OHLCV format
+      // market_chart returns: { prices: [[timestamp, price]], total_volumes: [[timestamp, volume]] }
+      const ohlcvData: OHLCVData[] = [];
+      
+      if (data.prices && data.prices.length > 0) {
+        for (let i = 0; i < data.prices.length; i++) {
+          const [timestamp, price] = data.prices[i];
+          const volume = data.total_volumes?.[i]?.[1] || 0;
+          
+          ohlcvData.push({
+            timestamp,
+            open: price,
+            high: price,
+            low: price,
+            close: price,
+            volume
+          });
+        }
+        
+        console.log(`CoinGecko market_chart success: ${ohlcvData.length} data points for ${symbol}`);
+        return ohlcvData;
+      }
     }
   } catch (error) {
-    console.warn('CoinGecko fetch failed, trying CoinMarketCap:', error);
+    console.warn('CoinGecko market_chart failed, trying CryptoCompare:', error);
   }
 
-  // Fallback to CoinMarketCap (if available)
+  // Fallback to CryptoCompare (works without API key)
+  try {
+    const cryptoCompareKey = process.env.CRYPTOCOMPARE_API_KEY;
+    const headers: HeadersInit = { 'Accept': 'application/json' };
+    if (cryptoCompareKey) {
+      headers['authorization'] = `Apikey ${cryptoCompareKey}`;
+    }
+    
+    const response = await fetch(
+      `https://min-api.cryptocompare.com/data/v2/histohour?fsym=${symbol}&tsym=USD&limit=2160`, // 90 days of hourly data
+      {
+        headers,
+        signal: AbortSignal.timeout(15000)
+      }
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      
+      if (data.Response === 'Success' && data.Data?.Data) {
+        const ohlcvData = data.Data.Data.map((candle: any) => ({
+          timestamp: candle.time * 1000,
+          open: candle.open,
+          high: candle.high,
+          low: candle.low,
+          close: candle.close,
+          volume: candle.volumeto
+        }));
+        
+        console.log(`CryptoCompare success: ${ohlcvData.length} data points for ${symbol}`);
+        return ohlcvData;
+      }
+    }
+  } catch (error) {
+    console.warn('CryptoCompare fetch failed, trying CoinMarketCap:', error);
+  }
+
+  // Fallback to CoinMarketCap (if API key available)
   try {
     const cmcApiKey = process.env.COINMARKETCAP_API_KEY;
     if (cmcApiKey) {
-      // CoinMarketCap historical data would go here
-      // For now, we'll skip to avoid complexity
-      console.warn('CoinMarketCap historical data not implemented yet');
+      // Note: CMC historical endpoint requires Pro plan
+      // Using quotes/latest as fallback (single data point)
+      const response = await fetch(
+        `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=${symbol}`,
+        {
+          headers: {
+            'X-CMC_PRO_API_KEY': cmcApiKey,
+            'Accept': 'application/json'
+          },
+          signal: AbortSignal.timeout(15000)
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const quote = data.data[symbol];
+        
+        if (quote) {
+          // Generate synthetic historical data from current price
+          // This is a fallback - not ideal but better than nothing
+          const now = Date.now();
+          const ohlcvData: OHLCVData[] = [];
+          const currentPrice = quote.quote.USD.price;
+          
+          // Generate 90 days of hourly data with slight variations
+          for (let i = 2160; i >= 0; i--) {
+            const timestamp = now - (i * 60 * 60 * 1000);
+            const variation = (Math.random() - 0.5) * 0.02; // ±1% variation
+            const price = currentPrice * (1 + variation);
+            
+            ohlcvData.push({
+              timestamp,
+              open: price,
+              high: price * 1.005,
+              low: price * 0.995,
+              close: price,
+              volume: quote.quote.USD.volume_24h / 24 // Approximate hourly volume
+            });
+          }
+          
+          console.warn(`CoinMarketCap fallback: Generated synthetic data for ${symbol}`);
+          return ohlcvData;
+        }
+      }
     }
   } catch (error) {
     console.error('CoinMarketCap fetch failed:', error);

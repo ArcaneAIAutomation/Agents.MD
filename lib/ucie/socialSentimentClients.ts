@@ -97,62 +97,96 @@ export interface RedditMetrics {
 // ============================================================================
 
 /**
- * Fetch social metrics from LunarCrush API
+ * Parse LunarCrush API v4 response
+ */
+function parseLunarCrushV4Response(data: any, symbol: string): LunarCrushData | null {
+  if (!data || !data.data) {
+    console.warn(`⚠️ No LunarCrush data found for ${symbol}`);
+    return null;
+  }
+
+  const coin = data.data;
+
+  return {
+    symbol: coin.symbol || symbol,
+    name: coin.name || '',
+    price: coin.price || 0,
+    volume24h: coin.volume_24h || 0,
+    marketCap: coin.market_cap || 0,
+    socialScore: coin.social_score || 0,
+    sentimentScore: calculateSentimentScore(coin.sentiment || 3), // v4 uses 0-5 scale
+    socialVolume: coin.social_volume || 0,
+    socialVolumeChange24h: coin.social_volume_change_24h || 0,
+    socialDominance: coin.social_dominance || 0,
+    galaxyScore: coin.galaxy_score || 0,
+    altRank: coin.alt_rank || 0,
+    mentions: coin.social_mentions || 0,
+    interactions: coin.social_interactions || 0,
+    contributors: coin.social_contributors || 0,
+    trendingScore: coin.trending_score || 0,
+  };
+}
+
+/**
+ * Fetch social metrics from LunarCrush API v4
  * LunarCrush provides comprehensive social data aggregated from multiple sources
  */
 export async function fetchLunarCrushData(symbol: string): Promise<LunarCrushData | null> {
   const apiKey = process.env.LUNARCRUSH_API_KEY;
   
   if (!apiKey) {
-    console.warn('LunarCrush API key not configured');
+    console.warn('❌ LunarCrush API key not configured');
     return null;
   }
 
   try {
+    console.log(`🌙 Fetching LunarCrush v4 data for ${symbol}...`);
+    
+    // Try authenticated endpoint first (v4)
     const response = await fetch(
-      `https://api.lunarcrush.com/v2?data=assets&key=${apiKey}&symbol=${symbol}`,
+      `https://lunarcrush.com/api4/public/coins/${symbol}/v1`,
       {
         headers: {
           'Accept': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
         },
-        signal: AbortSignal.timeout(10000), // 10 second timeout
+        signal: AbortSignal.timeout(10000),
       }
     );
 
     if (!response.ok) {
-      console.error(`LunarCrush API error: ${response.status}`);
-      return null;
+      console.warn(`⚠️ LunarCrush authenticated API error: ${response.status}, trying public endpoint...`);
+      
+      // Try public endpoint as fallback (no auth)
+      const publicResponse = await fetch(
+        `https://lunarcrush.com/api4/public/coins/${symbol}/v1`,
+        {
+          headers: {
+            'Accept': 'application/json',
+          },
+          signal: AbortSignal.timeout(10000),
+        }
+      );
+      
+      if (!publicResponse.ok) {
+        console.error(`❌ LunarCrush public API also failed: ${publicResponse.status}`);
+        return null;
+      }
+      
+      const publicData = await publicResponse.json();
+      console.log(`✅ LunarCrush public data fetched successfully for ${symbol}`);
+      return parseLunarCrushV4Response(publicData, symbol);
     }
 
     const data = await response.json();
+    console.log(`✅ LunarCrush authenticated data fetched successfully for ${symbol}`);
     
-    if (!data.data || data.data.length === 0) {
-      console.warn(`No LunarCrush data found for ${symbol}`);
-      return null;
-    }
-
-    const asset = data.data[0];
-
-    return {
-      symbol: asset.symbol || symbol,
-      name: asset.name || '',
-      price: asset.price || 0,
-      volume24h: asset.volume_24h || 0,
-      marketCap: asset.market_cap || 0,
-      socialScore: asset.social_score || 0,
-      sentimentScore: calculateSentimentScore(asset.sentiment || 0),
-      socialVolume: asset.social_volume || 0,
-      socialVolumeChange24h: asset.social_volume_24h_change || 0,
-      socialDominance: asset.social_dominance || 0,
-      galaxyScore: asset.galaxy_score || 0,
-      altRank: asset.alt_rank || 0,
-      mentions: asset.social_contributors || 0,
-      interactions: asset.interactions_24h || 0,
-      contributors: asset.social_contributors || 0,
-      trendingScore: asset.trending_score || 0,
-    };
+    return parseLunarCrushV4Response(data, symbol);
   } catch (error) {
-    console.error('Error fetching LunarCrush data:', error);
+    console.error('❌ Error fetching LunarCrush data:', error);
+    if (error instanceof Error) {
+      console.error(`❌ LunarCrush error details: ${error.message}`);
+    }
     return null;
   }
 }
@@ -203,7 +237,10 @@ export async function fetchTwitterMetrics(symbol: string): Promise<TwitterMetric
 
     const data = await response.json();
     
+    console.log(`✅ Twitter API success: ${data.data?.length || 0} tweets found for ${symbol}`);
+    
     if (!data.data || data.data.length === 0) {
+      console.warn(`⚠️ No Twitter data found for ${symbol}`);
       return {
         symbol,
         mentions24h: 0,
@@ -251,7 +288,7 @@ export async function fetchTwitterMetrics(symbol: string): Promise<TwitterMetric
     );
     const engagementRate = tweets.length > 0 ? totalEngagement / tweets.length : 0;
 
-    return {
+    const result = {
       symbol,
       mentions24h: tweets.length,
       sentiment: sentimentScore,
@@ -260,8 +297,15 @@ export async function fetchTwitterMetrics(symbol: string): Promise<TwitterMetric
       trendingHashtags: hashtags.slice(0, 10),
       engagementRate,
     };
+    
+    console.log(`✅ Twitter metrics complete: ${tweets.length} mentions, sentiment: ${sentimentScore}, ${influencers.length} influencers`);
+    
+    return result;
   } catch (error) {
-    console.error('Error fetching Twitter metrics:', error);
+    console.error('❌ Error fetching Twitter metrics:', error);
+    if (error instanceof Error) {
+      console.error(`❌ Twitter error details: ${error.message}`);
+    }
     return null;
   }
 }
