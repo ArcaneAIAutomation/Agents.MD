@@ -64,9 +64,6 @@ const CACHE_TTL = 3600; // seconds
 function setCachedData(key: string, data: any): void {
   // Deprecated - keeping for compatibility but not used
   return;
-    data,
-    timestamp: Date.now(),
-  });
 }
 
 // ============================================================================
