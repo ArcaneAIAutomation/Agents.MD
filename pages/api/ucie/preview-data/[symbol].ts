@@ -105,12 +105,14 @@ export default async function handler(
   }
 
   const normalizedSymbol = symbol.toUpperCase();
-  console.log(`📊 Collecting data preview for ${normalizedSymbol}...`);
+  const refresh = req.query.refresh === 'true'; // Force fresh data if refresh=true
+  
+  console.log(`📊 Collecting data preview for ${normalizedSymbol}${refresh ? ' (FRESH DATA)' : ''}...`);
 
   try {
     // Collect data from all effective APIs in parallel
     const startTime = Date.now();
-    const collectedData = await collectDataFromAPIs(normalizedSymbol, req);
+    const collectedData = await collectDataFromAPIs(normalizedSymbol, req, refresh);
     const collectionTime = Date.now() - startTime;
 
     console.log(`✅ Data collection completed in ${collectionTime}ms`);
@@ -235,48 +237,52 @@ export default async function handler(
  * Collect data from all effective APIs
  * ✅ FIX #3: Added detailed error logging for diagnostics
  * ✅ FIX #4: Use request host instead of environment variable (CRITICAL FIX)
+ * ✅ FIX #5: Added refresh parameter to force fresh data
  */
-async function collectDataFromAPIs(symbol: string, req: NextApiRequest) {
+async function collectDataFromAPIs(symbol: string, req: NextApiRequest, refresh: boolean = false) {
   // ✅ CRITICAL FIX: Construct base URL from request headers
   // This works in any environment without needing NEXT_PUBLIC_BASE_URL
   const protocol = req.headers['x-forwarded-proto'] || 'https';
   const host = req.headers['host'];
   const baseUrl = `${protocol}://${host}`;
   
-  console.log(`🔍 Collecting data for ${symbol}...`);
+  // Add refresh parameter to force fresh data
+  const refreshParam = refresh ? '?refresh=true' : '';
+  
+  console.log(`🔍 Collecting data for ${symbol}${refresh ? ' (FORCING FRESH DATA)' : ''}...`);
   console.log(`🌐 Using base URL: ${baseUrl}`);
   
   const results = await Promise.allSettled([
     fetchWithTimeout(
-      `${baseUrl}${EFFECTIVE_APIS.marketData.endpoint}/${symbol}`,
+      `${baseUrl}${EFFECTIVE_APIS.marketData.endpoint}/${symbol}${refreshParam}`,
       EFFECTIVE_APIS.marketData.timeout
     ).catch(err => {
       console.error(`❌ Market Data failed:`, err.message);
       throw err;
     }),
     fetchWithTimeout(
-      `${baseUrl}${EFFECTIVE_APIS.sentiment.endpoint}/${symbol}`,
+      `${baseUrl}${EFFECTIVE_APIS.sentiment.endpoint}/${symbol}${refreshParam}`,
       EFFECTIVE_APIS.sentiment.timeout
     ).catch(err => {
       console.error(`❌ Sentiment failed:`, err.message);
       throw err;
     }),
     fetchWithTimeout(
-      `${baseUrl}${EFFECTIVE_APIS.technical.endpoint}/${symbol}`,
+      `${baseUrl}${EFFECTIVE_APIS.technical.endpoint}/${symbol}${refreshParam}`,
       EFFECTIVE_APIS.technical.timeout
     ).catch(err => {
       console.error(`❌ Technical failed:`, err.message);
       throw err;
     }),
     fetchWithTimeout(
-      `${baseUrl}${EFFECTIVE_APIS.news.endpoint}/${symbol}`,
+      `${baseUrl}${EFFECTIVE_APIS.news.endpoint}/${symbol}${refreshParam}`,
       EFFECTIVE_APIS.news.timeout
     ).catch(err => {
       console.error(`❌ News failed:`, err.message);
       throw err;
     }),
     fetchWithTimeout(
-      `${baseUrl}${EFFECTIVE_APIS.onChain.endpoint}/${symbol}`,
+      `${baseUrl}${EFFECTIVE_APIS.onChain.endpoint}/${symbol}${refreshParam}`,
       EFFECTIVE_APIS.onChain.timeout
     ).catch(err => {
       console.error(`❌ On-Chain failed:`, err.message);

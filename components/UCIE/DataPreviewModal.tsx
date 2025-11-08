@@ -57,7 +57,9 @@ export default function DataPreviewModal({
     setError(null);
 
     try {
-      const response = await fetch(`/api/ucie/preview-data/${symbol}`);
+      // ✅ FORCE FRESH DATA: Always fetch fresh data when user clicks BTC/ETH
+      // This ensures Caesar AI gets the most recent data
+      const response = await fetch(`/api/ucie/preview-data/${symbol}?refresh=true`);
       const data = await response.json();
 
       if (data.success) {
