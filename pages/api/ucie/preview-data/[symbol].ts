@@ -125,7 +125,7 @@ export default async function handler(
           normalizedSymbol,
           'market-data',
           collectedData.marketData,
-          1800, // 30 minutes TTL
+          15 * 60, // 15 minutes TTL (standardized)
           collectedData.marketData.dataQuality || 0
         ).catch(err => console.error('Failed to cache market data:', err))
       );
@@ -137,7 +137,7 @@ export default async function handler(
           normalizedSymbol,
           'sentiment',
           collectedData.sentiment,
-          300, // 5 minutes TTL
+          15 * 60, // 15 minutes TTL (standardized)
           collectedData.sentiment.dataQuality || 0
         ).catch(err => console.error('Failed to cache sentiment:', err))
       );
@@ -149,7 +149,7 @@ export default async function handler(
           normalizedSymbol,
           'technical',
           collectedData.technical,
-          60, // 1 minute TTL
+          15 * 60, // 15 minutes TTL (standardized)
           collectedData.technical.dataQuality || 0
         ).catch(err => console.error('Failed to cache technical:', err))
       );
@@ -161,7 +161,7 @@ export default async function handler(
           normalizedSymbol,
           'news',
           collectedData.news,
-          300, // 5 minutes TTL
+          15 * 60, // 15 minutes TTL (standardized)
           collectedData.news.dataQuality || 0
         ).catch(err => console.error('Failed to cache news:', err))
       );
@@ -173,7 +173,7 @@ export default async function handler(
           normalizedSymbol,
           'on-chain',
           collectedData.onChain,
-          300, // 5 minutes TTL
+          15 * 60, // 15 minutes TTL (standardized)
           collectedData.onChain.dataQuality || 0
         ).catch(err => console.error('Failed to cache on-chain:', err))
       );
