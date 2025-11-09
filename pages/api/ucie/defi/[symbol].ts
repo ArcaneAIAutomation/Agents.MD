@@ -33,6 +33,7 @@ import {
   PeerProtocol,
 } from '../../../../lib/ucie/peerComparison';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
+import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
 // ============================================================================
 // Types
@@ -68,10 +69,13 @@ function setCachedData(key: string, data: any): void {
 // Main Handler
 // ============================================================================
 
-export default async function handler(
-  req: NextApiRequest,
+async function handler(
+  req: AuthenticatedRequest,
   res: NextApiResponse<DeFiMetricsResponse>
 ) {
+  // Get user info if authenticated (optional)
+  const userId = req.user?.id;
+  const userEmail = req.user?.email;
   // Only allow GET requests
   if (req.method !== 'GET') {
     return res.status(405).json({
@@ -126,7 +130,7 @@ export default async function handler(
       };
 
       // Cache in database
-      await setCachedAnalysis(normalizedSymbol, 'defi', response, CACHE_TTL, 0);
+      await setCachedAnalysis(normalizedSymbol, 'defi', response, CACHE_TTL, 0, userId, userEmail);
 
       return res.status(200).json({
         success: true,
@@ -218,7 +222,7 @@ export default async function handler(
     };
 
     // Cache the response in database
-    await setCachedAnalysis(normalizedSymbol, 'defi', response, CACHE_TTL, dataQuality);
+    await setCachedAnalysis(normalizedSymbol, 'defi', response, CACHE_TTL, dataQuality, userId, userEmail);
 
     return res.status(200).json({
       success: true,
@@ -319,3 +323,7 @@ function formatTVL(tvl: number): string {
     return `$${tvl.toFixed(2)}`;
   }
 }
+
+
+// Export with optional authentication middleware
+export default withOptionalAuth(handler);

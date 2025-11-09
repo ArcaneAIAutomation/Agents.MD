@@ -11,14 +11,18 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { fetchBitcoinOnChainData } from '../../../../lib/ucie/bitcoinOnChain';
 import { fetchEthereumOnChainData } from '../../../../lib/ucie/ethereumOnChain';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
+import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
 // Cache TTL: 15 minutes (for OpenAI/Caesar analysis)
 const CACHE_TTL = 15 * 60; // 900 seconds
 
-export default async function handler(
-  req: NextApiRequest,
+async function handler(
+  req: AuthenticatedRequest,
   res: NextApiResponse
 ) {
+  // Get user info if authenticated (optional)
+  const userId = req.user?.id;
+  const userEmail = req.user?.email;
   if (req.method !== 'GET') {
     return res.status(405).json({
       success: false,
@@ -71,7 +75,9 @@ export default async function handler(
       'on-chain',
       onChainData,
       CACHE_TTL,
-      onChainData.dataQuality
+      onChainData.dataQuality,
+      userId,
+      userEmail
     );
 
     console.log(`[UCIE On-Chain] Successfully fetched ${symbolUpper} on-chain data (quality: ${onChainData.dataQuality}%)`);
@@ -90,3 +96,7 @@ export default async function handler(
     });
   }
 }
+
+
+// Export with optional authentication middleware
+export default withOptionalAuth(handler);

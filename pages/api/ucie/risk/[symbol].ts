@@ -24,6 +24,7 @@ import {
   PortfolioImpactAnalysis 
 } from '../../../../lib/ucie/portfolioImpact';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
+import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
 export interface RiskAssessmentResponse {
   success: boolean;
@@ -77,10 +78,13 @@ function calculateDataQuality(
 /**
  * Main API handler
  */
-export default async function handler(
-  req: NextApiRequest,
+async function handler(
+  req: AuthenticatedRequest,
   res: NextApiResponse<RiskAssessmentResponse>
 ) {
+  // Get user info if authenticated (optional)
+  const userId = req.user?.id;
+  const userEmail = req.user?.email;
   // Only allow GET requests
   if (req.method !== 'GET') {
     return res.status(405).json({
@@ -239,7 +243,7 @@ export default async function handler(
     };
     
     // Cache the response in database
-    await setCachedAnalysis(symbolUpper, 'risk', response, CACHE_TTL, dataQualityScore);
+    await setCachedAnalysis(symbolUpper, 'risk', response, CACHE_TTL, dataQualityScore, userId, userEmail);
     
     // Return response
     return res.status(200).json(response);
@@ -262,3 +266,7 @@ export default async function handler(
     });
   }
 }
+
+
+// Export with optional authentication middleware
+export default withOptionalAuth(handler);

@@ -10,14 +10,18 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { calculateTechnicalIndicators } from '../../../../lib/ucie/technicalAnalysis';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
+import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
 // Cache TTL: 15 minutes (for OpenAI/Caesar analysis)
 const CACHE_TTL = 15 * 60; // 900 seconds
 
-export default async function handler(
-  req: NextApiRequest,
+async function handler(
+  req: AuthenticatedRequest,
   res: NextApiResponse
 ) {
+  // Get user info if authenticated (optional)
+  const userId = req.user?.id;
+  const userEmail = req.user?.email;
   if (req.method !== 'GET') {
     return res.status(405).json({
       success: false,
@@ -85,7 +89,9 @@ export default async function handler(
       'technical',
       technicalData,
       CACHE_TTL,
-      technicalData.dataQuality
+      technicalData.dataQuality,
+      userId,
+      userEmail
     );
 
     console.log(`[UCIE Technical] ${symbolUpper} signal: ${technicalData.signals.overall} (${technicalData.signals.confidence}% confidence)`);
@@ -105,3 +111,7 @@ export default async function handler(
     });
   }
 }
+
+
+// Export with optional authentication middleware
+export default withOptionalAuth(handler);

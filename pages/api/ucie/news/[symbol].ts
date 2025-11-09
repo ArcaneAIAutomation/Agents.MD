@@ -18,6 +18,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { fetchAllNews } from '../../../../lib/ucie/newsFetching';
 import { assessMultipleNews, generateNewsSummary, AssessedNewsArticle } from '../../../../lib/ucie/newsImpactAssessment';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
+import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
 interface NewsResponse {
   success: boolean;
@@ -50,10 +51,13 @@ interface ErrorResponse {
 // Cache TTL: 15 minutes (for OpenAI/Caesar analysis)
 const CACHE_TTL = 15 * 60; // 900 seconds
 
-export default async function handler(
-  req: NextApiRequest,
+async function handler(
+  req: AuthenticatedRequest,
   res: NextApiResponse<NewsResponse | ErrorResponse>
 ) {
+  // Get user info if authenticated (optional)
+  const userId = req.user?.id;
+  const userEmail = req.user?.email;
   // Only allow GET requests
   if (req.method !== 'GET') {
     return res.status(405).json({
@@ -150,7 +154,7 @@ export default async function handler(
     };
 
     // Cache the response in database
-    await setCachedAnalysis(symbolUpper, 'news', response, CACHE_TTL, dataQuality);
+    await setCachedAnalysis(symbolUpper, 'news', response, CACHE_TTL, dataQuality, userId, userEmail);
 
     console.log(`[UCIE News] Successfully fetched and assessed ${assessedArticles.length} articles for ${symbolUpper}`);
 
@@ -218,3 +222,7 @@ function cleanupCache() {
     console.log(`[UCIE News] Cleaned up ${keysToDelete.length} old cache entries`);
   }
 }
+
+
+// Export with optional authentication middleware
+export default withOptionalAuth(handler);

@@ -27,6 +27,7 @@ import {
   type InfluencerMetrics,
 } from '../../../../lib/ucie/influencerTracking';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
+import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
 // ============================================================================
 // Type Definitions
@@ -99,10 +100,14 @@ function calculateDataQuality(
 // Main API Handler
 // ============================================================================
 
-export default async function handler(
-  req: NextApiRequest,
+async function handler(
+  req: AuthenticatedRequest,
   res: NextApiResponse<SentimentResponse | ErrorResponse>
 ) {
+  // Get user info if authenticated (optional)
+  const userId = req.user?.id;
+  const userEmail = req.user?.email;
+
   // Only allow GET requests
   if (req.method !== 'GET') {
     return res.status(405).json({
@@ -176,7 +181,7 @@ export default async function handler(
     };
 
     // Cache the response in database
-    await setCachedAnalysis(normalizedSymbol, 'sentiment', response, CACHE_TTL, dataQuality);
+    await setCachedAnalysis(normalizedSymbol, 'sentiment', response, CACHE_TTL, dataQuality, userId, userEmail);
 
     // Return response
     return res.status(200).json(response);
@@ -209,3 +214,7 @@ setInterval(() => {
     }
   }
 }, 60 * 1000); // Run every minute
+
+
+// Export with optional authentication middleware
+export default withOptionalAuth(handler);
