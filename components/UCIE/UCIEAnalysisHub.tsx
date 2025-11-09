@@ -397,6 +397,12 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
   };
 
   const renderTabContent = () => {
+    // Special case: research tab can render without analysisData
+    // because CaesarAnalysisContainer handles its own loading
+    if (activeTab === 'research') {
+      return <CaesarAnalysisContainer symbol={symbol} jobId={analysisData?.research?.jobId} />;
+    }
+
     if (!analysisData) return null;
 
     switch (activeTab) {

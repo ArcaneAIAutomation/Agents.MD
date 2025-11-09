@@ -91,13 +91,14 @@ export function useProgressiveLoading({
     },
     {
       phase: 4,
-      label: 'Deep Analysis (Caesar AI Research & Predictions)',
+      label: 'Deep Analysis (Predictions)',
       endpoints: [
-        `/api/ucie/research/${symbol}`,
+        // Note: Caesar research is handled separately by CaesarAnalysisContainer
+        // to avoid blocking the UI with 10-minute polling
         `/api/ucie/predictions/${symbol}`
       ],
       priority: 'deep',
-      targetTime: 600000, // 10 minutes for Caesar
+      targetTime: 30000, // 30 seconds for predictions
       progress: 0,
       complete: false,
     },
@@ -260,7 +261,8 @@ export function useProgressiveLoading({
       defi: rawData['defi'],
       
       // Phase 4: Deep Analysis
-      research: rawData['research'],
+      // Note: research is handled separately by CaesarAnalysisContainer
+      research: rawData['research'] || null,
       predictions: rawData['predictions'],
       
       // Generate consensus from available data
