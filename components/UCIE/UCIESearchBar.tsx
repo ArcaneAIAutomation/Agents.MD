@@ -61,7 +61,9 @@ export default function UCIESearchBar({
 
     debounceTimerRef.current = setTimeout(async () => {
       try {
-        const response = await fetch(`/api/ucie/search?q=${encodeURIComponent(query)}`);
+        const response = await fetch(`/api/ucie/search?q=${encodeURIComponent(query)}`, {
+          credentials: 'include' // Required for authentication cookie
+        });
         
         if (!response.ok) {
           throw new Error('Search failed');

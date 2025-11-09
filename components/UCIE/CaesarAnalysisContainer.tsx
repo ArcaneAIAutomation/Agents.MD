@@ -122,6 +122,7 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
       startTimeRef.current = Date.now();
 
       const response = await fetch(`/api/ucie/research/${encodeURIComponent(symbol)}`, {
+        credentials: 'include', // Required for authentication cookie
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -198,7 +199,9 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
         return;
       }
 
-      const response = await fetch(`/api/ucie/research/${encodeURIComponent(symbol)}?jobId=${jobId}`);
+      const response = await fetch(`/api/ucie/research/${encodeURIComponent(symbol)}?jobId=${jobId}`, {
+        credentials: 'include' // Required for authentication cookie
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to check status: ${response.statusText}`);

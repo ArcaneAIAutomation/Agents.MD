@@ -41,6 +41,7 @@ export default function IntelligenceReportGenerator({
 
     try {
       const response = await fetch(`/api/ucie/export/${symbol}`, {
+        credentials: 'include', // Required for authentication cookie
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

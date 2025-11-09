@@ -187,6 +187,7 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
     try {
       // Only update price data for real-time updates (lightweight)
       const response = await fetch(`/api/ucie/market-data/${encodeURIComponent(symbol)}`, {
+        credentials: 'include', // Required for authentication cookie
         signal: AbortSignal.timeout(requestStrategy.timeout),
       });
       
@@ -247,6 +248,7 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
   const toggleWatchlist = async () => {
     try {
       const response = await fetch('/api/ucie/watchlist', {
+        credentials: 'include', // Required for authentication cookie
         method: isInWatchlist ? 'DELETE' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ symbol }),
