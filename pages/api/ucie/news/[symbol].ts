@@ -18,7 +18,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { fetchAllNews } from '../../../../lib/ucie/newsFetching';
 import { assessMultipleNews, generateNewsSummary, AssessedNewsArticle } from '../../../../lib/ucie/newsImpactAssessment';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
-import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
+import { withAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
 interface NewsResponse {
   success: boolean;
@@ -55,9 +55,9 @@ async function handler(
   req: AuthenticatedRequest,
   res: NextApiResponse<NewsResponse | ErrorResponse>
 ) {
-  // Get user info if authenticated (optional)
-  const userId = req.user?.id;
-  const userEmail = req.user?.email;
+  // Get user info (guaranteed by withAuth middleware)
+  const userId = req.user!.id;
+  const userEmail = req.user!.email;
   // Only allow GET requests
   if (req.method !== 'GET') {
     return res.status(405).json({
@@ -224,5 +224,5 @@ function cleanupCache() {
 }
 
 
-// Export with optional authentication middleware
-export default withOptionalAuth(handler);
+// Export with required authentication middleware
+export default withAuth(handler);

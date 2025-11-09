@@ -23,6 +23,7 @@ import {
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 import { getAggregatedPhaseData } from '../../../../lib/ucie/phaseDataStorage';
 import { getAllCachedDataForCaesar } from '../../../../lib/ucie/openaiSummaryStorage';
+import { withAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
 /**
  * API Response Types
@@ -59,10 +60,13 @@ function validateSymbol(symbol: string): boolean {
 /**
  * Main API Handler
  */
-export default async function handler(
-  req: NextApiRequest,
+async function handler(
+  req: AuthenticatedRequest,
   res: NextApiResponse<ApiResponse | any>
 ) {
+  // Get user info (guaranteed by withAuth middleware)
+  const userId = req.user!.id;
+  const userEmail = req.user!.email;
   // Support both GET (check status) and POST (start analysis)
   if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({
@@ -429,6 +433,9 @@ export default async function handler(
     });
   }
 }
+
+// Export with required authentication middleware
+export default withAuth(handler);
 
 /**
  * API Configuration

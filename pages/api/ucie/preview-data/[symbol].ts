@@ -17,7 +17,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
 import { setCachedAnalysis, getCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 import { storeOpenAISummary } from '../../../../lib/ucie/openaiSummaryStorage';
-import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
+import { withAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -91,9 +91,9 @@ async function handler(
   req: AuthenticatedRequest,
   res: NextApiResponse<ApiResponse>
 ) {
-  // Get user info if authenticated (optional)
-  const userId = req.user?.id;
-  const userEmail = req.user?.email;
+  // Get user info (guaranteed by withAuth middleware)
+  const userId = req.user!.id;
+  const userEmail = req.user!.email;
 
   if (req.method !== 'GET') {
     return res.status(405).json({
@@ -689,5 +689,5 @@ export const config = {
 };
 
 
-// Export with optional authentication middleware
-export default withOptionalAuth(handler);
+// Export with required authentication middleware
+export default withAuth(handler);

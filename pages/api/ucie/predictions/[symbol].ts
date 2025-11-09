@@ -11,7 +11,7 @@ import { detectPatterns, matchHistoricalPatterns, type PatternMatchingResult } f
 import { generateMultiTimeframeScenarios, type ScenarioAnalysis, type MarketConditions } from '../../../../lib/ucie/scenarioAnalysis';
 import { calculateModelPerformance, storePrediction, type ModelPerformance } from '../../../../lib/ucie/modelAccuracy';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
-import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
+import { withAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
 interface PredictionsResponse {
   success: boolean;
@@ -174,9 +174,9 @@ async function handler(
   req: AuthenticatedRequest,
   res: NextApiResponse<PredictionsResponse>
 ) {
-  // Get user info if authenticated (optional)
-  const userId = req.user?.id;
-  const userEmail = req.user?.email;
+  // Get user info (guaranteed by withAuth middleware)
+  const userId = req.user!.id;
+  const userEmail = req.user!.email;
   // Only allow GET requests
   if (req.method !== 'GET') {
     return res.status(405).json({
@@ -331,5 +331,5 @@ if (typeof setInterval !== 'undefined') {
 }
 
 
-// Export with optional authentication middleware
-export default withOptionalAuth(handler);
+// Export with required authentication middleware
+export default withAuth(handler);

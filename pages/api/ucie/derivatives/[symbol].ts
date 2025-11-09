@@ -23,7 +23,7 @@ import { analyzeOpenInterest } from '../../../../lib/ucie/openInterestTracking';
 import { analyzeLiquidations } from '../../../../lib/ucie/liquidationDetection';
 import { analyzeLongShortRatios } from '../../../../lib/ucie/longShortAnalysis';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
-import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
+import { withAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
 import type { FundingRateAnalysis } from '../../../../lib/ucie/fundingRateAnalysis';
 import type { OpenInterestAnalysis } from '../../../../lib/ucie/openInterestTracking';
@@ -122,9 +122,9 @@ async function handler(
   req: AuthenticatedRequest,
   res: NextApiResponse<DerivativesDataResponse>
 ) {
-  // Get user info if authenticated (optional)
-  const userId = req.user?.id;
-  const userEmail = req.user?.email;
+  // Get user info (guaranteed by withAuth middleware)
+  const userId = req.user!.id;
+  const userEmail = req.user!.email;
   // Only allow GET requests
   if (req.method !== 'GET') {
     return res.status(405).json({
@@ -342,5 +342,5 @@ async function handler(
 }
 
 
-// Export with optional authentication middleware
-export default withOptionalAuth(handler);
+// Export with required authentication middleware
+export default withAuth(handler);

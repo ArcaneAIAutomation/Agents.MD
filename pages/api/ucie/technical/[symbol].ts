@@ -10,7 +10,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { calculateTechnicalIndicators } from '../../../../lib/ucie/technicalAnalysis';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
-import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
+import { withAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
 // Cache TTL: 15 minutes (for OpenAI/Caesar analysis)
 const CACHE_TTL = 15 * 60; // 900 seconds
@@ -19,9 +19,9 @@ async function handler(
   req: AuthenticatedRequest,
   res: NextApiResponse
 ) {
-  // Get user info if authenticated (optional)
-  const userId = req.user?.id;
-  const userEmail = req.user?.email;
+  // Get user info (guaranteed by withAuth middleware)
+  const userId = req.user!.id;
+  const userEmail = req.user!.email;
   if (req.method !== 'GET') {
     return res.status(405).json({
       success: false,
@@ -113,5 +113,5 @@ async function handler(
 }
 
 
-// Export with optional authentication middleware
-export default withOptionalAuth(handler);
+// Export with required authentication middleware
+export default withAuth(handler);

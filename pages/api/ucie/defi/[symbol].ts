@@ -33,7 +33,7 @@ import {
   PeerProtocol,
 } from '../../../../lib/ucie/peerComparison';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
-import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
+import { withAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
 // ============================================================================
 // Types
@@ -73,9 +73,9 @@ async function handler(
   req: AuthenticatedRequest,
   res: NextApiResponse<DeFiMetricsResponse>
 ) {
-  // Get user info if authenticated (optional)
-  const userId = req.user?.id;
-  const userEmail = req.user?.email;
+  // Get user info (guaranteed by withAuth middleware)
+  const userId = req.user!.id;
+  const userEmail = req.user!.email;
   // Only allow GET requests
   if (req.method !== 'GET') {
     return res.status(405).json({
@@ -325,5 +325,5 @@ function formatTVL(tvl: number): string {
 }
 
 
-// Export with optional authentication middleware
-export default withOptionalAuth(handler);
+// Export with required authentication middleware
+export default withAuth(handler);

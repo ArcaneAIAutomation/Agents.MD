@@ -24,7 +24,7 @@ import {
   PortfolioImpactAnalysis 
 } from '../../../../lib/ucie/portfolioImpact';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
-import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
+import { withAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
 export interface RiskAssessmentResponse {
   success: boolean;
@@ -82,9 +82,9 @@ async function handler(
   req: AuthenticatedRequest,
   res: NextApiResponse<RiskAssessmentResponse>
 ) {
-  // Get user info if authenticated (optional)
-  const userId = req.user?.id;
-  const userEmail = req.user?.email;
+  // Get user info (guaranteed by withAuth middleware)
+  const userId = req.user!.id;
+  const userEmail = req.user!.email;
   // Only allow GET requests
   if (req.method !== 'GET') {
     return res.status(405).json({
@@ -268,5 +268,5 @@ async function handler(
 }
 
 
-// Export with optional authentication middleware
-export default withOptionalAuth(handler);
+// Export with required authentication middleware
+export default withAuth(handler);
