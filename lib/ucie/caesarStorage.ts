@@ -34,14 +34,15 @@ export async function storeCaesarJob(
   queryText: string,
   symbol?: string,
   computeUnits: number = 2,
-  userId?: string
+  userId?: string,
+  userEmail?: string
 ): Promise<string> {
   const result = await query(
     `INSERT INTO caesar_research_jobs 
-     (caesar_job_id, symbol, query, status, compute_units, user_id, expires_at)
-     VALUES ($1, $2, $3, $4, $5, $6, NOW() + INTERVAL '7 days')
+     (caesar_job_id, symbol, query, status, compute_units, user_id, user_email, expires_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, NOW() + INTERVAL '7 days')
      RETURNING id`,
-    [caesarJobId, symbol || null, queryText, 'queued', computeUnits, userId || null]
+    [caesarJobId, symbol || null, queryText, 'queued', computeUnits, userId || null, userEmail || null]
   );
   
   return result.rows[0].id;

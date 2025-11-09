@@ -28,12 +28,14 @@ export type AnalysisType =
  * @param symbol - Token symbol
  * @param analysisType - Type of analysis
  * @param userId - User ID for data isolation (REQUIRED for security)
+ * @param userEmail - User email for tracking (optional)
  * @returns Cached data or null if not found/expired
  */
 export async function getCachedAnalysis(
   symbol: string,
   analysisType: AnalysisType,
-  userId?: string
+  userId?: string,
+  userEmail?: string
 ): Promise<any | null> {
   try {
     // If no userId provided, use 'anonymous' for backward compatibility
@@ -41,7 +43,7 @@ export async function getCachedAnalysis(
     const effectiveUserId = userId || 'anonymous';
     
     const result = await query(
-      `SELECT data, data_quality_score, created_at, expires_at
+      `SELECT data, data_quality_score, created_at, expires_at, user_email
        FROM ucie_analysis_cache
        WHERE symbol = $1 AND analysis_type = $2 AND user_id = $3 AND expires_at > NOW()`,
       [symbol.toUpperCase(), analysisType, effectiveUserId]
@@ -74,6 +76,7 @@ export async function getCachedAnalysis(
  * @param ttlSeconds - Time to live in seconds (default: 24 hours)
  * @param dataQualityScore - Optional quality score (0-100)
  * @param userId - User ID for data isolation (REQUIRED for security)
+ * @param userEmail - User email for tracking (optional)
  */
 export async function setCachedAnalysis(
   symbol: string,
@@ -81,7 +84,8 @@ export async function setCachedAnalysis(
   data: any,
   ttlSeconds: number = 86400, // 24 hours default
   dataQualityScore?: number,
-  userId?: string
+  userId?: string,
+  userEmail?: string
 ): Promise<void> {
   try {
     // If no userId provided, use 'anonymous' for backward compatibility
@@ -89,18 +93,19 @@ export async function setCachedAnalysis(
     const effectiveUserId = userId || 'anonymous';
     
     await query(
-      `INSERT INTO ucie_analysis_cache (symbol, analysis_type, data, data_quality_score, user_id, expires_at)
-       VALUES ($1, $2, $3, $4, $5, NOW() + INTERVAL '${ttlSeconds} seconds')
+      `INSERT INTO ucie_analysis_cache (symbol, analysis_type, data, data_quality_score, user_id, user_email, expires_at)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW() + INTERVAL '${ttlSeconds} seconds')
        ON CONFLICT (symbol, analysis_type, user_id)
        DO UPDATE SET 
          data = $3, 
-         data_quality_score = $4, 
+         data_quality_score = $4,
+         user_email = $6,
          expires_at = NOW() + INTERVAL '${ttlSeconds} seconds', 
          created_at = NOW()`,
-      [symbol.toUpperCase(), analysisType, JSON.stringify(data), dataQualityScore, effectiveUserId]
+      [symbol.toUpperCase(), analysisType, JSON.stringify(data), dataQualityScore, effectiveUserId, userEmail || null]
     );
     
-    console.log(`💾 Cached ${symbol}/${analysisType} for ${ttlSeconds}s (user: ${effectiveUserId}, quality: ${dataQualityScore || 'N/A'})`);
+    console.log(`💾 Cached ${symbol}/${analysisType} for ${ttlSeconds}s (user: ${effectiveUserId}${userEmail ? ` <${userEmail}>` : ''}, quality: ${dataQualityScore || 'N/A'})`);
   } catch (error) {
     console.error(`❌ Failed to cache analysis for ${symbol}/${analysisType}:`, error);
     throw error;
