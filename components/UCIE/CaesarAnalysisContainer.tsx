@@ -27,6 +27,10 @@ interface AnalysisStatus {
   estimatedTimeRemaining?: number;
 }
 
+// Maximum wait time: 15 minutes (900 seconds)
+const MAX_WAIT_TIME = 900000; // 15 minutes in milliseconds
+const POLL_INTERVAL = 60000; // 60 seconds in milliseconds
+
 export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, progressiveLoadingComplete = true }: CaesarAnalysisContainerProps) {
   const [jobId, setJobId] = useState<string | null>(initialJobId || null);
   const [status, setStatus] = useState<AnalysisStatus | null>(null);
@@ -39,6 +43,22 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
   const [showPrompt, setShowPrompt] = useState(false);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(Date.now());
+  const [lastPollTime, setLastPollTime] = useState<Date>(new Date());
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
+
+  // Calculate fallback progress based on elapsed time
+  // Uses a logarithmic curve to show faster progress at start, slower near end
+  const calculateFallbackProgress = (elapsedMs: number): number => {
+    const elapsedMinutes = elapsedMs / 60000;
+    const expectedDuration = 10; // Expected 10 minutes for analysis
+    
+    // Logarithmic progress curve
+    // Fast progress initially, slows down as it approaches completion
+    const rawProgress = (Math.log(elapsedMinutes + 1) / Math.log(expectedDuration + 1)) * 100;
+    
+    // Cap at 95% until actually completed (never show 100% prematurely)
+    return Math.min(95, Math.max(0, rawProgress));
+  };
 
   // Start Caesar analysis if no jobId provided
   // Wait for progressive loading to complete + 3 second buffer for database writes
@@ -59,6 +79,19 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
     }
   }, [initialJobId, progressiveLoadingComplete]);
 
+  // Update elapsed time every second for live display
+  useEffect(() => {
+    if (!jobId || status?.status === 'completed' || status?.status === 'failed') {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setElapsedTime(Date.now() - startTimeRef.current);
+    }, 1000); // Update every second
+
+    return () => clearInterval(timer);
+  }, [jobId, status?.status]);
+
   // Poll for status updates every 60 seconds
   useEffect(() => {
     if (!jobId || status?.status === 'completed' || status?.status === 'failed') {
@@ -71,7 +104,7 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
     // Set up 60-second polling
     pollingIntervalRef.current = setInterval(() => {
       pollStatus();
-    }, 60000); // 60 seconds
+    }, POLL_INTERVAL); // 60 seconds
 
     return () => {
       if (pollingIntervalRef.current) {
@@ -135,9 +168,25 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
     try {
       const currentPollCount = pollCount + 1;
       setPollCount(currentPollCount);
+      setLastPollTime(new Date());
 
-      const elapsedSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
-      console.log(`🔄 [Caesar] Poll #${currentPollCount} - Checking status for job ${jobId} (${elapsedSeconds}s elapsed)...`);
+      const elapsedMs = Date.now() - startTimeRef.current;
+      const elapsedSeconds = Math.floor(elapsedMs / 1000);
+      const elapsedMinutes = Math.floor(elapsedSeconds / 60);
+      
+      console.log(`🔄 [Caesar] Poll #${currentPollCount} - Checking status for job ${jobId} (${elapsedMinutes}m ${elapsedSeconds % 60}s elapsed)...`);
+
+      // Check for timeout (15 minutes)
+      if (elapsedMs > MAX_WAIT_TIME) {
+        console.error(`❌ [Caesar] Analysis timed out after 15 minutes`);
+        setError('Analysis timed out after 15 minutes. Please try again.');
+        setLoading(false);
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
+        }
+        return;
+      }
 
       const response = await fetch(`/api/ucie/research/${encodeURIComponent(symbol)}?jobId=${jobId}`);
 
@@ -151,16 +200,21 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
         throw new Error(data.error || 'Failed to check analysis status');
       }
 
+      // Calculate fallback progress if API doesn't provide it
+      const apiProgress = data.progress || 0;
+      const fallbackProgress = calculateFallbackProgress(elapsedMs);
+      const displayProgress = apiProgress > 0 ? apiProgress : fallbackProgress;
+
       // Update status
       const newStatus: AnalysisStatus = {
         status: data.status || 'researching',
-        progress: data.progress || 0,
+        progress: Math.round(displayProgress),
         estimatedTimeRemaining: data.estimatedTimeRemaining,
       };
 
       setStatus(newStatus);
 
-      console.log(`📊 [Caesar] Status: ${newStatus.status} | Progress: ${newStatus.progress}% | ETA: ${newStatus.estimatedTimeRemaining || 'N/A'}s`);
+      console.log(`📊 [Caesar] Status: ${newStatus.status} | Progress: ${newStatus.progress}% | ETA: ${newStatus.estimatedTimeRemaining || 'calculating...'}s`);
 
       // Check if completed
       if (newStatus.status === 'completed' && data.data) {
@@ -304,21 +358,44 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
         {/* Status Information */}
         <div className="space-y-4 mb-8">
           <div className="flex items-center justify-center gap-2 text-bitcoin-white-80">
-            <Clock className="w-5 h-5 text-bitcoin-orange" />
+            <Clock className="w-5 h-5 text-bitcoin-orange animate-pulse" />
             <span>
               Status: <span className="text-bitcoin-white font-semibold capitalize">{status?.status || 'Starting'}</span>
             </span>
           </div>
 
-          {status?.estimatedTimeRemaining && status.estimatedTimeRemaining > 0 && (
+          {/* Elapsed Time (Live Counter) */}
+          <div className="text-bitcoin-white-60 font-mono">
+            Elapsed: {Math.floor(elapsedTime / 60000)}m {Math.floor((elapsedTime % 60000) / 1000)}s
+          </div>
+
+          {/* Estimated Time Remaining */}
+          {status?.estimatedTimeRemaining && status.estimatedTimeRemaining > 0 ? (
             <div className="text-bitcoin-white-60">
               Estimated time remaining: {Math.ceil(status.estimatedTimeRemaining / 60)} minutes
             </div>
+          ) : (
+            <div className="text-bitcoin-white-60">
+              Estimated time remaining: Calculating...
+            </div>
           )}
 
+          {/* Poll Information */}
           <div className="text-sm text-bitcoin-white-60">
             Poll #{pollCount} • Checking every 60 seconds
           </div>
+
+          {/* Last Poll Time */}
+          <div className="text-xs text-bitcoin-white-60">
+            Last checked: {lastPollTime.toLocaleTimeString()}
+          </div>
+
+          {/* Timeout Warning */}
+          {(Date.now() - startTimeRef.current) > 600000 && (
+            <div className="text-xs text-bitcoin-orange">
+              ⚠️ Analysis taking longer than expected (15 min timeout)
+            </div>
+          )}
         </div>
 
         {/* Status Details */}
