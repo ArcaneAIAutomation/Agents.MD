@@ -12,6 +12,7 @@ export function formatPrice(market: any): string {
                 market?.currentPrice || 
                 market?.priceUsd || 
                 market?.current_price ||
+                market?.priceAggregation?.averagePrice || // ✅ Preview data uses averagePrice
                 market?.priceAggregation?.aggregatedPrice ||
                 market?.data?.price ||
                 market?.data?.currentPrice;
@@ -38,6 +39,7 @@ export function formatVolume(market: any): string {
                  market?.totalVolume || 
                  market?.volume || 
                  market?.total_volume ||
+                 market?.priceAggregation?.totalVolume24h || // ✅ Preview data uses totalVolume24h
                  market?.priceAggregation?.aggregatedVolume24h ||
                  market?.data?.volume24h ||
                  market?.data?.totalVolume;
@@ -61,6 +63,7 @@ export function formatMarketCap(market: any): string {
                     market?.market_cap || 
                     market?.marketCapUsd || 
                     market?.market_cap_usd ||
+                    market?.marketData?.marketCap || // ✅ Preview data uses marketData.marketCap
                     market?.priceAggregation?.aggregatedMarketCap ||
                     market?.data?.marketCap ||
                     market?.data?.market_cap;
@@ -80,7 +83,11 @@ export function formatMarketCap(market: any): string {
  * Safely extract and format price change data
  */
 export function formatPriceChange(market: any): string {
-  const priceChange = market?.priceChange24h || market?.price_change_percentage_24h || market?.change24h || market?.percent_change_24h;
+  const priceChange = market?.priceChange24h || 
+                      market?.price_change_percentage_24h || 
+                      market?.change24h || 
+                      market?.percent_change_24h ||
+                      market?.priceAggregation?.averageChange24h; // ✅ Preview data uses averageChange24h
   if (priceChange === null || priceChange === undefined) return 'N/A';
   
   const numChange = Number(priceChange);
