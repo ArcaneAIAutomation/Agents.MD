@@ -74,26 +74,32 @@ export function generateCryptoResearchQuery(symbol: string, contextData?: any): 
     if (contextData['market-data'] || contextData.marketData) {
       const market = contextData['market-data'] || contextData.marketData;
       contextSection += `**Current Market Data:**\n`;
-      contextSection += `- Price: $${market.price?.toLocaleString() || 'N/A'}\n`;
-      contextSection += `- 24h Volume: $${market.volume24h?.toLocaleString() || 'N/A'}\n`;
-      contextSection += `- Market Cap: $${market.marketCap?.toLocaleString() || 'N/A'}\n`;
-      contextSection += `- 24h Change: ${market.priceChange24h?.toFixed(2) || 'N/A'}%\n\n`;
+      // Use safe formatters to handle different property names
+      const { formatPrice, formatVolume, formatMarketCap, formatPriceChange } = require('./dataFormatter');
+      contextSection += `- Price: ${formatPrice(market)}\n`;
+      contextSection += `- 24h Volume: ${formatVolume(market)}\n`;
+      contextSection += `- Market Cap: ${formatMarketCap(market)}\n`;
+      contextSection += `- 24h Change: ${formatPriceChange(market)}\n\n`;
     }
     
     // Sentiment
     if (contextData.sentiment) {
       contextSection += `**Social Sentiment:**\n`;
-      contextSection += `- Overall Score: ${contextData.sentiment.overallScore || 'N/A'}/100\n`;
-      contextSection += `- Trend: ${contextData.sentiment.trend || 'N/A'}\n`;
-      contextSection += `- 24h Mentions: ${contextData.sentiment.mentions24h || 'N/A'}\n\n`;
+      // Use safe formatters to handle different property names
+      const { formatSentimentScore, formatSentimentTrend, formatMentions } = require('./dataFormatter');
+      contextSection += `- Overall Score: ${formatSentimentScore(contextData.sentiment)}\n`;
+      contextSection += `- Trend: ${formatSentimentTrend(contextData.sentiment)}\n`;
+      contextSection += `- 24h Mentions: ${formatMentions(contextData.sentiment)}\n\n`;
     }
     
     // Technical Analysis
     if (contextData.technical) {
       contextSection += `**Technical Analysis:**\n`;
-      contextSection += `- RSI: ${contextData.technical.indicators?.rsi || 'N/A'}\n`;
-      contextSection += `- MACD Signal: ${contextData.technical.macd?.signal || 'N/A'}\n`;
-      contextSection += `- Trend: ${contextData.technical.trend?.direction || 'N/A'}\n\n`;
+      // Use safe formatters to handle different property names and object types
+      const { formatRSI, formatMACDSignal, formatTrendDirection } = require('./dataFormatter');
+      contextSection += `- RSI: ${formatRSI(contextData.technical)}\n`;
+      contextSection += `- MACD Signal: ${formatMACDSignal(contextData.technical)}\n`;
+      contextSection += `- Trend: ${formatTrendDirection(contextData.technical)}\n\n`;
     }
     
     // On-Chain Data (Blockchain Intelligence)
@@ -568,27 +574,44 @@ export async function getCaesarResearchStatus(jobId: string): Promise<UCIECaesar
   try {
     const job = await Caesar.getResearch(jobId);
     
-    // Estimate progress based on status
+    // Calculate progress based on elapsed time and status
     let progress = 0;
     let estimatedTimeRemaining: number | undefined;
     
+    // Parse created_at timestamp to calculate elapsed time
+    const createdAt = new Date(job.created_at);
+    const now = new Date();
+    const elapsedSeconds = Math.floor((now.getTime() - createdAt.getTime()) / 1000);
+    
+    // Expected total time: 10-15 minutes (600-900 seconds)
+    const EXPECTED_TOTAL_TIME = 900; // 15 minutes in seconds
+    
     switch (job.status) {
       case 'queued':
-        progress = 10;
-        estimatedTimeRemaining = 300; // 5 minutes
+        // 0-2 minutes: 0-20% progress
+        progress = Math.min(20, Math.floor((elapsedSeconds / 120) * 20));
+        estimatedTimeRemaining = Math.max(0, EXPECTED_TOTAL_TIME - elapsedSeconds);
         break;
+        
       case 'pending':
-        progress = 20;
-        estimatedTimeRemaining = 240; // 4 minutes
+        // 2-4 minutes: 20-40% progress
+        progress = Math.min(40, 20 + Math.floor(((elapsedSeconds - 120) / 120) * 20));
+        estimatedTimeRemaining = Math.max(0, EXPECTED_TOTAL_TIME - elapsedSeconds);
         break;
+        
       case 'researching':
-        progress = 50;
-        estimatedTimeRemaining = 120; // 2 minutes
+        // 4-15 minutes: 40-95% progress (logarithmic curve)
+        const researchingTime = elapsedSeconds - 240; // Time since researching started
+        const researchingProgress = Math.min(55, Math.floor(Math.log(researchingTime + 1) * 10));
+        progress = Math.min(95, 40 + researchingProgress);
+        estimatedTimeRemaining = Math.max(0, EXPECTED_TOTAL_TIME - elapsedSeconds);
         break;
+        
       case 'completed':
         progress = 100;
         estimatedTimeRemaining = 0;
         break;
+        
       case 'failed':
       case 'cancelled':
       case 'expired':
@@ -596,6 +619,9 @@ export async function getCaesarResearchStatus(jobId: string): Promise<UCIECaesar
         estimatedTimeRemaining = 0;
         break;
     }
+    
+    // Log progress for debugging
+    console.log(`📊 Job ${jobId}: ${job.status} - ${progress}% (${elapsedSeconds}s elapsed, ~${estimatedTimeRemaining}s remaining)`);
     
     return {
       jobId: job.id,
