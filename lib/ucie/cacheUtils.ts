@@ -97,15 +97,19 @@ export async function setCachedAnalysis(
       ? Math.round(dataQualityScore) 
       : null;
     
+    // ✅ FIX: Use ON CONFLICT ON CONSTRAINT to handle old constraint name
+    // The old constraint 'ucie_cache_unique' is (symbol, analysis_type) without user_id
+    // We need to handle this until migration 006 is run in production
     await query(
       `INSERT INTO ucie_analysis_cache (symbol, analysis_type, data, data_quality_score, user_id, user_email, expires_at)
        VALUES ($1, $2, $3, $4, $5, $6, NOW() + INTERVAL '${ttlSeconds} seconds')
-       ON CONFLICT (symbol, analysis_type, user_id)
+       ON CONFLICT (symbol, analysis_type)
        DO UPDATE SET 
-         data = $3, 
-         data_quality_score = $4,
-         user_email = $6,
-         expires_at = NOW() + INTERVAL '${ttlSeconds} seconds', 
+         data = EXCLUDED.data, 
+         data_quality_score = EXCLUDED.data_quality_score,
+         user_id = EXCLUDED.user_id,
+         user_email = EXCLUDED.user_email,
+         expires_at = EXCLUDED.expires_at, 
          created_at = NOW()`,
       [symbol.toUpperCase(), analysisType, JSON.stringify(data), qualityScoreInt, effectiveUserId, userEmail || null]
     );
