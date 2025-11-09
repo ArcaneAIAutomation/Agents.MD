@@ -313,35 +313,40 @@ async function collectDataFromAPIs(symbol: string, req: NextApiRequest, refresh:
   const results = await Promise.allSettled([
     fetchWithTimeout(
       `${baseUrl}${EFFECTIVE_APIS.marketData.endpoint}/${symbol}${refreshParam}`,
-      EFFECTIVE_APIS.marketData.timeout
+      EFFECTIVE_APIS.marketData.timeout,
+      req
     ).catch(err => {
       console.error(`❌ Market Data failed:`, err.message);
       throw err;
     }),
     fetchWithTimeout(
       `${baseUrl}${EFFECTIVE_APIS.sentiment.endpoint}/${symbol}${refreshParam}`,
-      EFFECTIVE_APIS.sentiment.timeout
+      EFFECTIVE_APIS.sentiment.timeout,
+      req
     ).catch(err => {
       console.error(`❌ Sentiment failed:`, err.message);
       throw err;
     }),
     fetchWithTimeout(
       `${baseUrl}${EFFECTIVE_APIS.technical.endpoint}/${symbol}${refreshParam}`,
-      EFFECTIVE_APIS.technical.timeout
+      EFFECTIVE_APIS.technical.timeout,
+      req
     ).catch(err => {
       console.error(`❌ Technical failed:`, err.message);
       throw err;
     }),
     fetchWithTimeout(
       `${baseUrl}${EFFECTIVE_APIS.news.endpoint}/${symbol}${refreshParam}`,
-      EFFECTIVE_APIS.news.timeout
+      EFFECTIVE_APIS.news.timeout,
+      req
     ).catch(err => {
       console.error(`❌ News failed:`, err.message);
       throw err;
     }),
     fetchWithTimeout(
       `${baseUrl}${EFFECTIVE_APIS.onChain.endpoint}/${symbol}${refreshParam}`,
-      EFFECTIVE_APIS.onChain.timeout
+      EFFECTIVE_APIS.onChain.timeout,
+      req
     ).catch(err => {
       console.error(`❌ On-Chain failed:`, err.message);
       throw err;
@@ -370,12 +375,22 @@ async function collectDataFromAPIs(symbol: string, req: NextApiRequest, refresh:
 /**
  * Fetch with timeout
  */
-async function fetchWithTimeout(url: string, timeout: number) {
+async function fetchWithTimeout(url: string, timeout: number, req: AuthenticatedRequest) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const response = await fetch(url, { signal: controller.signal });
+    // Forward the authentication cookie from the original request
+    const authCookie = req.cookies.auth_token;
+    const headers: HeadersInit = {};
+    if (authCookie) {
+      headers['Cookie'] = `auth_token=${authCookie}`;
+    }
+
+    const response = await fetch(url, { 
+      signal: controller.signal,
+      headers
+    });
     clearTimeout(timeoutId);
     
     if (!response.ok) {
