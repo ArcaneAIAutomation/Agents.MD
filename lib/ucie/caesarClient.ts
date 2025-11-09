@@ -385,11 +385,13 @@ export async function pollCaesarResearch(
 
 /**
  * Parse Caesar research results into UCIE format
+ * ✅ UPDATED: Include initial query in rawContent for transparency
  * 
  * @param job - Completed research job
+ * @param initialQuery - The query that was sent to Caesar (optional)
  * @returns Structured research data for UCIE
  */
-export function parseCaesarResearch(job: ResearchJob): UCIECaesarResearch {
+export function parseCaesarResearch(job: ResearchJob, initialQuery?: string): UCIECaesarResearch {
   try {
     console.log(`🔍 Parsing Caesar research job ${job.id}`);
     console.log(`📊 Job status: ${job.status}`);
@@ -458,7 +460,9 @@ export function parseCaesarResearch(job: ResearchJob): UCIECaesarResearch {
       sources,
       confidence: typeof parsedData.confidence === 'number' ? parsedData.confidence : 
                   sources.length > 0 ? Math.min(85, 50 + (sources.length * 5)) : 0,
-      rawContent: job.content || undefined
+      rawContent: initialQuery 
+        ? `=== INITIAL QUERY SENT TO CAESAR ===\n\n${initialQuery}\n\n=== CAESAR'S RAW RESPONSE ===\n\n${job.content || 'No raw content available'}`
+        : job.content || undefined
     };
     
     console.log(`✅ Parsed Caesar research successfully:`);
@@ -627,14 +631,17 @@ export async function performCryptoResearch(
     console.log(`📊 Using context data from ${Object.keys(contextData).length} sources`);
   }
   
+  // Generate the query (we'll need this for transparency)
+  const query = generateCryptoResearchQuery(symbol, contextData);
+  
   // Step 1: Create research job with context
   const { jobId } = await createCryptoResearch(symbol, computeUnits, contextData);
   
   // Step 2: Poll until completion
   const completedJob = await pollCaesarResearch(jobId, maxWaitTime);
   
-  // Step 3: Parse results
-  const research = parseCaesarResearch(completedJob);
+  // Step 3: Parse results with the original query for transparency
+  const research = parseCaesarResearch(completedJob, query);
   
   console.log(`✅ Complete research workflow finished for ${symbol}`);
   

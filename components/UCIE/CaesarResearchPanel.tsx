@@ -174,6 +174,7 @@ const ErrorState: React.FC<{ error: string }> = ({ error }) => (
 
 /**
  * Main Caesar Research Panel Component
+ * ✅ UPDATED: Single-page display with context data visible
  */
 export const CaesarResearchPanel: React.FC<CaesarResearchPanelProps> = ({
   symbol,
@@ -191,6 +192,19 @@ export const CaesarResearchPanel: React.FC<CaesarResearchPanelProps> = ({
     return <ErrorState error={error} />;
   }
 
+  // Combine all analysis into single text block
+  const fullAnalysis = `
+${research.technologyOverview}
+
+${research.teamLeadership}
+
+${research.partnerships}
+
+${research.marketPosition}
+
+${research.recentDevelopments}
+`.trim();
+
   return (
     <div className="bg-bitcoin-black border border-bitcoin-orange rounded-xl overflow-hidden">
       {/* Header */}
@@ -198,118 +212,91 @@ export const CaesarResearchPanel: React.FC<CaesarResearchPanelProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-bitcoin-white mb-1">
-              Caesar AI Deep Research
+              Caesar AI Deep Research: {symbol}
             </h2>
             <p className="text-sm text-bitcoin-white-60 italic">
-              Comprehensive analysis for {symbol}
+              Comprehensive AI-powered analysis with full context
             </p>
           </div>
-          <div className="flex items-center gap-2 text-bitcoin-orange">
-            <Clock className="w-5 h-5" />
-            <span className="text-xs font-semibold uppercase tracking-wider">
-              AI-Powered
-            </span>
+          <div className="flex items-center gap-2">
+            <ConfidenceIndicator confidence={research.confidence} />
           </div>
         </div>
       </div>
 
-      {/* Content */}
+      {/* Content - Single Page */}
       <div className="p-6 space-y-6">
-        {/* Confidence Score */}
-        <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
-          <ConfidenceIndicator confidence={research.confidence} />
-        </div>
-
-        {/* Technology Overview */}
-        <div>
-          <SectionHeader
-            icon={<TrendingUp className="w-5 h-5" />}
-            title="Technology & Innovation"
-          />
-          <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
-            <p className="text-sm text-bitcoin-white-80 leading-relaxed whitespace-pre-wrap">
-              {research.technologyOverview}
-            </p>
-          </div>
-        </div>
-
-        {/* Team & Leadership */}
-        <div>
-          <SectionHeader
-            icon={<Users className="w-5 h-5" />}
-            title="Team & Leadership"
-          />
-          <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
-            <p className="text-sm text-bitcoin-white-80 leading-relaxed whitespace-pre-wrap">
-              {research.teamLeadership}
-            </p>
-          </div>
-        </div>
-
-        {/* Partnerships & Ecosystem */}
-        <div>
-          <SectionHeader
-            icon={<Briefcase className="w-5 h-5" />}
-            title="Partnerships & Ecosystem"
-          />
-          <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
-            <p className="text-sm text-bitcoin-white-80 leading-relaxed whitespace-pre-wrap">
-              {research.partnerships}
-            </p>
-          </div>
-        </div>
-
-        {/* Market Position */}
-        <div>
-          <SectionHeader
-            icon={<TrendingUp className="w-5 h-5" />}
-            title="Market Position"
-          />
-          <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
-            <p className="text-sm text-bitcoin-white-80 leading-relaxed whitespace-pre-wrap">
-              {research.marketPosition}
-            </p>
-          </div>
-        </div>
-
-        {/* Risk Factors */}
-        {research.riskFactors.length > 0 && (
-          <div>
-            <SectionHeader
-              icon={<Shield className="w-5 h-5" />}
-              title="Risk Factors"
-            />
-            <div className="grid grid-cols-1 gap-3">
-              {research.riskFactors.map((risk, index) => (
-                <RiskBadge key={index} risk={risk} />
-              ))}
+        
+        {/* Context Data Fed to Caesar */}
+        {research.rawContent && (
+          <details className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg overflow-hidden">
+            <summary className="cursor-pointer px-4 py-3 bg-bitcoin-orange-5 hover:bg-bitcoin-orange-10 transition-colors">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-bitcoin-orange" />
+                <span className="text-sm font-bold text-bitcoin-white">
+                  View Initial Prompt Data (What Caesar Received)
+                </span>
+              </div>
+            </summary>
+            <div className="p-4 max-h-96 overflow-y-auto">
+              <pre className="text-xs text-bitcoin-white-80 font-mono whitespace-pre-wrap break-words">
+                {research.rawContent}
+              </pre>
             </div>
+          </details>
+        )}
+
+        {/* Full Analysis - Single Block */}
+        <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-6">
+          <h3 className="text-xl font-bold text-bitcoin-orange mb-4 flex items-center gap-2">
+            <TrendingUp className="w-5 h-5" />
+            Complete Analysis
+          </h3>
+          <div className="prose prose-invert max-w-none">
+            <p className="text-base text-bitcoin-white-80 leading-relaxed whitespace-pre-wrap">
+              {fullAnalysis}
+            </p>
+          </div>
+        </div>
+
+        {/* Risk Factors - Inline */}
+        {research.riskFactors.length > 0 && (
+          <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-lg p-6">
+            <h3 className="text-xl font-bold text-bitcoin-orange mb-4 flex items-center gap-2">
+              <Shield className="w-5 h-5" />
+              Risk Factors ({research.riskFactors.length})
+            </h3>
+            <ul className="space-y-2">
+              {research.riskFactors.map((risk, index) => (
+                <li key={index} className="flex items-start gap-2 text-sm text-bitcoin-white-80">
+                  <AlertTriangle className="w-4 h-4 text-bitcoin-orange flex-shrink-0 mt-0.5" />
+                  <span>{risk}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
-        {/* Recent Developments */}
-        <div>
-          <SectionHeader
-            icon={<Clock className="w-5 h-5" />}
-            title="Recent Developments"
-          />
-          <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
-            <p className="text-sm text-bitcoin-white-80 leading-relaxed whitespace-pre-wrap">
-              {research.recentDevelopments}
-            </p>
-          </div>
-        </div>
-
-        {/* Source Citations */}
+        {/* Source Citations - Compact */}
         {research.sources.length > 0 && (
-          <div>
-            <SectionHeader
-              icon={<ExternalLink className="w-5 h-5" />}
-              title={`Sources (${research.sources.length})`}
-            />
-            <div className="grid grid-cols-1 gap-3">
+          <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-6">
+            <h3 className="text-lg font-bold text-bitcoin-white mb-3 flex items-center gap-2">
+              <ExternalLink className="w-4 h-4 text-bitcoin-orange" />
+              Sources ({research.sources.length})
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {research.sources.map((source, index) => (
-                <SourceCitation key={index} source={source} />
+                <a
+                  key={index}
+                  href={source.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-xs text-bitcoin-white-60 hover:text-bitcoin-orange transition-colors group"
+                >
+                  <span className="font-bold text-bitcoin-orange">[{source.citationIndex}]</span>
+                  <span className="truncate group-hover:underline">{source.title}</span>
+                  <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                </a>
               ))}
             </div>
           </div>
@@ -319,8 +306,7 @@ export const CaesarResearchPanel: React.FC<CaesarResearchPanelProps> = ({
         <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
           <p className="text-xs text-bitcoin-white-60 leading-relaxed">
             <strong className="text-bitcoin-white">Disclaimer:</strong> This research is generated by AI and should not be considered financial advice. 
-            Always conduct your own research and consult with financial professionals before making investment decisions. 
-            Information accuracy depends on source quality and data availability at the time of analysis.
+            Always conduct your own research and consult with financial professionals before making investment decisions.
           </p>
         </div>
       </div>
