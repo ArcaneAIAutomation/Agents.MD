@@ -185,6 +185,13 @@ export async function getAllCachedDataForCaesar(symbol: string): Promise<{
     
     for (const row of cacheResult.rows) {
       const type = row.analysisType;
+      
+      // Log the actual structure of the data
+      console.log(`🔍 Database row for ${type}:`, {
+        keys: Object.keys(row.data || {}),
+        sample: JSON.stringify(row.data).substring(0, 300)
+      });
+      
       if (type === 'market-data') cachedData.marketData = row.data;
       else if (type === 'sentiment') cachedData.sentiment = row.data;
       else if (type === 'technical') cachedData.technical = row.data;
