@@ -72,6 +72,9 @@ export async function storeCaesarResults(
   dataQualityScore: number,
   costUsd?: number
 ): Promise<void> {
+  // ✅ FIX: Round quality score to integer (database expects INTEGER, not FLOAT)
+  const qualityScoreInt = Math.round(dataQualityScore);
+  
   await query(
     `UPDATE caesar_research_jobs 
      SET status = $1,
@@ -87,7 +90,7 @@ export async function storeCaesarResults(
       job.content || null,
       job.transformed_content || null,
       JSON.stringify(job.results || []),
-      dataQualityScore,
+      qualityScoreInt,
       costUsd || null,
       caesarJobId
     ]

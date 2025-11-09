@@ -92,6 +92,11 @@ export async function setCachedAnalysis(
     // In production, userId should ALWAYS be provided
     const effectiveUserId = userId || 'anonymous';
     
+    // ✅ FIX: Round quality score to integer (database expects INTEGER, not FLOAT)
+    const qualityScoreInt = dataQualityScore !== undefined 
+      ? Math.round(dataQualityScore) 
+      : null;
+    
     await query(
       `INSERT INTO ucie_analysis_cache (symbol, analysis_type, data, data_quality_score, user_id, user_email, expires_at)
        VALUES ($1, $2, $3, $4, $5, $6, NOW() + INTERVAL '${ttlSeconds} seconds')
@@ -102,10 +107,10 @@ export async function setCachedAnalysis(
          user_email = $6,
          expires_at = NOW() + INTERVAL '${ttlSeconds} seconds', 
          created_at = NOW()`,
-      [symbol.toUpperCase(), analysisType, JSON.stringify(data), dataQualityScore, effectiveUserId, userEmail || null]
+      [symbol.toUpperCase(), analysisType, JSON.stringify(data), qualityScoreInt, effectiveUserId, userEmail || null]
     );
     
-    console.log(`💾 Cached ${symbol}/${analysisType} for ${ttlSeconds}s (user: ${effectiveUserId}${userEmail ? ` <${userEmail}>` : ''}, quality: ${dataQualityScore || 'N/A'})`);
+    console.log(`💾 Cached ${symbol}/${analysisType} for ${ttlSeconds}s (user: ${effectiveUserId}${userEmail ? ` <${userEmail}>` : ''}, quality: ${qualityScoreInt || 'N/A'})`);
   } catch (error) {
     console.error(`❌ Failed to cache analysis for ${symbol}/${analysisType}:`, error);
     throw error;
