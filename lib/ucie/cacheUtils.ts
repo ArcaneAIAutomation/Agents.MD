@@ -92,6 +92,13 @@ export async function setCachedAnalysis(
     // In production, userId should ALWAYS be provided
     const effectiveUserId = userId || 'anonymous';
     
+    // ✅ DEBUG: Log user info to verify authentication is working
+    if (userId) {
+      console.log(`🔐 Authenticated user: ${userId}${userEmail ? ` <${userEmail}>` : ''}`);
+    } else {
+      console.log(`👤 Anonymous user (no authentication)`);
+    }
+    
     // ✅ FIX: Round quality score to integer (database expects INTEGER, not FLOAT)
     const qualityScoreInt = dataQualityScore !== undefined 
       ? Math.round(dataQualityScore) 
