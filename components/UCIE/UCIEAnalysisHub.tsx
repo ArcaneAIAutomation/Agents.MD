@@ -400,7 +400,11 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
     // Special case: research tab can render without analysisData
     // because CaesarAnalysisContainer handles its own loading
     if (activeTab === 'research') {
-      return <CaesarAnalysisContainer symbol={symbol} jobId={analysisData?.research?.jobId} />;
+      return <CaesarAnalysisContainer 
+        symbol={symbol} 
+        jobId={analysisData?.research?.jobId}
+        progressiveLoadingComplete={!loading}
+      />;
     }
 
     if (!analysisData) return null;
@@ -411,7 +415,11 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
       case 'market':
         return <MarketDataPanel symbol={symbol} data={analysisData['market-data'] || analysisData.marketData} />;
       case 'research':
-        return <CaesarAnalysisContainer symbol={symbol} jobId={analysisData.research?.jobId} />;
+        return <CaesarAnalysisContainer 
+          symbol={symbol} 
+          jobId={analysisData.research?.jobId}
+          progressiveLoadingComplete={!loading}
+        />;
       case 'onchain':
         return <OnChainAnalyticsPanel symbol={symbol} data={analysisData['on-chain'] || analysisData.onChain} />;
       case 'social':
@@ -448,7 +456,7 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
       { id: 'defi' as TabId, title: 'DeFi Metrics', icon: <Coins className="w-5 h-5" />, content: <DeFiMetricsPanel symbol={symbol} data={analysisData.defi} /> },
       { id: 'derivatives' as TabId, title: 'Derivatives', icon: <AlertTriangle className="w-5 h-5" />, content: <DerivativesPanel symbol={symbol} data={analysisData.derivatives} /> },
       { id: 'predictions' as TabId, title: 'Predictions & AI', icon: <Target className="w-5 h-5" />, content: <PredictiveModelPanel symbol={symbol} data={analysisData.predictions} /> },
-      { id: 'research' as TabId, title: 'AI Research', icon: <Brain className="w-5 h-5" />, content: <CaesarAnalysisContainer symbol={symbol} jobId={analysisData.research?.jobId} /> },
+      { id: 'research' as TabId, title: 'AI Research', icon: <Brain className="w-5 h-5" />, content: <CaesarAnalysisContainer symbol={symbol} jobId={analysisData.research?.jobId} progressiveLoadingComplete={!loading} /> },
     ];
 
     return (

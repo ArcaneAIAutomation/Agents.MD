@@ -18,6 +18,7 @@ import { UCIECaesarResearch } from '../../lib/ucie/caesarClient';
 interface CaesarAnalysisContainerProps {
   symbol: string;
   jobId?: string;
+  progressiveLoadingComplete?: boolean;
 }
 
 interface AnalysisStatus {
@@ -26,22 +27,35 @@ interface AnalysisStatus {
   estimatedTimeRemaining?: number;
 }
 
-export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId }: CaesarAnalysisContainerProps) {
+export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, progressiveLoadingComplete = true }: CaesarAnalysisContainerProps) {
   const [jobId, setJobId] = useState<string | null>(initialJobId || null);
   const [status, setStatus] = useState<AnalysisStatus | null>(null);
   const [research, setResearch] = useState<UCIECaesarResearch | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [pollCount, setPollCount] = useState(0);
+  const [preparingData, setPreparingData] = useState(true);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(Date.now());
 
   // Start Caesar analysis if no jobId provided
+  // Wait for progressive loading to complete + 3 second buffer for database writes
   useEffect(() => {
-    if (!initialJobId) {
-      startAnalysis();
+    if (!initialJobId && progressiveLoadingComplete) {
+      console.log('⏳ [Caesar] Progressive loading complete. Waiting 3 seconds for database writes to finalize...');
+      
+      // Add 3-second delay to ensure database writes are complete
+      const timer = setTimeout(() => {
+        console.log('✅ [Caesar] Database should be ready. Starting analysis...');
+        setPreparingData(false);
+        startAnalysis();
+      }, 3000); // 3 second buffer
+      
+      return () => clearTimeout(timer);
+    } else if (!progressiveLoadingComplete) {
+      console.log('⏳ [Caesar] Waiting for progressive loading to complete...');
     }
-  }, [initialJobId]);
+  }, [initialJobId, progressiveLoadingComplete]);
 
   // Poll for status updates every 60 seconds
   useEffect(() => {
@@ -172,6 +186,45 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId }:
     setPollCount(0);
     startAnalysis();
   };
+
+  // Show preparing data state
+  if (preparingData && !progressiveLoadingComplete) {
+    return (
+      <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-8">
+        <div className="text-center">
+          <Brain className="w-16 h-16 text-bitcoin-orange mx-auto mb-4 animate-pulse" />
+          <h2 className="text-3xl font-bold text-bitcoin-white mb-2">
+            Waiting for Data Collection
+          </h2>
+          <p className="text-bitcoin-white-80">
+            Progressive loading is still in progress...
+          </p>
+          <div className="mt-4 text-sm text-bitcoin-white-60">
+            Caesar analysis will start automatically when data is ready
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (preparingData && progressiveLoadingComplete) {
+    return (
+      <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-8">
+        <div className="text-center">
+          <Brain className="w-16 h-16 text-bitcoin-orange mx-auto mb-4 animate-pulse" />
+          <h2 className="text-3xl font-bold text-bitcoin-white mb-2">
+            Preparing Caesar Analysis
+          </h2>
+          <p className="text-bitcoin-white-80">
+            Finalizing data collection from database...
+          </p>
+          <div className="mt-4 text-sm text-bitcoin-white-60">
+            This will take just a few seconds
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Show completed analysis
   if (research && !loading) {
