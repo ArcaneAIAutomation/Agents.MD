@@ -166,7 +166,7 @@ async function verifyDatabaseStorage() {
         symbol,
         analysis_type,
         data_quality_score,
-        cached_data
+        data
       FROM ucie_analysis_cache
       WHERE symbol IN ('BTC', 'ETH')
       ORDER BY created_at DESC
@@ -178,7 +178,12 @@ async function verifyDatabaseStorage() {
       console.log(`   Symbol: ${sample.symbol}`);
       console.log(`   Type: ${sample.analysis_type}`);
       console.log(`   Quality: ${sample.data_quality_score}%`);
-      console.log(`   Data Preview: ${JSON.stringify(sample.cached_data).substring(0, 200)}...\n`);
+      if (sample.data) {
+        const dataStr = JSON.stringify(sample.data);
+        console.log(`   Data Preview: ${dataStr.substring(0, 200)}...\n`);
+      } else {
+        console.log(`   Data: No data available\n`);
+      }
     } else {
       console.log('   No sample data available\n');
     }
