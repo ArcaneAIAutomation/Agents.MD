@@ -63,6 +63,7 @@ const CACHE_TTL = 15 * 60; // 900 seconds
 
 /**
  * Calculate data quality score based on available sources
+ * ✅ UPDATED: Twitter removed (unreliable), only LunarCrush + Reddit
  */
 function calculateDataQuality(
   lunarCrush: LunarCrushData | null,
@@ -72,27 +73,24 @@ function calculateDataQuality(
   let score = 0;
   let maxScore = 0;
 
-  // LunarCrush (40 points)
-  maxScore += 40;
+  // LunarCrush (60 points) - Primary source, aggregates Twitter data
+  maxScore += 60;
   if (lunarCrush) {
-    score += 40;
+    score += 60;
+    // Bonus for high social score
+    if (lunarCrush.socialScore && lunarCrush.socialScore > 70) score += 10;
   }
 
-  // Twitter (30 points)
-  maxScore += 30;
-  if (twitter) {
-    score += 30;
-    // Bonus for high mention count
-    if (twitter.mentions24h > 100) score += 5;
-  }
-
-  // Reddit (30 points)
-  maxScore += 30;
+  // Reddit (40 points) - Secondary source
+  maxScore += 40;
   if (reddit) {
-    score += 30;
+    score += 40;
     // Bonus for high mention count
-    if (reddit.mentions24h > 50) score += 5;
+    if (reddit.mentions24h > 50) score += 10;
   }
+
+  // Twitter is disabled (causes timeouts)
+  // LunarCrush already aggregates Twitter data, so no data loss
 
   return Math.min(100, Math.round((score / maxScore) * 100));
 }

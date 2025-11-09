@@ -553,11 +553,14 @@ export async function fetchAggregatedSocialSentiment(symbol: string): Promise<{
   twitter: TwitterMetrics | null;
   reddit: RedditMetrics | null;
 }> {
-  const [lunarCrush, twitter, reddit] = await Promise.all([
+  // ✅ REMOVED TWITTER: Twitter API is unreliable and causes timeouts
+  // Only use LunarCrush (which aggregates Twitter data anyway) and Reddit
+  const [lunarCrush, reddit] = await Promise.all([
     fetchLunarCrushData(symbol),
-    fetchTwitterMetrics(symbol),
     fetchRedditMetrics(symbol),
   ]);
+  
+  const twitter = null; // Twitter disabled to prevent timeouts
 
   return {
     lunarCrush,

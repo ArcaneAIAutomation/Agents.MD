@@ -209,9 +209,8 @@ export default async function handler(
       console.warn(`⚠️ Failed to store ${failed} responses`);
     }
     
-    // Small delay to ensure database consistency (2 seconds)
-    console.log(`⏳ Waiting 2 seconds for database consistency...`);
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // ✅ REMOVED 2-second delay - database writes are already awaited
+    // Supabase connection pooling ensures consistency
 
     // Calculate data quality
     const apiStatus = calculateAPIStatus(collectedData);
