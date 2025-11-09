@@ -61,13 +61,13 @@ function validateSymbol(symbol: string): boolean {
  */
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<ApiResponse>
+  res: NextApiResponse<ApiResponse | any>
 ) {
-  // Only allow GET requests
-  if (req.method !== 'GET') {
+  // Support both GET (check status) and POST (start analysis)
+  if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({
       success: false,
-      error: 'Method not allowed. Use GET.'
+      error: 'Method not allowed. Use GET or POST.'
     });
   }
 
@@ -92,7 +92,66 @@ export default async function handler(
       });
     }
 
-    console.log(`🔍 Caesar research request for ${normalizedSymbol}`);
+    console.log(`🔍 Caesar research request for ${normalizedSymbol} (${req.method})`);
+
+    // Handle GET with jobId - check status
+    if (req.method === 'GET' && req.query.jobId) {
+      const jobId = req.query.jobId as string;
+      console.log(`📊 Checking status for job ${jobId}`);
+      
+      try {
+        const { getCaesarResearchStatus } = await import('../../../../lib/ucie/caesarClient');
+        const status = await getCaesarResearchStatus(jobId);
+        
+        // If completed, try to get the full research
+        if (status.status === 'completed') {
+          const { Caesar } = await import('../../../../utils/caesarClient');
+          const { parseCaesarResearch, generateCryptoResearchQuery } = await import('../../../../lib/ucie/caesarClient');
+          
+          const job = await Caesar.getResearch(jobId);
+          
+          // Get context data for query generation
+          const allCachedData = await getAllCachedDataForCaesar(normalizedSymbol);
+          const contextData: any = {
+            openaiSummary: allCachedData.openaiSummary?.summaryText || null,
+            dataQuality: allCachedData.openaiSummary?.dataQuality || 0,
+            apiStatus: allCachedData.openaiSummary?.apiStatus || null,
+            marketData: allCachedData.marketData,
+            sentiment: allCachedData.sentiment,
+            technical: allCachedData.technical,
+            news: allCachedData.news,
+            onChain: allCachedData.onChain
+          };
+          
+          const query = generateCryptoResearchQuery(normalizedSymbol, contextData);
+          const research = parseCaesarResearch(job, query);
+          
+          // Cache the results
+          await setCachedAnalysis(normalizedSymbol, 'research', research, CACHE_TTL, 100);
+          
+          return res.status(200).json({
+            success: true,
+            status: 'completed',
+            progress: 100,
+            data: research
+          });
+        }
+        
+        // Return status
+        return res.status(200).json({
+          success: true,
+          status: status.status,
+          progress: status.progress,
+          estimatedTimeRemaining: status.estimatedTimeRemaining
+        });
+      } catch (error) {
+        console.error(`❌ Failed to check job status:`, error);
+        return res.status(500).json({
+          success: false,
+          error: error instanceof Error ? error.message : 'Failed to check job status'
+        });
+      }
+    }
 
     // Check database cache first
     const cachedResearch = await getCachedAnalysis(normalizedSymbol, 'research');
@@ -187,7 +246,27 @@ export default async function handler(
     const contextSources = Object.keys(contextData).filter(k => contextData[k] !== null).length;
     console.log(`✅ Caesar AI context prepared with ${contextSources} data sources`);
     
-    // Perform complete research workflow with context
+    // If POST, just start the job and return jobId
+    if (req.method === 'POST') {
+      const { createCryptoResearch } = await import('../../../../lib/ucie/caesarClient');
+      
+      const { jobId, status } = await createCryptoResearch(
+        normalizedSymbol,
+        5, // compute units
+        contextData
+      );
+      
+      console.log(`✅ Caesar research job created: ${jobId}`);
+      
+      return res.status(200).json({
+        success: true,
+        jobId,
+        status,
+        message: 'Caesar analysis started. Poll with GET request using jobId parameter.'
+      });
+    }
+    
+    // If GET without jobId, perform complete research workflow (legacy behavior)
     // - Create research job (5 compute units for deep analysis)
     // - Poll for completion (max 10 minutes = 600 seconds)
     // - Parse and structure results

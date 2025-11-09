@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import MarketDataPanel from './MarketDataPanel';
 import CaesarResearchPanel from './CaesarResearchPanel';
+import CaesarAnalysisContainer from './CaesarAnalysisContainer';
 import OnChainAnalyticsPanel from './OnChainAnalyticsPanel';
 import SocialSentimentPanel from './SocialSentimentPanel';
 import NewsPanel from './NewsPanel';
@@ -404,7 +405,7 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
       case 'market':
         return <MarketDataPanel symbol={symbol} data={analysisData['market-data'] || analysisData.marketData} />;
       case 'research':
-        return <CaesarResearchPanel symbol={symbol} data={analysisData.research} />;
+        return <CaesarAnalysisContainer symbol={symbol} jobId={analysisData.research?.jobId} />;
       case 'onchain':
         return <OnChainAnalyticsPanel symbol={symbol} data={analysisData['on-chain'] || analysisData.onChain} />;
       case 'social':
@@ -441,7 +442,7 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
       { id: 'defi' as TabId, title: 'DeFi Metrics', icon: <Coins className="w-5 h-5" />, content: <DeFiMetricsPanel symbol={symbol} data={analysisData.defi} /> },
       { id: 'derivatives' as TabId, title: 'Derivatives', icon: <AlertTriangle className="w-5 h-5" />, content: <DerivativesPanel symbol={symbol} data={analysisData.derivatives} /> },
       { id: 'predictions' as TabId, title: 'Predictions & AI', icon: <Target className="w-5 h-5" />, content: <PredictiveModelPanel symbol={symbol} data={analysisData.predictions} /> },
-      { id: 'research' as TabId, title: 'AI Research', icon: <Brain className="w-5 h-5" />, content: <CaesarResearchPanel symbol={symbol} data={analysisData.research} /> },
+      { id: 'research' as TabId, title: 'AI Research', icon: <Brain className="w-5 h-5" />, content: <CaesarAnalysisContainer symbol={symbol} jobId={analysisData.research?.jobId} /> },
     ];
 
     return (
