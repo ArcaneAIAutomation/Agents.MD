@@ -169,7 +169,7 @@ export default async function handler(
     
     // ✅ CRITICAL: Retrieve ALL cached data from Supabase database
     // Caesar MUST use ONLY database data - fail immediately if not available
-    console.log(`📊 Retrieving all cached data from Supabase for Caesar AI...`);
+    console.log(`📊 Retrieving ALL cached data from Supabase for Caesar AI...`);
     const allCachedData = await getAllCachedDataForCaesar(normalizedSymbol);
     
     // ✅ VALIDATION: Check if we have sufficient data from database
@@ -189,7 +189,7 @@ export default async function handler(
       hasOnChain && 'On-Chain'
     ].filter(Boolean);
     
-    console.log(`📦 Database data availability:`);
+    console.log(`📦 Database data availability for ${normalizedSymbol}:`);
     console.log(`   OpenAI Summary: ${hasOpenAISummary ? '✅' : '❌'}`);
     console.log(`   Market Data: ${hasMarketData ? '✅' : '❌'}`);
     console.log(`   Sentiment: ${hasSentiment ? '✅' : '❌'}`);
@@ -197,6 +197,27 @@ export default async function handler(
     console.log(`   News: ${hasNews ? '✅' : '❌'}`);
     console.log(`   On-Chain: ${hasOnChain ? '✅' : '❌'}`);
     console.log(`   Total: ${availableDataSources.length}/6 sources available`);
+    
+    // ✅ DETAILED DATA LOGGING: Log what data we actually have
+    if (hasOpenAISummary) {
+      console.log(`   📝 OpenAI Summary length: ${allCachedData.openaiSummary?.summaryText?.length || 0} chars`);
+      console.log(`   📊 Data Quality: ${allCachedData.openaiSummary?.dataQuality || 0}%`);
+    }
+    if (hasMarketData) {
+      console.log(`   💰 Market Data: Price=${allCachedData.marketData?.price}, MCap=${allCachedData.marketData?.marketCap}`);
+    }
+    if (hasSentiment) {
+      console.log(`   😊 Sentiment: Score=${allCachedData.sentiment?.overallScore}, Trend=${allCachedData.sentiment?.trend}`);
+    }
+    if (hasTechnical) {
+      console.log(`   📈 Technical: RSI=${allCachedData.technical?.indicators?.rsi}, Trend=${allCachedData.technical?.trend?.direction}`);
+    }
+    if (hasNews) {
+      console.log(`   📰 News: ${allCachedData.news?.articles?.length || 0} articles available`);
+    }
+    if (hasOnChain) {
+      console.log(`   ⛓️ On-Chain: Holders=${allCachedData.onChain?.holderDistribution?.topHolders?.length || 0}, Whales=${allCachedData.onChain?.whaleActivity?.summary?.totalTransactions || 0}`);
+    }
     
     // ✅ FAIL IMMEDIATELY if critical data is missing
     if (!hasOpenAISummary) {
@@ -217,7 +238,9 @@ export default async function handler(
     
     console.log(`✅ Sufficient data available in database for Caesar analysis`);
     
-    // Build comprehensive context for Caesar from database data ONLY
+    // ✅ BUILD COMPREHENSIVE CONTEXT FOR CAESAR FROM DATABASE DATA ONLY
+    console.log(`🔨 Building comprehensive context for Caesar AI from database...`);
+    
     let contextData: any = {
       // OpenAI summary of collected data (from database)
       openaiSummary: allCachedData.openaiSummary?.summaryText || null,
@@ -232,12 +255,77 @@ export default async function handler(
       onChain: allCachedData.onChain
     };
     
+    // ✅ VERIFY DATA COMPLETENESS: Log detailed information about each data source
+    console.log(`📋 Context data verification:`);
+    
+    if (contextData.openaiSummary) {
+      console.log(`   ✅ OpenAI Summary: ${contextData.openaiSummary.length} chars`);
+    } else {
+      console.log(`   ❌ OpenAI Summary: MISSING`);
+    }
+    
+    if (contextData.marketData) {
+      const keys = Object.keys(contextData.marketData);
+      console.log(`   ✅ Market Data: ${keys.length} fields (${keys.join(', ')})`);
+    } else {
+      console.log(`   ❌ Market Data: MISSING`);
+    }
+    
+    if (contextData.sentiment) {
+      const keys = Object.keys(contextData.sentiment);
+      console.log(`   ✅ Sentiment: ${keys.length} fields (${keys.join(', ')})`);
+    } else {
+      console.log(`   ❌ Sentiment: MISSING`);
+    }
+    
+    if (contextData.technical) {
+      const keys = Object.keys(contextData.technical);
+      console.log(`   ✅ Technical: ${keys.length} fields (${keys.join(', ')})`);
+    } else {
+      console.log(`   ❌ Technical: MISSING`);
+    }
+    
+    if (contextData.news) {
+      const articleCount = contextData.news.articles?.length || 0;
+      console.log(`   ✅ News: ${articleCount} articles`);
+    } else {
+      console.log(`   ❌ News: MISSING`);
+    }
+    
+    if (contextData.onChain) {
+      const keys = Object.keys(contextData.onChain);
+      console.log(`   ✅ On-Chain: ${keys.length} fields (${keys.join(', ')})`);
+      
+      // Log detailed on-chain data
+      if (contextData.onChain.holderDistribution) {
+        console.log(`      - Holder Distribution: ${contextData.onChain.holderDistribution.topHolders?.length || 0} holders`);
+      }
+      if (contextData.onChain.whaleActivity) {
+        console.log(`      - Whale Activity: ${contextData.onChain.whaleActivity.summary?.totalTransactions || 0} transactions`);
+      }
+      if (contextData.onChain.exchangeFlows) {
+        console.log(`      - Exchange Flows: ${contextData.onChain.exchangeFlows.trend || 'N/A'}`);
+      }
+      if (contextData.onChain.smartContract) {
+        console.log(`      - Smart Contract: Score ${contextData.onChain.smartContract.score || 0}/100`);
+      }
+    } else {
+      console.log(`   ❌ On-Chain: MISSING`);
+    }
+    
     // Also retrieve phase data if session ID provided
     if (sessionId && typeof sessionId === 'string') {
       try {
         const phaseData = await getAggregatedPhaseData(sessionId, normalizedSymbol, 4);
         contextData.phaseData = phaseData;
-        console.log(`📊 Retrieved phase data from ${Object.keys(phaseData).length} previous phases`);
+        const phaseCount = Object.keys(phaseData).length;
+        console.log(`📊 Retrieved phase data from ${phaseCount} previous phases`);
+        
+        // Log phase data details
+        Object.keys(phaseData).forEach(phase => {
+          const phaseKeys = Object.keys(phaseData[phase]);
+          console.log(`   - Phase ${phase}: ${phaseKeys.length} data points`);
+        });
       } catch (error) {
         console.warn('⚠️ Failed to retrieve phase data from database:', error);
       }
@@ -245,6 +333,10 @@ export default async function handler(
     
     const contextSources = Object.keys(contextData).filter(k => contextData[k] !== null).length;
     console.log(`✅ Caesar AI context prepared with ${contextSources} data sources`);
+    
+    // ✅ CALCULATE TOTAL DATA SIZE
+    const contextSize = JSON.stringify(contextData).length;
+    console.log(`📦 Total context size: ${(contextSize / 1024).toFixed(2)} KB`);
     
     // If POST, just start the job and return jobId
     if (req.method === 'POST') {
