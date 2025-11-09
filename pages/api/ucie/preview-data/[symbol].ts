@@ -491,49 +491,65 @@ async function generateOpenAISummary(
   if (marketData?.success && marketData?.priceAggregation) {
     const agg = marketData.priceAggregation;
     context += `Market Data:\n`;
-    // Use safe formatters to handle any property name variation
-    const { formatPrice, formatVolume, formatMarketCap, formatPriceChange } = require('../../../../lib/ucie/dataFormatter');
-    context += `- Price: ${formatPrice(marketData)}\n`;
-    context += `- 24h Volume: ${formatVolume(marketData)}\n`;
-    context += `- Market Cap: ${formatMarketCap(marketData)}\n`;
-    context += `- 24h Change: ${formatPriceChange(marketData)}\n`;
-    context += `- Data Sources: ${agg.prices?.length || 0} exchanges\n\n`;
+    try {
+      // Use safe formatters to handle any property name variation
+      const { formatPrice, formatVolume, formatMarketCap, formatPriceChange } = require('../../../../lib/ucie/dataFormatter');
+      context += `- Price: ${formatPrice(marketData)}\n`;
+      context += `- 24h Volume: ${formatVolume(marketData)}\n`;
+      context += `- Market Cap: ${formatMarketCap(marketData)}\n`;
+      context += `- 24h Change: ${formatPriceChange(marketData)}\n`;
+      context += `- Data Sources: ${agg.prices?.length || 0} exchanges\n\n`;
+    } catch (error) {
+      console.error('❌ Error formatting market data:', error);
+      context += `- Price: ${agg.aggregatedPrice || 'N/A'}\n`;
+      context += `- Data Sources: ${agg.prices?.length || 0} exchanges\n\n`;
+    }
   }
 
   // ✅ FIXED: Sentiment - Use correct path (sentiment object)
   if (sentimentData?.success && sentimentData?.sentiment) {
     const sentiment = sentimentData.sentiment;
     context += `Social Sentiment:\n`;
-    // Use safe formatters to handle any property name variation
-    const { formatSentimentScore, formatSentimentTrend, formatMentions } = require('../../../../lib/ucie/dataFormatter');
-    context += `- Overall Score: ${formatSentimentScore(sentimentData)}\n`;
-    context += `- Trend: ${formatSentimentTrend(sentimentData)}\n`;
-    context += `- 24h Mentions: ${formatMentions(sentimentData)}\n`;
-    const sources = Object.keys(sentimentData.sources || {}).filter(k => sentimentData.sources[k]);
-    if (sources.length > 0) {
-      context += `- Sources: ${sources.join(', ')}\n`;
+    try {
+      // Use safe formatters to handle any property name variation
+      const { formatSentimentScore, formatSentimentTrend, formatMentions } = require('../../../../lib/ucie/dataFormatter');
+      context += `- Overall Score: ${formatSentimentScore(sentimentData)}\n`;
+      context += `- Trend: ${formatSentimentTrend(sentimentData)}\n`;
+      context += `- 24h Mentions: ${formatMentions(sentimentData)}\n`;
+      const sources = Object.keys(sentimentData.sources || {}).filter(k => sentimentData.sources[k]);
+      if (sources.length > 0) {
+        context += `- Sources: ${sources.join(', ')}\n`;
+      }
+      context += `\n`;
+    } catch (error) {
+      console.error('❌ Error formatting sentiment data:', error);
+      context += `- Overall Score: ${sentiment.overallScore || 'N/A'}\n\n`;
     }
-    context += `\n`;
   }
 
   // ✅ FIXED: Technical - Use correct path (indicators object)
   if (technicalData?.success && technicalData?.indicators) {
-    // Use safe formatters to handle any property name variation and object types
-    const { formatRSI, formatMACDSignal, formatTrendDirection } = require('../../../../lib/ucie/dataFormatter');
     context += `Technical Analysis:\n`;
-    context += `- RSI: ${formatRSI(technicalData)}\n`;
-    context += `- MACD Signal: ${formatMACDSignal(technicalData)}\n`;
-    context += `- Trend: ${formatTrendDirection(technicalData)}\n`;
-    
-    // Additional indicators if available
-    const indicators = technicalData.indicators;
-    if (indicators?.trend?.strength) {
-      context += `- Trend Strength: ${indicators.trend.strength}\n`;
+    try {
+      // Use safe formatters to handle any property name variation and object types
+      const { formatRSI, formatMACDSignal, formatTrendDirection } = require('../../../../lib/ucie/dataFormatter');
+      context += `- RSI: ${formatRSI(technicalData)}\n`;
+      context += `- MACD Signal: ${formatMACDSignal(technicalData)}\n`;
+      context += `- Trend: ${formatTrendDirection(technicalData)}\n`;
+      
+      // Additional indicators if available
+      const indicators = technicalData.indicators;
+      if (indicators?.trend?.strength) {
+        context += `- Trend Strength: ${indicators.trend.strength}\n`;
+      }
+      if (indicators.volatility) {
+        context += `- Volatility: ${indicators.volatility.current || 'N/A'}\n`;
+      }
+      context += `\n`;
+    } catch (error) {
+      console.error('❌ Error formatting technical data:', error);
+      context += `- Indicators available\n\n`;
     }
-    if (indicators.volatility) {
-      context += `- Volatility: ${indicators.volatility.current || 'N/A'}\n`;
-    }
-    context += `\n`;
   }
 
   // ✅ FIXED: News - Use correct path (articles array)
