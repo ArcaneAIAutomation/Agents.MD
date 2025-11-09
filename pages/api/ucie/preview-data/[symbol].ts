@@ -491,10 +491,12 @@ async function generateOpenAISummary(
   if (marketData?.success && marketData?.priceAggregation) {
     const agg = marketData.priceAggregation;
     context += `Market Data:\n`;
-    context += `- Price: $${agg.aggregatedPrice?.toLocaleString() || 'N/A'}\n`;
-    context += `- 24h Volume: $${agg.aggregatedVolume24h?.toLocaleString() || 'N/A'}\n`;
-    context += `- Market Cap: $${agg.aggregatedMarketCap?.toLocaleString() || 'N/A'}\n`;
-    context += `- 24h Change: ${agg.aggregatedChange24h?.toFixed(2) || 'N/A'}%\n`;
+    // Use safe formatters to handle any property name variation
+    const { formatPrice, formatVolume, formatMarketCap, formatPriceChange } = require('../../../../lib/ucie/dataFormatter');
+    context += `- Price: ${formatPrice(marketData)}\n`;
+    context += `- 24h Volume: ${formatVolume(marketData)}\n`;
+    context += `- Market Cap: ${formatMarketCap(marketData)}\n`;
+    context += `- 24h Change: ${formatPriceChange(marketData)}\n`;
     context += `- Data Sources: ${agg.prices?.length || 0} exchanges\n\n`;
   }
 
@@ -502,9 +504,11 @@ async function generateOpenAISummary(
   if (sentimentData?.success && sentimentData?.sentiment) {
     const sentiment = sentimentData.sentiment;
     context += `Social Sentiment:\n`;
-    context += `- Overall Score: ${sentiment.overallScore || 'N/A'}/100\n`;
-    context += `- Trend: ${sentiment.trend || 'N/A'}\n`;
-    context += `- 24h Mentions: ${sentiment.mentions24h?.toLocaleString() || 'N/A'}\n`;
+    // Use safe formatters to handle any property name variation
+    const { formatSentimentScore, formatSentimentTrend, formatMentions } = require('../../../../lib/ucie/dataFormatter');
+    context += `- Overall Score: ${formatSentimentScore(sentimentData)}\n`;
+    context += `- Trend: ${formatSentimentTrend(sentimentData)}\n`;
+    context += `- 24h Mentions: ${formatMentions(sentimentData)}\n`;
     const sources = Object.keys(sentimentData.sources || {}).filter(k => sentimentData.sources[k]);
     if (sources.length > 0) {
       context += `- Sources: ${sources.join(', ')}\n`;
@@ -514,16 +518,17 @@ async function generateOpenAISummary(
 
   // ✅ FIXED: Technical - Use correct path (indicators object)
   if (technicalData?.success && technicalData?.indicators) {
-    const indicators = technicalData.indicators;
+    // Use safe formatters to handle any property name variation and object types
+    const { formatRSI, formatMACDSignal, formatTrendDirection } = require('../../../../lib/ucie/dataFormatter');
     context += `Technical Analysis:\n`;
-    if (indicators.rsi) {
-      context += `- RSI: ${indicators.rsi.value?.toFixed(2) || 'N/A'} (${indicators.rsi.signal || 'N/A'})\n`;
-    }
-    if (indicators.macd) {
-      context += `- MACD: ${indicators.macd.signal || 'N/A'}\n`;
-    }
-    if (indicators.trend) {
-      context += `- Trend: ${indicators.trend.direction || 'N/A'} (${indicators.trend.strength || 'N/A'})\n`;
+    context += `- RSI: ${formatRSI(technicalData)}\n`;
+    context += `- MACD Signal: ${formatMACDSignal(technicalData)}\n`;
+    context += `- Trend: ${formatTrendDirection(technicalData)}\n`;
+    
+    // Additional indicators if available
+    const indicators = technicalData.indicators;
+    if (indicators?.trend?.strength) {
+      context += `- Trend Strength: ${indicators.trend.strength}\n`;
     }
     if (indicators.volatility) {
       context += `- Volatility: ${indicators.volatility.current || 'N/A'}\n`;
