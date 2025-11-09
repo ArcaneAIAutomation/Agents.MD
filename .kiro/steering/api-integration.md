@@ -2,7 +2,20 @@
 
 ## Multi-Source Data Strategy
 
-**Current Status (November 2025)**: The platform uses multiple cryptocurrency data sources with intelligent fallback mechanisms and comprehensive API coverage.
+**Current Status (January 2025)**: The platform uses multiple cryptocurrency data sources with intelligent fallback mechanisms and comprehensive API coverage.
+
+## 🚨 CRITICAL: UCIE System Integration
+
+**For all UCIE-related API work, you MUST follow the UCIE System rules defined in `ucie-system.md`.**
+
+### Key UCIE Rules:
+1. **AI Analysis Happens LAST** - Only after ALL data is cached in database
+2. **Database is Source of Truth** - All data stored in Supabase (no in-memory cache)
+3. **Use Utility Functions** - Always use `getCachedAnalysis()` and `setCachedAnalysis()`
+4. **Data Quality Check** - Minimum 70% quality before AI analysis
+5. **Context Aggregation** - Use `getComprehensiveContext()` for AI calls
+
+**See**: `.kiro/steering/ucie-system.md` for complete UCIE system documentation.
 
 #### Market Data APIs (✅ All Working)
 - **CoinMarketCap API** - Primary market data source (paid plan)
