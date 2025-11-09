@@ -75,6 +75,9 @@ export default async function handler(
     // Extract and validate symbol and session ID
     const { symbol, sessionId } = req.query;
     
+    // ✅ NEW: Extract collected data from request body (if POST)
+    const { collectedData } = req.body || {};
+    
     if (!symbol || typeof symbol !== 'string') {
       return res.status(400).json({
         success: false,
@@ -167,12 +170,36 @@ export default async function handler(
     // No cache, perform fresh research
     console.log(`🚀 Starting fresh Caesar research for ${normalizedSymbol}`);
     
-    // ✅ CRITICAL: Retrieve ALL cached data from Supabase database
-    // Caesar MUST use ONLY database data - fail immediately if not available
-    console.log(`📊 Retrieving ALL cached data from Supabase for Caesar AI...`);
-    const allCachedData = await getAllCachedDataForCaesar(normalizedSymbol);
+    let allCachedData: any;
+    let dataSource: 'preview' | 'database' = 'database';
     
-    // ✅ VALIDATION: Check if we have sufficient data from database
+    // ✅ PRIORITY 1: Use collected data from preview if available (BYPASS DATABASE)
+    if (collectedData) {
+      console.log(`📊 Using collected data from preview modal (BYPASSING DATABASE)...`);
+      dataSource = 'preview';
+      
+      // Transform preview data structure to match expected format
+      allCachedData = {
+        openaiSummary: {
+          summaryText: collectedData.summary || null,
+          dataQuality: collectedData.dataQuality || 0,
+          apiStatus: collectedData.apiStatus || null
+        },
+        marketData: collectedData.marketData || null,
+        sentiment: collectedData.sentiment || null,
+        technical: collectedData.technical || null,
+        news: collectedData.news || null,
+        onChain: collectedData.onChain || null
+      };
+      
+      console.log(`✅ Using fresh data from preview (data quality: ${collectedData.dataQuality}%)`);
+    } else {
+      // ✅ FALLBACK: Retrieve data from Supabase database
+      console.log(`📊 No preview data provided, retrieving from Supabase database...`);
+      allCachedData = await getAllCachedDataForCaesar(normalizedSymbol);
+    }
+    
+    // ✅ VALIDATION: Check if we have sufficient data
     const hasOpenAISummary = !!allCachedData.openaiSummary;
     const hasMarketData = !!allCachedData.marketData;
     const hasSentiment = !!allCachedData.sentiment;
@@ -189,7 +216,7 @@ export default async function handler(
       hasOnChain && 'On-Chain'
     ].filter(Boolean);
     
-    console.log(`📦 Database data availability for ${normalizedSymbol}:`);
+    console.log(`📦 Data availability for ${normalizedSymbol} (source: ${dataSource.toUpperCase()}):`);
     console.log(`   OpenAI Summary: ${hasOpenAISummary ? '✅' : '❌'}`);
     console.log(`   Market Data: ${hasMarketData ? '✅' : '❌'}`);
     console.log(`   Sentiment: ${hasSentiment ? '✅' : '❌'}`);
@@ -225,28 +252,28 @@ export default async function handler(
     
     // ✅ FAIL IMMEDIATELY if critical data is missing
     if (!hasOpenAISummary) {
-      console.error(`❌ CRITICAL: OpenAI summary not found in database for ${normalizedSymbol}`);
+      console.error(`❌ CRITICAL: OpenAI summary not found (source: ${dataSource}) for ${normalizedSymbol}`);
       return res.status(400).json({
         success: false,
-        error: 'OpenAI summary not available in database. Please run data collection first by clicking the BTC/ETH button and waiting for the preview modal.'
+        error: `OpenAI summary not available. Please run data collection first by clicking the ${normalizedSymbol} button and waiting for the preview modal.`
       });
     }
     
     if (availableDataSources.length < 3) {
-      console.error(`❌ CRITICAL: Insufficient data in database (${availableDataSources.length}/6 sources)`);
+      console.error(`❌ CRITICAL: Insufficient data (source: ${dataSource}) - ${availableDataSources.length}/6 sources`);
       return res.status(400).json({
         success: false,
-        error: `Insufficient data in database. Only ${availableDataSources.length}/6 sources available. Please run data collection first.`
+        error: `Insufficient data. Only ${availableDataSources.length}/6 sources available. Please run data collection first.`
       });
     }
     
-    console.log(`✅ Sufficient data available in database for Caesar analysis`);
+    console.log(`✅ Sufficient data available from ${dataSource.toUpperCase()} for Caesar analysis`);
     
-    // ✅ BUILD COMPREHENSIVE CONTEXT FOR CAESAR FROM DATABASE DATA ONLY
-    console.log(`🔨 Building comprehensive context for Caesar AI from database...`);
+    // ✅ BUILD COMPREHENSIVE CONTEXT FOR CAESAR FROM COLLECTED DATA
+    console.log(`🔨 Building comprehensive context for Caesar AI from ${dataSource.toUpperCase()}...`);
     
     let contextData: any = {
-      // OpenAI summary of collected data (from database)
+      // OpenAI summary of collected data
       openaiSummary: allCachedData.openaiSummary?.summaryText || null,
       dataQuality: allCachedData.openaiSummary?.dataQuality || 0,
       apiStatus: allCachedData.openaiSummary?.apiStatus || null,

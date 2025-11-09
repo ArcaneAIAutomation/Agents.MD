@@ -84,6 +84,7 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
   // Data Preview Modal State
   const [showPreview, setShowPreview] = useState(true); // Show preview on mount
   const [proceedWithAnalysis, setProceedWithAnalysis] = useState(false);
+  const [previewData, setPreviewData] = useState<any>(null); // ✅ Store preview data for Caesar
 
   // Mobile capabilities
   const mobileCapabilities = useUCIEMobile();
@@ -153,7 +154,9 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
   });
 
   // Handle preview modal actions
-  const handlePreviewContinue = () => {
+  const handlePreviewContinue = (preview: any) => {
+    console.log('📊 Preview data received:', preview);
+    setPreviewData(preview); // ✅ Store preview data for Caesar
     setShowPreview(false);
     setProceedWithAnalysis(true);
     haptic.buttonPress();
@@ -642,6 +645,7 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
             symbol={symbol} 
             jobId={analysisData?.research?.jobId}
             progressiveLoadingComplete={!loading}
+            previewData={previewData} // ✅ Pass preview data to Caesar
           />
         </div>
       </div>

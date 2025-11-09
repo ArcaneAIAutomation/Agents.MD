@@ -12,7 +12,7 @@ import DataSourceExpander from './DataSourceExpander';
 interface DataPreviewModalProps {
   symbol: string;
   isOpen: boolean;
-  onContinue: () => void;
+  onContinue: (previewData: DataPreview) => void; // ✅ Pass preview data to Caesar
   onCancel: () => void;
 }
 
@@ -298,7 +298,7 @@ export default function DataPreviewModal({
               Cancel Analysis
             </button>
             <button
-              onClick={onContinue}
+              onClick={() => preview && onContinue(preview)}
               className="bg-bitcoin-orange text-bitcoin-black border-2 border-bitcoin-orange font-bold uppercase tracking-wider px-8 py-3 rounded-lg transition-all hover:bg-bitcoin-black hover:text-bitcoin-orange hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[48px]"
             >
               Continue with Caesar AI Analysis →

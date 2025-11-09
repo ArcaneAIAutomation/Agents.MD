@@ -19,6 +19,7 @@ interface CaesarAnalysisContainerProps {
   symbol: string;
   jobId?: string;
   progressiveLoadingComplete?: boolean;
+  previewData?: any; // ✅ Preview data from DataPreviewModal
 }
 
 interface AnalysisStatus {
@@ -31,7 +32,7 @@ interface AnalysisStatus {
 const MAX_WAIT_TIME = 900000; // 15 minutes in milliseconds
 const POLL_INTERVAL = 60000; // 60 seconds in milliseconds
 
-export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, progressiveLoadingComplete = true }: CaesarAnalysisContainerProps) {
+export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, progressiveLoadingComplete = true, previewData }: CaesarAnalysisContainerProps) {
   const [jobId, setJobId] = useState<string | null>(initialJobId || null);
   const [status, setStatus] = useState<AnalysisStatus | null>(null);
   const [research, setResearch] = useState<UCIECaesarResearch | null>(null);
@@ -122,6 +123,15 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
 
       const response = await fetch(`/api/ucie/research/${encodeURIComponent(symbol)}`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          collectedData: previewData?.collectedData, // ✅ Pass preview data to Caesar
+          summary: previewData?.summary,
+          dataQuality: previewData?.dataQuality,
+          apiStatus: previewData?.apiStatus
+        }),
       });
 
       if (!response.ok) {
