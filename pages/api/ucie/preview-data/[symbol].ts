@@ -17,6 +17,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
 import { setCachedAnalysis, getCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 import { storeOpenAISummary } from '../../../../lib/ucie/openaiSummaryStorage';
+import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -86,10 +87,14 @@ const EFFECTIVE_APIS = {
   }
 };
 
-export default async function handler(
-  req: NextApiRequest,
+async function handler(
+  req: AuthenticatedRequest,
   res: NextApiResponse<ApiResponse>
 ) {
+  // Get user info if authenticated (optional)
+  const userId = req.user?.id;
+  const userEmail = req.user?.email;
+
   if (req.method !== 'GET') {
     return res.status(405).json({
       success: false,
@@ -131,7 +136,9 @@ export default async function handler(
           'market-data',
           collectedData.marketData,
           15 * 60, // 15 minutes TTL (standardized)
-          collectedData.marketData.dataQuality || 0
+          collectedData.marketData.dataQuality || 0,
+          userId,
+          userEmail
         ).catch(err => {
           console.error('❌ Failed to cache market data:', err);
           return { status: 'failed', type: 'market-data' };
@@ -146,7 +153,9 @@ export default async function handler(
           'sentiment',
           collectedData.sentiment,
           15 * 60, // 15 minutes TTL (standardized)
-          collectedData.sentiment.dataQuality || 0
+          collectedData.sentiment.dataQuality || 0,
+          userId,
+          userEmail
         ).catch(err => {
           console.error('❌ Failed to cache sentiment:', err);
           return { status: 'failed', type: 'sentiment' };
@@ -161,7 +170,9 @@ export default async function handler(
           'technical',
           collectedData.technical,
           15 * 60, // 15 minutes TTL (standardized)
-          collectedData.technical.dataQuality || 0
+          collectedData.technical.dataQuality || 0,
+          userId,
+          userEmail
         ).catch(err => {
           console.error('❌ Failed to cache technical:', err);
           return { status: 'failed', type: 'technical' };
@@ -176,7 +187,9 @@ export default async function handler(
           'news',
           collectedData.news,
           15 * 60, // 15 minutes TTL (standardized)
-          collectedData.news.dataQuality || 0
+          collectedData.news.dataQuality || 0,
+          userId,
+          userEmail
         ).catch(err => {
           console.error('❌ Failed to cache news:', err);
           return { status: 'failed', type: 'news' };
@@ -191,7 +204,9 @@ export default async function handler(
           'on-chain',
           collectedData.onChain,
           15 * 60, // 15 minutes TTL (standardized)
-          collectedData.onChain.dataQuality || 0
+          collectedData.onChain.dataQuality || 0,
+          userId,
+          userEmail
         ).catch(err => {
           console.error('❌ Failed to cache on-chain:', err);
           return { status: 'failed', type: 'on-chain' };
@@ -672,3 +687,7 @@ export const config = {
   },
   maxDuration: 30, // 30 seconds for data collection and summarization
 };
+
+
+// Export with optional authentication middleware
+export default withOptionalAuth(handler);

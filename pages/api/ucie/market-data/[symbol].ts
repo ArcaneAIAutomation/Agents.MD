@@ -18,6 +18,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { aggregateExchangePrices, type PriceAggregation } from '../../../../lib/ucie/priceAggregation';
 import { coinGeckoClient, coinMarketCapClient, type MarketData } from '../../../../lib/ucie/marketDataClients';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
+import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
 // Cache TTL: 15 minutes (for OpenAI/Caesar analysis)
 const CACHE_TTL = 15 * 60; // 900 seconds
@@ -87,8 +88,8 @@ async function fetchMarketData(symbol: string): Promise<MarketData | null> {
 /**
  * Main API handler
  */
-export default async function handler(
-  req: NextApiRequest,
+async function handler(
+  req: AuthenticatedRequest,
   res: NextApiResponse<MarketDataResponse>
 ) {
   // Only allow GET requests
@@ -123,8 +124,12 @@ export default async function handler(
 
   const symbolUpper = symbol.toUpperCase();
 
+  // Get user info if authenticated (optional)
+  const userId = req.user?.id;
+  const userEmail = req.user?.email;
+
   // Check database cache first
-  const cachedData = await getCachedAnalysis(symbolUpper, 'market-data');
+  const cachedData = await getCachedAnalysis(symbolUpper, 'market-data', userId, userEmail);
   if (cachedData) {
     return res.status(200).json({
       ...cachedData,
@@ -190,7 +195,7 @@ export default async function handler(
     };
 
     // Cache the response in database
-    await setCachedAnalysis(symbolUpper, 'market-data', response, CACHE_TTL, overallQuality);
+    await setCachedAnalysis(symbolUpper, 'market-data', response, CACHE_TTL, overallQuality, userId, userEmail);
 
     return res.status(200).json(response);
 
@@ -210,3 +215,7 @@ export default async function handler(
     });
   }
 }
+
+
+// Export with optional authentication middleware
+export default withOptionalAuth(handler);
