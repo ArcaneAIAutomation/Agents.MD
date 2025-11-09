@@ -279,7 +279,54 @@ After deployment completes:
 
 ---
 
-**Status**: 🟢 **FIXED AND DEPLOYED**  
+**Status**: 🟢 **FIXED AND DEPLOYED** (2 fixes applied)  
 **Impact**: All UCIE features now working correctly  
 **User Action**: Clear cache and hard refresh after deployment
+
+---
+
+## 🔧 Second Fix Applied (Server-Side)
+
+### Additional Issue Found
+
+After fixing the frontend, the issue persisted because the **preview-data endpoint** makes internal server-side API calls to collect data from other UCIE endpoints, and these internal calls weren't forwarding the authentication cookie.
+
+### Server-Side Authentication Forwarding
+
+**Problem**:
+```typescript
+// preview-data endpoint receives authenticated request ✅
+// But internal calls to other endpoints don't forward auth ❌
+const response = await fetch(`${baseUrl}/api/ucie/market-data/${symbol}`);
+// No cookie forwarded → 401 Unauthorized
+```
+
+**Solution**:
+```typescript
+// Extract auth cookie from original request
+const authCookie = req.cookies.auth_token;
+
+// Forward cookie in internal API call
+const response = await fetch(url, {
+  headers: {
+    'Cookie': `auth_token=${authCookie}`
+  }
+});
+// ✅ Cookie forwarded → Authentication succeeds
+```
+
+### Files Fixed (Second Round)
+
+1. **`pages/api/ucie/preview-data/[symbol].ts`**
+   - Updated `fetchWithTimeout` function to accept `req` parameter
+   - Extract `auth_token` cookie from original request
+   - Forward cookie in internal API call headers
+   - Updated all 5 `fetchWithTimeout` calls to pass `req`
+
+### Complete Fix Summary
+
+**Fix #1 (Frontend)**: Added `credentials: 'include'` to 7 frontend fetch calls  
+**Fix #2 (Backend)**: Forward authentication cookie in server-side internal API calls
+
+**Both fixes are required** for the system to work correctly!
 
