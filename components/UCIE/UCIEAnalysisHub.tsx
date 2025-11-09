@@ -515,17 +515,35 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
     );
   }
 
+  // Show loading during progressive loading
   if (loading) {
     return (
       <div className="min-h-screen bg-bitcoin-black py-4 md:py-8 px-2 md:px-4">
         <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="mb-4 md:mb-6">
+            <div className="flex items-center gap-2 md:gap-4 mb-4">
+              {onBack && (
+                <button
+                  onClick={onBack}
+                  className="text-bitcoin-orange hover:text-bitcoin-white transition-colors min-h-[44px] flex items-center"
+                >
+                  ← Back
+                </button>
+              )}
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-bitcoin-white">
+                {symbol} Analysis
+              </h1>
+            </div>
+          </div>
+
           <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-4 md:p-8">
             <div className="text-center mb-6 md:mb-8">
               <h2 className="text-2xl md:text-3xl font-bold text-bitcoin-white mb-2">
-                Analyzing {symbol}
+                Collecting Data for {symbol}
               </h2>
               <p className="text-sm md:text-base text-bitcoin-white-80">
-                Fetching data from 15+ sources and running AI analysis...
+                Fetching data from 15+ sources...
               </p>
               <div className="mt-4">
                 <div className="text-4xl md:text-5xl font-mono font-bold text-bitcoin-orange">
@@ -590,101 +608,24 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
     );
   }
 
-  // Wrap content in PullToRefresh for mobile
+  // After loading completes, show only Caesar analysis (no tabs)
   const content = (
     <div className="min-h-screen bg-bitcoin-black py-4 md:py-8 px-2 md:px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-4 md:mb-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-            <div className="flex items-center gap-2 md:gap-4">
-              {onBack && (
-                <button
-                  onClick={onBack}
-                  className="text-bitcoin-orange hover:text-bitcoin-white transition-colors min-h-[44px] flex items-center"
-                >
-                  ← Back
-                </button>
-              )}
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-bitcoin-white">
-                {symbol} Analysis
-              </h1>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 md:gap-4 mb-4">
+            {onBack && (
               <button
-                onClick={toggleWatchlist}
-                className={`p-2 rounded-lg border-2 transition-all min-h-[44px] min-w-[44px] ${
-                  isInWatchlist
-                    ? 'bg-bitcoin-orange text-bitcoin-black border-bitcoin-orange'
-                    : 'bg-transparent text-bitcoin-orange border-bitcoin-orange hover:bg-bitcoin-orange hover:text-bitcoin-black'
-                }`}
-                title={isInWatchlist ? 'Remove from watchlist' : 'Add to watchlist'}
+                onClick={onBack}
+                className="text-bitcoin-orange hover:text-bitcoin-white transition-colors min-h-[44px] flex items-center"
               >
-                <Star className="w-5 h-5" fill={isInWatchlist ? 'currentColor' : 'none'} />
+                ← Back
               </button>
-
-              <button
-                onClick={() => setRealTimeEnabled(!realTimeEnabled)}
-                className={`p-2 rounded-lg border-2 transition-all min-h-[44px] min-w-[44px] ${
-                  realTimeEnabled
-                    ? 'bg-bitcoin-orange text-bitcoin-black border-bitcoin-orange'
-                    : 'bg-transparent text-bitcoin-orange border-bitcoin-orange hover:bg-bitcoin-orange hover:text-bitcoin-black'
-                }`}
-                title={realTimeEnabled ? 'Disable real-time updates' : 'Enable real-time updates'}
-              >
-                <RefreshCw className="w-5 h-5" />
-              </button>
-
-              <button
-                onClick={handleRefresh}
-                className="p-2 rounded-lg border-2 border-bitcoin-orange bg-transparent text-bitcoin-orange hover:bg-bitcoin-orange hover:text-bitcoin-black transition-all min-h-[44px] min-w-[44px]"
-                title="Refresh analysis"
-              >
-                <RefreshCw className="w-5 h-5" />
-              </button>
-
-              <div className="relative">
-                <button
-                  onClick={() => setShowExportMenu(!showExportMenu)}
-                  className="p-2 rounded-lg border-2 border-bitcoin-orange bg-transparent text-bitcoin-orange hover:bg-bitcoin-orange hover:text-bitcoin-black transition-all min-h-[44px] min-w-[44px]"
-                  title="Export report"
-                >
-                  <Download className="w-5 h-5" />
-                </button>
-                {showExportMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg shadow-lg z-10">
-                    <button
-                      onClick={() => handleExport('pdf')}
-                      className="w-full text-left px-4 py-2 text-bitcoin-white hover:bg-bitcoin-orange-10 transition-colors"
-                    >
-                      Export as PDF
-                    </button>
-                    <button
-                      onClick={() => handleExport('json')}
-                      className="w-full text-left px-4 py-2 text-bitcoin-white hover:bg-bitcoin-orange-10 transition-colors"
-                    >
-                      Export as JSON
-                    </button>
-                    <button
-                      onClick={() => handleExport('markdown')}
-                      className="w-full text-left px-4 py-2 text-bitcoin-white hover:bg-bitcoin-orange-10 transition-colors"
-                    >
-                      Export as Markdown
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <button
-                onClick={handleShare}
-                className="p-2 rounded-lg border-2 border-bitcoin-orange bg-transparent text-bitcoin-orange hover:bg-bitcoin-orange hover:text-bitcoin-black transition-all min-h-[44px] min-w-[44px]"
-                title="Share analysis"
-              >
-                <Share2 className="w-5 h-5" />
-              </button>
-            </div>
+            )}
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-bitcoin-white">
+              {symbol} Caesar AI Analysis
+            </h1>
           </div>
 
           {/* Last Update Info */}
@@ -692,51 +633,17 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
             <span>Last updated: {lastUpdate.toLocaleTimeString()}</span>
             <span>•</span>
             <span>Data Quality: {dataQuality}%</span>
-            {realTimeEnabled && (
-              <>
-                <span>•</span>
-                <span className="text-bitcoin-orange">Live Updates Active</span>
-              </>
-            )}
           </div>
         </div>
 
-        {/* Desktop: Tabs | Mobile: Collapsible Sections */}
-        {mobileCapabilities.isDesktop ? (
-          <>
-            {/* Tabs (Desktop Only) */}
-            <div className="mb-6 overflow-x-auto">
-              <div className="flex gap-2 min-w-max pb-2">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => handleTabChange(tab.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all min-h-[44px] whitespace-nowrap ${
-                      activeTab === tab.id
-                        ? 'bg-bitcoin-orange text-bitcoin-black border-2 border-bitcoin-orange'
-                        : 'bg-transparent text-bitcoin-orange border-2 border-bitcoin-orange hover:bg-bitcoin-orange hover:text-bitcoin-black'
-                    }`}
-                  >
-                    {tab.icon}
-                    <span>{tab.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Tab Content (Desktop) */}
-            <div className="mb-8">
-              {renderTabContent()}
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Mobile: Single-Column Collapsible Sections */}
-            <div className="mb-6">
-              {renderMobileView()}
-            </div>
-          </>
-        )}
+        {/* Show only Caesar Analysis - No Tabs */}
+        <div className="mb-8">
+          <CaesarAnalysisContainer 
+            symbol={symbol} 
+            jobId={analysisData?.research?.jobId}
+            progressiveLoadingComplete={!loading}
+          />
+        </div>
       </div>
     </div>
   );

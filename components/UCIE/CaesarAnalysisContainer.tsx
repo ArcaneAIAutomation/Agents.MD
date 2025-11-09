@@ -35,6 +35,8 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
   const [loading, setLoading] = useState(true);
   const [pollCount, setPollCount] = useState(0);
   const [preparingData, setPreparingData] = useState(true);
+  const [queryPrompt, setQueryPrompt] = useState<string | null>(null);
+  const [showPrompt, setShowPrompt] = useState(false);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(Date.now());
 
@@ -102,12 +104,23 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
       if (data.jobId) {
         console.log(`✅ [Caesar] Analysis started with job ID: ${data.jobId}`);
         setJobId(data.jobId);
+        // Store the query prompt if provided
+        if (data.query) {
+          setQueryPrompt(data.query);
+        }
       } else if (data.data) {
         // Analysis completed immediately (cached)
         console.log(`✅ [Caesar] Analysis completed (cached)`);
         setResearch(data.data);
         setStatus({ status: 'completed', progress: 100 });
         setLoading(false);
+        // Store query from cached data
+        if (data.data.rawContent) {
+          const queryMatch = data.data.rawContent.match(/=== INITIAL QUERY SENT TO CAESAR ===\n\n([\s\S]*?)\n\n=== CAESAR'S RAW RESPONSE ===/);
+          if (queryMatch) {
+            setQueryPrompt(queryMatch[1]);
+          }
+        }
       }
     } catch (err) {
       console.error(`❌ [Caesar] Failed to start analysis:`, err);
@@ -332,6 +345,25 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
             </div>
           </div>
         </div>
+
+        {/* Expandable Prompt Viewer */}
+        {queryPrompt && (
+          <details className="mt-6 bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg overflow-hidden text-left">
+            <summary className="cursor-pointer px-4 py-3 bg-bitcoin-orange-5 hover:bg-bitcoin-orange-10 transition-colors">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-bitcoin-orange" />
+                <span className="text-sm font-bold text-bitcoin-white">
+                  View Prompt Sent to Caesar (Click to expand)
+                </span>
+              </div>
+            </summary>
+            <div className="p-4 max-h-96 overflow-y-auto">
+              <pre className="text-xs text-bitcoin-white-80 font-mono whitespace-pre-wrap break-words">
+                {queryPrompt}
+              </pre>
+            </div>
+          </details>
+        )}
 
         {/* Disclaimer */}
         <div className="mt-6 text-xs text-bitcoin-white-60">

@@ -248,7 +248,10 @@ export default async function handler(
     
     // If POST, just start the job and return jobId
     if (req.method === 'POST') {
-      const { createCryptoResearch } = await import('../../../../lib/ucie/caesarClient');
+      const { createCryptoResearch, generateCryptoResearchQuery } = await import('../../../../lib/ucie/caesarClient');
+      
+      // Generate the query to return to frontend
+      const query = generateCryptoResearchQuery(normalizedSymbol, contextData);
       
       const { jobId, status } = await createCryptoResearch(
         normalizedSymbol,
@@ -262,6 +265,7 @@ export default async function handler(
         success: true,
         jobId,
         status,
+        query, // Include the query so frontend can display it
         message: 'Caesar analysis started. Poll with GET request using jobId parameter.'
       });
     }
