@@ -7,11 +7,25 @@
  * Safely extract and format price data
  */
 export function formatPrice(market: any): string {
-  const price = market?.price || market?.currentPrice || market?.priceUsd || market?.current_price;
-  if (!price) return 'N/A';
+  // Try multiple possible locations for price data
+  const price = market?.price || 
+                market?.currentPrice || 
+                market?.priceUsd || 
+                market?.current_price ||
+                market?.priceAggregation?.aggregatedPrice ||
+                market?.data?.price ||
+                market?.data?.currentPrice;
+  
+  if (!price) {
+    console.warn('⚠️ formatPrice: No price found in market data. Keys:', Object.keys(market || {}));
+    return 'N/A';
+  }
   
   const numPrice = Number(price);
-  if (isNaN(numPrice)) return 'N/A';
+  if (isNaN(numPrice)) {
+    console.warn('⚠️ formatPrice: Price is not a number:', price);
+    return 'N/A';
+  }
   
   return `$${numPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
@@ -20,8 +34,18 @@ export function formatPrice(market: any): string {
  * Safely extract and format volume data
  */
 export function formatVolume(market: any): string {
-  const volume = market?.volume24h || market?.totalVolume || market?.volume || market?.total_volume;
-  if (!volume) return 'N/A';
+  const volume = market?.volume24h || 
+                 market?.totalVolume || 
+                 market?.volume || 
+                 market?.total_volume ||
+                 market?.priceAggregation?.aggregatedVolume24h ||
+                 market?.data?.volume24h ||
+                 market?.data?.totalVolume;
+  
+  if (!volume) {
+    console.warn('⚠️ formatVolume: No volume found in market data. Keys:', Object.keys(market || {}));
+    return 'N/A';
+  }
   
   const numVolume = Number(volume);
   if (isNaN(numVolume)) return 'N/A';
@@ -33,8 +57,18 @@ export function formatVolume(market: any): string {
  * Safely extract and format market cap data
  */
 export function formatMarketCap(market: any): string {
-  const marketCap = market?.marketCap || market?.market_cap || market?.marketCapUsd || market?.market_cap_usd;
-  if (!marketCap) return 'N/A';
+  const marketCap = market?.marketCap || 
+                    market?.market_cap || 
+                    market?.marketCapUsd || 
+                    market?.market_cap_usd ||
+                    market?.priceAggregation?.aggregatedMarketCap ||
+                    market?.data?.marketCap ||
+                    market?.data?.market_cap;
+  
+  if (!marketCap) {
+    console.warn('⚠️ formatMarketCap: No market cap found in market data. Keys:', Object.keys(market || {}));
+    return 'N/A';
+  }
   
   const numMarketCap = Number(marketCap);
   if (isNaN(numMarketCap)) return 'N/A';
@@ -92,11 +126,17 @@ export function formatMentions(sentiment: any): string {
  * Safely extract and format RSI
  */
 export function formatRSI(technical: any): string {
-  const indicators = technical?.indicators;
-  if (!indicators) return 'N/A';
+  const indicators = technical?.indicators || technical?.data?.indicators;
+  if (!indicators) {
+    console.warn('⚠️ formatRSI: No indicators found in technical data. Keys:', Object.keys(technical || {}));
+    return 'N/A';
+  }
   
-  const rsi = indicators.rsi;
-  if (!rsi) return 'N/A';
+  const rsi = indicators.rsi || indicators.RSI;
+  if (!rsi) {
+    console.warn('⚠️ formatRSI: No RSI found in indicators. Keys:', Object.keys(indicators));
+    return 'N/A';
+  }
   
   // Handle different RSI formats
   if (typeof rsi === 'number') {
@@ -108,6 +148,7 @@ export function formatRSI(technical: any): string {
     return isNaN(parsed) ? 'N/A' : parsed.toFixed(2);
   }
   
+  console.warn('⚠️ formatRSI: RSI format not recognized:', typeof rsi, rsi);
   return 'N/A';
 }
 

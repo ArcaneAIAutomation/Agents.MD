@@ -204,19 +204,23 @@ export default async function handler(
       console.log(`   📊 Data Quality: ${allCachedData.openaiSummary?.dataQuality || 0}%`);
     }
     if (hasMarketData) {
-      console.log(`   💰 Market Data: Price=${allCachedData.marketData?.price}, MCap=${allCachedData.marketData?.marketCap}`);
+      // Log the ACTUAL structure to understand what we're working with
+      console.log(`   💰 Market Data STRUCTURE:`, JSON.stringify(Object.keys(allCachedData.marketData), null, 2));
+      console.log(`   💰 Market Data SAMPLE:`, JSON.stringify(allCachedData.marketData, null, 2).substring(0, 500));
     }
     if (hasSentiment) {
-      console.log(`   😊 Sentiment: Score=${allCachedData.sentiment?.overallScore}, Trend=${allCachedData.sentiment?.trend}`);
+      console.log(`   😊 Sentiment STRUCTURE:`, JSON.stringify(Object.keys(allCachedData.sentiment), null, 2));
+      console.log(`   😊 Sentiment SAMPLE:`, JSON.stringify(allCachedData.sentiment, null, 2).substring(0, 300));
     }
     if (hasTechnical) {
-      console.log(`   📈 Technical: RSI=${allCachedData.technical?.indicators?.rsi}, Trend=${allCachedData.technical?.trend?.direction}`);
+      console.log(`   📈 Technical STRUCTURE:`, JSON.stringify(Object.keys(allCachedData.technical), null, 2));
+      console.log(`   📈 Technical SAMPLE:`, JSON.stringify(allCachedData.technical, null, 2).substring(0, 300));
     }
     if (hasNews) {
       console.log(`   📰 News: ${allCachedData.news?.articles?.length || 0} articles available`);
     }
     if (hasOnChain) {
-      console.log(`   ⛓️ On-Chain: Holders=${allCachedData.onChain?.holderDistribution?.topHolders?.length || 0}, Whales=${allCachedData.onChain?.whaleActivity?.summary?.totalTransactions || 0}`);
+      console.log(`   ⛓️ On-Chain STRUCTURE:`, JSON.stringify(Object.keys(allCachedData.onChain), null, 2));
     }
     
     // ✅ FAIL IMMEDIATELY if critical data is missing
