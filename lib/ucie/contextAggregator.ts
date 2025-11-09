@@ -35,15 +35,19 @@ export interface ComprehensiveContext {
 }
 
 /**
- * Aggregate all available cached data for a symbol
+ * Aggregate all available cached data for a symbol (USER-SPECIFIC)
  * 
  * @param symbol - Token symbol (e.g., 'BTC', 'ETH')
+ * @param userId - User ID for data isolation (REQUIRED for security)
  * @returns Comprehensive context with all available data
  */
-export async function getComprehensiveContext(symbol: string): Promise<ComprehensiveContext> {
-  console.log(`📊 Aggregating context for ${symbol}...`);
+export async function getComprehensiveContext(
+  symbol: string,
+  userId?: string
+): Promise<ComprehensiveContext> {
+  console.log(`📊 Aggregating context for ${symbol} (user: ${userId || 'anonymous'})...`);
   
-  // Fetch all available cached data in parallel
+  // Fetch all available cached data in parallel (user-specific)
   const [
     marketData,
     technical,
@@ -56,16 +60,16 @@ export async function getComprehensiveContext(symbol: string): Promise<Comprehen
     derivatives,
     research
   ] = await Promise.all([
-    getCachedAnalysis(symbol, 'market-data'),
-    getCachedAnalysis(symbol, 'technical'),
-    getCachedAnalysis(symbol, 'sentiment'),
-    getCachedAnalysis(symbol, 'news'),
-    getCachedAnalysis(symbol, 'on-chain'),
-    getCachedAnalysis(symbol, 'risk'),
-    getCachedAnalysis(symbol, 'predictions'),
-    getCachedAnalysis(symbol, 'defi'),
-    getCachedAnalysis(symbol, 'derivatives'),
-    getCachedAnalysis(symbol, 'research')
+    getCachedAnalysis(symbol, 'market-data', userId),
+    getCachedAnalysis(symbol, 'technical', userId),
+    getCachedAnalysis(symbol, 'sentiment', userId),
+    getCachedAnalysis(symbol, 'news', userId),
+    getCachedAnalysis(symbol, 'on-chain', userId),
+    getCachedAnalysis(symbol, 'risk', userId),
+    getCachedAnalysis(symbol, 'predictions', userId),
+    getCachedAnalysis(symbol, 'defi', userId),
+    getCachedAnalysis(symbol, 'derivatives', userId),
+    getCachedAnalysis(symbol, 'research', userId)
   ]);
 
   // Determine which data is available
@@ -269,19 +273,23 @@ export function formatContextForAI(context: ComprehensiveContext): string {
 }
 
 /**
- * Get minimal context (for faster AI calls)
+ * Get minimal context (for faster AI calls) (USER-SPECIFIC)
  * Only includes essential data: market, technical, sentiment
  * 
  * @param symbol - Token symbol
+ * @param userId - User ID for data isolation (REQUIRED for security)
  * @returns Minimal context string
  */
-export async function getMinimalContext(symbol: string): Promise<string> {
-  console.log(`📊 Getting minimal context for ${symbol}...`);
+export async function getMinimalContext(
+  symbol: string,
+  userId?: string
+): Promise<string> {
+  console.log(`📊 Getting minimal context for ${symbol} (user: ${userId || 'anonymous'})...`);
   
   const [marketData, technical, sentiment] = await Promise.all([
-    getCachedAnalysis(symbol, 'market-data'),
-    getCachedAnalysis(symbol, 'technical'),
-    getCachedAnalysis(symbol, 'sentiment')
+    getCachedAnalysis(symbol, 'market-data', userId),
+    getCachedAnalysis(symbol, 'technical', userId),
+    getCachedAnalysis(symbol, 'sentiment', userId)
   ]);
 
   let context = `${symbol} Quick Context:\n`;

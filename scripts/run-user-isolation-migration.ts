@@ -5,9 +5,13 @@
  * for proper data isolation between users.
  */
 
+import { config } from 'dotenv';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { query } from '../lib/db';
+
+// Load environment variables
+config({ path: '.env.local' });
 
 async function runMigration() {
   console.log('🚨 Running CRITICAL User Isolation Migration...\n');
