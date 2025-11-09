@@ -23,26 +23,32 @@ export type AnalysisType =
   | 'defi';
 
 /**
- * Get cached analysis from database
+ * Get cached analysis from database (USER-SPECIFIC)
  * 
  * @param symbol - Token symbol
  * @param analysisType - Type of analysis
+ * @param userId - User ID for data isolation (REQUIRED for security)
  * @returns Cached data or null if not found/expired
  */
 export async function getCachedAnalysis(
   symbol: string,
-  analysisType: AnalysisType
+  analysisType: AnalysisType,
+  userId?: string
 ): Promise<any | null> {
   try {
+    // If no userId provided, use 'anonymous' for backward compatibility
+    // In production, userId should ALWAYS be provided
+    const effectiveUserId = userId || 'anonymous';
+    
     const result = await query(
       `SELECT data, data_quality_score, created_at, expires_at
        FROM ucie_analysis_cache
-       WHERE symbol = $1 AND analysis_type = $2 AND expires_at > NOW()`,
-      [symbol.toUpperCase(), analysisType]
+       WHERE symbol = $1 AND analysis_type = $2 AND user_id = $3 AND expires_at > NOW()`,
+      [symbol.toUpperCase(), analysisType, effectiveUserId]
     );
     
     if (result.rows.length === 0) {
-      console.log(`❌ Cache miss for ${symbol}/${analysisType}`);
+      console.log(`❌ Cache miss for ${symbol}/${analysisType} (user: ${effectiveUserId})`);
       return null;
     }
     
@@ -50,7 +56,7 @@ export async function getCachedAnalysis(
     const age = Date.now() - new Date(row.created_at).getTime();
     const ttl = new Date(row.expires_at).getTime() - Date.now();
     
-    console.log(`✅ Cache hit for ${symbol}/${analysisType} (age: ${Math.floor(age / 1000)}s, ttl: ${Math.floor(ttl / 1000)}s, quality: ${row.data_quality_score || 'N/A'})`);
+    console.log(`✅ Cache hit for ${symbol}/${analysisType} (user: ${effectiveUserId}, age: ${Math.floor(age / 1000)}s, ttl: ${Math.floor(ttl / 1000)}s, quality: ${row.data_quality_score || 'N/A'})`);
     
     return row.data;
   } catch (error) {
@@ -60,35 +66,41 @@ export async function getCachedAnalysis(
 }
 
 /**
- * Store analysis in database cache
+ * Store analysis in database cache (USER-SPECIFIC)
  * 
  * @param symbol - Token symbol
  * @param analysisType - Type of analysis
  * @param data - Analysis data to cache
  * @param ttlSeconds - Time to live in seconds (default: 24 hours)
  * @param dataQualityScore - Optional quality score (0-100)
+ * @param userId - User ID for data isolation (REQUIRED for security)
  */
 export async function setCachedAnalysis(
   symbol: string,
   analysisType: AnalysisType,
   data: any,
   ttlSeconds: number = 86400, // 24 hours default
-  dataQualityScore?: number
+  dataQualityScore?: number,
+  userId?: string
 ): Promise<void> {
   try {
+    // If no userId provided, use 'anonymous' for backward compatibility
+    // In production, userId should ALWAYS be provided
+    const effectiveUserId = userId || 'anonymous';
+    
     await query(
-      `INSERT INTO ucie_analysis_cache (symbol, analysis_type, data, data_quality_score, expires_at)
-       VALUES ($1, $2, $3, $4, NOW() + INTERVAL '${ttlSeconds} seconds')
-       ON CONFLICT (symbol, analysis_type)
+      `INSERT INTO ucie_analysis_cache (symbol, analysis_type, data, data_quality_score, user_id, expires_at)
+       VALUES ($1, $2, $3, $4, $5, NOW() + INTERVAL '${ttlSeconds} seconds')
+       ON CONFLICT (symbol, analysis_type, user_id)
        DO UPDATE SET 
          data = $3, 
          data_quality_score = $4, 
          expires_at = NOW() + INTERVAL '${ttlSeconds} seconds', 
          created_at = NOW()`,
-      [symbol.toUpperCase(), analysisType, JSON.stringify(data), dataQualityScore]
+      [symbol.toUpperCase(), analysisType, JSON.stringify(data), dataQualityScore, effectiveUserId]
     );
     
-    console.log(`💾 Cached ${symbol}/${analysisType} for ${ttlSeconds}s (quality: ${dataQualityScore || 'N/A'})`);
+    console.log(`💾 Cached ${symbol}/${analysisType} for ${ttlSeconds}s (user: ${effectiveUserId}, quality: ${dataQualityScore || 'N/A'})`);
   } catch (error) {
     console.error(`❌ Failed to cache analysis for ${symbol}/${analysisType}:`, error);
     throw error;
@@ -96,28 +108,32 @@ export async function setCachedAnalysis(
 }
 
 /**
- * Invalidate cache for a symbol
+ * Invalidate cache for a symbol (USER-SPECIFIC)
  * 
  * @param symbol - Token symbol
  * @param analysisType - Optional specific analysis type to invalidate
+ * @param userId - User ID for data isolation (REQUIRED for security)
  */
 export async function invalidateCache(
   symbol: string,
-  analysisType?: AnalysisType
+  analysisType?: AnalysisType,
+  userId?: string
 ): Promise<void> {
   try {
+    const effectiveUserId = userId || 'anonymous';
+    
     if (analysisType) {
       await query(
-        `DELETE FROM ucie_analysis_cache WHERE symbol = $1 AND analysis_type = $2`,
-        [symbol.toUpperCase(), analysisType]
+        `DELETE FROM ucie_analysis_cache WHERE symbol = $1 AND analysis_type = $2 AND user_id = $3`,
+        [symbol.toUpperCase(), analysisType, effectiveUserId]
       );
-      console.log(`🗑️ Invalidated cache for ${symbol}/${analysisType}`);
+      console.log(`🗑️ Invalidated cache for ${symbol}/${analysisType} (user: ${effectiveUserId})`);
     } else {
       await query(
-        `DELETE FROM ucie_analysis_cache WHERE symbol = $1`,
-        [symbol.toUpperCase()]
+        `DELETE FROM ucie_analysis_cache WHERE symbol = $1 AND user_id = $2`,
+        [symbol.toUpperCase(), effectiveUserId]
       );
-      console.log(`🗑️ Invalidated all cache for ${symbol}`);
+      console.log(`🗑️ Invalidated all cache for ${symbol} (user: ${effectiveUserId})`);
     }
   } catch (error) {
     console.error(`❌ Failed to invalidate cache:`, error);
