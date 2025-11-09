@@ -134,7 +134,7 @@ async function handler(
           const research = parseCaesarResearch(job, query);
           
           // Cache the results
-          await setCachedAnalysis(normalizedSymbol, 'research', research, CACHE_TTL, 100);
+          await setCachedAnalysis(normalizedSymbol, 'research', research, CACHE_TTL, 100, userId, userEmail);
           
           return res.status(200).json({
             success: true,
@@ -409,7 +409,7 @@ async function handler(
     );
 
     // Cache the results in database (24 hours)
-    await setCachedAnalysis(normalizedSymbol, 'research', researchData, CACHE_TTL, 100);
+    await setCachedAnalysis(normalizedSymbol, 'research', researchData, CACHE_TTL, 100, userId, userEmail);
 
     // Return success response
     return res.status(200).json({
