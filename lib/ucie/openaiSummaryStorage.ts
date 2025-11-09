@@ -192,11 +192,22 @@ export async function getAllCachedDataForCaesar(symbol: string): Promise<{
         sample: JSON.stringify(row.data).substring(0, 300)
       });
       
-      if (type === 'market-data') cachedData.marketData = row.data;
-      else if (type === 'sentiment') cachedData.sentiment = row.data;
-      else if (type === 'technical') cachedData.technical = row.data;
-      else if (type === 'news') cachedData.news = row.data;
-      else if (type === 'on-chain') cachedData.onChain = row.data;
+      // ✅ FIX: Data is double-nested - row.data.data contains the actual data
+      // The database stores: {"cached":false,"data":{...actual data...}}
+      // We need to extract the inner "data" property
+      const actualData = row.data?.data || row.data;
+      
+      if (type === 'market-data') cachedData.marketData = actualData;
+      else if (type === 'sentiment') cachedData.sentiment = actualData;
+      else if (type === 'technical') cachedData.technical = actualData;
+      else if (type === 'news') cachedData.news = actualData;
+      else if (type === 'on-chain') cachedData.onChain = actualData;
+      
+      console.log(`✅ Extracted ${type} data:`, {
+        hasData: !!actualData,
+        keys: Object.keys(actualData || {}),
+        sample: JSON.stringify(actualData).substring(0, 200)
+      });
     }
     
     const dataCount = Object.values(cachedData).filter(v => v !== null).length;
