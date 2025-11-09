@@ -23,7 +23,7 @@ import {
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 import { getAggregatedPhaseData } from '../../../../lib/ucie/phaseDataStorage';
 import { getAllCachedDataForCaesar } from '../../../../lib/ucie/openaiSummaryStorage';
-import { withAuth, AuthenticatedRequest } from '../../../../middleware/auth';
+import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
 /**
  * API Response Types
@@ -64,9 +64,9 @@ async function handler(
   req: AuthenticatedRequest,
   res: NextApiResponse<ApiResponse | any>
 ) {
-  // Get user info (guaranteed by withAuth middleware)
-  const userId = req.user!.id;
-  const userEmail = req.user!.email;
+  // Get user info if authenticated (for database tracking)
+  const userId = req.user?.id || 'anonymous';
+  const userEmail = req.user?.email;
   // Support both GET (check status) and POST (start analysis)
   if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({
@@ -434,8 +434,8 @@ async function handler(
   }
 }
 
-// Export with required authentication middleware
-export default withAuth(handler);
+// Export with optional authentication middleware (for user tracking)
+export default withOptionalAuth(handler);
 
 /**
  * API Configuration

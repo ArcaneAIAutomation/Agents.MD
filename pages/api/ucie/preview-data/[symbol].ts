@@ -17,7 +17,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
 import { setCachedAnalysis, getCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 import { storeOpenAISummary } from '../../../../lib/ucie/openaiSummaryStorage';
-import { withAuth, AuthenticatedRequest } from '../../../../middleware/auth';
+import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -91,9 +91,9 @@ async function handler(
   req: AuthenticatedRequest,
   res: NextApiResponse<ApiResponse>
 ) {
-  // Get user info (guaranteed by withAuth middleware)
-  const userId = req.user!.id;
-  const userEmail = req.user!.email;
+  // Get user info if authenticated (for database tracking)
+  const userId = req.user?.id || 'anonymous';
+  const userEmail = req.user?.email;
 
   if (req.method !== 'GET') {
     return res.status(405).json({
@@ -313,40 +313,35 @@ async function collectDataFromAPIs(symbol: string, req: NextApiRequest, refresh:
   const results = await Promise.allSettled([
     fetchWithTimeout(
       `${baseUrl}${EFFECTIVE_APIS.marketData.endpoint}/${symbol}${refreshParam}`,
-      EFFECTIVE_APIS.marketData.timeout,
-      req
+      EFFECTIVE_APIS.marketData.timeout
     ).catch(err => {
       console.error(`❌ Market Data failed:`, err.message);
       throw err;
     }),
     fetchWithTimeout(
       `${baseUrl}${EFFECTIVE_APIS.sentiment.endpoint}/${symbol}${refreshParam}`,
-      EFFECTIVE_APIS.sentiment.timeout,
-      req
+      EFFECTIVE_APIS.sentiment.timeout
     ).catch(err => {
       console.error(`❌ Sentiment failed:`, err.message);
       throw err;
     }),
     fetchWithTimeout(
       `${baseUrl}${EFFECTIVE_APIS.technical.endpoint}/${symbol}${refreshParam}`,
-      EFFECTIVE_APIS.technical.timeout,
-      req
+      EFFECTIVE_APIS.technical.timeout
     ).catch(err => {
       console.error(`❌ Technical failed:`, err.message);
       throw err;
     }),
     fetchWithTimeout(
       `${baseUrl}${EFFECTIVE_APIS.news.endpoint}/${symbol}${refreshParam}`,
-      EFFECTIVE_APIS.news.timeout,
-      req
+      EFFECTIVE_APIS.news.timeout
     ).catch(err => {
       console.error(`❌ News failed:`, err.message);
       throw err;
     }),
     fetchWithTimeout(
       `${baseUrl}${EFFECTIVE_APIS.onChain.endpoint}/${symbol}${refreshParam}`,
-      EFFECTIVE_APIS.onChain.timeout,
-      req
+      EFFECTIVE_APIS.onChain.timeout
     ).catch(err => {
       console.error(`❌ On-Chain failed:`, err.message);
       throw err;
@@ -375,22 +370,12 @@ async function collectDataFromAPIs(symbol: string, req: NextApiRequest, refresh:
 /**
  * Fetch with timeout
  */
-async function fetchWithTimeout(url: string, timeout: number, req: AuthenticatedRequest) {
+async function fetchWithTimeout(url: string, timeout: number) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    // Forward the authentication cookie from the original request
-    const authCookie = req.cookies.auth_token;
-    const headers: HeadersInit = {};
-    if (authCookie) {
-      headers['Cookie'] = `auth_token=${authCookie}`;
-    }
-
-    const response = await fetch(url, { 
-      signal: controller.signal,
-      headers
-    });
+    const response = await fetch(url, { signal: controller.signal });
     clearTimeout(timeoutId);
     
     if (!response.ok) {
@@ -704,5 +689,5 @@ export const config = {
 };
 
 
-// Export with required authentication middleware
-export default withAuth(handler);
+// Export with optional authentication middleware (for user tracking)
+export default withOptionalAuth(handler);
