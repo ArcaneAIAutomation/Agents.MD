@@ -1,0 +1,146 @@
+{
+  "name": "Agents.MD",
+  "version": "2.0.0",
+  "description": "AI-powered cryptocurrency analysis and trading platform",
+  "type": "nextjs-project",
+  "framework": "Next.js",
+  "language": "TypeScript",
+  "rootDir": ".",
+  "sourceDir": "pages",
+  "buildDir": ".next",
+  "configDir": ".kiro",
+  "settings": {
+    "mcp": {
+      "configFile": ".kiro/settings/mcp.json",
+      "enabled": true
+    },
+    "hooks": {
+      "directory": ".kiro/hooks",
+      "enabled": true,
+      "autoLoad": true
+    },
+    "steering": {
+      "directory": ".kiro/steering",
+      "enabled": true
+    },
+    "specs": {
+      "directory": ".kiro/specs",
+      "enabled": true
+    }
+  },
+  "scripts": {
+    "dev": "npm run dev",
+    "build": "npm run build",
+    "start": "npm run start",
+    "test": "npm run test",
+    "lint": "npm run lint"
+  },
+  "paths": {
+    "pages": "pages",
+    "api": "pages/api",
+    "components": "components",
+    "utils": "utils",
+    "styles": "styles",
+    "public": "public",
+    "scripts": "scripts",
+    "data": "data"
+  },
+  "features": {
+    "authentication": {
+      "enabled": true,
+      "provider": "custom",
+      "config": ".kiro/steering/authentication.md"
+    },
+    "database": {
+      "enabled": true,
+      "type": "postgresql",
+      "provider": "supabase"
+    },
+    "api": {
+      "enabled": true,
+      "routes": "pages/api",
+      "healthCheck": ".kiro/hooks/api-health-check.kiro.hook"
+    },
+    "deployment": {
+      "platform": "vercel",
+      "config": "vercel.json"
+    }
+  },
+  "development": {
+    "port": 3000,
+    "env": {
+      "local": ".env.local",
+      "example": ".env.example"
+    },
+    "hotReload": true,
+    "typescript": true
+  },
+  "integrations": {
+    "mcp": {
+      "servers": [
+        "filesystem",
+        "postgres",
+        "fetch",
+        "memory",
+        "sequential-thinking"
+      ]
+    },
+    "apis": {
+      "caesar": {
+        "enabled": true,
+        "envVar": "CAESAR_API_KEY"
+      },
+      "coingecko": {
+        "enabled": true,
+        "envVar": "COINGECKO_API_KEY"
+      },
+      "coinmarketcap": {
+        "enabled": true,
+        "envVar": "COINMARKETCAP_API_KEY"
+      },
+      "openai": {
+        "enabled": true,
+        "envVar": "OPENAI_API_KEY"
+      },
+      "newsapi": {
+        "enabled": true,
+        "envVar": "NEWS_API_KEY"
+      }
+    }
+  },
+  "workflows": {
+    "sync": {
+      "enabled": true,
+      "hooks": [
+        "pre-work-sync",
+        "post-work-sync",
+        "auto-commit-on-save"
+      ]
+    },
+    "deployment": {
+      "enabled": true,
+      "scripts": [
+        "deploy.ps1",
+        "sync-quick.ps1"
+      ]
+    }
+  },
+  "ide": {
+    "kiro": {
+      "version": "1.0.0",
+      "workspace": "Agents.MD.code-workspace",
+      "extensions": [
+        "ms-vscode.vscode-typescript-next",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  },
+  "metadata": {
+    "created": "2025-11-10",
+    "lastModified": "2025-11-10",
+    "author": "ArcaneAIAutomation",
+    "repository": "https://github.com/ArcaneAIAutomation/Agents.MD",
+    "license": "Private"
+  }
+}

@@ -120,13 +120,13 @@ export default function UCIEHomePage() {
             />
             <FeatureCard
               icon={<BarChart3 className="w-8 h-8" />}
-              title="15+ Technical Indicators"
-              description="RSI, MACD, Bollinger Bands, EMA, and more with AI interpretation."
+              title="Advanced Charting"
+              description="TradingView integration with 100+ indicators, drawing tools, and professional analysis."
             />
             <FeatureCard
               icon={<TrendingUp className="w-8 h-8" />}
-              title="Multi-Source Data"
-              description="Real-time data from CoinGecko, CoinMarketCap, exchanges, and more."
+              title="Real-Time WebSocket"
+              description="Live price updates from multiple exchanges with sub-second latency."
             />
             <FeatureCard
               icon={<Shield className="w-8 h-8" />}
@@ -135,36 +135,45 @@ export default function UCIEHomePage() {
             />
             <FeatureCard
               icon={<Zap className="w-8 h-8" />}
-              title="Real-Time Updates"
-              description="Live price updates, whale transactions, and breaking news alerts."
+              title="Multi-Asset Support"
+              description="100+ cryptocurrencies supported with intelligent data source selection."
             />
             <FeatureCard
               icon={<Bitcoin className="w-8 h-8" />}
-              title="Bitcoin & Ethereum"
-              description="Perfected analysis for the two most important cryptocurrencies with 95%+ data quality."
+              title="Database-Backed Cache"
+              description="Lightning-fast responses with persistent caching and 84% cost reduction."
             />
           </div>
 
-          {/* BTC & ETH Focus Banner */}
+          {/* Multi-Asset Support Banner */}
           <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-8 mb-12">
             <h3 className="text-3xl font-bold text-bitcoin-white mb-4 text-center">
-              🎯 Currently Perfecting BTC & ETH
+              🚀 Now Supporting 100+ Cryptocurrencies
             </h3>
             <p className="text-lg text-bitcoin-white-80 mb-6 text-center max-w-3xl mx-auto">
-              We're focusing on providing the absolute best data quality for Bitcoin and Ethereum 
-              before expanding to other assets. This ensures you get 95%+ quality intelligence 
-              using ALL available resources: APIs, AI, blockchain data, and more.
+              UCIE has expanded beyond BTC & ETH to support the top 100 cryptocurrencies by market cap.
+              Get comprehensive analysis for Layer 1s, Layer 2s, DeFi protocols, and more with intelligent
+              data source selection and quality scoring.
             </p>
-            <div className="flex gap-4 justify-center mb-6">
-              <div className="bg-bitcoin-orange text-bitcoin-black px-8 py-4 rounded-lg font-bold text-xl">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+              <div className="bg-bitcoin-orange text-bitcoin-black px-4 py-3 rounded-lg font-bold text-center">
                 ✓ Bitcoin (BTC)
               </div>
-              <div className="bg-bitcoin-orange text-bitcoin-black px-8 py-4 rounded-lg font-bold text-xl">
+              <div className="bg-bitcoin-orange text-bitcoin-black px-4 py-3 rounded-lg font-bold text-center">
                 ✓ Ethereum (ETH)
+              </div>
+              <div className="bg-bitcoin-orange text-bitcoin-black px-4 py-3 rounded-lg font-bold text-center">
+                ✓ Solana (SOL)
+              </div>
+              <div className="bg-bitcoin-orange text-bitcoin-black px-4 py-3 rounded-lg font-bold text-center">
+                ✓ Cardano (ADA)
+              </div>
+              <div className="bg-bitcoin-orange text-bitcoin-black px-4 py-3 rounded-lg font-bold text-center">
+                ✓ 95+ More
               </div>
             </div>
             <p className="text-bitcoin-white-60 text-center text-sm">
-              More assets coming soon after we perfect these two!
+              Premium quality for BTC & ETH (95%+), excellent coverage for top 100 assets (70%+)
             </p>
           </div>
 
