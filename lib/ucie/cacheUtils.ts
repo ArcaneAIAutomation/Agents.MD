@@ -23,12 +23,12 @@ export type AnalysisType =
   | 'defi';
 
 /**
- * Get cached analysis from database (USER-SPECIFIC)
+ * Get cached analysis from database (AUTHENTICATED USERS ONLY)
  * 
  * @param symbol - Token symbol
  * @param analysisType - Type of analysis
- * @param userId - User ID for data isolation (REQUIRED for security)
- * @param userEmail - User email for tracking (optional)
+ * @param userId - User ID (optional, for logging only)
+ * @param userEmail - User email (optional, for logging only)
  * @returns Cached data or null if not found/expired
  */
 export async function getCachedAnalysis(
@@ -38,19 +38,17 @@ export async function getCachedAnalysis(
   userEmail?: string
 ): Promise<any | null> {
   try {
-    // If no userId provided, use 'anonymous' for backward compatibility
-    // In production, userId should ALWAYS be provided
-    const effectiveUserId = userId || 'anonymous';
-    
+    // ✅ NEW: Query by symbol + analysis_type only (no user_id)
+    // Since UNIQUE constraint is now (symbol, analysis_type), there's only ONE entry
     const result = await query(
-      `SELECT data, data_quality_score, created_at, expires_at, user_email
+      `SELECT data, data_quality_score, created_at, expires_at, user_email, user_id
        FROM ucie_analysis_cache
-       WHERE symbol = $1 AND analysis_type = $2 AND user_id = $3 AND expires_at > NOW()`,
-      [symbol.toUpperCase(), analysisType, effectiveUserId]
+       WHERE symbol = $1 AND analysis_type = $2 AND expires_at > NOW()`,
+      [symbol.toUpperCase(), analysisType]
     );
     
     if (result.rows.length === 0) {
-      console.log(`❌ Cache miss for ${symbol}/${analysisType} (user: ${effectiveUserId})`);
+      console.log(`❌ Cache miss for ${symbol}/${analysisType}`);
       return null;
     }
     
@@ -58,7 +56,7 @@ export async function getCachedAnalysis(
     const age = Date.now() - new Date(row.created_at).getTime();
     const ttl = new Date(row.expires_at).getTime() - Date.now();
     
-    console.log(`✅ Cache hit for ${symbol}/${analysisType} (user: ${effectiveUserId}, age: ${Math.floor(age / 1000)}s, ttl: ${Math.floor(ttl / 1000)}s, quality: ${row.data_quality_score || 'N/A'})`);
+    console.log(`✅ Cache hit for ${symbol}/${analysisType} (stored by: ${row.user_email}, age: ${Math.floor(age / 1000)}s, ttl: ${Math.floor(ttl / 1000)}s, quality: ${row.data_quality_score || 'N/A'})`);
     
     return row.data;
   } catch (error) {
@@ -68,15 +66,15 @@ export async function getCachedAnalysis(
 }
 
 /**
- * Store analysis in database cache (USER-SPECIFIC)
+ * Store analysis in database cache (AUTHENTICATED USERS ONLY)
  * 
  * @param symbol - Token symbol
  * @param analysisType - Type of analysis
  * @param data - Analysis data to cache
  * @param ttlSeconds - Time to live in seconds (default: 24 hours)
  * @param dataQualityScore - Optional quality score (0-100)
- * @param userId - User ID for data isolation (REQUIRED for security)
- * @param userEmail - User email for tracking (optional)
+ * @param userId - User ID for tracking (REQUIRED)
+ * @param userEmail - User email (REQUIRED - authenticated users only)
  */
 export async function setCachedAnalysis(
   symbol: string,
@@ -88,27 +86,26 @@ export async function setCachedAnalysis(
   userEmail?: string
 ): Promise<void> {
   try {
-    // If no userId provided, use 'anonymous' for backward compatibility
-    // In production, userId should ALWAYS be provided
-    const effectiveUserId = userId || 'anonymous';
-    
-    // ✅ DEBUG: Log user info to verify authentication is working
-    if (userId) {
-      console.log(`🔐 Authenticated user: ${userId}${userEmail ? ` <${userEmail}>` : ''}`);
-    } else {
-      console.log(`👤 Anonymous user (no authentication)`);
+    // ✅ REQUIRE AUTHENTICATION: Only store data for authenticated users
+    if (!userEmail || !userId) {
+      console.log(`⚠️  Skipping cache for ${symbol}/${analysisType} - authentication required (user_email must be provided)`);
+      return; // Skip caching for anonymous users
     }
     
+    // ✅ DEBUG: Log authenticated user
+    console.log(`🔐 Caching for authenticated user: ${userId} <${userEmail}>`);
+    
     // ✅ UPSERT: Replace old data if it exists
-    // This ensures every query gets fresh data
+    // UNIQUE constraint is now (symbol, analysis_type) - no user_id
     await query(
       `INSERT INTO ucie_analysis_cache (
         symbol, analysis_type, data, data_quality_score, user_id, user_email, expires_at, created_at
       ) VALUES ($1, $2, $3, $4, $5, $6, NOW() + INTERVAL '${ttlSeconds} seconds', NOW())
-      ON CONFLICT (symbol, analysis_type, user_id)
+      ON CONFLICT (symbol, analysis_type)
       DO UPDATE SET
         data = EXCLUDED.data,
         data_quality_score = EXCLUDED.data_quality_score,
+        user_id = EXCLUDED.user_id,
         user_email = EXCLUDED.user_email,
         expires_at = EXCLUDED.expires_at,
         created_at = NOW()`,
@@ -117,12 +114,12 @@ export async function setCachedAnalysis(
         analysisType,
         JSON.stringify(data),
         dataQualityScore || null,
-        effectiveUserId,
-        userEmail || null
+        userId,
+        userEmail
       ]
     );
     
-    console.log(`✅ Analysis cached for ${symbol}/${analysisType} (TTL: ${ttlSeconds}s, quality: ${dataQualityScore || 'N/A'}, REPLACED old data)`);
+    console.log(`✅ Analysis cached for ${symbol}/${analysisType} (user: ${userEmail}, TTL: ${ttlSeconds}s, quality: ${dataQualityScore || 'N/A'})`);
   } catch (error) {
     console.error(`❌ Failed to cache analysis for ${symbol}/${analysisType}:`, error);
     throw error;
