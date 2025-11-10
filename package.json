@@ -34,6 +34,7 @@
     "migrate:ucie-cache": "npx tsx scripts/run-ucie-cache-migration.ts",
     "migrate:ucie": "npx tsx scripts/run-ucie-migration.ts",
     "migrate:ucie:ps1": "pwsh -File scripts/run-ucie-migration.ps1",
+    "check:env": "npx tsx scripts/check-database-env.ts",
     "setup:ucie": "npx tsx scripts/setup-ucie-database.ts",
     "setup:ucie:complete": "npx tsx scripts/setup-complete-ucie-database.ts",
     "test:ucie": "npx tsx scripts/test-ucie-database.ts",
