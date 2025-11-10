@@ -269,7 +269,20 @@ Be concise but comprehensive. Use bullet points for clarity.`
       cached: false
     };
     
-    // Cache the response
+    // Store in dedicated OpenAI analysis table (REPLACES old data)
+    const { storeOpenAIAnalysis } = await import('../../../../lib/ucie/analysisStorage');
+    await storeOpenAIAnalysis(
+      symbolUpper,
+      summaryText,
+      response.dataQuality,
+      apiStatus,
+      userId,
+      userEmail
+    );
+    
+    console.log(`✅ OpenAI analysis stored in database (replaced old data)`);
+    
+    // Also cache for quick retrieval
     await setCachedAnalysis(
       symbolUpper,
       'openai-summary',
