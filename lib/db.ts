@@ -6,6 +6,10 @@
  * for interacting with Vercel Postgres database.
  */
 
+// Load environment variables from .env.local
+import { config } from 'dotenv';
+config({ path: '.env.local' });
+
 import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg';
 
 // ============================================================================
