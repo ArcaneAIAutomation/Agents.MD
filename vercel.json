@@ -6,10 +6,22 @@
   "outputDirectory": ".next",
   "installCommand": "npm install",
   "devCommand": "npm run dev",
-  "regions": ["iad1"],
+  "regions": ["lhr1"],
   "functions": {
     "pages/api/**/*.ts": {
       "maxDuration": 30
+    },
+    "pages/api/ucie/caesar-research/**/*.ts": {
+      "maxDuration": 900
+    },
+    "pages/api/ucie/caesar-poll/**/*.ts": {
+      "maxDuration": 60
+    },
+    "pages/api/ucie/openai-summary/**/*.ts": {
+      "maxDuration": 60
+    },
+    "pages/api/ucie/gemini-summary/**/*.ts": {
+      "maxDuration": 60
     }
   },
   "crons": [

@@ -128,32 +128,6 @@ export async function setCachedAnalysis(
     throw error;
   }
 }
-    
-    // ✅ FIX: Round quality score to integer (database expects INTEGER, not FLOAT)
-    const qualityScoreInt = dataQualityScore !== undefined 
-      ? Math.round(dataQualityScore) 
-      : null;
-    
-    // ✅ FIX: Now using correct constraint with user_id after migration
-    await query(
-      `INSERT INTO ucie_analysis_cache (symbol, analysis_type, data, data_quality_score, user_id, user_email, expires_at)
-       VALUES ($1, $2, $3, $4, $5, $6, NOW() + INTERVAL '${ttlSeconds} seconds')
-       ON CONFLICT (symbol, analysis_type, user_id)
-       DO UPDATE SET 
-         data = EXCLUDED.data, 
-         data_quality_score = EXCLUDED.data_quality_score,
-         user_email = EXCLUDED.user_email,
-         expires_at = EXCLUDED.expires_at, 
-         created_at = NOW()`,
-      [symbol.toUpperCase(), analysisType, JSON.stringify(data), qualityScoreInt, effectiveUserId, userEmail || null]
-    );
-    
-    console.log(`💾 Cached ${symbol}/${analysisType} for ${ttlSeconds}s (user: ${effectiveUserId}${userEmail ? ` <${userEmail}>` : ''}, quality: ${qualityScoreInt || 'N/A'})`);
-  } catch (error) {
-    console.error(`❌ Failed to cache analysis for ${symbol}/${analysisType}:`, error);
-    throw error;
-  }
-}
 
 /**
  * Invalidate cache for a symbol (USER-SPECIFIC)
