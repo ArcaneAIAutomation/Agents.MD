@@ -12,7 +12,7 @@
       "maxDuration": 30
     },
     "pages/api/ucie/caesar-research/**/*.ts": {
-      "maxDuration": 840
+      "maxDuration": 800
     },
     "pages/api/ucie/caesar-poll/**/*.ts": {
       "maxDuration": 60
