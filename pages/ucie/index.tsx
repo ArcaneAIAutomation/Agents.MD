@@ -75,34 +75,25 @@ export default function UCIEHomePage() {
                 )}
               </button>
 
-              {/* Ethereum Button */}
+              {/* Ethereum Button - DISABLED (Under Development) */}
               <button
-                onClick={() => handleAnalyze('ETH')}
-                disabled={loading !== null}
-                className="group bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-8 transition-all hover:bg-bitcoin-orange hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[200px] flex flex-col items-center justify-center"
+                disabled
+                className="bg-bitcoin-black border-2 border-bitcoin-white-60 rounded-xl p-8 opacity-50 cursor-not-allowed min-h-[200px] flex flex-col items-center justify-center"
+                title="Ethereum analysis is under development"
               >
-                {loading === 'ETH' ? (
-                  <div className="flex flex-col items-center">
-                    <div className="w-16 h-16 border-4 border-bitcoin-orange border-t-transparent rounded-full animate-spin mb-4"></div>
-                    <p className="text-bitcoin-white text-lg font-semibold">Loading Ethereum Analysis...</p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="w-20 h-20 mb-4 text-bitcoin-orange group-hover:text-bitcoin-black transition-colors">
-                      <Coins className="w-full h-full" strokeWidth={1.5} />
-                    </div>
-                    <h3 className="text-3xl font-bold text-bitcoin-white group-hover:text-bitcoin-black mb-2 transition-colors">
-                      Ethereum
-                    </h3>
-                    <p className="text-xl font-mono text-bitcoin-orange group-hover:text-bitcoin-black mb-4 transition-colors">
-                      ETH
-                    </p>
-                    <div className="flex items-center gap-2 text-bitcoin-white-80 group-hover:text-bitcoin-black transition-colors">
-                      <span className="text-sm font-semibold">Start Analysis</span>
-                      <ArrowRight className="w-5 h-5" strokeWidth={2.5} />
-                    </div>
-                  </>
-                )}
+                <div className="w-20 h-20 mb-4 text-bitcoin-white-60">
+                  <Coins className="w-full h-full" strokeWidth={1.5} />
+                </div>
+                <h3 className="text-3xl font-bold text-bitcoin-white-60 mb-2">
+                  Ethereum
+                </h3>
+                <p className="text-xl font-mono text-bitcoin-white-60 mb-4">
+                  ETH
+                </p>
+                <div className="flex flex-col items-center gap-1 text-bitcoin-white-60">
+                  <span className="text-sm font-semibold">Start Analysis</span>
+                  <span className="text-xs">(Under Development)</span>
+                </div>
               </button>
             </div>
 
