@@ -58,19 +58,36 @@ export default function DataPreviewModal({
 
     try {
       // ✅ FORCE FRESH DATA: Always fetch fresh data when user clicks BTC/ETH
-      // This ensures Caesar AI gets the most recent data
-      const response = await fetch(`/api/ucie/preview-data/${symbol}?refresh=true`, {
-        credentials: 'include' // Required for authentication cookie
+      // Add timestamp to prevent any caching
+      const timestamp = Date.now();
+      const response = await fetch(`/api/ucie/preview-data/${symbol}?refresh=true&t=${timestamp}`, {
+        credentials: 'include', // Required for authentication cookie
+        cache: 'no-store', // Prevent browser caching
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
       const data = await response.json();
 
       if (data.success) {
         setPreview(data.data);
+        console.log('✅ Preview data loaded:', {
+          dataQuality: data.data.dataQuality,
+          sources: data.data.apiStatus.working.length,
+          timestamp: data.data.timestamp
+        });
       } else {
         setError(data.error || 'Failed to load data preview');
       }
     } catch (err) {
-      setError('Network error: Failed to fetch data preview');
+      const errorMessage = err instanceof Error ? err.message : 'Network error';
+      setError(`Failed to fetch data preview: ${errorMessage}`);
       console.error('Data preview error:', err);
     } finally {
       setLoading(false);

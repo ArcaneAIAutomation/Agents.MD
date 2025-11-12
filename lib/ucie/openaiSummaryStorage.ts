@@ -30,6 +30,7 @@ export interface OpenAISummary {
 
 /**
  * Store OpenAI summary in database
+ * ✅ UPDATED: Now stores in ucie_openai_analysis table (correct table from migration)
  */
 export async function storeOpenAISummary(
   symbol: string,
@@ -37,39 +38,41 @@ export async function storeOpenAISummary(
   dataQuality: number,
   apiStatus: OpenAISummary['apiStatus'],
   collectedDataSummary?: OpenAISummary['collectedDataSummary'],
-  ttlSeconds: number = 15 * 60 // 15 minutes default
+  ttlSeconds: number = 15 * 60, // 15 minutes default
+  userId: string = 'anonymous',
+  userEmail?: string
 ): Promise<void> {
   try {
-    const expiresAt = new Date(Date.now() + ttlSeconds * 1000);
-    
     await query(
-      `INSERT INTO ucie_openai_summary (
+      `INSERT INTO ucie_openai_analysis (
         symbol,
+        user_id,
+        user_email,
         summary_text,
-        data_quality,
+        data_quality_score,
         api_status,
-        collected_data_summary,
-        expires_at
-      ) VALUES ($1, $2, $3, $4, $5, $6)
-      ON CONFLICT (symbol)
+        ai_provider,
+        updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+      ON CONFLICT (symbol, user_id)
       DO UPDATE SET
         summary_text = EXCLUDED.summary_text,
-        data_quality = EXCLUDED.data_quality,
+        data_quality_score = EXCLUDED.data_quality_score,
         api_status = EXCLUDED.api_status,
-        collected_data_summary = EXCLUDED.collected_data_summary,
-        created_at = NOW(),
-        expires_at = EXCLUDED.expires_at`,
+        ai_provider = EXCLUDED.ai_provider,
+        updated_at = NOW()`,
       [
         symbol,
+        userId,
+        userEmail || null,
         summaryText,
         dataQuality,
         JSON.stringify(apiStatus),
-        collectedDataSummary ? JSON.stringify(collectedDataSummary) : null,
-        expiresAt
+        'openai'
       ]
     );
     
-    console.log(`✅ Stored OpenAI summary for ${symbol} in database`);
+    console.log(`✅ Stored OpenAI summary for ${symbol} in ucie_openai_analysis table`);
   } catch (error) {
     console.error('❌ Failed to store OpenAI summary:', error);
     throw error;
@@ -78,24 +81,27 @@ export async function storeOpenAISummary(
 
 /**
  * Retrieve OpenAI summary from database
+ * ✅ UPDATED: Now retrieves from ucie_openai_analysis table
  */
-export async function getOpenAISummary(symbol: string): Promise<OpenAISummary | null> {
+export async function getOpenAISummary(
+  symbol: string,
+  userId: string = 'anonymous'
+): Promise<OpenAISummary | null> {
   try {
     const result = await query(
       `SELECT 
         symbol,
         summary_text as "summaryText",
-        data_quality as "dataQuality",
+        data_quality_score as "dataQuality",
         api_status as "apiStatus",
-        collected_data_summary as "collectedDataSummary",
         created_at as "createdAt",
-        expires_at as "expiresAt"
-      FROM ucie_openai_summary
+        updated_at as "expiresAt"
+      FROM ucie_openai_analysis
       WHERE symbol = $1
-        AND expires_at > NOW()
-      ORDER BY created_at DESC
+        AND user_id = $2
+      ORDER BY updated_at DESC
       LIMIT 1`,
-      [symbol]
+      [symbol, userId]
     );
     
     if (result.rows.length === 0) {
@@ -105,14 +111,14 @@ export async function getOpenAISummary(symbol: string): Promise<OpenAISummary | 
     
     const row = result.rows[0];
     
-    console.log(`📦 Retrieved OpenAI summary for ${symbol} from database`);
+    console.log(`📦 Retrieved OpenAI summary for ${symbol} from ucie_openai_analysis table`);
     
     return {
       symbol: row.symbol,
       summaryText: row.summaryText,
       dataQuality: row.dataQuality,
       apiStatus: row.apiStatus,
-      collectedDataSummary: row.collectedDataSummary,
+      collectedDataSummary: undefined,
       createdAt: row.createdAt,
       expiresAt: row.expiresAt
     };
@@ -124,19 +130,21 @@ export async function getOpenAISummary(symbol: string): Promise<OpenAISummary | 
 
 /**
  * Delete expired OpenAI summaries
+ * ✅ UPDATED: Now cleans from ucie_openai_analysis table
+ * Note: This table doesn't have expires_at, so we clean old entries (>24 hours)
  */
 export async function cleanupExpiredSummaries(): Promise<number> {
   try {
     const result = await query(
-      `DELETE FROM ucie_openai_summary
-      WHERE expires_at < NOW()
+      `DELETE FROM ucie_openai_analysis
+      WHERE updated_at < NOW() - INTERVAL '24 hours'
       RETURNING id`
     );
     
     const deletedCount = result.rows.length;
     
     if (deletedCount > 0) {
-      console.log(`🧹 Cleaned up ${deletedCount} expired OpenAI summaries`);
+      console.log(`🧹 Cleaned up ${deletedCount} old OpenAI summaries (>24h)`);
     }
     
     return deletedCount;

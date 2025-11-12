@@ -124,15 +124,29 @@ async function handler(
 
   const normalizedSymbol = symbol.toUpperCase();
   
-  console.log(`📊 Collecting FRESH data for ${normalizedSymbol} (100% live data)...`);
+  // Check if refresh parameter is set
+  const forceRefresh = req.query.refresh === 'true';
+  
+  console.log(`📊 Collecting ${forceRefresh ? 'FRESH' : 'CACHED'} data for ${normalizedSymbol}...`);
 
   try {
-    // ✅ ALWAYS FETCH FRESH DATA (no cache check)
-    // User requirement: 100% real live API data
+    // ✅ INVALIDATE CACHE if refresh=true
+    if (forceRefresh) {
+      console.log(`🗑️ Invalidating cache for ${normalizedSymbol}...`);
+      try {
+        // Import invalidateCache function
+        const { invalidateCache } = await import('../../../../lib/ucie/cache');
+        const deleted = await invalidateCache({ symbol: normalizedSymbol });
+        console.log(`✅ Invalidated ${deleted} cache entries for ${normalizedSymbol}`);
+      } catch (err) {
+        console.warn(`⚠️ Failed to invalidate cache:`, err);
+        // Continue anyway - we'll fetch fresh data
+      }
+    }
     
     // Collect data from all effective APIs in parallel
     const startTime = Date.now();
-    const collectedData = await collectDataFromAPIs(normalizedSymbol, req, false);
+    const collectedData = await collectDataFromAPIs(normalizedSymbol, req, forceRefresh);
     const collectionTime = Date.now() - startTime;
 
     console.log(`✅ Data collection completed in ${collectionTime}ms`);
@@ -250,12 +264,46 @@ async function handler(
       console.warn(`⚠️ Failed to store ${failed} responses`);
     }
 
+    // ✅ CRITICAL: Wait 10 seconds to ensure database is fully populated
+    // This ensures OpenAI analysis has access to all stored data
+    console.log(`⏳ Waiting 10 seconds to ensure database is fully populated...`);
+    await new Promise(resolve => setTimeout(resolve, 10000));
+    console.log(`✅ Database population delay complete`);
+
+    // ✅ Generate OpenAI summary AFTER database is populated
+    console.log(`🤖 Generating OpenAI summary for ${normalizedSymbol}...`);
+    let summary = '';
+    try {
+      summary = await generateOpenAISummary(normalizedSymbol, collectedData, apiStatus);
+      console.log(`✅ OpenAI summary generated (${summary.length} chars)`);
+      
+      // Store OpenAI summary in database
+      const { storeOpenAISummary } = await import('../../../../lib/ucie/openaiSummaryStorage');
+      await storeOpenAISummary(
+        normalizedSymbol,
+        summary,
+        dataQuality,
+        apiStatus,
+        {
+          marketData: !!collectedData.marketData,
+          sentiment: !!collectedData.sentiment,
+          technical: !!collectedData.technical,
+          news: !!collectedData.news,
+          onChain: !!collectedData.onChain
+        },
+        15 * 60, // 15 minutes TTL
+        userId,
+        userEmail
+      );
+      console.log(`✅ OpenAI summary stored in ucie_openai_analysis table`);
+    } catch (error) {
+      console.error('❌ Failed to generate OpenAI summary:', error);
+      summary = generateBasicSummary(normalizedSymbol, collectedData, apiStatus);
+    }
+
     // ✅ Return data after database writes complete
     const totalTime = Date.now() - startTime;
     console.log(`⚡ Total processing time: ${totalTime}ms (collection: ${collectionTime}ms, storage: ${storageTime}ms)`);
-
-    // Generate basic summary for frontend display
-    const summary = generateBasicSummary(normalizedSymbol, collectedData, apiStatus);
 
     const responseData = {
       symbol: normalizedSymbol,
