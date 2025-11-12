@@ -157,8 +157,7 @@ export default function DataPreviewModal({
                 Your {symbol} data has been successfully collected and stored.
               </p>
               <p className="text-bitcoin-white-60 mb-6">
-                Click <strong className="text-bitcoin-orange">Continue</strong> below to proceed with Caesar AI's deep analysis. 
-                This final step will provide comprehensive insights backed by research and source citations.
+                Click <strong className="text-bitcoin-orange">View Full Data</strong> to review all collected information, or <strong className="text-bitcoin-orange">Continue</strong> to proceed with Caesar AI's deep analysis.
               </p>
               <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4 mb-6 text-left">
                 <h4 className="text-sm font-bold text-bitcoin-white mb-2 flex items-center gap-2">
@@ -192,12 +191,10 @@ export default function DataPreviewModal({
                   ← Go Back
                 </button>
                 <button
-                  disabled
-                  className="bg-transparent text-bitcoin-white-60 border-2 border-bitcoin-white-60 font-bold uppercase tracking-wider px-6 py-3 rounded-lg cursor-not-allowed opacity-50 min-h-[48px] relative"
-                  title="Feature under development"
+                  onClick={fetchDataPreview}
+                  className="bg-transparent text-bitcoin-orange border-2 border-bitcoin-orange font-bold uppercase tracking-wider px-6 py-3 rounded-lg transition-all hover:bg-bitcoin-orange hover:text-bitcoin-black hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] min-h-[48px]"
                 >
-                  <span className="block">View Full Data</span>
-                  <span className="block text-xs normal-case mt-1">(Under Development)</span>
+                  View Full Data
                 </button>
                 <button
                   onClick={fetchDataPreview}
