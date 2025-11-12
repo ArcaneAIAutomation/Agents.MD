@@ -43,6 +43,12 @@ interface DataPreview {
   timing: {
     total: number;
     collection: number;
+    storage: number;
+  };
+  databaseStatus: {
+    stored: number;
+    failed: number;
+    total: number;
   };
 }
 
@@ -140,24 +146,10 @@ async function handler(
       console.log(`❌ Failed APIs: ${apiStatus.failed.join(', ')}`);
     }
 
-    // ✅ FAST RESPONSE: Return data immediately (5-8 seconds total)
-    const totalTime = Date.now() - startTime;
-    console.log(`⚡ Returning fresh data in ${totalTime}ms`);
-
-    const responseData = {
-      symbol: normalizedSymbol,
-      timestamp: new Date().toISOString(),
-      dataQuality,
-      collectedData,
-      apiStatus,
-      timing: {
-        total: totalTime,
-        collection: collectionTime
-      }
-    };
-
-    // ✅ BACKGROUND: Store in database (non-blocking, fire-and-forget)
-    console.log(`🔥 Starting background database writes (non-blocking)...`);
+    // ✅ CRITICAL: Store in database FIRST (BLOCKING)
+    // This ensures data is available for OpenAI analysis
+    console.log(`💾 Storing API responses in Supabase database (BLOCKING)...`);
+    const storageStartTime = Date.now();
     const storagePromises = [];
 
     if (collectedData.marketData?.success) {
@@ -170,7 +162,10 @@ async function handler(
           collectedData.marketData.dataQuality || 0,
           userId,
           userEmail
-        )
+        ).catch(err => {
+          console.error('❌ Failed to store market data:', err);
+          return { status: 'failed', type: 'market-data' };
+        })
       );
     }
 
@@ -184,7 +179,10 @@ async function handler(
           collectedData.sentiment.dataQuality || 0,
           userId,
           userEmail
-        )
+        ).catch(err => {
+          console.error('❌ Failed to store sentiment:', err);
+          return { status: 'failed', type: 'sentiment' };
+        })
       );
     }
 
@@ -198,7 +196,10 @@ async function handler(
           collectedData.technical.dataQuality || 0,
           userId,
           userEmail
-        )
+        ).catch(err => {
+          console.error('❌ Failed to store technical:', err);
+          return { status: 'failed', type: 'technical' };
+        })
       );
     }
 
@@ -212,7 +213,10 @@ async function handler(
           collectedData.news.dataQuality || 0,
           userId,
           userEmail
-        )
+        ).catch(err => {
+          console.error('❌ Failed to store news:', err);
+          return { status: 'failed', type: 'news' };
+        })
       );
     }
 
@@ -226,21 +230,47 @@ async function handler(
           collectedData.onChain.dataQuality || 0,
           userId,
           userEmail
-        )
+        ).catch(err => {
+          console.error('❌ Failed to store on-chain:', err);
+          return { status: 'failed', type: 'on-chain' };
+        })
       );
     }
 
-    // Fire-and-forget: Database writes happen in background
-    Promise.allSettled(storagePromises).then(results => {
-      const successful = results.filter(r => r.status === 'fulfilled').length;
-      const failed = results.filter(r => r.status === 'rejected').length;
-      console.log(`✅ Background: Stored ${successful}/${storagePromises.length} API responses`);
-      if (failed > 0) {
-        console.warn(`⚠️ Background: Failed to store ${failed} responses`);
-      }
-    });
+    // ✅ WAIT for all database writes to complete
+    console.log(`⏳ Waiting for ${storagePromises.length} database writes...`);
+    const storageResults = await Promise.allSettled(storagePromises);
+    const successful = storageResults.filter(r => r.status === 'fulfilled').length;
+    const failed = storageResults.filter(r => r.status === 'rejected').length;
+    const storageTime = Date.now() - storageStartTime;
+    
+    console.log(`✅ Stored ${successful}/${storagePromises.length} API responses in ${storageTime}ms`);
+    if (failed > 0) {
+      console.warn(`⚠️ Failed to store ${failed} responses`);
+    }
 
-    // Return immediately with fresh data
+    // ✅ Return data after database writes complete
+    const totalTime = Date.now() - startTime;
+    console.log(`⚡ Total processing time: ${totalTime}ms (collection: ${collectionTime}ms, storage: ${storageTime}ms)`);
+
+    const responseData = {
+      symbol: normalizedSymbol,
+      timestamp: new Date().toISOString(),
+      dataQuality,
+      collectedData,
+      apiStatus,
+      timing: {
+        total: totalTime,
+        collection: collectionTime,
+        storage: storageTime
+      },
+      databaseStatus: {
+        stored: successful,
+        failed: failed,
+        total: storagePromises.length
+      }
+    };
+
     return res.status(200).json({
       success: true,
       data: responseData
