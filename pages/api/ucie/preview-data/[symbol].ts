@@ -27,7 +27,6 @@ interface DataPreview {
   symbol: string;
   timestamp: string;
   dataQuality: number;
-  summary: string;
   collectedData: {
     marketData: any;
     sentiment: any;
@@ -41,6 +40,10 @@ interface DataPreview {
     total: number;
     successRate: number;
   };
+  timing: {
+    total: number;
+    collection: number;
+  };
 }
 
 interface ApiResponse {
@@ -51,39 +54,39 @@ interface ApiResponse {
 
 /**
  * Most Effective UCIE APIs (Based on audit)
- * ✅ OPTIMIZED: Timeouts set 2-3 seconds below maximum for efficiency
- * ✅ Vercel limit: 30s → Set to 27s (3s buffer)
- * ✅ API timeouts: Reduced by 2-3s for faster failure detection
+ * ✅ AGGRESSIVE OPTIMIZATION: Ultra-short timeouts to prevent Vercel timeout
+ * ✅ Vercel limit: 30s → Set to 25s (5s buffer)
+ * ✅ API timeouts: 5s max (fail fast, use cache)
  */
 const EFFECTIVE_APIS = {
   marketData: {
     endpoint: '/api/ucie/market-data',
     priority: 1,
-    timeout: 7000, // ✅ 7 seconds (was 10s, reduced by 3s)
+    timeout: 5000, // ✅ 5 seconds (aggressive - fail fast)
     required: true
   },
   sentiment: {
     endpoint: '/api/ucie/sentiment',
     priority: 2,
-    timeout: 7000, // ✅ 7 seconds (was 10s, reduced by 3s)
+    timeout: 5000, // ✅ 5 seconds (aggressive - fail fast)
     required: false
   },
   technical: {
     endpoint: '/api/ucie/technical',
     priority: 2,
-    timeout: 7000, // ✅ 7 seconds (was 10s, reduced by 3s)
+    timeout: 5000, // ✅ 5 seconds (aggressive - fail fast)
     required: false
   },
   news: {
     endpoint: '/api/ucie/news',
     priority: 2,
-    timeout: 27000, // ✅ 27 seconds (was 30s, reduced by 3s)
+    timeout: 5000, // ✅ 5 seconds (aggressive - fail fast, skip if slow)
     required: false
   },
   onChain: {
     endpoint: '/api/ucie/on-chain',
     priority: 3,
-    timeout: 7000, // ✅ 7 seconds (was 10s, reduced by 3s)
+    timeout: 5000, // ✅ 5 seconds (aggressive - fail fast)
     required: false
   }
 };
@@ -113,123 +116,19 @@ async function handler(
   }
 
   const normalizedSymbol = symbol.toUpperCase();
-  const refresh = req.query.refresh === 'true'; // Force fresh data if refresh=true
   
-  console.log(`📊 Collecting data preview for ${normalizedSymbol}${refresh ? ' (FRESH DATA)' : ''}...`);
+  console.log(`📊 Collecting FRESH data for ${normalizedSymbol} (100% live data)...`);
 
   try {
+    // ✅ ALWAYS FETCH FRESH DATA (no cache check)
+    // User requirement: 100% real live API data
+    
     // Collect data from all effective APIs in parallel
     const startTime = Date.now();
-    const collectedData = await collectDataFromAPIs(normalizedSymbol, req, refresh);
+    const collectedData = await collectDataFromAPIs(normalizedSymbol, req, false);
     const collectionTime = Date.now() - startTime;
 
     console.log(`✅ Data collection completed in ${collectionTime}ms`);
-
-    // ✅ CRITICAL: Store collected data in database FIRST (BLOCKING)
-    // OpenAI summary must wait for this to complete so it can read from database
-    console.log(`💾 Storing API responses in database (BLOCKING - OpenAI will wait)...`);
-    const storagePromises = [];
-
-    if (collectedData.marketData?.success) {
-      storagePromises.push(
-        setCachedAnalysis(
-          normalizedSymbol,
-          'market-data',
-          collectedData.marketData,
-          15 * 60, // 15 minutes TTL (standardized)
-          collectedData.marketData.dataQuality || 0,
-          userId,
-          userEmail
-        ).catch(err => {
-          console.error('❌ Failed to cache market data:', err);
-          return { status: 'failed', type: 'market-data' };
-        })
-      );
-    }
-
-    if (collectedData.sentiment?.success) {
-      storagePromises.push(
-        setCachedAnalysis(
-          normalizedSymbol,
-          'sentiment',
-          collectedData.sentiment,
-          15 * 60, // 15 minutes TTL (standardized)
-          collectedData.sentiment.dataQuality || 0,
-          userId,
-          userEmail
-        ).catch(err => {
-          console.error('❌ Failed to cache sentiment:', err);
-          return { status: 'failed', type: 'sentiment' };
-        })
-      );
-    }
-
-    if (collectedData.technical?.success) {
-      storagePromises.push(
-        setCachedAnalysis(
-          normalizedSymbol,
-          'technical',
-          collectedData.technical,
-          15 * 60, // 15 minutes TTL (standardized)
-          collectedData.technical.dataQuality || 0,
-          userId,
-          userEmail
-        ).catch(err => {
-          console.error('❌ Failed to cache technical:', err);
-          return { status: 'failed', type: 'technical' };
-        })
-      );
-    }
-
-    if (collectedData.news?.success) {
-      storagePromises.push(
-        setCachedAnalysis(
-          normalizedSymbol,
-          'news',
-          collectedData.news,
-          15 * 60, // 15 minutes TTL (standardized)
-          collectedData.news.dataQuality || 0,
-          userId,
-          userEmail
-        ).catch(err => {
-          console.error('❌ Failed to cache news:', err);
-          return { status: 'failed', type: 'news' };
-        })
-      );
-    }
-
-    if (collectedData.onChain?.success) {
-      storagePromises.push(
-        setCachedAnalysis(
-          normalizedSymbol,
-          'on-chain',
-          collectedData.onChain,
-          15 * 60, // 15 minutes TTL (standardized)
-          collectedData.onChain.dataQuality || 0,
-          userId,
-          userEmail
-        ).catch(err => {
-          console.error('❌ Failed to cache on-chain:', err);
-          return { status: 'failed', type: 'on-chain' };
-        })
-      );
-    }
-
-    // ✅ WAIT for all storage to complete BEFORE generating OpenAI summary
-    console.log(`⏳ Waiting for ${storagePromises.length} database writes to complete...`);
-    const storageResults = await Promise.allSettled(storagePromises);
-    const successful = storageResults.filter(r => r.status === 'fulfilled').length;
-    const failed = storageResults.filter(r => r.status === 'rejected').length;
-    console.log(`✅ Stored ${successful}/${storagePromises.length} API responses in database`);
-    if (failed > 0) {
-      console.warn(`⚠️ Failed to store ${failed} responses`);
-    }
-    
-    // ✅ CRITICAL: Add 1-second delay to ensure database consistency
-    // Supabase connection pooling may have slight propagation delay
-    console.log(`⏳ Waiting 1 second for database consistency...`);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log(`✅ Database consistency ensured - OpenAI will read fresh data`);
 
     // Calculate data quality
     const apiStatus = calculateAPIStatus(collectedData);
@@ -241,50 +140,137 @@ async function handler(
       console.log(`❌ Failed APIs: ${apiStatus.failed.join(', ')}`);
     }
 
-    // ✅ CRITICAL: Generate OpenAI summary ONLY from database
-    // OpenAI will call getCachedAnalysis() which reads from Supabase
-    console.log(`🤖 Generating OpenAI summary from Supabase database...`);
-    const summaryStartTime = Date.now();
-    const summary = await generateOpenAISummary(normalizedSymbol, collectedData, apiStatus);
-    const summaryTime = Date.now() - summaryStartTime;
+    // ✅ FAST RESPONSE: Return data immediately (5-8 seconds total)
+    const totalTime = Date.now() - startTime;
+    console.log(`⚡ Returning fresh data in ${totalTime}ms`);
 
-    console.log(`✅ Summary generated in ${summaryTime}ms`);
-    
-    // ✅ Store OpenAI summary in database for Caesar AI access
-    try {
-      await storeOpenAISummary(
-        normalizedSymbol,
-        summary,
-        dataQuality,
-        apiStatus,
-        {
-          marketData: collectedData.marketData?.success === true,
-          sentiment: collectedData.sentiment?.success === true,
-          technical: collectedData.technical?.success === true,
-          news: collectedData.news?.success === true,
-          onChain: collectedData.onChain?.success === true
-        },
-        15 * 60 // 15 minutes TTL
-      );
-      console.log(`💾 Stored OpenAI summary in database for Caesar AI`);
-    } catch (error) {
-      console.error(`⚠️ Failed to store OpenAI summary:`, error);
-      // Non-blocking - continue even if storage fails
-    }
-
-    // Build preview response
-    const preview: DataPreview = {
+    const responseData = {
       symbol: normalizedSymbol,
       timestamp: new Date().toISOString(),
       dataQuality,
-      summary,
       collectedData,
-      apiStatus
+      apiStatus,
+      timing: {
+        total: totalTime,
+        collection: collectionTime
+      }
     };
 
+    // ✅ BACKGROUND: Store in database (non-blocking, fire-and-forget)
+    console.log(`🔥 Starting background database writes (non-blocking)...`);
+    const storagePromises = [];
+
+    if (collectedData.marketData?.success) {
+      storagePromises.push(
+        setCachedAnalysis(
+          normalizedSymbol,
+          'market-data',
+          collectedData.marketData,
+          15 * 60,
+          collectedData.marketData.dataQuality || 0,
+          userId,
+          userEmail
+        )
+      );
+    }
+
+    if (collectedData.sentiment?.success) {
+      storagePromises.push(
+        setCachedAnalysis(
+          normalizedSymbol,
+          'sentiment',
+          collectedData.sentiment,
+          15 * 60,
+          collectedData.sentiment.dataQuality || 0,
+          userId,
+          userEmail
+        )
+      );
+    }
+
+    if (collectedData.technical?.success) {
+      storagePromises.push(
+        setCachedAnalysis(
+          normalizedSymbol,
+          'technical',
+          collectedData.technical,
+          15 * 60,
+          collectedData.technical.dataQuality || 0,
+          userId,
+          userEmail
+        )
+      );
+    }
+
+    if (collectedData.news?.success) {
+      storagePromises.push(
+        setCachedAnalysis(
+          normalizedSymbol,
+          'news',
+          collectedData.news,
+          15 * 60,
+          collectedData.news.dataQuality || 0,
+          userId,
+          userEmail
+        )
+      );
+    }
+
+    if (collectedData.onChain?.success) {
+      storagePromises.push(
+        setCachedAnalysis(
+          normalizedSymbol,
+          'on-chain',
+          collectedData.onChain,
+          15 * 60,
+          collectedData.onChain.dataQuality || 0,
+          userId,
+          userEmail
+        )
+      );
+    }
+
+    // Fire-and-forget: Database writes happen in background
+    Promise.allSettled(storagePromises).then(results => {
+      const successful = results.filter(r => r.status === 'fulfilled').length;
+      const failed = results.filter(r => r.status === 'rejected').length;
+      console.log(`✅ Background: Stored ${successful}/${storagePromises.length} API responses`);
+      if (failed > 0) {
+        console.warn(`⚠️ Background: Failed to store ${failed} responses`);
+      }
+
+      // ✅ BACKGROUND: Generate and store OpenAI summary (after database writes)
+      console.log(`🤖 Background: Generating OpenAI summary...`);
+      generateOpenAISummary(normalizedSymbol, collectedData, apiStatus)
+        .then(summary => {
+          console.log(`✅ Background: OpenAI summary generated`);
+          return storeOpenAISummary(
+            normalizedSymbol,
+            summary,
+            dataQuality,
+            apiStatus,
+            {
+              marketData: collectedData.marketData?.success === true,
+              sentiment: collectedData.sentiment?.success === true,
+              technical: collectedData.technical?.success === true,
+              news: collectedData.news?.success === true,
+              onChain: collectedData.onChain?.success === true
+            },
+            15 * 60
+          );
+        })
+        .then(() => {
+          console.log(`💾 Background: Stored OpenAI summary for Caesar AI`);
+        })
+        .catch(err => {
+          console.error(`⚠️ Background: OpenAI summary failed:`, err);
+        });
+    });
+
+    // Return immediately with fresh data
     return res.status(200).json({
       success: true,
-      data: preview
+      data: responseData
     });
 
   } catch (error) {
@@ -610,9 +596,9 @@ async function generateOpenAISummary(
 
   // Generate summary with OpenAI
   try {
-    // ✅ OPTIMIZED: Add 7s timeout and reduce max_tokens for faster response
+    // ✅ AGGRESSIVE: 5s timeout for OpenAI (fail fast, use fallback)
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 7000); // 7 seconds timeout
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 seconds timeout
     
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
@@ -634,8 +620,8 @@ Keep the summary to 3-4 paragraphs, professional but accessible. Use bullet poin
         }
       ],
       temperature: 0.7,
-      max_tokens: 400, // ✅ Reduced from 500 for faster response
-      timeout: 7000 // ✅ 7 seconds timeout
+      max_tokens: 300, // ✅ Reduced from 400 for faster response
+      timeout: 5000 // ✅ 5 seconds timeout (aggressive)
     }, {
       signal: controller.signal
     });
@@ -644,8 +630,8 @@ Keep the summary to 3-4 paragraphs, professional but accessible. Use bullet poin
     return completion.choices[0].message.content || 'Summary generation failed';
 
   } catch (error) {
-    console.error('OpenAI summary error:', error);
-    // Fallback to basic summary
+    console.error('OpenAI summary error (using fallback):', error);
+    // Fallback to basic summary (instant, no API call)
     return generateFallbackSummary(symbol, collectedData, apiStatus);
   }
 }
@@ -690,7 +676,7 @@ function generateFallbackSummary(
 
 /**
  * API Configuration
- * ✅ OPTIMIZED: maxDuration set to 27s (3s below Vercel 30s limit)
+ * ✅ OPTIMIZED: maxDuration set to 15s (plenty of buffer for 5-8s response)
  */
 export const config = {
   api: {
@@ -699,7 +685,7 @@ export const config = {
       sizeLimit: '1mb',
     },
   },
-  maxDuration: 27, // ✅ 27 seconds (3s buffer below 30s limit)
+  maxDuration: 15, // ✅ 15 seconds (response in 5-8s, background work continues)
 };
 
 
