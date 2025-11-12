@@ -16,8 +16,8 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
-import { getCachedAnalysis, setCachedAnalysis, AnalysisType } from '../../../../lib/ucie/cacheUtils';
-import { storeOpenAISummary } from '../../../../lib/ucie/openaiSummaryStorage';
+import { getCachedAnalysis, AnalysisType } from '../../../../lib/ucie/cacheUtils';
+import { query } from '../../../../lib/db';
 import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
 const openai = new OpenAI({
@@ -77,41 +77,67 @@ async function handler(
   try {
     const startTime = Date.now();
 
-    // ✅ STEP 1: Check if analysis already exists (< 15 minutes old)
-    const existingAnalysis = await getCachedAnalysis(
-      normalizedSymbol,
-      'openai-analysis' as AnalysisType,
-      userId,
-      userEmail,
-      15 * 60 // 15 minutes TTL
+    // ✅ STEP 1: Check if analysis already exists in ucie_openai_analysis table (< 30 minutes old)
+    const existingResult = await query(
+      `SELECT 
+        summary_text,
+        data_quality_score,
+        api_status,
+        created_at
+      FROM ucie_openai_analysis
+      WHERE symbol = $1 AND user_id = $2
+        AND created_at > NOW() - INTERVAL '30 minutes'
+      ORDER BY created_at DESC
+      LIMIT 1`,
+      [normalizedSymbol, userId]
     );
 
-    if (existingAnalysis) {
-      console.log(`✅ Returning cached OpenAI analysis (< 15 min old)`);
+    if (existingResult.rows.length > 0) {
+      const existing = existingResult.rows[0];
+      const age = Math.floor((Date.now() - new Date(existing.created_at).getTime()) / 1000);
+      console.log(`✅ Returning cached OpenAI analysis (${age}s old)`);
+      
       return res.status(200).json({
         success: true,
         data: {
           symbol: normalizedSymbol,
-          timestamp: existingAnalysis.timestamp || new Date().toISOString(),
-          analysis: existingAnalysis.analysis || existingAnalysis.summary,
-          dataQuality: existingAnalysis.dataQuality || 0,
-          dataAvailability: existingAnalysis.dataAvailability || {},
+          timestamp: existing.created_at,
+          analysis: existing.summary_text,
+          dataQuality: existing.data_quality_score || 0,
+          dataAvailability: existing.api_status || {},
           timing: {
             total: 0,
             generation: 0
-          }
+          },
+          cached: true
         }
       });
     }
 
-    // ✅ STEP 2: Read all data from database
-    console.log(`📦 Reading data from Supabase database...`);
-    const [marketData, sentimentData, technicalData, newsData, onChainData] = await Promise.all([
+    // ✅ STEP 2: Read ALL analysis_type data from Supabase database
+    console.log(`📦 Reading ALL data from Supabase database...`);
+    
+    // Fetch all possible analysis types
+    const [
+      marketData,
+      sentimentData,
+      technicalData,
+      newsData,
+      onChainData,
+      predictionsData,
+      riskData,
+      derivativesData,
+      defiData
+    ] = await Promise.all([
       getCachedAnalysis(normalizedSymbol, 'market-data'),
       getCachedAnalysis(normalizedSymbol, 'sentiment'),
       getCachedAnalysis(normalizedSymbol, 'technical'),
       getCachedAnalysis(normalizedSymbol, 'news'),
-      getCachedAnalysis(normalizedSymbol, 'on-chain')
+      getCachedAnalysis(normalizedSymbol, 'on-chain'),
+      getCachedAnalysis(normalizedSymbol, 'predictions'),
+      getCachedAnalysis(normalizedSymbol, 'risk'),
+      getCachedAnalysis(normalizedSymbol, 'derivatives'),
+      getCachedAnalysis(normalizedSymbol, 'defi')
     ]);
 
     // Log what we retrieved
@@ -120,7 +146,11 @@ async function handler(
       sentiment: !!sentimentData?.success,
       technical: !!technicalData?.success,
       news: !!newsData?.success,
-      onChain: !!onChainData?.success
+      onChain: !!onChainData?.success,
+      predictions: !!predictionsData?.success,
+      risk: !!riskData?.success,
+      derivatives: !!derivativesData?.success,
+      defi: !!defiData?.success
     };
 
     console.log(`📦 Database retrieval results:`);
@@ -129,10 +159,15 @@ async function handler(
     console.log(`   Technical: ${dataAvailability.technical ? '✅' : '❌'}`);
     console.log(`   News: ${dataAvailability.news ? '✅' : '❌'}`);
     console.log(`   On-Chain: ${dataAvailability.onChain ? '✅' : '❌'}`);
+    console.log(`   Predictions: ${dataAvailability.predictions ? '✅' : '❌'}`);
+    console.log(`   Risk: ${dataAvailability.risk ? '✅' : '❌'}`);
+    console.log(`   Derivatives: ${dataAvailability.derivatives ? '✅' : '❌'}`);
+    console.log(`   DeFi: ${dataAvailability.defi ? '✅' : '❌'}`);
 
     // Calculate data quality
     const availableCount = Object.values(dataAvailability).filter(Boolean).length;
-    const dataQuality = Math.round((availableCount / 5) * 100);
+    const totalTypes = Object.keys(dataAvailability).length;
+    const dataQuality = Math.round((availableCount / totalTypes) * 100);
 
     if (dataQuality < 40) {
       return res.status(400).json({
@@ -141,14 +176,20 @@ async function handler(
       });
     }
 
-    // ✅ STEP 3: Build context from database data
+    // ✅ STEP 3: Build comprehensive context from ALL database data
     const context = buildAnalysisContext(
       normalizedSymbol,
-      marketData,
-      sentimentData,
-      technicalData,
-      newsData,
-      onChainData,
+      {
+        marketData,
+        sentimentData,
+        technicalData,
+        newsData,
+        onChainData,
+        predictionsData,
+        riskData,
+        derivativesData,
+        defiData
+      },
       dataQuality
     );
 
@@ -217,8 +258,8 @@ Be professional, data-driven, and actionable. Use bullet points for clarity.`
     
     console.log(`✅ OpenAI analysis generated in ${generationTime}ms`);
 
-    // ✅ STEP 5: Store analysis in database
-    console.log(`💾 Storing OpenAI analysis in database...`);
+    // ✅ STEP 5: Store analysis in ucie_openai_analysis table
+    console.log(`💾 Storing OpenAI analysis in ucie_openai_analysis table...`);
     
     const analysisData = {
       symbol: normalizedSymbol,
@@ -232,33 +273,43 @@ Be professional, data-driven, and actionable. Use bullet points for clarity.`
       }
     };
 
-    // Store in ucie_analysis_cache as 'openai-analysis' type
-    await setCachedAnalysis(
-      normalizedSymbol,
-      'openai-analysis' as AnalysisType,
-      analysisData,
-      15 * 60, // 15 minutes TTL
-      dataQuality,
-      userId,
-      userEmail
+    // Store in ucie_openai_analysis table (dedicated table for OpenAI analysis)
+    await query(
+      `INSERT INTO ucie_openai_analysis (
+        symbol,
+        user_id,
+        user_email,
+        summary_text,
+        data_quality_score,
+        api_status,
+        ai_provider,
+        created_at,
+        updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
+      ON CONFLICT (symbol, user_id)
+      DO UPDATE SET
+        summary_text = EXCLUDED.summary_text,
+        data_quality_score = EXCLUDED.data_quality_score,
+        api_status = EXCLUDED.api_status,
+        ai_provider = EXCLUDED.ai_provider,
+        updated_at = NOW()`,
+      [
+        normalizedSymbol,
+        userId,
+        userEmail || null,
+        analysis,
+        dataQuality,
+        JSON.stringify({
+          working: Object.keys(dataAvailability).filter(k => dataAvailability[k as keyof typeof dataAvailability]),
+          failed: Object.keys(dataAvailability).filter(k => !dataAvailability[k as keyof typeof dataAvailability]),
+          total: Object.keys(dataAvailability).length,
+          successRate: dataQuality
+        }),
+        'openai'
+      ]
     );
 
-    // Also store using legacy storeOpenAISummary for Caesar AI compatibility
-    await storeOpenAISummary(
-      normalizedSymbol,
-      analysis,
-      dataQuality,
-      {
-        working: Object.keys(dataAvailability).filter(k => dataAvailability[k as keyof typeof dataAvailability]),
-        failed: Object.keys(dataAvailability).filter(k => !dataAvailability[k as keyof typeof dataAvailability]),
-        total: 5,
-        successRate: dataQuality
-      },
-      dataAvailability,
-      15 * 60
-    );
-
-    console.log(`✅ OpenAI analysis stored in database`);
+    console.log(`✅ OpenAI analysis stored in ucie_openai_analysis table`);
 
     // ✅ STEP 6: Return analysis
     const totalTime = Date.now() - startTime;
@@ -279,17 +330,34 @@ Be professional, data-driven, and actionable. Use bullet points for clarity.`
 }
 
 /**
- * Build analysis context from database data
+ * Build comprehensive analysis context from ALL database data
  */
 function buildAnalysisContext(
   symbol: string,
-  marketData: any,
-  sentimentData: any,
-  technicalData: any,
-  newsData: any,
-  onChainData: any,
+  allData: {
+    marketData: any;
+    sentimentData: any;
+    technicalData: any;
+    newsData: any;
+    onChainData: any;
+    predictionsData: any;
+    riskData: any;
+    derivativesData: any;
+    defiData: any;
+  },
   dataQuality: number
 ): string {
+  const {
+    marketData,
+    sentimentData,
+    technicalData,
+    newsData,
+    onChainData,
+    predictionsData,
+    riskData,
+    derivativesData,
+    defiData
+  } = allData;
   let context = `Cryptocurrency: ${symbol}\n`;
   context += `Data Quality: ${dataQuality}%\n`;
   context += `Analysis Timestamp: ${new Date().toISOString()}\n\n`;
@@ -403,6 +471,75 @@ function buildAnalysisContext(
     
     if (onChainData.dataQuality) {
       context += `On-Chain Data Quality: ${onChainData.dataQuality}%\n`;
+    }
+    context += `\n`;
+  }
+
+  // Predictions Data
+  if (predictionsData?.success && predictionsData?.predictions) {
+    context += `=== PRICE PREDICTIONS ===\n`;
+    const predictions = predictionsData.predictions;
+    if (predictions.shortTerm) {
+      context += `Short Term (7 days): ${predictions.shortTerm.prediction || 'N/A'}\n`;
+      context += `  Confidence: ${predictions.shortTerm.confidence || 'N/A'}%\n`;
+    }
+    if (predictions.mediumTerm) {
+      context += `Medium Term (30 days): ${predictions.mediumTerm.prediction || 'N/A'}\n`;
+      context += `  Confidence: ${predictions.mediumTerm.confidence || 'N/A'}%\n`;
+    }
+    if (predictions.longTerm) {
+      context += `Long Term (90 days): ${predictions.longTerm.prediction || 'N/A'}\n`;
+      context += `  Confidence: ${predictions.longTerm.confidence || 'N/A'}%\n`;
+    }
+    context += `\n`;
+  }
+
+  // Risk Assessment Data
+  if (riskData?.success && riskData?.risk) {
+    context += `=== RISK ASSESSMENT ===\n`;
+    const risk = riskData.risk;
+    context += `Overall Risk Score: ${risk.overallScore || 'N/A'}/100\n`;
+    context += `Risk Level: ${risk.level || 'N/A'}\n`;
+    if (risk.factors) {
+      context += `Risk Factors:\n`;
+      Object.entries(risk.factors).forEach(([factor, score]) => {
+        context += `  - ${factor}: ${score}/100\n`;
+      });
+    }
+    context += `\n`;
+  }
+
+  // Derivatives Data
+  if (derivativesData?.success && derivativesData?.derivatives) {
+    context += `=== DERIVATIVES MARKET ===\n`;
+    const derivatives = derivativesData.derivatives;
+    if (derivatives.openInterest) {
+      context += `Open Interest: $${derivatives.openInterest.toLocaleString() || 'N/A'}\n`;
+    }
+    if (derivatives.fundingRate) {
+      context += `Funding Rate: ${derivatives.fundingRate}%\n`;
+    }
+    if (derivatives.longShortRatio) {
+      context += `Long/Short Ratio: ${derivatives.longShortRatio}\n`;
+    }
+    context += `\n`;
+  }
+
+  // DeFi Data
+  if (defiData?.success && defiData?.defi) {
+    context += `=== DEFI METRICS ===\n`;
+    const defi = defiData.defi;
+    if (defi.tvl) {
+      context += `Total Value Locked: $${(defi.tvl / 1e9).toFixed(2)}B\n`;
+    }
+    if (defi.protocols) {
+      context += `Active Protocols: ${defi.protocols.length}\n`;
+      if (defi.protocols.length > 0) {
+        context += `Top Protocols:\n`;
+        defi.protocols.slice(0, 5).forEach((protocol: any) => {
+          context += `  - ${protocol.name}: $${(protocol.tvl / 1e9).toFixed(2)}B\n`;
+        });
+      }
     }
     context += `\n`;
   }
