@@ -51,38 +51,39 @@ interface ApiResponse {
 
 /**
  * Most Effective UCIE APIs (Based on audit)
- * ✅ FIX #2: Increased timeouts to reduce timeout failures
- * ✅ FIX #6: Increased News timeout to 30 seconds (OpenAI processing takes time)
+ * ✅ OPTIMIZED: Timeouts set 2-3 seconds below maximum for efficiency
+ * ✅ Vercel limit: 30s → Set to 27s (3s buffer)
+ * ✅ API timeouts: Reduced by 2-3s for faster failure detection
  */
 const EFFECTIVE_APIS = {
   marketData: {
     endpoint: '/api/ucie/market-data',
     priority: 1,
-    timeout: 10000, // 10 seconds
+    timeout: 7000, // ✅ 7 seconds (was 10s, reduced by 3s)
     required: true
   },
   sentiment: {
     endpoint: '/api/ucie/sentiment',
     priority: 2,
-    timeout: 10000, // 10 seconds
+    timeout: 7000, // ✅ 7 seconds (was 10s, reduced by 3s)
     required: false
   },
   technical: {
     endpoint: '/api/ucie/technical',
     priority: 2,
-    timeout: 10000, // 10 seconds
+    timeout: 7000, // ✅ 7 seconds (was 10s, reduced by 3s)
     required: false
   },
   news: {
     endpoint: '/api/ucie/news',
     priority: 2,
-    timeout: 30000, // ✅ 30 seconds (OpenAI batch processing)
+    timeout: 27000, // ✅ 27 seconds (was 30s, reduced by 3s)
     required: false
   },
   onChain: {
     endpoint: '/api/ucie/on-chain',
     priority: 3,
-    timeout: 10000, // 10 seconds
+    timeout: 7000, // ✅ 7 seconds (was 10s, reduced by 3s)
     required: false
   }
 };
@@ -605,6 +606,10 @@ async function generateOpenAISummary(
 
   // Generate summary with OpenAI
   try {
+    // ✅ OPTIMIZED: Add 7s timeout and reduce max_tokens for faster response
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7000); // 7 seconds timeout
+    
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
@@ -625,9 +630,13 @@ Keep the summary to 3-4 paragraphs, professional but accessible. Use bullet poin
         }
       ],
       temperature: 0.7,
-      max_tokens: 500
+      max_tokens: 400, // ✅ Reduced from 500 for faster response
+      timeout: 7000 // ✅ 7 seconds timeout
+    }, {
+      signal: controller.signal
     });
 
+    clearTimeout(timeoutId);
     return completion.choices[0].message.content || 'Summary generation failed';
 
   } catch (error) {
@@ -677,6 +686,7 @@ function generateFallbackSummary(
 
 /**
  * API Configuration
+ * ✅ OPTIMIZED: maxDuration set to 27s (3s below Vercel 30s limit)
  */
 export const config = {
   api: {
@@ -685,7 +695,7 @@ export const config = {
       sizeLimit: '1mb',
     },
   },
-  maxDuration: 30, // 30 seconds for data collection and summarization
+  maxDuration: 27, // ✅ 27 seconds (3s buffer below 30s limit)
 };
 
 
