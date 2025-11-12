@@ -54,39 +54,39 @@ interface ApiResponse {
 
 /**
  * Most Effective UCIE APIs (Based on audit)
- * ✅ AGGRESSIVE OPTIMIZATION: Ultra-short timeouts to prevent Vercel timeout
- * ✅ Vercel limit: 30s → Set to 25s (5s buffer)
- * ✅ API timeouts: 5s max (fail fast, use cache)
+ * ✅ REALISTIC TIMEOUTS: Database API fetching can take up to 25 seconds
+ * ✅ Vercel limit: 30s → Set maxDuration to 28s (2s buffer)
+ * ✅ API timeouts: 25s max (allow full database fetch time)
  */
 const EFFECTIVE_APIS = {
   marketData: {
     endpoint: '/api/ucie/market-data',
     priority: 1,
-    timeout: 5000, // ✅ 5 seconds (aggressive - fail fast)
+    timeout: 25000, // ✅ 25 seconds (realistic for database fetching)
     required: true
   },
   sentiment: {
     endpoint: '/api/ucie/sentiment',
     priority: 2,
-    timeout: 5000, // ✅ 5 seconds (aggressive - fail fast)
+    timeout: 25000, // ✅ 25 seconds (realistic for database fetching)
     required: false
   },
   technical: {
     endpoint: '/api/ucie/technical',
     priority: 2,
-    timeout: 5000, // ✅ 5 seconds (aggressive - fail fast)
+    timeout: 25000, // ✅ 25 seconds (realistic for database fetching)
     required: false
   },
   news: {
     endpoint: '/api/ucie/news',
     priority: 2,
-    timeout: 5000, // ✅ 5 seconds (aggressive - fail fast, skip if slow)
+    timeout: 25000, // ✅ 25 seconds (realistic for database fetching)
     required: false
   },
   onChain: {
     endpoint: '/api/ucie/on-chain',
     priority: 3,
-    timeout: 5000, // ✅ 5 seconds (aggressive - fail fast)
+    timeout: 25000, // ✅ 25 seconds (realistic for database fetching)
     required: false
   }
 };
@@ -238,33 +238,6 @@ async function handler(
       if (failed > 0) {
         console.warn(`⚠️ Background: Failed to store ${failed} responses`);
       }
-
-      // ✅ BACKGROUND: Generate and store OpenAI summary (after database writes)
-      console.log(`🤖 Background: Generating OpenAI summary...`);
-      generateOpenAISummary(normalizedSymbol, collectedData, apiStatus)
-        .then(summary => {
-          console.log(`✅ Background: OpenAI summary generated`);
-          return storeOpenAISummary(
-            normalizedSymbol,
-            summary,
-            dataQuality,
-            apiStatus,
-            {
-              marketData: collectedData.marketData?.success === true,
-              sentiment: collectedData.sentiment?.success === true,
-              technical: collectedData.technical?.success === true,
-              news: collectedData.news?.success === true,
-              onChain: collectedData.onChain?.success === true
-            },
-            15 * 60
-          );
-        })
-        .then(() => {
-          console.log(`💾 Background: Stored OpenAI summary for Caesar AI`);
-        })
-        .catch(err => {
-          console.error(`⚠️ Background: OpenAI summary failed:`, err);
-        });
     });
 
     // Return immediately with fresh data
@@ -676,7 +649,8 @@ function generateFallbackSummary(
 
 /**
  * API Configuration
- * ✅ OPTIMIZED: maxDuration set to 15s (plenty of buffer for 5-8s response)
+ * ✅ REALISTIC: maxDuration set to 28s (2s buffer below 30s Vercel limit)
+ * Database API fetching can take up to 25 seconds
  */
 export const config = {
   api: {
@@ -685,7 +659,7 @@ export const config = {
       sizeLimit: '1mb',
     },
   },
-  maxDuration: 15, // ✅ 15 seconds (response in 5-8s, background work continues)
+  maxDuration: 28, // ✅ 28 seconds (2s buffer for 25s API calls + processing)
 };
 
 
