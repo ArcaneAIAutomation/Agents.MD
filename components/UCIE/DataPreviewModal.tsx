@@ -143,7 +143,7 @@ export default function DataPreviewModal({
                 onClick={fetchDataPreview}
                 className="mt-4 bg-bitcoin-orange text-bitcoin-black font-bold px-6 py-2 rounded-lg hover:bg-bitcoin-black hover:text-bitcoin-orange border-2 border-bitcoin-orange transition-all"
               >
-                Retry
+                Continue
               </button>
             </div>
           )}
