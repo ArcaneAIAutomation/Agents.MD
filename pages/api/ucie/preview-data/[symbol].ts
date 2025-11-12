@@ -144,12 +144,76 @@ async function handler(
       }
     }
     
-    // Collect data from all effective APIs in parallel
+    // ✅ AUTOMATIC RETRY LOGIC: 3 attempts with 10-second delays
+    console.log(`🔄 Starting data collection with automatic retry (3 attempts, 10s timeout each)...`);
     const startTime = Date.now();
-    const collectedData = await collectDataFromAPIs(normalizedSymbol, req, forceRefresh);
-    const collectionTime = Date.now() - startTime;
-
-    console.log(`✅ Data collection completed in ${collectionTime}ms`);
+    let collectedData: any = null;
+    let collectionTime = 0;
+    let attempt = 0;
+    const maxAttempts = 3;
+    const attemptTimeout = 10000; // 10 seconds per attempt
+    const retryDelay = 10000; // 10 seconds between retries
+    
+    for (attempt = 1; attempt <= maxAttempts; attempt++) {
+      console.log(`📡 Attempt ${attempt}/${maxAttempts} - Collecting data...`);
+      const attemptStart = Date.now();
+      
+      try {
+        // Collect data with timeout
+        collectedData = await Promise.race([
+          collectDataFromAPIs(normalizedSymbol, req, forceRefresh),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Attempt timeout')), attemptTimeout)
+          )
+        ]);
+        
+        collectionTime = Date.now() - attemptStart;
+        console.log(`✅ Attempt ${attempt} completed in ${collectionTime}ms`);
+        
+        // Check if we got good data
+        const apiStatus = calculateAPIStatus(collectedData);
+        const dataQuality = apiStatus.successRate;
+        
+        console.log(`📊 Attempt ${attempt} data quality: ${dataQuality}%`);
+        
+        // If we got 100% data quality, break early
+        if (dataQuality === 100) {
+          console.log(`🎉 Perfect data quality achieved on attempt ${attempt}!`);
+          break;
+        }
+        
+        // If we got at least 80% and it's the last attempt, accept it
+        if (dataQuality >= 80 && attempt === maxAttempts) {
+          console.log(`✅ Acceptable data quality (${dataQuality}%) on final attempt`);
+          break;
+        }
+        
+        // If not the last attempt and quality < 100%, retry
+        if (attempt < maxAttempts) {
+          console.log(`⏳ Data quality ${dataQuality}% - Retrying in ${retryDelay/1000}s...`);
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
+        
+      } catch (error) {
+        console.error(`❌ Attempt ${attempt} failed:`, error);
+        
+        // If this was the last attempt, throw error
+        if (attempt === maxAttempts) {
+          throw new Error(`All ${maxAttempts} attempts failed`);
+        }
+        
+        // Otherwise, wait and retry
+        console.log(`⏳ Retrying in ${retryDelay/1000}s...`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+      }
+    }
+    
+    if (!collectedData) {
+      throw new Error('Failed to collect data after all retry attempts');
+    }
+    
+    const totalTime = Date.now() - startTime;
+    console.log(`✅ Data collection completed after ${attempt} attempt(s) in ${totalTime}ms`);
 
     // Calculate data quality
     const apiStatus = calculateAPIStatus(collectedData);
@@ -264,10 +328,10 @@ async function handler(
       console.warn(`⚠️ Failed to store ${failed} responses`);
     }
 
-    // ✅ CRITICAL: Wait 10 seconds to ensure database is fully populated
-    // This ensures OpenAI analysis has access to all stored data
-    console.log(`⏳ Waiting 10 seconds to ensure database is fully populated...`);
-    await new Promise(resolve => setTimeout(resolve, 10000));
+    // ✅ CRITICAL: Wait 5 seconds after retries complete
+    // This ensures database is fully populated and indexed
+    console.log(`⏳ Waiting 5 seconds to ensure database is fully populated and indexed...`);
+    await new Promise(resolve => setTimeout(resolve, 5000));
     console.log(`✅ Database population delay complete`);
 
     // ✅ Generate OpenAI summary AFTER database is populated
@@ -301,9 +365,9 @@ async function handler(
       summary = generateBasicSummary(normalizedSymbol, collectedData, apiStatus);
     }
 
-    // ✅ Return data after database writes complete
-    const totalTime = Date.now() - startTime;
-    console.log(`⚡ Total processing time: ${totalTime}ms (collection: ${collectionTime}ms, storage: ${storageTime}ms)`);
+    // ✅ Return data after all processing complete
+    const finalTotalTime = Date.now() - startTime;
+    console.log(`⚡ Total processing time: ${finalTotalTime}ms (${attempt} attempts, ${successful}/${storagePromises.length} stored)`);
 
     const responseData = {
       symbol: normalizedSymbol,
@@ -313,14 +377,20 @@ async function handler(
       collectedData,
       apiStatus,
       timing: {
-        total: totalTime,
+        total: finalTotalTime,
         collection: collectionTime,
-        storage: storageTime
+        storage: storageTime,
+        attempts: attempt
       },
       databaseStatus: {
         stored: successful,
         failed: failed,
         total: storagePromises.length
+      },
+      retryInfo: {
+        attempts: attempt,
+        maxAttempts: maxAttempts,
+        success: true
       }
     };
 
