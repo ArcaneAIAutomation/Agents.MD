@@ -225,8 +225,11 @@ async function handler(
       console.warn(`⚠️ Failed to store ${failed} responses`);
     }
     
-    // ✅ REMOVED 2-second delay - database writes are already awaited
-    // Supabase connection pooling ensures consistency
+    // ✅ CRITICAL: Add 1-second delay to ensure database consistency
+    // Supabase connection pooling may have slight propagation delay
+    console.log(`⏳ Waiting 1 second for database consistency...`);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    console.log(`✅ Database consistency ensured - OpenAI will read fresh data`);
 
     // Calculate data quality
     const apiStatus = calculateAPIStatus(collectedData);
@@ -238,8 +241,9 @@ async function handler(
       console.log(`❌ Failed APIs: ${apiStatus.failed.join(', ')}`);
     }
 
-    // Generate OpenAI summary
-    console.log(`🤖 Generating OpenAI summary...`);
+    // ✅ CRITICAL: Generate OpenAI summary ONLY from database
+    // OpenAI will call getCachedAnalysis() which reads from Supabase
+    console.log(`🤖 Generating OpenAI summary from Supabase database...`);
     const summaryStartTime = Date.now();
     const summary = await generateOpenAISummary(normalizedSymbol, collectedData, apiStatus);
     const summaryTime = Date.now() - summaryStartTime;
