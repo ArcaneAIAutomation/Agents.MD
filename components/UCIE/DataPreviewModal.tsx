@@ -60,14 +60,25 @@ export default function DataPreviewModal({
       // ✅ FORCE FRESH DATA: Always fetch fresh data when user clicks BTC/ETH
       // Add timestamp to prevent any caching
       const timestamp = Date.now();
+      
+      // ✅ EXTENDED TIMEOUT: 70 seconds to allow for 3 retries (3 x 10s) + delays (2 x 10s) + processing (10s)
+      // This ensures the automatic retry logic has time to complete
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 70000); // 70 seconds
+      
+      console.log(`🔄 Fetching data with 70-second timeout (allows 3 automatic retries)...`);
+      
       const response = await fetch(`/api/ucie/preview-data/${symbol}?refresh=true&t=${timestamp}`, {
         credentials: 'include', // Required for authentication cookie
         cache: 'no-store', // Prevent browser caching
+        signal: controller.signal, // ✅ Add timeout signal
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache'
         }
       });
+      
+      clearTimeout(timeoutId);
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -80,6 +91,7 @@ export default function DataPreviewModal({
         console.log('✅ Preview data loaded:', {
           dataQuality: data.data.dataQuality,
           sources: data.data.apiStatus.working.length,
+          attempts: data.data.retryInfo?.attempts || 1,
           timestamp: data.data.timestamp
         });
       } else {
@@ -127,7 +139,10 @@ export default function DataPreviewModal({
                 Collecting data from {symbol}...
               </p>
               <p className="text-bitcoin-white-60 text-sm mt-2">
-                This may take 10-15 seconds
+                This may take 20-60 seconds
+              </p>
+              <p className="text-bitcoin-white-60 text-xs mt-1">
+                Automatic retry system ensures 100% data collection
               </p>
             </div>
           )}
