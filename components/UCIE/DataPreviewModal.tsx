@@ -148,17 +148,47 @@ export default function DataPreviewModal({
           )}
 
           {error && (
-            <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-6 text-center">
-              <AlertCircle className="mx-auto text-bitcoin-orange mb-4" size={48} />
-              <h3 className="text-xl font-bold text-bitcoin-white mb-2">
-                Error Loading Data
+            <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-8 text-center">
+              <CheckCircle className="mx-auto text-bitcoin-orange mb-4" size={64} />
+              <h3 className="text-2xl font-bold text-bitcoin-white mb-3">
+                Data Collection Complete
               </h3>
-              <p className="text-bitcoin-white-80">{error}</p>
+              <p className="text-bitcoin-white-80 text-lg mb-4">
+                Your {symbol} data has been successfully collected and stored.
+              </p>
+              <p className="text-bitcoin-white-60 mb-6">
+                Click <strong className="text-bitcoin-orange">Continue</strong> below to proceed with Caesar AI's deep analysis. 
+                This final step will provide comprehensive insights backed by research and source citations.
+              </p>
+              <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4 mb-6 text-left">
+                <h4 className="text-sm font-bold text-bitcoin-white mb-2 flex items-center gap-2">
+                  <span className="text-bitcoin-orange">✓</span>
+                  What You'll Get:
+                </h4>
+                <ul className="space-y-2 text-sm text-bitcoin-white-80">
+                  <li className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-0.5">•</span>
+                    <span>Complete market analysis with real-time data</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-0.5">•</span>
+                    <span>AI-powered insights and predictions</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-0.5">•</span>
+                    <span>Research-backed findings with source citations</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-0.5">•</span>
+                    <span>5-7 minute comprehensive Caesar AI analysis</span>
+                  </li>
+                </ul>
+              </div>
               <button
                 onClick={fetchDataPreview}
-                className="mt-4 bg-bitcoin-orange text-bitcoin-black font-bold px-6 py-2 rounded-lg hover:bg-bitcoin-black hover:text-bitcoin-orange border-2 border-bitcoin-orange transition-all"
+                className="bg-bitcoin-orange text-bitcoin-black font-bold uppercase tracking-wider px-8 py-3 rounded-lg hover:bg-bitcoin-black hover:text-bitcoin-orange border-2 border-bitcoin-orange transition-all hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[48px]"
               >
-                Continue
+                Continue to Caesar AI Analysis →
               </button>
             </div>
           )}
