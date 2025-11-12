@@ -129,15 +129,39 @@ export function generateCryptoResearchQuery(symbol: string, contextData?: any): 
         }
       }
       
-      // Whale Activity
+      // Whale Activity with Exchange Flow Analysis
       if (onChain.whaleActivity) {
         const whale = onChain.whaleActivity.summary;
-        contextSection += `\n**Whale Activity (Large Transactions):**\n`;
+        contextSection += `\n**Whale Activity (Large Transactions >$1M):**\n`;
         contextSection += `- Total Whale Transactions: ${whale?.totalTransactions || 0}\n`;
-        contextSection += `- Total Value: $${whale?.totalValueUSD?.toLocaleString() || 'N/A'}\n`;
-        contextSection += `- Exchange Deposits: ${whale?.exchangeDeposits || 0} (selling pressure)\n`;
-        contextSection += `- Exchange Withdrawals: ${whale?.exchangeWithdrawals || 0} (accumulation)\n`;
-        contextSection += `- Largest Transaction: $${whale?.largestTransaction?.toLocaleString() || 'N/A'}\n`;
+        contextSection += `- Total Value: $${whale?.totalValueUSD?.toLocaleString() || '0'}\n`;
+        contextSection += `- Largest Transaction: $${whale?.largestTransaction?.toLocaleString() || '0'}\n`;
+        
+        // ✅ NEW: Exchange Flow Analysis
+        if (whale?.exchangeDeposits !== undefined || whale?.exchangeWithdrawals !== undefined) {
+          contextSection += `\n**Exchange Flow Analysis:**\n`;
+          contextSection += `- To Exchanges (Deposits): ${whale?.exchangeDeposits || 0} transactions (⚠️ SELLING PRESSURE)\n`;
+          contextSection += `- From Exchanges (Withdrawals): ${whale?.exchangeWithdrawals || 0} transactions (✅ ACCUMULATION)\n`;
+          contextSection += `- Cold Wallet Movements: ${whale?.coldWalletMovements || 0} transactions (whale-to-whale)\n`;
+          
+          // Calculate net flow sentiment
+          const deposits = whale?.exchangeDeposits || 0;
+          const withdrawals = whale?.exchangeWithdrawals || 0;
+          const netFlow = withdrawals - deposits;
+          
+          if (netFlow > 0) {
+            contextSection += `- Net Flow: +${netFlow} (BULLISH - More withdrawals than deposits)\n`;
+          } else if (netFlow < 0) {
+            contextSection += `- Net Flow: ${netFlow} (BEARISH - More deposits than withdrawals)\n`;
+          } else {
+            contextSection += `- Net Flow: Neutral (Equal deposits and withdrawals)\n`;
+          }
+        }
+        
+        // Recent whale transactions count
+        if (onChain.whaleActivity.transactions?.length > 0) {
+          contextSection += `- Recent Large Transactions: ${onChain.whaleActivity.transactions.length} tracked\n`;
+        }
       }
       
       // Exchange Flows

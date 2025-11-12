@@ -111,17 +111,56 @@ export function formatSentimentScore(sentiment: any): string {
 
 /**
  * Safely extract and format sentiment trend
+ * ✅ FIXED: Calculate trend from distribution data if not provided
  */
 export function formatSentimentTrend(sentiment: any): string {
-  return sentiment?.trend || sentiment?.sentiment_trend || sentiment?.sentimentTrend || 'N/A';
+  // Try to get pre-calculated trend first
+  if (sentiment?.trend || sentiment?.sentiment_trend || sentiment?.sentimentTrend) {
+    return sentiment.trend || sentiment.sentiment_trend || sentiment.sentimentTrend;
+  }
+  
+  // Calculate from distribution
+  if (sentiment?.distribution) {
+    const { positive, negative, neutral } = sentiment.distribution;
+    if (positive > 60) return 'strongly bullish';
+    if (negative > 60) return 'strongly bearish';
+    if (positive > 50) return 'bullish';
+    if (negative > 50) return 'bearish';
+    if (positive > negative + 10) return 'slightly bullish';
+    if (negative > positive + 10) return 'slightly bearish';
+    return 'neutral';
+  }
+  
+  // Fallback: calculate from overall score
+  if (sentiment?.overallScore !== undefined) {
+    const score = Number(sentiment.overallScore);
+    if (!isNaN(score)) {
+      if (score > 60) return 'bullish';
+      if (score < 40) return 'bearish';
+      return 'neutral';
+    }
+  }
+  
+  console.warn('⚠️ formatSentimentTrend: No trend data available. Keys:', Object.keys(sentiment || {}));
+  return 'N/A';
 }
 
 /**
  * Safely extract and format mentions
+ * ✅ FIXED: Use correct field name volumeMetrics.total24h
  */
 export function formatMentions(sentiment: any): string {
-  const mentions = sentiment?.mentions24h || sentiment?.mentions || sentiment?.social_volume || sentiment?.socialVolume;
-  if (!mentions) return 'N/A';
+  // Try volumeMetrics first (correct field for AggregatedSentiment)
+  const mentions = sentiment?.volumeMetrics?.total24h || 
+                   sentiment?.mentions24h || 
+                   sentiment?.mentions || 
+                   sentiment?.social_volume || 
+                   sentiment?.socialVolume;
+  
+  if (!mentions) {
+    console.warn('⚠️ formatMentions: No mentions found. Keys:', Object.keys(sentiment || {}));
+    return 'N/A';
+  }
   
   const numMentions = Number(mentions);
   if (isNaN(numMentions)) return 'N/A';
