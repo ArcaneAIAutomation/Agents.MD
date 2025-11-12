@@ -27,6 +27,7 @@ interface DataPreview {
   symbol: string;
   timestamp: string;
   dataQuality: number;
+  summary: string; // Basic summary for frontend display
   collectedData: {
     marketData: any;
     sentiment: any;
@@ -253,10 +254,14 @@ async function handler(
     const totalTime = Date.now() - startTime;
     console.log(`⚡ Total processing time: ${totalTime}ms (collection: ${collectionTime}ms, storage: ${storageTime}ms)`);
 
+    // Generate basic summary for frontend display
+    const summary = generateBasicSummary(normalizedSymbol, collectedData, apiStatus);
+
     const responseData = {
       symbol: normalizedSymbol,
       timestamp: new Date().toISOString(),
       dataQuality,
+      summary, // Include summary for frontend
       collectedData,
       apiStatus,
       timing: {
@@ -674,6 +679,67 @@ function generateFallbackSummary(
 
   summary += `This data will be used to provide context for the deep Caesar AI analysis. Proceed to get comprehensive research including technology analysis, team evaluation, partnerships, and risk assessment.`;
 
+  return summary;
+}
+
+/**
+ * Generate basic summary for frontend display
+ * This is a quick summary based on collected data
+ * Full AI analysis happens in Phase 2 (OpenAI endpoint)
+ */
+function generateBasicSummary(
+  symbol: string,
+  collectedData: any,
+  apiStatus: any
+): string {
+  let summary = `Data collection complete for ${symbol}. `;
+  
+  // Data quality
+  summary += `Successfully collected data from ${apiStatus.working.length} out of ${apiStatus.total} sources (${apiStatus.successRate}% data quality). `;
+  
+  // Market data
+  if (collectedData.marketData?.success && collectedData.marketData?.priceAggregation) {
+    const price = collectedData.marketData.priceAggregation.averagePrice;
+    const change = collectedData.marketData.priceAggregation.averageChange24h;
+    if (price) {
+      summary += `\n\nCurrent price: $${price.toLocaleString()}`;
+      if (change !== undefined) {
+        summary += ` (${change > 0 ? '+' : ''}${change.toFixed(2)}% 24h)`;
+      }
+      summary += '. ';
+    }
+  }
+  
+  // Sentiment
+  if (collectedData.sentiment?.success && collectedData.sentiment?.sentiment) {
+    const score = collectedData.sentiment.sentiment.overallScore;
+    const trend = collectedData.sentiment.sentiment.trend;
+    if (score) {
+      summary += `Social sentiment: ${score}/100 (${trend || 'neutral'}). `;
+    }
+  }
+  
+  // Technical
+  if (collectedData.technical?.success && collectedData.technical?.indicators?.trend) {
+    const direction = collectedData.technical.indicators.trend.direction;
+    if (direction) {
+      summary += `Technical trend: ${direction}. `;
+    }
+  }
+  
+  // News
+  if (collectedData.news?.success && collectedData.news?.articles?.length > 0) {
+    summary += `\n\nFound ${collectedData.news.articles.length} recent news articles. `;
+  }
+  
+  // On-chain
+  if (collectedData.onChain?.success) {
+    summary += `On-chain data available. `;
+  }
+  
+  // Next steps
+  summary += `\n\nThis data is now stored in the database and ready for comprehensive AI analysis. Click "Continue with Caesar AI Analysis" to proceed with deep research including technology analysis, team evaluation, partnerships, risk assessment, and more.`;
+  
   return summary;
 }
 
