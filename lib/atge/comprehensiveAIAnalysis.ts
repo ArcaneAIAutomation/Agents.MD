@@ -355,30 +355,35 @@ export async function generateComprehensiveAnalysis(
   );
   const riskRewardRatio = rewardAmount / riskAmount;
   
-  // Generate AI analysis - Gemini primary (fast), GPT-5 with timeout
-  console.log(`[ATGE] Calling Gemini AI for primary analysis (fast)...`);
+  // Generate AI analysis - Gemini 2.5 Pro primary (60s timeout), ChatGPT 5.1 fallback (60s timeout)
+  console.log(`[ATGE] Calling Gemini 2.5 Pro for primary analysis (60s timeout for maximum accuracy)...`);
   let openAIAnalysis = '';
   let geminiAnalysis = '';
   let aiModelsUsed: string[] = [];
   
-  // Use Gemini as primary (5 seconds vs GPT-5's 27+ seconds)
+  // Use Gemini as primary with 60-second timeout for maximum accuracy
   try {
-    geminiAnalysis = await generateGeminiAnalysis(input);
+    geminiAnalysis = await Promise.race([
+      generateGeminiAnalysis(input),
+      new Promise<string>((_, reject) => 
+        setTimeout(() => reject(new Error('Gemini timeout after 60 seconds')), 60000)
+      )
+    ]);
     aiModelsUsed.push('Gemini 2.5 Pro');
     console.log(`[ATGE] Gemini analysis completed successfully`);
   } catch (geminiErr) {
-    console.error('[ATGE] Gemini analysis failed, trying GPT-5 with timeout:', geminiErr);
+    console.error('[ATGE] Gemini analysis failed, trying ChatGPT 5.1 with timeout:', geminiErr);
     
-    // Fallback to GPT-5 with 20-second timeout
+    // Fallback to ChatGPT 5.1 with 60-second timeout for maximum accuracy
     try {
       openAIAnalysis = await Promise.race([
         generateOpenAIAnalysis(input),
         new Promise<string>((_, reject) => 
-          setTimeout(() => reject(new Error('GPT-5 timeout after 20 seconds')), 20000)
+          setTimeout(() => reject(new Error('ChatGPT 5.1 timeout after 60 seconds')), 60000)
         )
       ]);
-      aiModelsUsed.push('OpenAI GPT-5 (Fallback)');
-      console.log(`[ATGE] GPT-5 fallback analysis completed successfully`);
+      aiModelsUsed.push('OpenAI ChatGPT 5.1 (Fallback)');
+      console.log(`[ATGE] ChatGPT 5.1 fallback analysis completed successfully`);
     } catch (gptErr) {
       console.error('[ATGE] Both AI analyses failed:', gptErr);
       geminiAnalysis = 'AI analysis unavailable - using technical indicators only';
@@ -386,13 +391,13 @@ export async function generateComprehensiveAnalysis(
     }
   }
   
-  // Combine AI reasoning (Gemini primary, GPT-5 fallback)
+  // Combine AI reasoning (Gemini 2.5 Pro primary, ChatGPT 5.1 fallback)
   const aiReasoning = `**COMPREHENSIVE AI ANALYSIS**
 
-${geminiAnalysis ? `**Gemini AI Analysis (Primary):**
+${geminiAnalysis ? `**Google Gemini 2.5 Pro Analysis (Primary):**
 ${geminiAnalysis}` : ''}
 
-${openAIAnalysis ? `**OpenAI GPT-5 Analysis (Fallback):**
+${openAIAnalysis ? `**OpenAI ChatGPT 5.1 Analysis (Fallback):**
 ${openAIAnalysis}` : ''}
 
 **Confidence Score:** ${confidenceScore}/100
