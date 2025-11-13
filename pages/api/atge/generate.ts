@@ -16,6 +16,7 @@ import { getSentimentData } from '../../../lib/atge/sentimentData';
 import { getOnChainData } from '../../../lib/atge/onChainData';
 import { getLunarCrushAnalysis } from '../../../lib/atge/lunarcrush';
 import { generateTradeSignal } from '../../../lib/atge/aiGenerator';
+import { generateComprehensiveAnalysis } from '../../../lib/atge/comprehensiveAIAnalysis';
 import { fetchHistoricalData } from '../../../lib/atge/historicalData';
 import {
   storeTradeSignal,
@@ -147,48 +148,55 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     console.log(`[ATGE] Data fetching completed (including LunarCrush from sentiment data)`);
     console.log(`[ATGE] Technical indicators from ${technicalIndicators.dataSource} (quality: ${technicalIndicators.dataQuality}%)`);
 
-    // Generate trade signal with AI with performance tracking
-    const tradeSignal = await measureExecutionTime(
+    // Generate comprehensive AI analysis with OpenAI GPT-4o + Gemini AI
+    console.log(`[ATGE] Starting comprehensive AI analysis (OpenAI GPT-4o + Gemini AI)...`);
+    const comprehensiveAnalysis = await measureExecutionTime(
       async () => {
-        return await generateTradeSignal({
+        return await generateComprehensiveAnalysis({
+          symbol,
+          timeframe,
           marketData,
           technicalIndicators,
-          sentimentData, // Already includes LunarCrush data
-          onChainData
+          sentimentData,
+          onChainData,
+          newsHeadlines: [] // TODO: Add news headlines from NewsAPI
         });
       },
-      'generate_trade_signal',
+      'comprehensive_ai_analysis',
       'generation_time',
       userId
     );
 
-    console.log(`[ATGE] AI generation completed`);
+    console.log(`[ATGE] Comprehensive AI analysis completed`);
+    console.log(`[ATGE] Confidence: ${comprehensiveAnalysis.confidenceScore}%, R/R: ${comprehensiveAnalysis.riskRewardRatio}:1`);
+    console.log(`[ATGE] Data sources: ${comprehensiveAnalysis.dataSources.aiModels.join(', ')}`);
 
     // Calculate expiration time based on timeframe
     const generatedAt = new Date();
-    const expiresAt = new Date(generatedAt.getTime() + tradeSignal.timeframeHours * 60 * 60 * 1000);
+    const timeframeHours = { '15m': 0.25, '1h': 1, '4h': 4, '1d': 24 }[timeframe] || 1;
+    const expiresAt = new Date(generatedAt.getTime() + timeframeHours * 60 * 60 * 1000);
 
-    // Store trade signal in database
+    // Store trade signal in database with comprehensive analysis
     const storedSignal = await storeTradeSignal({
       userId,
-      symbol: tradeSignal.symbol,
+      symbol,
       status: 'active',
-      entryPrice: tradeSignal.entryPrice,
-      tp1Price: tradeSignal.tp1Price,
-      tp1Allocation: tradeSignal.tp1Allocation,
-      tp2Price: tradeSignal.tp2Price,
-      tp2Allocation: tradeSignal.tp2Allocation,
-      tp3Price: tradeSignal.tp3Price,
-      tp3Allocation: tradeSignal.tp3Allocation,
-      stopLossPrice: tradeSignal.stopLossPrice,
-      stopLossPercentage: tradeSignal.stopLossPercentage,
-      timeframe: tradeSignal.timeframe,
-      timeframeHours: tradeSignal.timeframeHours,
-      confidenceScore: tradeSignal.confidenceScore,
-      riskRewardRatio: tradeSignal.riskRewardRatio,
-      marketCondition: tradeSignal.marketCondition,
-      aiReasoning: tradeSignal.aiReasoning,
-      aiModelVersion: tradeSignal.aiModelVersion,
+      entryPrice: comprehensiveAnalysis.entryPrice,
+      tp1Price: comprehensiveAnalysis.tp1Price,
+      tp1Allocation: comprehensiveAnalysis.tp1Allocation,
+      tp2Price: comprehensiveAnalysis.tp2Price,
+      tp2Allocation: comprehensiveAnalysis.tp2Allocation,
+      tp3Price: comprehensiveAnalysis.tp3Price,
+      tp3Allocation: comprehensiveAnalysis.tp3Allocation,
+      stopLossPrice: comprehensiveAnalysis.stopLossPrice,
+      stopLossPercentage: comprehensiveAnalysis.stopLossPercentage,
+      timeframe,
+      timeframeHours,
+      confidenceScore: comprehensiveAnalysis.confidenceScore,
+      riskRewardRatio: comprehensiveAnalysis.riskRewardRatio,
+      marketCondition: comprehensiveAnalysis.marketCondition,
+      aiReasoning: comprehensiveAnalysis.aiReasoning,
+      aiModelVersion: 'OpenAI GPT-4o + Gemini 2.0 Flash',
       generatedAt,
       expiresAt
     });
