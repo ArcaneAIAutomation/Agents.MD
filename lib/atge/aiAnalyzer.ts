@@ -93,9 +93,9 @@ export async function analyzeTradeWithAI(
     // Build comprehensive prompt with all context
     const prompt = buildAnalysisPrompt(context);
 
-    // Call OpenAI GPT-5.1 for analysis
+    // Call OpenAI GPT-5 for analysis
     const response = await openai.chat.completions.create({
-      model: 'gpt-5.1',
+      model: 'gpt-5',
       messages: [
         {
           role: 'system',

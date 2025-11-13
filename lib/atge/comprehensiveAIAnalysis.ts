@@ -1,7 +1,7 @@
 /**
  * Comprehensive AI Analysis for ATGE
  * 
- * Uses OpenAI GPT-5.1 and Gemini AI for the most advanced trade analysis
+ * Uses OpenAI GPT-5 and Gemini AI for the most advanced trade analysis
  * Combines data from ALL available sources:
  * - CoinMarketCap, CoinGecko, Kraken (Market Data)
  * - Binance (Technical Indicators)
@@ -95,7 +95,7 @@ interface ComprehensiveAnalysisOutput {
 }
 
 /**
- * Generate comprehensive AI analysis using OpenAI GPT-5.1
+ * Generate comprehensive AI analysis using OpenAI GPT-5
  */
 async function generateOpenAIAnalysis(input: ComprehensiveAnalysisInput): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -153,7 +153,7 @@ Provide your analysis in a structured format with clear reasoning.`;
       'Authorization': `Bearer ${apiKey}`
     },
     body: JSON.stringify({
-      model: 'gpt-5.1',
+      model: 'gpt-5',
       messages: [
         {
           role: 'system',
@@ -357,7 +357,7 @@ export async function generateComprehensiveAnalysis(
   const riskRewardRatio = rewardAmount / riskAmount;
   
   // Generate AI analyses in parallel
-  console.log(`[ATGE] Calling OpenAI GPT-5.1 and Gemini AI for analysis...`);
+  console.log(`[ATGE] Calling OpenAI GPT-5 and Gemini AI for analysis...`);
   const [openAIAnalysis, geminiAnalysis] = await Promise.all([
     generateOpenAIAnalysis(input).catch(err => {
       console.error('[ATGE] OpenAI analysis failed:', err);
@@ -372,7 +372,7 @@ export async function generateComprehensiveAnalysis(
   // Combine AI reasoning
   const aiReasoning = `**COMPREHENSIVE AI ANALYSIS**
 
-**OpenAI GPT-5.1 Analysis:**
+**OpenAI GPT-5 Analysis:**
 ${openAIAnalysis}
 
 **Gemini AI Analysis:**
@@ -387,7 +387,7 @@ ${geminiAnalysis}
 - Technical Indicators: ${input.technicalIndicators.dataSource} (${input.technicalIndicators.dataQuality}% quality)
 - Social Sentiment: LunarCrush, Twitter, Reddit
 - On-Chain Data: Blockchain.com, Etherscan
-- AI Models: OpenAI GPT-5.1, Gemini 2.0 Flash`;
+- AI Models: OpenAI GPT-5, Gemini 2.0 Flash`;
   
   return {
     ...tradeLevels,
@@ -406,7 +406,7 @@ ${geminiAnalysis}
       sentimentData: ['LunarCrush', 'Twitter', 'Reddit'],
       onChainData: ['Blockchain.com', 'Etherscan'],
       newsData: ['NewsAPI'],
-      aiModels: ['OpenAI GPT-5.1', 'Gemini 2.0 Flash']
+      aiModels: ['OpenAI GPT-5', 'Gemini 2.0 Flash']
     },
     dataQualityScore: input.technicalIndicators.dataQuality,
     analysisDepth: 'expert'

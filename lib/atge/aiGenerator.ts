@@ -185,7 +185,7 @@ async function generateWithGPT4o(context: string, symbol: string): Promise<Trade
       'Authorization': `Bearer ${apiKey}`
     },
     body: JSON.stringify({
-      model: 'gpt-5.1',
+      model: 'gpt-5',
       messages: [
         {
           role: 'system',
@@ -276,7 +276,7 @@ async function generateWithGPT4o(context: string, symbol: string): Promise<Trade
     riskRewardRatio: Math.round(riskRewardRatio * 100) / 100,
     marketCondition: signalData.marketCondition,
     aiReasoning: signalData.reasoning,
-    aiModelVersion: 'gpt-5.1'
+    aiModelVersion: 'gpt-5'
   };
 }
 

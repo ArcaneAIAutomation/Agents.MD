@@ -201,7 +201,7 @@ export default function ATGEInterface({ className = '' }: ATGEInterfaceProps) {
           <div className="grid grid-cols-4 gap-4 mt-4 mb-4">
             <div className="text-center">
               <div className="text-bitcoin-orange font-mono text-xl font-bold mb-1">Dual AI</div>
-              <div className="text-bitcoin-white-60 text-xs uppercase tracking-wider">GPT-5.1 + Gemini</div>
+              <div className="text-bitcoin-white-60 text-xs uppercase tracking-wider">GPT-5 + Gemini</div>
             </div>
             <div className="text-center">
               <div className="text-bitcoin-orange font-mono text-xl font-bold mb-1">13 APIs</div>
@@ -223,7 +223,7 @@ export default function ATGEInterface({ className = '' }: ATGEInterfaceProps) {
           <div className="grid grid-cols-2 gap-3 mt-3 mb-3">
             <div className="text-center bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-2">
               <div className="text-bitcoin-orange font-mono text-lg font-bold mb-0.5">Dual AI</div>
-              <div className="text-bitcoin-white-60 text-xs">GPT-5.1 + Gemini</div>
+              <div className="text-bitcoin-white-60 text-xs">GPT-5 + Gemini</div>
             </div>
             <div className="text-center bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-2">
               <div className="text-bitcoin-orange font-mono text-lg font-bold mb-0.5">13 APIs</div>
@@ -246,7 +246,7 @@ export default function ATGEInterface({ className = '' }: ATGEInterfaceProps) {
             <span className="text-bitcoin-orange">⚡</span> How It Works
           </h3>
           <p className="text-bitcoin-white-60 text-xs leading-relaxed">
-            The Ultimate AI Trade Generation Engine uses <span className="text-bitcoin-orange font-semibold">Dual AI Analysis</span> (OpenAI GPT-5.1 + Google Gemini 2.0 Flash) to analyze real-time data from <span className="text-bitcoin-orange font-semibold">13 APIs</span>: Market data (CoinMarketCap, CoinGecko, Kraken), Technical indicators (Binance - 500 candles), Social sentiment (LunarCrush, Twitter, Reddit), On-chain metrics (Blockchain.com, Etherscan), and News (NewsAPI). Each trade includes entry price, 3 take-profit levels, stop loss, timeframe (15m/1h/4h/1d), confidence score, and comprehensive AI reasoning. All data is <span className="text-bitcoin-orange font-semibold">force-refreshed</span> for 100% real-time accuracy with complete data source attribution.
+            The Ultimate AI Trade Generation Engine uses <span className="text-bitcoin-orange font-semibold">Dual AI Analysis</span> (OpenAI GPT-5 + Google Gemini 2.0 Flash) to analyze real-time data from <span className="text-bitcoin-orange font-semibold">13 APIs</span>: Market data (CoinMarketCap, CoinGecko, Kraken), Technical indicators (Binance - 500 candles), Social sentiment (LunarCrush, Twitter, Reddit), On-chain metrics (Blockchain.com, Etherscan), and News (NewsAPI). Each trade includes entry price, 3 take-profit levels, stop loss, timeframe (15m/1h/4h/1d), confidence score, and comprehensive AI reasoning. All data is <span className="text-bitcoin-orange font-semibold">force-refreshed</span> for 100% real-time accuracy with complete data source attribution.
           </p>
         </div>
 
