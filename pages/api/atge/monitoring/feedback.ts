@@ -1,6 +1,6 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { verifyAuth } from '../../../../middleware/auth';
-import { logUserFeedback } from '../../../../lib/atge/monitoring';
+import { NextApiResponse } from 'next';
+import { withAuth, AuthenticatedRequest } from '../../../../middleware/auth';
+import { submitFeedback } from '../../../../lib/atge/monitoring';
 
 /**
  * POST /api/atge/monitoring/feedback
@@ -14,17 +14,14 @@ import { logUserFeedback } from '../../../../lib/atge/monitoring';
  * - tradeSignalId: UUID (optional)
  * - metadata: object (optional)
  */
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    // 1. Verify authentication
-    const authResult = await verifyAuth(req);
-    if (!authResult.success) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+    // 1. Get authenticated user
+    const userId = req.user!.id;
 
     // 2. Get request body
     const { feedbackType, rating, comment, tradeSignalId, metadata } = req.body;
@@ -45,9 +42,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // 4. Log feedback
-    await logUserFeedback({
+    await submitFeedback({
       timestamp: new Date(),
-      userId: authResult.user!.id,
+      userId,
       feedbackType,
       rating,
       comment,
@@ -69,3 +66,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 }
+
+export default withAuth(handler);

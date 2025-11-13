@@ -1,6 +1,11 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { verifyAuth } from '../../../../middleware/auth';
-import { getMonitoringStats } from '../../../../lib/atge/monitoring';
+import { NextApiResponse } from 'next';
+import { withAuth, AuthenticatedRequest } from '../../../../middleware/auth';
+import { 
+  getErrorCountByType,
+  getPerformanceSummary,
+  getFeedbackSummary,
+  checkSystemHealth
+} from '../../../../lib/atge/monitoring';
 
 /**
  * GET /api/atge/monitoring/stats
@@ -16,19 +21,13 @@ import { getMonitoringStats } from '../../../../lib/atge/monitoring';
  * - database: Database statistics
  * - userFeedback: User feedback statistics
  */
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    // 1. Verify authentication
-    const authResult = await verifyAuth(req);
-    if (!authResult.success) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
-    // 2. Get query parameters
+    // 1. Get query parameters
     const { timeRange = '24h' } = req.query;
 
     // Validate timeRange
@@ -40,14 +39,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
+    // 2. Convert timeRange to hours
+    const hoursMap: Record<string, number> = {
+      '1h': 1,
+      '24h': 24,
+      '7d': 168,
+      '30d': 720
+    };
+    const hours = hoursMap[timeRange as string];
+
     // 3. Get monitoring statistics
-    const stats = await getMonitoringStats(timeRange as string);
+    const [errors, performance, feedback, health] = await Promise.all([
+      getErrorCountByType(hours),
+      getPerformanceSummary(),
+      getFeedbackSummary(),
+      checkSystemHealth()
+    ]);
 
     // 4. Return response
     return res.status(200).json({
       success: true,
       timeRange,
-      stats,
+      stats: {
+        errors,
+        performance,
+        feedback,
+        health
+      },
       timestamp: new Date().toISOString()
     });
 
@@ -59,3 +77,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 }
+
+export default withAuth(handler);

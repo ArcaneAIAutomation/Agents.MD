@@ -7,7 +7,7 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { query, queryOne } from '../../../lib/db';
-import { verifyAuth } from '../../../lib/auth/jwt';
+import { withAuth, AuthenticatedRequest } from '../../../middleware/auth';
 import { analyzeTradeWithAI } from '../../../lib/atge/aiAnalyzer';
 
 interface AnalyzeRequest {

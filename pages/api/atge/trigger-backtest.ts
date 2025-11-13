@@ -11,9 +11,9 @@
 import { NextApiResponse } from 'next';
 import { withAuth, AuthenticatedRequest } from '../../../middleware/auth';
 import { fetchTradeSignal, updateTradeStatus } from '../../../lib/atge/database';
-import { fetchHistoricalPriceData } from '../../../lib/atge/historicalData';
-import { analyzeTradeOutcome } from '../../../lib/atge/backtesting';
-import { analyzeCompletedTrade } from '../../../lib/atge/aiAnalyzer';
+import { fetchHistoricalData, getTradeHistoricalData } from '../../../lib/atge/historicalData';
+import { runBacktest } from '../../../lib/atge/backtesting';
+import { analyzeTradeWithAI } from '../../../lib/atge/aiAnalyzer';
 
 async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   // Only allow POST requests
@@ -65,15 +65,24 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
       });
     }
     
-    // Step 1: Fetch historical price data
+    // Step 1: Fetch historical price data from database
     console.log(`[Backtest] Fetching historical data for trade ${tradeSignalId}...`);
     
-    const historicalData = await fetchHistoricalPriceData({
-      symbol: tradeSignal.symbol,
-      startTime: tradeSignal.generatedAt,
-      endTime: tradeSignal.expiresAt,
-      resolution: '1m' // Minute-level data for maximum accuracy
-    });
+    let historicalData = await getTradeHistoricalData(tradeSignalId);
+    
+    // If no data in database, fetch from API
+    if (!historicalData || historicalData.length === 0) {
+      console.log(`[Backtest] No cached data, fetching from API...`);
+      
+      const response = await fetchHistoricalData({
+        symbol: tradeSignal.symbol,
+        startTime: tradeSignal.generatedAt,
+        endTime: tradeSignal.expiresAt,
+        resolution: '1m'
+      });
+      
+      historicalData = response.data;
+    }
     
     if (!historicalData || historicalData.length === 0) {
       console.error(`[Backtest] No historical data available for trade ${tradeSignalId}`);
@@ -93,17 +102,26 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     // Step 2: Run backtesting analysis
     console.log(`[Backtest] Analyzing trade outcome...`);
     
-    const backtestResult = await analyzeTradeOutcome(tradeSignal, historicalData);
+    const backtestResult = runBacktest(tradeSignal, historicalData, 1000);
     
     console.log(`[Backtest] Analysis complete. Status: ${backtestResult.status}`);
-    console.log(`[Backtest] P/L: $${backtestResult.profitLossUsd}`);
+    console.log(`[Backtest] P/L: ${backtestResult.profitLossUsd}`);
     
     // Step 3: Generate AI analysis (optional, can be done asynchronously)
-    let aiAnalysis: string | undefined;
+    let aiAnalysis: any = undefined;
     
     try {
       console.log(`[Backtest] Generating AI analysis...`);
-      aiAnalysis = await analyzeCompletedTrade(tradeSignal, backtestResult);
+      aiAnalysis = await analyzeTradeWithAI({
+        tradeSignal,
+        backtestResult,
+        marketSnapshot: {
+          currentPrice: historicalData[historicalData.length - 1].close,
+          priceChange24h: 0,
+          volume24h: 0,
+          marketCap: 0
+        }
+      });
       console.log(`[Backtest] AI analysis generated`);
     } catch (error) {
       console.error(`[Backtest] AI analysis failed:`, error);
