@@ -99,19 +99,41 @@ export default function ATGEInterface({ className = '' }: ATGEInterfaceProps) {
     setSuccessMessage(null);
 
     try {
-      // TODO: Implement actual API call to /api/atge/generate
-      // For now, simulating the API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Call the real API endpoint to generate trade signal
+      const response = await fetch('/api/atge/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          symbol: selectedSymbol,
+        }),
+      });
 
-      // Simulate successful generation
-      setLastGeneratedAt(new Date());
-      setSuccessMessage('Trade signal generated successfully! Check the trade history below.');
-      setTimeout(() => setSuccessMessage(null), 5000);
+      const data = await response.json();
 
-      // TODO: Refresh trade history and performance summary
-    } catch (err) {
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate trade signal');
+      }
+
+      if (data.success) {
+        setLastGeneratedAt(new Date());
+        setSuccessMessage(
+          `Trade signal generated successfully! ${data.message || 'Check the trade history below.'}`
+        );
+        setTimeout(() => setSuccessMessage(null), 5000);
+
+        // Trigger a page refresh to update all components with new data
+        // This will refresh the performance dashboard and trade history
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        throw new Error(data.error || 'Failed to generate trade signal');
+      }
+    } catch (err: any) {
       console.error('Generate signal error:', err);
-      setError('Failed to generate trade signal. Please try again.');
+      setError(err.message || 'Failed to generate trade signal. Please try again.');
     } finally {
       setIsGenerating(false);
     }

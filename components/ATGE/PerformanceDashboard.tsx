@@ -45,7 +45,7 @@ export default function PerformanceDashboard({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [autoRefresh, setAutoRefresh] = useState(false); // Disabled by default
 
   // Fetch performance statistics
   const fetchPerformanceStats = async () => {
@@ -149,14 +149,16 @@ export default function PerformanceDashboard({
           </div>
 
           <div className={`flex items-center gap-2 md:gap-3 ${isMobile ? 'flex-col w-full' : ''}`}>
-            {/* Auto-refresh toggle - Touch-friendly */}
+            {/* Auto-refresh toggle - Disabled by default, greyed out */}
             <button
               onClick={toggleAutoRefresh}
-              className={`flex items-center justify-center gap-2 px-4 py-2 min-h-[48px] rounded-lg font-semibold text-sm transition-all ${isMobile ? 'w-full' : ''} ${
+              disabled={true}
+              className={`flex items-center justify-center gap-2 px-4 py-2 min-h-[48px] rounded-lg font-semibold text-sm transition-all cursor-not-allowed opacity-50 ${isMobile ? 'w-full' : ''} ${
                 autoRefresh
                   ? 'bg-bitcoin-orange text-bitcoin-black'
-                  : 'bg-bitcoin-black border border-bitcoin-orange-20 text-bitcoin-white-60 hover:border-bitcoin-orange'
+                  : 'bg-bitcoin-black border border-bitcoin-orange-20 text-bitcoin-white-60'
               }`}
+              title="Auto-refresh is disabled. Use manual refresh instead."
             >
               <RefreshCw size={16} className={autoRefresh ? 'animate-spin' : ''} />
               <span className={isMobile ? 'text-xs' : ''}>
