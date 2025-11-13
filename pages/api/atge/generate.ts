@@ -20,7 +20,7 @@ import {
   storeTechnicalIndicators,
   storeMarketSnapshot
 } from '../../../lib/atge/database';
-import { trackPerformance, trackError } from '../../../lib/atge/monitoring';
+import { measureExecutionTime, logError } from '../../../lib/atge/monitoring';
 
 // Rate limiting: Track last generation time per user
 const userCooldowns = new Map<string, number>();
@@ -121,9 +121,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     const startTime = Date.now();
 
     // Fetch all market data in parallel with performance tracking
-    const [marketData, technicalIndicators, sentimentData, onChainData, lunarCrushData] = await trackPerformance(
-      'fetch_market_data',
-      'api_response',
+    const [marketData, technicalIndicators, sentimentData, onChainData, lunarCrushData] = await measureExecutionTime(
       async () => {
         // Fetch LunarCrush data ONLY for Bitcoin
         const lunarCrushPromise = symbol.toUpperCase() === 'BTC'
@@ -141,15 +139,15 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
           lunarCrushPromise
         ]);
       },
-      { symbol, userId }
+      'fetch_market_data',
+      'api_response',
+      userId
     );
 
     console.log(`[ATGE] Data fetching completed${lunarCrushData ? ' (including Bitcoin LunarCrush)' : ''}`);
 
     // Generate trade signal with AI with performance tracking
-    const tradeSignal = await trackPerformance(
-      'generate_trade_signal',
-      'generation_time',
+    const tradeSignal = await measureExecutionTime(
       async () => {
         return await generateTradeSignal({
           marketData,
@@ -159,7 +157,9 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
           lunarCrushData
         });
       },
-      { symbol, userId }
+      'generate_trade_signal',
+      'generation_time',
+      userId
     );
 
     console.log(`[ATGE] AI generation completed`);
@@ -277,12 +277,14 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     console.error('[ATGE] Trade generation error:', error);
 
     // Track error in monitoring system
-    await trackError(
-      'generation',
-      error as Error,
-      { symbol: req.body.symbol, userId: req.user!.id },
-      'high'
-    );
+    await logError({
+      errorType: 'generation',
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      errorStack: error instanceof Error ? error.stack : undefined,
+      userId: req.user!.id,
+      context: { symbol: req.body.symbol },
+      severity: 'high'
+    });
 
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
