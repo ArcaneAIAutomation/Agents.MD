@@ -195,7 +195,7 @@ Whale Activity: ${input.onChainData.whaleTransactions} transactions
 
 Provide: 1) Market outlook 2) Key support/resistance 3) Risk factors 4) Trade recommendation`;
 
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp-1219:generateContent?key=${apiKey}`, {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -364,7 +364,7 @@ export async function generateComprehensiveAnalysis(
   // Use Gemini as primary (5 seconds vs GPT-5's 27+ seconds)
   try {
     geminiAnalysis = await generateGeminiAnalysis(input);
-    aiModelsUsed.push('Gemini 2.0 Flash Thinking');
+    aiModelsUsed.push('Gemini 2.5 Pro');
     console.log(`[ATGE] Gemini analysis completed successfully`);
   } catch (geminiErr) {
     console.error('[ATGE] Gemini analysis failed, trying GPT-5 with timeout:', geminiErr);
