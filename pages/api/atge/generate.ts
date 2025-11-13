@@ -11,6 +11,7 @@ import { NextApiResponse } from 'next';
 import { withAuth, AuthenticatedRequest } from '../../../middleware/auth';
 import { getMarketData } from '../../../lib/atge/marketData';
 import { getTechnicalIndicators } from '../../../lib/atge/technicalIndicators';
+import { getTechnicalIndicatorsV2 } from '../../../lib/atge/technicalIndicatorsV2';
 import { getSentimentData } from '../../../lib/atge/sentimentData';
 import { getOnChainData } from '../../../lib/atge/onChainData';
 import { getLunarCrushAnalysis } from '../../../lib/atge/lunarcrush';
@@ -122,12 +123,17 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
 
     const startTime = Date.now();
 
+    // Determine timeframe from query parameter (default to 1h)
+    const timeframe = (req.query.timeframe as '15m' | '1h' | '4h' | '1d') || '1h';
+    console.log(`[ATGE] Using timeframe: ${timeframe}`);
+
     // Fetch all market data in parallel with performance tracking
+    // Use V2 indicators for accurate, timeframe-specific calculations
     const [marketData, technicalIndicators, sentimentData, onChainData] = await measureExecutionTime(
       async () => {
         return await Promise.all([
           getMarketData(symbol),
-          getTechnicalIndicators(symbol),
+          getTechnicalIndicatorsV2(symbol, timeframe), // V2 with timeframe support
           getSentimentData(symbol), // Already includes LunarCrush data
           getOnChainData(symbol)
         ]);
@@ -138,6 +144,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     );
 
     console.log(`[ATGE] Data fetching completed (including LunarCrush from sentiment data)`);
+    console.log(`[ATGE] Technical indicators from ${technicalIndicators.dataSource} (quality: ${technicalIndicators.dataQuality}%)`);
 
     // Generate trade signal with AI with performance tracking
     const tradeSignal = await measureExecutionTime(
@@ -185,7 +192,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
       expiresAt
     });
 
-    // Store technical indicators
+    // Store technical indicators with V2 metadata
     await storeTechnicalIndicators({
       tradeSignalId: storedSignal.id,
       rsiValue: technicalIndicators.rsi,
@@ -200,7 +207,13 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
       bollingerLower: technicalIndicators.bollingerBands.lower,
       atrValue: technicalIndicators.atr,
       volume24h: marketData.volume24h,
-      marketCap: marketData.marketCap
+      marketCap: marketData.marketCap,
+      // V2 Metadata
+      dataSource: technicalIndicators.dataSource,
+      timeframe: technicalIndicators.timeframe,
+      calculatedAt: technicalIndicators.calculatedAt,
+      dataQuality: technicalIndicators.dataQuality,
+      candleCount: technicalIndicators.candleCount
     });
 
     // Store market snapshot with LunarCrush data from sentimentData

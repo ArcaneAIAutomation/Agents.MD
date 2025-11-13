@@ -53,6 +53,12 @@ export interface TradeSignal {
     bollingerLower: number;
     volumeAvg: number;
     atr: number;
+    // V2 Metadata
+    dataSource?: string;
+    timeframe?: string;
+    calculatedAt?: Date;
+    dataQuality?: number;
+    candleCount?: number;
   };
   
   // Market Snapshot (at generation time)
@@ -226,17 +232,30 @@ export default function TradeRow({ trade, onClick, className = '' }: TradeRowPro
         }}
       >
         <div className={`grid gap-3 md:gap-4 items-center ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-12'}`}>
-          {/* Trade ID & Date - Mobile Optimized */}
+          {/* Symbol & Timeframe - PROMINENT */}
           <div className={isMobile ? '' : 'md:col-span-2'}>
             <div className={isMobile ? 'flex items-center justify-between' : ''}>
               <div>
-                <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-1">
-                  {isMobile ? 'ID' : 'Trade ID'}
+                {/* Timeframe Badge - VERY PROMINENT */}
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={`
+                    px-3 py-1 rounded-lg font-bold text-sm border-2
+                    ${trade.timeframe === '15m' ? 'bg-bitcoin-orange text-bitcoin-black border-bitcoin-orange' : ''}
+                    ${trade.timeframe === '1h' ? 'bg-bitcoin-orange-20 text-bitcoin-orange border-bitcoin-orange' : ''}
+                    ${trade.timeframe === '4h' ? 'bg-bitcoin-black text-bitcoin-orange border-bitcoin-orange' : ''}
+                    ${trade.timeframe === '1d' ? 'bg-bitcoin-black text-bitcoin-white border-bitcoin-orange' : ''}
+                    ${trade.timeframe === '1w' ? 'bg-bitcoin-black text-bitcoin-white-60 border-bitcoin-orange-20' : ''}
+                  `}>
+                    {trade.timeframe.toUpperCase()}
+                  </span>
+                  <span className="font-mono text-lg font-bold text-bitcoin-white">
+                    {trade.symbol}
+                  </span>
+                </div>
+                <p className="text-bitcoin-white-60 text-xs">
+                  ID: #{trade.id.substring(0, 8)}
                 </p>
-                <p className="text-bitcoin-white font-mono text-sm font-bold">
-                  #{trade.id.substring(0, 8)}
-                </p>
-                <p className="text-bitcoin-white-60 text-xs mt-1">
+                <p className="text-bitcoin-white-60 text-xs">
                   {new Date(trade.generatedAt).toLocaleDateString()}
                 </p>
               </div>
@@ -442,10 +461,60 @@ export default function TradeRow({ trade, onClick, className = '' }: TradeRowPro
                 Trade Details
               </h4>
               <div className="space-y-3">
-                <div className="p-3 bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg">
-                  <p className="text-bitcoin-white-60 text-xs mb-1">Timeframe</p>
-                  <p className="text-bitcoin-white font-bold">{trade.timeframe} ({trade.timeframeHours}h)</p>
-                </div>
+                {/* Data Source & Quality - PROMINENT */}
+                {trade.indicators && (
+                  <div className="p-3 bg-bitcoin-orange bg-opacity-10 border-2 border-bitcoin-orange rounded-lg">
+                    <p className="text-bitcoin-orange text-xs font-bold uppercase tracking-wider mb-2">
+                      📊 Data Source & Quality
+                    </p>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-bitcoin-white-60 text-xs">Source:</span>
+                        <span className="text-bitcoin-white font-bold text-sm">
+                          {trade.indicators.dataSource || 'CoinGecko'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-bitcoin-white-60 text-xs">Timeframe:</span>
+                        <span className="text-bitcoin-orange font-bold text-sm">
+                          {trade.indicators.timeframe || trade.timeframe}
+                        </span>
+                      </div>
+                      {trade.indicators.dataQuality !== undefined && (
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-bitcoin-white-60 text-xs">Quality:</span>
+                            <span className="text-bitcoin-orange font-bold text-sm">
+                              {trade.indicators.dataQuality}%
+                            </span>
+                          </div>
+                          <div className="w-full bg-bitcoin-black border border-bitcoin-orange-20 rounded-full h-2">
+                            <div 
+                              className="bg-bitcoin-orange h-full rounded-full transition-all"
+                              style={{ width: `${trade.indicators.dataQuality}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                      {trade.indicators.calculatedAt && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-bitcoin-white-60 text-xs">Calculated:</span>
+                          <span className="text-bitcoin-white-80 text-xs">
+                            {new Date(trade.indicators.calculatedAt).toLocaleTimeString()}
+                          </span>
+                        </div>
+                      )}
+                      {trade.indicators.candleCount && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-bitcoin-white-60 text-xs">Candles:</span>
+                          <span className="text-bitcoin-white-80 text-xs">
+                            {trade.indicators.candleCount}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 <div className="p-3 bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg">
                   <p className="text-bitcoin-white-60 text-xs mb-1">Market Condition</p>

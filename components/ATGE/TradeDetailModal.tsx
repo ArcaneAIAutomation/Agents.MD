@@ -147,6 +147,120 @@ export default function TradeDetailModal({
             </div>
           </div>
 
+          {/* Data Source & Quality - PROMINENT SECTION */}
+          {trade.indicators && (
+            <div className="bg-bitcoin-orange bg-opacity-10 border-2 border-bitcoin-orange rounded-xl p-6">
+              <h3 className="text-xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
+                <Database size={24} className="text-bitcoin-orange" />
+                📊 Data Source & Quality
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Timeframe */}
+                <div className="bg-bitcoin-black border border-bitcoin-orange rounded-lg p-4">
+                  <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
+                    Timeframe
+                  </p>
+                  <p className="text-2xl font-bold text-bitcoin-orange font-mono">
+                    {trade.indicators.timeframe || trade.timeframe}
+                  </p>
+                  <p className="text-bitcoin-white-60 text-xs mt-1">
+                    Candle period
+                  </p>
+                </div>
+
+                {/* Data Source */}
+                <div className="bg-bitcoin-black border border-bitcoin-orange rounded-lg p-4">
+                  <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
+                    Data Source
+                  </p>
+                  <p className="text-2xl font-bold text-bitcoin-white">
+                    {trade.indicators.dataSource || 'CoinGecko'}
+                  </p>
+                  <p className="text-bitcoin-white-60 text-xs mt-1">
+                    OHLC provider
+                  </p>
+                </div>
+
+                {/* Data Quality */}
+                {trade.indicators.dataQuality !== undefined && (
+                  <div className="bg-bitcoin-black border border-bitcoin-orange rounded-lg p-4">
+                    <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
+                      Data Quality
+                    </p>
+                    <p className="text-2xl font-bold text-bitcoin-orange font-mono">
+                      {trade.indicators.dataQuality}%
+                    </p>
+                    <div className="mt-2">
+                      <div className="w-full bg-bitcoin-black border border-bitcoin-orange-20 rounded-full h-2">
+                        <div 
+                          className="bg-bitcoin-orange h-full rounded-full transition-all"
+                          style={{ width: `${trade.indicators.dataQuality}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Candle Count */}
+                {trade.indicators.candleCount && (
+                  <div className="bg-bitcoin-black border border-bitcoin-orange rounded-lg p-4">
+                    <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
+                      Candles Used
+                    </p>
+                    <p className="text-2xl font-bold text-bitcoin-white font-mono">
+                      {trade.indicators.candleCount}
+                    </p>
+                    <p className="text-bitcoin-white-60 text-xs mt-1">
+                      Historical data
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Calculated At */}
+              {trade.indicators.calculatedAt && (
+                <div className="mt-4 p-3 bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-bitcoin-white-60 text-sm">Indicators Calculated At:</span>
+                    <span className="text-bitcoin-white font-mono text-sm">
+                      {new Date(trade.indicators.calculatedAt).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Historical Data Source (if available) */}
+              {trade.result && (
+                <div className="mt-4 p-3 bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg">
+                  <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
+                    Historical Backtest Data
+                  </p>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-bitcoin-white-60 text-xs mb-1">Source</p>
+                      <p className="text-bitcoin-white text-sm font-mono">
+                        {trade.result.dataSource || 'N/A'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-bitcoin-white-60 text-xs mb-1">Resolution</p>
+                      <p className="text-bitcoin-white text-sm font-mono">
+                        {trade.result.dataResolution || 'N/A'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-bitcoin-white-60 text-xs mb-1">Quality</p>
+                      <p className="text-bitcoin-orange text-sm font-mono font-bold">
+                        {trade.result.dataQualityScore || 0}%
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Technical Indicators at Generation */}
           <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-xl p-6">
             <h3 className="text-xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">

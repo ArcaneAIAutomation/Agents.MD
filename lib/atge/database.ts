@@ -126,6 +126,13 @@ export interface TechnicalIndicators {
   volume24h?: number;
   marketCap?: number;
   
+  // Metadata (V2)
+  dataSource?: string;
+  timeframe?: string;
+  calculatedAt?: Date;
+  dataQuality?: number;
+  candleCount?: number;
+  
   createdAt: Date;
 }
 
@@ -380,7 +387,7 @@ export async function storeTradeResults(
 // ============================================================================
 
 /**
- * Store technical indicators
+ * Store technical indicators with metadata (V2)
  */
 export async function storeTechnicalIndicators(
   indicators: Omit<TechnicalIndicators, 'id' | 'createdAt'>
@@ -393,7 +400,8 @@ export async function storeTechnicalIndicators(
       ema_20, ema_50, ema_200,
       bollinger_upper, bollinger_middle, bollinger_lower,
       atr_value,
-      volume_24h, market_cap
+      volume_24h, market_cap,
+      data_source, timeframe, calculated_at, data_quality, candle_count
     ) VALUES (
       $1,
       $2,
@@ -401,7 +409,8 @@ export async function storeTechnicalIndicators(
       $6, $7, $8,
       $9, $10, $11,
       $12,
-      $13, $14
+      $13, $14,
+      $15, $16, $17, $18, $19
     )
     RETURNING *
   `, [
@@ -411,7 +420,12 @@ export async function storeTechnicalIndicators(
     indicators.ema20, indicators.ema50, indicators.ema200,
     indicators.bollingerUpper, indicators.bollingerMiddle, indicators.bollingerLower,
     indicators.atrValue,
-    indicators.volume24h, indicators.marketCap
+    indicators.volume24h, indicators.marketCap,
+    indicators.dataSource || 'CoinGecko',
+    indicators.timeframe || '1d',
+    indicators.calculatedAt || new Date(),
+    indicators.dataQuality || 0,
+    indicators.candleCount || 0
   ]);
   
   return mapTechnicalIndicatorsFromDb(result);
