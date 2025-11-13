@@ -133,35 +133,39 @@ function createGPT4oPrompt(context: string): string {
 
 ${context}
 
-Generate a trading signal with the following structure (respond ONLY with valid JSON):
+CRITICAL: You MUST respond with ONLY valid JSON. No markdown, no code blocks, no explanations - JUST the JSON object.
+
+Generate a trading signal with this EXACT structure:
 
 {
-  "entryPrice": <number>,
-  "tp1Price": <number>,
+  "entryPrice": 103000.00,
+  "tp1Price": 106090.00,
   "tp1Allocation": 40,
-  "tp2Price": <number>,
+  "tp2Price": 109270.00,
   "tp2Allocation": 30,
-  "tp3Price": <number>,
+  "tp3Price": 113300.00,
   "tp3Allocation": 30,
-  "stopLossPrice": <number>,
-  "stopLossPercentage": <number>,
-  "timeframe": "<1h|4h|1d|1w>",
-  "confidenceScore": <0-100>,
-  "marketCondition": "<trending|ranging|volatile>",
-  "reasoning": "<detailed explanation of why this trade makes sense>"
+  "stopLossPrice": 98860.00,
+  "stopLossPercentage": 4.02,
+  "timeframe": "4h",
+  "confidenceScore": 78,
+  "marketCondition": "trending",
+  "reasoning": "Detailed explanation here"
 }
 
 Guidelines:
 1. Entry price should be close to current price (within 2%)
 2. TP1 should be 2-5% from entry, TP2 should be 5-10%, TP3 should be 10-20%
 3. Stop loss should be 3-7% below entry for long positions
-4. Timeframe should match the expected duration to reach targets
-5. Confidence score should reflect the strength of all indicators
-6. Market condition should be based on volatility and trend analysis
+4. Timeframe must be one of: "1h", "4h", "1d", "1w"
+5. Confidence score must be 0-100 (integer)
+6. Market condition must be one of: "trending", "ranging", "volatile"
 7. Reasoning should be detailed and reference specific indicators
-8. **IMPORTANT**: If LunarCrush data is available in Social Sentiment, consider Galaxy Score and social sentiment in your decision. High Galaxy Score (>70) should increase confidence.
+8. If LunarCrush Galaxy Score >70, increase confidence by 5-10 points
+9. All prices must be numbers (not strings)
+10. All property names must be in double quotes
 
-Respond ONLY with the JSON object, no additional text.`;
+RESPOND WITH ONLY THE JSON OBJECT - NO OTHER TEXT.`;
 }
 
 /**
@@ -185,14 +189,15 @@ async function generateWithGPT4o(context: string, symbol: string): Promise<Trade
       messages: [
         {
           role: 'system',
-          content: 'You are an expert cryptocurrency trading analyst. Respond only with valid JSON.'
+          content: 'You are an expert cryptocurrency trading analyst. You MUST respond with ONLY valid JSON. No markdown, no code blocks, no explanations - just the raw JSON object.'
         },
         {
           role: 'user',
           content: createGPT4oPrompt(context)
         }
       ],
-      temperature: 0.7,
+      response_format: { type: 'json_object' }, // Force JSON mode
+      temperature: 0.5, // Lower temperature for more consistent output
       max_tokens: 1000
     })
   });
@@ -204,13 +209,38 @@ async function generateWithGPT4o(context: string, symbol: string): Promise<Trade
   const data = await response.json();
   const content = data.choices[0].message.content;
   
-  // Parse JSON response
+  // Parse JSON response with better error handling
   const jsonMatch = content.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
-    throw new Error('Invalid JSON response from GPT-4o');
+    console.error('[ATGE] No JSON found in GPT-4o response:', content);
+    throw new Error('Invalid JSON response from GPT-4o - no JSON object found');
   }
   
-  const signalData = JSON.parse(jsonMatch[0]);
+  let signalData;
+  try {
+    // Try to parse the JSON
+    signalData = JSON.parse(jsonMatch[0]);
+  } catch (parseError) {
+    console.error('[ATGE] JSON parse error:', parseError);
+    console.error('[ATGE] Raw JSON string:', jsonMatch[0]);
+    
+    // Try to fix common JSON issues
+    let fixedJson = jsonMatch[0]
+      // Fix unquoted property names
+      .replace(/(\w+):/g, '"$1":')
+      // Fix single quotes
+      .replace(/'/g, '"')
+      // Fix trailing commas
+      .replace(/,(\s*[}\]])/g, '$1');
+    
+    try {
+      signalData = JSON.parse(fixedJson);
+      console.log('[ATGE] Successfully parsed JSON after fixes');
+    } catch (secondError) {
+      console.error('[ATGE] Failed to parse JSON even after fixes');
+      throw new Error(`Invalid JSON from GPT-4o: ${parseError.message}`);
+    }
+  }
   
   // Calculate timeframe hours
   const timeframeHours = {
