@@ -165,7 +165,8 @@ Provide your analysis in a structured format with clear reasoning.`;
         }
       ],
       max_completion_tokens: 2000
-    })
+    }),
+    signal: AbortSignal.timeout(120000) // 120 second timeout for fetch itself
   });
 
   if (!response.ok) {
@@ -210,7 +211,8 @@ Provide: 1) Market outlook 2) Key support/resistance 3) Risk factors 4) Trade re
         temperature: 0.7,
         maxOutputTokens: 1000
       }
-    })
+    }),
+    signal: AbortSignal.timeout(120000) // 120 second timeout for fetch itself
   });
 
   if (!response.ok) {
@@ -355,7 +357,7 @@ export async function generateComprehensiveAnalysis(
   );
   const riskRewardRatio = rewardAmount / riskAmount;
   
-  // Generate AI analysis - ChatGPT 5.1 primary (120s timeout), Gemini 2.5 Pro fallback (60s timeout)
+  // Generate AI analysis - ChatGPT 5.1 primary (120s timeout), Gemini 2.5 Pro fallback (120s timeout)
   console.log(`[ATGE] Calling ChatGPT 5.1 for primary analysis (120s timeout for maximum accuracy)...`);
   let openAIAnalysis = '';
   let geminiAnalysis = '';
@@ -374,12 +376,12 @@ export async function generateComprehensiveAnalysis(
   } catch (gptErr) {
     console.error('[ATGE] ChatGPT 5.1 analysis failed, trying Gemini 2.5 Pro with timeout:', gptErr);
     
-    // Fallback to Gemini 2.5 Pro with 60-second timeout for maximum accuracy
+    // Fallback to Gemini 2.5 Pro with 120-second timeout for maximum accuracy
     try {
       geminiAnalysis = await Promise.race([
         generateGeminiAnalysis(input),
         new Promise<string>((_, reject) => 
-          setTimeout(() => reject(new Error('Gemini 2.5 Pro timeout after 60 seconds')), 60000)
+          setTimeout(() => reject(new Error('Gemini 2.5 Pro timeout after 120 seconds')), 120000)
         )
       ]);
       aiModelsUsed.push('Google Gemini 2.5 Pro (Fallback)');
