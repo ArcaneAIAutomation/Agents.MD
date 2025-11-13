@@ -140,6 +140,10 @@ async function fetchTwitterSentiment(symbol: string): Promise<SentimentData['twi
 
 /**
  * Fetch Reddit sentiment
+ * 
+ * NOTE: Reddit API frequently returns 403 errors due to rate limiting
+ * This function gracefully handles failures and returns null
+ * Trade generation continues without Reddit data
  */
 async function fetchRedditSentiment(symbol: string): Promise<SentimentData['reddit']> {
   try {
@@ -149,24 +153,43 @@ async function fetchRedditSentiment(symbol: string): Promise<SentimentData['redd
     
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'ATGE/1.0'
-      }
+        'User-Agent': 'Mozilla/5.0 (compatible; ATGE/1.0; +https://news.arcane.group)'
+      },
+      signal: AbortSignal.timeout(5000) // 5 second timeout
     });
 
     if (!response.ok) {
-      throw new Error(`Reddit API error: ${response.status}`);
+      // Reddit often returns 403 - this is expected, not an error
+      if (response.status === 403) {
+        console.log('[ATGE] Reddit API returned 403 (rate limited) - continuing without Reddit data');
+      } else {
+        console.warn(`[ATGE] Reddit API returned ${response.status} - continuing without Reddit data`);
+      }
+      return null;
     }
 
     const data = await response.json();
+    
+    // Validate response structure
+    if (!data?.data?.children || !Array.isArray(data.data.children)) {
+      console.warn('[ATGE] Reddit API returned invalid data structure - continuing without Reddit data');
+      return null;
+    }
+    
     const posts = data.data.children;
+    
+    if (posts.length === 0) {
+      console.log('[ATGE] Reddit API returned no posts - continuing without Reddit data');
+      return null;
+    }
     
     const postCount = posts.length;
     const commentCount = posts.reduce((sum: number, post: any) => 
-      sum + (post.data.num_comments || 0), 0);
+      sum + (post.data?.num_comments || 0), 0);
     
     // Calculate sentiment based on upvote ratio
     const avgUpvoteRatio = posts.reduce((sum: number, post: any) => 
-      sum + (post.data.upvote_ratio || 0.5), 0) / postCount;
+      sum + (post.data?.upvote_ratio || 0.5), 0) / postCount;
     
     const sentimentScore = Math.round(avgUpvoteRatio * 100);
     
@@ -177,6 +200,8 @@ async function fetchRedditSentiment(symbol: string): Promise<SentimentData['redd
       sentiment = 'negative';
     }
     
+    console.log(`[ATGE] Reddit sentiment fetched successfully: ${sentiment} (${sentimentScore})`);
+    
     return {
       postCount,
       commentCount,
@@ -184,7 +209,16 @@ async function fetchRedditSentiment(symbol: string): Promise<SentimentData['redd
       sentimentScore
     };
   } catch (error) {
-    console.error('[ATGE] Reddit fetch failed:', error);
+    // Gracefully handle all errors - Reddit is optional
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        console.log('[ATGE] Reddit API timeout (5s) - continuing without Reddit data');
+      } else {
+        console.log(`[ATGE] Reddit fetch failed: ${error.message} - continuing without Reddit data`);
+      }
+    } else {
+      console.log('[ATGE] Reddit fetch failed with unknown error - continuing without Reddit data');
+    }
     return null;
   }
 }
@@ -245,27 +279,70 @@ function calculateAggregateSentiment(
  * 
  * @param symbol - Cryptocurrency symbol (BTC or ETH)
  * @returns Aggregated sentiment data
+ * 
+ * NOTE: This function is designed to NEVER throw errors
+ * If all sources fail, it returns neutral sentiment (score: 50)
+ * Trade generation continues regardless of sentiment data availability
  */
 export async function getSentimentData(symbol: string): Promise<SentimentData> {
   console.log(`[ATGE] Fetching sentiment data for ${symbol}`);
   
-  // Fetch from all sources in parallel
-  const [lunarCrush, twitter, reddit] = await Promise.all([
-    fetchLunarCrushData(symbol),
-    fetchTwitterSentiment(symbol),
-    fetchRedditSentiment(symbol)
-  ]);
-  
-  // Calculate aggregate sentiment
-  const aggregateSentiment = calculateAggregateSentiment(lunarCrush, twitter, reddit);
-  
-  return {
-    lunarCrush,
-    twitter,
-    reddit,
-    aggregateSentiment,
-    timestamp: new Date()
-  };
+  try {
+    // Fetch from all sources in parallel
+    // Each function handles its own errors and returns null on failure
+    const [lunarCrush, twitter, reddit] = await Promise.all([
+      fetchLunarCrushData(symbol).catch(err => {
+        console.log(`[ATGE] LunarCrush error caught in Promise.all: ${err.message}`);
+        return null;
+      }),
+      fetchTwitterSentiment(symbol).catch(err => {
+        console.log(`[ATGE] Twitter error caught in Promise.all: ${err.message}`);
+        return null;
+      }),
+      fetchRedditSentiment(symbol).catch(err => {
+        console.log(`[ATGE] Reddit error caught in Promise.all: ${err.message}`);
+        return null;
+      })
+    ]);
+    
+    // Log which sources succeeded
+    const successfulSources = [
+      lunarCrush && 'LunarCrush',
+      twitter && 'Twitter',
+      reddit && 'Reddit'
+    ].filter(Boolean);
+    
+    if (successfulSources.length > 0) {
+      console.log(`[ATGE] Sentiment data fetched from: ${successfulSources.join(', ')}`);
+    } else {
+      console.log('[ATGE] No sentiment data available - using neutral sentiment (50)');
+    }
+    
+    // Calculate aggregate sentiment
+    const aggregateSentiment = calculateAggregateSentiment(lunarCrush, twitter, reddit);
+    
+    return {
+      lunarCrush,
+      twitter,
+      reddit,
+      aggregateSentiment,
+      timestamp: new Date()
+    };
+  } catch (error) {
+    // Ultimate fallback - should never happen, but ensures function never throws
+    console.error('[ATGE] Unexpected error in getSentimentData:', error);
+    
+    return {
+      lunarCrush: null,
+      twitter: null,
+      reddit: null,
+      aggregateSentiment: {
+        score: 50,
+        label: 'neutral'
+      },
+      timestamp: new Date()
+    };
+  }
 }
 
 export type { SentimentData };
