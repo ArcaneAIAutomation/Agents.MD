@@ -355,39 +355,45 @@ export async function generateComprehensiveAnalysis(
   );
   const riskRewardRatio = rewardAmount / riskAmount;
   
-  // Generate AI analysis - GPT-5 primary, Gemini fallback
-  console.log(`[ATGE] Calling OpenAI GPT-5 for primary analysis...`);
+  // Generate AI analysis - Gemini primary (fast), GPT-5 with timeout
+  console.log(`[ATGE] Calling Gemini AI for primary analysis (fast)...`);
   let openAIAnalysis = '';
   let geminiAnalysis = '';
   let aiModelsUsed: string[] = [];
   
+  // Use Gemini as primary (5 seconds vs GPT-5's 27+ seconds)
   try {
-    openAIAnalysis = await generateOpenAIAnalysis(input);
-    aiModelsUsed.push('OpenAI GPT-5');
-    console.log(`[ATGE] OpenAI GPT-5 analysis completed successfully`);
-  } catch (err) {
-    console.error('[ATGE] OpenAI analysis failed, trying Gemini fallback:', err);
+    geminiAnalysis = await generateGeminiAnalysis(input);
+    aiModelsUsed.push('Gemini 2.0 Flash');
+    console.log(`[ATGE] Gemini analysis completed successfully`);
+  } catch (geminiErr) {
+    console.error('[ATGE] Gemini analysis failed, trying GPT-5 with timeout:', geminiErr);
     
-    // Fallback to Gemini if OpenAI fails
+    // Fallback to GPT-5 with 20-second timeout
     try {
-      geminiAnalysis = await generateGeminiAnalysis(input);
-      aiModelsUsed.push('Gemini 2.0 Flash (Fallback)');
-      console.log(`[ATGE] Gemini fallback analysis completed successfully`);
-    } catch (geminiErr) {
-      console.error('[ATGE] Both AI analyses failed:', geminiErr);
-      openAIAnalysis = 'AI analysis unavailable - using technical indicators only';
+      openAIAnalysis = await Promise.race([
+        generateOpenAIAnalysis(input),
+        new Promise<string>((_, reject) => 
+          setTimeout(() => reject(new Error('GPT-5 timeout after 20 seconds')), 20000)
+        )
+      ]);
+      aiModelsUsed.push('OpenAI GPT-5 (Fallback)');
+      console.log(`[ATGE] GPT-5 fallback analysis completed successfully`);
+    } catch (gptErr) {
+      console.error('[ATGE] Both AI analyses failed:', gptErr);
+      geminiAnalysis = 'AI analysis unavailable - using technical indicators only';
       aiModelsUsed.push('Technical Analysis Only');
     }
   }
   
-  // Combine AI reasoning
+  // Combine AI reasoning (Gemini primary, GPT-5 fallback)
   const aiReasoning = `**COMPREHENSIVE AI ANALYSIS**
 
-${openAIAnalysis ? `**OpenAI GPT-5 Analysis:**
-${openAIAnalysis}` : ''}
-
-${geminiAnalysis ? `**Gemini AI Analysis:**
+${geminiAnalysis ? `**Gemini AI Analysis (Primary):**
 ${geminiAnalysis}` : ''}
+
+${openAIAnalysis ? `**OpenAI GPT-5 Analysis (Fallback):**
+${openAIAnalysis}` : ''}
 
 **Confidence Score:** ${confidenceScore}/100
 **Market Condition:** ${marketCondition.toUpperCase()}
