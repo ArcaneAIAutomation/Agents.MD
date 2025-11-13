@@ -569,7 +569,12 @@ export default function TradeDetailModal({
                   <p className={`text-2xl font-bold font-mono ${
                     trade.snapshot.priceChange24h >= 0 ? 'text-bitcoin-orange' : 'text-red-500'
                   }`}>
-                    {formatPercentage(trade.snapshot.priceChange24h)}
+                    {formatCurrency(trade.snapshot.priceChange24h)}
+                  </p>
+                  <p className={`text-sm font-semibold mt-1 ${
+                    trade.snapshot.priceChange24h >= 0 ? 'text-bitcoin-orange' : 'text-red-500'
+                  }`}>
+                    ({formatPercentage((trade.snapshot.priceChange24h / trade.snapshot.price) * 100)})
                   </p>
                 </div>
 
