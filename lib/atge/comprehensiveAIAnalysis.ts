@@ -355,50 +355,50 @@ export async function generateComprehensiveAnalysis(
   );
   const riskRewardRatio = rewardAmount / riskAmount;
   
-  // Generate AI analysis - Gemini 2.5 Pro primary (60s timeout), ChatGPT 5.1 fallback (60s timeout)
-  console.log(`[ATGE] Calling Gemini 2.5 Pro for primary analysis (60s timeout for maximum accuracy)...`);
+  // Generate AI analysis - ChatGPT 5.1 primary (120s timeout), Gemini 2.5 Pro fallback (60s timeout)
+  console.log(`[ATGE] Calling ChatGPT 5.1 for primary analysis (120s timeout for maximum accuracy)...`);
   let openAIAnalysis = '';
   let geminiAnalysis = '';
   let aiModelsUsed: string[] = [];
   
-  // Use Gemini as primary with 60-second timeout for maximum accuracy
+  // Use ChatGPT 5.1 as primary with 120-second timeout for maximum accuracy
   try {
-    geminiAnalysis = await Promise.race([
-      generateGeminiAnalysis(input),
+    openAIAnalysis = await Promise.race([
+      generateOpenAIAnalysis(input),
       new Promise<string>((_, reject) => 
-        setTimeout(() => reject(new Error('Gemini timeout after 60 seconds')), 60000)
+        setTimeout(() => reject(new Error('ChatGPT 5.1 timeout after 120 seconds')), 120000)
       )
     ]);
-    aiModelsUsed.push('Gemini 2.5 Pro');
-    console.log(`[ATGE] Gemini analysis completed successfully`);
-  } catch (geminiErr) {
-    console.error('[ATGE] Gemini analysis failed, trying ChatGPT 5.1 with timeout:', geminiErr);
+    aiModelsUsed.push('OpenAI ChatGPT 5.1');
+    console.log(`[ATGE] ChatGPT 5.1 analysis completed successfully`);
+  } catch (gptErr) {
+    console.error('[ATGE] ChatGPT 5.1 analysis failed, trying Gemini 2.5 Pro with timeout:', gptErr);
     
-    // Fallback to ChatGPT 5.1 with 60-second timeout for maximum accuracy
+    // Fallback to Gemini 2.5 Pro with 60-second timeout for maximum accuracy
     try {
-      openAIAnalysis = await Promise.race([
-        generateOpenAIAnalysis(input),
+      geminiAnalysis = await Promise.race([
+        generateGeminiAnalysis(input),
         new Promise<string>((_, reject) => 
-          setTimeout(() => reject(new Error('ChatGPT 5.1 timeout after 60 seconds')), 60000)
+          setTimeout(() => reject(new Error('Gemini 2.5 Pro timeout after 60 seconds')), 60000)
         )
       ]);
-      aiModelsUsed.push('OpenAI ChatGPT 5.1 (Fallback)');
-      console.log(`[ATGE] ChatGPT 5.1 fallback analysis completed successfully`);
-    } catch (gptErr) {
-      console.error('[ATGE] Both AI analyses failed:', gptErr);
-      geminiAnalysis = 'AI analysis unavailable - using technical indicators only';
+      aiModelsUsed.push('Google Gemini 2.5 Pro (Fallback)');
+      console.log(`[ATGE] Gemini 2.5 Pro fallback analysis completed successfully`);
+    } catch (geminiErr) {
+      console.error('[ATGE] Both AI analyses failed:', geminiErr);
+      openAIAnalysis = 'AI analysis unavailable - using technical indicators only';
       aiModelsUsed.push('Technical Analysis Only');
     }
   }
   
-  // Combine AI reasoning (Gemini 2.5 Pro primary, ChatGPT 5.1 fallback)
+  // Combine AI reasoning (ChatGPT 5.1 primary, Gemini 2.5 Pro fallback)
   const aiReasoning = `**COMPREHENSIVE AI ANALYSIS**
 
-${geminiAnalysis ? `**Google Gemini 2.5 Pro Analysis (Primary):**
-${geminiAnalysis}` : ''}
-
-${openAIAnalysis ? `**OpenAI ChatGPT 5.1 Analysis (Fallback):**
+${openAIAnalysis ? `**OpenAI ChatGPT 5.1 Analysis (Primary):**
 ${openAIAnalysis}` : ''}
+
+${geminiAnalysis ? `**Google Gemini 2.5 Pro Analysis (Fallback):**
+${geminiAnalysis}` : ''}
 
 **Confidence Score:** ${confidenceScore}/100
 **Market Condition:** ${marketCondition.toUpperCase()}
