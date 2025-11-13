@@ -10,9 +10,9 @@ export default function ATGEPage() {
         <title>AI Trade Generation Engine - Bitcoin Sovereign Technology</title>
         <meta 
           name="description" 
-          content="AI-powered Bitcoin trade signal generation with GPT-4o. Real-time analysis, backtested results, and complete transparency." 
+          content="Ultimate AI-powered Bitcoin trade signals with Dual AI (GPT-4o + Gemini 2.0). 13 real-time data sources, 4 timeframes, 100% transparency." 
         />
-        <meta name="keywords" content="Bitcoin, AI trading, trade signals, GPT-4o, cryptocurrency, technical analysis" />
+        <meta name="keywords" content="Bitcoin, AI trading, trade signals, GPT-4o, Gemini AI, cryptocurrency, technical analysis, real-time data" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -41,29 +41,29 @@ export default function ATGEPage() {
                   <div className="flex justify-center mb-2">
                     <Zap size={24} className="text-bitcoin-orange" />
                   </div>
-                  <div className="text-xl font-bold text-bitcoin-orange font-mono">GPT-4o</div>
-                  <div className="text-sm text-bitcoin-white-60">AI Model</div>
+                  <div className="text-xl font-bold text-bitcoin-orange font-mono">Dual AI</div>
+                  <div className="text-sm text-bitcoin-white-60">GPT-4o + Gemini</div>
                 </div>
                 <div className="text-center">
                   <div className="flex justify-center mb-2">
                     <Target size={24} className="text-bitcoin-orange" />
                   </div>
-                  <div className="text-xl font-bold text-bitcoin-orange font-mono">3 Targets</div>
-                  <div className="text-sm text-bitcoin-white-60">Take Profit</div>
+                  <div className="text-xl font-bold text-bitcoin-orange font-mono">13 APIs</div>
+                  <div className="text-sm text-bitcoin-white-60">Data Sources</div>
                 </div>
                 <div className="text-center">
                   <div className="flex justify-center mb-2">
                     <Shield size={24} className="text-bitcoin-orange" />
                   </div>
-                  <div className="text-xl font-bold text-bitcoin-orange font-mono">$1000</div>
-                  <div className="text-sm text-bitcoin-white-60">Standard Size</div>
+                  <div className="text-xl font-bold text-bitcoin-orange font-mono">4 Timeframes</div>
+                  <div className="text-sm text-bitcoin-white-60">15m/1h/4h/1d</div>
                 </div>
                 <div className="text-center">
                   <div className="flex justify-center mb-2">
                     <TrendingUp size={24} className="text-bitcoin-orange" />
                   </div>
                   <div className="text-xl font-bold text-bitcoin-orange font-mono">100%</div>
-                  <div className="text-sm text-bitcoin-white-60">Real Data</div>
+                  <div className="text-sm text-bitcoin-white-60">Real-Time Data</div>
                 </div>
               </div>
             </div>
@@ -80,11 +80,7 @@ export default function ATGEPage() {
                   How It Works
                 </h3>
                 <p className="text-bitcoin-white-60 text-sm leading-relaxed">
-                  The AI Trade Generation Engine uses GPT-4o to analyze real-time market data, 
-                  technical indicators, social sentiment, and on-chain metrics to generate 
-                  comprehensive trade signals. Each signal includes entry price, 3 take-profit 
-                  levels, stop loss, timeframe, and confidence score. All trades are automatically 
-                  backtested against 100% real historical data to verify accuracy.
+                  The Ultimate AI Trade Generation Engine uses <span className="text-bitcoin-orange font-semibold">Dual AI Analysis</span> (OpenAI GPT-4o + Google Gemini 2.0 Flash) to analyze real-time data from <span className="text-bitcoin-orange font-semibold">13 APIs</span>: Market data (CoinMarketCap, CoinGecko, Kraken), Technical indicators (Binance - 500 candles), Social sentiment (LunarCrush, Twitter, Reddit), On-chain metrics (Blockchain.com, Etherscan), and News (NewsAPI). Each trade includes entry price, 3 take-profit levels, stop loss, timeframe (15m/1h/4h/1d), confidence score, and comprehensive AI reasoning. All data is <span className="text-bitcoin-orange font-semibold">force-refreshed</span> for 100% real-time accuracy with complete data source attribution.
                 </p>
               </div>
             </div>

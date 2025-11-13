@@ -200,20 +200,20 @@ export default function ATGEInterface({ className = '' }: ATGEInterfaceProps) {
         {!isMobile && (
           <div className="grid grid-cols-4 gap-4 mt-4 mb-4">
             <div className="text-center">
-              <div className="text-bitcoin-orange font-mono text-xl font-bold mb-1">GPT-4o</div>
-              <div className="text-bitcoin-white-60 text-xs uppercase tracking-wider">AI Model</div>
+              <div className="text-bitcoin-orange font-mono text-xl font-bold mb-1">Dual AI</div>
+              <div className="text-bitcoin-white-60 text-xs uppercase tracking-wider">GPT-4o + Gemini</div>
             </div>
             <div className="text-center">
-              <div className="text-bitcoin-orange font-mono text-xl font-bold mb-1">3 Targets</div>
-              <div className="text-bitcoin-white-60 text-xs uppercase tracking-wider">Take Profit</div>
+              <div className="text-bitcoin-orange font-mono text-xl font-bold mb-1">13 APIs</div>
+              <div className="text-bitcoin-white-60 text-xs uppercase tracking-wider">Data Sources</div>
             </div>
             <div className="text-center">
-              <div className="text-bitcoin-orange font-mono text-xl font-bold mb-1">$1000</div>
-              <div className="text-bitcoin-white-60 text-xs uppercase tracking-wider">Standard Size</div>
+              <div className="text-bitcoin-orange font-mono text-xl font-bold mb-1">4 Timeframes</div>
+              <div className="text-bitcoin-white-60 text-xs uppercase tracking-wider">15m/1h/4h/1d</div>
             </div>
             <div className="text-center">
               <div className="text-bitcoin-orange font-mono text-xl font-bold mb-1">100%</div>
-              <div className="text-bitcoin-white-60 text-xs uppercase tracking-wider">Real Data</div>
+              <div className="text-bitcoin-white-60 text-xs uppercase tracking-wider">Real-Time Data</div>
             </div>
           </div>
         )}
@@ -222,20 +222,20 @@ export default function ATGEInterface({ className = '' }: ATGEInterfaceProps) {
         {isMobile && (
           <div className="grid grid-cols-2 gap-3 mt-3 mb-3">
             <div className="text-center bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-2">
-              <div className="text-bitcoin-orange font-mono text-lg font-bold mb-0.5">GPT-4o</div>
-              <div className="text-bitcoin-white-60 text-xs">AI Model</div>
+              <div className="text-bitcoin-orange font-mono text-lg font-bold mb-0.5">Dual AI</div>
+              <div className="text-bitcoin-white-60 text-xs">GPT-4o + Gemini</div>
             </div>
             <div className="text-center bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-2">
-              <div className="text-bitcoin-orange font-mono text-lg font-bold mb-0.5">3 Targets</div>
-              <div className="text-bitcoin-white-60 text-xs">Take Profit</div>
+              <div className="text-bitcoin-orange font-mono text-lg font-bold mb-0.5">13 APIs</div>
+              <div className="text-bitcoin-white-60 text-xs">Data Sources</div>
             </div>
             <div className="text-center bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-2">
-              <div className="text-bitcoin-orange font-mono text-lg font-bold mb-0.5">$1000</div>
-              <div className="text-bitcoin-white-60 text-xs">Standard Size</div>
+              <div className="text-bitcoin-orange font-mono text-lg font-bold mb-0.5">4 Timeframes</div>
+              <div className="text-bitcoin-white-60 text-xs">15m/1h/4h/1d</div>
             </div>
             <div className="text-center bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-2">
               <div className="text-bitcoin-orange font-mono text-lg font-bold mb-0.5">100%</div>
-              <div className="text-bitcoin-white-60 text-xs">Real Data</div>
+              <div className="text-bitcoin-white-60 text-xs">Real-Time Data</div>
             </div>
           </div>
         )}
@@ -246,7 +246,7 @@ export default function ATGEInterface({ className = '' }: ATGEInterfaceProps) {
             <span className="text-bitcoin-orange">⚡</span> How It Works
           </h3>
           <p className="text-bitcoin-white-60 text-xs leading-relaxed">
-            The AI Trade Generation Engine uses GPT-4o to analyze real-time market data, technical indicators, social sentiment, and on-chain metrics to generate comprehensive trade signals. Each signal includes entry price, 3 take-profit levels, stop loss, timeframe, and confidence score. All trades are automatically backtested against 100% real historical data to verify accuracy.
+            The Ultimate AI Trade Generation Engine uses <span className="text-bitcoin-orange font-semibold">Dual AI Analysis</span> (OpenAI GPT-4o + Google Gemini 2.0 Flash) to analyze real-time data from <span className="text-bitcoin-orange font-semibold">13 APIs</span>: Market data (CoinMarketCap, CoinGecko, Kraken), Technical indicators (Binance - 500 candles), Social sentiment (LunarCrush, Twitter, Reddit), On-chain metrics (Blockchain.com, Etherscan), and News (NewsAPI). Each trade includes entry price, 3 take-profit levels, stop loss, timeframe (15m/1h/4h/1d), confidence score, and comprehensive AI reasoning. All data is <span className="text-bitcoin-orange font-semibold">force-refreshed</span> for 100% real-time accuracy with complete data source attribution.
           </p>
         </div>
 
