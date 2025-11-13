@@ -8,11 +8,11 @@
   "devCommand": "npm run dev",
   "regions": ["lhr1"],
   "functions": {
+    "pages/api/atge/generate.ts": {
+      "maxDuration": 300
+    },
     "pages/api/**/*.ts": {
       "maxDuration": 40
-    },
-    "pages/api/atge/generate.ts": {
-      "maxDuration": 150
     },
     "pages/api/ucie/caesar-research/**/*.ts": {
       "maxDuration": 800
