@@ -12,7 +12,7 @@
       "maxDuration": 40
     },
     "pages/api/atge/generate.ts": {
-      "maxDuration": 40
+      "maxDuration": 80
     },
     "pages/api/ucie/caesar-research/**/*.ts": {
       "maxDuration": 800
