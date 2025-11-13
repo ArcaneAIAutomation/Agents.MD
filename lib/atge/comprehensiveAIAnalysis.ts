@@ -355,27 +355,39 @@ export async function generateComprehensiveAnalysis(
   );
   const riskRewardRatio = rewardAmount / riskAmount;
   
-  // Generate AI analyses in parallel
-  console.log(`[ATGE] Calling OpenAI GPT-5 and Gemini AI for analysis...`);
-  const [openAIAnalysis, geminiAnalysis] = await Promise.all([
-    generateOpenAIAnalysis(input).catch(err => {
-      console.error('[ATGE] OpenAI analysis failed:', err);
-      return 'OpenAI analysis unavailable';
-    }),
-    generateGeminiAnalysis(input).catch(err => {
-      console.error('[ATGE] Gemini analysis failed:', err);
-      return 'Gemini analysis unavailable';
-    })
-  ]);
+  // Generate AI analysis - GPT-5 primary, Gemini fallback
+  console.log(`[ATGE] Calling OpenAI GPT-5 for primary analysis...`);
+  let openAIAnalysis = '';
+  let geminiAnalysis = '';
+  let aiModelsUsed: string[] = [];
+  
+  try {
+    openAIAnalysis = await generateOpenAIAnalysis(input);
+    aiModelsUsed.push('OpenAI GPT-5');
+    console.log(`[ATGE] OpenAI GPT-5 analysis completed successfully`);
+  } catch (err) {
+    console.error('[ATGE] OpenAI analysis failed, trying Gemini fallback:', err);
+    
+    // Fallback to Gemini if OpenAI fails
+    try {
+      geminiAnalysis = await generateGeminiAnalysis(input);
+      aiModelsUsed.push('Gemini 2.0 Flash (Fallback)');
+      console.log(`[ATGE] Gemini fallback analysis completed successfully`);
+    } catch (geminiErr) {
+      console.error('[ATGE] Both AI analyses failed:', geminiErr);
+      openAIAnalysis = 'AI analysis unavailable - using technical indicators only';
+      aiModelsUsed.push('Technical Analysis Only');
+    }
+  }
   
   // Combine AI reasoning
   const aiReasoning = `**COMPREHENSIVE AI ANALYSIS**
 
-**OpenAI GPT-5 Analysis:**
-${openAIAnalysis}
+${openAIAnalysis ? `**OpenAI GPT-5 Analysis:**
+${openAIAnalysis}` : ''}
 
-**Gemini AI Analysis:**
-${geminiAnalysis}
+${geminiAnalysis ? `**Gemini AI Analysis:**
+${geminiAnalysis}` : ''}
 
 **Confidence Score:** ${confidenceScore}/100
 **Market Condition:** ${marketCondition.toUpperCase()}
@@ -386,7 +398,7 @@ ${geminiAnalysis}
 - Technical Indicators: ${input.technicalIndicators.dataSource} (${input.technicalIndicators.dataQuality}% quality)
 - Social Sentiment: LunarCrush, Twitter, Reddit
 - On-Chain Data: Blockchain.com, Etherscan
-- AI Models: OpenAI GPT-5, Gemini 2.0 Flash`;
+- AI Models: ${aiModelsUsed.join(', ')}`;
   
   return {
     ...tradeLevels,
@@ -405,7 +417,7 @@ ${geminiAnalysis}
       sentimentData: ['LunarCrush', 'Twitter', 'Reddit'],
       onChainData: ['Blockchain.com', 'Etherscan'],
       newsData: ['NewsAPI'],
-      aiModels: ['OpenAI GPT-5', 'Gemini 2.0 Flash']
+      aiModels: aiModelsUsed
     },
     dataQualityScore: input.technicalIndicators.dataQuality,
     analysisDepth: 'expert'
