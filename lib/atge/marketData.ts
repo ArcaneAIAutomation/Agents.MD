@@ -115,16 +115,21 @@ async function fetchFromCoinGecko(symbol: string): Promise<MarketData> {
  * Get market data with caching and fallback
  * 
  * @param symbol - Cryptocurrency symbol (BTC or ETH)
- * @returns Market data with 60-second cache
+ * @param forceRefresh - If true, bypass cache and fetch fresh data (default: false)
+ * @returns Market data with 60-second cache (or fresh if forceRefresh=true)
  */
-export async function getMarketData(symbol: string): Promise<MarketData> {
+export async function getMarketData(symbol: string, forceRefresh: boolean = false): Promise<MarketData> {
   const cacheKey = symbol.toUpperCase();
   
-  // Check cache first
-  const cached = cache.get(cacheKey);
-  if (cached && Date.now() < cached.expiresAt) {
-    console.log(`[ATGE] Using cached market data for ${symbol}`);
-    return cached.data;
+  // Check cache first (unless force refresh for trade generation)
+  if (!forceRefresh) {
+    const cached = cache.get(cacheKey);
+    if (cached && Date.now() < cached.expiresAt) {
+      console.log(`[ATGE] Using cached market data for ${symbol}`);
+      return cached.data;
+    }
+  } else {
+    console.log(`[ATGE] Force refreshing market data for ${symbol} (trade generation)`);
   }
 
   console.log(`[ATGE] Fetching fresh market data for ${symbol}`);

@@ -128,12 +128,13 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     console.log(`[ATGE] Using timeframe: ${timeframe}`);
 
     // Fetch all market data in parallel with performance tracking
+    // CRITICAL: Force fresh data for trade generation (no cache)
     // Use V2 indicators for accurate, timeframe-specific calculations
     const [marketData, technicalIndicators, sentimentData, onChainData] = await measureExecutionTime(
       async () => {
         return await Promise.all([
-          getMarketData(symbol),
-          getTechnicalIndicatorsV2(symbol, timeframe), // V2 with timeframe support
+          getMarketData(symbol, true), // Force fresh data (no cache)
+          getTechnicalIndicatorsV2(symbol, timeframe), // V2 with timeframe support (always fresh from Binance)
           getSentimentData(symbol), // Already includes LunarCrush data
           getOnChainData(symbol)
         ]);
