@@ -1,306 +1,162 @@
-# UCIE Quick Start Guide
+# ATGE Trade Details Fix - Quick Start Guide
 
-**Time to Setup**: 5 minutes  
-**Difficulty**: Easy  
-**Result**: Complete UCIE database ready for API/AI data
+**For Developers**: Get the trade details working in 3 steps
 
 ---
 
-## 🚀 Quick Start (3 Steps)
-
-### Step 1: Check Environment Variables
+## Step 1: Run Database Migration (5 minutes)
 
 ```bash
-npm run check:env
-```
+# Connect to your database
+psql $DATABASE_URL
 
-**This will:**
-- ✅ Check if `.env.local` exists
-- ✅ Check if `DATABASE_URL` is set
-- ✅ Check if API keys are set
-- ✅ Show what's missing
+# Run the migration
+\i migrations/004_add_trade_display_fields.sql
 
-**If DATABASE_URL is missing:**
-1. Go to https://supabase.com/dashboard
-2. Select your project
-3. Go to **Settings → Database**
-4. Copy **"Connection string"** (Transaction mode)
-5. Create `.env.local` file:
-   ```bash
-   cp .env.example .env.local
-   ```
-6. Add to `.env.local`:
-   ```
-   DATABASE_URL=postgres://user:pass@host:6543/postgres
-   ```
-7. Run `npm run check:env` again
-
-### Step 2: Setup Database
-
-```bash
-npm run setup:ucie:complete
-```
-
-**This will:**
-- ✅ Create all 6 UCIE tables
-- ✅ Create all indexes (8+)
-- ✅ Create unique constraints (UPSERT)
-- ✅ Test UPSERT functionality
-- ✅ Verify everything works
-
-**Expected Output:**
-```
-🎉 UCIE DATABASE SETUP COMPLETE!
-✅ All 6 tables created successfully
-✅ 8+ indexes created
-✅ UPSERT functionality verified
-✅ Database ready for API/AI data storage
-```
-
-### Step 3: Test Database
-
-```bash
-npm run test:ucie
-```
-
-**This will:**
-- ✅ Run 10 comprehensive tests
-- ✅ Test UPSERT operations
-- ✅ Test data replacement
-- ✅ Verify no duplicates
-
-**Expected Output:**
-```
-✅ Passed: 10/10
-🎉 ALL TESTS PASSED!
+# Verify it worked
+\d trade_results
+# You should see: data_source, data_resolution, data_quality_score columns
 ```
 
 ---
 
-## 🗄️ What Gets Created
+## Step 2: Update API Response (30 minutes)
 
-### 6 Database Tables
+### 2.1 Add Helper Functions
 
-1. **`ucie_analysis_cache`** - Stores ALL API data
-   - Market data, sentiment, news, technical, on-chain, risk, predictions, derivatives, DeFi
+Open `pages/api/atge/trades.ts` and add these functions at the top (after imports):
 
-2. **`ucie_openai_analysis`** - Stores AI summaries
-   - OpenAI GPT-4o and Gemini Pro summaries
+```typescript
+function calculateRSISignal(rsiValue: number): 'overbought' | 'oversold' | 'neutral' {
+  if (rsiValue > 70) return 'overbought';
+  if (rsiValue < 30) return 'oversold';
+  return 'neutral';
+}
 
-3. **`ucie_caesar_research`** - Stores Caesar AI research
-   - Complete analysis, findings, recommendations, sources
-
-4. **`ucie_phase_data`** - Session data (1-hour TTL)
-
-5. **`ucie_watchlist`** - User watchlists
-
-6. **`ucie_alerts`** - User alerts
-
----
-
-## 🔧 Troubleshooting
-
-### Issue 1: DATABASE_URL not set
-
-**Error**: `DATABASE_URL environment variable is not set`
-
-**Solution**:
-```bash
-# 1. Check environment
-npm run check:env
-
-# 2. Create .env.local
-cp .env.example .env.local
-
-# 3. Add DATABASE_URL from Supabase
-# Edit .env.local and add:
-DATABASE_URL=postgres://user:pass@host:6543/postgres
-
-# 4. Verify
-npm run check:env
+function calculateMACDSignal(macdValue: number): 'bullish' | 'bearish' | 'neutral' {
+  if (macdValue > 0) return 'bullish';
+  if (macdValue < 0) return 'bearish';
+  return 'neutral';
+}
 ```
 
-### Issue 2: Connection timeout
+### 2.2 Update Indicators Mapping
 
-**Error**: `Connection timeout` or `ECONNREFUSED`
+Find the section that maps indicators (around line 330) and replace with:
 
-**Solution**:
-1. Check DATABASE_URL format (should use port 6543, not 5432)
-2. Verify Supabase database is running
-3. Check firewall settings
-4. Test connection:
-   ```bash
-   psql $DATABASE_URL -c "SELECT NOW()"
-   ```
-
-### Issue 3: Permission denied
-
-**Error**: `permission denied for table`
-
-**Solution**:
-```bash
-# Grant permissions
-psql $DATABASE_URL -c "GRANT ALL ON ALL TABLES IN SCHEMA public TO your_user;"
-psql $DATABASE_URL -c "GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO your_user;"
+```typescript
+// Add indicators if exists
+if (row.rsi_value !== null) {
+  const rsiValue = parseFloat(row.rsi_value);
+  const macdValue = row.macd_value ? parseFloat(row.macd_value) : 0;
+  
+  trade.indicators = {
+    rsiValue: rsiValue,
+    rsiSignal: calculateRSISignal(rsiValue),
+    macdValue: macdValue,
+    macdSignal: calculateMACDSignal(macdValue),
+    ema20: row.ema_20 ? parseFloat(row.ema_20) : 0,
+    ema50: row.ema_50 ? parseFloat(row.ema_50) : 0,
+    ema200: row.ema_200 ? parseFloat(row.ema_200) : 0,
+    bollingerUpper: row.bollinger_upper ? parseFloat(row.bollinger_upper) : 0,
+    bollingerMiddle: row.bollinger_middle ? parseFloat(row.bollinger_middle) : 0,
+    bollingerLower: row.bollinger_lower ? parseFloat(row.bollinger_lower) : 0,
+    volumeAvg: row.indicator_volume ? parseFloat(row.indicator_volume) : 0,
+    atr: row.atr_value ? parseFloat(row.atr_value) : 0
+  };
+}
 ```
 
-### Issue 4: Tables already exist
+### 2.3 Update Snapshot Mapping
 
-**Error**: `relation "ucie_openai_analysis" already exists`
+Find the section that maps snapshot (around line 350) and replace with:
 
-**Solution**: This is OK! The migration uses `CREATE TABLE IF NOT EXISTS`, so it won't fail if tables exist.
-
----
-
-## 📋 Required Environment Variables
-
-### Minimum (for database setup):
-```bash
-DATABASE_URL=postgres://user:pass@host:6543/postgres
-```
-
-### Recommended (for UCIE to work):
-```bash
-DATABASE_URL=postgres://user:pass@host:6543/postgres
-OPENAI_API_KEY=sk-...
-GEMINI_API_KEY=...
-CAESAR_API_KEY=...
-COINMARKETCAP_API_KEY=...
-NEWS_API_KEY=...
-```
-
-### Complete list:
-See `.env.example` for all available environment variables.
-
----
-
-## 🎯 Next Steps
-
-### After Successful Setup
-
-1. **Start Development Server**:
-   ```bash
-   npm run dev
-   ```
-
-2. **Test UCIE Endpoints**:
-   ```bash
-   # Test market data
-   curl http://localhost:3000/api/ucie/market-data/BTC
-
-   # Test OpenAI summary
-   curl http://localhost:3000/api/ucie/openai-summary/BTC
-
-   # Test Gemini summary
-   curl http://localhost:3000/api/ucie/gemini-summary/BTC
-   ```
-
-3. **Deploy to Production**:
-   ```bash
-   git push origin main
-   ```
-
----
-
-## 📊 Verification
-
-### Check Tables Exist
-
-```bash
-psql $DATABASE_URL -c "
-SELECT table_name 
-FROM information_schema.tables 
-WHERE table_schema = 'public' 
-  AND table_name LIKE 'ucie_%'
-ORDER BY table_name;
-"
-```
-
-**Expected**: 6 tables (ucie_alerts, ucie_analysis_cache, ucie_caesar_research, ucie_openai_analysis, ucie_phase_data, ucie_watchlist)
-
-### Check Data Storage
-
-```bash
-# Check API data cache
-psql $DATABASE_URL -c "SELECT COUNT(*) FROM ucie_analysis_cache;"
-
-# Check OpenAI summaries
-psql $DATABASE_URL -c "SELECT COUNT(*) FROM ucie_openai_analysis;"
-
-# Check Caesar research
-psql $DATABASE_URL -c "SELECT COUNT(*) FROM ucie_caesar_research;"
+```typescript
+// Add snapshot if exists
+if (row.current_price !== null) {
+  trade.snapshot = {
+    price: parseFloat(row.current_price),
+    volume24h: row.snapshot_volume ? parseFloat(row.snapshot_volume) : 0,
+    marketCap: row.snapshot_market_cap ? parseFloat(row.snapshot_market_cap) : 0,
+    priceChange24h: row.price_change_24h ? parseFloat(row.price_change_24h) : 0,
+    high24h: row.high_24h ? parseFloat(row.high_24h) : parseFloat(row.current_price),
+    low24h: row.low_24h ? parseFloat(row.low_24h) : parseFloat(row.current_price),
+    timestamp: new Date(row.snapshot_at)
+  };
+}
 ```
 
 ---
 
-## 🎉 Success Criteria
+## Step 3: Test It (10 minutes)
 
-### ✅ Setup is successful when:
+### 3.1 Generate a Test Trade
 
-- [ ] `npm run check:env` shows DATABASE_URL is set
-- [ ] `npm run setup:ucie:complete` completes without errors
-- [ ] All 6 tables created
-- [ ] All indexes created
-- [ ] UPSERT functionality verified
-- [ ] `npm run test:ucie` shows 10/10 tests passed
-
-### ✅ System is ready when:
-
-- [ ] Database connection works
-- [ ] All tables exist
-- [ ] UPSERT replaces old data
-- [ ] No duplicate entries
-- [ ] Tests pass
-
----
-
-## 📚 Documentation
-
-- **Complete Setup**: `UCIE-DATABASE-COMPLETE.md`
-- **Automated Setup**: `UCIE-AUTOMATED-SETUP.md`
-- **System Guide**: `.kiro/steering/ucie-system.md`
-- **Environment Variables**: `.env.example`
-
----
-
-## 💡 Tips
-
-### Tip 1: Use Transaction Mode (Port 6543)
-
-Always use port **6543** (Transaction mode), not 5432:
-```
-✅ CORRECT: postgres://user:pass@host:6543/postgres
-❌ WRONG:   postgres://user:pass@host:5432/postgres
-```
-
-### Tip 2: Check Environment First
-
-Always run `npm run check:env` before database setup:
 ```bash
-npm run check:env
-npm run setup:ucie:complete
+# Start your dev server
+npm run dev
+
+# In another terminal, generate a trade
+curl -X POST http://localhost:3000/api/atge/generate \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"symbol":"BTC"}'
 ```
 
-### Tip 3: Test After Setup
+### 3.2 Visual Test
 
-Always run tests after setup to verify:
-```bash
-npm run setup:ucie:complete
-npm run test:ucie
-```
-
-### Tip 4: Keep .env.local Secret
-
-Never commit `.env.local` to git:
-- It's in `.gitignore`
-- Contains sensitive API keys
-- Use Vercel environment variables for production
+1. Open http://localhost:3000/atge/history
+2. Click on any trade to open the detail modal
+3. Verify you see:
+   - ✅ RSI value with color (red/orange/white)
+   - ✅ MACD value with color (orange/red/white)
+   - ✅ EMA 20, 50, 200 values
+   - ✅ Market snapshot section (if data available)
+   - ✅ Data source: "CoinMarketCap" (not "Pending")
+   - ✅ Data resolution: "1-minute intervals" (not "Pending")
+   - ✅ Quality score: "100%" (not "N/A")
 
 ---
 
-**Status**: ✅ **READY TO USE**  
-**Time**: 5 minutes  
-**Difficulty**: Easy  
-**Result**: Complete UCIE database
+## Troubleshooting
 
-**Three commands. Five minutes. Complete database.** 🚀
+### Issue: "Column does not exist"
+**Solution**: Run the database migration again
+
+### Issue: "Cannot read property 'rsiSignal' of undefined"
+**Solution**: Make sure you added the helper functions
+
+### Issue: Still seeing "N/A" values
+**Solution**: Check that the API is returning the indicators object
+
+### Issue: TypeScript errors
+**Solution**: The frontend interfaces are already updated, just restart your TypeScript server
+
+---
+
+## What Changed?
+
+### Frontend (Already Done ✅)
+- TradeSignal interface now has `indicators` and `snapshot` fields
+- TradeDetailModal displays all the data
+- Color coding for signals
+- Fallback messages when data unavailable
+
+### Backend (You Need to Do ⏳)
+- Add signal calculation functions
+- Update API response mapping
+- Run database migration
+
+---
+
+## Need More Details?
+
+- **Technical Documentation**: `ATGE-TRADE-DETAILS-FIX-COMPLETE.md`
+- **Integration Guide**: `ATGE-BACKEND-INTEGRATION-GUIDE.md`
+- **Implementation Status**: `IMPLEMENTATION-COMPLETE.md`
+
+---
+
+**That's it! 3 steps and you're done.** 🚀
+
+The trade detail modal will now show complete information instead of "N/A" and "Pending" placeholders.

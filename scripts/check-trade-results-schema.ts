@@ -1,29 +1,22 @@
-/**
- * Check trade_results table schema
- */
-
 import { query } from '../lib/db';
+import { config } from 'dotenv';
+
+config({ path: '.env.local' });
 
 async function checkSchema() {
-  console.log('🔍 Checking trade_results table schema...\n');
+  const result = await query(`
+    SELECT column_name, data_type, character_maximum_length, column_default
+    FROM information_schema.columns 
+    WHERE table_name = 'trade_results' 
+    ORDER BY ordinal_position
+  `);
   
-  try {
-    const result = await query(`
-      SELECT column_name, data_type, is_nullable
-      FROM information_schema.columns
-      WHERE table_schema = 'public'
-      AND table_name = 'trade_results'
-      ORDER BY ordinal_position
-    `);
-    
-    console.log('Columns in trade_results table:\n');
-    result.rows.forEach(row => {
-      console.log(`- ${row.column_name} (${row.data_type}) ${row.is_nullable === 'YES' ? 'NULL' : 'NOT NULL'}`);
-    });
-    
-  } catch (error) {
-    console.error('Error:', error);
-  }
+  console.log('\nTrade Results Table Schema:\n');
+  result.rows.forEach((row: any) => {
+    const length = row.character_maximum_length ? `(${row.character_maximum_length})` : '';
+    const def = row.column_default ? ` DEFAULT ${row.column_default}` : '';
+    console.log(`  ${row.column_name}: ${row.data_type}${length}${def}`);
+  });
   
   process.exit(0);
 }

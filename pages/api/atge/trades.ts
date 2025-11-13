@@ -72,32 +72,48 @@ interface TradeWithRelations {
   
   // Technical Indicators (if exists)
   indicators?: {
-    rsiValue?: number;
-    macdValue?: number;
-    macdSignal?: number;
-    macdHistogram?: number;
-    ema20?: number;
-    ema50?: number;
-    ema200?: number;
-    bollingerUpper?: number;
-    bollingerMiddle?: number;
-    bollingerLower?: number;
-    atrValue?: number;
-    volume24h?: number;
-    marketCap?: number;
+    rsiValue: number;
+    rsiSignal: 'overbought' | 'oversold' | 'neutral';
+    macdValue: number;
+    macdSignal: 'bullish' | 'bearish' | 'neutral';
+    ema20: number;
+    ema50: number;
+    ema200: number;
+    bollingerUpper: number;
+    bollingerMiddle: number;
+    bollingerLower: number;
+    volumeAvg: number;
+    atr: number;
   };
   
   // Market Snapshot (if exists)
   snapshot?: {
-    currentPrice: number;
-    priceChange24h?: number;
-    volume24h?: number;
-    marketCap?: number;
-    socialSentimentScore?: number;
-    whaleActivityCount?: number;
-    fearGreedIndex?: number;
-    snapshotAt: Date;
+    price: number;
+    volume24h: number;
+    marketCap: number;
+    priceChange24h: number;
+    high24h: number;
+    low24h: number;
+    timestamp: Date;
   };
+}
+
+/**
+ * Calculate RSI signal based on value
+ */
+function calculateRSISignal(rsiValue: number): 'overbought' | 'oversold' | 'neutral' {
+  if (rsiValue > 70) return 'overbought';
+  if (rsiValue < 30) return 'oversold';
+  return 'neutral';
+}
+
+/**
+ * Calculate MACD signal based on value
+ */
+function calculateMACDSignal(macdValue: number): 'bullish' | 'bearish' | 'neutral' {
+  if (macdValue > 0) return 'bullish';
+  if (macdValue < 0) return 'bearish';
+  return 'neutral';
 }
 
 async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
@@ -209,6 +225,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
         
         -- Market Snapshot
         ms.current_price, ms.price_change_24h, ms.volume_24h as snapshot_volume, ms.market_cap as snapshot_market_cap,
+        ms.high_24h, ms.low_24h,
         ms.social_sentiment_score, ms.whale_activity_count, ms.fear_greed_index,
         ms.snapshot_at
         
@@ -294,34 +311,35 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
       
       // Add indicators if exists
       if (row.rsi_value !== null) {
+        const rsiValue = parseFloat(row.rsi_value);
+        const macdValue = row.macd_value ? parseFloat(row.macd_value) : 0;
+        
         trade.indicators = {
-          rsiValue: row.rsi_value ? parseFloat(row.rsi_value) : undefined,
-          macdValue: row.macd_value ? parseFloat(row.macd_value) : undefined,
-          macdSignal: row.macd_signal ? parseFloat(row.macd_signal) : undefined,
-          macdHistogram: row.macd_histogram ? parseFloat(row.macd_histogram) : undefined,
-          ema20: row.ema_20 ? parseFloat(row.ema_20) : undefined,
-          ema50: row.ema_50 ? parseFloat(row.ema_50) : undefined,
-          ema200: row.ema_200 ? parseFloat(row.ema_200) : undefined,
-          bollingerUpper: row.bollinger_upper ? parseFloat(row.bollinger_upper) : undefined,
-          bollingerMiddle: row.bollinger_middle ? parseFloat(row.bollinger_middle) : undefined,
-          bollingerLower: row.bollinger_lower ? parseFloat(row.bollinger_lower) : undefined,
-          atrValue: row.atr_value ? parseFloat(row.atr_value) : undefined,
-          volume24h: row.indicator_volume ? parseFloat(row.indicator_volume) : undefined,
-          marketCap: row.indicator_market_cap ? parseFloat(row.indicator_market_cap) : undefined
+          rsiValue: rsiValue,
+          rsiSignal: calculateRSISignal(rsiValue),
+          macdValue: macdValue,
+          macdSignal: calculateMACDSignal(macdValue),
+          ema20: row.ema_20 ? parseFloat(row.ema_20) : 0,
+          ema50: row.ema_50 ? parseFloat(row.ema_50) : 0,
+          ema200: row.ema_200 ? parseFloat(row.ema_200) : 0,
+          bollingerUpper: row.bollinger_upper ? parseFloat(row.bollinger_upper) : 0,
+          bollingerMiddle: row.bollinger_middle ? parseFloat(row.bollinger_middle) : 0,
+          bollingerLower: row.bollinger_lower ? parseFloat(row.bollinger_lower) : 0,
+          volumeAvg: row.indicator_volume ? parseFloat(row.indicator_volume) : 0,
+          atr: row.atr_value ? parseFloat(row.atr_value) : 0
         };
       }
       
       // Add snapshot if exists
       if (row.current_price !== null) {
         trade.snapshot = {
-          currentPrice: parseFloat(row.current_price),
-          priceChange24h: row.price_change_24h ? parseFloat(row.price_change_24h) : undefined,
-          volume24h: row.snapshot_volume ? parseFloat(row.snapshot_volume) : undefined,
-          marketCap: row.snapshot_market_cap ? parseFloat(row.snapshot_market_cap) : undefined,
-          socialSentimentScore: row.social_sentiment_score,
-          whaleActivityCount: row.whale_activity_count,
-          fearGreedIndex: row.fear_greed_index,
-          snapshotAt: new Date(row.snapshot_at)
+          price: parseFloat(row.current_price),
+          volume24h: row.snapshot_volume ? parseFloat(row.snapshot_volume) : 0,
+          marketCap: row.snapshot_market_cap ? parseFloat(row.snapshot_market_cap) : 0,
+          priceChange24h: row.price_change_24h ? parseFloat(row.price_change_24h) : 0,
+          high24h: row.high_24h ? parseFloat(row.high_24h) : parseFloat(row.current_price),
+          low24h: row.low_24h ? parseFloat(row.low_24h) : parseFloat(row.current_price),
+          timestamp: new Date(row.snapshot_at)
         };
       }
       

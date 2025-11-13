@@ -39,6 +39,33 @@ export interface TradeSignal {
   createdAt: Date;
   updatedAt: Date;
   
+  // Technical Indicators (at generation time)
+  indicators?: {
+    rsiValue: number;
+    rsiSignal: 'overbought' | 'oversold' | 'neutral';
+    macdValue: number;
+    macdSignal: 'bullish' | 'bearish' | 'neutral';
+    ema20: number;
+    ema50: number;
+    ema200: number;
+    bollingerUpper: number;
+    bollingerMiddle: number;
+    bollingerLower: number;
+    volumeAvg: number;
+    atr: number;
+  };
+  
+  // Market Snapshot (at generation time)
+  snapshot?: {
+    price: number;
+    volume24h: number;
+    marketCap: number;
+    priceChange24h: number;
+    high24h: number;
+    low24h: number;
+    timestamp: Date;
+  };
+  
   // Results (if completed)
   result?: {
     actualEntryPrice: number;
@@ -59,6 +86,9 @@ export interface TradeSignal {
     profitLossPercentage?: number;
     tradeDurationMinutes?: number;
     netProfitLossUsd?: number;
+    dataSource?: string;
+    dataResolution?: string;
+    dataQualityScore?: number;
   };
 }
 

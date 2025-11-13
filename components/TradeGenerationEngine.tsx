@@ -17,19 +17,32 @@ export interface TradeSignal {
   technicalIndicators: {
     rsi: number
     macd: string
-    sma20: number
-    sma50: number
+    bollinger?: string
+    ema20: number
+    ema50: number
     support: number
     resistance: number
-    bollinger: {
-      upper: number
-      lower: number
-      middle: number
-    }
+    atr?: number
+    stochastic?: string
   }
   marketConditions: string
+  sentimentAnalysis?: string
+  newsImpact?: string
   riskLevel: 'LOW' | 'MEDIUM' | 'HIGH'
   expectedDuration: string
+  dataQuality?: {
+    exchangesCovered: number
+    technicalIndicators: number
+    sentimentSources: number
+    priceSpread: number
+    confidence: string
+  }
+  arbitrageOpportunity?: string
+  liquidityAnalysis?: string
+  liveDataValidation?: {
+    primarySource: string
+    newsAvailable: boolean
+  }
   timestamp: string
 }
 
@@ -445,12 +458,12 @@ export default function TradeGenerationEngine() {
           <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-1 mobile-touch-target">
             <div className="text-center">
               <div className="stat-label text-xs mb-1 truncate">RSI</div>
-              <div className={`text-base sm:text-lg font-black font-mono break-words ${tradeSignal.technicalIndicators.rsi > 70 ? 'text-bitcoin-orange' : tradeSignal.technicalIndicators.rsi < 30 ? 'text-bitcoin-orange' : 'text-bitcoin-white'}`}>
-                {tradeSignal.technicalIndicators.rsi?.toFixed(1) || 'N/A'}
+              <div className={`text-base sm:text-lg font-black font-mono break-words ${tradeSignal.technicalIndicators?.rsi > 70 ? 'text-bitcoin-orange' : tradeSignal.technicalIndicators?.rsi < 30 ? 'text-bitcoin-orange' : 'text-bitcoin-white'}`}>
+                {tradeSignal.technicalIndicators?.rsi ? tradeSignal.technicalIndicators.rsi.toFixed(1) : 'N/A'}
               </div>
               <div className="text-xs text-bitcoin-white-60 mt-1 truncate">
-                {tradeSignal.technicalIndicators.rsi > 70 ? 'Overbought' : 
-                 tradeSignal.technicalIndicators.rsi < 30 ? 'Oversold' : 'Neutral'}
+                {tradeSignal.technicalIndicators?.rsi > 70 ? 'Overbought' : 
+                 tradeSignal.technicalIndicators?.rsi < 30 ? 'Oversold' : 'Neutral'}
               </div>
             </div>
           </div>
@@ -458,8 +471,8 @@ export default function TradeGenerationEngine() {
           <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-2 mobile-touch-target">
             <div className="text-center">
               <div className="stat-label text-xs mb-1 truncate">MACD</div>
-              <div className={`text-base sm:text-lg font-black font-mono break-words ${tradeSignal.technicalIndicators.macd === 'BULLISH' ? 'text-bitcoin-orange' : tradeSignal.technicalIndicators.macd === 'BEARISH' ? 'text-bitcoin-orange' : 'text-bitcoin-white'}`}>
-                {tradeSignal.technicalIndicators.macd || 'N/A'}
+              <div className={`text-base sm:text-lg font-black font-mono break-words ${tradeSignal.technicalIndicators?.macd === 'BULLISH' ? 'text-bitcoin-orange' : tradeSignal.technicalIndicators?.macd === 'BEARISH' ? 'text-bitcoin-orange' : 'text-bitcoin-white'}`}>
+                {tradeSignal.technicalIndicators?.macd || 'N/A'}
               </div>
               <div className="text-xs text-bitcoin-white-60 mt-1 truncate">Momentum</div>
             </div>
@@ -469,7 +482,7 @@ export default function TradeGenerationEngine() {
             <div className="text-center">
               <div className="stat-label text-xs mb-1 truncate">Support</div>
               <div className="text-xs sm:text-sm font-black font-mono text-bitcoin-white break-words">
-                {tradeSignal.technicalIndicators.support ? formatPrice(tradeSignal.technicalIndicators.support) : 'N/A'}
+                {tradeSignal.technicalIndicators?.support ? formatPrice(tradeSignal.technicalIndicators.support) : 'N/A'}
               </div>
               <div className="text-xs text-bitcoin-white-60 mt-1 truncate">Key Level</div>
             </div>
@@ -479,7 +492,7 @@ export default function TradeGenerationEngine() {
             <div className="text-center">
               <div className="stat-label text-xs mb-1 truncate">Resistance</div>
               <div className="text-xs sm:text-sm font-black font-mono text-bitcoin-white break-words">
-                {tradeSignal.technicalIndicators.resistance ? formatPrice(tradeSignal.technicalIndicators.resistance) : 'N/A'}
+                {tradeSignal.technicalIndicators?.resistance ? formatPrice(tradeSignal.technicalIndicators.resistance) : 'N/A'}
               </div>
               <div className="text-xs text-bitcoin-white-60 mt-1 truncate">Key Level</div>
             </div>
@@ -489,7 +502,7 @@ export default function TradeGenerationEngine() {
             <div className="text-center">
               <div className="stat-label text-xs mb-1 truncate">EMA 20</div>
               <div className="text-xs sm:text-sm font-black font-mono text-bitcoin-white break-words">
-                {tradeSignal.technicalIndicators.ema20 ? formatPrice(tradeSignal.technicalIndicators.ema20) : 'N/A'}
+                {tradeSignal.technicalIndicators?.ema20 ? formatPrice(tradeSignal.technicalIndicators.ema20) : 'N/A'}
               </div>
               <div className="text-xs text-bitcoin-white-60 mt-1 truncate">Short Term</div>
             </div>
@@ -499,12 +512,53 @@ export default function TradeGenerationEngine() {
             <div className="text-center">
               <div className="stat-label text-xs mb-1 truncate">EMA 50</div>
               <div className="text-xs sm:text-sm font-black font-mono text-bitcoin-white break-words">
-                {tradeSignal.technicalIndicators.ema50 ? formatPrice(tradeSignal.technicalIndicators.ema50) : 'N/A'}
+                {tradeSignal.technicalIndicators?.ema50 ? formatPrice(tradeSignal.technicalIndicators.ema50) : 'N/A'}
               </div>
               <div className="text-xs text-bitcoin-white-60 mt-1 truncate">Long Term</div>
             </div>
           </div>
         </div>
+
+        {/* Additional Technical Indicators Row */}
+        {(tradeSignal.technicalIndicators?.atr || tradeSignal.technicalIndicators?.stochastic || tradeSignal.technicalIndicators?.bollinger) && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 mt-3">
+            {tradeSignal.technicalIndicators?.atr && (
+              <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-1 mobile-touch-target">
+                <div className="text-center">
+                  <div className="stat-label text-xs mb-1 truncate">ATR</div>
+                  <div className="text-xs sm:text-sm font-black font-mono text-bitcoin-white break-words">
+                    {formatPrice(tradeSignal.technicalIndicators.atr)}
+                  </div>
+                  <div className="text-xs text-bitcoin-white-60 mt-1 truncate">Volatility</div>
+                </div>
+              </div>
+            )}
+            
+            {tradeSignal.technicalIndicators?.stochastic && (
+              <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-2 mobile-touch-target">
+                <div className="text-center">
+                  <div className="stat-label text-xs mb-1 truncate">Stochastic</div>
+                  <div className={`text-base sm:text-lg font-black font-mono break-words ${tradeSignal.technicalIndicators.stochastic === 'OVERBOUGHT' ? 'text-bitcoin-orange' : tradeSignal.technicalIndicators.stochastic === 'OVERSOLD' ? 'text-bitcoin-orange' : 'text-bitcoin-white'}`}>
+                    {tradeSignal.technicalIndicators.stochastic}
+                  </div>
+                  <div className="text-xs text-bitcoin-white-60 mt-1 truncate">Oscillator</div>
+                </div>
+              </div>
+            )}
+            
+            {tradeSignal.technicalIndicators?.bollinger && (
+              <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-3 mobile-touch-target">
+                <div className="text-center">
+                  <div className="stat-label text-xs mb-1 truncate">Bollinger</div>
+                  <div className="text-base sm:text-lg font-black font-mono text-bitcoin-white break-words">
+                    {tradeSignal.technicalIndicators.bollinger}
+                  </div>
+                  <div className="text-xs text-bitcoin-white-60 mt-1 truncate">Bands</div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         
         {/* Market Conditions */}
@@ -584,30 +638,8 @@ export default function TradeGenerationEngine() {
           </div>
         </div>
         
-        {/* Live Data Quality Metrics */}
-        {tradeSignal?.liveDataValidation && (
-          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-            <div className="bg-bitcoin-black p-2 sm:p-3 rounded-lg border-2 border-bitcoin-orange-20">
-              <div className="font-bold text-bitcoin-orange mb-1 truncate">Data Source</div>
-              <div className="text-bitcoin-white break-words text-xs">{tradeSignal.liveDataValidation.primarySource}</div>
-            </div>
-            <div className="bg-bitcoin-black p-2 sm:p-3 rounded-lg border-2 border-bitcoin-orange-20">
-              <div className="font-bold text-bitcoin-orange mb-1 truncate">Confidence</div>
-              <div className="text-bitcoin-white text-xs">{tradeSignal.confidence}%</div>
-            </div>
-            <div className="bg-bitcoin-black p-2 sm:p-3 rounded-lg border-2 border-bitcoin-orange-20">
-              <div className="font-bold text-bitcoin-orange mb-1 truncate">News</div>
-              <div className="text-bitcoin-white text-xs">{tradeSignal.liveDataValidation.newsAvailable ? 'LIVE' : 'N/A'}</div>
-            </div>
-            <div className="bg-bitcoin-black p-2 sm:p-3 rounded-lg border-2 border-bitcoin-orange-20">
-              <div className="font-bold text-bitcoin-orange mb-1 truncate">Freshness</div>
-              <div className="text-bitcoin-white text-xs">REAL-TIME</div>
-            </div>
-          </div>
-        )}
-        
-        {/* Fallback for older data format */}
-        {tradeSignal?.dataQuality && !tradeSignal?.liveDataValidation && (
+        {/* Data Quality Metrics */}
+        {tradeSignal?.dataQuality && (
           <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
             <div className="bg-bitcoin-black p-2 sm:p-3 rounded-lg border-2 border-bitcoin-orange-20">
               <div className="font-bold text-bitcoin-orange mb-1 truncate">Exchanges</div>
@@ -623,7 +655,7 @@ export default function TradeGenerationEngine() {
             </div>
             <div className="bg-bitcoin-black p-2 sm:p-3 rounded-lg border-2 border-bitcoin-orange-20">
               <div className="font-bold text-bitcoin-orange mb-1 truncate">Spread</div>
-              <div className="text-bitcoin-white">{tradeSignal.dataQuality.priceSpread?.toFixed(3) || 'N/A'}%</div>
+              <div className="text-bitcoin-white">{tradeSignal.dataQuality.priceSpread ? tradeSignal.dataQuality.priceSpread.toFixed(3) + '%' : 'N/A'}</div>
             </div>
           </div>
         )}
