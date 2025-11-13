@@ -15,10 +15,12 @@ import { getSentimentData } from '../../../lib/atge/sentimentData';
 import { getOnChainData } from '../../../lib/atge/onChainData';
 import { getLunarCrushAnalysis } from '../../../lib/atge/lunarcrush';
 import { generateTradeSignal } from '../../../lib/atge/aiGenerator';
+import { fetchHistoricalData } from '../../../lib/atge/historicalData';
 import {
   storeTradeSignal,
   storeTechnicalIndicators,
-  storeMarketSnapshot
+  storeMarketSnapshot,
+  storeHistoricalPrices
 } from '../../../lib/atge/database';
 import { measureExecutionTime, logError } from '../../../lib/atge/monitoring';
 
@@ -121,22 +123,13 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     const startTime = Date.now();
 
     // Fetch all market data in parallel with performance tracking
-    const [marketData, technicalIndicators, sentimentData, onChainData, lunarCrushData] = await measureExecutionTime(
+    const [marketData, technicalIndicators, sentimentData, onChainData] = await measureExecutionTime(
       async () => {
-        // Fetch LunarCrush data ONLY for Bitcoin
-        const lunarCrushPromise = symbol.toUpperCase() === 'BTC'
-          ? getLunarCrushAnalysis(symbol).catch(error => {
-              console.warn('[ATGE] LunarCrush data unavailable:', error);
-              return undefined; // Graceful fallback
-            })
-          : Promise.resolve(undefined); // Skip for non-Bitcoin symbols
-
         return await Promise.all([
           getMarketData(symbol),
           getTechnicalIndicators(symbol),
-          getSentimentData(symbol),
-          getOnChainData(symbol),
-          lunarCrushPromise
+          getSentimentData(symbol), // Already includes LunarCrush data
+          getOnChainData(symbol)
         ]);
       },
       'fetch_market_data',
@@ -144,7 +137,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
       userId
     );
 
-    console.log(`[ATGE] Data fetching completed${lunarCrushData ? ' (including Bitcoin LunarCrush)' : ''}`);
+    console.log(`[ATGE] Data fetching completed (including LunarCrush from sentiment data)`);
 
     // Generate trade signal with AI with performance tracking
     const tradeSignal = await measureExecutionTime(
@@ -152,9 +145,8 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
         return await generateTradeSignal({
           marketData,
           technicalIndicators,
-          sentimentData,
-          onChainData,
-          lunarCrushData
+          sentimentData, // Already includes LunarCrush data
+          onChainData
         });
       },
       'generate_trade_signal',
@@ -211,7 +203,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
       marketCap: marketData.marketCap
     });
 
-    // Store market snapshot with LunarCrush data
+    // Store market snapshot with LunarCrush data from sentimentData
     await storeMarketSnapshot({
       tradeSignalId: storedSignal.id,
       currentPrice: marketData.currentPrice,
@@ -221,20 +213,60 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
       socialSentimentScore: sentimentData.aggregateSentiment.score,
       whaleActivityCount: onChainData.largeTransactionCount,
       fearGreedIndex: undefined, // TODO: Integrate Fear & Greed Index API
-      // LunarCrush Social Intelligence
-      galaxyScore: lunarCrushData?.currentMetrics.galaxyScore,
-      altRank: lunarCrushData?.currentMetrics.altRank,
-      socialDominance: lunarCrushData?.currentMetrics.socialDominance,
-      sentimentPositive: lunarCrushData?.currentMetrics.sentiment.positive,
-      sentimentNegative: lunarCrushData?.currentMetrics.sentiment.negative,
-      sentimentNeutral: lunarCrushData?.currentMetrics.sentiment.neutral,
-      socialVolume24h: lunarCrushData?.currentMetrics.socialVolume.total,
-      socialPosts24h: lunarCrushData?.currentMetrics.socialVolume.posts,
-      socialInteractions24h: lunarCrushData?.currentMetrics.socialVolume.interactions,
-      socialContributors24h: lunarCrushData?.currentMetrics.socialVolume.contributors,
-      correlationScore: lunarCrushData?.currentMetrics.correlationScore,
+      // LunarCrush Social Intelligence (from sentimentData.lunarCrush)
+      galaxyScore: sentimentData.lunarCrush?.galaxyScore,
+      altRank: sentimentData.lunarCrush?.altRank,
+      socialDominance: undefined, // Not available in basic API
+      sentimentPositive: sentimentData.lunarCrush?.sentiment === 'bullish' ? 70 : sentimentData.lunarCrush?.sentiment === 'bearish' ? 30 : 50,
+      sentimentNegative: sentimentData.lunarCrush?.sentiment === 'bearish' ? 70 : sentimentData.lunarCrush?.sentiment === 'bullish' ? 30 : 50,
+      sentimentNeutral: sentimentData.lunarCrush?.sentiment === 'neutral' ? 100 : 0,
+      socialVolume24h: undefined, // Not available in basic API
+      socialPosts24h: undefined, // Not available in basic API
+      socialInteractions24h: undefined, // Not available in basic API
+      socialContributors24h: undefined, // Not available in basic API
+      correlationScore: undefined, // Not available in basic API
       snapshotAt: new Date()
     });
+
+    // Fetch and store historical prices for backtesting
+    // This runs in the background and doesn't block the response
+    console.log('[ATGE] Fetching historical prices for backtesting...');
+    fetchHistoricalData({
+      symbol,
+      startTime: generatedAt,
+      endTime: expiresAt,
+      resolution: '1h' // 1-hour candles for backtesting
+    }, 1) // Priority 1 (high priority)
+      .then(async (historicalData) => {
+        // Convert to database format
+        const prices = historicalData.data.map(candle => ({
+          tradeSignalId: storedSignal.id,
+          timestamp: candle.timestamp,
+          open: candle.open,
+          high: candle.high,
+          low: candle.low,
+          close: candle.close,
+          volume: candle.volume,
+          dataSource: historicalData.source
+        }));
+
+        // Store in database
+        await storeHistoricalPrices(prices);
+        console.log(`[ATGE] Stored ${prices.length} historical price candles for trade ${storedSignal.id}`);
+      })
+      .catch(error => {
+        console.error('[ATGE] Failed to fetch/store historical prices:', error);
+        // Log error but don't fail the trade generation
+        logError({
+          errorType: 'backtesting',
+          errorMessage: `Failed to fetch historical prices: ${error.message}`,
+          errorStack: error.stack,
+          userId,
+          tradeSignalId: storedSignal.id,
+          context: { symbol, startTime: generatedAt, endTime: expiresAt },
+          severity: 'medium'
+        });
+      });
 
     // Update rate limits
     updateRateLimits(userId);

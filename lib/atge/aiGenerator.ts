@@ -12,7 +12,7 @@ import { MarketData } from './marketData';
 import { TechnicalIndicators } from './technicalIndicators';
 import { SentimentData } from './sentimentData';
 import { OnChainData } from './onChainData';
-import { LunarCrushAnalysis } from './lunarcrush';
+// LunarCrush data is now included in SentimentData
 
 interface TradeSignal {
   symbol: string;
@@ -37,52 +37,22 @@ interface TradeSignal {
 interface ComprehensiveContext {
   marketData: MarketData;
   technicalIndicators: TechnicalIndicators;
-  sentimentData: SentimentData;
+  sentimentData: SentimentData; // Includes LunarCrush data
   onChainData: OnChainData;
-  lunarCrushData?: LunarCrushAnalysis;
 }
 
 /**
- * Build comprehensive context from all data sources including LunarCrush
+ * Build comprehensive context from all data sources
+ * LunarCrush data is included in sentimentData
  */
 export function buildComprehensiveContext(
   marketData: MarketData,
   technicalIndicators: TechnicalIndicators,
   sentimentData: SentimentData,
-  onChainData: OnChainData,
-  lunarCrushData?: LunarCrushAnalysis
+  onChainData: OnChainData
 ): string {
-  // Build LunarCrush section if data is available (Bitcoin only)
-  const lunarCrushSection = lunarCrushData ? `
-## Bitcoin Social Intelligence - LunarCrush (Weight: 30-40% of decision)
-
-**Core Metrics:**
-- Galaxy Score: ${lunarCrushData.currentMetrics.galaxyScore}/100 (${lunarCrushData.trends.galaxyScoreTrend})
-- AltRank: #${lunarCrushData.currentMetrics.altRank} (Market position)
-- Social Dominance: ${lunarCrushData.currentMetrics.socialDominance.toFixed(2)}%
-- Sentiment: ${lunarCrushData.currentMetrics.sentiment.positive.toFixed(1)}% positive, ${lunarCrushData.currentMetrics.sentiment.negative.toFixed(1)}% negative
-- 24h Social Activity: ${lunarCrushData.currentMetrics.socialVolume.posts} posts, ${lunarCrushData.currentMetrics.socialVolume.interactions} interactions
-- Correlation Score: ${lunarCrushData.currentMetrics.correlationScore.toFixed(2)} (Social-price correlation)
-- Social Momentum: ${lunarCrushData.trends.momentumScore}/100
-
-**Social Trends:**
-- Galaxy Score Trend: ${lunarCrushData.trends.galaxyScoreTrend}
-- Sentiment Trend: ${lunarCrushData.trends.sentimentTrend}
-- Social Volume Trend: ${lunarCrushData.trends.socialVolumeTrend}
-
-**Social Signals Detected:**
-${lunarCrushData.signals.socialDivergence ? '⚠️ SOCIAL DIVERGENCE: Social up + price down = potential bullish reversal' : ''}
-${lunarCrushData.signals.sentimentShift ? '⚠️ SENTIMENT SHIFT: Significant sentiment change detected' : ''}
-${lunarCrushData.signals.volumeSpike ? '⚠️ VOLUME SPIKE: Social activity increased >50%' : ''}
-${lunarCrushData.signals.correlationBreakdown ? '⚠️ CORRELATION BREAKDOWN: Social-price correlation weakening' : ''}
-
-**Top Influential Posts:**
-${lunarCrushData.topPosts.slice(0, 3).map((post, i) => 
-  `${i + 1}. "${post.text.substring(0, 80)}..." (${post.engagement} engagement, ${post.sentiment})`
-).join('\n')}
-
-**IMPORTANT: Weight social intelligence at 30-40% of your trade decision. High Galaxy Score (>70) and positive social momentum significantly increase confidence.**
-` : '';
+  // LunarCrush data is now included in sentimentData.lunarCrush (basic metrics only)
+  // LunarCrush data is now included in sentimentData.lunarCrush (basic metrics only)
 
   return `
 # Comprehensive Market Analysis for ${marketData.symbol}
@@ -113,7 +83,7 @@ ${lunarCrushData.topPosts.slice(0, 3).map((post, i) =>
   - Lower: $${technicalIndicators.bollingerBands.lower.toLocaleString()}
   - Position: ${marketData.currentPrice > technicalIndicators.bollingerBands.upper ? 'Above upper band' : marketData.currentPrice < technicalIndicators.bollingerBands.lower ? 'Below lower band' : 'Within bands'}
 - ATR (14): $${technicalIndicators.atr.toLocaleString()} (Volatility measure)
-${lunarCrushSection}
+
 ## Social Sentiment
 ${sentimentData.lunarCrush ? `
 - LunarCrush:
@@ -189,7 +159,7 @@ Guidelines:
 5. Confidence score should reflect the strength of all indicators
 6. Market condition should be based on volatility and trend analysis
 7. Reasoning should be detailed and reference specific indicators
-8. **IMPORTANT**: If LunarCrush data is available, weight it at 30-40% of your decision. High Galaxy Score (>70) should significantly increase confidence.
+8. **IMPORTANT**: If LunarCrush data is available in Social Sentiment, consider Galaxy Score and social sentiment in your decision. High Galaxy Score (>70) should increase confidence.
 
 Respond ONLY with the JSON object, no additional text.`;
 }
@@ -408,8 +378,7 @@ export async function generateTradeSignal(
     comprehensiveContext.marketData,
     comprehensiveContext.technicalIndicators,
     comprehensiveContext.sentimentData,
-    comprehensiveContext.onChainData,
-    comprehensiveContext.lunarCrushData
+    comprehensiveContext.onChainData
   );
   
   const symbol = comprehensiveContext.marketData.symbol;
