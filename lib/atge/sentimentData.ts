@@ -93,57 +93,6 @@ async function fetchTwitterSentiment(symbol: string): Promise<SentimentData['twi
   // Twitter API disabled - return null to skip
   console.log('[ATGE] Twitter sentiment fetch disabled (skipping)');
   return null;
-  
-  /* DISABLED CODE - Uncomment to re-enable Twitter sentiment
-  const bearerToken = process.env.TWITTER_BEARER_TOKEN;
-  
-  if (!bearerToken) {
-    console.warn('[ATGE] Twitter Bearer Token not configured');
-    return null;
-  }
-
-  try {
-    // Search for recent tweets about the cryptocurrency
-    const searchQuery = symbol.toUpperCase() === 'BTC' ? 'bitcoin' : 'ethereum';
-    const url = `https://api.twitter.com/2/tweets/search/recent?query=${searchQuery}&max_results=100&tweet.fields=created_at,public_metrics`;
-    
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${bearerToken}`
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`Twitter API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    
-    const mentionCount = data.meta?.result_count || 0;
-    
-    // Simple sentiment analysis based on engagement
-    // Higher engagement typically indicates positive sentiment
-    const avgLikes = data.data?.reduce((sum: number, tweet: any) => 
-      sum + (tweet.public_metrics?.like_count || 0), 0) / (mentionCount || 1);
-    
-    const sentimentScore = Math.min(100, Math.round((avgLikes / 10) * 100));
-    
-    let sentiment: 'positive' | 'negative' | 'neutral' = 'neutral';
-    if (sentimentScore > 60) {
-      sentiment = 'positive';
-    } else if (sentimentScore < 40) {
-      sentiment = 'negative';
-    }
-    
-    return {
-      mentionCount,
-      sentiment,
-      sentimentScore
-    };
-  } catch (error) {
-    console.error('[ATGE] Twitter fetch failed:', error);
-    return null;
-  }
 }
 
 /**
