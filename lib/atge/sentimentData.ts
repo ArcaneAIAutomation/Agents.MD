@@ -85,8 +85,16 @@ async function fetchLunarCrushData(symbol: string): Promise<SentimentData['lunar
 
 /**
  * Fetch Twitter/X sentiment
+ * 
+ * NOTE: Twitter API disabled to prevent rate limit issues during trade generation.
+ * Returns null to skip Twitter sentiment analysis.
  */
 async function fetchTwitterSentiment(symbol: string): Promise<SentimentData['twitter']> {
+  // Twitter API disabled - return null to skip
+  console.log('[ATGE] Twitter sentiment fetch disabled (skipping)');
+  return null;
+  
+  /* DISABLED CODE - Uncomment to re-enable Twitter sentiment
   const bearerToken = process.env.TWITTER_BEARER_TOKEN;
   
   if (!bearerToken) {
