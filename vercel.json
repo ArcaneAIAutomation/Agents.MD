@@ -9,7 +9,10 @@
   "regions": ["lhr1"],
   "functions": {
     "pages/api/**/*.ts": {
-      "maxDuration": 30
+      "maxDuration": 40
+    },
+    "pages/api/atge/generate.ts": {
+      "maxDuration": 40
     },
     "pages/api/ucie/caesar-research/**/*.ts": {
       "maxDuration": 800
