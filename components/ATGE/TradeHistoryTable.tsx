@@ -7,6 +7,7 @@ import TradeDetailModal from './TradeDetailModal';
 interface TradeHistoryTableProps {
   symbol: string;
   className?: string;
+  lastGeneratedAt?: Date | null;
 }
 
 // Mobile viewport detection hook
@@ -31,7 +32,8 @@ function useMobileViewport() {
 
 export default function TradeHistoryTable({
   symbol,
-  className = ''
+  className = '',
+  lastGeneratedAt
 }: TradeHistoryTableProps) {
   const { isMobile, isTablet } = useMobileViewport();
   
@@ -115,10 +117,10 @@ export default function TradeHistoryTable({
     }
   };
 
-  // Initial fetch
+  // Initial fetch and refresh when new trade is generated
   useEffect(() => {
     fetchTrades();
-  }, [symbol]);
+  }, [symbol, lastGeneratedAt]); // Refresh when lastGeneratedAt changes
 
   // Apply filters and sorting
   useEffect(() => {

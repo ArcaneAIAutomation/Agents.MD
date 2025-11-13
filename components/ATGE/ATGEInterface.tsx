@@ -118,15 +118,15 @@ export default function ATGEInterface({ className = '' }: ATGEInterfaceProps) {
       if (data.success) {
         setLastGeneratedAt(new Date());
         setSuccessMessage(
-          `Trade signal generated successfully! ${data.message || 'Check the trade history below.'}`
+          `✅ Trade signal generated successfully! View your trade analysis below.`
         );
-        setTimeout(() => setSuccessMessage(null), 5000);
+        
+        // Keep success message visible longer so user can see it
+        setTimeout(() => setSuccessMessage(null), 8000);
 
-        // Trigger a page refresh to update all components with new data
-        // This will refresh the performance dashboard and trade history
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
+        // DO NOT reload the page - this logs the user out!
+        // Instead, the TradeHistoryTable and PerformanceDashboard components
+        // will automatically refresh their data when they detect lastGeneratedAt changed
       } else {
         throw new Error(data.error || 'Failed to generate trade signal');
       }
@@ -258,6 +258,7 @@ export default function ATGEInterface({ className = '' }: ATGEInterfaceProps) {
       {/* Performance Dashboard */}
       <PerformanceDashboard
         symbol={selectedSymbol}
+        lastGeneratedAt={lastGeneratedAt}
         onViewAllTrades={() => {
           // Scroll to trade history section
           const tradeHistoryElement = document.getElementById('trade-history-section');
@@ -269,7 +270,10 @@ export default function ATGEInterface({ className = '' }: ATGEInterfaceProps) {
 
       {/* Trade History Table */}
       <div id="trade-history-section">
-        <TradeHistoryTable symbol={selectedSymbol} />
+        <TradeHistoryTable 
+          symbol={selectedSymbol} 
+          lastGeneratedAt={lastGeneratedAt}
+        />
       </div>
 
       {/* Unlock modal */}

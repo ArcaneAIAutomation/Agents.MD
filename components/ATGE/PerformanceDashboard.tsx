@@ -9,6 +9,7 @@ interface PerformanceDashboardProps {
   symbol: string;
   onViewAllTrades?: () => void;
   className?: string;
+  lastGeneratedAt?: Date | null;
 }
 
 // Mobile viewport detection hook
@@ -34,7 +35,8 @@ function useMobileViewport() {
 export default function PerformanceDashboard({
   symbol,
   onViewAllTrades,
-  className = ''
+  className = '',
+  lastGeneratedAt
 }: PerformanceDashboardProps) {
   const { isMobile, isTablet } = useMobileViewport();
   const [performanceStats, setPerformanceStats] = useState<PerformanceStats | null>(null);
@@ -84,10 +86,10 @@ export default function PerformanceDashboard({
     }
   };
 
-  // Initial fetch
+  // Initial fetch and refresh when new trade is generated
   useEffect(() => {
     fetchPerformanceStats();
-  }, [symbol]);
+  }, [symbol, lastGeneratedAt]); // Refresh when lastGeneratedAt changes
 
   // Auto-refresh every 30 seconds if enabled
   useEffect(() => {
