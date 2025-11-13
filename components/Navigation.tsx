@@ -84,7 +84,8 @@ const Navigation = forwardRef<NavigationRef>((props, ref) => {
     { name: 'Universal Intelligence', path: '/ucie', icon: Brain, emoji: '🧠', description: 'Multi-Asset Crypto Analysis' },
     { name: 'Crypto News Wire', path: '/crypto-news', icon: Newspaper, emoji: '📰', description: 'Real-Time News & Sentiment' },
     { name: 'AI Trade Engine', path: '/atge', icon: Zap, emoji: '⚡', description: 'AI-Powered Trade Signals' },
-    { name: 'AI Trade Generation', path: '/trade-generation', icon: Bot, emoji: '🤖', description: 'GPT-4o Trading Signals' },
+    // COMMENTED OUT - Keep for future reference
+    // { name: 'AI Trade Generation', path: '/trade-generation', icon: Bot, emoji: '🤖', description: 'GPT-4o Trading Signals' },
     { name: 'Bitcoin Report', path: '/bitcoin-report', icon: Bitcoin, emoji: '₿', description: 'BTC Market Analysis' },
     { name: 'Ethereum Report', path: '/ethereum-report', icon: Coins, emoji: '⟠', description: 'ETH & DeFi Insights' },
     { name: 'Whale Watch', path: '/whale-watch', icon: Fish, emoji: '🐋', description: 'Large Transaction Tracking' },
