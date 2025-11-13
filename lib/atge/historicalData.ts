@@ -331,34 +331,75 @@ async function fetchFromCoinMarketCap(request: HistoricalDataRequest): Promise<O
   url.searchParams.append('interval', getIntervalParam(request.resolution));
   url.searchParams.append('convert', 'USD');
 
-  const response = await fetch(url.toString(), {
-    headers: {
-      'X-CMC_PRO_API_KEY': apiKey,
-      'Accept': 'application/json'
+  // Retry logic with exponential backoff
+  const maxRetries = 3;
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`[HistoricalData] CoinMarketCap attempt ${attempt}/${maxRetries}`);
+      
+      const response = await fetch(url.toString(), {
+        headers: {
+          'X-CMC_PRO_API_KEY': apiKey,
+          'Accept': 'application/json',
+          'User-Agent': 'ATGE-Trading-System/1.0'
+        },
+        signal: AbortSignal.timeout(30000) // 30 second timeout
+      });
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          // Rate limited - wait longer
+          const waitTime = Math.pow(2, attempt) * 2000; // 4s, 8s, 16s
+          console.log(`[HistoricalData] Rate limited, waiting ${waitTime}ms`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          continue;
+        }
+        throw new Error(`CoinMarketCap API error: ${response.status} ${response.statusText}`);
+      }
+
+      const json = await response.json();
+      
+      if (json.status?.error_code !== 0) {
+        throw new Error(`CoinMarketCap API error: ${json.status?.error_message}`);
+      }
+
+      // Parse response
+      const quotes = json.data?.quotes || [];
+      
+      const ohlcvData = quotes.map((quote: any) => ({
+        timestamp: new Date(quote.time_open),
+        open: quote.quote.USD.open,
+        high: quote.quote.USD.high,
+        low: quote.quote.USD.low,
+        close: quote.quote.USD.close,
+        volume: quote.quote.USD.volume
+      }));
+
+      console.log(`[HistoricalData] CoinMarketCap success on attempt ${attempt}`);
+      return ohlcvData;
+      
+    } catch (error: any) {
+      lastError = error;
+      console.warn(`[HistoricalData] CoinMarketCap attempt ${attempt} failed:`, error.message);
+      
+      // Don't retry on certain errors
+      if (error.name === 'AbortError') {
+        console.error(`[HistoricalData] Request timeout after 30s`);
+        break;
+      }
+      
+      // Wait before retry (exponential backoff)
+      if (attempt < maxRetries) {
+        const waitTime = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
+        console.log(`[HistoricalData] Waiting ${waitTime}ms before retry...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
     }
-  });
-
-  if (!response.ok) {
-    throw new Error(`CoinMarketCap API error: ${response.status} ${response.statusText}`);
   }
 
-  const json = await response.json();
-  
-  if (json.status?.error_code !== 0) {
-    throw new Error(`CoinMarketCap API error: ${json.status?.error_message}`);
-  }
-
-  // Parse response
-  const quotes = json.data?.quotes || [];
-  
-  return quotes.map((quote: any) => ({
-    timestamp: new Date(quote.time_open),
-    open: quote.quote.USD.open,
-    high: quote.quote.USD.high,
-    low: quote.quote.USD.low,
-    close: quote.quote.USD.close,
-    volume: quote.quote.USD.volume
-  }));
+  throw lastError || new Error('CoinMarketCap fetch failed after all retries');
 }
 
 async function fetchFromCoinGecko(request: HistoricalDataRequest): Promise<OHLCVData[]> {
@@ -380,17 +421,62 @@ async function fetchFromCoinGecko(request: HistoricalDataRequest): Promise<OHLCV
   // CoinGecko market chart endpoint
   const url = `https://api.coingecko.com/api/v3/coins/${geckoId}/market_chart/range?vs_currency=usd&from=${from}&to=${to}`;
 
-  const response = await fetch(url, {
-    headers: {
-      'Accept': 'application/json'
-    }
-  });
+  // Retry logic with exponential backoff
+  const maxRetries = 3;
+  let lastError: Error | null = null;
 
-  if (!response.ok) {
-    throw new Error(`CoinGecko API error: ${response.status} ${response.statusText}`);
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`[HistoricalData] CoinGecko attempt ${attempt}/${maxRetries}`);
+      
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'ATGE-Trading-System/1.0'
+        },
+        signal: AbortSignal.timeout(30000) // 30 second timeout
+      });
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          // Rate limited - wait longer
+          const waitTime = Math.pow(2, attempt) * 2000; // 4s, 8s, 16s
+          console.log(`[HistoricalData] Rate limited, waiting ${waitTime}ms`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          continue;
+        }
+        throw new Error(`CoinGecko API error: ${response.status} ${response.statusText}`);
+      }
+
+      const json = await response.json();
+      
+      // Success - return data
+      console.log(`[HistoricalData] CoinGecko success on attempt ${attempt}`);
+      return parseCoinGeckoResponse(json, request);
+      
+    } catch (error: any) {
+      lastError = error;
+      console.warn(`[HistoricalData] CoinGecko attempt ${attempt} failed:`, error.message);
+      
+      // Don't retry on certain errors
+      if (error.name === 'AbortError') {
+        console.error(`[HistoricalData] Request timeout after 30s`);
+        break;
+      }
+      
+      // Wait before retry (exponential backoff)
+      if (attempt < maxRetries) {
+        const waitTime = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
+        console.log(`[HistoricalData] Waiting ${waitTime}ms before retry...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
+    }
   }
 
-  const json = await response.json();
+  throw lastError || new Error('CoinGecko fetch failed after all retries');
+}
+
+function parseCoinGeckoResponse(json: any, request: HistoricalDataRequest): OHLCVData[] {
 
   // CoinGecko returns prices, market_caps, total_volumes arrays
   // Each array contains [timestamp, value] pairs
