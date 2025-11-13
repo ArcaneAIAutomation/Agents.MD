@@ -177,7 +177,7 @@ export default function ATGEInterface({ className = '' }: ATGEInterfaceProps) {
     <div className={`space-y-4 md:space-y-6 ${className}`}>
       {/* Header - Mobile Optimized */}
       <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-4 md:p-6">
-        <div className={`flex items-center gap-3 mb-3 ${isMobile ? 'flex-col text-center' : ''}`}>
+        <div className={`flex items-center gap-3 mb-4 ${isMobile ? 'flex-col text-center' : ''}`}>
           <TrendingUp 
             size={isMobile ? 28 : 32} 
             className={`text-bitcoin-orange ${isMobile ? 'mb-2' : ''}`} 
@@ -186,14 +186,68 @@ export default function ATGEInterface({ className = '' }: ATGEInterfaceProps) {
             <h1 className={`font-bold text-bitcoin-white ${isMobile ? 'text-xl' : 'text-2xl md:text-3xl'}`}>
               AI Trade Generation Engine
             </h1>
-            <p className={`text-bitcoin-white-60 ${isMobile ? 'text-xs mt-1' : 'text-sm'}`}>
+            <p className={`text-bitcoin-white-80 font-medium ${isMobile ? 'text-xs mt-1' : 'text-sm mt-1'}`}>
               {isMobile ? (
-                <>GPT-4o • Real-time Analysis</>
+                <>Advanced AI-powered trade signals with 100% real data backtesting</>
               ) : (
-                <>Powered by GPT-4o • Real-time Market Analysis • Backtested Results</>
+                <>Advanced AI-powered trade signal generation with 100% real data backtesting</>
               )}
             </p>
           </div>
+        </div>
+
+        {/* API/AI Capabilities Showcase - Desktop */}
+        {!isMobile && (
+          <div className="grid grid-cols-4 gap-4 mt-4 mb-4">
+            <div className="text-center">
+              <div className="text-bitcoin-orange font-mono text-xl font-bold mb-1">GPT-4o</div>
+              <div className="text-bitcoin-white-60 text-xs uppercase tracking-wider">AI Model</div>
+            </div>
+            <div className="text-center">
+              <div className="text-bitcoin-orange font-mono text-xl font-bold mb-1">3 Targets</div>
+              <div className="text-bitcoin-white-60 text-xs uppercase tracking-wider">Take Profit</div>
+            </div>
+            <div className="text-center">
+              <div className="text-bitcoin-orange font-mono text-xl font-bold mb-1">$1000</div>
+              <div className="text-bitcoin-white-60 text-xs uppercase tracking-wider">Standard Size</div>
+            </div>
+            <div className="text-center">
+              <div className="text-bitcoin-orange font-mono text-xl font-bold mb-1">100%</div>
+              <div className="text-bitcoin-white-60 text-xs uppercase tracking-wider">Real Data</div>
+            </div>
+          </div>
+        )}
+
+        {/* API/AI Capabilities Showcase - Mobile */}
+        {isMobile && (
+          <div className="grid grid-cols-2 gap-3 mt-3 mb-3">
+            <div className="text-center bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-2">
+              <div className="text-bitcoin-orange font-mono text-lg font-bold mb-0.5">GPT-4o</div>
+              <div className="text-bitcoin-white-60 text-xs">AI Model</div>
+            </div>
+            <div className="text-center bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-2">
+              <div className="text-bitcoin-orange font-mono text-lg font-bold mb-0.5">3 Targets</div>
+              <div className="text-bitcoin-white-60 text-xs">Take Profit</div>
+            </div>
+            <div className="text-center bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-2">
+              <div className="text-bitcoin-orange font-mono text-lg font-bold mb-0.5">$1000</div>
+              <div className="text-bitcoin-white-60 text-xs">Standard Size</div>
+            </div>
+            <div className="text-center bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-2">
+              <div className="text-bitcoin-orange font-mono text-lg font-bold mb-0.5">100%</div>
+              <div className="text-bitcoin-white-60 text-xs">Real Data</div>
+            </div>
+          </div>
+        )}
+
+        {/* How It Works Section */}
+        <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4 mt-4">
+          <h3 className="text-bitcoin-white font-bold text-sm mb-2 flex items-center gap-2">
+            <span className="text-bitcoin-orange">⚡</span> How It Works
+          </h3>
+          <p className="text-bitcoin-white-60 text-xs leading-relaxed">
+            The AI Trade Generation Engine uses GPT-4o to analyze real-time market data, technical indicators, social sentiment, and on-chain metrics to generate comprehensive trade signals. Each signal includes entry price, 3 take-profit levels, stop loss, timeframe, and confidence score. All trades are automatically backtested against 100% real historical data to verify accuracy.
+          </p>
         </div>
 
         {/* Status indicator */}
