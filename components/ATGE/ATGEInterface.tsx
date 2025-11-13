@@ -54,9 +54,8 @@ export default function ATGEInterface({ className = '' }: ATGEInterfaceProps) {
   // Handle unlock
   const handleUnlock = async (password: string): Promise<boolean> => {
     try {
-      // TODO: Implement actual password verification
-      // For now, using a placeholder password
-      const ATGE_PASSWORD = process.env.NEXT_PUBLIC_ATGE_PASSWORD || 'trade2025';
+      // Verify password against environment variable
+      const ATGE_PASSWORD = process.env.NEXT_PUBLIC_ATGE_PASSWORD || 'tothemoon';
       
       if (password === ATGE_PASSWORD) {
         setIsUnlocked(true);

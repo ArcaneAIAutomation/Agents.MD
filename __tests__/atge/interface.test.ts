@@ -34,8 +34,8 @@ describe('ATGE Unlock Flow', () => {
   describe('Password Validation', () => {
     
     test('should accept correct password', () => {
-      const correctPassword = 'trade2025';
-      const inputPassword = 'trade2025';
+      const correctPassword = 'tothemoon';
+      const inputPassword = 'tothemoon';
       
       const result = inputPassword === correctPassword;
       
@@ -43,7 +43,7 @@ describe('ATGE Unlock Flow', () => {
     });
     
     test('should reject incorrect password', () => {
-      const correctPassword = 'trade2025';
+      const correctPassword = 'tothemoon';
       const inputPassword = 'wrongpassword';
       
       const result = inputPassword === correctPassword;
@@ -52,7 +52,7 @@ describe('ATGE Unlock Flow', () => {
     });
     
     test('should reject empty password', () => {
-      const correctPassword = 'trade2025';
+      const correctPassword = 'tothemoon';
       const inputPassword = '';
       
       const result = inputPassword.trim() === '' || inputPassword !== correctPassword;
@@ -342,10 +342,10 @@ describe('ATGE Interface Integration', () => {
   test('should complete full unlock flow', () => {
     // Initial state
     let isUnlocked = false;
-    const correctPassword = 'trade2025';
+    const correctPassword = 'tothemoon';
     
     // User enters correct password
-    const inputPassword = 'trade2025';
+    const inputPassword = 'tothemoon';
     
     // Verify password
     if (inputPassword === correctPassword) {

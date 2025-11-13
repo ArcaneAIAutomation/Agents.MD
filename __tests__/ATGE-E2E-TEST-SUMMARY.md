@@ -148,7 +148,7 @@ const TEST_CONFIG = {
     email: 'atge-test@example.com',
     password: 'TestPassword123!'
   },
-  atgePassword: 'trade2025',
+  atgePassword: 'tothemoon',
   testSymbol: 'BTC',
   timeout: 60000 // 60 seconds for E2E tests
 };
