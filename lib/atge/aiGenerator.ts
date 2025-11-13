@@ -197,8 +197,7 @@ async function generateWithGPT4o(context: string, symbol: string): Promise<Trade
         }
       ],
       response_format: { type: 'json_object' }, // Force JSON mode
-      temperature: 0.5, // Lower temperature for more consistent output
-      max_tokens: 1000
+      max_completion_tokens: 1000
     })
   });
 
