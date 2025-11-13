@@ -1,7 +1,7 @@
 /**
  * AI Trade Analyzer
  * 
- * Uses GPT-4o to analyze completed trades and provide insights on why they succeeded or failed.
+ * Uses OpenAI GPT-5.1 to analyze completed trades and provide insights on why they succeeded or failed.
  * Requirements: 7.1-7.15
  */
 
@@ -83,7 +83,7 @@ interface TradeAnalysis {
 }
 
 /**
- * Analyze a completed trade using GPT-4o
+ * Analyze a completed trade using OpenAI GPT-5.1
  * Requirements: 7.1-7.6
  */
 export async function analyzeTradeWithAI(
@@ -93,9 +93,9 @@ export async function analyzeTradeWithAI(
     // Build comprehensive prompt with all context
     const prompt = buildAnalysisPrompt(context);
 
-    // Call GPT-4o for analysis
+    // Call OpenAI GPT-5.1 for analysis
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-5.1',
       messages: [
         {
           role: 'system',

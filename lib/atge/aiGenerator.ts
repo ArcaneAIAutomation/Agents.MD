@@ -1,7 +1,7 @@
 /**
  * AI Trade Signal Generator for ATGE
  * 
- * Uses GPT-4o to generate trade signals with comprehensive market analysis
+ * Uses OpenAI GPT-5.1 to generate trade signals with comprehensive market analysis
  * Implements Gemini AI fallback
  * Validates and retries up to 3 times
  * 
@@ -126,7 +126,7 @@ ${sentimentData.reddit ? `
 }
 
 /**
- * Create GPT-4o prompt for trade signal generation
+ * Create OpenAI GPT-5.1 prompt for trade signal generation
  */
 function createGPT4oPrompt(context: string): string {
   return `You are an expert cryptocurrency trading analyst. Based on the comprehensive market analysis below, generate a precise trading signal.
@@ -169,7 +169,7 @@ RESPOND WITH ONLY THE JSON OBJECT - NO OTHER TEXT.`;
 }
 
 /**
- * Generate trade signal using GPT-4o
+ * Generate trade signal using OpenAI GPT-5.1
  */
 async function generateWithGPT4o(context: string, symbol: string): Promise<TradeSignal> {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -185,7 +185,7 @@ async function generateWithGPT4o(context: string, symbol: string): Promise<Trade
       'Authorization': `Bearer ${apiKey}`
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model: 'gpt-5.1',
       messages: [
         {
           role: 'system',
@@ -203,7 +203,7 @@ async function generateWithGPT4o(context: string, symbol: string): Promise<Trade
   });
 
   if (!response.ok) {
-    throw new Error(`GPT-4o API error: ${response.status} ${response.statusText}`);
+    throw new Error(`OpenAI GPT-5.1 API error: ${response.status} ${response.statusText}`);
   }
 
   const data = await response.json();
@@ -212,8 +212,8 @@ async function generateWithGPT4o(context: string, symbol: string): Promise<Trade
   // Parse JSON response with better error handling
   const jsonMatch = content.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
-    console.error('[ATGE] No JSON found in GPT-4o response:', content);
-    throw new Error('Invalid JSON response from GPT-4o - no JSON object found');
+    console.error('[ATGE] No JSON found in OpenAI GPT-5.1 response:', content);
+    throw new Error('Invalid JSON response from OpenAI GPT-5.1 - no JSON object found');
   }
   
   let signalData;
@@ -238,7 +238,7 @@ async function generateWithGPT4o(context: string, symbol: string): Promise<Trade
       console.log('[ATGE] Successfully parsed JSON after fixes');
     } catch (secondError) {
       console.error('[ATGE] Failed to parse JSON even after fixes');
-      throw new Error(`Invalid JSON from GPT-4o: ${parseError.message}`);
+      throw new Error(`Invalid JSON from OpenAI GPT-5.1: ${parseError.message}`);
     }
   }
   
@@ -276,7 +276,7 @@ async function generateWithGPT4o(context: string, symbol: string): Promise<Trade
     riskRewardRatio: Math.round(riskRewardRatio * 100) / 100,
     marketCondition: signalData.marketCondition,
     aiReasoning: signalData.reasoning,
-    aiModelVersion: 'gpt-4o'
+    aiModelVersion: 'gpt-5.1'
   };
 }
 
@@ -417,18 +417,18 @@ export async function generateTradeSignal(
     try {
       console.log(`[ATGE] Generating trade signal (attempt ${attempt}/${maxRetries})`);
       
-      // Try GPT-4o first
+      // Try OpenAI GPT-5.1 first
       try {
         const signal = await generateWithGPT4o(context, symbol);
         
         if (validateTradeSignal(signal)) {
-          console.log('[ATGE] Trade signal generated successfully with GPT-4o');
+          console.log('[ATGE] Trade signal generated successfully with OpenAI GPT-5.1');
           return signal;
         } else {
-          console.warn('[ATGE] Invalid signal from GPT-4o, retrying...');
+          console.warn('[ATGE] Invalid signal from OpenAI GPT-5.1, retrying...');
         }
       } catch (gptError) {
-        console.error('[ATGE] GPT-4o failed, trying Gemini:', gptError);
+        console.error('[ATGE] OpenAI GPT-5.1 failed, trying Gemini:', gptError);
         
         // Fallback to Gemini
         const signal = await generateWithGemini(context, symbol);
