@@ -196,7 +196,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
       riskRewardRatio: comprehensiveAnalysis.riskRewardRatio,
       marketCondition: comprehensiveAnalysis.marketCondition,
       aiReasoning: comprehensiveAnalysis.aiReasoning,
-      aiModelVersion: 'OpenAI GPT-4o + Gemini 2.0 Flash',
+      aiModelVersion: 'OpenAI ChatGPT 5.1 + Google Gemini 2.5 Pro',
       generatedAt,
       expiresAt
     });

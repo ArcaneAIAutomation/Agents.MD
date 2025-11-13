@@ -1,7 +1,7 @@
 /**
  * Comprehensive AI Analysis for ATGE
  * 
- * Uses OpenAI GPT-5 and Gemini AI for the most advanced trade analysis
+ * Uses OpenAI ChatGPT 5.1 and Google Gemini 2.5 Pro for the most advanced trade analysis
  * Combines data from ALL available sources:
  * - CoinMarketCap, CoinGecko, Kraken (Market Data)
  * - Binance (Technical Indicators)
