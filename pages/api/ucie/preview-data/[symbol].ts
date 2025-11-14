@@ -778,7 +778,7 @@ Keep the summary to 3-4 paragraphs, professional but accessible. Use bullet poin
         }
       ],
       temperature: 0.7,
-      max_tokens: 300
+      max_tokens: 1000
     });
     
     // Use Promise.race for reliable timeout (OpenAI SDK doesn't handle AbortController well)
