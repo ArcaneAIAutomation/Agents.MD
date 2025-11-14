@@ -287,7 +287,13 @@ export async function aggregateExchangePrices(symbol: string): Promise<PriceAggr
   const priceVariancePercentage = lowestPrice > 0
     ? (priceVariance / lowestPrice) * 100
     : 0;
-  const totalVolume24h = successfulPrices.reduce((sum, p) => sum + p.volume24h, 0);
+  // ✅ FIXED: Use highest volume from single authoritative source
+  // Don't sum volumes - that double-counts the same trades across exchanges
+  const volumeSources = successfulPrices
+    .filter(p => p.volume24h > 0)
+    .sort((a, b) => b.volume24h - a.volume24h);
+  
+  const totalVolume24h = volumeSources.length > 0 ? volumeSources[0].volume24h : 0;
   const averageChange24h = successfulPrices.length > 0
     ? successfulPrices.reduce((sum, p) => sum + p.change24h, 0) / successfulPrices.length
     : 0;

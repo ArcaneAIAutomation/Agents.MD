@@ -175,10 +175,22 @@ function calculateConfidence(scores: Array<{ value: number; weight: number }>): 
  * Calculate sentiment distribution (positive, neutral, negative percentages)
  */
 export function calculateSentimentDistribution(
-  posts: SocialPost[]
+  posts: SocialPost[],
+  lunarCrush: LunarCrushData | null = null
 ): { positive: number; neutral: number; negative: number } {
+  // ✅ FIXED: Use LunarCrush distribution data if available (more accurate)
+  if (lunarCrush && lunarCrush.sentimentDistribution) {
+    return {
+      positive: lunarCrush.sentimentDistribution.positive || 0,
+      neutral: lunarCrush.sentimentDistribution.neutral || 0,
+      negative: lunarCrush.sentimentDistribution.negative || 0,
+    };
+  }
+  
+  // Fallback to post analysis if LunarCrush data unavailable
   if (posts.length === 0) {
-    return { positive: 33.3, neutral: 33.3, negative: 33.4 };
+    // ✅ FIXED: Return null data instead of fake 33/33/33
+    return { positive: 0, neutral: 0, negative: 0 };
   }
 
   const counts = {
@@ -527,8 +539,8 @@ export function aggregateSentimentData(
     ...(reddit?.topPosts || []),
   ];
 
-  // Calculate distribution
-  const distribution = calculateSentimentDistribution(allPosts);
+  // Calculate distribution (use LunarCrush data if available for accuracy)
+  const distribution = calculateSentimentDistribution(allPosts, lunarCrush);
 
   // Calculate volume metrics
   const totalVolume = (twitter?.mentions24h || 0) + (reddit?.mentions24h || 0);

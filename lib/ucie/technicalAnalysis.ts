@@ -676,16 +676,18 @@ function generateTradingSignals(data: {
   let overall: TechnicalIndicators['signals']['overall'];
   let confidence: number;
   
-  if (buyPercentage >= 70) {
+  // ✅ FIXED: More decisive thresholds (45%/60% instead of 55%/70%)
+  // This prevents "neutral" labels when indicators clearly point one direction
+  if (buyPercentage >= 60) {
     overall = 'strong_buy';
     confidence = buyPercentage;
-  } else if (buyPercentage >= 55) {
+  } else if (buyPercentage >= 45) {
     overall = 'buy';
     confidence = buyPercentage;
-  } else if (sellPercentage >= 70) {
+  } else if (sellPercentage >= 60) {
     overall = 'strong_sell';
     confidence = sellPercentage;
-  } else if (sellPercentage >= 55) {
+  } else if (sellPercentage >= 45) {
     overall = 'sell';
     confidence = sellPercentage;
   } else {
