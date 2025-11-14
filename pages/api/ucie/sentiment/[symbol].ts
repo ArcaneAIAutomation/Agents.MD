@@ -196,25 +196,5 @@ async function handler(
   }
 }
 
-// ============================================================================
-// Cache Cleanup
-// ============================================================================
-
-/**
- * Clean up expired cache entries periodically
- */
-setInterval(() => {
-  const now = Date.now();
-  
-  for (const [symbol, cached] of cache.entries()) {
-    const age = now - cached.timestamp;
-    
-    if (age > CACHE_TTL) {
-      cache.delete(symbol);
-    }
-  }
-}, 60 * 1000); // Run every minute
-
-
 // Export with optional authentication middleware (for user tracking)
 export default withOptionalAuth(handler);

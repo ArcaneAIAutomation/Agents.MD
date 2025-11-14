@@ -132,9 +132,36 @@ async function handler(
       return res.status(200).json(response);
     }
 
-    // Assess impact of all articles
+    // Assess impact of all articles (with timeout protection)
     console.log(`[UCIE News] Assessing impact for ${articles.length} articles`);
-    const assessedArticles = await assessMultipleNews(articles, symbolUpper);
+    let assessedArticles: AssessedNewsArticle[];
+    
+    try {
+      // ✅ FIXED: Add 20-second timeout for impact assessment
+      // If it times out, use articles without AI assessment
+      const assessmentPromise = assessMultipleNews(articles, symbolUpper);
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Assessment timeout')), 20000);
+      });
+      
+      assessedArticles = await Promise.race([assessmentPromise, timeoutPromise]);
+    } catch (error) {
+      console.warn(`[UCIE News] Impact assessment timed out, using articles without AI assessment`);
+      // Fallback: Use articles with default assessment
+      assessedArticles = articles.map(article => ({
+        ...article,
+        assessment: {
+          articleId: article.id,
+          impact: 'neutral' as const,
+          impactScore: 50,
+          confidence: 50,
+          summary: article.description,
+          keyPoints: [],
+          marketImplications: 'Impact assessment unavailable',
+          timeframe: 'short-term' as const
+        }
+      }));
+    }
 
     // Generate summary
     const summary = generateNewsSummary(assessedArticles);
