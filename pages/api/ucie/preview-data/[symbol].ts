@@ -134,12 +134,12 @@ async function handler(
     if (forceRefresh) {
       console.log(`🗑️ Invalidating cache for ${normalizedSymbol}...`);
       try {
-        // Import invalidateCache function
-        const { invalidateCache } = await import('../../../../lib/ucie/cache');
-        const deleted = await invalidateCache({ symbol: normalizedSymbol });
-        console.log(`✅ Invalidated ${deleted} cache entries for ${normalizedSymbol}`);
+        // Import invalidateCache function from correct path
+        const { invalidateCache } = await import('../../../../lib/ucie/cacheUtils');
+        await invalidateCache(normalizedSymbol);
+        console.log(`✅ Invalidated cache for ${normalizedSymbol}`);
       } catch (err) {
-        console.warn(`⚠️ Failed to invalidate cache:`, err);
+        console.error(`Cache invalidation error:`, err);
         // Continue anyway - we'll fetch fresh data
       }
     }
@@ -746,10 +746,9 @@ Keep the summary to 3-4 paragraphs, professional but accessible. Use bullet poin
         }
       ],
       temperature: 0.7,
-      max_tokens: 300, // ✅ Reduced from 400 for faster response
-      timeout: 5000 // ✅ 5 seconds timeout (aggressive)
+      max_tokens: 300 // ✅ Reduced from 400 for faster response
     }, {
-      signal: controller.signal
+      signal: controller.signal // ✅ Use AbortController for timeout instead of timeout parameter
     });
 
     clearTimeout(timeoutId);
@@ -863,8 +862,8 @@ function generateBasicSummary(
 
 /**
  * API Configuration
- * ✅ REALISTIC: maxDuration set to 28s (2s buffer below 30s Vercel limit)
- * Database API fetching can take up to 25 seconds
+ * ✅ INCREASED: maxDuration set to 60s for reliable data collection
+ * Allows for retry logic and database operations
  */
 export const config = {
   api: {
@@ -873,7 +872,7 @@ export const config = {
       sizeLimit: '1mb',
     },
   },
-  maxDuration: 28, // ✅ 28 seconds (2s buffer for 25s API calls + processing)
+  maxDuration: 60, // ✅ 60 seconds for retry logic + database operations
 };
 
 
