@@ -734,11 +734,8 @@ async function generateOpenAISummary(
 
   // Generate summary with OpenAI
   try {
-    // ✅ AGGRESSIVE: 5s timeout for OpenAI (fail fast, use fallback)
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 seconds timeout
-    
-    const completion = await openai.chat.completions.create({
+    // ✅ FIXED: Increased timeout to 15s and use Promise.race for reliable timeout
+    const completionPromise = openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
         {
@@ -758,12 +755,15 @@ Keep the summary to 3-4 paragraphs, professional but accessible. Use bullet poin
         }
       ],
       temperature: 0.7,
-      max_tokens: 300 // ✅ Reduced from 400 for faster response
-    }, {
-      signal: controller.signal // ✅ Use AbortController for timeout instead of timeout parameter
+      max_tokens: 300
     });
-
-    clearTimeout(timeoutId);
+    
+    // Use Promise.race for reliable timeout (OpenAI SDK doesn't handle AbortController well)
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('OpenAI timeout')), 15000);
+    });
+    
+    const completion = await Promise.race([completionPromise, timeoutPromise]);
     return completion.choices[0].message.content || 'Summary generation failed';
 
   } catch (error) {
