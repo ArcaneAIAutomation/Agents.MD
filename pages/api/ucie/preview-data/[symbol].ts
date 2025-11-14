@@ -233,7 +233,7 @@ async function handler(
           normalizedSymbol,
           'market-data',
           collectedData.marketData,
-          15 * 60,
+          2 * 60, // ✅ 2 minutes for fresh data
           collectedData.marketData.dataQuality || 0,
           userId,
           userEmail
@@ -250,7 +250,7 @@ async function handler(
           normalizedSymbol,
           'sentiment',
           collectedData.sentiment,
-          15 * 60,
+          2 * 60, // ✅ 2 minutes for fresh data
           collectedData.sentiment.dataQuality || 0,
           userId,
           userEmail
@@ -267,7 +267,7 @@ async function handler(
           normalizedSymbol,
           'technical',
           collectedData.technical,
-          15 * 60,
+          2 * 60, // ✅ 2 minutes for fresh data
           collectedData.technical.dataQuality || 0,
           userId,
           userEmail
@@ -284,7 +284,7 @@ async function handler(
           normalizedSymbol,
           'news',
           collectedData.news,
-          15 * 60,
+          2 * 60, // ✅ 2 minutes for fresh data
           collectedData.news.dataQuality || 0,
           userId,
           userEmail
@@ -301,7 +301,7 @@ async function handler(
           normalizedSymbol,
           'on-chain',
           collectedData.onChain,
-          15 * 60,
+          2 * 60, // ✅ 2 minutes for fresh data
           collectedData.onChain.dataQuality || 0,
           userId,
           userEmail
@@ -369,7 +369,7 @@ async function handler(
           news: !!collectedData.news,
           onChain: !!collectedData.onChain
         },
-        15 * 60, // 15 minutes TTL
+        2 * 60, // ✅ 2 minutes TTL for fresh data
         userId,
         userEmail
       );

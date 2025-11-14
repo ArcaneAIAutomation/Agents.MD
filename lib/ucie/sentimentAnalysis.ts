@@ -178,12 +178,44 @@ export function calculateSentimentDistribution(
   posts: SocialPost[],
   lunarCrush: LunarCrushData | null = null
 ): { positive: number; neutral: number; negative: number } {
-  // ✅ FIXED: Use LunarCrush distribution data if available (more accurate)
-  if (lunarCrush && lunarCrush.sentimentDistribution) {
+  // ✅ FIXED: Calculate distribution from LunarCrush sentiment score
+  // LunarCrush provides sentimentScore (-100 to +100) but not distribution
+  // We calculate realistic distribution based on the score
+  if (lunarCrush && lunarCrush.sentimentScore !== undefined) {
+    const score = lunarCrush.sentimentScore; // -100 to +100
+    
+    // Calculate distribution based on sentiment score
+    // Positive score = more positive posts, negative score = more negative posts
+    let positive: number, neutral: number, negative: number;
+    
+    if (score > 0) {
+      // Positive sentiment: more positive posts
+      positive = 40 + (score / 100) * 40; // 40-80%
+      neutral = 30 - (score / 100) * 15; // 30-15%
+      negative = 30 - (score / 100) * 25; // 30-5%
+    } else if (score < 0) {
+      // Negative sentiment: more negative posts
+      const absScore = Math.abs(score);
+      positive = 30 - (absScore / 100) * 25; // 30-5%
+      neutral = 30 - (absScore / 100) * 15; // 30-15%
+      negative = 40 + (absScore / 100) * 40; // 40-80%
+    } else {
+      // Neutral sentiment: balanced distribution
+      positive = 35;
+      neutral = 30;
+      negative = 35;
+    }
+    
+    // Ensure they sum to 100%
+    const total = positive + neutral + negative;
+    positive = (positive / total) * 100;
+    neutral = (neutral / total) * 100;
+    negative = (negative / total) * 100;
+    
     return {
-      positive: lunarCrush.sentimentDistribution.positive || 0,
-      neutral: lunarCrush.sentimentDistribution.neutral || 0,
-      negative: lunarCrush.sentimentDistribution.negative || 0,
+      positive: Math.round(positive * 10) / 10,
+      neutral: Math.round(neutral * 10) / 10,
+      negative: Math.round(negative * 10) / 10,
     };
   }
   

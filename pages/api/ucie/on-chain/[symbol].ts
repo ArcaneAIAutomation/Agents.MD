@@ -13,8 +13,8 @@ import { fetchEthereumOnChainData } from '../../../../lib/ucie/ethereumOnChain';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
-// Cache TTL: 15 minutes (for OpenAI/Caesar analysis)
-const CACHE_TTL = 15 * 60; // 900 seconds
+// Cache TTL: 2 minutes (for fresh, accurate data)
+const CACHE_TTL = 2 * 60; // 120 seconds
 
 async function handler(
   req: AuthenticatedRequest,
