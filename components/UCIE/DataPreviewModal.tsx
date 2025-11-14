@@ -149,40 +149,16 @@ export default function DataPreviewModal({
 
           {error && (
             <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-8 text-center">
-              <CheckCircle className="mx-auto text-bitcoin-orange mb-4" size={64} />
+              <XCircle className="mx-auto text-bitcoin-orange mb-4" size={64} />
               <h3 className="text-2xl font-bold text-bitcoin-white mb-3">
-                Data Collection Complete
+                Data Collection Error
               </h3>
               <p className="text-bitcoin-white-80 text-lg mb-4">
-                Your {symbol} data has been successfully collected and stored.
+                {error}
               </p>
               <p className="text-bitcoin-white-60 mb-6">
-                Click <strong className="text-bitcoin-orange">View Full Data</strong> to review all collected information, or <strong className="text-bitcoin-orange">Continue</strong> to proceed with Caesar AI's deep analysis.
+                Please try again or contact support if the issue persists.
               </p>
-              <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4 mb-6 text-left">
-                <h4 className="text-sm font-bold text-bitcoin-white mb-2 flex items-center gap-2">
-                  <span className="text-bitcoin-orange">✓</span>
-                  What You'll Get:
-                </h4>
-                <ul className="space-y-2 text-sm text-bitcoin-white-80">
-                  <li className="flex items-start gap-2">
-                    <span className="text-bitcoin-orange mt-0.5">•</span>
-                    <span>Complete market analysis with real-time data</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-bitcoin-orange mt-0.5">•</span>
-                    <span>AI-powered insights and predictions</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-bitcoin-orange mt-0.5">•</span>
-                    <span>Research-backed findings with source citations</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-bitcoin-orange mt-0.5">•</span>
-                    <span>5-7 minute comprehensive Caesar AI analysis</span>
-                  </li>
-                </ul>
-              </div>
               <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={onCancel}
@@ -192,15 +168,9 @@ export default function DataPreviewModal({
                 </button>
                 <button
                   onClick={fetchDataPreview}
-                  className="bg-transparent text-bitcoin-orange border-2 border-bitcoin-orange font-bold uppercase tracking-wider px-6 py-3 rounded-lg transition-all hover:bg-bitcoin-orange hover:text-bitcoin-black hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] min-h-[48px]"
-                >
-                  View Full Data
-                </button>
-                <button
-                  onClick={fetchDataPreview}
                   className="bg-bitcoin-orange text-bitcoin-black border-2 border-bitcoin-orange font-bold uppercase tracking-wider px-8 py-3 rounded-lg transition-all hover:bg-bitcoin-black hover:text-bitcoin-orange hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[48px]"
                 >
-                  Continue to Caesar AI →
+                  Retry Collection
                 </button>
               </div>
             </div>
@@ -376,9 +346,22 @@ export default function DataPreviewModal({
             </button>
             <button
               onClick={() => preview && onContinue(preview)}
-              className="bg-bitcoin-orange text-bitcoin-black border-2 border-bitcoin-orange font-bold uppercase tracking-wider px-8 py-3 rounded-lg transition-all hover:bg-bitcoin-black hover:text-bitcoin-orange hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[48px]"
+              disabled={preview.dataQuality < 80}
+              className={`font-bold uppercase tracking-wider px-8 py-3 rounded-lg transition-all min-h-[48px] ${
+                preview.dataQuality < 80
+                  ? 'bg-bitcoin-black text-bitcoin-white-60 border-2 border-bitcoin-white-60 cursor-not-allowed opacity-50'
+                  : 'bg-bitcoin-orange text-bitcoin-black border-2 border-bitcoin-orange hover:bg-bitcoin-black hover:text-bitcoin-orange hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95'
+              }`}
+              title={preview.dataQuality < 80 ? 'Data quality must be at least 80% to continue' : 'Continue with Caesar AI Analysis'}
             >
-              Continue with Caesar AI Analysis →
+              {preview.dataQuality < 80 ? (
+                <>
+                  <AlertCircle className="inline-block mr-2" size={20} />
+                  Insufficient Data ({preview.dataQuality}%)
+                </>
+              ) : (
+                'Continue with Caesar AI Analysis →'
+              )}
             </button>
           </div>
         )}

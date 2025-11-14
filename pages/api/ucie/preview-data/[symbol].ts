@@ -144,28 +144,24 @@ async function handler(
       }
     }
     
-    // ✅ AUTOMATIC RETRY LOGIC: 3 attempts with 10-second delays
-    console.log(`🔄 Starting data collection with automatic retry (3 attempts, 10s timeout each)...`);
+    // ✅ AUTOMATIC RETRY LOGIC: 2 attempts with 30-second timeout each
+    console.log(`🔄 Starting data collection with automatic retry (2 attempts, 30s timeout each)...`);
     const startTime = Date.now();
     let collectedData: any = null;
     let collectionTime = 0;
     let attempt = 0;
-    const maxAttempts = 3;
-    const attemptTimeout = 10000; // 10 seconds per attempt
-    const retryDelay = 10000; // 10 seconds between retries
+    const maxAttempts = 2; // Reduced to 2 attempts to stay within 60s limit
+    const attemptTimeout = 30000; // 30 seconds per attempt (realistic for API calls)
+    const retryDelay = 5000; // 5 seconds between retries
     
     for (attempt = 1; attempt <= maxAttempts; attempt++) {
       console.log(`📡 Attempt ${attempt}/${maxAttempts} - Collecting data...`);
       const attemptStart = Date.now();
       
       try {
-        // Collect data with timeout
-        collectedData = await Promise.race([
-          collectDataFromAPIs(normalizedSymbol, req, forceRefresh),
-          new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Attempt timeout')), attemptTimeout)
-          )
-        ]);
+        // Collect data (individual APIs have their own 25s timeouts)
+        // No wrapper timeout - let individual API timeouts handle it
+        collectedData = await collectDataFromAPIs(normalizedSymbol, req, forceRefresh);
         
         collectionTime = Date.now() - attemptStart;
         console.log(`✅ Attempt ${attempt} completed in ${collectionTime}ms`);
