@@ -43,25 +43,42 @@ const CACHE_TTL = 5 * 60 * 1000; // milliseconds
 const cache = new Map<string, { data: any; timestamp: number }>();
 
 /**
- * Fetch data from an endpoint with timeout
+ * Fetch data from an endpoint with timeout and retry logic
  */
-async function fetchWithTimeout(url: string, timeoutMs: number): Promise<any> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+async function fetchWithTimeout(url: string, timeoutMs: number, retries: number = 2): Promise<any> {
+  let lastError: Error | null = null;
   
-  try {
-    const response = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeoutId);
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+    try {
+      console.log(`🔄 Fetching ${url} (attempt ${attempt + 1}/${retries + 1})`);
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log(`✅ Successfully fetched ${url}`);
+      return data;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      lastError = error instanceof Error ? error : new Error('Unknown error');
+      console.warn(`⚠️ Attempt ${attempt + 1} failed for ${url}:`, lastError.message);
+      
+      // Wait before retry (exponential backoff)
+      if (attempt < retries) {
+        const waitTime = Math.min(1000 * Math.pow(2, attempt), 5000);
+        console.log(`⏳ Waiting ${waitTime}ms before retry...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
     }
-    
-    return await response.json();
-  } catch (error) {
-    clearTimeout(timeoutId);
-    throw error;
   }
+  
+  throw lastError || new Error('All retry attempts failed');
 }
 
 /**
@@ -158,21 +175,27 @@ export default async function handler(
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://news.arcane.group';
     
     console.log(`🔍 Comprehensive analysis fetching from: ${baseUrl}`);
+    console.log(`📊 Using STAGED approach to prevent timeouts`);
     
-    // Fetch all data sources in parallel with timeouts
-    // News has longer timeout (70s) due to multiple source aggregation
-    const [
-      marketDataResult,
-      technicalResult,
-      sentimentResult,
-      newsResult,
-      riskResult
-    ] = await Promise.allSettled([
-      fetchWithTimeout(`${baseUrl}/api/ucie/market-data/${symbolUpper}`, 8000),
-      fetchWithTimeout(`${baseUrl}/api/ucie/technical/${symbolUpper}`, 8000),
-      fetchWithTimeout(`${baseUrl}/api/ucie/sentiment/${symbolUpper}`, 8000),
-      fetchWithTimeout(`${baseUrl}/api/ucie/news/${symbolUpper}`, 70000), // 70 seconds for news
-      fetchWithTimeout(`${baseUrl}/api/ucie/risk/${symbolUpper}`, 8000)
+    // ✅ STAGED APPROACH: Fetch data in stages to prevent timeout
+    // Stage 1: Fast endpoints (market data, technical) - 30s timeout each
+    console.log(`📊 Stage 1: Fetching market data and technical analysis...`);
+    const [marketDataResult, technicalResult] = await Promise.allSettled([
+      fetchWithTimeout(`${baseUrl}/api/ucie/market-data/${symbolUpper}`, 30000, 2),
+      fetchWithTimeout(`${baseUrl}/api/ucie/technical/${symbolUpper}`, 30000, 2)
+    ]);
+    
+    // Stage 2: Medium endpoints (sentiment, risk) - 30s timeout each
+    console.log(`📊 Stage 2: Fetching sentiment and risk analysis...`);
+    const [sentimentResult, riskResult] = await Promise.allSettled([
+      fetchWithTimeout(`${baseUrl}/api/ucie/sentiment/${symbolUpper}`, 30000, 2),
+      fetchWithTimeout(`${baseUrl}/api/ucie/risk/${symbolUpper}`, 30000, 2)
+    ]);
+    
+    // Stage 3: Slow endpoint (news) - 90s timeout with retries
+    console.log(`📊 Stage 3: Fetching news (this may take longer)...`);
+    const [newsResult] = await Promise.allSettled([
+      fetchWithTimeout(`${baseUrl}/api/ucie/news/${symbolUpper}`, 90000, 2) // 90 seconds with 2 retries
     ]);
     
     // Extract successful results with logging

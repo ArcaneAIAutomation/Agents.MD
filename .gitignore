@@ -98,6 +98,29 @@ tmp/
 production-secrets.txt
 vercel-env-vars.txt
 
+# Documentation with sensitive data (credentials, URLs, keys)
+*-SETUP*.md
+*-DEPLOY*.md
+*-DEPLOYMENT*.md
+*-PRODUCTION*.md
+*-QUICK-START*.md
+*-QUICK-DEPLOY*.md
+*-ENV-*.md
+*-VERCEL-*.md
+*-DATABASE-*.md
+*-REDIS-*.md
+*-STAGING-*.md
+*-AUTOMATION-*.md
+CAESAR-DEBUGGING-GUIDE.md
+CAESAR-QUICK-START.md
+CAESAR-SETUP-GUIDE.md
+AUTH-QUICK-REFERENCE.md
+AUTOMATED-SETUP-INSTRUCTIONS.md
+DEPLOYMENT-*.md
+FINAL-*.md
+EMAIL-VERIFICATION-*.md
+DEEP-DIVE-*-TROUBLESHOOTING.md
+
 # Development and testing files
 test-*.js
 *-test.js

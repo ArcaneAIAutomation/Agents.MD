@@ -144,9 +144,9 @@ async function handler(
     // Fetch comprehensive market data (with fallback)
     const marketDataPromise = fetchMarketData(symbolUpper);
 
-    // Wait for both with timeout
+    // Wait for both with increased timeout (30 seconds)
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Request timeout')), 15000);
+      setTimeout(() => reject(new Error('Request timeout after 30 seconds')), 30000);
     });
 
     const [priceAggregation, marketData] = await Promise.race([
