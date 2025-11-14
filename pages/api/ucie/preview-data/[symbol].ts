@@ -619,21 +619,25 @@ async function generateOpenAISummary(
   context += `- APIs Working: ${apiStatus.working.length}/${apiStatus.total}\n`;
   context += `- Data Quality: ${apiStatus.successRate}%\n\n`;
 
-  // ✅ FIXED: Market Data - Use correct path (priceAggregation.aggregatedPrice)
+  // ✅ FIXED: Market Data - Use correct path (priceAggregation.averagePrice)
   if (marketData?.success && marketData?.priceAggregation) {
     const agg = marketData.priceAggregation;
     context += `Market Data:\n`;
     try {
-      // Use safe formatters to handle any property name variation
-      const { formatPrice, formatVolume, formatMarketCap, formatPriceChange } = require('../../../../lib/ucie/dataFormatter');
-      context += `- Price: ${formatPrice(marketData)}\n`;
-      context += `- 24h Volume: ${formatVolume(marketData)}\n`;
-      context += `- Market Cap: ${formatMarketCap(marketData)}\n`;
-      context += `- 24h Change: ${formatPriceChange(marketData)}\n`;
+      // Extract actual values from priceAggregation
+      const price = agg.averagePrice || agg.aggregatedPrice || 0;
+      const volume = agg.totalVolume24h || agg.aggregatedVolume24h || 0;
+      const marketCap = marketData.marketData?.marketCap || agg.aggregatedMarketCap || 0;
+      const change = agg.averageChange24h || agg.aggregatedChange24h || 0;
+      
+      context += `- Price: $${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`;
+      context += `- 24h Volume: $${(volume / 1e9).toFixed(2)}B\n`;
+      context += `- Market Cap: $${(marketCap / 1e9).toFixed(2)}B\n`;
+      context += `- 24h Change: ${change > 0 ? '+' : ''}${change.toFixed(2)}%\n`;
       context += `- Data Sources: ${agg.prices?.length || 0} exchanges\n\n`;
     } catch (error) {
       console.error('❌ Error formatting market data:', error);
-      context += `- Price: ${agg.aggregatedPrice || 'N/A'}\n`;
+      context += `- Price: ${agg.averagePrice || agg.aggregatedPrice || 'N/A'}\n`;
       context += `- Data Sources: ${agg.prices?.length || 0} exchanges\n\n`;
     }
   }
@@ -643,11 +647,15 @@ async function generateOpenAISummary(
     const sentiment = sentimentData.sentiment;
     context += `Social Sentiment:\n`;
     try {
-      // Use safe formatters to handle any property name variation
-      const { formatSentimentScore, formatSentimentTrend, formatMentions } = require('../../../../lib/ucie/dataFormatter');
-      context += `- Overall Score: ${formatSentimentScore(sentimentData)}\n`;
-      context += `- Trend: ${formatSentimentTrend(sentimentData)}\n`;
-      context += `- 24h Mentions: ${formatMentions(sentimentData)}\n`;
+      // Extract actual values from sentiment data
+      const score = sentiment.overallScore || 0;
+      const trend = sentiment.trend || 'neutral';
+      const mentions = sentimentData.volumeMetrics?.total24h || sentiment.mentions24h || 0;
+      
+      context += `- Overall Score: ${score.toFixed(0)}/100\n`;
+      context += `- Trend: ${trend}\n`;
+      context += `- 24h Mentions: ${mentions.toLocaleString('en-US')}\n`;
+      
       const sources = Object.keys(sentimentData.sources || {}).filter(k => sentimentData.sources[k]);
       if (sources.length > 0) {
         context += `- Sources: ${sources.join(', ')}\n`;
@@ -663,14 +671,17 @@ async function generateOpenAISummary(
   if (technicalData?.success && technicalData?.indicators) {
     context += `Technical Analysis:\n`;
     try {
-      // Use safe formatters to handle any property name variation and object types
-      const { formatRSI, formatMACDSignal, formatTrendDirection } = require('../../../../lib/ucie/dataFormatter');
-      context += `- RSI: ${formatRSI(technicalData)}\n`;
-      context += `- MACD Signal: ${formatMACDSignal(technicalData)}\n`;
-      context += `- Trend: ${formatTrendDirection(technicalData)}\n`;
+      // Extract actual values from technical indicators
+      const indicators = technicalData.indicators;
+      const rsi = indicators.rsi?.value || indicators.rsi || 0;
+      const macdSignal = indicators.macd?.signal || 'neutral';
+      const trend = indicators.trend?.direction || technicalData.trend?.direction || 'neutral';
+      
+      context += `- RSI: ${typeof rsi === 'number' ? rsi.toFixed(2) : rsi}\n`;
+      context += `- MACD Signal: ${macdSignal}\n`;
+      context += `- Trend: ${trend}\n`;
       
       // Additional indicators if available
-      const indicators = technicalData.indicators;
       if (indicators?.trend?.strength) {
         context += `- Trend Strength: ${indicators.trend.strength}\n`;
       }
