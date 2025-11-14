@@ -85,21 +85,47 @@ export function generateCryptoResearchQuery(symbol: string, contextData?: any): 
     // Sentiment
     if (contextData.sentiment) {
       contextSection += `**Social Sentiment:**\n`;
-      // Use safe formatters to handle different property names
-      const { formatSentimentScore, formatSentimentTrend, formatMentions } = require('./dataFormatter');
-      contextSection += `- Overall Score: ${formatSentimentScore(contextData.sentiment)}\n`;
-      contextSection += `- Trend: ${formatSentimentTrend(contextData.sentiment)}\n`;
-      contextSection += `- 24h Mentions: ${formatMentions(contextData.sentiment)}\n\n`;
+      // Extract actual values from sentiment data structure
+      const sentiment = contextData.sentiment.sentiment || contextData.sentiment;
+      const score = sentiment.overallScore || 0;
+      const trend = sentiment.trend || 'neutral';
+      const mentions = contextData.sentiment.volumeMetrics?.total24h || sentiment.mentions24h || 0;
+      
+      contextSection += `- Overall Score: ${score.toFixed(0)}/100\n`;
+      contextSection += `- Trend: ${trend}\n`;
+      contextSection += `- 24h Mentions: ${mentions.toLocaleString('en-US')}\n`;
+      
+      // Add sources if available
+      if (contextData.sentiment.sources) {
+        const sources = Object.keys(contextData.sentiment.sources).filter(k => contextData.sentiment.sources[k]);
+        if (sources.length > 0) {
+          contextSection += `- Sources: ${sources.join(', ')}\n`;
+        }
+      }
+      contextSection += `\n`;
     }
     
     // Technical Analysis
     if (contextData.technical) {
       contextSection += `**Technical Analysis:**\n`;
-      // Use safe formatters to handle different property names and object types
-      const { formatRSI, formatMACDSignal, formatTrendDirection } = require('./dataFormatter');
-      contextSection += `- RSI: ${formatRSI(contextData.technical)}\n`;
-      contextSection += `- MACD Signal: ${formatMACDSignal(contextData.technical)}\n`;
-      contextSection += `- Trend: ${formatTrendDirection(contextData.technical)}\n\n`;
+      // Extract actual values from technical indicators
+      const indicators = contextData.technical.indicators || contextData.technical;
+      const rsi = indicators.rsi?.value || indicators.rsi || 0;
+      const macdSignal = indicators.macd?.signal || 'neutral';
+      const trend = indicators.trend?.direction || contextData.technical.trend?.direction || 'neutral';
+      
+      contextSection += `- RSI: ${typeof rsi === 'number' ? rsi.toFixed(2) : rsi}\n`;
+      contextSection += `- MACD Signal: ${macdSignal}\n`;
+      contextSection += `- Trend: ${trend}\n`;
+      
+      // Add additional indicators if available
+      if (indicators.trend?.strength) {
+        contextSection += `- Trend Strength: ${indicators.trend.strength}\n`;
+      }
+      if (indicators.volatility) {
+        contextSection += `- Volatility: ${indicators.volatility.current || 'N/A'}\n`;
+      }
+      contextSection += `\n`;
     }
     
     // On-Chain Data (Blockchain Intelligence)
