@@ -69,31 +69,31 @@ const EFFECTIVE_APIS = {
   marketData: {
     endpoint: '/api/ucie/market-data',
     priority: 1,
-    timeout: 25000, // ✅ 25 seconds (realistic for database fetching)
+    timeout: 30000, // ✅ 30 seconds (required data source)
     required: true
   },
   sentiment: {
     endpoint: '/api/ucie/sentiment',
     priority: 2,
-    timeout: 25000, // ✅ 25 seconds (realistic for database fetching)
+    timeout: 30000, // ✅ 30 seconds (optional but valuable)
     required: false
   },
   technical: {
     endpoint: '/api/ucie/technical',
     priority: 2,
-    timeout: 25000, // ✅ 25 seconds (realistic for database fetching)
-    required: false
+    timeout: 30000, // ✅ 30 seconds (required for analysis)
+    required: true
   },
   news: {
     endpoint: '/api/ucie/news',
     priority: 2,
-    timeout: 25000, // ✅ 25 seconds (realistic for database fetching)
+    timeout: 35000, // ✅ 35 seconds (news can be slow, but optional)
     required: false
   },
   onChain: {
     endpoint: '/api/ucie/on-chain',
     priority: 3,
-    timeout: 25000, // ✅ 25 seconds (realistic for database fetching)
+    timeout: 30000, // ✅ 30 seconds (optional but valuable)
     required: false
   }
 };
@@ -424,6 +424,7 @@ async function collectDataFromAPIs(symbol: string, req: NextApiRequest, refresh:
   console.log(`🌐 Using base URL: ${baseUrl}`);
   
   const results = await Promise.allSettled([
+    // ✅ MARKET DATA: Required - Fail if this fails
     fetchWithTimeout(
       `${baseUrl}${EFFECTIVE_APIS.marketData.endpoint}/${symbol}${refreshParam}`,
       EFFECTIVE_APIS.marketData.timeout
@@ -431,13 +432,15 @@ async function collectDataFromAPIs(symbol: string, req: NextApiRequest, refresh:
       console.error(`❌ Market Data failed:`, err.message);
       throw err;
     }),
+    // ✅ SENTIMENT: Optional - Continue if this fails
     fetchWithTimeout(
       `${baseUrl}${EFFECTIVE_APIS.sentiment.endpoint}/${symbol}${refreshParam}`,
       EFFECTIVE_APIS.sentiment.timeout
     ).catch(err => {
       console.error(`❌ Sentiment failed:`, err.message);
-      throw err;
+      return null; // Optional - don't fail entire collection
     }),
+    // ✅ TECHNICAL: Required - Fail if this fails
     fetchWithTimeout(
       `${baseUrl}${EFFECTIVE_APIS.technical.endpoint}/${symbol}${refreshParam}`,
       EFFECTIVE_APIS.technical.timeout
@@ -445,19 +448,21 @@ async function collectDataFromAPIs(symbol: string, req: NextApiRequest, refresh:
       console.error(`❌ Technical failed:`, err.message);
       throw err;
     }),
+    // ✅ NEWS: Optional - Continue if this fails
     fetchWithTimeout(
       `${baseUrl}${EFFECTIVE_APIS.news.endpoint}/${symbol}${refreshParam}`,
       EFFECTIVE_APIS.news.timeout
     ).catch(err => {
       console.error(`❌ News failed:`, err.message);
-      throw err;
+      return null; // Optional - don't fail entire collection
     }),
+    // ✅ ON-CHAIN: Optional - Continue if this fails
     fetchWithTimeout(
       `${baseUrl}${EFFECTIVE_APIS.onChain.endpoint}/${symbol}${refreshParam}`,
       EFFECTIVE_APIS.onChain.timeout
     ).catch(err => {
       console.error(`❌ On-Chain failed:`, err.message);
-      throw err;
+      return null; // Optional - don't fail entire collection
     })
   ]);
 
