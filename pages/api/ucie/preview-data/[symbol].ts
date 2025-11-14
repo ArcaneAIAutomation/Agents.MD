@@ -69,31 +69,31 @@ const EFFECTIVE_APIS = {
   marketData: {
     endpoint: '/api/ucie/market-data',
     priority: 1,
-    timeout: 30000, // ✅ 30 seconds (required data source)
+    timeout: 45000, // ✅ 45 seconds (required data source - increased for reliability)
     required: true
   },
   sentiment: {
     endpoint: '/api/ucie/sentiment',
     priority: 2,
-    timeout: 30000, // ✅ 30 seconds (optional but valuable)
+    timeout: 45000, // ✅ 45 seconds (optional but valuable - increased for reliability)
     required: false
   },
   technical: {
     endpoint: '/api/ucie/technical',
     priority: 2,
-    timeout: 30000, // ✅ 30 seconds (required for analysis)
+    timeout: 45000, // ✅ 45 seconds (required for analysis - increased for reliability)
     required: true
   },
   news: {
     endpoint: '/api/ucie/news',
     priority: 2,
-    timeout: 35000, // ✅ 35 seconds (news can be slow, but optional)
+    timeout: 50000, // ✅ 50 seconds (news can be slow, but optional - increased for reliability)
     required: false
   },
   onChain: {
     endpoint: '/api/ucie/on-chain',
     priority: 3,
-    timeout: 30000, // ✅ 30 seconds (optional but valuable)
+    timeout: 45000, // ✅ 45 seconds (optional but valuable - increased for reliability)
     required: false
   }
 };
@@ -330,24 +330,42 @@ async function handler(
     await new Promise(resolve => setTimeout(resolve, 5000));
     console.log(`✅ Database population delay complete`);
 
-    // ✅ Generate OpenAI summary AFTER database is populated
-    console.log(`🤖 Generating OpenAI summary for ${normalizedSymbol}...`);
+    // ✅ CRITICAL: Verify data quality before AI summary
+    // Only generate AI summary if we have sufficient data (≥60%)
+    console.log(`🔍 Verifying data quality before AI summary...`);
+    console.log(`   Data Quality: ${dataQuality}%`);
+    console.log(`   Required Data: Market (${!!collectedData.marketData?.success}), Technical (${!!collectedData.technical?.success})`);
+    
+    // Check if we have minimum required data (market + technical)
+    const hasRequiredData = 
+      collectedData.marketData?.success === true &&
+      collectedData.technical?.success === true;
+    
+    if (!hasRequiredData) {
+      console.warn(`⚠️ Insufficient data for AI summary - skipping`);
+      console.warn(`   Market Data: ${collectedData.marketData?.success ? '✅' : '❌'}`);
+      console.warn(`   Technical Data: ${collectedData.technical?.success ? '✅' : '❌'}`);
+    }
+
+    // ✅ Generate OpenAI summary ONLY if we have required data
     let summary = '';
-    try {
-      summary = await generateOpenAISummary(normalizedSymbol, collectedData, apiStatus);
-      console.log(`✅ OpenAI summary generated (${summary.length} chars)`);
-      
-      // Store OpenAI summary in database
-      const { storeOpenAISummary } = await import('../../../../lib/ucie/openaiSummaryStorage');
-      await storeOpenAISummary(
-        normalizedSymbol,
-        summary,
-        dataQuality,
-        apiStatus,
-        {
-          marketData: !!collectedData.marketData,
-          sentiment: !!collectedData.sentiment,
-          technical: !!collectedData.technical,
+    if (hasRequiredData && dataQuality >= 60) {
+      console.log(`🤖 Generating OpenAI summary for ${normalizedSymbol}...`);
+      try {
+        summary = await generateOpenAISummary(normalizedSymbol, collectedData, apiStatus);
+        console.log(`✅ OpenAI summary generated (${summary.length} chars)`);
+        
+        // Store OpenAI summary in database
+        const { storeOpenAISummary } = await import('../../../../lib/ucie/openaiSummaryStorage');
+        await storeOpenAISummary(
+          normalizedSymbol,
+          summary,
+          dataQuality,
+          apiStatus,
+          {
+            marketData: !!collectedData.marketData,
+            sentiment: !!collectedData.sentiment,
+            technical: !!collectedData.technical,
           news: !!collectedData.news,
           onChain: !!collectedData.onChain
         },
@@ -356,8 +374,13 @@ async function handler(
         userEmail
       );
       console.log(`✅ OpenAI summary stored in ucie_openai_analysis table`);
-    } catch (error) {
-      console.error('❌ Failed to generate OpenAI summary:', error);
+      } catch (error) {
+        console.error('❌ Failed to generate OpenAI summary:', error);
+        summary = generateBasicSummary(normalizedSymbol, collectedData, apiStatus);
+      }
+    } else {
+      // Use basic summary if insufficient data
+      console.log(`📝 Using basic summary (insufficient data for AI)`);
       summary = generateBasicSummary(normalizedSymbol, collectedData, apiStatus);
     }
 
@@ -759,8 +782,9 @@ Keep the summary to 3-4 paragraphs, professional but accessible. Use bullet poin
     });
     
     // Use Promise.race for reliable timeout (OpenAI SDK doesn't handle AbortController well)
+    // ✅ INCREASED: 25-second timeout for OpenAI (was 15s)
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('OpenAI timeout')), 15000);
+      setTimeout(() => reject(new Error('OpenAI timeout')), 25000);
     });
     
     const completion = await Promise.race([completionPromise, timeoutPromise]);

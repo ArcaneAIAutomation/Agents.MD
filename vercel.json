@@ -15,19 +15,19 @@
       "maxDuration": 60
     },
     "pages/api/ucie/market-data/**/*.ts": {
-      "maxDuration": 60
+      "maxDuration": 90
     },
     "pages/api/ucie/sentiment/**/*.ts": {
-      "maxDuration": 60
+      "maxDuration": 90
     },
     "pages/api/ucie/news/**/*.ts": {
       "maxDuration": 120
     },
     "pages/api/ucie/technical/**/*.ts": {
-      "maxDuration": 60
+      "maxDuration": 90
     },
     "pages/api/ucie/on-chain/**/*.ts": {
-      "maxDuration": 60
+      "maxDuration": 90
     },
     "pages/api/ucie/risk/**/*.ts": {
       "maxDuration": 60
@@ -48,7 +48,7 @@
       "maxDuration": 180
     },
     "pages/api/ucie/preview-data/**/*.ts": {
-      "maxDuration": 60
+      "maxDuration": 120
     },
     "pages/api/ucie/research/**/*.ts": {
       "maxDuration": 300
