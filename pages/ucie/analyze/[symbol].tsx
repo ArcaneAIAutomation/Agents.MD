@@ -1,15 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Layout from '../../../components/Layout';
 import UCIEAnalysisHub from '../../../components/UCIE/UCIEAnalysisHub';
+import ProgressiveLoadingScreen from '../../../components/UCIE/ProgressiveLoadingScreen';
 
 export default function AnalyzePage() {
   const router = useRouter();
   const { symbol } = router.query;
+  const [analysisData, setAnalysisData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const handleBack = () => {
     router.push('/ucie');
+  };
+
+  const handleAnalysisComplete = (data: any) => {
+    console.log('✅ Analysis complete:', data);
+    setAnalysisData(data);
+    setIsLoading(false);
+  };
+
+  const handleAnalysisError = (errorMsg: string) => {
+    console.error('❌ Analysis error:', errorMsg);
+    setError(errorMsg);
+    setIsLoading(false);
   };
 
   if (!symbol || typeof symbol !== 'string') {
@@ -44,7 +60,55 @@ export default function AnalyzePage() {
           content={`Comprehensive analysis of ${symbol.toUpperCase()} with AI-powered research, real-time data, and multi-dimensional intelligence.`} 
         />
       </Head>
-      <UCIEAnalysisHub symbol={symbol.toUpperCase()} onBack={handleBack} />
+      
+      {/* Show progressive loading screen while analysis is in progress */}
+      {isLoading && !error && (
+        <ProgressiveLoadingScreen 
+          symbol={symbol.toUpperCase()}
+          onComplete={handleAnalysisComplete}
+          onError={handleAnalysisError}
+        />
+      )}
+
+      {/* Show error state */}
+      {error && !isLoading && (
+        <div className="min-h-screen bg-bitcoin-black py-8 px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-8 text-center">
+              <div className="text-6xl mb-4">❌</div>
+              <h2 className="text-2xl font-bold text-bitcoin-white mb-4">
+                Analysis Failed
+              </h2>
+              <p className="text-bitcoin-white-80 mb-6">
+                {error}
+              </p>
+              <div className="flex gap-4 justify-center">
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="bg-bitcoin-orange text-bitcoin-black border-2 border-bitcoin-orange font-bold uppercase px-6 py-3 rounded-lg transition-all hover:bg-bitcoin-black hover:text-bitcoin-orange min-h-[48px]"
+                >
+                  Retry Analysis
+                </button>
+                <button 
+                  onClick={handleBack}
+                  className="bg-transparent text-bitcoin-orange border-2 border-bitcoin-orange font-semibold uppercase px-6 py-3 rounded-lg transition-all hover:bg-bitcoin-orange hover:text-bitcoin-black min-h-[48px]"
+                >
+                  Go Back
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Show analysis hub when data is ready */}
+      {analysisData && !isLoading && !error && (
+        <UCIEAnalysisHub 
+          symbol={symbol.toUpperCase()} 
+          onBack={handleBack}
+          initialData={analysisData}
+        />
+      )}
     </Layout>
   );
 }
