@@ -109,6 +109,11 @@ export async function setCachedAnalysis(
       console.log(`🤖 Caching for system user (anonymous request)`);
     }
     
+    // ✅ FIX: Round data quality score to integer (database column is INTEGER, not FLOAT)
+    const qualityScoreInt = dataQualityScore !== undefined && dataQualityScore !== null 
+      ? Math.round(dataQualityScore) 
+      : null;
+    
     // ✅ UPSERT: Replace old data if it exists
     // UNIQUE constraint is (symbol, analysis_type) - one entry per symbol+type
     await query(
@@ -127,7 +132,7 @@ export async function setCachedAnalysis(
         symbol.toUpperCase(),
         analysisType,
         JSON.stringify(data),
-        dataQualityScore || null,
+        qualityScoreInt,
         effectiveUserId,
         effectiveUserEmail
       ]

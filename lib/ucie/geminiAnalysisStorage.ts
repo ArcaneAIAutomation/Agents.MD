@@ -36,6 +36,17 @@ export interface GeminiAnalysisData {
  * @returns Stored analysis ID
  */
 export async function storeGeminiAnalysis(data: GeminiAnalysisData): Promise<number> {
+  // ✅ FIX: Round numeric values to integers for INTEGER columns
+  const dataQualityInt = Math.round(data.dataQualityScore);
+  const tokensUsedInt = data.tokensUsed ? Math.round(data.tokensUsed) : null;
+  const promptTokensInt = data.promptTokens ? Math.round(data.promptTokens) : null;
+  const completionTokensInt = data.completionTokens ? Math.round(data.completionTokens) : null;
+  const thinkingTokensInt = data.thinkingTokens ? Math.round(data.thinkingTokens) : null;
+  const responseTimeMsInt = data.responseTimeMs ? Math.round(data.responseTimeMs) : null;
+  const processingTimeMsInt = data.processingTimeMs ? Math.round(data.processingTimeMs) : null;
+  const availableDataCountInt = data.availableDataCount ? Math.round(data.availableDataCount) : null;
+  const confidenceScoreInt = data.confidenceScore ? Math.round(data.confidenceScore) : null;
+  
   const result = await query(
     `INSERT INTO ucie_gemini_analysis (
       symbol,
@@ -88,22 +99,22 @@ export async function storeGeminiAnalysis(data: GeminiAnalysisData): Promise<num
       data.userEmail || null,
       data.summaryText,
       data.thinkingProcess || null,
-      data.dataQualityScore,
+      dataQualityInt,
       JSON.stringify(data.apiStatus),
       'gemini',
       data.modelUsed || 'gemini-2.5-pro',
-      data.tokensUsed || null,
-      data.promptTokens || null,
-      data.completionTokens || null,
-      data.thinkingTokens || null,
+      tokensUsedInt,
+      promptTokensInt,
+      completionTokensInt,
+      thinkingTokensInt,
       data.estimatedCostUsd || null,
-      data.responseTimeMs || null,
-      data.processingTimeMs || null,
+      responseTimeMsInt,
+      processingTimeMsInt,
       data.dataSourcesUsed ? JSON.stringify(data.dataSourcesUsed) : null,
-      data.availableDataCount || null,
+      availableDataCountInt,
       10, // total_data_sources
       data.analysisType || 'summary',
-      data.confidenceScore || null
+      confidenceScoreInt
     ]
   );
 

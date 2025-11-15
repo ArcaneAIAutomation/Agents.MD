@@ -43,6 +43,9 @@ export async function storeOpenAISummary(
   userEmail?: string
 ): Promise<void> {
   try {
+    // ✅ FIX: Round data quality to integer (database column is INTEGER, not FLOAT)
+    const dataQualityInt = Math.round(dataQuality);
+    
     await query(
       `INSERT INTO ucie_openai_analysis (
         symbol,
@@ -66,7 +69,7 @@ export async function storeOpenAISummary(
         userId,
         userEmail || null,
         summaryText,
-        dataQuality,
+        dataQualityInt,
         JSON.stringify(apiStatus),
         'openai'
       ]
