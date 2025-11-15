@@ -30,6 +30,10 @@ interface DataPreview {
     technical: any;
     news: any;
     onChain: any;
+    predictions: any;
+    risk: any;
+    derivatives: any;
+    defi: any;
   };
   apiStatus: {
     working: string[];
@@ -56,40 +60,65 @@ interface ApiResponse {
 }
 
 /**
- * Most Effective UCIE APIs (Based on audit)
+ * ALL UCIE APIs - Complete Data Collection
+ * ✅ COMPREHENSIVE: All 9 data sources for complete analysis
  * ✅ REALISTIC TIMEOUTS: Database API fetching can take up to 25 seconds
- * ✅ Vercel limit: 30s → Set maxDuration to 28s (2s buffer)
- * ✅ API timeouts: 25s max (allow full database fetch time)
+ * ✅ Vercel limit: 60s → Set maxDuration to 60s for all sources
+ * ✅ API timeouts: 45s max (allow full database fetch time)
  */
 const EFFECTIVE_APIS = {
   marketData: {
     endpoint: '/api/ucie/market-data',
     priority: 1,
-    timeout: 45000, // ✅ 45 seconds (required data source - increased for reliability)
+    timeout: 45000, // ✅ 45 seconds (required data source)
     required: true
   },
   sentiment: {
     endpoint: '/api/ucie/sentiment',
     priority: 2,
-    timeout: 45000, // ✅ 45 seconds (optional but valuable - increased for reliability)
+    timeout: 45000, // ✅ 45 seconds (social sentiment analysis)
     required: false
   },
   technical: {
     endpoint: '/api/ucie/technical',
     priority: 2,
-    timeout: 45000, // ✅ 45 seconds (required for analysis - increased for reliability)
+    timeout: 45000, // ✅ 45 seconds (required for analysis)
     required: true
   },
   news: {
     endpoint: '/api/ucie/news',
     priority: 2,
-    timeout: 50000, // ✅ 50 seconds (news can be slow, but optional - increased for reliability)
+    timeout: 50000, // ✅ 50 seconds (news can be slow)
     required: false
   },
   onChain: {
     endpoint: '/api/ucie/on-chain',
     priority: 3,
-    timeout: 45000, // ✅ 45 seconds (optional but valuable - increased for reliability)
+    timeout: 45000, // ✅ 45 seconds (blockchain data)
+    required: false
+  },
+  predictions: {
+    endpoint: '/api/ucie/predictions',
+    priority: 3,
+    timeout: 45000, // ✅ 45 seconds (price predictions)
+    required: false
+  },
+  risk: {
+    endpoint: '/api/ucie/risk',
+    priority: 3,
+    timeout: 45000, // ✅ 45 seconds (risk assessment)
+    required: false
+  },
+  derivatives: {
+    endpoint: '/api/ucie/derivatives',
+    priority: 3,
+    timeout: 45000, // ✅ 45 seconds (futures/options data)
+    required: false
+  },
+  defi: {
+    endpoint: '/api/ucie/defi',
+    priority: 3,
+    timeout: 45000, // ✅ 45 seconds (DeFi metrics)
     required: false
   }
 };
@@ -308,6 +337,74 @@ async function handler(
       );
     }
 
+    if (collectedData.predictions?.success) {
+      storagePromises.push(
+        setCachedAnalysis(
+          normalizedSymbol,
+          'predictions',
+          collectedData.predictions,
+          2 * 60, // ✅ 2 minutes for fresh data
+          collectedData.predictions.dataQuality || 0,
+          userId,
+          userEmail
+        ).catch(err => {
+          console.error('❌ Failed to store predictions:', err);
+          return { status: 'failed', type: 'predictions' };
+        })
+      );
+    }
+
+    if (collectedData.risk?.success) {
+      storagePromises.push(
+        setCachedAnalysis(
+          normalizedSymbol,
+          'risk',
+          collectedData.risk,
+          2 * 60, // ✅ 2 minutes for fresh data
+          collectedData.risk.dataQuality || 0,
+          userId,
+          userEmail
+        ).catch(err => {
+          console.error('❌ Failed to store risk:', err);
+          return { status: 'failed', type: 'risk' };
+        })
+      );
+    }
+
+    if (collectedData.derivatives?.success) {
+      storagePromises.push(
+        setCachedAnalysis(
+          normalizedSymbol,
+          'derivatives',
+          collectedData.derivatives,
+          2 * 60, // ✅ 2 minutes for fresh data
+          collectedData.derivatives.dataQuality || 0,
+          userId,
+          userEmail
+        ).catch(err => {
+          console.error('❌ Failed to store derivatives:', err);
+          return { status: 'failed', type: 'derivatives' };
+        })
+      );
+    }
+
+    if (collectedData.defi?.success) {
+      storagePromises.push(
+        setCachedAnalysis(
+          normalizedSymbol,
+          'defi',
+          collectedData.defi,
+          2 * 60, // ✅ 2 minutes for fresh data
+          collectedData.defi.dataQuality || 0,
+          userId,
+          userEmail
+        ).catch(err => {
+          console.error('❌ Failed to store defi:', err);
+          return { status: 'failed', type: 'defi' };
+        })
+      );
+    }
+
     // ✅ WAIT for all database writes to complete
     console.log(`⏳ Waiting for ${storagePromises.length} database writes...`);
     const storageResults = await Promise.allSettled(storagePromises);
@@ -378,13 +475,17 @@ async function handler(
             marketData: !!collectedData.marketData,
             sentiment: !!collectedData.sentiment,
             technical: !!collectedData.technical,
-          news: !!collectedData.news,
-          onChain: !!collectedData.onChain
-        },
-        2 * 60, // ✅ 2 minutes TTL for fresh data
-        userId,
-        userEmail
-      );
+            news: !!collectedData.news,
+            onChain: !!collectedData.onChain,
+            predictions: !!collectedData.predictions,
+            risk: !!collectedData.risk,
+            derivatives: !!collectedData.derivatives,
+            defi: !!collectedData.defi
+          },
+          2 * 60, // ✅ 2 minutes TTL for fresh data
+          userId,
+          userEmail
+        );
       console.log(`✅ OpenAI summary stored in ucie_openai_analysis table`);
       } catch (error) {
         console.error('❌ Failed to generate Gemini AI summary:', error);
@@ -498,11 +599,43 @@ async function collectDataFromAPIs(symbol: string, req: NextApiRequest, refresh:
     ).catch(err => {
       console.error(`❌ On-Chain failed:`, err.message);
       return null; // Optional - don't fail entire collection
+    }),
+    // ✅ PREDICTIONS: Optional - Continue if this fails
+    fetchWithTimeout(
+      `${baseUrl}${EFFECTIVE_APIS.predictions.endpoint}/${symbol}${refreshParam}`,
+      EFFECTIVE_APIS.predictions.timeout
+    ).catch(err => {
+      console.error(`❌ Predictions failed:`, err.message);
+      return null; // Optional - don't fail entire collection
+    }),
+    // ✅ RISK: Optional - Continue if this fails
+    fetchWithTimeout(
+      `${baseUrl}${EFFECTIVE_APIS.risk.endpoint}/${symbol}${refreshParam}`,
+      EFFECTIVE_APIS.risk.timeout
+    ).catch(err => {
+      console.error(`❌ Risk failed:`, err.message);
+      return null; // Optional - don't fail entire collection
+    }),
+    // ✅ DERIVATIVES: Optional - Continue if this fails
+    fetchWithTimeout(
+      `${baseUrl}${EFFECTIVE_APIS.derivatives.endpoint}/${symbol}${refreshParam}`,
+      EFFECTIVE_APIS.derivatives.timeout
+    ).catch(err => {
+      console.error(`❌ Derivatives failed:`, err.message);
+      return null; // Optional - don't fail entire collection
+    }),
+    // ✅ DEFI: Optional - Continue if this fails
+    fetchWithTimeout(
+      `${baseUrl}${EFFECTIVE_APIS.defi.endpoint}/${symbol}${refreshParam}`,
+      EFFECTIVE_APIS.defi.timeout
+    ).catch(err => {
+      console.error(`❌ DeFi failed:`, err.message);
+      return null; // Optional - don't fail entire collection
     })
   ]);
 
-  // ✅ FIX #3: Log results for each API
-  const apiNames = ['Market Data', 'Sentiment', 'Technical', 'News', 'On-Chain'];
+  // ✅ FIX #3: Log results for each API (ALL 9 sources)
+  const apiNames = ['Market Data', 'Sentiment', 'Technical', 'News', 'On-Chain', 'Predictions', 'Risk', 'Derivatives', 'DeFi'];
   results.forEach((result, index) => {
     if (result.status === 'fulfilled') {
       console.log(`✅ ${apiNames[index]}: Success`);
@@ -516,7 +649,11 @@ async function collectDataFromAPIs(symbol: string, req: NextApiRequest, refresh:
     sentiment: results[1].status === 'fulfilled' ? results[1].value : null,
     technical: results[2].status === 'fulfilled' ? results[2].value : null,
     news: results[3].status === 'fulfilled' ? results[3].value : null,
-    onChain: results[4].status === 'fulfilled' ? results[4].value : null
+    onChain: results[4].status === 'fulfilled' ? results[4].value : null,
+    predictions: results[5].status === 'fulfilled' ? results[5].value : null,
+    risk: results[6].status === 'fulfilled' ? results[6].value : null,
+    derivatives: results[7].status === 'fulfilled' ? results[7].value : null,
+    defi: results[8].status === 'fulfilled' ? results[8].value : null
   };
 }
 
@@ -613,11 +750,51 @@ function calculateAPIStatus(collectedData: any) {
     failed.push('On-Chain');
   }
 
+  // Predictions - Check for actual predictions
+  if (
+    collectedData.predictions?.success === true &&
+    collectedData.predictions?.predictions
+  ) {
+    working.push('Predictions');
+  } else {
+    failed.push('Predictions');
+  }
+
+  // Risk - Check for actual risk data
+  if (
+    collectedData.risk?.success === true &&
+    collectedData.risk?.risk
+  ) {
+    working.push('Risk');
+  } else {
+    failed.push('Risk');
+  }
+
+  // Derivatives - Check for actual derivatives data
+  if (
+    collectedData.derivatives?.success === true &&
+    collectedData.derivatives?.derivatives
+  ) {
+    working.push('Derivatives');
+  } else {
+    failed.push('Derivatives');
+  }
+
+  // DeFi - Check for actual DeFi data
+  if (
+    collectedData.defi?.success === true &&
+    collectedData.defi?.defi
+  ) {
+    working.push('DeFi');
+  } else {
+    failed.push('DeFi');
+  }
+
   return {
     working,
     failed,
-    total: 5,
-    successRate: Math.round((working.length / 5) * 100)
+    total: 9, // ✅ Updated to 9 total sources
+    successRate: Math.round((working.length / 9) * 100)
   };
 }
 
@@ -827,25 +1004,33 @@ async function generateGeminiSummary(
   collectedData: any,
   apiStatus: any
 ): Promise<string> {
-  console.log(`📊 Gemini AI Summary: Reading ALL data from Supabase database...`);
+  console.log(`📊 Gemini AI Summary: Reading ALL 9 data sources from Supabase database...`);
   
   // Import Gemini client
   const { generateGeminiAnalysis } = await import('../../../../lib/ucie/geminiClient');
   
-  // Read from database (same as OpenAI function)
+  // ✅ CRITICAL: Read ALL 9 data sources from database
   const marketData = await getCachedAnalysis(symbol, 'market-data');
   const sentimentData = await getCachedAnalysis(symbol, 'sentiment');
   const technicalData = await getCachedAnalysis(symbol, 'technical');
   const newsData = await getCachedAnalysis(symbol, 'news');
   const onChainData = await getCachedAnalysis(symbol, 'on-chain');
+  const predictionsData = await getCachedAnalysis(symbol, 'predictions');
+  const riskData = await getCachedAnalysis(symbol, 'risk');
+  const derivativesData = await getCachedAnalysis(symbol, 'derivatives');
+  const defiData = await getCachedAnalysis(symbol, 'defi');
 
   // Log what we retrieved
-  console.log(`📦 Database retrieval results:`);
+  console.log(`📦 Database retrieval results (ALL 9 sources):`);
   console.log(`   Market Data: ${marketData ? '✅ Found' : '❌ Not found'}`);
   console.log(`   Sentiment: ${sentimentData ? '✅ Found' : '❌ Not found'}`);
   console.log(`   Technical: ${technicalData ? '✅ Found' : '❌ Not found'}`);
   console.log(`   News: ${newsData ? '✅ Found' : '❌ Not found'}`);
   console.log(`   On-Chain: ${onChainData ? '✅ Found' : '❌ Not found'}`);
+  console.log(`   Predictions: ${predictionsData ? '✅ Found' : '❌ Not found'}`);
+  console.log(`   Risk: ${riskData ? '✅ Found' : '❌ Not found'}`);
+  console.log(`   Derivatives: ${derivativesData ? '✅ Found' : '❌ Not found'}`);
+  console.log(`   DeFi: ${defiData ? '✅ Found' : '❌ Not found'}`);
   
   // Build context from database data
   let context = `Cryptocurrency: ${symbol}\n\n`;
@@ -905,7 +1090,78 @@ async function generateGeminiSummary(
 
   // On-Chain
   if (onChainData?.success) {
-    context += `On-Chain Data: Available\n\n`;
+    context += `On-Chain Data:\n`;
+    if (onChainData.whaleActivity) {
+      context += `- Whale Transactions: ${onChainData.whaleActivity.count || 0}\n`;
+      context += `- Total Value: $${(onChainData.whaleActivity.totalValue / 1e6).toFixed(2)}M\n`;
+    }
+    if (onChainData.networkHealth) {
+      context += `- Network Health: ${onChainData.networkHealth.status || 'N/A'}\n`;
+    }
+    context += `\n`;
+  }
+
+  // Predictions
+  if (predictionsData?.success && predictionsData?.predictions) {
+    context += `Price Predictions:\n`;
+    const predictions = predictionsData.predictions;
+    if (predictions.shortTerm) {
+      context += `- 24h Prediction: ${predictions.shortTerm.target?.toLocaleString() || 'N/A'} (${predictions.shortTerm.confidence || 0}% confidence)\n`;
+    }
+    if (predictions.mediumTerm) {
+      context += `- 7d Prediction: ${predictions.mediumTerm.target?.toLocaleString() || 'N/A'} (${predictions.mediumTerm.confidence || 0}% confidence)\n`;
+    }
+    if (predictions.longTerm) {
+      context += `- 30d Prediction: ${predictions.longTerm.target?.toLocaleString() || 'N/A'} (${predictions.longTerm.confidence || 0}% confidence)\n`;
+    }
+    context += `\n`;
+  }
+
+  // Risk Assessment
+  if (riskData?.success && riskData?.risk) {
+    context += `Risk Assessment:\n`;
+    const risk = riskData.risk;
+    context += `- Overall Risk Level: ${risk.level || 'N/A'}\n`;
+    context += `- Risk Score: ${risk.score || 0}/100\n`;
+    if (risk.volatility) {
+      context += `- Volatility: ${risk.volatility.level || 'N/A'} (${risk.volatility.value?.toFixed(2) || 'N/A'}%)\n`;
+    }
+    if (risk.factors && risk.factors.length > 0) {
+      context += `- Key Risk Factors: ${risk.factors.slice(0, 3).join(', ')}\n`;
+    }
+    context += `\n`;
+  }
+
+  // Derivatives
+  if (derivativesData?.success && derivativesData?.derivatives) {
+    context += `Derivatives Data:\n`;
+    const derivatives = derivativesData.derivatives;
+    if (derivatives.fundingRate) {
+      context += `- Funding Rate: ${(derivatives.fundingRate * 100).toFixed(4)}%\n`;
+    }
+    if (derivatives.openInterest) {
+      context += `- Open Interest: $${(derivatives.openInterest / 1e9).toFixed(2)}B\n`;
+    }
+    if (derivatives.longShortRatio) {
+      context += `- Long/Short Ratio: ${derivatives.longShortRatio.toFixed(2)}\n`;
+    }
+    context += `\n`;
+  }
+
+  // DeFi
+  if (defiData?.success && defiData?.defi) {
+    context += `DeFi Metrics:\n`;
+    const defi = defiData.defi;
+    if (defi.tvl) {
+      context += `- Total Value Locked: $${(defi.tvl / 1e9).toFixed(2)}B\n`;
+    }
+    if (defi.protocols) {
+      context += `- Active Protocols: ${defi.protocols.length || 0}\n`;
+    }
+    if (defi.topProtocol) {
+      context += `- Top Protocol: ${defi.topProtocol.name} ($${(defi.topProtocol.tvl / 1e9).toFixed(2)}B TVL)\n`;
+    }
+    context += `\n`;
   }
 
   // System prompt for Gemini
@@ -950,16 +1206,37 @@ Structure your analysis with the following sections:
    - On-chain metrics and activity
    - Network health indicators
    - Holder behavior and distribution
+   - Whale transaction analysis
    - DeFi integration and usage
 
-7. RISK ASSESSMENT (200 words)
-   - Key risks and concerns
-   - Volatility analysis
-   - Market risks
-   - Regulatory or technical risks
-   - Risk mitigation considerations
+7. PRICE PREDICTIONS & TARGETS (200 words)
+   - Short-term (24h) price predictions
+   - Medium-term (7d) price outlook
+   - Long-term (30d) projections
+   - Confidence levels and probability
+   - Key factors affecting predictions
 
-Use ONLY the data provided. Be specific with numbers, percentages, and concrete data points. Provide actionable insights and clear explanations. Format as a professional, detailed analysis report.`;
+8. DERIVATIVES & FUTURES ANALYSIS (200 words)
+   - Funding rates and their implications
+   - Open interest trends
+   - Long/Short ratios
+   - Leverage and liquidation risks
+   - Institutional positioning
+
+9. RISK ASSESSMENT (200 words)
+   - Overall risk level and score
+   - Volatility analysis
+   - Market risks and concerns
+   - Regulatory or technical risks
+   - Risk mitigation strategies
+
+10. DEFI ECOSYSTEM INTEGRATION (100 words)
+   - Total Value Locked (TVL)
+   - Active protocols and usage
+   - DeFi market position
+   - Yield opportunities
+
+Use ONLY the data provided. Be specific with numbers, percentages, and concrete data points. Provide actionable insights and clear explanations. Format as a professional, detailed analysis report covering ALL available data sources.`;
 
   // Call Gemini AI with increased token limit for comprehensive analysis
   const response = await generateGeminiAnalysis(
