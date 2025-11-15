@@ -984,51 +984,22 @@ Use ONLY the data provided. Be specific with numbers, percentages, and concrete 
 
 /**
  * Generate Gemini AI summary of collected data
- * Uses Google Gemini 2.5 Pro for fast, accurate analysis
- * Reads data from Supabase database (preferred) or falls back to collectedData parameter
+ * ✅ SIMPLIFIED: ALWAYS use collectedData parameter (already in memory)
+ * This avoids database read issues and timeout problems
  */
 async function generateGeminiSummary(
   symbol: string,
   collectedData: any,
   apiStatus: any
 ): Promise<string> {
-  console.log(`📊 Gemini AI Summary: Reading ALL 5 core data sources from Supabase database...`);
+  console.log(`📊 Gemini AI Summary: Using collectedData parameter (in-memory, fast)`);
+  console.log(`   This data was just collected in Phase 1 and is already available`);
   
-  // Import Gemini client
-  const { generateGeminiAnalysis } = await import('../../../../lib/ucie/geminiClient');
-  
-  // ✅ CRITICAL: Read ALL 5 core data sources from database (9 underlying APIs)
-  // Use 30-minute freshness window to match our cache TTL (5-30 minutes)
-  const maxAge = 30 * 60; // 30 minutes (1800 seconds)
-  const marketData = await getCachedAnalysis(symbol, 'market-data', undefined, undefined, maxAge);
-  const sentimentData = await getCachedAnalysis(symbol, 'sentiment', undefined, undefined, maxAge);
-  const technicalData = await getCachedAnalysis(symbol, 'technical', undefined, undefined, maxAge);
-  const newsData = await getCachedAnalysis(symbol, 'news', undefined, undefined, maxAge);
-  const onChainData = await getCachedAnalysis(symbol, 'on-chain', undefined, undefined, maxAge);
-
-  // Log what we retrieved
-  console.log(`📦 Database retrieval results (5 core sources = 9 underlying APIs):`);
-  console.log(`   Market Data: ${marketData ? '✅ Found' : '❌ Not found'} (4 APIs: CMC, CoinGecko, Kraken, Coinbase)`);
-  console.log(`   Sentiment: ${sentimentData ? '✅ Found' : '❌ Not found'} (3 APIs: LunarCrush, Twitter, Reddit)`);
-  console.log(`   Technical: ${technicalData ? '✅ Found' : '❌ Not found'} (Calculated indicators)`);
-  console.log(`   News: ${newsData ? '✅ Found' : '❌ Not found'} (1 API: NewsAPI)`);
-  console.log(`   On-Chain: ${onChainData ? '✅ Found' : '❌ Not found'} (1 API: Blockchain.com - Bitcoin only)`);
-  
-  // ✅ CRITICAL: Check if we have enough data to generate analysis
-  const availableDataCount = [marketData, sentimentData, technicalData, newsData, onChainData].filter(d => d !== null).length;
-  const dataAvailability = (availableDataCount / 5) * 100;
-  
-  console.log(`📊 Data availability: ${availableDataCount}/5 sources (${dataAvailability.toFixed(0)}%)`);
-  
-  // If we have less than 60% data, throw error to trigger retry or use collectedData fallback
-  if (dataAvailability < 60) {
-    console.error(`❌ Insufficient data in database (${dataAvailability.toFixed(0)}% < 60% required)`);
-    console.log(`⚠️ Using collectedData parameter as fallback instead of database`);
-    
-    // Use the collectedData parameter that was passed in (from Phase 1)
-    // This is the data that was just collected and should be available
-    return generateGeminiFromCollectedData(symbol, collectedData, apiStatus);
-  }
+  // ✅ SIMPLIFIED: Just use the collectedData that was passed in
+  // This is the data that was just collected in Phase 1 and is already in memory
+  // No need to read from database - it's the same data!
+  return generateGeminiFromCollectedData(symbol, collectedData, apiStatus);
+}
   
   // Build context from database data
   let context = `Cryptocurrency: ${symbol}\n\n`;

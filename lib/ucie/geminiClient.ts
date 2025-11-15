@@ -17,7 +17,8 @@ export async function generateGeminiAnalysis(
   systemPrompt: string,
   userPrompt: string,
   maxTokens: number = 1000,
-  temperature: number = 0.7
+  temperature: number = 0.7,
+  retries: number = 3
 ): Promise<GeminiResponse> {
   const apiKey = process.env.GEMINI_API_KEY;
   
@@ -27,49 +28,92 @@ export async function generateGeminiAnalysis(
 
   const prompt = `${systemPrompt}\n\n${userPrompt}`;
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: prompt
-          }]
-        }],
-        generationConfig: {
-          temperature: temperature,
-          maxOutputTokens: maxTokens,
-          topP: 0.95,
-          topK: 40
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: prompt
+              }]
+            }],
+            generationConfig: {
+              temperature: temperature,
+              maxOutputTokens: maxTokens,
+              topP: 0.95,
+              topK: 40
+            }
+          }),
+          signal: AbortSignal.timeout(120000) // 120 second timeout
         }
-      }),
-      signal: AbortSignal.timeout(120000) // 120 second timeout
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        const error = new Error(`Gemini API error: ${response.status} - ${errorText}`);
+        
+        // Retry on 503 (overloaded) or 429 (rate limit)
+        if (response.status === 503 || response.status === 429) {
+          console.log(`⚠️  Gemini API ${response.status} error (attempt ${attempt}/${retries}), retrying in ${attempt * 2}s...`);
+          lastError = error;
+          await new Promise(resolve => setTimeout(resolve, attempt * 2000)); // Exponential backoff
+          continue;
+        }
+        
+        throw error;
+      }
+
+      // Success - parse and return
+      const data = await response.json();
+
+      // Debug logging
+      console.log('Gemini API response structure:', JSON.stringify(data, null, 2).substring(0, 500));
+
+      if (!data.candidates || !data.candidates[0]) {
+        throw new Error(`Invalid Gemini API response: missing candidates. Response: ${JSON.stringify(data)}`);
+      }
+
+      if (!data.candidates[0].content) {
+        throw new Error(`Invalid Gemini API response: missing content. Response: ${JSON.stringify(data)}`);
+      }
+
+      if (!data.candidates[0].content.parts || !data.candidates[0].content.parts[0]) {
+        throw new Error(`Invalid Gemini API response: missing parts. Response: ${JSON.stringify(data)}`);
+      }
+
+      const content = data.candidates[0].content.parts[0].text;
+      const tokensUsed = data.usageMetadata?.totalTokenCount || 0;
+
+      return {
+        content,
+        tokensUsed,
+        model: 'gemini-2.5-pro'
+      };
+      
+    } catch (error) {
+      lastError = error as Error;
+      
+      // Don't retry on non-retryable errors
+      if (!error.message.includes('503') && !error.message.includes('429')) {
+        throw error;
+      }
+      
+      if (attempt < retries) {
+        console.log(`⚠️  Gemini API error (attempt ${attempt}/${retries}), retrying in ${attempt * 2}s...`);
+        await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+      }
     }
-  );
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
   }
 
-  const data = await response.json();
-
-  if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-    throw new Error('Invalid Gemini API response structure');
-  }
-
-  const content = data.candidates[0].content.parts[0].text;
-  const tokensUsed = data.usageMetadata?.totalTokenCount || 0;
-
-  return {
-    content,
-    tokensUsed,
-    model: 'gemini-2.5-pro'
-  };
+  throw lastError || new Error('Gemini API failed after retries');
 }
 
 /**
