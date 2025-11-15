@@ -849,8 +849,121 @@ function generateFallbackSummary(
 }
 
 /**
+ * Generate Gemini AI summary from collected data (fallback when database is empty)
+ * Uses the collectedData parameter directly instead of reading from database
+ */
+async function generateGeminiFromCollectedData(
+  symbol: string,
+  collectedData: any,
+  apiStatus: any
+): Promise<string> {
+  console.log(`📊 Gemini AI Summary: Using collectedData parameter (database fallback)`);
+  
+  // Import Gemini client
+  const { generateGeminiAnalysis } = await import('../../../../lib/ucie/geminiClient');
+  
+  // Build context from collectedData parameter
+  let context = `Cryptocurrency: ${symbol}\n\n`;
+  context += `Data Collection Status:\n`;
+  context += `- APIs Working: ${apiStatus.working.length}/${apiStatus.total}\n`;
+  context += `- Data Quality: ${apiStatus.successRate}%\n\n`;
+
+  // Market Data
+  if (collectedData.marketData?.success && collectedData.marketData?.priceAggregation) {
+    const agg = collectedData.marketData.priceAggregation;
+    context += `Market Data:\n`;
+    const price = agg.averagePrice || agg.aggregatedPrice || 0;
+    const volume = agg.totalVolume24h || agg.aggregatedVolume24h || 0;
+    const marketCap = collectedData.marketData.marketData?.marketCap || agg.aggregatedMarketCap || 0;
+    const change = agg.averageChange24h || agg.aggregatedChange24h || 0;
+    
+    context += `- Price: ${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`;
+    context += `- 24h Volume: ${(volume / 1e9).toFixed(2)}B\n`;
+    context += `- Market Cap: ${(marketCap / 1e9).toFixed(2)}B\n`;
+    context += `- 24h Change: ${change > 0 ? '+' : ''}${change.toFixed(2)}%\n\n`;
+  }
+
+  // Sentiment
+  if (collectedData.sentiment?.success && collectedData.sentiment?.sentiment) {
+    const sentiment = collectedData.sentiment.sentiment;
+    context += `Social Sentiment:\n`;
+    const score = sentiment.overallScore || 0;
+    const trend = sentiment.trend || 'neutral';
+    const mentions = collectedData.sentiment.volumeMetrics?.total24h || sentiment.mentions24h || 0;
+    
+    context += `- Overall Score: ${score.toFixed(0)}/100\n`;
+    context += `- Trend: ${trend}\n`;
+    context += `- 24h Mentions: ${mentions.toLocaleString('en-US')}\n\n`;
+  }
+
+  // Technical
+  if (collectedData.technical?.success && collectedData.technical?.indicators) {
+    context += `Technical Analysis:\n`;
+    const indicators = collectedData.technical.indicators;
+    const rsi = indicators.rsi?.value || indicators.rsi || 0;
+    const macdSignal = indicators.macd?.signal || 'neutral';
+    const trend = indicators.trend?.direction || collectedData.technical.trend?.direction || 'neutral';
+    
+    context += `- RSI: ${typeof rsi === 'number' ? rsi.toFixed(2) : rsi}\n`;
+    context += `- MACD Signal: ${macdSignal}\n`;
+    context += `- Trend: ${trend}\n\n`;
+  }
+
+  // News
+  if (collectedData.news?.success && collectedData.news?.articles?.length > 0) {
+    context += `Recent News (${collectedData.news.articles.length} articles):\n`;
+    collectedData.news.articles.slice(0, 5).forEach((article: any, i: number) => {
+      context += `${i + 1}. ${article.title}\n`;
+    });
+    context += `\n`;
+  }
+
+  // On-Chain
+  if (collectedData.onChain?.success) {
+    context += `On-Chain Data:\n`;
+    if (collectedData.onChain.whaleActivity) {
+      const whale = collectedData.onChain.whaleActivity.summary || collectedData.onChain.whaleActivity;
+      context += `- Whale Transactions: ${whale.totalTransactions || 0}\n`;
+      context += `- Total Value: ${((whale.totalValueUSD || 0) / 1e6).toFixed(2)}M\n`;
+    }
+    context += `\n`;
+  }
+
+  // System prompt
+  const systemPrompt = `You are a professional cryptocurrency analyst. Provide a comprehensive, data-driven analysis (~2500 words) of ${symbol} based on the provided data. 
+
+Structure your analysis with these sections:
+
+1. EXECUTIVE SUMMARY (300 words)
+2. MARKET ANALYSIS (500 words)
+3. TECHNICAL ANALYSIS (500 words)
+4. SOCIAL SENTIMENT & COMMUNITY (400 words)
+5. NEWS & DEVELOPMENTS (400 words)
+6. ON-CHAIN & FUNDAMENTALS (300 words)
+7. RISK ASSESSMENT & OUTLOOK (100 words)
+
+Use ONLY the data provided. Be specific with numbers, percentages, and concrete data points.`;
+
+  // Call Gemini AI
+  try {
+    const geminiPromise = generateGeminiAnalysis(systemPrompt, context, 10000, 0.7);
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Gemini timeout after 45 seconds')), 45000);
+    });
+    
+    const response = await Promise.race([geminiPromise, timeoutPromise]);
+    console.log(`✅ Gemini AI generated ${response.tokensUsed} tokens from collectedData`);
+    return response.content;
+  } catch (error) {
+    console.error(`❌ Gemini AI failed:`, error);
+    throw error; // Re-throw to trigger fallback in caller
+  }
+}
+
+/**
  * Generate Gemini AI summary of collected data
  * Uses Google Gemini 2.5 Pro for fast, accurate analysis
+ * Reads data from Supabase database (preferred) or falls back to collectedData parameter
  */
 async function generateGeminiSummary(
   symbol: string,
@@ -863,11 +976,13 @@ async function generateGeminiSummary(
   const { generateGeminiAnalysis } = await import('../../../../lib/ucie/geminiClient');
   
   // ✅ CRITICAL: Read ALL 5 core data sources from database (9 underlying APIs)
-  const marketData = await getCachedAnalysis(symbol, 'market-data');
-  const sentimentData = await getCachedAnalysis(symbol, 'sentiment');
-  const technicalData = await getCachedAnalysis(symbol, 'technical');
-  const newsData = await getCachedAnalysis(symbol, 'news');
-  const onChainData = await getCachedAnalysis(symbol, 'on-chain');
+  // Use 30-minute freshness window to match our cache TTL (5-30 minutes)
+  const maxAge = 30 * 60; // 30 minutes (1800 seconds)
+  const marketData = await getCachedAnalysis(symbol, 'market-data', undefined, undefined, maxAge);
+  const sentimentData = await getCachedAnalysis(symbol, 'sentiment', undefined, undefined, maxAge);
+  const technicalData = await getCachedAnalysis(symbol, 'technical', undefined, undefined, maxAge);
+  const newsData = await getCachedAnalysis(symbol, 'news', undefined, undefined, maxAge);
+  const onChainData = await getCachedAnalysis(symbol, 'on-chain', undefined, undefined, maxAge);
 
   // Log what we retrieved
   console.log(`📦 Database retrieval results (5 core sources = 9 underlying APIs):`);
@@ -876,6 +991,22 @@ async function generateGeminiSummary(
   console.log(`   Technical: ${technicalData ? '✅ Found' : '❌ Not found'} (Calculated indicators)`);
   console.log(`   News: ${newsData ? '✅ Found' : '❌ Not found'} (1 API: NewsAPI)`);
   console.log(`   On-Chain: ${onChainData ? '✅ Found' : '❌ Not found'} (1 API: Blockchain.com - Bitcoin only)`);
+  
+  // ✅ CRITICAL: Check if we have enough data to generate analysis
+  const availableDataCount = [marketData, sentimentData, technicalData, newsData, onChainData].filter(d => d !== null).length;
+  const dataAvailability = (availableDataCount / 5) * 100;
+  
+  console.log(`📊 Data availability: ${availableDataCount}/5 sources (${dataAvailability.toFixed(0)}%)`);
+  
+  // If we have less than 60% data, throw error to trigger retry or use collectedData fallback
+  if (dataAvailability < 60) {
+    console.error(`❌ Insufficient data in database (${dataAvailability.toFixed(0)}% < 60% required)`);
+    console.log(`⚠️ Using collectedData parameter as fallback instead of database`);
+    
+    // Use the collectedData parameter that was passed in (from Phase 1)
+    // This is the data that was just collected and should be available
+    return generateGeminiFromCollectedData(symbol, collectedData, apiStatus);
+  }
   
   // Build context from database data
   let context = `Cryptocurrency: ${symbol}\n\n`;
