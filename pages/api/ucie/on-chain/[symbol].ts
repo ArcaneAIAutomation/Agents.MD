@@ -74,6 +74,18 @@ async function handler(
 
     // Fetch Bitcoin on-chain data only (Etherscan removed)
     const onChainData = await fetchBitcoinOnChainData();
+    
+    // ✅ ENHANCEMENT: Add AI-powered analysis of on-chain data
+    console.log(`🤖 Adding AI analysis to on-chain data...`);
+    try {
+      const { analyzeOnChainData } = await import('../../../../lib/ucie/onChainAnalysis');
+      const aiInsights = await analyzeOnChainData(onChainData);
+      onChainData.aiInsights = aiInsights;
+      console.log(`✅ AI on-chain analysis complete`);
+    } catch (error) {
+      console.error(`⚠️ AI on-chain analysis failed:`, error);
+      // Continue without AI insights
+    }
 
     // Cache the response in database (skip if refresh=true for live data)
     if (!forceRefresh) {

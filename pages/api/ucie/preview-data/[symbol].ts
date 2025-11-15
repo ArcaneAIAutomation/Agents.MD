@@ -869,7 +869,7 @@ async function generateGeminiSummary(
     context += `- 24h Change: ${change > 0 ? '+' : ''}${change.toFixed(2)}%\n\n`;
   }
 
-  // Sentiment
+  // Sentiment with AI Insights
   if (sentimentData?.success && sentimentData?.sentiment) {
     const sentiment = sentimentData.sentiment;
     context += `Social Sentiment:\n`;
@@ -879,7 +879,20 @@ async function generateGeminiSummary(
     
     context += `- Overall Score: ${score.toFixed(0)}/100\n`;
     context += `- Trend: ${trend}\n`;
-    context += `- 24h Mentions: ${mentions.toLocaleString('en-US')}\n\n`;
+    context += `- 24h Mentions: ${mentions.toLocaleString('en-US')}\n`;
+    
+    // ✅ NEW: Include AI trend insights
+    if (sentimentData.trendInsights) {
+      const insights = sentimentData.trendInsights;
+      context += `\nAI Trend Analysis:\n`;
+      context += `- ${insights.trendAnalysis}\n`;
+      context += `- Momentum: ${insights.momentumIndicator}\n`;
+      if (insights.keyNarratives && insights.keyNarratives.length > 0) {
+        context += `- Key Narratives: ${insights.keyNarratives.join(', ')}\n`;
+      }
+      context += `- Trading Implications: ${insights.tradingImplications}\n`;
+    }
+    context += `\n`;
   }
 
   // Technical
@@ -895,24 +908,59 @@ async function generateGeminiSummary(
     context += `- Trend: ${trend}\n\n`;
   }
 
-  // News
+  // News with Enhanced Details
   if (newsData?.success && newsData?.articles?.length > 0) {
     context += `Recent News (${newsData.articles.length} articles):\n`;
-    newsData.articles.slice(0, 3).forEach((article: any, i: number) => {
+    
+    // Include top 5 articles with sentiment and impact
+    newsData.articles.slice(0, 5).forEach((article: any, i: number) => {
       context += `${i + 1}. ${article.title}\n`;
+      if (article.sentiment) {
+        context += `   Sentiment: ${article.sentiment} (${article.sentimentScore || 0}/100)\n`;
+      }
+      if (article.impactScore) {
+        context += `   Impact: ${article.impactScore}/10\n`;
+      }
+      if (article.category) {
+        context += `   Category: ${article.category}\n`;
+      }
     });
+    
+    // Include news summary if available
+    if (newsData.summary) {
+      context += `\nNews Summary:\n`;
+      context += `- Overall Sentiment: ${newsData.summary.overallSentiment || 'neutral'}\n`;
+      context += `- Bullish: ${newsData.summary.bullishCount || 0}, Bearish: ${newsData.summary.bearishCount || 0}, Neutral: ${newsData.summary.neutralCount || 0}\n`;
+      context += `- Average Impact: ${(newsData.summary.averageImpact || 0).toFixed(1)}/10\n`;
+    }
     context += `\n`;
   }
 
-  // On-Chain
+  // On-Chain with AI Insights
   if (onChainData?.success) {
     context += `On-Chain Data:\n`;
     if (onChainData.whaleActivity) {
-      context += `- Whale Transactions: ${onChainData.whaleActivity.count || 0}\n`;
-      context += `- Total Value: $${(onChainData.whaleActivity.totalValue / 1e6).toFixed(2)}M\n`;
+      const whale = onChainData.whaleActivity.summary || onChainData.whaleActivity;
+      context += `- Whale Transactions: ${whale.totalTransactions || 0}\n`;
+      context += `- Total Value: $${((whale.totalValueUSD || 0) / 1e6).toFixed(2)}M\n`;
+      context += `- Exchange Deposits: ${whale.exchangeDeposits || 0} (selling pressure)\n`;
+      context += `- Exchange Withdrawals: ${whale.exchangeWithdrawals || 0} (accumulation)\n`;
+      context += `- Net Flow: ${(whale.exchangeWithdrawals || 0) - (whale.exchangeDeposits || 0)} (${(whale.exchangeWithdrawals || 0) > (whale.exchangeDeposits || 0) ? 'bullish' : 'bearish'})\n`;
     }
-    if (onChainData.networkHealth) {
-      context += `- Network Health: ${onChainData.networkHealth.status || 'N/A'}\n`;
+    if (onChainData.networkMetrics) {
+      context += `- Hash Rate: ${(onChainData.networkMetrics.hashRate || 0).toFixed(2)} TH/s\n`;
+      context += `- Mempool: ${(onChainData.networkMetrics.mempoolSize || 0).toLocaleString()} txs\n`;
+    }
+    
+    // ✅ NEW: Include AI on-chain insights
+    if (onChainData.aiInsights) {
+      const insights = onChainData.aiInsights;
+      context += `\nAI On-Chain Analysis:\n`;
+      context += `- Whale Activity: ${insights.whaleActivityAnalysis}\n`;
+      context += `- Exchange Flows: ${insights.exchangeFlowAnalysis}\n`;
+      context += `- Network Health: ${insights.networkHealthSummary}\n`;
+      context += `- Risk Level: ${insights.riskIndicators?.level || 'N/A'}\n`;
+      context += `- Trading Implications: ${insights.tradingImplications}\n`;
     }
     context += `\n`;
   }

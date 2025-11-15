@@ -39,6 +39,7 @@ interface SentimentResponse {
   timestamp: string;
   sentiment: AggregatedSentiment;
   influencers: InfluencerMetrics;
+  trendInsights?: any; // ✅ NEW: AI-powered trend analysis
   sources: {
     lunarCrush: boolean;
     twitter: boolean;
@@ -174,6 +175,27 @@ async function handler(
     // Calculate data quality
     const dataQuality = calculateDataQuality(lunarCrush, twitter, reddit);
 
+    // ✅ ENHANCEMENT: Add AI-powered sentiment trend analysis
+    let trendInsights = null;
+    console.log(`🤖 Adding AI trend analysis to sentiment data...`);
+    try {
+      const { analyzeSentimentTrends } = await import('../../../../lib/ucie/sentimentTrendAnalysis');
+      trendInsights = await analyzeSentimentTrends({
+        sentiment,
+        volumeMetrics: sentiment.volumeMetrics,
+        influencers: influencerData.metrics,
+        sources: {
+          lunarCrush: !!lunarCrush,
+          twitter: !!twitter,
+          reddit: !!reddit
+        }
+      });
+      console.log(`✅ AI sentiment trend analysis complete`);
+    } catch (error) {
+      console.error(`⚠️ AI sentiment analysis failed:`, error);
+      // Continue without AI insights
+    }
+
     // Build response
     const response: SentimentResponse = {
       success: true,
@@ -181,6 +203,7 @@ async function handler(
       timestamp: new Date().toISOString(),
       sentiment,
       influencers: influencerData.metrics,
+      trendInsights, // ✅ NEW: AI-powered trend analysis
       sources: {
         lunarCrush: !!lunarCrush,
         twitter: !!twitter,
