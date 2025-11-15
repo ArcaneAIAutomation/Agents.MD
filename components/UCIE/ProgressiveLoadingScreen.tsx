@@ -255,17 +255,27 @@ export default function ProgressiveLoadingScreen({
           {/* Status Message */}
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-bitcoin-white mb-2">
-              {status.message}
+              {status.status === 'complete' ? 'Analysis complete! Ready for Caesar AI deep research.' : status.message}
             </h2>
             <div className="flex items-center justify-center gap-4 text-bitcoin-white-60">
               <span className="text-sm">
                 Elapsed: {formatTime(elapsedTime)}
               </span>
-              <span className="text-sm">•</span>
-              <span className="text-sm">
-                Est. Total: ~5 minutes
-              </span>
+              {status.status !== 'complete' && (
+                <>
+                  <span className="text-sm">•</span>
+                  <span className="text-sm">
+                    Est. Total: ~5 minutes
+                  </span>
+                </>
+              )}
             </div>
+            {status.status === 'complete' && (
+              <div className="mt-3 flex items-center justify-center gap-2 text-bitcoin-orange font-semibold animate-pulse">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-sm">Opening data preview automatically...</span>
+              </div>
+            )}
           </div>
 
           {/* Progress Bar */}
@@ -392,14 +402,21 @@ export default function ProgressiveLoadingScreen({
 
           {/* Caesar Ready Indicator */}
           {status.caesarReady && (
-            <div className="mt-8 p-6 rounded-lg border-2 border-bitcoin-orange bg-bitcoin-orange bg-opacity-10">
+            <div className="mt-8 p-6 rounded-lg border-2 border-bitcoin-orange bg-bitcoin-orange bg-opacity-10 animate-pulse">
               <div className="text-center">
                 <div className="text-4xl mb-3">🏛️</div>
                 <h3 className="text-xl font-bold text-bitcoin-white mb-2">
                   Ready for Caesar AI Deep Research
                 </h3>
-                <p className="text-sm text-bitcoin-white-80">
-                  All data collected and analyzed. You can now proceed to Caesar AI for comprehensive research and source verification.
+                <p className="text-sm text-bitcoin-white-80 mb-3">
+                  All data collected and analyzed. 
+                </p>
+                <div className="flex items-center justify-center gap-2 text-bitcoin-orange font-semibold">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Automatically opening data preview...</span>
+                </div>
+                <p className="text-xs text-bitcoin-white-60 mt-2">
+                  You will be forwarded to review your data in a few seconds
                 </p>
               </div>
             </div>
