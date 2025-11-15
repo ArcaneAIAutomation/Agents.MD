@@ -79,19 +79,67 @@ export async function generateCryptoSummary(
   symbol: string,
   contextData: string
 ): Promise<string> {
-  const systemPrompt = `You are a cryptocurrency analyst. Summarize the collected data in a clear, concise format for a user who is about to proceed with deep AI analysis. Focus on:
-1. Current market status (price, volume, sentiment)
-2. Key technical indicators and trends
-3. Notable news or developments
-4. Data quality and completeness
-5. What the user can expect from the deep analysis
+  const systemPrompt = `You are a professional cryptocurrency analyst. Provide a comprehensive, data-driven analysis (~1500-2000 words) of ${symbol} based on the provided data. 
 
-Keep the summary to 3-4 paragraphs, professional but accessible. Use bullet points for key metrics.`;
+Structure your analysis with these sections:
+
+1. EXECUTIVE SUMMARY (200-250 words)
+   - Current market position and key metrics
+   - Overall sentiment and trend direction
+   - Critical insights at a glance
+   - Key takeaways for traders and investors
+
+2. MARKET ANALYSIS (300-400 words)
+   - Current price action and recent movements
+   - 24-hour, 7-day, and 30-day performance
+   - Market cap and volume analysis
+   - Comparison to major cryptocurrencies
+   - Trading patterns and liquidity
+   - Price spread across exchanges
+
+3. TECHNICAL ANALYSIS (300-400 words)
+   - Key technical indicators (RSI, MACD, EMAs, Bollinger Bands)
+   - Support and resistance levels
+   - Trend analysis and momentum
+   - Chart patterns and signals
+   - Short-term and medium-term outlook
+   - Volume analysis and confirmation
+
+4. SOCIAL SENTIMENT & COMMUNITY (250-300 words)
+   - Overall sentiment score and trend
+   - Social media activity and mentions
+   - Community engagement levels
+   - Influencer sentiment
+   - Notable discussions or concerns
+   - Sentiment distribution (bullish/bearish/neutral)
+
+5. NEWS & DEVELOPMENTS (200-250 words)
+   - Recent news and announcements
+   - Market-moving events
+   - Regulatory developments
+   - Partnership or technology updates
+   - Industry context and implications
+
+6. ON-CHAIN & FUNDAMENTALS (200-250 words)
+   - On-chain metrics and activity
+   - Network health indicators
+   - Whale transaction analysis
+   - Exchange flow patterns
+   - Holder behavior and distribution
+
+7. RISK ASSESSMENT & OUTLOOK (150-200 words)
+   - Key risks and concerns
+   - Volatility analysis
+   - Market risks
+   - Regulatory or technical risks
+   - Overall market outlook and recommendations
+
+Use ONLY the data provided. Be specific with numbers, percentages, and concrete data points. Provide actionable insights and clear explanations. Format as a professional, detailed analysis report covering ALL available data sources.`;
 
   const response = await generateGeminiAnalysis(
     systemPrompt,
     contextData,
-    1000,
+    8192,  // ✅ INCREASED from 1000 to 8192 for comprehensive analysis
     0.7
   );
 
