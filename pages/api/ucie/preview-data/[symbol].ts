@@ -343,15 +343,31 @@ async function handler(
       console.warn(`   Technical Data: ${collectedData.technical?.success ? '✅' : '❌'}`);
     }
 
-    // ✅ Generate OpenAI summary ONLY if we have required data
+    // ✅ Generate Gemini AI summary ONLY if we have required data
     let summary = '';
     if (hasRequiredData && dataQuality >= 60) {
-      console.log(`🤖 Generating OpenAI summary for ${normalizedSymbol}...`);
+      console.log(`🤖 Generating Gemini AI summary for ${normalizedSymbol}...`);
       try {
-        summary = await generateOpenAISummary(normalizedSymbol, collectedData, apiStatus);
-        console.log(`✅ OpenAI summary generated (${summary.length} chars)`);
+        summary = await generateGeminiSummary(normalizedSymbol, collectedData, apiStatus);
+        console.log(`✅ Gemini AI summary generated (${summary.length} chars)`);
         
-        // Store OpenAI summary in database
+        // Store Gemini summary in database
+        const { storeGeminiAnalysis } = await import('../../../../lib/ucie/geminiAnalysisStorage');
+        await storeGeminiAnalysis({
+          symbol: normalizedSymbol,
+          userId: userId || 'anonymous',
+          userEmail: userEmail || 'anonymous@example.com',
+          summaryText: summary,
+          dataQualityScore: dataQuality,
+          apiStatus: apiStatus,
+          modelUsed: 'gemini-2.5-pro',
+          analysisType: 'summary',
+          dataSourcesUsed: apiStatus.working,
+          availableDataCount: apiStatus.working.length
+        });
+        console.log(`✅ Gemini summary stored in ucie_gemini_analysis table`);
+        
+        // Also store in OpenAI summary table for backward compatibility
         const { storeOpenAISummary } = await import('../../../../lib/ucie/openaiSummaryStorage');
         await storeOpenAISummary(
           normalizedSymbol,
@@ -371,7 +387,7 @@ async function handler(
       );
       console.log(`✅ OpenAI summary stored in ucie_openai_analysis table`);
       } catch (error) {
-        console.error('❌ Failed to generate OpenAI summary:', error);
+        console.error('❌ Failed to generate Gemini AI summary:', error);
         summary = generateBasicSummary(normalizedSymbol, collectedData, apiStatus);
       }
     } else {
@@ -800,6 +816,119 @@ function generateFallbackSummary(
   summary += `This data will be used to provide context for the deep Caesar AI analysis. Proceed to get comprehensive research including technology analysis, team evaluation, partnerships, and risk assessment.`;
 
   return summary;
+}
+
+/**
+ * Generate Gemini AI summary of collected data
+ * Uses Google Gemini 2.5 Pro for fast, accurate analysis
+ */
+async function generateGeminiSummary(
+  symbol: string,
+  collectedData: any,
+  apiStatus: any
+): Promise<string> {
+  console.log(`📊 Gemini AI Summary: Reading ALL data from Supabase database...`);
+  
+  // Import Gemini client
+  const { generateGeminiAnalysis } = await import('../../../../lib/ucie/geminiClient');
+  
+  // Read from database (same as OpenAI function)
+  const marketData = await getCachedAnalysis(symbol, 'market-data');
+  const sentimentData = await getCachedAnalysis(symbol, 'sentiment');
+  const technicalData = await getCachedAnalysis(symbol, 'technical');
+  const newsData = await getCachedAnalysis(symbol, 'news');
+  const onChainData = await getCachedAnalysis(symbol, 'on-chain');
+
+  // Log what we retrieved
+  console.log(`📦 Database retrieval results:`);
+  console.log(`   Market Data: ${marketData ? '✅ Found' : '❌ Not found'}`);
+  console.log(`   Sentiment: ${sentimentData ? '✅ Found' : '❌ Not found'}`);
+  console.log(`   Technical: ${technicalData ? '✅ Found' : '❌ Not found'}`);
+  console.log(`   News: ${newsData ? '✅ Found' : '❌ Not found'}`);
+  console.log(`   On-Chain: ${onChainData ? '✅ Found' : '❌ Not found'}`);
+  
+  // Build context from database data
+  let context = `Cryptocurrency: ${symbol}\n\n`;
+  context += `Data Collection Status:\n`;
+  context += `- APIs Working: ${apiStatus.working.length}/${apiStatus.total}\n`;
+  context += `- Data Quality: ${apiStatus.successRate}%\n\n`;
+
+  // Market Data
+  if (marketData?.success && marketData?.priceAggregation) {
+    const agg = marketData.priceAggregation;
+    context += `Market Data:\n`;
+    const price = agg.averagePrice || agg.aggregatedPrice || 0;
+    const volume = agg.totalVolume24h || agg.aggregatedVolume24h || 0;
+    const marketCap = marketData.marketData?.marketCap || agg.aggregatedMarketCap || 0;
+    const change = agg.averageChange24h || agg.aggregatedChange24h || 0;
+    
+    context += `- Price: $${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`;
+    context += `- 24h Volume: $${(volume / 1e9).toFixed(2)}B\n`;
+    context += `- Market Cap: $${(marketCap / 1e9).toFixed(2)}B\n`;
+    context += `- 24h Change: ${change > 0 ? '+' : ''}${change.toFixed(2)}%\n\n`;
+  }
+
+  // Sentiment
+  if (sentimentData?.success && sentimentData?.sentiment) {
+    const sentiment = sentimentData.sentiment;
+    context += `Social Sentiment:\n`;
+    const score = sentiment.overallScore || 0;
+    const trend = sentiment.trend || 'neutral';
+    const mentions = sentimentData.volumeMetrics?.total24h || sentiment.mentions24h || 0;
+    
+    context += `- Overall Score: ${score.toFixed(0)}/100\n`;
+    context += `- Trend: ${trend}\n`;
+    context += `- 24h Mentions: ${mentions.toLocaleString('en-US')}\n\n`;
+  }
+
+  // Technical
+  if (technicalData?.success && technicalData?.indicators) {
+    context += `Technical Analysis:\n`;
+    const indicators = technicalData.indicators;
+    const rsi = indicators.rsi?.value || indicators.rsi || 0;
+    const macdSignal = indicators.macd?.signal || 'neutral';
+    const trend = indicators.trend?.direction || technicalData.trend?.direction || 'neutral';
+    
+    context += `- RSI: ${typeof rsi === 'number' ? rsi.toFixed(2) : rsi}\n`;
+    context += `- MACD Signal: ${macdSignal}\n`;
+    context += `- Trend: ${trend}\n\n`;
+  }
+
+  // News
+  if (newsData?.success && newsData?.articles?.length > 0) {
+    context += `Recent News (${newsData.articles.length} articles):\n`;
+    newsData.articles.slice(0, 3).forEach((article: any, i: number) => {
+      context += `${i + 1}. ${article.title}\n`;
+    });
+    context += `\n`;
+  }
+
+  // On-Chain
+  if (onChainData?.success) {
+    context += `On-Chain Data: Available\n\n`;
+  }
+
+  // System prompt for Gemini
+  const systemPrompt = `You are a professional cryptocurrency analyst. Provide a concise, data-driven summary (200-300 words) of ${symbol} based on the provided data. Focus on:
+1. Current market position and price action
+2. Technical indicators and trends
+3. Social sentiment and community activity
+4. Key insights and notable patterns
+5. Brief outlook
+
+Use ONLY the data provided. Be specific with numbers and percentages. Format as a professional analysis summary.`;
+
+  // Call Gemini AI
+  const response = await generateGeminiAnalysis(
+    systemPrompt,
+    context,
+    2048, // maxTokens
+    0.7   // temperature
+  );
+
+  console.log(`✅ Gemini AI generated ${response.tokensUsed} tokens`);
+  
+  return response.content;
 }
 
 /**
