@@ -1000,16 +1000,24 @@ async function generateGeminiSummary(
   // No need to read from database - it's the same data!
   return generateGeminiFromCollectedData(symbol, collectedData, apiStatus);
 }
-  
-  // Build context from database data
+
+/**
+ * Generate OpenAI summary of collected data (DEPRECATED - using Gemini now)
+ */
+async function generateOpenAISummaryFromCollectedData(
+  symbol: string,
+  collectedData: any,
+  apiStatus: any
+): Promise<string> {
+  // Build context from collected data
   let context = `Cryptocurrency: ${symbol}\n\n`;
   context += `Data Collection Status:\n`;
   context += `- APIs Working: ${apiStatus.working.length}/${apiStatus.total}\n`;
   context += `- Data Quality: ${apiStatus.successRate}%\n\n`;
 
   // Market Data
-  if (marketData?.success && marketData?.priceAggregation) {
-    const agg = marketData.priceAggregation;
+  if (collectedData.marketData?.success && collectedData.marketData?.priceAggregation) {
+    const agg = collectedData.marketData.priceAggregation;
     context += `Market Data:\n`;
     const price = agg.averagePrice || agg.aggregatedPrice || 0;
     const volume = agg.totalVolume24h || agg.aggregatedVolume24h || 0;
