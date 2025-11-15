@@ -867,14 +867,39 @@ async function generateOpenAISummary(
     context += `Note: The following data sources are unavailable: ${apiStatus.failed.join(', ')}\n`;
   }
 
-  // Generate summary with Gemini 2.5 Pro
+  // ✅ FIXED: Generate summary with OpenAI GPT-4o (not Gemini)
   try {
-    console.log(`🤖 Generating Gemini 2.5 Pro summary...`);
-    const summary = await generateCryptoSummary(symbol, context);
-    console.log(`✅ Gemini summary generated (${summary.length} chars)`);
-    return summary;
+    console.log(`🤖 Generating OpenAI GPT-4o summary...`);
+    console.log(`   Context length: ${context.length} chars`);
+    
+    // Import OpenAI client
+    const { generateOpenAIAnalysis } = await import('../../../../lib/ucie/openaiClient');
+    
+    // System prompt for OpenAI
+    const systemPrompt = `You are a professional cryptocurrency analyst. Provide a comprehensive analysis of ${symbol} with these sections:
+
+1. EXECUTIVE SUMMARY (300 words)
+2. MARKET ANALYSIS (400 words)
+3. TECHNICAL ANALYSIS (400 words)
+4. RISK ASSESSMENT & OUTLOOK (300 words)
+
+Use ONLY the data provided. Be specific with numbers and percentages.`;
+    
+    // Generate analysis with OpenAI GPT-4o
+    const response = await generateOpenAIAnalysis(
+      systemPrompt,
+      context,
+      4000, // Max tokens (faster than Gemini's 8192)
+      0.7   // Temperature
+    );
+    
+    console.log(`✅ OpenAI GPT-4o summary generated (${response.content.length} chars, ${response.tokensUsed} tokens)`);
+    return response.content;
+    
   } catch (error) {
-    console.error('Gemini summary error (using fallback):', error);
+    console.error('OpenAI GPT-4o summary error (using fallback):', error);
+    console.error('   Error type:', error instanceof Error ? error.constructor.name : typeof error);
+    console.error('   Error message:', error instanceof Error ? error.message : String(error));
     // Fallback to basic summary (instant, no API call)
     return generateFallbackSummary(symbol, collectedData, apiStatus);
   }
