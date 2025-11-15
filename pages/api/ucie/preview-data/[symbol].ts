@@ -327,8 +327,8 @@ async function handler(
     await new Promise(resolve => setTimeout(resolve, 5000));
     console.log(`✅ Database population delay complete`);
 
-    // ✅ CRITICAL: Verify data quality before AI summary
-    // Only generate AI summary if we have sufficient data (≥60%)
+    // ✅ CRITICAL: ALWAYS generate Gemini AI summary (no threshold)
+    // This ensures users always see AI-generated analysis
     console.log(`🔍 Verifying data quality before AI summary...`);
     console.log(`   Data Quality: ${dataQuality}%`);
     console.log(`   Required Data: Market (${!!collectedData.marketData?.success}), Technical (${!!collectedData.technical?.success})`);
@@ -339,19 +339,21 @@ async function handler(
       collectedData.technical?.success === true;
     
     if (!hasRequiredData) {
-      console.warn(`⚠️ Insufficient data for AI summary - skipping`);
+      console.warn(`⚠️ Missing required data for AI summary`);
       console.warn(`   Market Data: ${collectedData.marketData?.success ? '✅' : '❌'}`);
       console.warn(`   Technical Data: ${collectedData.technical?.success ? '✅' : '❌'}`);
     }
 
-    // ✅ Generate Gemini AI summary ONLY if we have required data
+    // ✅ ALWAYS attempt Gemini AI summary (removed 60% threshold)
     let summary = '';
-    if (hasRequiredData && dataQuality >= 60) {
-      console.log(`🤖 Generating Gemini AI summary for ${normalizedSymbol}...`);
-      try {
-        summary = await generateGeminiSummary(normalizedSymbol, collectedData, apiStatus);
-        console.log(`✅ Gemini AI summary generated (${summary.length} chars)`);
-        
+    console.log(`🤖 Generating Gemini AI summary for ${normalizedSymbol}...`);
+    try {
+      summary = await generateGeminiSummary(normalizedSymbol, collectedData, apiStatus);
+      console.log(`✅ Gemini AI summary generated (${summary.length} chars)`);
+      
+      // ✅ CRITICAL: Only store if summary is substantial (> 500 chars)
+      // This prevents storing basic fallback summaries
+      if (summary.length > 500) {
         // Store Gemini summary in database
         const { storeGeminiAnalysis } = await import('../../../../lib/ucie/geminiAnalysisStorage');
         await storeGeminiAnalysis({
@@ -366,7 +368,7 @@ async function handler(
           dataSourcesUsed: apiStatus.working,
           availableDataCount: apiStatus.working.length
         });
-        console.log(`✅ Gemini summary stored in ucie_gemini_analysis table`);
+        console.log(`✅ Gemini summary stored in ucie_gemini_analysis table (${summary.length} chars)`);
         
         // Also store in OpenAI summary table for backward compatibility
         const { storeOpenAISummary } = await import('../../../../lib/ucie/openaiSummaryStorage');
@@ -386,15 +388,15 @@ async function handler(
           userId,
           userEmail
         );
-      console.log(`✅ OpenAI summary stored in ucie_openai_analysis table`);
-      } catch (error) {
-        console.error('❌ Failed to generate Gemini AI summary:', error);
-        summary = generateBasicSummary(normalizedSymbol, collectedData, apiStatus);
+        console.log(`✅ OpenAI summary stored in ucie_openai_analysis table`);
+      } else {
+        console.warn(`⚠️ Gemini summary too short (${summary.length} chars), not storing in database`);
       }
-    } else {
-      // Use basic summary if insufficient data
-      console.log(`📝 Using basic summary (insufficient data for AI)`);
+    } catch (error) {
+      console.error('❌ Failed to generate Gemini AI summary:', error);
+      console.error('   Error details:', error instanceof Error ? error.message : String(error));
       summary = generateBasicSummary(normalizedSymbol, collectedData, apiStatus);
+      console.log(`📝 Using basic fallback summary (${summary.length} chars)`);
     }
 
     // ✅ CRITICAL: Retrieve Gemini analysis from database
