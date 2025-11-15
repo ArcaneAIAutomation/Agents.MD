@@ -52,8 +52,8 @@ interface CollectionResponse {
   error?: string;
 }
 
-// Cache TTL: 2 minutes (for fresh, accurate data)
-const CACHE_TTL = 2 * 60; // 120 seconds
+// Cache TTL: 5 minutes (aggregated data collection)
+const CACHE_TTL = 5 * 60; // 300 seconds
 
 /**
  * Fetch with timeout and retry

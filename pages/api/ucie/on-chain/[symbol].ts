@@ -12,8 +12,8 @@ import { fetchBitcoinOnChainData } from '../../../../lib/ucie/bitcoinOnChain';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
-// Cache TTL: 2 minutes (for fresh, accurate data)
-const CACHE_TTL = 2 * 60; // 120 seconds
+// Cache TTL: 5 minutes (blockchain data updates every block)
+const CACHE_TTL = 5 * 60; // 300 seconds
 
 async function handler(
   req: AuthenticatedRequest,

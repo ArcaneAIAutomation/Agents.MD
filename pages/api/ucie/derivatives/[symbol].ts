@@ -30,8 +30,8 @@ import type { OpenInterestAnalysis } from '../../../../lib/ucie/openInterestTrac
 import type { LiquidationAnalysis } from '../../../../lib/ucie/liquidationDetection';
 import type { LongShortAnalysis } from '../../../../lib/ucie/longShortAnalysis';
 
-// Cache TTL: 2 minutes (for fresh, accurate data)
-const CACHE_TTL = 2 * 60; // 120 seconds
+// Cache TTL: 5 minutes (futures data updates frequently)
+const CACHE_TTL = 5 * 60; // 300 seconds
 
 export interface DerivativesDataResponse {
   success: boolean;

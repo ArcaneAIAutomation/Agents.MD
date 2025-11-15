@@ -47,8 +47,8 @@ interface OpenAISummaryResponse {
   error?: string;
 }
 
-// Cache TTL: 2 minutes (for fresh, accurate data)
-const CACHE_TTL = 2 * 60; // 120 seconds
+// Cache TTL: 30 minutes (OpenAI analysis is expensive and stable)
+const CACHE_TTL = 30 * 60; // 1800 seconds
 
 async function handler(
   req: AuthenticatedRequest,

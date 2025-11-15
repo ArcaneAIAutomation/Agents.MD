@@ -44,9 +44,9 @@ interface ErrorResponse {
 type ApiResponse = SuccessResponse | ErrorResponse;
 
 /**
- * Cache TTL: 2 minutes (for fresh, accurate data)
+ * Cache TTL: 30 minutes (Caesar research is expensive and stable)
  */
-const CACHE_TTL = 2 * 60; // 120 seconds
+const CACHE_TTL = 30 * 60; // 1800 seconds
 
 /**
  * Validate token symbol

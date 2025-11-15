@@ -15,8 +15,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
-// Cache TTL: 2 minutes (for fresh, accurate data)
-const CACHE_TTL = 2 * 60; // 120 seconds
+// Cache TTL: 5 minutes (enriched data processing)
+const CACHE_TTL = 5 * 60; // 300 seconds
 
 interface EnrichedData {
   success: boolean;

@@ -56,8 +56,8 @@ interface DeFiMetricsResponse {
   cached?: boolean;
 }
 
-// Cache TTL: 2 minutes (for fresh, accurate data)
-const CACHE_TTL = 2 * 60; // 120 seconds
+// Cache TTL: 10 minutes (TVL data updates slowly)
+const CACHE_TTL = 10 * 60; // 600 seconds
 
 // Cache functions removed - now using database cache via cacheUtils
 function setCachedData(key: string, data: any): void {
