@@ -146,7 +146,7 @@ User clicks "Analyze BTC"
 │   }],                                                      │
 │   generationConfig: {                                     │
 │     temperature: 0.7,                                     │
-│     maxOutputTokens: 2048,                                │
+│     maxOutputTokens: 8192,  // Increased for 2000 words  │
 │     topP: 0.95,                                           │
 │     topK: 40                                              │
 │   }                                                        │
@@ -154,27 +154,33 @@ User clicks "Analyze BTC"
 │                                                            │
 │ System Prompt:                                            │
 │ "You are a professional cryptocurrency analyst.           │
-│  Provide a concise, data-driven summary (200-300 words)  │
-│  of {symbol} based on the provided data. Focus on:       │
-│  1. Current market position and price action              │
-│  2. Technical indicators and trends                       │
-│  3. Social sentiment and community activity               │
-│  4. Key insights and notable patterns                     │
-│  5. Brief outlook"                                        │
+│  Provide a comprehensive, data-driven analysis            │
+│  (approximately 2000 words) of {symbol} based on the      │
+│  provided data.                                           │
+│                                                            │
+│  Structure your analysis with these sections:             │
+│  1. Executive Summary (200 words)                         │
+│  2. Market Analysis (400 words)                           │
+│  3. Technical Analysis (400 words)                        │
+│  4. Social Sentiment & Community (300 words)              │
+│  5. News & Developments (300 words)                       │
+│  6. On-Chain & Fundamentals (200 words)                   │
+│  7. Risk Assessment (200 words)"                          │
 │                                                            │
 │ Response:                                                 │
 │ {                                                          │
 │   candidates: [{                                          │
 │     content: {                                            │
 │       parts: [{                                           │
-│         text: "Bitcoin (BTC) is currently trading..."    │
+│         text: "EXECUTIVE SUMMARY\n\nBitcoin (BTC)..."    │
+│              "[~2000 word comprehensive analysis]"       │
 │       }]                                                   │
 │     }                                                      │
 │   }],                                                      │
 │   usageMetadata: {                                        │
-│     promptTokenCount: 500,                                │
-│     candidatesTokenCount: 300,                            │
-│     totalTokenCount: 800                                  │
+│     promptTokenCount: 800,                                │
+│     candidatesTokenCount: 2500,                           │
+│     totalTokenCount: 3300                                 │
 │   }                                                        │
 │ }                                                          │
 └────────────────────────────────────────────────────────────┘
@@ -452,9 +458,9 @@ Return fresh data
 
 **Phase 2: Gemini AI Summary**
 - Model: gemini-2.5-pro
-- Input tokens: ~500 tokens
-- Output tokens: ~300 tokens
-- Cost: $0.00025 (input) + $0.00045 (output) = **$0.0007 per summary**
+- Input tokens: ~800 tokens
+- Output tokens: ~2,500 tokens (2000 words)
+- Cost: $0.0004 (input) + $0.00375 (output) = **$0.00415 per summary**
 
 **Phase 3: Caesar AI Research**
 - Compute units: 2-5
@@ -467,9 +473,11 @@ Return fresh data
 
 | Usage | Phase 1 | Phase 2 (Gemini) | Phase 3 (Caesar) | Total |
 |-------|---------|------------------|------------------|-------|
-| 100 analyses | $0 | $0.07 | $20-50 | $20-50 |
-| 500 analyses | $0 | $0.35 | $100-250 | $100-250 |
-| 1,000 analyses | $0 | $0.70 | $200-500 | $200-500 |
+| 100 analyses | $0 | $0.42 | $20-50 | $20-50 |
+| 500 analyses | $0 | $2.08 | $100-250 | $102-252 |
+| 1,000 analyses | $0 | $4.15 | $200-500 | $204-504 |
+
+**Note**: With 95% cache hit rate, Gemini costs reduced to $0.02-0.21/month for 100-1000 analyses!
 
 **With 95% cache hit rate**: Costs reduced by 95%!
 

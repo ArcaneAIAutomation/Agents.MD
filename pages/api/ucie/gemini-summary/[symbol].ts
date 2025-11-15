@@ -157,13 +157,33 @@ function buildGeminiPrompt(symbol: string, context: any): string {
     prompt += `Medium-term: ${context.predictions.mediumTerm || 'N/A'}\n\n`;
   }
 
-  prompt += `\nProvide a comprehensive analysis summary (300-500 words) covering:\n`;
-  prompt += `1. Current market position and trends\n`;
-  prompt += `2. Technical analysis insights\n`;
-  prompt += `3. Sentiment and social metrics\n`;
-  prompt += `4. Key risks and opportunities\n`;
-  prompt += `5. Short-term outlook\n\n`;
-  prompt += `Use ONLY the fresh data provided above. Do not use any cached or historical information.`;
+  prompt += `\nProvide a comprehensive, detailed analysis (approximately 2000 words) covering:\n\n`;
+  prompt += `1. EXECUTIVE SUMMARY (200 words)\n`;
+  prompt += `   - Current market position and key metrics\n`;
+  prompt += `   - Overall sentiment and trend direction\n\n`;
+  prompt += `2. MARKET ANALYSIS (400 words)\n`;
+  prompt += `   - Price action and recent movements\n`;
+  prompt += `   - Market cap and volume analysis\n`;
+  prompt += `   - Trading patterns and liquidity\n\n`;
+  prompt += `3. TECHNICAL ANALYSIS (400 words)\n`;
+  prompt += `   - Key indicators (RSI, MACD, EMAs)\n`;
+  prompt += `   - Support/resistance levels\n`;
+  prompt += `   - Trend analysis and momentum\n\n`;
+  prompt += `4. SOCIAL SENTIMENT (300 words)\n`;
+  prompt += `   - Sentiment scores and trends\n`;
+  prompt += `   - Community engagement\n`;
+  prompt += `   - Notable discussions\n\n`;
+  prompt += `5. NEWS & DEVELOPMENTS (300 words)\n`;
+  prompt += `   - Recent news and events\n`;
+  prompt += `   - Market impact\n\n`;
+  prompt += `6. ON-CHAIN METRICS (200 words)\n`;
+  prompt += `   - Network activity\n`;
+  prompt += `   - Holder behavior\n\n`;
+  prompt += `7. RISK ASSESSMENT (200 words)\n`;
+  prompt += `   - Key risks and opportunities\n`;
+  prompt += `   - Volatility analysis\n`;
+  prompt += `   - Short-term outlook\n\n`;
+  prompt += `Use ONLY the fresh data provided above. Be specific with numbers and percentages. Provide actionable insights.`;
 
   return prompt;
 }
@@ -195,7 +215,7 @@ async function callGeminiAI(prompt: string): Promise<{ summary: string }> {
             temperature: 0.7,
             topK: 40,
             topP: 0.95,
-            maxOutputTokens: 2048
+            maxOutputTokens: 8192  // Increased for 2000 word analysis
           }
         }),
         signal: controller.signal

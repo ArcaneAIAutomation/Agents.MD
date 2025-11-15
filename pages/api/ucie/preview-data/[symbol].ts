@@ -909,20 +909,63 @@ async function generateGeminiSummary(
   }
 
   // System prompt for Gemini
-  const systemPrompt = `You are a professional cryptocurrency analyst. Provide a concise, data-driven summary (200-300 words) of ${symbol} based on the provided data. Focus on:
-1. Current market position and price action
-2. Technical indicators and trends
-3. Social sentiment and community activity
-4. Key insights and notable patterns
-5. Brief outlook
+  const systemPrompt = `You are a professional cryptocurrency analyst. Provide a comprehensive, data-driven analysis (approximately 2000 words) of ${symbol} based on the provided data. 
 
-Use ONLY the data provided. Be specific with numbers and percentages. Format as a professional analysis summary.`;
+Structure your analysis with the following sections:
 
-  // Call Gemini AI
+1. EXECUTIVE SUMMARY (200 words)
+   - Current market position and key metrics
+   - Overall sentiment and trend direction
+   - Critical insights at a glance
+
+2. MARKET ANALYSIS (400 words)
+   - Current price action and recent movements
+   - 24-hour, 7-day, and 30-day performance
+   - Market cap and volume analysis
+   - Comparison to major cryptocurrencies
+   - Trading patterns and liquidity
+
+3. TECHNICAL ANALYSIS (400 words)
+   - Key technical indicators (RSI, MACD, EMAs)
+   - Support and resistance levels
+   - Trend analysis and momentum
+   - Chart patterns and signals
+   - Short-term and medium-term outlook
+
+4. SOCIAL SENTIMENT & COMMUNITY (300 words)
+   - Overall sentiment score and trend
+   - Social media activity and mentions
+   - Community engagement levels
+   - Influencer sentiment
+   - Notable discussions or concerns
+
+5. NEWS & DEVELOPMENTS (300 words)
+   - Recent news and announcements
+   - Market-moving events
+   - Regulatory developments
+   - Partnership or technology updates
+   - Industry context
+
+6. ON-CHAIN & FUNDAMENTALS (200 words)
+   - On-chain metrics and activity
+   - Network health indicators
+   - Holder behavior and distribution
+   - DeFi integration and usage
+
+7. RISK ASSESSMENT (200 words)
+   - Key risks and concerns
+   - Volatility analysis
+   - Market risks
+   - Regulatory or technical risks
+   - Risk mitigation considerations
+
+Use ONLY the data provided. Be specific with numbers, percentages, and concrete data points. Provide actionable insights and clear explanations. Format as a professional, detailed analysis report.`;
+
+  // Call Gemini AI with increased token limit for comprehensive analysis
   const response = await generateGeminiAnalysis(
     systemPrompt,
     context,
-    2048, // maxTokens
+    8192, // maxTokens - increased for 2000 word analysis
     0.7   // temperature
   );
 
