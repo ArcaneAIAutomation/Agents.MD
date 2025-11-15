@@ -21,6 +21,8 @@ interface DataPreview {
   timestamp: string;
   dataQuality: number;
   summary: string;
+  geminiAnalysis: string | null; // ✅ Full Gemini AI analysis
+  caesarPromptPreview: string; // ✅ Caesar prompt preview
   collectedData: {
     marketData: any;
     sentiment: any;
@@ -280,17 +282,41 @@ export default function DataPreviewModal({
                 </div>
               )}
 
-              {/* AI Summary */}
+              {/* Gemini AI Analysis */}
               <div className="bg-bitcoin-black border border-bitcoin-orange rounded-lg p-4">
                 <h3 className="text-lg font-bold text-bitcoin-white mb-3 flex items-center gap-2">
                   <span className="text-bitcoin-orange">🤖</span>
-                  AI Summary
+                  Gemini AI Analysis
+                  {preview.geminiAnalysis && (
+                    <span className="text-xs text-bitcoin-white-60 font-normal ml-2">
+                      ({preview.geminiAnalysis.split(' ').length.toLocaleString()} words)
+                    </span>
+                  )}
                 </h3>
                 <div className="prose prose-invert max-w-none">
-                  <p className="text-bitcoin-white-80 whitespace-pre-wrap leading-relaxed">
-                    {preview.summary}
-                  </p>
+                  <div className="text-bitcoin-white-80 whitespace-pre-wrap leading-relaxed max-h-96 overflow-y-auto">
+                    {preview.geminiAnalysis || preview.summary}
+                  </div>
                 </div>
+              </div>
+
+              {/* Caesar Prompt Preview */}
+              <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
+                <h3 className="text-lg font-bold text-bitcoin-white mb-3 flex items-center gap-2">
+                  <span className="text-bitcoin-orange">📋</span>
+                  Caesar AI Research Prompt Preview
+                  <span className="text-xs text-bitcoin-white-60 font-normal ml-2">
+                    (What will be sent to Caesar)
+                  </span>
+                </h3>
+                <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded p-3 max-h-96 overflow-y-auto">
+                  <pre className="text-xs text-bitcoin-white-80 whitespace-pre-wrap font-mono leading-relaxed">
+                    {preview.caesarPromptPreview}
+                  </pre>
+                </div>
+                <p className="text-xs text-bitcoin-white-60 mt-2">
+                  This comprehensive prompt includes all collected data, AI insights, and research instructions that will be sent to Caesar AI for deep analysis.
+                </p>
               </div>
 
               {/* Data Source Expander */}
