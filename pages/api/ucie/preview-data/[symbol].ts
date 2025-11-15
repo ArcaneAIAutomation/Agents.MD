@@ -344,17 +344,17 @@ async function handler(
       console.warn(`   Technical Data: ${collectedData.technical?.success ? '✅' : '❌'}`);
     }
 
-    // ✅ ALWAYS attempt Gemini AI summary (removed 60% threshold)
+    // ✅ ALWAYS attempt OpenAI GPT-4o summary (switched from Gemini due to 503 errors)
     let summary = '';
-    console.log(`🤖 Generating Gemini AI summary for ${normalizedSymbol}...`);
+    console.log(`🤖 Generating OpenAI GPT-4o summary for ${normalizedSymbol}...`);
     try {
-      summary = await generateGeminiSummary(normalizedSymbol, collectedData, apiStatus);
-      console.log(`✅ Gemini AI summary generated (${summary.length} chars, ~${Math.round(summary.split(' ').length)} words)`);
+      summary = await generateOpenAISummary(normalizedSymbol, collectedData, apiStatus);
+      console.log(`✅ OpenAI GPT-4o summary generated (${summary.length} chars, ~${Math.round(summary.split(' ').length)} words)`);
       
       // ✅ CRITICAL: Store ALL summaries (even short ones) so status endpoint knows analysis completed
       const analysisType = summary.length > 500 ? 'summary' : 'fallback';
       
-      // Store Gemini summary in database
+      // Store OpenAI summary in database (using Gemini table for backward compatibility)
       const { storeGeminiAnalysis } = await import('../../../../lib/ucie/geminiAnalysisStorage');
       await storeGeminiAnalysis({
         symbol: normalizedSymbol,
@@ -363,7 +363,7 @@ async function handler(
         summaryText: summary,
         dataQualityScore: dataQuality,
         apiStatus: apiStatus,
-        modelUsed: 'gemini-2.5-pro',
+        modelUsed: 'gpt-4o', // ✅ Changed from gemini-2.5-pro to gpt-4o
         analysisType: analysisType, // Track if it's full summary or fallback
         dataSourcesUsed: apiStatus.working,
         availableDataCount: apiStatus.working.length
@@ -391,7 +391,7 @@ async function handler(
       console.log(`✅ Summary also stored in ucie_openai_analysis table`);
       
     } catch (error) {
-      console.error('❌ Failed to generate Gemini AI summary:', error);
+      console.error('❌ Failed to generate OpenAI GPT-4o summary:', error);
       console.error('   Error type:', error instanceof Error ? error.constructor.name : typeof error);
       console.error('   Error message:', error instanceof Error ? error.message : String(error));
       console.error('   Error stack:', error instanceof Error ? error.stack : 'N/A');
@@ -421,17 +421,17 @@ async function handler(
       }
     }
 
-    // ✅ CRITICAL: Retrieve Gemini analysis from database
-    console.log(`📊 Retrieving Gemini analysis from database...`);
-    let geminiAnalysis: string | null = null;
+    // ✅ CRITICAL: Retrieve AI analysis from database
+    console.log(`📊 Retrieving AI analysis from database...`);
+    let aiAnalysis: string | null = null;
     try {
       const { getGeminiAnalysis } = await import('../../../../lib/ucie/geminiAnalysisStorage');
-      const geminiData = await getGeminiAnalysis(normalizedSymbol, userId);
-      if (geminiData?.summary_text) {
-        geminiAnalysis = geminiData.summary_text;
-        console.log(`✅ Retrieved Gemini analysis (${geminiAnalysis.length} chars)`);
+      const aiData = await getGeminiAnalysis(normalizedSymbol, userId);
+      if (aiData?.summary_text) {
+        aiAnalysis = aiData.summary_text;
+        console.log(`✅ Retrieved AI analysis (${aiAnalysis.length} chars, model: ${aiData.model_used || 'unknown'})`);
       } else {
-        console.warn(`⚠️ No Gemini analysis found in database`);
+        console.warn(`⚠️ No AI analysis found in database`);
       }
     } catch (error) {
       console.error(`❌ Failed to retrieve Gemini analysis:`, error);
@@ -454,8 +454,8 @@ async function handler(
       symbol: normalizedSymbol,
       timestamp: new Date().toISOString(),
       dataQuality,
-      summary: geminiAnalysis || summary, // ✅ Use Gemini analysis if available, fallback to basic summary
-      geminiAnalysis: geminiAnalysis, // ✅ Include full Gemini analysis
+      summary: aiAnalysis || summary, // ✅ Use AI analysis if available, fallback to basic summary
+      aiAnalysis: aiAnalysis, // ✅ Include full AI analysis (OpenAI GPT-4o)
       caesarPromptPreview: caesarPromptPreview, // ✅ Include Caesar prompt preview
       collectedData,
       apiStatus,
