@@ -3,14 +3,16 @@
  * 
  * GET /api/ucie/preview-data/[symbol]
  * 
- * Collects data from all effective UCIE APIs and generates an OpenAI summary
+ * Collects data from all effective UCIE APIs and generates an OpenAI GPT-4o summary
  * for user review before proceeding with Caesar AI analysis.
  * 
  * Features:
  * - Parallel data collection from working APIs
- * - OpenAI GPT-4o summarization
+ * - OpenAI GPT-4o summarization (latest model)
  * - Data quality scoring
  * - User-friendly preview format
+ * 
+ * Fixed: Parameter name mismatch (geminiSummary → aiAnalysis)
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';
