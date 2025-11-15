@@ -52,14 +52,23 @@ async function handler(
   }
 
   try {
-    // Check database cache first
-    const cachedData = await getCachedAnalysis(symbolUpper, 'on-chain');
-    if (cachedData) {
-      console.log(`[UCIE On-Chain] Cache hit for ${symbolUpper}`);
-      return res.status(200).json({
-        ...cachedData,
-        cached: true
-      });
+    // ✅ CHECK FOR REFRESH PARAMETER: Skip cache for live data
+    const forceRefresh = req.query.refresh === 'true';
+    
+    if (forceRefresh) {
+      console.log(`🔄 LIVE DATA MODE: Bypassing cache for ${symbolUpper} on-chain`);
+    }
+
+    // Check database cache first (skip if refresh=true)
+    if (!forceRefresh) {
+      const cachedData = await getCachedAnalysis(symbolUpper, 'on-chain');
+      if (cachedData) {
+        console.log(`✅ Cache hit for ${symbolUpper} on-chain`);
+        return res.status(200).json({
+          ...cachedData,
+          cached: true
+        });
+      }
     }
 
     console.log(`[UCIE On-Chain] Fetching on-chain data for ${symbolUpper}`);
@@ -69,16 +78,21 @@ async function handler(
       ? await fetchBitcoinOnChainData()
       : await fetchEthereumOnChainData();
 
-    // Cache the response in database
-    await setCachedAnalysis(
-      symbolUpper,
-      'on-chain',
-      onChainData,
-      CACHE_TTL,
-      onChainData.dataQuality,
-      userId,
-      userEmail
-    );
+    // Cache the response in database (skip if refresh=true for live data)
+    if (!forceRefresh) {
+      await setCachedAnalysis(
+        symbolUpper,
+        'on-chain',
+        onChainData,
+        CACHE_TTL,
+        onChainData.dataQuality,
+        userId,
+        userEmail
+      );
+      console.log(`💾 Cached ${symbolUpper} on-chain for ${CACHE_TTL}s`);
+    } else {
+      console.log(`⚡ LIVE DATA: Not caching ${symbolUpper} on-chain`);
+    }
 
     console.log(`[UCIE On-Chain] Successfully fetched ${symbolUpper} on-chain data (quality: ${onChainData.dataQuality}%)`);
 

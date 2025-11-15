@@ -198,7 +198,7 @@ async function handler(
     const generationStart = Date.now();
     
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-5',
       messages: [
         {
           role: 'system',
@@ -249,8 +249,7 @@ Be professional, data-driven, and actionable. Use bullet points for clarity.`
         }
       ],
       temperature: 0.7,
-      max_tokens: 2000, // Comprehensive analysis
-      timeout: 30000 // 30 seconds timeout
+      max_completion_tokens: 2000 // Comprehensive analysis
     });
 
     const analysis = completion.choices[0].message.content || 'Analysis generation failed';

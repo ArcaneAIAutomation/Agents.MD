@@ -231,7 +231,7 @@ async function handler(
     console.log(`📝 Sending ${fullContext.length} chars to OpenAI...`);
     
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-5',
       messages: [
         {
           role: 'system',
@@ -252,7 +252,7 @@ Be concise but comprehensive. Use bullet points for clarity.`
         }
       ],
       temperature: 0.3,
-      max_tokens: 2000
+      max_completion_tokens: 2000
     });
     
     const summaryText = completion.choices[0]?.message?.content || '';

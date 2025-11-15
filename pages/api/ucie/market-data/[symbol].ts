@@ -128,13 +128,23 @@ async function handler(
   const userId = req.user?.id || 'anonymous';
   const userEmail = req.user?.email;
 
-  // Check database cache first
-  const cachedData = await getCachedAnalysis(symbolUpper, 'market-data', userId, userEmail);
-  if (cachedData) {
-    return res.status(200).json({
-      ...cachedData,
-      cached: true,
-    });
+  // ✅ CHECK FOR REFRESH PARAMETER: Skip cache for live data
+  const forceRefresh = req.query.refresh === 'true';
+  
+  if (forceRefresh) {
+    console.log(`🔄 LIVE DATA MODE: Bypassing cache for ${symbolUpper}`);
+  }
+
+  // Check database cache first (skip if refresh=true)
+  if (!forceRefresh) {
+    const cachedData = await getCachedAnalysis(symbolUpper, 'market-data', userId, userEmail);
+    if (cachedData) {
+      console.log(`✅ Cache hit for ${symbolUpper} market-data`);
+      return res.status(200).json({
+        ...cachedData,
+        cached: true,
+      });
+    }
   }
 
   try {
@@ -194,8 +204,13 @@ async function handler(
       },
     };
 
-    // Cache the response in database
-    await setCachedAnalysis(symbolUpper, 'market-data', response, CACHE_TTL, overallQuality, userId, userEmail);
+    // Cache the response in database (skip if refresh=true for live data)
+    if (!forceRefresh) {
+      await setCachedAnalysis(symbolUpper, 'market-data', response, CACHE_TTL, overallQuality, userId, userEmail);
+      console.log(`💾 Cached ${symbolUpper} market-data for ${CACHE_TTL}s`);
+    } else {
+      console.log(`⚡ LIVE DATA: Not caching ${symbolUpper} market-data`);
+    }
 
     return res.status(200).json(response);
 

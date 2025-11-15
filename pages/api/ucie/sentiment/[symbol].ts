@@ -129,13 +129,23 @@ async function handler(
 
     const normalizedSymbol = symbol.toUpperCase();
 
-    // Check database cache first
-    const cachedData = await getCachedAnalysis(normalizedSymbol, 'sentiment');
-    if (cachedData) {
-      return res.status(200).json({
-        ...cachedData,
-        cached: true,
-      });
+    // ✅ CHECK FOR REFRESH PARAMETER: Skip cache for live data
+    const forceRefresh = req.query.refresh === 'true';
+    
+    if (forceRefresh) {
+      console.log(`🔄 LIVE DATA MODE: Bypassing cache for ${normalizedSymbol} sentiment`);
+    }
+
+    // Check database cache first (skip if refresh=true)
+    if (!forceRefresh) {
+      const cachedData = await getCachedAnalysis(normalizedSymbol, 'sentiment');
+      if (cachedData) {
+        console.log(`✅ Cache hit for ${normalizedSymbol} sentiment`);
+        return res.status(200).json({
+          ...cachedData,
+          cached: true,
+        });
+      }
     }
 
     // Fetch social sentiment data from all sources
@@ -180,8 +190,13 @@ async function handler(
       cached: false,
     };
 
-    // Cache the response in database
-    await setCachedAnalysis(normalizedSymbol, 'sentiment', response, CACHE_TTL, dataQuality, userId, userEmail);
+    // Cache the response in database (skip if refresh=true for live data)
+    if (!forceRefresh) {
+      await setCachedAnalysis(normalizedSymbol, 'sentiment', response, CACHE_TTL, dataQuality, userId, userEmail);
+      console.log(`💾 Cached ${normalizedSymbol} sentiment for ${CACHE_TTL}s`);
+    } else {
+      console.log(`⚡ LIVE DATA: Not caching ${normalizedSymbol} sentiment`);
+    }
 
     // Return response
     return res.status(200).json(response);

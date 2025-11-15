@@ -14,14 +14,10 @@
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import OpenAI from 'openai';
 import { setCachedAnalysis, getCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 import { storeOpenAISummary } from '../../../../lib/ucie/openaiSummaryStorage';
+import { generateCryptoSummary } from '../../../../lib/ucie/geminiClient';
 import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
 
 interface DataPreview {
   symbol: string;
@@ -755,43 +751,14 @@ async function generateOpenAISummary(
     context += `Note: The following data sources are unavailable: ${apiStatus.failed.join(', ')}\n`;
   }
 
-  // Generate summary with OpenAI
+  // Generate summary with Gemini 2.5 Pro
   try {
-    // ✅ FIXED: Increased timeout to 15s and use Promise.race for reliable timeout
-    const completionPromise = openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: `You are a cryptocurrency analyst. Summarize the collected data in a clear, concise format for a user who is about to proceed with deep AI analysis. Focus on:
-1. Current market status (price, volume, sentiment)
-2. Key technical indicators and trends
-3. Notable news or developments
-4. Data quality and completeness
-5. What the user can expect from the deep analysis
-
-Keep the summary to 3-4 paragraphs, professional but accessible. Use bullet points for key metrics.`
-        },
-        {
-          role: 'user',
-          content: context
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 1000
-    });
-    
-    // Use Promise.race for reliable timeout (OpenAI SDK doesn't handle AbortController well)
-    // ✅ INCREASED: 25-second timeout for OpenAI (was 15s)
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('OpenAI timeout')), 25000);
-    });
-    
-    const completion = await Promise.race([completionPromise, timeoutPromise]);
-    return completion.choices[0].message.content || 'Summary generation failed';
-
+    console.log(`🤖 Generating Gemini 2.5 Pro summary...`);
+    const summary = await generateCryptoSummary(symbol, context);
+    console.log(`✅ Gemini summary generated (${summary.length} chars)`);
+    return summary;
   } catch (error) {
-    console.error('OpenAI summary error (using fallback):', error);
+    console.error('Gemini summary error (using fallback):', error);
     // Fallback to basic summary (instant, no API call)
     return generateFallbackSummary(symbol, collectedData, apiStatus);
   }

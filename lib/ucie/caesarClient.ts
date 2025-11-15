@@ -82,24 +82,39 @@ export function generateCryptoResearchQuery(symbol: string, contextData?: any): 
       contextSection += `- 24h Change: ${formatPriceChange(market)}\n\n`;
     }
     
-    // Sentiment
+    // Sentiment with Enhanced LunarCrush Data
     if (contextData.sentiment) {
-      contextSection += `**Social Sentiment:**\n`;
+      contextSection += `**Social Sentiment & LunarCrush Intelligence:**\n`;
       // Extract actual values from sentiment data structure
       const sentiment = contextData.sentiment.sentiment || contextData.sentiment;
       const score = sentiment.overallScore || 0;
       const trend = sentiment.trend || 'neutral';
       const mentions = contextData.sentiment.volumeMetrics?.total24h || sentiment.mentions24h || 0;
       
-      contextSection += `- Overall Score: ${score.toFixed(0)}/100\n`;
-      contextSection += `- Trend: ${trend}\n`;
-      contextSection += `- 24h Mentions: ${mentions.toLocaleString('en-US')}\n`;
+      contextSection += `- Overall Sentiment Score: ${score.toFixed(0)}/100\n`;
+      contextSection += `- Sentiment Trend: ${trend}\n`;
+      contextSection += `- 24h Social Mentions: ${mentions.toLocaleString('en-US')}\n`;
+      
+      // ✅ ENHANCED: LunarCrush Detailed Metrics
+      if (contextData.sentiment.lunarCrush) {
+        const lc = contextData.sentiment.lunarCrush;
+        contextSection += `\n**LunarCrush Advanced Metrics:**\n`;
+        contextSection += `- Galaxy Score: ${lc.galaxyScore || 0}/100 (overall health indicator)\n`;
+        contextSection += `- AltRank: #${lc.altRank || 'N/A'} (lower is better)\n`;
+        contextSection += `- Social Score: ${lc.socialScore || 0}/100 (social media activity)\n`;
+        contextSection += `- Social Volume: ${(lc.socialVolume || 0).toLocaleString('en-US')} interactions\n`;
+        contextSection += `- Social Volume Change (24h): ${lc.socialVolumeChange24h > 0 ? '+' : ''}${(lc.socialVolumeChange24h || 0).toFixed(2)}%\n`;
+        contextSection += `- Social Dominance: ${(lc.socialDominance || 0).toFixed(2)}% (share of crypto social volume)\n`;
+        contextSection += `- Trending Score: ${lc.trendingScore || 0}/100\n`;
+        contextSection += `- Total Interactions: ${(lc.interactions || 0).toLocaleString('en-US')}\n`;
+        contextSection += `- Active Contributors: ${(lc.contributors || 0).toLocaleString('en-US')}\n`;
+      }
       
       // Add sources if available
       if (contextData.sentiment.sources) {
         const sources = Object.keys(contextData.sentiment.sources).filter(k => contextData.sentiment.sources[k]);
         if (sources.length > 0) {
-          contextSection += `- Sources: ${sources.join(', ')}\n`;
+          contextSection += `\n**Data Sources:** ${sources.join(', ')}\n`;
         }
       }
       contextSection += `\n`;

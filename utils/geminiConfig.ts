@@ -9,6 +9,10 @@
 
 /**
  * Gemini model types
+ * 
+ * Model versions:
+ * - gemini-2.5-flash: Fast, cost-effective model for routine analysis
+ * - gemini-2.5-pro: Latest stable Pro model with enhanced capabilities
  */
 export type GeminiModel = 'gemini-2.5-flash' | 'gemini-2.5-pro';
 

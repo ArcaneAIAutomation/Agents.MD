@@ -2,6 +2,7 @@
  * News Fetching Utilities for UCIE
  * 
  * Fetches cryptocurrency news from multiple sources:
+ * - LunarCrush (Primary - Topic-specific social posts)
  * - NewsAPI
  * - CryptoCompare
  * 
@@ -10,6 +11,7 @@
  * - News deduplication
  * - Automatic categorization
  * - Breaking news detection
+ * - Relevance scoring
  */
 
 export interface NewsArticle {
@@ -23,6 +25,8 @@ export interface NewsArticle {
   category: 'partnerships' | 'technology' | 'regulatory' | 'market' | 'community';
   isBreaking: boolean;
   relevanceScore: number;
+  engagements?: number; // For LunarCrush posts
+  creator?: string; // For LunarCrush posts
 }
 
 export interface NewsAPIResponse {
@@ -168,17 +172,120 @@ export async function fetchCryptoCompareNews(symbol: string): Promise<NewsArticl
 }
 
 /**
+ * Fetch news from LunarCrush (Primary Source - Topic-specific posts)
+ * ✅ NEW: LunarCrush provides highly relevant, crypto-specific social posts
+ */
+export async function fetchLunarCrushNews(symbol: string): Promise<NewsArticle[]> {
+  const apiKey = process.env.LUNARCRUSH_API_KEY;
+  
+  if (!apiKey) {
+    console.warn('LUNARCRUSH_API_KEY not configured, skipping LunarCrush news');
+    return [];
+  }
+
+  try {
+    // Map common symbols to LunarCrush topic format
+    const topicMap: Record<string, string> = {
+      'BTC': 'bitcoin',
+      'ETH': 'ethereum',
+      'SOL': 'solana',
+      'XRP': 'xrp',
+      'ADA': 'cardano',
+      'DOGE': 'dogecoin',
+      'DOT': 'polkadot',
+      'MATIC': 'polygon',
+      'AVAX': 'avalanche',
+      'LINK': 'chainlink'
+    };
+    
+    const topic = topicMap[symbol.toUpperCase()] || symbol.toLowerCase();
+    
+    // Fetch top posts from last 24 hours
+    const url = `https://lunarcrush.com/api4/public/topic/${topic}/posts/v1?interval=1d`;
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 seconds
+    
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'User-Agent': 'UCIE/1.0'
+      }
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      throw new Error(`LunarCrush API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!data.data || !Array.isArray(data.data)) {
+      return [];
+    }
+    
+    // Convert LunarCrush posts to NewsArticle format
+    // Take top 15 most relevant posts
+    return data.data.slice(0, 15).map((post: any, index: number) => ({
+      id: `lunarcrush-${post.id || index}`,
+      title: post.text?.substring(0, 100) || 'Social Post',
+      description: post.text || '',
+      url: post.url || `https://lunarcrush.com/topic/${topic}`,
+      source: `LunarCrush - ${post.creator?.screen_name || 'Social'}`,
+      publishedAt: post.created_at || new Date().toISOString(),
+      imageUrl: post.image_url,
+      category: 'community' as const,
+      isBreaking: false,
+      relevanceScore: calculateLunarCrushRelevance(post, symbol),
+      engagements: post.engagements || 0,
+      creator: post.creator?.screen_name
+    }));
+  } catch (error) {
+    console.error('LunarCrush news fetch error:', error);
+    return [];
+  }
+}
+
+/**
+ * Calculate relevance score for LunarCrush posts
+ */
+function calculateLunarCrushRelevance(post: any, symbol: string): number {
+  let score = 0.7; // Base score for LunarCrush (high quality source)
+  
+  // Boost for high engagement
+  const engagements = post.engagements || 0;
+  if (engagements > 10000) score += 0.2;
+  else if (engagements > 1000) score += 0.15;
+  else if (engagements > 100) score += 0.1;
+  
+  // Boost for verified creators
+  if (post.creator?.verified) score += 0.1;
+  
+  // Boost for high follower count
+  const followers = post.creator?.followers || 0;
+  if (followers > 100000) score += 0.1;
+  else if (followers > 10000) score += 0.05;
+  
+  return Math.min(score, 1.0);
+}
+
+/**
  * Fetch news from all sources and deduplicate
  * ✅ IMPROVED: Returns source status for better error visibility
+ * ✅ ENHANCED: Now includes LunarCrush as primary source
  */
 export async function fetchAllNews(symbol: string): Promise<{
   articles: NewsArticle[];
   sources: {
+    LunarCrush: { success: boolean; articles: number; error?: string };
     NewsAPI: { success: boolean; articles: number; error?: string };
     CryptoCompare: { success: boolean; articles: number; error?: string };
   };
 }> {
-  const [newsAPIArticles, cryptoCompareArticles] = await Promise.allSettled([
+  const [lunarCrushArticles, newsAPIArticles, cryptoCompareArticles] = await Promise.allSettled([
+    fetchLunarCrushNews(symbol),
     fetchNewsAPI(symbol),
     fetchCryptoCompareNews(symbol)
   ]);
@@ -187,10 +294,28 @@ export async function fetchAllNews(symbol: string): Promise<{
   
   // Track source status
   const sources = {
+    LunarCrush: { success: false, articles: 0, error: undefined as string | undefined },
     NewsAPI: { success: false, articles: 0, error: undefined as string | undefined },
     CryptoCompare: { success: false, articles: 0, error: undefined as string | undefined }
   };
   
+  // LunarCrush (Primary Source)
+  if (lunarCrushArticles.status === 'fulfilled') {
+    allArticles.push(...lunarCrushArticles.value);
+    sources.LunarCrush = {
+      success: true,
+      articles: lunarCrushArticles.value.length,
+      error: undefined
+    };
+  } else {
+    sources.LunarCrush = {
+      success: false,
+      articles: 0,
+      error: lunarCrushArticles.reason?.message || 'Failed to fetch'
+    };
+  }
+  
+  // NewsAPI
   if (newsAPIArticles.status === 'fulfilled') {
     allArticles.push(...newsAPIArticles.value);
     sources.NewsAPI = {
@@ -206,6 +331,7 @@ export async function fetchAllNews(symbol: string): Promise<{
     };
   }
   
+  // CryptoCompare
   if (cryptoCompareArticles.status === 'fulfilled') {
     allArticles.push(...cryptoCompareArticles.value);
     sources.CryptoCompare = {

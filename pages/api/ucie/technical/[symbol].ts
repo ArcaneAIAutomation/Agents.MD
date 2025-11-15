@@ -63,16 +63,25 @@ async function handler(
   }
 
   try {
-    // Check database cache first
+    // ✅ CHECK FOR REFRESH PARAMETER: Skip cache for live data
+    const forceRefresh = req.query.refresh === 'true';
     const cacheKey = `${symbolUpper}-${tf}`;
-    const cachedData = await getCachedAnalysis(cacheKey, 'technical');
-    if (cachedData) {
-      console.log(`[UCIE Technical] Cache hit for ${cacheKey}`);
-      return res.status(200).json({
-        success: true,
-        ...cachedData,
-        cached: true
-      });
+    
+    if (forceRefresh) {
+      console.log(`🔄 LIVE DATA MODE: Bypassing cache for ${cacheKey} technical`);
+    }
+
+    // Check database cache first (skip if refresh=true)
+    if (!forceRefresh) {
+      const cachedData = await getCachedAnalysis(cacheKey, 'technical');
+      if (cachedData) {
+        console.log(`✅ Cache hit for ${cacheKey} technical`);
+        return res.status(200).json({
+          success: true,
+          ...cachedData,
+          cached: true
+        });
+      }
     }
 
     console.log(`[UCIE Technical] Calculating indicators for ${symbolUpper} (${tf})`);
@@ -83,16 +92,21 @@ async function handler(
       tf as '1h' | '4h' | '1d'
     );
 
-    // Cache the response in database
-    await setCachedAnalysis(
-      cacheKey,
-      'technical',
-      technicalData,
-      CACHE_TTL,
-      technicalData.dataQuality,
-      userId,
-      userEmail
-    );
+    // Cache the response in database (skip if refresh=true for live data)
+    if (!forceRefresh) {
+      await setCachedAnalysis(
+        cacheKey,
+        'technical',
+        technicalData,
+        CACHE_TTL,
+        technicalData.dataQuality,
+        userId,
+        userEmail
+      );
+      console.log(`💾 Cached ${cacheKey} technical for ${CACHE_TTL}s`);
+    } else {
+      console.log(`⚡ LIVE DATA: Not caching ${cacheKey} technical`);
+    }
 
     console.log(`[UCIE Technical] ${symbolUpper} signal: ${technicalData.signals.overall} (${technicalData.signals.confidence}% confidence)`);
 

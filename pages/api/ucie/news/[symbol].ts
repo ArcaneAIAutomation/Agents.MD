@@ -33,6 +33,7 @@ interface NewsResponse {
     majorNews: AssessedNewsArticle[];
   };
   sources: {
+    LunarCrush: { success: boolean; articles: number; error?: string };
     NewsAPI: { success: boolean; articles: number; error?: string };
     CryptoCompare: { success: boolean; articles: number; error?: string };
   };
@@ -88,14 +89,23 @@ async function handler(
   }
 
   try {
-    // Check database cache first
-    const cachedData = await getCachedAnalysis(symbolUpper, 'news');
-    if (cachedData) {
-      console.log(`[UCIE News] Cache hit for ${symbolUpper}`);
-      return res.status(200).json({
-        ...cachedData,
-        cached: true
-      });
+    // ✅ CHECK FOR REFRESH PARAMETER: Skip cache for live data
+    const forceRefresh = req.query.refresh === 'true';
+    
+    if (forceRefresh) {
+      console.log(`🔄 LIVE DATA MODE: Bypassing cache for ${symbolUpper} news`);
+    }
+
+    // Check database cache first (skip if refresh=true)
+    if (!forceRefresh) {
+      const cachedData = await getCachedAnalysis(symbolUpper, 'news');
+      if (cachedData) {
+        console.log(`✅ Cache hit for ${symbolUpper} news`);
+        return res.status(200).json({
+          ...cachedData,
+          cached: true
+        });
+      }
     }
 
     console.log(`[UCIE News] Fetching news for ${symbolUpper}`);
@@ -104,6 +114,7 @@ async function handler(
     const { articles, sources } = await fetchAllNews(symbolUpper);
 
     console.log(`[UCIE News] Fetched ${articles.length} articles`);
+    console.log(`[UCIE News] LunarCrush: ${sources.LunarCrush.success ? `✅ ${sources.LunarCrush.articles} articles` : `❌ ${sources.LunarCrush.error}`}`);
     console.log(`[UCIE News] NewsAPI: ${sources.NewsAPI.success ? `✅ ${sources.NewsAPI.articles} articles` : `❌ ${sources.NewsAPI.error}`}`);
     console.log(`[UCIE News] CryptoCompare: ${sources.CryptoCompare.success ? `✅ ${sources.CryptoCompare.articles} articles` : `❌ ${sources.CryptoCompare.error}`}`);
 
@@ -125,6 +136,7 @@ async function handler(
         timestamp: new Date().toISOString(),
         cached: false,
         error: 'No news articles found. ' + 
+          (sources.LunarCrush.error ? `LunarCrush: ${sources.LunarCrush.error}. ` : '') +
           (sources.NewsAPI.error ? `NewsAPI: ${sources.NewsAPI.error}. ` : '') +
           (sources.CryptoCompare.error ? `CryptoCompare: ${sources.CryptoCompare.error}.` : '')
       };
@@ -180,8 +192,13 @@ async function handler(
       cached: false
     };
 
-    // Cache the response in database
-    await setCachedAnalysis(symbolUpper, 'news', response, CACHE_TTL, dataQuality, userId, userEmail);
+    // Cache the response in database (skip if refresh=true for live data)
+    if (!forceRefresh) {
+      await setCachedAnalysis(symbolUpper, 'news', response, CACHE_TTL, dataQuality, userId, userEmail);
+      console.log(`💾 Cached ${symbolUpper} news for ${CACHE_TTL}s`);
+    } else {
+      console.log(`⚡ LIVE DATA: Not caching ${symbolUpper} news`);
+    }
 
     console.log(`[UCIE News] Successfully fetched and assessed ${assessedArticles.length} articles for ${symbolUpper}`);
 
