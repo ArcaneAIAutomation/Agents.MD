@@ -478,7 +478,7 @@ async function handler(
       normalizedSymbol,
       collectedData,
       apiStatus,
-      geminiAnalysis || summary
+      aiAnalysis || summary
     );
 
     // ✅ Return data after all processing complete
@@ -868,22 +868,37 @@ async function generateAISummary(
     context += `Note: The following data sources are unavailable: ${apiStatus.failed.join(', ')}\n`;
   }
 
-  // ✅ Generate summary with Gemini 2.0 Flash (latest model)
+  // ✅ Generate summary with OpenAI GPT-4o (latest model)
   try {
-    console.log(`🤖 Generating Gemini 2.0 Flash summary...`);
+    console.log(`🤖 Generating OpenAI GPT-4o summary...`);
     console.log(`   Context length: ${context.length} chars`);
     
-    // Import Gemini client
-    const { generateCryptoSummary } = await import('../../../../lib/ucie/geminiClient');
+    // Import OpenAI client
+    const { generateOpenAIAnalysis } = await import('../../../../lib/ucie/openaiClient');
     
-    // Generate analysis with Gemini 2.0 Flash
-    const summary = await generateCryptoSummary(symbol, context);
+    // System prompt for OpenAI
+    const systemPrompt = `You are a professional cryptocurrency analyst. Provide a comprehensive analysis of ${symbol} with these sections:
+
+1. EXECUTIVE SUMMARY (300 words)
+2. MARKET ANALYSIS (400 words)
+3. TECHNICAL ANALYSIS (400 words)
+4. RISK ASSESSMENT & OUTLOOK (300 words)
+
+Use ONLY the data provided. Be specific with numbers and percentages.`;
     
-    console.log(`✅ Gemini 2.0 Flash summary generated (${summary.length} chars)`);
-    return summary;
+    // Generate analysis with OpenAI GPT-4o
+    const response = await generateOpenAIAnalysis(
+      systemPrompt,
+      context,
+      4000, // Max tokens
+      0.7   // Temperature
+    );
+    
+    console.log(`✅ OpenAI GPT-4o summary generated (${response.content.length} chars, ${response.tokensUsed} tokens)`);
+    return response.content;
     
   } catch (error) {
-    console.error('Gemini 2.0 Flash summary error (using fallback):', error);
+    console.error('OpenAI GPT-4o summary error (using fallback):', error);
     console.error('   Error type:', error instanceof Error ? error.constructor.name : typeof error);
     console.error('   Error message:', error instanceof Error ? error.message : String(error));
     // Fallback to basic summary (instant, no API call)
@@ -1348,7 +1363,7 @@ async function generateCaesarPromptPreview(
   symbol: string,
   collectedData: any,
   apiStatus: any,
-  geminiSummary: string
+  aiAnalysis: string
 ): Promise<string> {
   let prompt = `# Caesar AI Research Request for ${symbol}\n\n`;
   
