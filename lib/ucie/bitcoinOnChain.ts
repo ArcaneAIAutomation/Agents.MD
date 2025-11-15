@@ -9,14 +9,36 @@
  */
 
 export interface BitcoinNetworkMetrics {
-  hashRate: number; // Hash rate in TH/s
-  difficulty: number;
+  // Block Information
+  latestBlockHeight: number; // Current block height
+  latestBlockTime: number; // Unix timestamp of latest block
+  latestBlockHash: string; // Hash of latest block
   blockTime: number; // Average minutes between blocks
+  blocksToday: number; // Number of blocks mined today
+  
+  // Network Security
+  hashRate: number; // Hash rate in TH/s
+  difficulty: number; // Current mining difficulty
+  
+  // Mempool Status
   mempoolSize: number; // Number of unconfirmed transactions
   mempoolBytes: number; // Size of mempool in bytes
+  
+  // Transaction Fees
+  averageFeePerTx: number; // Average fee per transaction (satoshis)
+  recommendedFeePerVByte: number; // Recommended fee per vByte (sat/vB)
+  typicalFeePerVByte: number; // Typical fee per vByte (sat/vB)
+  
+  // Supply Information
   totalCirculating: number; // Total BTC in circulation
-  blocksToday: number;
-  marketPriceUSD: number;
+  totalMined: number; // Total BTC mined (same as circulating)
+  maxSupply: number; // Maximum BTC supply (21M)
+  
+  // Recent Activity
+  recentTxCountPerBlock: number; // Average transactions per block (recent)
+  
+  // Market Data
+  marketPriceUSD: number; // Current BTC price in USD
 }
 
 export interface BitcoinWhaleTransaction {
@@ -82,6 +104,64 @@ async function fetchBitcoinStats(): Promise<any> {
   } catch (error) {
     clearTimeout(timeoutId);
     throw error;
+  }
+}
+
+/**
+ * Fetch latest block information from Blockchain.com
+ */
+async function fetchLatestBlock(): Promise<any> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const response = await fetch('https://blockchain.info/latestblock', {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'UCIE/1.0'
+      }
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`Blockchain.com API error: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
+}
+
+/**
+ * Fetch recent blocks to calculate average transactions per block
+ */
+async function fetchRecentBlocks(limit: number = 10): Promise<any[]> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const response = await fetch(`https://blockchain.info/blocks/${Date.now()}?format=json`, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'UCIE/1.0'
+      }
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`Blockchain.com API error: ${response.status}`);
+    }
+
+    const blocks = await response.json();
+    return blocks.slice(0, limit);
+  } catch (error) {
+    clearTimeout(timeoutId);
+    console.error('Failed to fetch recent blocks:', error);
+    return [];
   }
 }
 
@@ -345,26 +425,86 @@ function analyzeMempoolCongestion(
 export async function fetchBitcoinOnChainData(): Promise<BitcoinOnChainData> {
   try {
     // Fetch all data in parallel
-    const [stats, largeTxs, btcPrice] = await Promise.allSettled([
+    const [stats, latestBlock, recentBlocks, largeTxs, btcPrice] = await Promise.allSettled([
       fetchBitcoinStats(),
+      fetchLatestBlock(),
+      fetchRecentBlocks(10),
       fetchLargeTransactions(),
       getBitcoinPrice()
     ]);
 
     // Extract results
     const statsData = stats.status === 'fulfilled' ? stats.value : null;
+    const latestBlockData = latestBlock.status === 'fulfilled' ? latestBlock.value : null;
+    const recentBlocksData = recentBlocks.status === 'fulfilled' ? recentBlocks.value : [];
     const largeTxsData = largeTxs.status === 'fulfilled' ? largeTxs.value : [];
     const btcPriceData = btcPrice.status === 'fulfilled' ? btcPrice.value : 0;
 
-    // Parse network metrics
+    // Calculate average transactions per block from recent blocks
+    let recentTxCountPerBlock = 0;
+    if (recentBlocksData.length > 0) {
+      const totalTxs = recentBlocksData.reduce((sum: number, block: any) => {
+        return sum + (block.n_tx || 0);
+      }, 0);
+      recentTxCountPerBlock = Math.round(totalTxs / recentBlocksData.length);
+    }
+
+    // Calculate fee recommendations based on mempool congestion
+    const mempoolSize = statsData?.n_tx_mempool || 0;
+    const mempoolBytes = statsData?.mempool_size || 0;
+    
+    // Fee estimation based on congestion
+    let recommendedFeePerVByte = 1; // Default: 1 sat/vB
+    let typicalFeePerVByte = 1;
+    
+    if (mempoolSize > 100000 || mempoolBytes > 100000000) {
+      // High congestion
+      recommendedFeePerVByte = 50;
+      typicalFeePerVByte = 40;
+    } else if (mempoolSize > 50000 || mempoolBytes > 50000000) {
+      // Medium congestion
+      recommendedFeePerVByte = 20;
+      typicalFeePerVByte = 15;
+    } else {
+      // Low congestion
+      recommendedFeePerVByte = 5;
+      typicalFeePerVByte = 3;
+    }
+
+    // Calculate average fee per transaction (estimate)
+    const averageFeePerTx = typicalFeePerVByte * 250; // Assume average tx size of 250 vBytes
+
+    // Parse network metrics with all new fields
     const networkMetrics: BitcoinNetworkMetrics = {
+      // Block Information
+      latestBlockHeight: latestBlockData?.height || statsData?.n_blocks_total || 0,
+      latestBlockTime: latestBlockData?.time || Math.floor(Date.now() / 1000),
+      latestBlockHash: latestBlockData?.hash || '',
+      blockTime: statsData?.minutes_between_blocks || 10,
+      blocksToday: statsData?.n_blocks_total || 0,
+      
+      // Network Security
       hashRate: statsData?.hash_rate || 0,
       difficulty: statsData?.difficulty || 0,
-      blockTime: statsData?.minutes_between_blocks || 10,
-      mempoolSize: statsData?.n_tx_mempool || 0,
-      mempoolBytes: statsData?.mempool_size || 0,
+      
+      // Mempool Status
+      mempoolSize: mempoolSize,
+      mempoolBytes: mempoolBytes,
+      
+      // Transaction Fees
+      averageFeePerTx: averageFeePerTx,
+      recommendedFeePerVByte: recommendedFeePerVByte,
+      typicalFeePerVByte: typicalFeePerVByte,
+      
+      // Supply Information
       totalCirculating: (statsData?.totalbc || 0) / 100000000,
-      blocksToday: statsData?.n_blocks_total || 0,
+      totalMined: (statsData?.totalbc || 0) / 100000000,
+      maxSupply: 21000000,
+      
+      // Recent Activity
+      recentTxCountPerBlock: recentTxCountPerBlock,
+      
+      // Market Data
       marketPriceUSD: statsData?.market_price_usd || btcPriceData
     };
 
@@ -428,13 +568,35 @@ export async function fetchBitcoinOnChainData(): Promise<BitcoinOnChainData> {
       symbol: 'BTC',
       chain: 'bitcoin',
       networkMetrics: {
+        // Block Information
+        latestBlockHeight: 0,
+        latestBlockTime: Math.floor(Date.now() / 1000),
+        latestBlockHash: '',
+        blockTime: 10,
+        blocksToday: 0,
+        
+        // Network Security
         hashRate: 0,
         difficulty: 0,
-        blockTime: 10,
+        
+        // Mempool Status
         mempoolSize: 0,
         mempoolBytes: 0,
+        
+        // Transaction Fees
+        averageFeePerTx: 0,
+        recommendedFeePerVByte: 0,
+        typicalFeePerVByte: 0,
+        
+        // Supply Information
         totalCirculating: 19600000, // Approximate
-        blocksToday: 0,
+        totalMined: 19600000,
+        maxSupply: 21000000,
+        
+        // Recent Activity
+        recentTxCountPerBlock: 0,
+        
+        // Market Data
         marketPriceUSD: 0
       },
       whaleActivity: {
