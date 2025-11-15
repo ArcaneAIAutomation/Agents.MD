@@ -1496,9 +1496,9 @@ async function generateCaesarPromptPreview(
     prompt += `\n`;
   }
   
-  // Gemini AI Summary
+  // AI Summary (OpenAI GPT-4o)
   prompt += `## AI-Generated Market Summary\n`;
-  prompt += `${geminiSummary}\n\n`;
+  prompt += `${aiAnalysis}\n\n`;
   
   // Research Instructions
   prompt += `## Research Instructions\n`;
