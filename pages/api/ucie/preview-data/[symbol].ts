@@ -349,54 +349,76 @@ async function handler(
     console.log(`🤖 Generating Gemini AI summary for ${normalizedSymbol}...`);
     try {
       summary = await generateGeminiSummary(normalizedSymbol, collectedData, apiStatus);
-      console.log(`✅ Gemini AI summary generated (${summary.length} chars)`);
+      console.log(`✅ Gemini AI summary generated (${summary.length} chars, ~${Math.round(summary.split(' ').length)} words)`);
       
-      // ✅ CRITICAL: Only store if summary is substantial (> 500 chars)
-      // This prevents storing basic fallback summaries
-      if (summary.length > 500) {
-        // Store Gemini summary in database
+      // ✅ CRITICAL: Store ALL summaries (even short ones) so status endpoint knows analysis completed
+      const analysisType = summary.length > 500 ? 'summary' : 'fallback';
+      
+      // Store Gemini summary in database
+      const { storeGeminiAnalysis } = await import('../../../../lib/ucie/geminiAnalysisStorage');
+      await storeGeminiAnalysis({
+        symbol: normalizedSymbol,
+        userId: userId || 'anonymous',
+        userEmail: userEmail || 'anonymous@example.com',
+        summaryText: summary,
+        dataQualityScore: dataQuality,
+        apiStatus: apiStatus,
+        modelUsed: 'gemini-2.5-pro',
+        analysisType: analysisType, // Track if it's full summary or fallback
+        dataSourcesUsed: apiStatus.working,
+        availableDataCount: apiStatus.working.length
+      });
+      console.log(`✅ Gemini ${analysisType} stored in ucie_gemini_analysis table (${summary.length} chars)`);
+      
+      // Also store in OpenAI summary table for backward compatibility
+      const { storeOpenAISummary } = await import('../../../../lib/ucie/openaiSummaryStorage');
+      await storeOpenAISummary(
+        normalizedSymbol,
+        summary,
+        dataQuality,
+        apiStatus,
+        {
+          marketData: !!collectedData.marketData,
+          sentiment: !!collectedData.sentiment,
+          technical: !!collectedData.technical,
+          news: !!collectedData.news,
+          onChain: !!collectedData.onChain
+        },
+        30 * 60, // ✅ 30 minutes TTL (matches cache TTL)
+        userId,
+        userEmail
+      );
+      console.log(`✅ Summary also stored in ucie_openai_analysis table`);
+      
+    } catch (error) {
+      console.error('❌ Failed to generate Gemini AI summary:', error);
+      console.error('   Error type:', error instanceof Error ? error.constructor.name : typeof error);
+      console.error('   Error message:', error instanceof Error ? error.message : String(error));
+      console.error('   Error stack:', error instanceof Error ? error.stack : 'N/A');
+      
+      // Generate fallback summary
+      summary = generateBasicSummary(normalizedSymbol, collectedData, apiStatus);
+      console.log(`📝 Using basic fallback summary (${summary.length} chars)`);
+      
+      // ✅ CRITICAL: Store error state in database so status endpoint knows it failed
+      try {
         const { storeGeminiAnalysis } = await import('../../../../lib/ucie/geminiAnalysisStorage');
         await storeGeminiAnalysis({
           symbol: normalizedSymbol,
           userId: userId || 'anonymous',
           userEmail: userEmail || 'anonymous@example.com',
-          summaryText: summary,
+          summaryText: `ERROR: ${error instanceof Error ? error.message : String(error)}\n\nFallback Summary:\n${summary}`,
           dataQualityScore: dataQuality,
           apiStatus: apiStatus,
           modelUsed: 'gemini-2.5-pro',
-          analysisType: 'summary',
+          analysisType: 'error', // Mark as error so status endpoint knows
           dataSourcesUsed: apiStatus.working,
           availableDataCount: apiStatus.working.length
         });
-        console.log(`✅ Gemini summary stored in ucie_gemini_analysis table (${summary.length} chars)`);
-        
-        // Also store in OpenAI summary table for backward compatibility
-        const { storeOpenAISummary } = await import('../../../../lib/ucie/openaiSummaryStorage');
-        await storeOpenAISummary(
-          normalizedSymbol,
-          summary,
-          dataQuality,
-          apiStatus,
-          {
-            marketData: !!collectedData.marketData,
-            sentiment: !!collectedData.sentiment,
-            technical: !!collectedData.technical,
-            news: !!collectedData.news,
-            onChain: !!collectedData.onChain
-          },
-          2 * 60, // ✅ 2 minutes TTL for fresh data
-          userId,
-          userEmail
-        );
-        console.log(`✅ OpenAI summary stored in ucie_openai_analysis table`);
-      } else {
-        console.warn(`⚠️ Gemini summary too short (${summary.length} chars), not storing in database`);
+        console.log(`✅ Error state stored in database for status tracking`);
+      } catch (storeError) {
+        console.error('❌ Failed to store error state:', storeError);
       }
-    } catch (error) {
-      console.error('❌ Failed to generate Gemini AI summary:', error);
-      console.error('   Error details:', error instanceof Error ? error.message : String(error));
-      summary = generateBasicSummary(normalizedSymbol, collectedData, apiStatus);
-      console.log(`📝 Using basic fallback summary (${summary.length} chars)`);
     }
 
     // ✅ CRITICAL: Retrieve Gemini analysis from database
@@ -1195,32 +1217,27 @@ Structure your analysis with these sections:
 
 Use ONLY the data provided. Be specific with numbers, percentages, and concrete data points. Provide actionable insights and clear explanations. Format as a professional, detailed analysis report covering ALL available data sources.`;
 
-  // Call Gemini AI with timeout protection (must complete within 45 seconds)
+  // Call Gemini AI (no timeout - let Vercel's 60s limit handle it)
   // Increased to 10000 tokens for comprehensive analysis
   try {
-    const geminiPromise = generateGeminiAnalysis(
+    console.log(`🤖 Calling Gemini API with 10000 tokens...`);
+    const response = await generateGeminiAnalysis(
       systemPrompt,
       context,
-      10000, // ✅ INCREASED: 10000 tokens (~2500 words) for comprehensive analysis
+      10000, // ✅ 10000 tokens (~2500 words) for comprehensive analysis
       0.7    // temperature
     );
     
-    // Race against 45-second timeout (leaves 15s buffer for Vercel's 60s limit)
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Gemini timeout after 45 seconds')), 45000);
-    });
-    
-    const response = await Promise.race([geminiPromise, timeoutPromise]);
-    
-    console.log(`✅ Gemini AI generated ${response.tokensUsed} tokens`);
+    console.log(`✅ Gemini AI generated ${response.tokensUsed} tokens (${response.content.length} chars)`);
     return response.content;
     
   } catch (error) {
     console.error(`❌ Gemini AI failed:`, error);
-    console.log(`⚠️ Falling back to basic summary`);
+    console.error(`   Error type: ${error instanceof Error ? error.constructor.name : typeof error}`);
+    console.error(`   Error message: ${error instanceof Error ? error.message : String(error)}`);
     
-    // Fallback to basic summary if Gemini times out
-    return generateBasicSummary(symbol, { marketData: null, sentiment: null, technical: null, news: null, onChain: null }, { working: [], failed: [], total: 5, successRate: 0 });
+    // Re-throw error to be handled by caller
+    throw error;
   }
 }
 
