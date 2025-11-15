@@ -75,10 +75,38 @@ export default function ProgressiveLoadingScreen({
   const [error, setError] = useState<string | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
 
-  // Poll status every 2 seconds
+  // Trigger data collection and poll status
   useEffect(() => {
     let pollInterval: NodeJS.Timeout;
     let timeInterval: NodeJS.Timeout;
+    let dataCollectionTriggered = false;
+
+    const triggerDataCollection = async () => {
+      if (dataCollectionTriggered) return;
+      dataCollectionTriggered = true;
+
+      try {
+        console.log(`🚀 Triggering data collection for ${symbol}...`);
+        
+        // ✅ CRITICAL: Trigger data collection by calling preview-data endpoint
+        // This starts the background process that fetches and caches all data
+        const triggerResponse = await fetch(`/api/ucie/preview-data/${symbol}?refresh=true`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!triggerResponse.ok) {
+          console.warn(`⚠️ Data collection trigger returned ${triggerResponse.status}, but continuing to poll...`);
+        } else {
+          console.log(`✅ Data collection triggered successfully`);
+        }
+      } catch (err) {
+        console.error('❌ Failed to trigger data collection:', err);
+        // Don't throw - we'll still try to poll status
+      }
+    };
 
     const pollStatus = async () => {
       try {
@@ -97,11 +125,13 @@ export default function ProgressiveLoadingScreen({
           clearInterval(timeInterval);
           
           try {
+            console.log(`✅ Analysis complete! Fetching full data...`);
             const analysisResponse = await fetch(`/api/ucie/preview-data/${symbol}`);
             if (!analysisResponse.ok) {
               throw new Error(`Analysis fetch failed: ${analysisResponse.status}`);
             }
             const analysisData = await analysisResponse.json();
+            console.log(`✅ Full analysis data retrieved`);
             onComplete(analysisData);
           } catch (err) {
             const errorMsg = err instanceof Error ? err.message : 'Failed to fetch analysis';
@@ -117,9 +147,15 @@ export default function ProgressiveLoadingScreen({
       }
     };
 
-    // Start polling immediately
-    pollStatus();
-    pollInterval = setInterval(pollStatus, 2000); // Poll every 2 seconds
+    // ✅ STEP 1: Trigger data collection FIRST
+    triggerDataCollection();
+
+    // ✅ STEP 2: Start polling status after 3 seconds (give data collection time to start)
+    const startPollingTimeout = setTimeout(() => {
+      console.log(`📊 Starting status polling...`);
+      pollStatus(); // Poll immediately
+      pollInterval = setInterval(pollStatus, 2000); // Then poll every 2 seconds
+    }, 3000);
 
     // Track elapsed time
     timeInterval = setInterval(() => {
@@ -127,6 +163,7 @@ export default function ProgressiveLoadingScreen({
     }, 1000);
 
     return () => {
+      clearTimeout(startPollingTimeout);
       clearInterval(pollInterval);
       clearInterval(timeInterval);
     };
