@@ -2,14 +2,13 @@
  * UCIE On-Chain Data API Endpoint
  * 
  * GET /api/ucie/on-chain/BTC
- * GET /api/ucie/on-chain/ETH
  * 
- * Returns comprehensive blockchain data for Bitcoin and Ethereum
+ * Returns comprehensive blockchain data for Bitcoin only
+ * Note: Etherscan removed - only Bitcoin on-chain data via Blockchain.com
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { fetchBitcoinOnChainData } from '../../../../lib/ucie/bitcoinOnChain';
-import { fetchEthereumOnChainData } from '../../../../lib/ucie/ethereumOnChain';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
@@ -42,11 +41,11 @@ async function handler(
 
   const symbolUpper = symbol.toUpperCase();
 
-  // Only allow BTC and ETH
-  if (symbolUpper !== 'BTC' && symbolUpper !== 'ETH') {
+  // Only allow BTC (Etherscan removed)
+  if (symbolUpper !== 'BTC') {
     return res.status(400).json({
       success: false,
-      error: 'Only BTC and ETH are supported at this time',
+      error: 'Only BTC is supported. Etherscan has been removed from UCIE.',
       symbol: symbolUpper
     });
   }
@@ -71,12 +70,10 @@ async function handler(
       }
     }
 
-    console.log(`[UCIE On-Chain] Fetching on-chain data for ${symbolUpper}`);
+    console.log(`[UCIE On-Chain] Fetching Bitcoin on-chain data from Blockchain.com`);
 
-    // Fetch on-chain data based on symbol
-    const onChainData = symbolUpper === 'BTC'
-      ? await fetchBitcoinOnChainData()
-      : await fetchEthereumOnChainData();
+    // Fetch Bitcoin on-chain data only (Etherscan removed)
+    const onChainData = await fetchBitcoinOnChainData();
 
     // Cache the response in database (skip if refresh=true for live data)
     if (!forceRefresh) {

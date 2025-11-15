@@ -502,8 +502,8 @@ async function collectDataFromAPIs(symbol: string, req: NextApiRequest, refresh:
     })
   ]);
 
-  // ✅ Log results for each API (5 core sources = 10 underlying APIs)
-  const apiNames = ['Market Data (4 APIs)', 'Sentiment (3 APIs)', 'Technical', 'News', 'On-Chain (2 APIs)'];
+  // ✅ Log results for each API (5 core sources = 9 underlying APIs)
+  const apiNames = ['Market Data (4 APIs)', 'Sentiment (3 APIs)', 'Technical', 'News', 'On-Chain (1 API - BTC only)'];
   results.forEach((result, index) => {
     if (result.status === 'fulfilled') {
       console.log(`✅ ${apiNames[index]}: Success`);
@@ -833,7 +833,7 @@ async function generateGeminiSummary(
   // Import Gemini client
   const { generateGeminiAnalysis } = await import('../../../../lib/ucie/geminiClient');
   
-  // ✅ CRITICAL: Read ALL 5 core data sources from database (10 underlying APIs)
+  // ✅ CRITICAL: Read ALL 5 core data sources from database (9 underlying APIs)
   const marketData = await getCachedAnalysis(symbol, 'market-data');
   const sentimentData = await getCachedAnalysis(symbol, 'sentiment');
   const technicalData = await getCachedAnalysis(symbol, 'technical');
@@ -841,12 +841,12 @@ async function generateGeminiSummary(
   const onChainData = await getCachedAnalysis(symbol, 'on-chain');
 
   // Log what we retrieved
-  console.log(`📦 Database retrieval results (5 core sources = 10 underlying APIs):`);
+  console.log(`📦 Database retrieval results (5 core sources = 9 underlying APIs):`);
   console.log(`   Market Data: ${marketData ? '✅ Found' : '❌ Not found'} (4 APIs: CMC, CoinGecko, Kraken, Coinbase)`);
   console.log(`   Sentiment: ${sentimentData ? '✅ Found' : '❌ Not found'} (3 APIs: LunarCrush, Twitter, Reddit)`);
   console.log(`   Technical: ${technicalData ? '✅ Found' : '❌ Not found'} (Calculated indicators)`);
   console.log(`   News: ${newsData ? '✅ Found' : '❌ Not found'} (1 API: NewsAPI)`);
-  console.log(`   On-Chain: ${onChainData ? '✅ Found' : '❌ Not found'} (2 APIs: Etherscan V2, Blockchain.com)`);
+  console.log(`   On-Chain: ${onChainData ? '✅ Found' : '❌ Not found'} (1 API: Blockchain.com - Bitcoin only)`);
   
   // Build context from database data
   let context = `Cryptocurrency: ${symbol}\n\n`;
@@ -917,71 +917,65 @@ async function generateGeminiSummary(
     context += `\n`;
   }
 
-  // System prompt for Gemini
-  const systemPrompt = `You are a professional cryptocurrency analyst. Provide a comprehensive, data-driven analysis (approximately 2000 words) of ${symbol} based on the provided data. 
+  // System prompt for Gemini (optimized for speed - ~750 words)
+  const systemPrompt = `You are a professional cryptocurrency analyst. Provide a concise, data-driven analysis (~750 words) of ${symbol} based on the provided data. 
 
-Structure your analysis with the following sections:
+Structure your analysis with these sections:
 
-1. EXECUTIVE SUMMARY (200 words)
+1. EXECUTIVE SUMMARY (100 words)
    - Current market position and key metrics
    - Overall sentiment and trend direction
-   - Critical insights at a glance
 
-2. MARKET ANALYSIS (400 words)
+2. MARKET & TECHNICAL ANALYSIS (200 words)
    - Current price action and recent movements
-   - 24-hour, 7-day, and 30-day performance
-   - Market cap and volume analysis
-   - Comparison to major cryptocurrencies
-   - Trading patterns and liquidity
-
-3. TECHNICAL ANALYSIS (400 words)
    - Key technical indicators (RSI, MACD, EMAs)
-   - Support and resistance levels
-   - Trend analysis and momentum
-   - Chart patterns and signals
-   - Short-term and medium-term outlook
+   - Support/resistance levels and trend analysis
 
-4. SOCIAL SENTIMENT & COMMUNITY (300 words)
+3. SOCIAL SENTIMENT (150 words)
    - Overall sentiment score and trend
-   - Social media activity and mentions
-   - Community engagement levels
-   - Influencer sentiment
-   - Notable discussions or concerns
+   - Social media activity and community engagement
 
-5. NEWS & DEVELOPMENTS (300 words)
-   - Recent news and announcements
-   - Market-moving events
-   - Regulatory developments
-   - Partnership or technology updates
-   - Industry context
+4. NEWS & DEVELOPMENTS (150 words)
+   - Recent news and market-moving events
+   - Regulatory or partnership updates
 
-6. ON-CHAIN & FUNDAMENTALS (200 words)
-   - On-chain metrics and activity
-   - Network health indicators
-   - Holder behavior and distribution
-   - Whale transaction analysis
+5. ON-CHAIN DATA (100 words)
+   - Whale activity and network health
    - Exchange flow patterns
 
-7. RISK ASSESSMENT & OUTLOOK (200 words)
-   - Key risks and concerns
-   - Volatility analysis
-   - Market risks
-   - Regulatory or technical risks
-   - Overall market outlook and recommendations
+6. OUTLOOK & RISKS (100 words)
+   - Key risks and opportunities
+   - Short-term market outlook
 
-Use ONLY the data provided. Be specific with numbers, percentages, and concrete data points. Provide actionable insights and clear explanations. Format as a professional, detailed analysis report covering ALL available data sources.`;
+Use ONLY the data provided. Be specific with numbers and percentages. Keep it concise and actionable.`;
 
-  // Call Gemini AI with increased token limit for comprehensive analysis
-  const response = await generateGeminiAnalysis(
-    systemPrompt,
-    context,
-    8192, // maxTokens - increased for 2000 word analysis
-    0.7   // temperature
-  );
-
-  console.log(`✅ Gemini AI generated ${response.tokensUsed} tokens`);
-  
-  return response.content;
+  // Call Gemini AI with timeout protection (must complete within 45 seconds)
+  // Reduced tokens from 8192 to 3000 for faster response
+  try {
+    const geminiPromise = generateGeminiAnalysis(
+      systemPrompt,
+      context,
+      3000, // ✅ REDUCED: 3000 tokens (~750 words) for faster response
+      0.7   // temperature
+    );
+    
+    // Race against 45-second timeout (leaves 15s buffer for Vercel's 60s limit)
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Gemini timeout after 45 seconds')), 45000);
+    });
+    
+    const response = await Promise.race([geminiPromise, timeoutPromise]);
+    
+    console.log(`✅ Gemini AI generated ${response.tokensUsed} tokens`);
+    return response.content;
+    
+  } catch (error) {
+    console.error(`❌ Gemini AI failed:`, error);
+    console.log(`⚠️ Falling back to basic summary`);
+    
+    // Fallback to basic summary if Gemini times out
+    return generateBasicSummary(symbol, { marketData: null, sentiment: null, technical: null, news: null, onChain: null }, { working: [], failed: [], total: 5, successRate: 0 });
+  }
 }
 
 /**
