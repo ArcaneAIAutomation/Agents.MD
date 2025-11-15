@@ -98,10 +98,19 @@ export function formatPriceChange(market: any): string {
 
 /**
  * Safely extract and format sentiment score
+ * ✅ FIXED: Never return 0 for major cryptocurrencies (impossible value)
  */
-export function formatSentimentScore(sentiment: any): string {
+export function formatSentimentScore(sentiment: any, symbol?: string): string {
   const score = sentiment?.overallScore || sentiment?.score || sentiment?.sentiment_score || sentiment?.sentimentScore;
-  if (score === null || score === undefined) return 'N/A';
+  
+  // Check for missing or invalid data
+  if (score === null || score === undefined || score === 0) {
+    // For major coins like BTC/ETH, 0 sentiment is impossible
+    if (symbol === 'BTC' || symbol === 'ETH') {
+      return 'Data Unavailable';
+    }
+    return 'N/A';
+  }
   
   const numScore = Number(score);
   if (isNaN(numScore)) return 'N/A';
@@ -148,8 +157,9 @@ export function formatSentimentTrend(sentiment: any): string {
 /**
  * Safely extract and format mentions
  * ✅ FIXED: Use correct field name volumeMetrics.total24h
+ * ✅ FIXED: Never return 0 for major cryptocurrencies (impossible value)
  */
-export function formatMentions(sentiment: any): string {
+export function formatMentions(sentiment: any, symbol?: string): string {
   // Try volumeMetrics first (correct field for AggregatedSentiment)
   const mentions = sentiment?.volumeMetrics?.total24h || 
                    sentiment?.mentions24h || 
@@ -157,13 +167,23 @@ export function formatMentions(sentiment: any): string {
                    sentiment?.social_volume || 
                    sentiment?.socialVolume;
   
-  if (!mentions) {
+  // Check for missing or invalid data
+  if (!mentions || mentions === 0) {
+    // For major coins like BTC/ETH, 0 mentions is impossible
+    if (symbol === 'BTC' || symbol === 'ETH') {
+      return 'Data Unavailable';
+    }
     console.warn('⚠️ formatMentions: No mentions found. Keys:', Object.keys(sentiment || {}));
     return 'N/A';
   }
   
   const numMentions = Number(mentions);
-  if (isNaN(numMentions)) return 'N/A';
+  if (isNaN(numMentions) || numMentions === 0) {
+    if (symbol === 'BTC' || symbol === 'ETH') {
+      return 'Data Unavailable';
+    }
+    return 'N/A';
+  }
   
   return numMentions.toLocaleString('en-US');
 }

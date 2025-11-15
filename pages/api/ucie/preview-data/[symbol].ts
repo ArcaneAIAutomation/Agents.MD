@@ -877,9 +877,21 @@ async function generateGeminiSummary(
     const trend = sentiment.trend || 'neutral';
     const mentions = sentimentData.volumeMetrics?.total24h || sentiment.mentions24h || 0;
     
-    context += `- Overall Score: ${score.toFixed(0)}/100\n`;
+    // ✅ FIX: Never show 0 for Bitcoin sentiment (impossible value)
+    if (score === 0 && (symbol === 'BTC' || symbol === 'ETH')) {
+      context += `- Overall Score: Data temporarily unavailable (API issue)\n`;
+    } else {
+      context += `- Overall Score: ${score.toFixed(0)}/100\n`;
+    }
+    
     context += `- Trend: ${trend}\n`;
-    context += `- 24h Mentions: ${mentions.toLocaleString('en-US')}\n`;
+    
+    // ✅ FIX: Never show 0 mentions for Bitcoin (impossible value)
+    if (mentions === 0 && (symbol === 'BTC' || symbol === 'ETH')) {
+      context += `- 24h Mentions: Data temporarily unavailable (Bitcoin typically has 50K-200K daily mentions)\n`;
+    } else {
+      context += `- 24h Mentions: ${mentions.toLocaleString('en-US')}\n`;
+    }
     
     // ✅ NEW: Include AI trend insights
     if (sentimentData.trendInsights) {
