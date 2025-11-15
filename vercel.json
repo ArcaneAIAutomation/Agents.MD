@@ -48,7 +48,7 @@
       "maxDuration": 180
     },
     "pages/api/ucie/preview-data/**/*.ts": {
-      "maxDuration": 120
+      "maxDuration": 300
     },
     "pages/api/ucie/research/**/*.ts": {
       "maxDuration": 300

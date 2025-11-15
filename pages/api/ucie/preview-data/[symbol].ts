@@ -66,31 +66,31 @@ const EFFECTIVE_APIS = {
   marketData: {
     endpoint: '/api/ucie/market-data',
     priority: 1,
-    timeout: 45000, // ✅ 45 seconds (required data source)
+    timeout: 90000, // ✅ 90 seconds (MAXIMUM - prevent any failures)
     required: true
   },
   sentiment: {
     endpoint: '/api/ucie/sentiment',
     priority: 2,
-    timeout: 45000, // ✅ 45 seconds (social sentiment analysis)
+    timeout: 90000, // ✅ 90 seconds (MAXIMUM - prevent any failures)
     required: false
   },
   technical: {
     endpoint: '/api/ucie/technical',
     priority: 2,
-    timeout: 45000, // ✅ 45 seconds (required for analysis)
+    timeout: 90000, // ✅ 90 seconds (MAXIMUM - prevent any failures)
     required: true
   },
   news: {
     endpoint: '/api/ucie/news',
     priority: 2,
-    timeout: 50000, // ✅ 50 seconds (news can be slow)
+    timeout: 120000, // ✅ 120 seconds (MAXIMUM - news can be very slow)
     required: false
   },
   onChain: {
     endpoint: '/api/ucie/on-chain',
     priority: 3,
-    timeout: 45000, // ✅ 45 seconds (blockchain data)
+    timeout: 90000, // ✅ 90 seconds (MAXIMUM - prevent any failures)
     required: false
   }
 };
