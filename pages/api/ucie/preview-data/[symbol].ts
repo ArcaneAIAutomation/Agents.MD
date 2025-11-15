@@ -917,46 +917,72 @@ async function generateGeminiSummary(
     context += `\n`;
   }
 
-  // System prompt for Gemini (optimized for speed - ~750 words)
-  const systemPrompt = `You are a professional cryptocurrency analyst. Provide a concise, data-driven analysis (~750 words) of ${symbol} based on the provided data. 
+  // System prompt for Gemini (comprehensive analysis - ~2500 words with 10000 tokens)
+  const systemPrompt = `You are a professional cryptocurrency analyst. Provide a comprehensive, data-driven analysis (~2500 words) of ${symbol} based on the provided data. 
 
 Structure your analysis with these sections:
 
-1. EXECUTIVE SUMMARY (100 words)
+1. EXECUTIVE SUMMARY (300 words)
    - Current market position and key metrics
    - Overall sentiment and trend direction
+   - Critical insights at a glance
+   - Key takeaways for traders and investors
 
-2. MARKET & TECHNICAL ANALYSIS (200 words)
+2. MARKET ANALYSIS (500 words)
    - Current price action and recent movements
-   - Key technical indicators (RSI, MACD, EMAs)
-   - Support/resistance levels and trend analysis
+   - 24-hour, 7-day, and 30-day performance
+   - Market cap and volume analysis
+   - Comparison to major cryptocurrencies
+   - Trading patterns and liquidity
+   - Price spread across exchanges
 
-3. SOCIAL SENTIMENT (150 words)
+3. TECHNICAL ANALYSIS (500 words)
+   - Key technical indicators (RSI, MACD, EMAs, Bollinger Bands)
+   - Support and resistance levels
+   - Trend analysis and momentum
+   - Chart patterns and signals
+   - Short-term and medium-term outlook
+   - Volume analysis and confirmation
+
+4. SOCIAL SENTIMENT & COMMUNITY (400 words)
    - Overall sentiment score and trend
-   - Social media activity and community engagement
+   - Social media activity and mentions
+   - Community engagement levels
+   - Influencer sentiment
+   - Notable discussions or concerns
+   - Sentiment distribution (bullish/bearish/neutral)
 
-4. NEWS & DEVELOPMENTS (150 words)
-   - Recent news and market-moving events
-   - Regulatory or partnership updates
+5. NEWS & DEVELOPMENTS (400 words)
+   - Recent news and announcements
+   - Market-moving events
+   - Regulatory developments
+   - Partnership or technology updates
+   - Industry context and implications
 
-5. ON-CHAIN DATA (100 words)
-   - Whale activity and network health
+6. ON-CHAIN & FUNDAMENTALS (300 words)
+   - On-chain metrics and activity
+   - Network health indicators
+   - Whale transaction analysis
    - Exchange flow patterns
+   - Holder behavior and distribution
 
-6. OUTLOOK & RISKS (100 words)
-   - Key risks and opportunities
-   - Short-term market outlook
+7. RISK ASSESSMENT & OUTLOOK (100 words)
+   - Key risks and concerns
+   - Volatility analysis
+   - Market risks
+   - Regulatory or technical risks
+   - Overall market outlook and recommendations
 
-Use ONLY the data provided. Be specific with numbers and percentages. Keep it concise and actionable.`;
+Use ONLY the data provided. Be specific with numbers, percentages, and concrete data points. Provide actionable insights and clear explanations. Format as a professional, detailed analysis report covering ALL available data sources.`;
 
   // Call Gemini AI with timeout protection (must complete within 45 seconds)
-  // Reduced tokens from 8192 to 3000 for faster response
+  // Increased to 10000 tokens for comprehensive analysis
   try {
     const geminiPromise = generateGeminiAnalysis(
       systemPrompt,
       context,
-      3000, // ✅ REDUCED: 3000 tokens (~750 words) for faster response
-      0.7   // temperature
+      10000, // ✅ INCREASED: 10000 tokens (~2500 words) for comprehensive analysis
+      0.7    // temperature
     );
     
     // Race against 45-second timeout (leaves 15s buffer for Vercel's 60s limit)
