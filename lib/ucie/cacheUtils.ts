@@ -51,6 +51,22 @@ export async function getCachedAnalysis(
     
     if (result.rows.length === 0) {
       console.log(`❌ Cache miss for ${symbol}/${analysisType}`);
+      
+      // ✅ DEBUG: Check if data exists but is expired
+      const expiredCheck = await query(
+        `SELECT expires_at, created_at FROM ucie_analysis_cache WHERE symbol = $1 AND analysis_type = $2`,
+        [symbol.toUpperCase(), analysisType]
+      );
+      
+      if (expiredCheck.rows.length > 0) {
+        const row = expiredCheck.rows[0];
+        const expiresAt = new Date(row.expires_at);
+        const now = new Date();
+        console.log(`   ℹ️ Data exists but is expired (expired: ${expiresAt.toISOString()}, now: ${now.toISOString()})`);
+      } else {
+        console.log(`   ℹ️ No data found in database at all (not even expired)`);
+      }
+      
       return null;
     }
     
@@ -139,6 +155,24 @@ export async function setCachedAnalysis(
     );
     
     console.log(`✅ Analysis cached for ${symbol}/${analysisType} (user: ${effectiveUserEmail}, TTL: ${ttlSeconds}s, quality: ${dataQualityScore || 'N/A'})`);
+    
+    // ✅ VERIFICATION: Immediately verify the data was written
+    // This helps catch database write issues early
+    try {
+      const verification = await query(
+        `SELECT symbol, analysis_type, created_at FROM ucie_analysis_cache WHERE symbol = $1 AND analysis_type = $2`,
+        [symbol.toUpperCase(), analysisType]
+      );
+      
+      if (verification.rows.length > 0) {
+        console.log(`   ✅ Verified: Data exists in database (created: ${verification.rows[0].created_at})`);
+      } else {
+        console.error(`   ❌ VERIFICATION FAILED: Data not found in database after write!`);
+      }
+    } catch (verifyError) {
+      console.error(`   ⚠️ Verification query failed:`, verifyError);
+    }
+    
   } catch (error) {
     console.error(`❌ Failed to cache analysis for ${symbol}/${analysisType}:`, error);
     // ✅ NON-BLOCKING: Don't throw error to prevent timeout

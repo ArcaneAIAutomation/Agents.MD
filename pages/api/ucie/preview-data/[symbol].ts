@@ -321,11 +321,46 @@ async function handler(
       console.warn(`⚠️ Failed to store ${failed} responses`);
     }
 
-    // ✅ CRITICAL: Wait 5 seconds after retries complete
-    // This ensures database is fully populated and indexed
-    console.log(`⏳ Waiting 5 seconds to ensure database is fully populated and indexed...`);
-    await new Promise(resolve => setTimeout(resolve, 5000));
-    console.log(`✅ Database population delay complete`);
+    // ✅ CRITICAL: Wait and VERIFY database is populated
+    // This ensures database is fully populated and indexed before AI analysis
+    console.log(`⏳ Waiting and verifying database is fully populated...`);
+    
+    let verificationAttempts = 0;
+    const maxVerificationAttempts = 10;
+    let allDataVerified = false;
+    
+    while (verificationAttempts < maxVerificationAttempts && !allDataVerified) {
+      verificationAttempts++;
+      
+      // Wait 2 seconds between attempts
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Verify each data type is in database
+      const verifyMarket = await getCachedAnalysis(normalizedSymbol, 'market-data');
+      const verifySentiment = await getCachedAnalysis(normalizedSymbol, 'sentiment');
+      const verifyTechnical = await getCachedAnalysis(normalizedSymbol, 'technical');
+      const verifyNews = await getCachedAnalysis(normalizedSymbol, 'news');
+      const verifyOnChain = await getCachedAnalysis(normalizedSymbol, 'on-chain');
+      
+      const foundCount = [verifyMarket, verifySentiment, verifyTechnical, verifyNews, verifyOnChain]
+        .filter(d => d !== null).length;
+      
+      console.log(`   Verification attempt ${verificationAttempts}/${maxVerificationAttempts}: Found ${foundCount}/5 data types in database`);
+      
+      // Check if we have minimum required data (market + technical)
+      if (verifyMarket && verifyTechnical) {
+        allDataVerified = true;
+        console.log(`✅ Database verification complete! Found required data (market + technical)`);
+        break;
+      }
+      
+      if (verificationAttempts >= maxVerificationAttempts) {
+        console.warn(`⚠️ Database verification timeout after ${maxVerificationAttempts} attempts`);
+        console.warn(`   Found: Market=${!!verifyMarket}, Sentiment=${!!verifySentiment}, Technical=${!!verifyTechnical}, News=${!!verifyNews}, OnChain=${!!verifyOnChain}`);
+      }
+    }
+    
+    console.log(`✅ Database population and verification complete (${verificationAttempts} attempts, ${verificationAttempts * 2}s total)`);
 
     // ✅ CRITICAL: ALWAYS generate Gemini AI summary (no threshold)
     // This ensures users always see AI-generated analysis
@@ -693,13 +728,26 @@ async function generateOpenAISummary(
   const newsData = await getCachedAnalysis(symbol, 'news');
   const onChainData = await getCachedAnalysis(symbol, 'on-chain');
 
-  // Log what we retrieved
+  // Log what we retrieved with detailed info
   console.log(`📦 Database retrieval results:`);
-  console.log(`   Market Data: ${marketData ? '✅ Found' : '❌ Not found'}`);
-  console.log(`   Sentiment: ${sentimentData ? '✅ Found' : '❌ Not found'}`);
-  console.log(`   Technical: ${technicalData ? '✅ Found' : '❌ Not found'}`);
-  console.log(`   News: ${newsData ? '✅ Found' : '❌ Not found'}`);
-  console.log(`   On-Chain: ${onChainData ? '✅ Found' : '❌ Not found'}`);
+  console.log(`   Market Data: ${marketData ? '✅ Found' : '❌ Not found'}${marketData ? ` (${JSON.stringify(marketData).length} bytes)` : ''}`);
+  console.log(`   Sentiment: ${sentimentData ? '✅ Found' : '❌ Not found'}${sentimentData ? ` (${JSON.stringify(sentimentData).length} bytes)` : ''}`);
+  console.log(`   Technical: ${technicalData ? '✅ Found' : '❌ Not found'}${technicalData ? ` (${JSON.stringify(technicalData).length} bytes)` : ''}`);
+  console.log(`   News: ${newsData ? '✅ Found' : '❌ Not found'}${newsData ? ` (${JSON.stringify(newsData).length} bytes)` : ''}`);
+  console.log(`   On-Chain: ${onChainData ? '✅ Found' : '❌ Not found'}${onChainData ? ` (${JSON.stringify(onChainData).length} bytes)` : ''}`);
+  
+  // Check if we have minimum required data
+  if (!marketData || !technicalData) {
+    const missingData = [];
+    if (!marketData) missingData.push('Market Data');
+    if (!technicalData) missingData.push('Technical Data');
+    
+    const errorMsg = `❌ CRITICAL: Missing required data from database: ${missingData.join(', ')}`;
+    console.error(errorMsg);
+    console.error(`   This means the database writes may have failed or data hasn't been committed yet`);
+    console.error(`   Throwing error to trigger fallback summary...`);
+    throw new Error(errorMsg);
+  }
   
   // Build context from database data
   let context = `Cryptocurrency: ${symbol}\n\n`;
