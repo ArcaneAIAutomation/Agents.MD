@@ -33,7 +33,7 @@ export async function generateGeminiAnalysis(
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: {
@@ -95,7 +95,7 @@ export async function generateGeminiAnalysis(
       return {
         content,
         tokensUsed,
-        model: 'gemini-2.5-pro'
+        model: 'gemini-2.0-flash-exp'
       };
       
     } catch (error) {

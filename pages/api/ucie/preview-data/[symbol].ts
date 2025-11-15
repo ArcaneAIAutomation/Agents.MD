@@ -379,17 +379,17 @@ async function handler(
       console.warn(`   Technical Data: ${collectedData.technical?.success ? '✅' : '❌'}`);
     }
 
-    // ✅ ALWAYS attempt OpenAI GPT-4o summary (switched from Gemini due to 503 errors)
+    // ✅ ALWAYS attempt Gemini 2.0 Flash summary (latest experimental model)
     let summary = '';
-    console.log(`🤖 Generating OpenAI GPT-4o summary for ${normalizedSymbol}...`);
+    console.log(`🤖 Generating Gemini 2.0 Flash summary for ${normalizedSymbol}...`);
     try {
-      summary = await generateOpenAISummary(normalizedSymbol, collectedData, apiStatus);
-      console.log(`✅ OpenAI GPT-4o summary generated (${summary.length} chars, ~${Math.round(summary.split(' ').length)} words)`);
+      summary = await generateAISummary(normalizedSymbol, collectedData, apiStatus);
+      console.log(`✅ Gemini 2.0 Flash summary generated (${summary.length} chars, ~${Math.round(summary.split(' ').length)} words)`);
       
       // ✅ CRITICAL: Store ALL summaries (even short ones) so status endpoint knows analysis completed
       const analysisType = summary.length > 500 ? 'summary' : 'fallback';
       
-      // Store OpenAI summary in database (using Gemini table for backward compatibility)
+      // Store Gemini summary in database
       const { storeGeminiAnalysis } = await import('../../../../lib/ucie/geminiAnalysisStorage');
       await storeGeminiAnalysis({
         symbol: normalizedSymbol,
@@ -398,7 +398,7 @@ async function handler(
         summaryText: summary,
         dataQualityScore: dataQuality,
         apiStatus: apiStatus,
-        modelUsed: 'gpt-4o', // ✅ Changed from gemini-2.5-pro to gpt-4o
+        modelUsed: 'gemini-2.0-flash-exp', // ✅ Latest Gemini experimental model
         analysisType: analysisType, // Track if it's full summary or fallback
         dataSourcesUsed: apiStatus.working,
         availableDataCount: apiStatus.working.length
@@ -709,11 +709,12 @@ function calculateAPIStatus(collectedData: any) {
 }
 
 /**
- * Generate OpenAI summary of collected data
+ * Generate AI summary of collected data
  * ✅ CRITICAL: ONLY uses data from Supabase database (ucie_analysis_cache)
- * This ensures OpenAI summary is based on the same data Caesar will use
+ * This ensures AI summary is based on the same data Caesar will use
+ * Currently using: Gemini 2.0 Flash (latest experimental model)
  */
-async function generateOpenAISummary(
+async function generateAISummary(
   symbol: string,
   collectedData: any,
   apiStatus: any
@@ -867,37 +868,22 @@ async function generateOpenAISummary(
     context += `Note: The following data sources are unavailable: ${apiStatus.failed.join(', ')}\n`;
   }
 
-  // ✅ FIXED: Generate summary with OpenAI GPT-4o (not Gemini)
+  // ✅ Generate summary with Gemini 2.0 Flash (latest model)
   try {
-    console.log(`🤖 Generating OpenAI GPT-4o summary...`);
+    console.log(`🤖 Generating Gemini 2.0 Flash summary...`);
     console.log(`   Context length: ${context.length} chars`);
     
-    // Import OpenAI client
-    const { generateOpenAIAnalysis } = await import('../../../../lib/ucie/openaiClient');
+    // Import Gemini client
+    const { generateCryptoSummary } = await import('../../../../lib/ucie/geminiClient');
     
-    // System prompt for OpenAI
-    const systemPrompt = `You are a professional cryptocurrency analyst. Provide a comprehensive analysis of ${symbol} with these sections:
-
-1. EXECUTIVE SUMMARY (300 words)
-2. MARKET ANALYSIS (400 words)
-3. TECHNICAL ANALYSIS (400 words)
-4. RISK ASSESSMENT & OUTLOOK (300 words)
-
-Use ONLY the data provided. Be specific with numbers and percentages.`;
+    // Generate analysis with Gemini 2.0 Flash
+    const summary = await generateCryptoSummary(symbol, context);
     
-    // Generate analysis with OpenAI GPT-4o
-    const response = await generateOpenAIAnalysis(
-      systemPrompt,
-      context,
-      4000, // Max tokens (faster than Gemini's 8192)
-      0.7   // Temperature
-    );
-    
-    console.log(`✅ OpenAI GPT-4o summary generated (${response.content.length} chars, ${response.tokensUsed} tokens)`);
-    return response.content;
+    console.log(`✅ Gemini 2.0 Flash summary generated (${summary.length} chars)`);
+    return summary;
     
   } catch (error) {
-    console.error('OpenAI GPT-4o summary error (using fallback):', error);
+    console.error('Gemini 2.0 Flash summary error (using fallback):', error);
     console.error('   Error type:', error instanceof Error ? error.constructor.name : typeof error);
     console.error('   Error message:', error instanceof Error ? error.message : String(error));
     // Fallback to basic summary (instant, no API call)
