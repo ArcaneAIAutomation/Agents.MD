@@ -58,7 +58,8 @@ export interface BitcoinOnChainData {
   chain: string;
   networkMetrics: BitcoinNetworkMetrics;
   whaleActivity: {
-    timeframe: string; // ✅ NEW: "24 hours" to indicate analysis period
+    timeframe: string; // "12 hours" - analysis period
+    minThreshold: string; // "1000 BTC" - minimum transaction size tracked
     transactions: BitcoinWhaleTransaction[];
     summary: {
       totalTransactions: number;
@@ -69,8 +70,8 @@ export interface BitcoinOnChainData {
       exchangeDeposits: number; // Transactions to exchanges (selling pressure)
       exchangeWithdrawals: number; // Transactions from exchanges (accumulation)
       coldWalletMovements: number; // Large cold wallet transfers
-      netFlow: number; // ✅ NEW: Net flow (withdrawals - deposits)
-      flowSentiment: 'bullish' | 'bearish' | 'neutral'; // ✅ NEW: Overall flow sentiment
+      netFlow: number; // Net flow (withdrawals - deposits)
+      flowSentiment: 'bullish' | 'bearish' | 'neutral'; // Overall flow sentiment
     };
   };
   mempoolAnalysis: {
@@ -169,17 +170,18 @@ async function fetchRecentBlocks(limit: number = 10): Promise<any[]> {
 }
 
 /**
- * Fetch blocks from the last 24 hours
- * Bitcoin averages ~144 blocks per day (1 block every 10 minutes)
+ * Fetch blocks from the last 12 hours
+ * Bitcoin averages ~72 blocks per 12 hours (1 block every 10 minutes)
+ * ✅ OPTIMIZED: Reduced from 24h to 12h for faster processing
  */
-async function fetch24HourBlocks(): Promise<any[]> {
+async function fetch12HourBlocks(): Promise<any[]> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
 
   try {
-    // Get blocks from last 24 hours (approximately 144 blocks)
-    const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
-    const response = await fetch(`https://blockchain.info/blocks/${oneDayAgo}?format=json`, {
+    // Get blocks from last 12 hours (approximately 72 blocks)
+    const twelveHoursAgo = Date.now() - (12 * 60 * 60 * 1000);
+    const response = await fetch(`https://blockchain.info/blocks/${twelveHoursAgo}?format=json`, {
       signal: controller.signal,
       headers: {
         'User-Agent': 'UCIE/1.0'
@@ -193,11 +195,11 @@ async function fetch24HourBlocks(): Promise<any[]> {
     }
 
     const blocks = await response.json();
-    console.log(`📊 Fetched ${blocks.length} blocks from last 24 hours`);
+    console.log(`📊 Fetched ${blocks.length} blocks from last 12 hours`);
     return blocks;
   } catch (error) {
     clearTimeout(timeoutId);
-    console.error('Failed to fetch 24-hour blocks:', error);
+    console.error('Failed to fetch 12-hour blocks:', error);
     return [];
   }
 }
@@ -233,66 +235,91 @@ async function fetchBlockTransactions(blockHash: string): Promise<any[]> {
 }
 
 /**
- * Fetch whale transactions from the last 24 hours
- * This provides a more comprehensive view of large movements
+ * Fetch ultra-whale transactions from the last 12 hours
+ * ✅ OPTIMIZED: Only tracks transactions > 1000 BTC for speed
+ * ✅ OPTIMIZED: Reduced from 24h to 12h for faster processing
+ * ✅ OPTIMIZED: Samples fewer blocks (5 instead of 15)
  */
-async function fetch24HourWhaleTransactions(
+async function fetch12HourWhaleTransactions(
   btcPrice: number,
-  minValueUSD: number = 1000000
+  minValueBTC: number = 1000 // ✅ NEW: 1000 BTC minimum (~$96M at current prices)
 ): Promise<any[]> {
   try {
-    console.log('🐋 Fetching 24-hour whale activity...');
+    console.log(`🐋 Fetching 12-hour ultra-whale activity (>${minValueBTC} BTC)...`);
     
-    // Get blocks from last 24 hours
-    const blocks = await fetch24HourBlocks();
+    // Get blocks from last 12 hours
+    const blocks = await fetch12HourBlocks();
     
     if (blocks.length === 0) {
-      console.warn('⚠️ No blocks fetched for 24-hour analysis, using mempool only');
+      console.warn('⚠️ No blocks fetched for 12-hour analysis, using mempool only');
       return await fetchLargeTransactions();
     }
 
     const allTransactions: any[] = [];
     
-    // Sample blocks to avoid too many API calls
-    // Take every 10th block to get ~14 samples across 24 hours
-    const sampledBlocks = blocks.filter((_: any, index: number) => index % 10 === 0);
-    console.log(`📊 Sampling ${sampledBlocks.length} blocks for whale analysis`);
+    // ✅ OPTIMIZED: Sample fewer blocks (every 15th block = ~5 samples)
+    const sampledBlocks = blocks.filter((_: any, index: number) => index % 15 === 0);
+    console.log(`📊 Sampling ${sampledBlocks.length} blocks for ultra-whale analysis`);
     
-    // Fetch transactions from sampled blocks
-    for (const block of sampledBlocks.slice(0, 15)) { // Limit to 15 blocks max
+    // ✅ OPTIMIZED: Limit to 5 blocks max for speed
+    const blocksToAnalyze = sampledBlocks.slice(0, 5);
+    
+    // Fetch transactions from sampled blocks with timeout
+    for (const block of blocksToAnalyze) {
       try {
-        const txs = await fetchBlockTransactions(block.hash);
+        // ✅ Add timeout for each block fetch
+        const txsPromise = fetchBlockTransactions(block.hash);
+        const timeoutPromise = new Promise<any[]>((_, reject) => 
+          setTimeout(() => reject(new Error('Block fetch timeout')), 5000)
+        );
         
-        // Filter for large transactions
+        const txs = await Promise.race([txsPromise, timeoutPromise]);
+        
+        // ✅ OPTIMIZED: Filter for ultra-large transactions only (>1000 BTC)
         const largeTxs = txs.filter((tx: any) => {
           const totalOutput = tx.out?.reduce((sum: number, output: any) => {
             return sum + (output.value || 0);
           }, 0) || 0;
           
           const valueBTC = totalOutput / 100000000;
-          const valueUSD = valueBTC * btcPrice;
           
-          return valueUSD >= minValueUSD;
+          return valueBTC >= minValueBTC; // Only track >1000 BTC
         });
         
-        allTransactions.push(...largeTxs);
+        if (largeTxs.length > 0) {
+          console.log(`  Found ${largeTxs.length} ultra-whale txs in block ${block.height}`);
+          allTransactions.push(...largeTxs);
+        }
         
-        // Small delay to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // ✅ OPTIMIZED: Reduced delay
+        await new Promise(resolve => setTimeout(resolve, 50));
       } catch (error) {
-        console.error(`Error fetching block ${block.hash}:`, error);
+        console.error(`  Skipping block ${block.hash}: ${error instanceof Error ? error.message : 'error'}`);
       }
     }
     
-    // Also include current mempool transactions
-    const mempoolTxs = await fetchLargeTransactions();
-    allTransactions.push(...mempoolTxs);
+    // Also include current mempool transactions (with same filter)
+    try {
+      const mempoolTxs = await fetchLargeTransactions();
+      const largeMempoolTxs = mempoolTxs.filter((tx: any) => {
+        const totalOutput = tx.out?.reduce((sum: number, output: any) => {
+          return sum + (output.value || 0);
+        }, 0) || 0;
+        
+        const valueBTC = totalOutput / 100000000;
+        return valueBTC >= minValueBTC;
+      });
+      
+      allTransactions.push(...largeMempoolTxs);
+    } catch (error) {
+      console.error('Error fetching mempool:', error);
+    }
     
-    console.log(`✅ Found ${allTransactions.length} whale transactions in last 24 hours`);
+    console.log(`✅ Found ${allTransactions.length} ultra-whale transactions (>${minValueBTC} BTC) in last 12 hours`);
     return allTransactions;
     
   } catch (error) {
-    console.error('Error fetching 24-hour whale transactions:', error);
+    console.error('Error fetching 12-hour whale transactions:', error);
     // Fallback to mempool only
     return await fetchLargeTransactions();
   }
@@ -573,11 +600,11 @@ export async function fetchBitcoinOnChainData(): Promise<BitcoinOnChainData> {
     const recentBlocksData = recentBlocks.status === 'fulfilled' ? recentBlocks.value : [];
     const btcPriceData = btcPrice.status === 'fulfilled' ? btcPrice.value : 0;
     
-    // Fetch 24-hour whale transactions (this takes longer, so do it after getting price)
-    console.log('🐋 Fetching 24-hour whale activity...');
-    const largeTxsData = await fetch24HourWhaleTransactions(
+    // Fetch 12-hour ultra-whale transactions (>1000 BTC only for speed)
+    console.log('🐋 Fetching 12-hour ultra-whale activity...');
+    const largeTxsData = await fetch12HourWhaleTransactions(
       btcPriceData || statsData?.market_price_usd || 0,
-      1000000 // $1M threshold
+      1000 // ✅ 1000 BTC minimum (~$96M)
     );
 
     // Calculate average transactions per block from recent blocks
@@ -674,7 +701,7 @@ export async function fetchBitcoinOnChainData(): Promise<BitcoinOnChainData> {
       flowSentiment = 'bearish'; // More deposits = selling pressure
     }
     
-    console.log(`✅ 24-hour analysis complete: ${whaleData.transactions.length} whale transactions, net flow: ${netFlow > 0 ? '+' : ''}${netFlow} (${flowSentiment})`);
+    console.log(`✅ 12-hour ultra-whale analysis complete: ${whaleData.transactions.length} transactions (>1000 BTC), net flow: ${netFlow > 0 ? '+' : ''}${netFlow} (${flowSentiment})`);
 
     // Analyze mempool
     const mempoolAnalysis = analyzeMempoolCongestion(
@@ -694,8 +721,9 @@ export async function fetchBitcoinOnChainData(): Promise<BitcoinOnChainData> {
       chain: 'bitcoin',
       networkMetrics,
       whaleActivity: {
-        timeframe: '24 hours', // ✅ NEW: Indicate analysis period
-        transactions: whaleData.transactions.slice(0, 50), // Top 50 from 24 hours
+        timeframe: '12 hours', // ✅ OPTIMIZED: 12-hour analysis
+        minThreshold: '1000 BTC', // ✅ NEW: Indicate minimum threshold
+        transactions: whaleData.transactions.slice(0, 50), // Top 50 ultra-whales
         summary: {
           totalTransactions: whaleData.transactions.length,
           totalValueUSD,
@@ -705,8 +733,8 @@ export async function fetchBitcoinOnChainData(): Promise<BitcoinOnChainData> {
           exchangeDeposits: whaleData.exchangeDeposits,
           exchangeWithdrawals: whaleData.exchangeWithdrawals,
           coldWalletMovements: whaleData.coldWalletMovements,
-          netFlow, // ✅ NEW
-          flowSentiment // ✅ NEW
+          netFlow,
+          flowSentiment
         }
       },
       mempoolAnalysis,
@@ -754,7 +782,8 @@ export async function fetchBitcoinOnChainData(): Promise<BitcoinOnChainData> {
         marketPriceUSD: 0
       },
       whaleActivity: {
-        timeframe: '24 hours',
+        timeframe: '12 hours',
+        minThreshold: '1000 BTC',
         transactions: [],
         summary: {
           totalTransactions: 0,
