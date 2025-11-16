@@ -403,7 +403,9 @@ This implementation plan breaks down the Veritas Protocol development into discr
 
 
 
-- [-] 27. Write API integration tests
+- [x] 27. Write API integration tests
+
+
 
 
 

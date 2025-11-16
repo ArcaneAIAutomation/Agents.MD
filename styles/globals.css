@@ -12499,3 +12499,494 @@ ol[role="list"] {
 /* ============================================
    END OF MOBILE/TABLET ACCESS GATE FIXES
    ============================================ */
+
+
+/* ============================================
+   MOBILE/TABLET GLOBAL VISUAL CONSISTENCY
+   Enforce Bitcoin Sovereign Design Across All Components
+   Orange Border + Black Background + White Text
+   ============================================ */
+
+@media (max-width: 1023px) {
+  
+  /* ============================================
+     UNIVERSAL CARD/BLOCK STYLING
+     All content cards must have orange border on black
+     ============================================ */
+  
+  /* Bitcoin Block - Main Container Pattern */
+  .bitcoin-block,
+  .bitcoin-block-subtle,
+  [class*="bitcoin-block"] {
+    background: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    border-radius: 12px;
+    padding: 1.5rem !important;
+    color: var(--bitcoin-white-80) !important;
+  }
+  
+  /* News Cards, Article Cards, Content Cards */
+  .news-card,
+  .article-card,
+  .content-card,
+  .info-card,
+  .stat-card,
+  .metric-card,
+  [class*="card"] {
+    background: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    border-radius: 12px;
+    padding: 1rem !important;
+    color: var(--bitcoin-white-80) !important;
+  }
+  
+  /* Ensure all divs with borders follow the pattern */
+  div[class*="border-"],
+  div[class*="rounded-"] {
+    background: var(--bitcoin-black) !important;
+    border-color: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-white-80) !important;
+  }
+  
+  /* ============================================
+     TEXT STYLING - WHITE ON BLACK
+     All text must be visible on black background
+     ============================================ */
+  
+  /* Headlines - Pure White */
+  h1, h2, h3, h4, h5, h6,
+  .headline,
+  .title,
+  [class*="heading"] {
+    color: var(--bitcoin-white) !important;
+    background: transparent !important;
+  }
+  
+  /* Body Text - White 80% */
+  p, span, div,
+  .text,
+  .description,
+  .content {
+    color: var(--bitcoin-white-80) !important;
+  }
+  
+  /* Labels and Metadata - White 60% */
+  label,
+  .label,
+  .meta,
+  .timestamp,
+  .date,
+  small {
+    color: var(--bitcoin-white-60) !important;
+  }
+  
+  /* Emphasis Text - Orange */
+  strong, b,
+  .emphasis,
+  .highlight,
+  .accent {
+    color: var(--bitcoin-orange) !important;
+  }
+  
+  /* Links - Orange with Underline */
+  a {
+    color: var(--bitcoin-orange) !important;
+    text-decoration: underline;
+    text-decoration-color: var(--bitcoin-orange);
+    text-underline-offset: 2px;
+  }
+  
+  a:hover {
+    color: var(--bitcoin-white) !important;
+    text-decoration-color: var(--bitcoin-white);
+  }
+  
+  /* ============================================
+     BUTTON CONSISTENCY
+     All buttons follow primary/secondary/tertiary pattern
+     ============================================ */
+  
+  /* Primary Action Buttons - Solid Orange */
+  button[class*="primary"],
+  button[class*="cta"],
+  button[class*="action"],
+  .btn-primary,
+  .btn-cta,
+  .btn-action {
+    background: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    min-height: 48px;
+  }
+  
+  /* Secondary Buttons - Orange Outline */
+  button[class*="secondary"],
+  button[class*="outline"],
+  .btn-secondary,
+  .btn-outline {
+    background: transparent !important;
+    color: var(--bitcoin-orange) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    min-height: 48px;
+  }
+  
+  /* Tertiary Buttons - White Outline */
+  button[class*="tertiary"],
+  button[class*="ghost"],
+  .btn-tertiary,
+  .btn-ghost {
+    background: transparent !important;
+    color: var(--bitcoin-white-60) !important;
+    border: 2px solid var(--bitcoin-white-60) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    min-height: 48px;
+  }
+  
+  /* ============================================
+     FORM INPUTS - ORANGE BORDER ON BLACK
+     ============================================ */
+  
+  input,
+  textarea,
+  select {
+    background: var(--bitcoin-black) !important;
+    color: var(--bitcoin-white) !important;
+    border: 2px solid var(--bitcoin-orange-20) !important;
+    border-radius: 8px;
+    padding: 0.75rem !important;
+    font-size: 1rem !important; /* Prevent iOS zoom */
+  }
+  
+  input:focus,
+  textarea:focus,
+  select:focus {
+    border-color: var(--bitcoin-orange) !important;
+    outline: 2px solid var(--bitcoin-orange) !important;
+    box-shadow: 0 0 0 3px rgba(247, 147, 26, 0.3) !important;
+  }
+  
+  /* Placeholder Text */
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--bitcoin-white-60) !important;
+  }
+  
+  /* ============================================
+     BADGES AND TAGS - ORANGE ACCENT
+     ============================================ */
+  
+  .badge,
+  .tag,
+  .chip,
+  .pill,
+  [class*="badge"],
+  [class*="tag"] {
+    background: var(--bitcoin-black) !important;
+    color: var(--bitcoin-orange) !important;
+    border: 1px solid var(--bitcoin-orange) !important;
+    border-radius: 6px;
+    padding: 0.25rem 0.75rem !important;
+    font-weight: 600;
+    font-size: 0.75rem !important;
+    text-transform: uppercase;
+  }
+  
+  /* Active/Selected Badges */
+  .badge.active,
+  .tag.active,
+  .badge[aria-selected="true"],
+  .tag[aria-selected="true"] {
+    background: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+  }
+  
+  /* ============================================
+     DIVIDERS - ORANGE LINES
+     ============================================ */
+  
+  hr,
+  .divider,
+  .separator {
+    border: none !important;
+    border-top: 1px solid var(--bitcoin-orange) !important;
+    opacity: 0.2;
+    margin: 1rem 0;
+  }
+  
+  /* Strong Dividers */
+  hr.strong,
+  .divider-strong {
+    opacity: 1 !important;
+    border-top-width: 2px !important;
+  }
+  
+  /* ============================================
+     MODALS AND OVERLAYS - BLACK WITH ORANGE BORDER
+     ============================================ */
+  
+  .modal,
+  .overlay,
+  .popup,
+  .dialog,
+  [role="dialog"],
+  [role="alertdialog"] {
+    background: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    border-radius: 12px;
+    box-shadow: 0 0 40px rgba(247, 147, 26, 0.5) !important;
+  }
+  
+  /* Modal Headers */
+  .modal-header,
+  .dialog-header {
+    border-bottom: 2px solid var(--bitcoin-orange) !important;
+    background: var(--bitcoin-black) !important;
+    color: var(--bitcoin-white) !important;
+  }
+  
+  /* Modal Content */
+  .modal-content,
+  .dialog-content {
+    background: var(--bitcoin-black) !important;
+    color: var(--bitcoin-white-80) !important;
+  }
+  
+  /* Modal Footer */
+  .modal-footer,
+  .dialog-footer {
+    border-top: 2px solid var(--bitcoin-orange) !important;
+    background: var(--bitcoin-black) !important;
+  }
+  
+  /* ============================================
+     LISTS - ORANGE BORDERS BETWEEN ITEMS
+     ============================================ */
+  
+  ul, ol {
+    list-style: none;
+    padding: 0;
+  }
+  
+  li {
+    border-bottom: 1px solid var(--bitcoin-orange-20) !important;
+    padding: 0.75rem 0;
+    color: var(--bitcoin-white-80) !important;
+  }
+  
+  li:last-child {
+    border-bottom: none !important;
+  }
+  
+  /* List Item Hover */
+  li:hover {
+    background: rgba(247, 147, 26, 0.05) !important;
+    border-color: var(--bitcoin-orange) !important;
+  }
+  
+  /* ============================================
+     TABLES - ORANGE BORDERS
+     ============================================ */
+  
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 2px solid var(--bitcoin-orange) !important;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  th {
+    background: var(--bitcoin-black) !important;
+    color: var(--bitcoin-orange) !important;
+    border-bottom: 2px solid var(--bitcoin-orange) !important;
+    padding: 0.75rem !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+  }
+  
+  td {
+    background: var(--bitcoin-black) !important;
+    color: var(--bitcoin-white-80) !important;
+    border-bottom: 1px solid var(--bitcoin-orange-20) !important;
+    padding: 0.75rem !important;
+  }
+  
+  tr:last-child td {
+    border-bottom: none !important;
+  }
+  
+  /* ============================================
+     NAVIGATION - ORANGE ACCENTS
+     ============================================ */
+  
+  nav {
+    background: var(--bitcoin-black) !important;
+    border-bottom: 2px solid var(--bitcoin-orange) !important;
+  }
+  
+  nav a {
+    color: var(--bitcoin-white-60) !important;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+  }
+  
+  nav a:hover,
+  nav a.active,
+  nav a[aria-current="page"] {
+    color: var(--bitcoin-orange) !important;
+    border-bottom-color: var(--bitcoin-orange) !important;
+  }
+  
+  /* ============================================
+     ALERTS AND NOTIFICATIONS - ORANGE BORDER
+     ============================================ */
+  
+  .alert,
+  .notification,
+  .toast,
+  .message,
+  [role="alert"],
+  [role="status"] {
+    background: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    border-radius: 8px;
+    padding: 1rem !important;
+    color: var(--bitcoin-white-80) !important;
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.3);
+  }
+  
+  /* Alert Icons */
+  .alert svg,
+  .notification svg {
+    color: var(--bitcoin-orange) !important;
+    stroke: var(--bitcoin-orange) !important;
+  }
+  
+  /* ============================================
+     LOADING STATES - ORANGE SPINNER
+     ============================================ */
+  
+  .spinner,
+  .loader,
+  .loading {
+    border: 3px solid var(--bitcoin-orange-20) !important;
+    border-top-color: var(--bitcoin-orange) !important;
+    border-radius: 50%;
+  }
+  
+  /* Loading Text */
+  .loading-text {
+    color: var(--bitcoin-orange) !important;
+  }
+  
+  /* ============================================
+     ICONS - ORANGE COLOR
+     ============================================ */
+  
+  svg {
+    color: var(--bitcoin-orange) !important;
+    stroke: var(--bitcoin-orange) !important;
+    fill: none !important;
+  }
+  
+  /* Icons in buttons inherit button color */
+  button svg {
+    color: inherit !important;
+    stroke: inherit !important;
+  }
+  
+  /* ============================================
+     SCROLLBARS - ORANGE THUMB
+     ============================================ */
+  
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--bitcoin-black);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--bitcoin-orange);
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--bitcoin-white);
+  }
+  
+  /* ============================================
+     SELECTION - ORANGE HIGHLIGHT
+     ============================================ */
+  
+  ::selection {
+    background: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+  }
+  
+  ::-moz-selection {
+    background: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+  }
+  
+  /* ============================================
+     FOCUS INDICATORS - ORANGE OUTLINE
+     ============================================ */
+  
+  *:focus-visible {
+    outline: 3px solid var(--bitcoin-orange) !important;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 5px rgba(247, 147, 26, 0.3) !important;
+  }
+  
+  /* ============================================
+     ENSURE BLACK BACKGROUND EVERYWHERE
+     ============================================ */
+  
+  body,
+  #__next,
+  main,
+  section,
+  article,
+  aside {
+    background: var(--bitcoin-black) !important;
+    color: var(--bitcoin-white-80) !important;
+  }
+  
+  /* ============================================
+     TABLET SPECIFIC (768px-1023px)
+     Slightly larger elements
+     ============================================ */
+  
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .bitcoin-block,
+    .bitcoin-block-subtle,
+    [class*="bitcoin-block"] {
+      padding: 2rem !important;
+    }
+    
+    .news-card,
+    .article-card,
+    .content-card {
+      padding: 1.5rem !important;
+    }
+    
+    button {
+      min-height: 52px !important;
+      padding: 1rem 1.5rem !important;
+    }
+  }
+}
+
+/* ============================================
+   END OF MOBILE/TABLET GLOBAL VISUAL CONSISTENCY
+   ============================================ */

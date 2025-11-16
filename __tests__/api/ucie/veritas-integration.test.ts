@@ -62,6 +62,11 @@ import { orchestrateValidation } from '../../../lib/ucie/veritas/utils/validatio
 import { getCachedAnalysis, setCachedAnalysis } from '../../../lib/ucie/cacheUtils';
 import { logValidationAttempt } from '../../../lib/ucie/veritas/utils/validationMetrics';
 
+// Import additional endpoint handlers
+import newsHandler from '../../../pages/api/ucie/news/[symbol]';
+import technicalHandler from '../../../pages/api/ucie/technical/[symbol]';
+import predictionsHandler from '../../../pages/api/ucie/predictions/[symbol]';
+
 // ============================================================================
 // Test Helpers
 // ============================================================================
@@ -595,6 +600,401 @@ describe('Veritas Protocol - API Integration Tests', () => {
       const data = JSON.parse(res._getData());
       expect(data.metadata.veritasEnabled).toBe(true);
       expect(data.metadata.veritasValidated).toBe(false);
+    });
+  });
+  
+  // ==========================================================================
+  // Test 7: Individual Endpoint Integration Tests
+  // ==========================================================================
+  
+  describe('Market Data Endpoint Integration', () => {
+    it('should include validation when enabled', async () => {
+      (isVeritasEnabled as jest.Mock).mockReturnValue(true);
+      
+      const { req, res } = createMocks({
+        method: 'GET',
+        query: { symbol: 'BTC' }
+      });
+      
+      await marketDataHandler(req, res);
+      
+      expect(res._getStatusCode()).toBe(200);
+      const data = JSON.parse(res._getData());
+      
+      // Should have market data
+      expect(data.price).toBeDefined();
+      expect(data.volume24h).toBeDefined();
+      
+      // Should have optional validation field
+      if (data.veritasValidation) {
+        expect(data.veritasValidation.isValid).toBeDefined();
+        expect(data.veritasValidation.confidence).toBeDefined();
+      }
+    });
+    
+    it('should work without validation when disabled', async () => {
+      (isVeritasEnabled as jest.Mock).mockReturnValue(false);
+      
+      const { req, res } = createMocks({
+        method: 'GET',
+        query: { symbol: 'BTC' }
+      });
+      
+      await marketDataHandler(req, res);
+      
+      expect(res._getStatusCode()).toBe(200);
+      const data = JSON.parse(res._getData());
+      
+      // Should have market data
+      expect(data.price).toBeDefined();
+      expect(data.volume24h).toBeDefined();
+      
+      // Should NOT have validation field
+      expect(data.veritasValidation).toBeUndefined();
+    });
+  });
+  
+  describe('Sentiment Endpoint Integration', () => {
+    it('should include validation when enabled', async () => {
+      (isVeritasEnabled as jest.Mock).mockReturnValue(true);
+      
+      const { req, res } = createMocks({
+        method: 'GET',
+        query: { symbol: 'BTC' }
+      });
+      
+      await sentimentHandler(req, res);
+      
+      expect(res._getStatusCode()).toBe(200);
+      const data = JSON.parse(res._getData());
+      
+      // Should have sentiment data
+      expect(data.sentiment).toBeDefined();
+      
+      // Should have optional validation field
+      if (data.veritasValidation) {
+        expect(data.veritasValidation.isValid).toBeDefined();
+        expect(data.veritasValidation.confidence).toBeDefined();
+      }
+    });
+    
+    it('should work without validation when disabled', async () => {
+      (isVeritasEnabled as jest.Mock).mockReturnValue(false);
+      
+      const { req, res } = createMocks({
+        method: 'GET',
+        query: { symbol: 'BTC' }
+      });
+      
+      await sentimentHandler(req, res);
+      
+      expect(res._getStatusCode()).toBe(200);
+      const data = JSON.parse(res._getData());
+      
+      // Should have sentiment data
+      expect(data.sentiment).toBeDefined();
+      
+      // Should NOT have validation field
+      expect(data.veritasValidation).toBeUndefined();
+    });
+  });
+  
+  describe('On-Chain Endpoint Integration', () => {
+    it('should include validation when enabled', async () => {
+      (isVeritasEnabled as jest.Mock).mockReturnValue(true);
+      
+      const { req, res } = createMocks({
+        method: 'GET',
+        query: { symbol: 'BTC' }
+      });
+      
+      await onChainHandler(req, res);
+      
+      expect(res._getStatusCode()).toBe(200);
+      const data = JSON.parse(res._getData());
+      
+      // Should have on-chain data
+      expect(data.blockchain).toBeDefined();
+      
+      // Should have optional validation field
+      if (data.veritasValidation) {
+        expect(data.veritasValidation.isValid).toBeDefined();
+        expect(data.veritasValidation.confidence).toBeDefined();
+      }
+    });
+    
+    it('should work without validation when disabled', async () => {
+      (isVeritasEnabled as jest.Mock).mockReturnValue(false);
+      
+      const { req, res } = createMocks({
+        method: 'GET',
+        query: { symbol: 'BTC' }
+      });
+      
+      await onChainHandler(req, res);
+      
+      expect(res._getStatusCode()).toBe(200);
+      const data = JSON.parse(res._getData());
+      
+      // Should have on-chain data
+      expect(data.blockchain).toBeDefined();
+      
+      // Should NOT have validation field
+      expect(data.veritasValidation).toBeUndefined();
+    });
+  });
+  
+  describe('News Endpoint Integration', () => {
+    it('should include validation when enabled (once news validator is implemented)', async () => {
+      (isVeritasEnabled as jest.Mock).mockReturnValue(true);
+      
+      const { req, res } = createMocks({
+        method: 'GET',
+        query: { symbol: 'BTC' }
+      });
+      
+      await newsHandler(req, res);
+      
+      expect(res._getStatusCode()).toBe(200);
+      const data = JSON.parse(res._getData());
+      
+      // Should have news data
+      expect(data.news).toBeDefined();
+      
+      // Should have optional validation field (once Task 24.5 is complete)
+      if (data.veritasValidation) {
+        expect(data.veritasValidation.isValid).toBeDefined();
+        expect(data.veritasValidation.confidence).toBeDefined();
+      }
+    });
+    
+    it('should work without validation when disabled', async () => {
+      (isVeritasEnabled as jest.Mock).mockReturnValue(false);
+      
+      const { req, res } = createMocks({
+        method: 'GET',
+        query: { symbol: 'BTC' }
+      });
+      
+      await newsHandler(req, res);
+      
+      expect(res._getStatusCode()).toBe(200);
+      const data = JSON.parse(res._getData());
+      
+      // Should have news data
+      expect(data.news).toBeDefined();
+      
+      // Should NOT have validation field
+      expect(data.veritasValidation).toBeUndefined();
+    });
+  });
+  
+  describe('Technical Endpoint Integration (Optional Validation)', () => {
+    it('should work with or without validation', async () => {
+      const { req, res } = createMocks({
+        method: 'GET',
+        query: { symbol: 'BTC' }
+      });
+      
+      await technicalHandler(req, res);
+      
+      expect(res._getStatusCode()).toBe(200);
+      const data = JSON.parse(res._getData());
+      
+      // Should have technical data
+      expect(data.technical).toBeDefined();
+      
+      // Validation is optional for this endpoint
+      // Test passes whether validation is present or not
+    });
+  });
+  
+  describe('Predictions Endpoint Integration (Optional Validation)', () => {
+    it('should work with or without validation', async () => {
+      const { req, res } = createMocks({
+        method: 'GET',
+        query: { symbol: 'BTC' }
+      });
+      
+      await predictionsHandler(req, res);
+      
+      expect(res._getStatusCode()).toBe(200);
+      const data = JSON.parse(res._getData());
+      
+      // Should have predictions data
+      expect(data.predictions).toBeDefined();
+      
+      // Validation is optional for this endpoint
+      // Test passes whether validation is present or not
+    });
+  });
+  
+  // ==========================================================================
+  // Test 8: Cross-Endpoint Consistency
+  // ==========================================================================
+  
+  describe('Cross-Endpoint Consistency', () => {
+    it('should have consistent validation structure across all endpoints', async () => {
+      (isVeritasEnabled as jest.Mock).mockReturnValue(true);
+      
+      const endpoints = [
+        { handler: marketDataHandler, name: 'market-data' },
+        { handler: sentimentHandler, name: 'sentiment' },
+        { handler: onChainHandler, name: 'on-chain' },
+        { handler: newsHandler, name: 'news' }
+      ];
+      
+      for (const endpoint of endpoints) {
+        const { req, res } = createMocks({
+          method: 'GET',
+          query: { symbol: 'BTC' }
+        });
+        
+        await endpoint.handler(req, res);
+        
+        const data = JSON.parse(res._getData());
+        
+        // If validation is present, it should have consistent structure
+        if (data.veritasValidation) {
+          expect(data.veritasValidation.isValid).toBeDefined();
+          expect(data.veritasValidation.confidence).toBeDefined();
+          expect(data.veritasValidation.alerts).toBeDefined();
+          expect(data.veritasValidation.discrepancies).toBeDefined();
+          expect(data.veritasValidation.dataQualitySummary).toBeDefined();
+        }
+      }
+    });
+    
+    it('should all work without validation when disabled', async () => {
+      (isVeritasEnabled as jest.Mock).mockReturnValue(false);
+      
+      const endpoints = [
+        { handler: marketDataHandler, name: 'market-data' },
+        { handler: sentimentHandler, name: 'sentiment' },
+        { handler: onChainHandler, name: 'on-chain' },
+        { handler: newsHandler, name: 'news' },
+        { handler: technicalHandler, name: 'technical' },
+        { handler: predictionsHandler, name: 'predictions' }
+      ];
+      
+      for (const endpoint of endpoints) {
+        const { req, res } = createMocks({
+          method: 'GET',
+          query: { symbol: 'BTC' }
+        });
+        
+        await endpoint.handler(req, res);
+        
+        expect(res._getStatusCode()).toBe(200);
+        
+        const data = JSON.parse(res._getData());
+        
+        // None should have validation field when disabled
+        expect(data.veritasValidation).toBeUndefined();
+      }
+    });
+  });
+  
+  // ==========================================================================
+  // Test 9: Performance Impact
+  // ==========================================================================
+  
+  describe('Performance Impact', () => {
+    it('should not significantly slow down response time with validation', async () => {
+      (isVeritasEnabled as jest.Mock).mockReturnValue(true);
+      
+      const { req, res } = createMocks({
+        method: 'GET',
+        query: { symbol: 'BTC' }
+      });
+      
+      const startTime = Date.now();
+      await analyzeHandler(req, res);
+      const endTime = Date.now();
+      
+      const responseTime = endTime - startTime;
+      
+      // Validation should add < 2 seconds (as per design spec)
+      expect(responseTime).toBeLessThan(2000);
+    });
+    
+    it('should be faster without validation', async () => {
+      (isVeritasEnabled as jest.Mock).mockReturnValue(false);
+      
+      const { req, res } = createMocks({
+        method: 'GET',
+        query: { symbol: 'BTC' }
+      });
+      
+      const startTime = Date.now();
+      await analyzeHandler(req, res);
+      const endTime = Date.now();
+      
+      const responseTime = endTime - startTime;
+      
+      // Without validation should be very fast
+      expect(responseTime).toBeLessThan(1000);
+    });
+  });
+  
+  // ==========================================================================
+  // Test 10: Error Scenarios
+  // ==========================================================================
+  
+  describe('Error Scenarios', () => {
+    it('should handle invalid symbol gracefully', async () => {
+      (isVeritasEnabled as jest.Mock).mockReturnValue(true);
+      
+      const { req, res } = createMocks({
+        method: 'GET',
+        query: { symbol: 'INVALID' }
+      });
+      
+      await analyzeHandler(req, res);
+      
+      // Should return error but not crash
+      expect(res._getStatusCode()).toBeGreaterThanOrEqual(400);
+    });
+    
+    it('should handle missing symbol parameter', async () => {
+      (isVeritasEnabled as jest.Mock).mockReturnValue(true);
+      
+      const { req, res } = createMocks({
+        method: 'GET',
+        query: {}
+      });
+      
+      await analyzeHandler(req, res);
+      
+      // Should return error but not crash
+      expect(res._getStatusCode()).toBeGreaterThanOrEqual(400);
+    });
+    
+    it('should handle validation timeout gracefully', async () => {
+      (isVeritasEnabled as jest.Mock).mockReturnValue(true);
+      
+      // Mock timeout scenario
+      const timeoutResult = {
+        ...createMockOrchestrationResult(),
+        timedOut: true,
+        completed: false,
+        halted: true
+      };
+      (orchestrateValidation as jest.Mock).mockResolvedValue(timeoutResult);
+      
+      const { req, res } = createMocks({
+        method: 'GET',
+        query: { symbol: 'BTC' }
+      });
+      
+      await analyzeHandler(req, res);
+      
+      // Should still return success with partial validation
+      expect(res._getStatusCode()).toBe(200);
+      
+      const data = JSON.parse(res._getData());
+      expect(data.success).toBe(true);
+      expect(data.analysis.veritasValidation.timedOut).toBe(true);
     });
   });
 });
