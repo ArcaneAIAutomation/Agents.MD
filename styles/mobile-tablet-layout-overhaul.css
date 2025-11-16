@@ -498,3 +498,171 @@
     padding: 1.5rem !important;
   }
 }
+
+/* ============================================
+   DESKTOP PRESERVATION (1024px+)
+   CRITICAL: Keep desktop centered and unchanged
+   ============================================ */
+
+@media (min-width: 1024px) {
+  
+  /* ============================================
+     ENSURE DESKTOP CONTENT STAYS CENTERED
+     ============================================ */
+  
+  /* Main Content Container - Centered */
+  main,
+  .main-content,
+  #__next > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    padding: 0;
+  }
+  
+  /* Access Gate Container - Centered */
+  .access-gate-overlay,
+  .access-gate-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  /* All Content Sections - Centered */
+  section,
+  .section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  /* Headings - Centered */
+  h1, h2, h3, h4, h5, h6 {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Paragraphs - Centered */
+  p {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Buttons - Centered */
+  button,
+  .btn-bitcoin-primary,
+  .btn-bitcoin-secondary,
+  .btn-bitcoin-tertiary {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Button Groups - Centered */
+  .btn-bitcoin-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin: 0 auto;
+  }
+  
+  /* Forms - Centered */
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+  }
+  
+  /* Form Groups - Centered */
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  /* Inputs - Centered */
+  input,
+  textarea,
+  select {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Cards and Blocks - Centered */
+  .bitcoin-block,
+  .bitcoin-block-subtle,
+  .bitcoin-block-orange {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Icons - Centered */
+  svg,
+  img {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Divs - Centered */
+  div {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* ============================================
+     DESKTOP SPECIFIC OVERRIDES
+     Ensure no mobile styles leak to desktop
+     ============================================ */
+  
+  /* Reset any mobile full-width styles */
+  .mobile-viewport-container,
+  .mobile-full-width,
+  .mobile-content-padding {
+    width: auto !important;
+    max-width: none !important;
+    border: none !important;
+    padding: inherit !important;
+    margin: inherit !important;
+  }
+  
+  /* Reset mobile button styles */
+  button,
+  .btn-bitcoin-primary,
+  .btn-bitcoin-secondary {
+    width: auto !important;
+    max-width: none !important;
+  }
+  
+  /* Reset mobile form styles */
+  input,
+  textarea,
+  select {
+    width: auto !important;
+    max-width: none !important;
+  }
+  
+  /* Reset mobile grid styles */
+  .stat-grid,
+  .stat-grid-2,
+  .stat-grid-3,
+  .stat-grid-4 {
+    grid-template-columns: inherit !important;
+    gap: inherit !important;
+  }
+}
