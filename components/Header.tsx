@@ -98,17 +98,16 @@ export default function Header() {
           {shouldShowMobileMenu && (
             <button
               onClick={toggleMobileMenu}
-              className={`hamburger-menu-button p-2 rounded-md hover:bg-bitcoin-orange-10 focus:outline-none focus:ring-2 focus:ring-bitcoin-orange transition-all duration-300 ${isMobileMenuOpen ? 'active' : ''}`}
+              className={`hamburger-menu-button flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-bitcoin-black border-2 border-bitcoin-orange hover:bg-bitcoin-orange hover:border-bitcoin-orange focus:outline-none focus:ring-2 focus:ring-bitcoin-orange transition-all duration-300 ${isMobileMenuOpen ? 'active' : ''}`}
               style={{ 
-                minWidth: `${minTouchTargetSize}px`,
-                minHeight: `${minTouchTargetSize}px`,
-                color: '#F7931A'
+                minWidth: '100px',
+                minHeight: `${minTouchTargetSize}px`
               }}
               aria-label="Toggle navigation menu"
               aria-expanded={isMobileMenuOpen}
             >
               <svg
-                className="w-7 h-7 transition-transform duration-300"
+                className="w-6 h-6 text-bitcoin-orange transition-all duration-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -133,6 +132,9 @@ export default function Header() {
                   />
                 )}
               </svg>
+              <span className="text-sm font-bold text-bitcoin-white uppercase tracking-wider">
+                MENU
+              </span>
             </button>
           )}
 
