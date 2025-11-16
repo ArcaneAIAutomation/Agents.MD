@@ -359,8 +359,9 @@ export default function RegistrationForm({ onSuccess, onError, onSwitchToLogin }
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-bitcoin-white-60 hover:text-bitcoin-orange transition-colors"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-bitcoin-orange hover:text-bitcoin-white transition-colors bg-transparent border-0 p-1"
               tabIndex={-1}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
@@ -479,8 +480,9 @@ export default function RegistrationForm({ onSuccess, onError, onSwitchToLogin }
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-bitcoin-white-60 hover:text-bitcoin-orange transition-colors"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-bitcoin-orange hover:text-bitcoin-white transition-colors bg-transparent border-0 p-1"
               tabIndex={-1}
+              aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
             >
               {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
@@ -514,17 +516,17 @@ export default function RegistrationForm({ onSuccess, onError, onSwitchToLogin }
 
         {/* Switch to Login */}
         <div className="text-center mt-6">
-          <p className="text-sm text-bitcoin-white-60">
-            Already have an account?{' '}
-            <button
-              type="button"
-              onClick={onSwitchToLogin}
-              className="text-bitcoin-orange hover:text-bitcoin-orange-80 font-semibold transition-colors"
-              disabled={isLoading}
-            >
-              Sign in here
-            </button>
+          <p className="text-sm text-bitcoin-white-60 mb-3">
+            Already have an account?
           </p>
+          <button
+            type="button"
+            onClick={onSwitchToLogin}
+            className="btn-bitcoin-secondary w-full"
+            disabled={isLoading}
+          >
+            Sign in here
+          </button>
         </div>
       </form>
     </div>

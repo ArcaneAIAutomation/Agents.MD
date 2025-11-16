@@ -421,43 +421,43 @@ This implementation plan breaks down the Veritas Protocol development into discr
 ## Phase 9: UI Components (Week 8) - OPTIONAL
 
 - [ ] 28. Create admin alert review dashboard
-  - Create `pages/admin/veritas-alerts.tsx`
-  - Display pending alerts requiring human review
-  - Show alert severity, timestamp, and details
-  - Implement "Mark as Reviewed" functionality
-  - Add filtering by severity and date
-  - Require admin authentication
-  - _Requirements: 10.1, 10.2, 10.4_
+- Create `pages/admin/veritas-alerts.tsx`
+- Display pending alerts requiring human review
+- Show alert severity, timestamp, and details
+- Implement "Mark as Reviewed" functionality
+- Add filtering by severity and date
+- Require admin authentication
+- _Requirements: 10.1, 10.2, 10.4_
 
 - [ ] 29. Create Veritas confidence score badge component
-  - Create `components/UCIE/VeritasConfidenceScoreBadge.tsx`
-  - Display confidence score with color coding
-  - Show tooltip with score breakdown including source weights
-  - Make component optional (only renders if validation present)
-  - _Requirements: 8.1, 16.4_
+- Create `components/UCIE/VeritasConfidenceScoreBadge.tsx`
+- Display confidence score with color coding
+- Show tooltip with score breakdown including source weights
+- Make component optional (only renders if validation present)
+- _Requirements: 8.1, 16.4_
 
 - [ ] 30. Create data quality summary component
-  - Create `components/UCIE/DataQualitySummary.tsx`
-  - Display passed and failed checks
-  - Show data quality score by type
-  - Display source reliability scores with trust weights
-  - Make component optional
-  - _Requirements: 5.1, 5.2, 14.1, 16.4_
+- Create `components/UCIE/DataQualitySummary.tsx`
+- Display passed and failed checks
+- Show data quality score by type
+- Display source reliability scores with trust weights
+- Make component optional
+- _Requirements: 5.1, 5.2, 14.1, 16.4_
 
 - [ ] 31. Create validation alerts panel component
-  - Create `components/UCIE/ValidationAlertsPanel.tsx`
-  - Display all alerts sorted by severity
-  - Show discrepancies with source attribution
-  - Provide recommendations for each alert
-  - Make component collapsible
-  - _Requirements: 10.2, 10.3, 16.4_
+- Create `components/UCIE/ValidationAlertsPanel.tsx`
+- Display all alerts sorted by severity
+- Show discrepancies with source attribution
+- Provide recommendations for each alert
+- Make component collapsible
+- _Requirements: 10.2, 10.3, 16.4_
 
 - [ ] 32. Integrate validation display into analysis hub
-  - Update `components/UCIE/UCIEAnalysisHub.tsx`
-  - Add conditional rendering of validation components
-  - Add "Show Validation Details" toggle
-  - Ensure existing UI unchanged when validation absent
-  - _Requirements: 16.4_
+- Update `components/UCIE/UCIEAnalysisHub.tsx`
+- Add conditional rendering of validation components
+- Add "Show Validation Details" toggle
+- Ensure existing UI unchanged when validation absent
+- _Requirements: 16.4_
 
 - [ ] 33. Write UI component tests
   - Test conditional rendering

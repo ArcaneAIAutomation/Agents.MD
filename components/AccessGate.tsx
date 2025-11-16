@@ -290,7 +290,7 @@ export default function AccessGate({ onAccessGranted }: AccessGateProps) {
               />
               
               {/* Back Button */}
-              <div className="mt-6 text-center">
+              <div className="mt-6">
                 <button
                   onClick={() => {
                     setMode('initial');
@@ -298,7 +298,7 @@ export default function AccessGate({ onAccessGranted }: AccessGateProps) {
                     setSuccessMessage(null);
                     clearError();
                   }}
-                  className="text-sm text-bitcoin-white-60 hover:text-bitcoin-orange transition-colors"
+                  className="btn-bitcoin-tertiary w-full"
                   disabled={authLoading}
                 >
                   ← Back to Options
@@ -319,7 +319,7 @@ export default function AccessGate({ onAccessGranted }: AccessGateProps) {
               />
               
               {/* Back Button */}
-              <div className="mt-6 text-center">
+              <div className="mt-6">
                 <button
                   onClick={() => {
                     setMode('initial');
@@ -327,7 +327,7 @@ export default function AccessGate({ onAccessGranted }: AccessGateProps) {
                     setSuccessMessage(null);
                     clearError();
                   }}
-                  className="text-sm text-bitcoin-white-60 hover:text-bitcoin-orange transition-colors"
+                  className="btn-bitcoin-tertiary w-full"
                   disabled={authLoading}
                 >
                   ← Back to Options
