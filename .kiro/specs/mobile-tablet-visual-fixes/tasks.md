@@ -628,6 +628,514 @@ This implementation plan addresses critical mobile and tablet visual issues in t
   **Estimated Time**: 20-25 hours  
   **Priority**: CRITICAL - This task addresses the core visual structure and alignment issues
 
+- [ ] 12. Deep Dive: Fix ALL Remaining Visual Issues on Mobile/Tablet
+
+  **Priority**: CRITICAL  
+  **Objective**: Conduct a comprehensive deep-dive inspection of the ENTIRE project to identify and fix ALL remaining visual issues on mobile/tablet (320px-1023px), including element overflow, scaling problems, alignment issues, and functional overlay visibility.
+
+  **Identified Issues from Screenshot**:
+  - Password field "show/hide" toggle button (orange square) overflows outside input field border
+  - Elements not properly contained within their orange borders
+  - Scaling issues where elements don't fit within their designated areas
+  - Visual data not properly formatted or aligned
+  - Potential issues with scroll-based overlays not being visible or functional
+
+  - [ ] 12.1 Comprehensive Visual Audit - Authentication Pages
+
+    **Objective**: Fix all visual issues on login, registration, and authentication pages
+
+    **Specific Fixes Needed**:
+    - Fix password field "show/hide" toggle button overflow (CRITICAL - see screenshot)
+    - Ensure toggle button stays INSIDE the password input field border
+    - Position toggle button with proper padding from right edge (e.g., `right: 12px`)
+    - Verify toggle button doesn't break input field layout
+    - Test on all mobile devices (320px-1023px)
+    - Fix any similar overflow issues on other form inputs
+    - Ensure "Remember me" checkbox aligns properly with label
+    - Verify all buttons fit within their containers
+    - Test email input icon positioning
+    - Ensure lock icon in header fits properly
+
+    **Testing**:
+    - [ ] iPhone SE (375px) - All auth pages
+    - [ ] iPhone 14 (390px) - All auth pages
+    - [ ] iPad Mini (768px) - All auth pages
+    - [ ] iPad Pro (1024px) - All auth pages
+
+    _Requirements: 1.1, 1.2, 8.1, 8.2, 11.8_
+    **Target Files**: `components/auth/LoginForm.tsx`, `components/auth/RegistrationForm.tsx`, `pages/auth/login.tsx`, `pages/auth/register.tsx`
+
+  - [ ] 12.2 Comprehensive Visual Audit - Landing Page
+
+    **Objective**: Fix all visual issues on the landing page (index.tsx)
+
+    **Specific Fixes Needed**:
+    - Verify hero section elements fit within containers
+    - Check feature cards for proper scaling and alignment
+    - Ensure live market data banner fits within viewport
+    - Fix any icon overflow in feature descriptions
+    - Verify hamburger menu icon is properly sized and positioned
+    - Test menu overlay covers full viewport without gaps
+    - Ensure all text is readable and properly truncated
+    - Check spacing between elements is consistent
+    - Verify footer elements align properly
+
+    **Testing**:
+    - [ ] Test at 320px (smallest mobile)
+    - [ ] Test at 375px (iPhone SE)
+    - [ ] Test at 390px (iPhone 14)
+    - [ ] Test at 428px (iPhone 14 Pro Max)
+    - [ ] Test at 768px (iPad Mini)
+    - [ ] Test at 1023px (large tablet)
+
+    _Requirements: 4.1, 4.2, 4.3, 4.4, 5.1, 5.2, 5.3, 5.4, 5.5_
+    **Target Files**: `pages/index.tsx`, `components/Layout.tsx`
+
+  - [ ] 12.3 Comprehensive Visual Audit - Bitcoin Report Page
+
+    **Objective**: Fix all visual issues on Bitcoin analysis page
+
+    **Specific Fixes Needed**:
+    - Ensure trading charts fit within viewport (no horizontal scroll)
+    - Fix chart legend overflow issues
+    - Verify technical indicator cards align properly in grid
+    - Check stat cards for proper sizing and alignment
+    - Ensure zone cards (supply/demand) fit within containers
+    - Fix any price display overflow
+    - Verify "Analyze" buttons fit within their containers
+    - Test chart tooltips display within viewport
+    - Check chart controls (zoom, pan) are accessible
+    - Ensure all data tables scroll horizontally if needed
+
+    **Testing**:
+    - [ ] Test chart rendering at all breakpoints
+    - [ ] Test with real market data
+    - [ ] Verify all interactive elements work
+    - [ ] Check overlay modals display properly
+
+    _Requirements: 2.1, 2.4, 9.1, 9.3, 11.5, 11.6_
+    **Target Files**: `pages/bitcoin-report.tsx`, `components/BTCTradingChart.tsx`
+
+  - [ ] 12.4 Comprehensive Visual Audit - Ethereum Report Page
+
+    **Objective**: Fix all visual issues on Ethereum analysis page
+
+    **Specific Fixes Needed**:
+    - Ensure trading charts fit within viewport
+    - Fix any chart overflow issues
+    - Verify technical indicators display properly
+    - Check stat cards alignment
+    - Ensure all data is visible and readable
+    - Fix any icon overflow in indicator cards
+    - Verify price displays fit within containers
+    - Test chart interactions work smoothly
+
+    **Testing**:
+    - [ ] Test at all mobile/tablet breakpoints
+    - [ ] Verify chart responsiveness
+    - [ ] Check data table scrolling
+    - [ ] Test overlay modals
+
+    _Requirements: 2.2, 2.4, 9.1, 9.3, 11.5, 11.6_
+    **Target Files**: `pages/ethereum-report.tsx`, `components/ETHTradingChart.tsx`
+
+  - [ ] 12.5 Comprehensive Visual Audit - Crypto News Wire Page
+
+    **Objective**: Fix all visual issues on news page
+
+    **Specific Fixes Needed**:
+    - Ensure news cards fit within viewport
+    - Fix any image overflow in news cards
+    - Verify article titles truncate properly (line-clamp-2)
+    - Check sentiment badges fit within cards
+    - Ensure "Read More" buttons are accessible
+    - Fix any timestamp or metadata overflow
+    - Verify news source logos scale properly
+    - Test article expansion/collapse functionality
+    - Check scroll-based loading works smoothly
+
+    **Testing**:
+    - [ ] Test with various article lengths
+    - [ ] Verify image loading and scaling
+    - [ ] Check card grid alignment
+    - [ ] Test infinite scroll functionality
+
+    _Requirements: 2.3, 9.1, 11.3, 11.4, 11.9_
+    **Target Files**: `pages/crypto-news.tsx`, news card components
+
+  - [ ] 12.6 Comprehensive Visual Audit - Whale Watch Page
+
+    **Objective**: Fix all visual issues on whale tracking page
+
+    **Specific Fixes Needed**:
+    - Ensure transaction cards fit within viewport
+    - Fix whale amount displays (large numbers must fit)
+    - Verify wallet addresses truncate properly
+    - Check "Analyze" buttons fit within cards
+    - Ensure transaction details are readable
+    - Fix any timestamp overflow
+    - Verify blockchain explorer links are accessible
+    - Test analysis overlay displays properly
+    - Check Caesar AI analysis results fit within modal
+
+    **Testing**:
+    - [ ] Test with real whale transaction data
+    - [ ] Verify large number formatting
+    - [ ] Check address truncation
+    - [ ] Test analysis modal on all devices
+
+    _Requirements: 2.3, 2.4, 9.1, 9.4, 11.9_
+    **Target Files**: `pages/whale-watch.tsx`, `components/WhaleWatch/`
+
+  - [ ] 12.7 Comprehensive Visual Audit - Trade Generation Page
+
+    **Objective**: Fix all visual issues on trade signals page
+
+    **Specific Fixes Needed**:
+    - Ensure trading signal cards fit within viewport
+    - Fix confidence score displays
+    - Verify entry/exit price displays fit properly
+    - Check stop-loss and take-profit indicators
+    - Ensure risk/reward ratio displays correctly
+    - Fix any chart overflow in signal cards
+    - Verify "Generate Signal" button is accessible
+    - Test signal details expansion
+    - Check AI reasoning text truncates properly
+
+    **Testing**:
+    - [ ] Test signal generation flow
+    - [ ] Verify all price displays
+    - [ ] Check card alignment in grid
+    - [ ] Test signal details modal
+
+    _Requirements: 2.3, 2.4, 9.1, 9.5, 11.9_
+    **Target Files**: `pages/trade-generation.tsx`, trade signal components
+
+  - [ ] 12.8 Fix Form Input Controls (Password Toggle, Icons, etc.)
+
+    **Objective**: Fix ALL form input control positioning and overflow issues
+
+    **Critical Fixes**:
+    - **Password Toggle Button** (HIGHEST PRIORITY):
+      ```css
+      /* Fix password toggle overflow */
+      .password-toggle {
+        position: absolute;
+        right: 12px; /* Inside the input border */
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px;
+        padding: 8px;
+        background: var(--bitcoin-orange);
+        border-radius: 6px;
+        z-index: 1;
+      }
+      
+      /* Ensure input has padding for toggle */
+      input[type="password"] {
+        padding-right: 56px !important; /* Space for toggle button */
+      }
+      ```
+    
+    - Fix email input icon positioning
+    - Ensure all input icons stay within input borders
+    - Verify checkbox alignment with labels
+    - Fix any select dropdown arrow positioning
+    - Test all form controls on mobile devices
+
+    **Testing**:
+    - [ ] Test password toggle on all devices
+    - [ ] Verify toggle doesn't break input layout
+    - [ ] Check toggle button is clickable
+    - [ ] Test with different password lengths
+    - [ ] Verify toggle icon visibility
+
+    _Requirements: 1.1, 1.2, 8.1, 8.2, 11.8_
+    **Target Files**: `components/auth/LoginForm.tsx`, `components/auth/RegistrationForm.tsx`, `styles/globals.css`
+
+  - [ ] 12.9 Fix Scroll-Based Overlays and Modals
+
+    **Objective**: Ensure all overlays, modals, and scroll-based content are visible and functional
+
+    **Specific Fixes Needed**:
+    - Verify hamburger menu overlay covers full viewport (100vw × 100vh)
+    - Ensure menu content is scrollable if it exceeds viewport height
+    - Fix any modal positioning issues
+    - Verify modal content fits within viewport
+    - Check modal close buttons are accessible
+    - Ensure overlay backgrounds are properly styled (black with opacity)
+    - Fix any z-index conflicts
+    - Verify scroll locking when modals are open
+    - Test modal animations are smooth
+
+    **Modal Types to Test**:
+    - [ ] Hamburger menu overlay
+    - [ ] Whale analysis results modal
+    - [ ] Trade signal details modal
+    - [ ] News article expansion
+    - [ ] Chart fullscreen mode (if applicable)
+    - [ ] Error/success message modals
+
+    **Testing**:
+    - [ ] Test modal opening/closing
+    - [ ] Verify scroll behavior
+    - [ ] Check backdrop click to close
+    - [ ] Test escape key to close
+    - [ ] Verify modal content scrolling
+
+    _Requirements: 6.2, 6.3, 12.2, 12.5_
+    **Target Files**: `components/Layout.tsx`, modal components, `styles/globals.css`
+
+  - [ ] 12.10 Fix Element Scaling and Fitting Issues
+
+    **Objective**: Ensure ALL elements scale properly and fit within their designated areas
+
+    **Specific Fixes Needed**:
+    - Identify all elements that overflow their orange borders
+    - Fix icon sizing to fit within containers
+    - Ensure buttons scale properly with text content
+    - Verify badges and tags fit within their containers
+    - Fix any logo or branding element overflow
+    - Check stat card values fit within cards
+    - Ensure chart legends fit within chart containers
+    - Fix any tooltip overflow issues
+    - Verify dropdown menus fit within viewport
+
+    **CSS Patterns to Apply**:
+    ```css
+    /* Ensure elements fit within containers */
+    .container-element {
+      max-width: 100%;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    
+    /* Ensure icons fit */
+    .icon-container svg {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+    }
+    
+    /* Ensure text fits */
+    .text-container {
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      max-width: 100%;
+    }
+    ```
+
+    **Testing**:
+    - [ ] Visual inspection of all pages
+    - [ ] Check all orange-bordered containers
+    - [ ] Verify no element extends beyond borders
+    - [ ] Test at all breakpoints
+
+    _Requirements: 11.1, 11.2, 11.3, 11.4, 11.9_
+    **Target Files**: All component files, `styles/globals.css`, `styles/container-containment.css`
+
+  - [ ] 12.11 Fix Data Formatting and Alignment
+
+    **Objective**: Ensure all visual data is properly formatted, scaled, and aligned
+
+    **Specific Fixes Needed**:
+    - Fix price displays to fit within containers
+    - Ensure large numbers format properly (e.g., $1,234,567.89)
+    - Verify percentage displays fit within stat cards
+    - Check date/time formatting is consistent
+    - Ensure wallet addresses truncate properly (0x1234...5678)
+    - Fix any table cell overflow
+    - Verify chart axis labels are readable
+    - Check legend items align properly
+    - Ensure tooltip content is formatted correctly
+
+    **Formatting Patterns**:
+    ```typescript
+    // Price formatting
+    const formatPrice = (price: number) => {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(price);
+    };
+    
+    // Address truncation
+    const truncateAddress = (address: string) => {
+      return `${address.slice(0, 6)}...${address.slice(-4)}`;
+    };
+    ```
+
+    **Testing**:
+    - [ ] Test with various data ranges
+    - [ ] Verify large numbers display correctly
+    - [ ] Check decimal precision
+    - [ ] Test address truncation
+    - [ ] Verify date formatting
+
+    _Requirements: 2.1, 2.2, 2.3, 2.4, 11.3, 11.9_
+    **Target Files**: All data display components, utility functions
+
+  - [ ] 12.12 Fix Menu and Navigation Visual Issues
+
+    **Objective**: Ensure menu and navigation elements are perfectly aligned and functional
+
+    **Specific Fixes Needed**:
+    - Verify hamburger icon (3 lines) is properly sized and positioned
+    - Ensure menu overlay covers entire viewport without gaps
+    - Fix menu item card alignment
+    - Verify menu icons align with text
+    - Check menu item descriptions fit within cards
+    - Ensure active menu item indicator is visible
+    - Fix any menu scrolling issues
+    - Verify menu close button is accessible
+    - Test menu animations are smooth
+
+    **Testing**:
+    - [ ] Test menu opening/closing
+    - [ ] Verify menu item clicks
+    - [ ] Check menu scrolling
+    - [ ] Test active state indicators
+    - [ ] Verify menu on all devices
+
+    _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 12.1, 12.2, 12.3_
+    **Target Files**: `components/Layout.tsx`, menu components
+
+  - [ ] 12.13 Comprehensive Cross-Page Testing
+
+    **Objective**: Test ALL pages systematically on ALL target devices
+
+    **Testing Matrix**:
+    
+    **Devices**:
+    - [ ] iPhone SE (375px)
+    - [ ] iPhone 14 (390px)
+    - [ ] iPhone 14 Pro Max (428px)
+    - [ ] iPad Mini (768px)
+    - [ ] iPad Pro (1024px)
+    
+    **Pages**:
+    - [ ] Landing page (index.tsx)
+    - [ ] Login page (auth/login.tsx)
+    - [ ] Registration page (auth/register.tsx)
+    - [ ] Bitcoin Report (bitcoin-report.tsx)
+    - [ ] Ethereum Report (ethereum-report.tsx)
+    - [ ] Crypto News Wire (crypto-news.tsx)
+    - [ ] Whale Watch (whale-watch.tsx)
+    - [ ] Trade Generation (trade-generation.tsx)
+    - [ ] Regulatory Watch (regulatory-watch.tsx)
+    
+    **Checks for Each Page**:
+    - [ ] No horizontal scroll
+    - [ ] All elements fit within containers
+    - [ ] All text is readable
+    - [ ] All buttons are accessible
+    - [ ] All forms work correctly
+    - [ ] All overlays display properly
+    - [ ] All animations are smooth
+    - [ ] All data is formatted correctly
+    - [ ] All icons are visible
+    - [ ] All borders are visible
+    - [ ] Orange borders contain all content
+    - [ ] No element overflow
+    - [ ] Proper spacing throughout
+    - [ ] Consistent styling
+
+    _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5_
+
+  - [ ] 12.14 Create Visual Issue Documentation
+
+    **Objective**: Document all visual issues found and their fixes
+
+    **Deliverables**:
+    - Create `MOBILE-TABLET-VISUAL-ISSUES-REPORT.md`
+    - Document all issues with screenshots
+    - Categorize issues by severity (Critical, High, Medium, Low)
+    - Provide before/after comparisons
+    - Document all CSS fixes applied
+    - Create troubleshooting guide for future issues
+    - Include testing checklist for QA
+
+    **Report Structure**:
+    ```markdown
+    # Mobile/Tablet Visual Issues Report
+    
+    ## Critical Issues (Must Fix)
+    1. Password toggle overflow - FIXED
+    2. [Other critical issues]
+    
+    ## High Priority Issues
+    1. [Issue description]
+    
+    ## Medium Priority Issues
+    1. [Issue description]
+    
+    ## Low Priority Issues
+    1. [Issue description]
+    
+    ## Fixes Applied
+    - [CSS fix 1]
+    - [CSS fix 2]
+    
+    ## Testing Results
+    - [Device test results]
+    ```
+
+    _Requirements: 11.4, 11.5_
+    **Target Files**: New documentation file
+
+  - [ ] 12.15 Final Visual Polish and Validation
+
+    **Objective**: Final review and polish of all visual elements
+
+    **Tasks**:
+    - Review all pages for visual consistency
+    - Verify Bitcoin Sovereign aesthetic throughout
+    - Check all spacing is consistent (4px, 8px, 12px, 16px multiples)
+    - Ensure all animations are smooth (0.3s ease)
+    - Verify all glow effects are properly applied
+    - Check all hover states work correctly
+    - Ensure all focus states are visible
+    - Verify all active states are clear
+    - Test all interactive elements
+    - Validate WCAG AA compliance
+    - Check performance metrics (LCP, CLS, FID)
+    - Verify desktop (1024px+) is unchanged
+
+    **Final Validation**:
+    - [ ] Zero horizontal scroll on any page (320px-1023px)
+    - [ ] All elements fit within orange borders
+    - [ ] All text is readable and properly formatted
+    - [ ] All images scale correctly
+    - [ ] All buttons are accessible (48px minimum)
+    - [ ] All forms work without issues
+    - [ ] All overlays display properly
+    - [ ] All data is formatted correctly
+    - [ ] Bitcoin Sovereign colors only (black, orange, white)
+    - [ ] Desktop completely unchanged
+    - [ ] Performance targets met
+    - [ ] Accessibility standards met
+
+    _Requirements: All requirements_
+
+  **Success Criteria**:
+  - ✅ Password toggle button stays INSIDE input field border (CRITICAL)
+  - ✅ ALL elements fit within their orange-bordered containers
+  - ✅ ALL visual data is properly formatted and aligned
+  - ✅ ALL scroll-based overlays are visible and functional
+  - ✅ ALL pages tested on ALL target devices
+  - ✅ Zero visual issues remaining on mobile/tablet
+  - ✅ 100% Bitcoin Sovereign aesthetic compliance
+  - ✅ Desktop (1024px+) completely unchanged
+  - ✅ WCAG AA accessibility maintained
+  - ✅ Performance targets achieved
+
+  **Estimated Time**: 30-40 hours  
+  **Priority**: CRITICAL - Fixes all remaining visual issues identified by user
+
 ## Notes
 
 - All tasks must maintain Bitcoin Sovereign color system (Black #000000, Orange #F7931A, White #FFFFFF)
