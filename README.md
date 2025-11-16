@@ -296,7 +296,59 @@ MARKET_UPDATE_INTERVAL=1
 NEXO_RSS_FEED=https://nexo.io/rss
 FCA_NEWS_URL=https://www.fca.org.uk/news/rss
 EBA_RSS_FEED=https://www.eba.europa.eu/rss
+
+# Veritas Protocol (Data Validation System)
+ENABLE_VERITAS_PROTOCOL=false  # Set to 'true' to enable validation
+ENABLE_VERITAS_PROTOCOL=false  # Set to 'true' to enable validation
 ```
+
+### Veritas Protocol (Optional)
+
+The **Veritas Protocol** is an institutional-grade data validation system that adds cross-validation, logical consistency checks, and transparent discrepancy reporting to UCIE analysis.
+
+**Key Features:**
+- **Cross-Source Validation**: Verify data across multiple APIs (CoinGecko, CoinMarketCap, Kraken)
+- **Logical Consistency Checks**: Detect impossible data states (e.g., volume without transactions)
+- **Discrepancy Alerts**: Transparent reporting of data quality issues
+- **Confidence Scoring**: 0-100 score indicating analysis reliability
+- **Graceful Degradation**: Analysis continues even if validation fails
+
+**Enable Veritas Protocol:**
+```env
+ENABLE_VERITAS_PROTOCOL=true
+```
+
+**Configuration Options:**
+```env
+# Enable/disable Veritas Protocol
+ENABLE_VERITAS_PROTOCOL=false
+
+# Validation timeout (milliseconds)
+VERITAS_TIMEOUT_MS=5000
+
+# Feature-specific flags (optional)
+ENABLE_VERITAS_MARKET_VALIDATION=true
+ENABLE_VERITAS_SOCIAL_VALIDATION=true
+ENABLE_VERITAS_ONCHAIN_VALIDATION=true
+ENABLE_VERITAS_NEWS_VALIDATION=true
+```
+
+**How It Works:**
+1. Data is fetched from existing APIs (no changes to current flow)
+2. If Veritas is enabled, validation runs in parallel
+3. Validation results are added to API responses as optional fields
+4. If validation fails, analysis continues with existing data
+5. Validation never blocks or breaks existing functionality
+
+**Backward Compatibility:**
+- All existing API endpoints work unchanged
+- Validation is completely optional
+- Can be enabled/disabled without code changes
+- No impact on performance when disabled
+
+**For More Information:**
+- See `.kiro/specs/ucie-veritas-protocol/` for complete specification
+- See `lib/ucie/veritas/` for implementation details
 
 ## 📡 API Integration
 

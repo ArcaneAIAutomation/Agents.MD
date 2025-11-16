@@ -19,6 +19,9 @@ import { fetchAllNews } from '../../../../lib/ucie/newsFetching';
 import { assessMultipleNews, generateNewsSummary, AssessedNewsArticle } from '../../../../lib/ucie/newsImpactAssessment';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
+import { isVeritasEnabled } from '../../../../lib/ucie/veritas/utils/featureFlags';
+import { validateNewsCorrelation } from '../../../../lib/ucie/veritas/validators/newsValidator';
+import type { VeritasValidationResult } from '../../../../lib/ucie/veritas/types/validationTypes';
 
 interface NewsResponse {
   success: boolean;
@@ -40,6 +43,7 @@ interface NewsResponse {
   dataQuality: number;
   timestamp: string;
   cached: boolean;
+  veritasValidation?: VeritasValidationResult;
   error?: string;
 }
 
@@ -181,6 +185,7 @@ async function handler(
     // Calculate data quality score
     const dataQuality = calculateDataQuality(assessedArticles);
 
+    // Build base response
     const response: NewsResponse = {
       success: true,
       symbol: symbolUpper,
@@ -191,6 +196,71 @@ async function handler(
       timestamp: new Date().toISOString(),
       cached: false
     };
+
+    // ============================================================================
+    // VERITAS PROTOCOL: News Correlation Validation (Optional)
+    // ============================================================================
+    
+    if (isVeritasEnabled()) {
+      try {
+        console.log(`🔍 [Veritas] Running news correlation validation for ${symbolUpper}...`);
+        
+        // Fetch on-chain data for correlation (from cache if available)
+        let onChainData = null;
+        try {
+          const onChainCached = await getCachedAnalysis(symbolUpper, 'on-chain');
+          if (onChainCached) {
+            onChainData = onChainCached;
+            console.log(`✅ [Veritas] Using cached on-chain data for correlation`);
+          } else {
+            // Fetch fresh on-chain data if not cached
+            const onChainResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/ucie/on-chain/${symbolUpper}`);
+            if (onChainResponse.ok) {
+              onChainData = await onChainResponse.json();
+              console.log(`✅ [Veritas] Fetched fresh on-chain data for correlation`);
+            }
+          }
+        } catch (onChainError) {
+          console.warn(`⚠️ [Veritas] Could not fetch on-chain data for correlation:`, onChainError);
+        }
+
+        // Run news correlation validation
+        const newsData = {
+          articles: assessedArticles.map(a => ({
+            id: a.id,
+            title: a.title,
+            description: a.description,
+            source: a.source,
+            publishedAt: a.publishedAt,
+            url: a.url
+          })),
+          summary
+        };
+
+        const validation = await validateNewsCorrelation(
+          symbolUpper,
+          newsData,
+          onChainData
+        );
+
+        // Add validation to response
+        response.veritasValidation = validation;
+
+        console.log(`✅ [Veritas] News validation complete - Confidence: ${validation.confidence}%`);
+        
+        // Log alerts if any
+        if (validation.alerts.length > 0) {
+          console.log(`📊 [Veritas] ${validation.alerts.length} alerts generated:`);
+          validation.alerts.forEach(alert => {
+            console.log(`   ${alert.severity.toUpperCase()}: ${alert.message}`);
+          });
+        }
+      } catch (validationError) {
+        console.error(`❌ [Veritas] News validation failed:`, validationError);
+        // Don't fail the entire request if validation fails
+        // Just log the error and continue without validation
+      }
+    }
 
     // Cache the response in database (skip if refresh=true for live data)
     if (!forceRefresh) {

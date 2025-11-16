@@ -11,6 +11,9 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { fetchBitcoinOnChainData } from '../../../../lib/ucie/bitcoinOnChain';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
+import { isVeritasEnabled } from '../../../../lib/ucie/veritas/utils/featureFlags';
+import { validateOnChainData } from '../../../../lib/ucie/veritas/validators/onChainValidator';
+import type { VeritasValidationResult } from '../../../../lib/ucie/veritas/types/validationTypes';
 
 // Cache TTL: 5 minutes (blockchain data updates every block)
 const CACHE_TTL = 5 * 60; // 300 seconds
@@ -87,12 +90,57 @@ async function handler(
       // Continue without AI insights
     }
 
+    // ✅ VERITAS PROTOCOL: Optional validation when feature flag enabled
+    let veritasValidation: VeritasValidationResult | undefined;
+    if (isVeritasEnabled()) {
+      try {
+        console.log(`🔍 Veritas Protocol enabled - validating on-chain data for ${symbolUpper}...`);
+        
+        // Fetch market data for consistency checking
+        // We need market volume to validate market-to-chain consistency
+        let marketData: any = null;
+        try {
+          const marketDataCached = await getCachedAnalysis(symbolUpper, 'market-data', userId, userEmail);
+          if (marketDataCached) {
+            marketData = marketDataCached;
+            console.log(`   Using cached market data for validation`);
+          } else {
+            console.log(`   No cached market data available - validation will be partial`);
+          }
+        } catch (error) {
+          console.warn(`   Failed to fetch market data for validation:`, error instanceof Error ? error.message : 'Unknown error');
+        }
+        
+        // Run validation with 5-second timeout
+        const validationPromise = validateOnChainData(symbolUpper, marketData, onChainData);
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('Veritas validation timeout')), 5000);
+        });
+        
+        veritasValidation = await Promise.race([validationPromise, timeoutPromise]);
+        
+        console.log(`✅ Veritas validation complete: confidence=${veritasValidation.confidence}%, alerts=${veritasValidation.alerts.length}`);
+      } catch (error) {
+        // Graceful degradation: Log error but don't fail the request
+        console.warn(`⚠️ Veritas validation failed for ${symbolUpper}:`, error instanceof Error ? error.message : 'Unknown error');
+        console.warn('   Continuing without validation (graceful degradation)');
+        // Don't add veritasValidation if validation fails
+      }
+    }
+
+    // Build response with optional validation field
+    const response = {
+      ...onChainData,
+      cached: false,
+      ...(veritasValidation && { veritasValidation })
+    };
+
     // Cache the response in database (skip if refresh=true for live data)
     if (!forceRefresh) {
       await setCachedAnalysis(
         symbolUpper,
         'on-chain',
-        onChainData,
+        response,
         CACHE_TTL,
         onChainData.dataQuality,
         userId,
@@ -105,10 +153,7 @@ async function handler(
 
     console.log(`[UCIE On-Chain] Successfully fetched ${symbolUpper} on-chain data (quality: ${onChainData.dataQuality}%)`);
 
-    return res.status(200).json({
-      ...onChainData,
-      cached: false
-    });
+    return res.status(200).json(response);
   } catch (error) {
     console.error('[UCIE On-Chain] Error:', error);
 

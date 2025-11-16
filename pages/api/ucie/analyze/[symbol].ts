@@ -1,4 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { orchestrateValidation, type OrchestrationResult } from '../../../../lib/ucie/veritas/utils/validationOrchestrator';
+import { isVeritasEnabled } from '../../../../lib/ucie/veritas/utils/featureFlags';
+import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
+import { logValidationAttempt, logMetricsToConsole } from '../../../../lib/ucie/veritas/utils/validationMetrics';
 
 interface ComprehensiveAnalysis {
   symbol: string;
@@ -19,6 +23,7 @@ interface ComprehensiveAnalysis {
   anomalies: any;
   consensus: any;
   executiveSummary: any;
+  veritasValidation?: OrchestrationResult; // Optional Veritas validation results
 }
 
 interface DataSource {
@@ -149,12 +154,114 @@ export default async function handler(
     // Aggregate results into analysis
     Object.assign(analysis, results.data);
 
+    // ========================================================================
+    // VERITAS PROTOCOL VALIDATION (Optional)
+    // ========================================================================
+    
+    // Run Veritas validation if feature flag is enabled
+    if (isVeritasEnabled()) {
+      try {
+        console.log(`🔍 [Veritas] Running validation for ${normalizedSymbol}...`);
+        
+        // Check cache first (5 minute TTL)
+        const cachedValidation = await getCachedAnalysis(
+          normalizedSymbol,
+          'veritas-validation',
+          undefined,
+          undefined,
+          300 // 5 minutes
+        );
+        
+        let validationResult: OrchestrationResult;
+        
+        if (cachedValidation) {
+          console.log(`✅ [Veritas] Using cached validation (age: ${Math.floor((Date.now() - new Date(cachedValidation.startTime).getTime()) / 1000)}s)`);
+          validationResult = cachedValidation;
+        } else {
+          console.log(`🔄 [Veritas] Running fresh validation...`);
+          
+          // Run validation
+          validationResult = await orchestrateValidation({
+            symbol: normalizedSymbol,
+            marketData: results.data.marketData,
+            socialData: {
+              lunarCrush: results.data.sentiment?.lunarCrush,
+              reddit: results.data.sentiment?.reddit
+            },
+            onChainData: results.data.onChain,
+            newsData: results.data.news
+          });
+          
+          // Cache validation results (5 minute TTL)
+          await setCachedAnalysis(
+            normalizedSymbol,
+            'veritas-validation',
+            validationResult,
+            300, // 5 minutes
+            validationResult.dataQualitySummary?.overallScore
+          );
+          
+          // Log metrics to database
+          await logValidationAttempt(validationResult);
+          
+          // Log metrics to console
+          logMetricsToConsole(validationResult);
+        }
+        
+        // Add validation results to analysis
+        analysis.veritasValidation = validationResult;
+        
+        // Log validation summary
+        console.log(`✅ [Veritas] Validation complete`);
+        console.log(`   Confidence: ${validationResult.confidenceScore?.overallScore || 0}%`);
+        console.log(`   Data Quality: ${validationResult.dataQualitySummary?.overallScore || 0}/100`);
+        console.log(`   Completed: ${validationResult.completed ? 'Yes' : 'No'}`);
+        console.log(`   Duration: ${validationResult.duration}ms`);
+        
+        // Override data quality score with Veritas score if validation completed
+        if (validationResult.completed && validationResult.dataQualitySummary) {
+          analysis.dataQualityScore = validationResult.dataQualitySummary.overallScore;
+          console.log(`   Using Veritas data quality score: ${analysis.dataQualityScore}/100`);
+        }
+        
+      } catch (error: any) {
+        // Graceful degradation: Log error but don't fail the entire analysis
+        console.error('⚠️ [Veritas] Validation failed (graceful degradation):', error.message);
+        console.log('   Continuing with standard analysis...');
+        
+        // Add error information to validation result
+        analysis.veritasValidation = {
+          success: false,
+          completed: false,
+          halted: true,
+          haltReason: error.message || 'Validation error',
+          progress: 0,
+          currentStep: null,
+          completedSteps: [],
+          results: {},
+          startTime: new Date().toISOString(),
+          endTime: new Date().toISOString(),
+          duration: 0,
+          timedOut: false,
+          errors: [{
+            step: 'market',
+            error: error.message || 'Unknown error',
+            timestamp: new Date().toISOString()
+          }]
+        };
+      }
+    } else {
+      console.log('ℹ️ [Veritas] Validation disabled (feature flag off)');
+    }
+
     // Generate consensus and executive summary
     analysis.consensus = generateConsensus(analysis);
     analysis.executiveSummary = generateExecutiveSummary(analysis);
 
-    // Calculate data quality score
-    analysis.dataQualityScore = calculateDataQuality(results.sources);
+    // Calculate data quality score (if not overridden by Veritas)
+    if (!analysis.dataQualityScore) {
+      analysis.dataQualityScore = calculateDataQuality(results.sources);
+    }
 
     return res.status(200).json({
       success: true,
@@ -165,6 +272,8 @@ export default async function handler(
         failedSources: results.sources.filter(s => !s.success).length,
         dataQuality: analysis.dataQualityScore,
         processingTime: results.processingTime,
+        veritasEnabled: isVeritasEnabled(),
+        veritasValidated: !!analysis.veritasValidation?.completed,
       },
     });
   } catch (error: any) {

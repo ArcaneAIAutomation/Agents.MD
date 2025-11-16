@@ -12253,3 +12253,249 @@ ol[role="list"] {
   background-size: 200% 100%;
   animation: skeleton-loading 1.5s ease-in-out infinite;
 }
+
+
+/* ============================================
+   MOBILE/TABLET ACCESS GATE BUTTON FIXES
+   Ensures Perfect Styling on All Devices
+   Matches Desktop Appearance Exactly
+   ============================================ */
+
+@media (max-width: 1023px) {
+  
+  /* ============================================
+     ACCESS GATE BUTTON OVERRIDES
+     Force correct colors and styling on mobile/tablet
+     ============================================ */
+  
+  /* PRIMARY BUTTON - Solid Orange Fill (Register with Access Code) */
+  .btn-bitcoin-primary {
+    background: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 1.5rem !important;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    min-height: 56px !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.3);
+  }
+  
+  .btn-bitcoin-primary:hover,
+  .btn-bitcoin-primary:active {
+    background: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    box-shadow: 0 0 30px rgba(247, 147, 26, 0.5);
+    transform: scale(1.02);
+  }
+  
+  .btn-bitcoin-primary svg {
+    color: var(--bitcoin-black) !important;
+    stroke: var(--bitcoin-black) !important;
+    fill: none !important;
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.5;
+  }
+  
+  /* SECONDARY BUTTON - Orange Outline (I Already Have an Account) */
+  .btn-bitcoin-secondary {
+    background: transparent !important;
+    color: var(--bitcoin-orange) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 1.5rem !important;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    min-height: 56px !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    cursor: pointer;
+  }
+  
+  .btn-bitcoin-secondary:hover,
+  .btn-bitcoin-secondary:active {
+    background: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.3);
+    transform: scale(1.02);
+  }
+  
+  .btn-bitcoin-secondary svg {
+    color: var(--bitcoin-orange) !important;
+    stroke: var(--bitcoin-orange) !important;
+    fill: none !important;
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.5;
+  }
+  
+  .btn-bitcoin-secondary:hover svg,
+  .btn-bitcoin-secondary:active svg {
+    color: var(--bitcoin-black) !important;
+    stroke: var(--bitcoin-black) !important;
+  }
+  
+  /* TERTIARY BUTTON - White/Gray Outline (Request Early Access) */
+  .btn-bitcoin-tertiary {
+    background: transparent !important;
+    color: var(--bitcoin-white-60) !important;
+    border: 2px solid var(--bitcoin-white-60) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 1.5rem !important;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    min-height: 56px !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    cursor: pointer;
+  }
+  
+  .btn-bitcoin-tertiary:hover,
+  .btn-bitcoin-tertiary:active {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: var(--bitcoin-white) !important;
+    border: 2px solid var(--bitcoin-white) !important;
+    transform: scale(1.02);
+  }
+  
+  .btn-bitcoin-tertiary svg {
+    color: var(--bitcoin-white-60) !important;
+    stroke: var(--bitcoin-white-60) !important;
+    fill: none !important;
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.5;
+  }
+  
+  .btn-bitcoin-tertiary:hover svg,
+  .btn-bitcoin-tertiary:active svg {
+    color: var(--bitcoin-white) !important;
+    stroke: var(--bitcoin-white) !important;
+  }
+  
+  /* ============================================
+     ACCESS GATE CONTAINER FIXES
+     Ensure proper spacing and layout
+     ============================================ */
+  
+  .access-gate-overlay {
+    padding: 1rem;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Access Gate Card */
+  .access-gate-overlay .bg-bitcoin-black {
+    padding: 1.5rem !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(247, 147, 26, 0.3);
+  }
+  
+  /* Access Gate Title */
+  .access-gate-overlay h1 {
+    font-size: 1.75rem !important;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+    color: var(--bitcoin-white) !important;
+  }
+  
+  /* Access Gate Subtitle */
+  .access-gate-overlay p {
+    font-size: 0.9375rem !important;
+    line-height: 1.5;
+    color: var(--bitcoin-white-80) !important;
+  }
+  
+  /* Access Gate Icon */
+  .access-gate-overlay .w-16 {
+    width: 56px !important;
+    height: 56px !important;
+    color: var(--bitcoin-orange) !important;
+    stroke: var(--bitcoin-orange) !important;
+    stroke-width: 2;
+  }
+  
+  /* Button Spacing */
+  .access-gate-overlay .space-y-4 > * + * {
+    margin-top: 1rem !important;
+  }
+  
+  /* ============================================
+     TABLET SPECIFIC (768px-1023px)
+     Slightly larger elements for tablets
+     ============================================ */
+  
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .btn-bitcoin-primary,
+    .btn-bitcoin-secondary,
+    .btn-bitcoin-tertiary {
+      min-height: 60px !important;
+      padding: 1.125rem 1.75rem !important;
+      font-size: 0.9375rem !important;
+    }
+    
+    .access-gate-overlay .bg-bitcoin-black {
+      padding: 2rem !important;
+    }
+    
+    .access-gate-overlay h1 {
+      font-size: 2rem !important;
+    }
+  }
+  
+  /* ============================================
+     DISABLED STATE FIXES
+     Ensure disabled buttons are clearly visible
+     ============================================ */
+  
+  .btn-bitcoin-primary:disabled,
+  .btn-bitcoin-secondary:disabled,
+  .btn-bitcoin-tertiary:disabled {
+    background: var(--bitcoin-black) !important;
+    color: var(--bitcoin-orange-30) !important;
+    border-color: var(--bitcoin-orange-30) !important;
+    cursor: not-allowed;
+    opacity: 0.5;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  
+  /* ============================================
+     FOCUS STATE FIXES
+     Enhanced visibility for keyboard navigation
+     ============================================ */
+  
+  .btn-bitcoin-primary:focus-visible,
+  .btn-bitcoin-secondary:focus-visible,
+  .btn-bitcoin-tertiary:focus-visible {
+    outline: 3px solid var(--bitcoin-orange) !important;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 5px rgba(247, 147, 26, 0.4) !important;
+  }
+}
+
+/* ============================================
+   END OF MOBILE/TABLET ACCESS GATE FIXES
+   ============================================ */

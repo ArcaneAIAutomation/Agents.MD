@@ -19,6 +19,8 @@ import { aggregateExchangePrices, type PriceAggregation } from '../../../../lib/
 import { coinGeckoClient, coinMarketCapClient, type MarketData } from '../../../../lib/ucie/marketDataClients';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
+import { isVeritasEnabled } from '../../../../lib/ucie/veritas/utils/featureFlags';
+import { validateMarketData, type VeritasValidationResult } from '../../../../lib/ucie/veritas/validators/marketDataValidator';
 
 // Cache TTL: 5 minutes (balances freshness with performance)
 const CACHE_TTL = 5 * 60; // 300 seconds
@@ -44,6 +46,7 @@ export interface MarketDataResponse {
     url: string;
     message: string;
   };
+  veritasValidation?: VeritasValidationResult;
   error?: string;
 }
 
@@ -203,6 +206,31 @@ async function handler(
         message: 'Market data powered by CoinGecko'
       },
     };
+
+    // ✅ VERITAS PROTOCOL: Optional validation when feature flag enabled
+    if (isVeritasEnabled()) {
+      try {
+        console.log(`🔍 Veritas Protocol enabled - validating market data for ${symbolUpper}...`);
+        
+        // Run validation with 5-second timeout
+        const validationPromise = validateMarketData(symbolUpper, response);
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('Veritas validation timeout')), 5000);
+        });
+        
+        const validation = await Promise.race([validationPromise, timeoutPromise]);
+        
+        // Add validation results to response (optional field)
+        response.veritasValidation = validation;
+        
+        console.log(`✅ Veritas validation complete: confidence=${validation.confidence}%, alerts=${validation.alerts.length}`);
+      } catch (error) {
+        // Graceful degradation: Log error but don't fail the request
+        console.warn(`⚠️ Veritas validation failed for ${symbolUpper}:`, error instanceof Error ? error.message : 'Unknown error');
+        console.warn('   Continuing without validation (graceful degradation)');
+        // Don't add veritasValidation field if validation fails
+      }
+    }
 
     // Cache the response in database (skip if refresh=true for live data)
     if (!forceRefresh) {

@@ -28,6 +28,10 @@ import {
 } from '../../../../lib/ucie/influencerTracking';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
+import {
+  validateSocialSentiment,
+  type VeritasValidationResult,
+} from '../../../../lib/ucie/veritas/validators/socialSentimentValidator';
 
 // ============================================================================
 // Type Definitions
@@ -47,6 +51,7 @@ interface SentimentResponse {
   };
   dataQuality: number; // 0-100
   cached: boolean;
+  veritasValidation?: VeritasValidationResult; // ✅ NEW: Optional Veritas validation (Requirements: 16.2, 16.3)
   error?: string;
 }
 
@@ -212,6 +217,39 @@ async function handler(
       dataQuality,
       cached: false,
     };
+
+    // ✅ VERITAS PROTOCOL: Optional validation when feature flag enabled (Requirements: 16.2, 16.3)
+    if (process.env.ENABLE_VERITAS_PROTOCOL === 'true') {
+      try {
+        console.log(`🔍 Veritas Protocol enabled - validating social sentiment for ${normalizedSymbol}...`);
+        
+        // Run validation with timeout protection (5 seconds max)
+        const validationPromise = validateSocialSentiment(normalizedSymbol, {
+          lunarCrush,
+          twitter,
+          reddit,
+          sentiment
+        });
+        
+        const timeoutPromise = new Promise<null>((resolve) => 
+          setTimeout(() => resolve(null), 5000)
+        );
+        
+        const validation = await Promise.race([validationPromise, timeoutPromise]);
+        
+        if (validation) {
+          // Add validation results to response (optional field)
+          response.veritasValidation = validation;
+          console.log(`✅ Veritas validation complete: confidence=${validation.confidence}%, alerts=${validation.alerts.length}`);
+        } else {
+          console.warn('⚠️ Veritas validation timeout - continuing without validation');
+        }
+      } catch (error) {
+        // Graceful degradation: validation failure doesn't break the response
+        console.error('⚠️ Veritas validation failed:', error);
+        console.log('Continuing with standard response (no validation)');
+      }
+    }
 
     // Cache the response in database (skip if refresh=true for live data)
     if (!forceRefresh) {

@@ -245,27 +245,30 @@ export default function AccessGate({ onAccessGranted }: AccessGateProps) {
               </p>
               
               <div className="space-y-4">
+                {/* PRIMARY BUTTON - Solid Orange (Register) */}
                 <button
                   onClick={switchToRegister}
-                  className="w-full bg-bitcoin-orange text-bitcoin-black border-2 border-bitcoin-orange font-bold uppercase tracking-wider px-6 py-4 rounded-lg transition-all hover:bg-bitcoin-black hover:text-bitcoin-orange hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[48px] flex items-center justify-center gap-3"
+                  className="btn-bitcoin-primary w-full"
                   disabled={authLoading}
                 >
                   <Lock className="w-5 h-5" />
                   Register with Access Code
                 </button>
                 
+                {/* SECONDARY BUTTON - Orange Outline (Login) */}
                 <button
                   onClick={switchToLogin}
-                  className="w-full bg-transparent text-bitcoin-orange border-2 border-bitcoin-orange font-semibold uppercase tracking-wider px-6 py-4 rounded-lg transition-all hover:bg-bitcoin-orange hover:text-bitcoin-black hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:scale-105 active:scale-95 min-h-[48px] flex items-center justify-center gap-3"
+                  className="btn-bitcoin-secondary w-full"
                   disabled={authLoading}
                 >
                   <CheckCircle className="w-5 h-5" />
                   I Already Have an Account
                 </button>
                 
+                {/* TERTIARY BUTTON - White Outline (Request Access) */}
                 <button
                   onClick={() => setMode('request-access')}
-                  className="w-full bg-transparent text-bitcoin-white-60 border-2 border-bitcoin-orange-20 font-semibold uppercase tracking-wider px-6 py-4 rounded-lg transition-all hover:border-bitcoin-orange hover:text-bitcoin-orange hover:shadow-[0_0_20px_rgba(247,147,26,0.2)] hover:scale-105 active:scale-95 min-h-[48px] flex items-center justify-center gap-3"
+                  className="btn-bitcoin-tertiary w-full"
                   disabled={authLoading}
                 >
                   <Mail className="w-5 h-5" />

@@ -20,7 +20,8 @@ export type AnalysisType =
   | 'predictions'
   | 'risk'
   | 'derivatives'
-  | 'defi';
+  | 'defi'
+  | 'veritas-validation'; // Veritas Protocol validation results
 
 /**
  * Get cached analysis from database (WITH FRESHNESS CHECK)
