@@ -357,82 +357,82 @@ export default function TradeGenerationEngine() {
       </div>
 
       {/* Trade Signal Card */}
-      <div className="bg-bitcoin-black rounded-xl p-3 sm:p-4 md:p-6 border-2 border-bitcoin-orange mb-4 sm:mb-6 animate-slide-up shadow-bitcoin-glow">
+      <div className="bg-bitcoin-black rounded-xl p-3 sm:p-4 md:p-6 border-2 border-bitcoin-orange mb-4 sm:mb-6 animate-slide-up shadow-bitcoin-glow overflow-hidden">
         <div className="space-y-4 sm:space-y-6">
           {/* Signal Header */}
           <div className="text-center space-y-2 sm:space-y-3">
-            <h3 className="text-lg sm:text-xl md:text-2xl font-black text-bitcoin-white animate-slide-up break-words" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <h3 className="text-lg sm:text-xl md:text-2xl font-black text-bitcoin-white animate-slide-up break-words truncate px-2" style={{ fontFamily: 'Inter, sans-serif' }}>
               {tradeSignal.symbol} Trade Signal
             </h3>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
-              <span className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold border-2 border-bitcoin-orange min-h-[40px] flex items-center justify-center animate-pulse-subtle w-full sm:w-auto ${tradeSignal.direction === 'LONG' ? 'bg-bitcoin-orange text-bitcoin-black' : 'bg-bitcoin-black text-bitcoin-orange'}`}>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 px-2">
+              <span className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold border-2 border-bitcoin-orange min-h-[48px] flex items-center justify-center animate-pulse-subtle w-full sm:w-auto max-w-full truncate ${tradeSignal.direction === 'LONG' ? 'bg-bitcoin-orange text-bitcoin-black' : 'bg-bitcoin-black text-bitcoin-orange'}`}>
                 {tradeSignal.direction === 'LONG' ? '📈 LONG POSITION' : '📉 SHORT POSITION'}
               </span>
-              <span className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold border-2 border-bitcoin-orange min-h-[40px] flex items-center justify-center w-full sm:w-auto ${tradeSignal.riskLevel === 'HIGH' ? 'bg-bitcoin-orange text-bitcoin-black' : 'bg-bitcoin-black text-bitcoin-orange'}`}>
+              <span className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold border-2 border-bitcoin-orange min-h-[48px] flex items-center justify-center w-full sm:w-auto max-w-full truncate ${tradeSignal.riskLevel === 'HIGH' ? 'bg-bitcoin-orange text-bitcoin-black' : 'bg-bitcoin-black text-bitcoin-orange'}`}>
                 {tradeSignal.riskLevel} RISK
               </span>
             </div>
           </div>
 
           {/* Price Levels Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <div className="stat-card p-3 sm:p-4 rounded-xl animate-fade-in-delay-1 mobile-touch-target">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 overflow-hidden">
+            <div className="stat-card p-3 sm:p-4 rounded-xl animate-fade-in-delay-1 min-h-[48px] overflow-hidden">
+              <div className="flex items-center justify-between mb-2 min-w-0">
+                <div className="flex items-center space-x-2 min-w-0">
                   <Target className="h-4 w-4 sm:h-5 sm:w-5 text-bitcoin-orange flex-shrink-0" />
-                  <span className="stat-label text-xs sm:text-sm">ENTRY PRICE</span>
+                  <span className="stat-label text-xs sm:text-sm truncate">ENTRY PRICE</span>
                 </div>
               </div>
-              <div className="price-display text-lg sm:text-xl break-words">
+              <div className="price-display text-lg sm:text-xl break-words overflow-hidden">
                 {formatPrice(tradeSignal.entryPrice)}
               </div>
             </div>
 
-            <div className="stat-card p-3 sm:p-4 rounded-xl animate-fade-in-delay-2 mobile-touch-target">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
+            <div className="stat-card p-3 sm:p-4 rounded-xl animate-fade-in-delay-2 min-h-[48px] overflow-hidden">
+              <div className="flex items-center justify-between mb-2 min-w-0">
+                <div className="flex items-center space-x-2 min-w-0">
                   <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-bitcoin-orange flex-shrink-0" />
-                  <span className="stat-label text-xs sm:text-sm">STOP LOSS</span>
+                  <span className="stat-label text-xs sm:text-sm truncate">STOP LOSS</span>
                 </div>
               </div>
-              <div className="text-lg sm:text-xl font-black text-bitcoin-white break-words font-mono">
+              <div className="text-lg sm:text-xl font-black text-bitcoin-white break-words font-mono overflow-hidden">
                 {formatPrice(tradeSignal.stopLoss)}
               </div>
             </div>
 
-            <div className="stat-card p-3 sm:p-4 rounded-xl animate-fade-in-delay-3 mobile-touch-target">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
+            <div className="stat-card p-3 sm:p-4 rounded-xl animate-fade-in-delay-3 min-h-[48px] overflow-hidden">
+              <div className="flex items-center justify-between mb-2 min-w-0">
+                <div className="flex items-center space-x-2 min-w-0">
                   <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-bitcoin-orange flex-shrink-0" />
-                  <span className="stat-label text-xs sm:text-sm">TAKE PROFIT</span>
+                  <span className="stat-label text-xs sm:text-sm truncate">TAKE PROFIT</span>
                 </div>
               </div>
-              <div className="text-lg sm:text-xl font-black text-bitcoin-white break-words font-mono">
+              <div className="text-lg sm:text-xl font-black text-bitcoin-white break-words font-mono overflow-hidden">
                 {formatPrice(tradeSignal.takeProfit)}
               </div>
             </div>
 
-            <div className="stat-card p-3 sm:p-4 rounded-xl animate-fade-in-delay-1 mobile-touch-target">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
+            <div className="stat-card p-3 sm:p-4 rounded-xl animate-fade-in-delay-1 min-h-[48px] overflow-hidden">
+              <div className="flex items-center justify-between mb-2 min-w-0">
+                <div className="flex items-center space-x-2 min-w-0">
                   <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-bitcoin-orange flex-shrink-0" />
-                  <span className="stat-label text-xs sm:text-sm">RISK:REWARD</span>
+                  <span className="stat-label text-xs sm:text-sm truncate">RISK:REWARD</span>
                 </div>
               </div>
-              <div className="stat-value-orange text-lg sm:text-xl break-words">
+              <div className="stat-value-orange text-lg sm:text-xl break-words overflow-hidden">
                 1:{tradeSignal.riskRewardRatio.toFixed(1)}
               </div>
             </div>
           </div>
 
           {/* Confidence Level */}
-          <div className="stat-card p-3 sm:p-4 rounded-xl animate-slide-up">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
-              <div className="flex items-center space-x-2">
+          <div className="stat-card p-3 sm:p-4 rounded-xl animate-slide-up overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3 min-w-0">
+              <div className="flex items-center space-x-2 min-w-0">
                 <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-bitcoin-orange flex-shrink-0" />
-                <span className="stat-label text-xs sm:text-sm">AI CONFIDENCE LEVEL</span>
+                <span className="stat-label text-xs sm:text-sm truncate">AI CONFIDENCE LEVEL</span>
               </div>
-              <span className="stat-value-orange text-lg sm:text-xl">{tradeSignal.confidence}%</span>
+              <span className="stat-value-orange text-lg sm:text-xl flex-shrink-0">{tradeSignal.confidence}%</span>
             </div>
             <div className="w-full bg-bitcoin-black border border-bitcoin-orange-20 rounded-full h-2 sm:h-3 overflow-hidden">
               <div 
@@ -440,7 +440,7 @@ export default function TradeGenerationEngine() {
                 style={{ width: `${tradeSignal.confidence}%` }}
               ></div>
             </div>
-            <div className="mt-2 text-xs text-bitcoin-white-60 text-center">
+            <div className="mt-2 text-xs text-bitcoin-white-60 text-center truncate">
               {tradeSignal.confidence >= 80 ? 'High Confidence' : 
                tradeSignal.confidence >= 60 ? 'Medium Confidence' : 'Low Confidence'}
             </div>
@@ -449,13 +449,13 @@ export default function TradeGenerationEngine() {
       </div>
 
       {/* Technical Analysis Section */}
-      <div className="space-y-4 sm:space-y-6">
-        <h4 className="text-base sm:text-lg font-black text-bitcoin-white text-center animate-slide-up break-words" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="space-y-4 sm:space-y-6 overflow-hidden">
+        <h4 className="text-base sm:text-lg font-black text-bitcoin-white text-center animate-slide-up break-words px-2" style={{ fontFamily: 'Inter, sans-serif' }}>
           📊 Technical Analysis ({tradeSignal.timeframe})
         </h4>
         
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
-          <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-1 mobile-touch-target">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 overflow-hidden">
+          <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-1 min-h-[48px] overflow-hidden">
             <div className="text-center">
               <div className="stat-label text-xs mb-1 truncate">RSI</div>
               <div className={`text-base sm:text-lg font-black font-mono break-words ${tradeSignal.technicalIndicators?.rsi > 70 ? 'text-bitcoin-orange' : tradeSignal.technicalIndicators?.rsi < 30 ? 'text-bitcoin-orange' : 'text-bitcoin-white'}`}>
@@ -468,7 +468,7 @@ export default function TradeGenerationEngine() {
             </div>
           </div>
 
-          <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-2 mobile-touch-target">
+          <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-2 min-h-[48px] overflow-hidden">
             <div className="text-center">
               <div className="stat-label text-xs mb-1 truncate">MACD</div>
               <div className={`text-base sm:text-lg font-black font-mono break-words ${tradeSignal.technicalIndicators?.macd === 'BULLISH' ? 'text-bitcoin-orange' : tradeSignal.technicalIndicators?.macd === 'BEARISH' ? 'text-bitcoin-orange' : 'text-bitcoin-white'}`}>
@@ -478,7 +478,7 @@ export default function TradeGenerationEngine() {
             </div>
           </div>
 
-          <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-3 mobile-touch-target">
+          <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-3 min-h-[48px] overflow-hidden">
             <div className="text-center">
               <div className="stat-label text-xs mb-1 truncate">Support</div>
               <div className="text-xs sm:text-sm font-black font-mono text-bitcoin-white break-words">
@@ -488,7 +488,7 @@ export default function TradeGenerationEngine() {
             </div>
           </div>
 
-          <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-1 mobile-touch-target">
+          <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-1 min-h-[48px] overflow-hidden">
             <div className="text-center">
               <div className="stat-label text-xs mb-1 truncate">Resistance</div>
               <div className="text-xs sm:text-sm font-black font-mono text-bitcoin-white break-words">
@@ -498,7 +498,7 @@ export default function TradeGenerationEngine() {
             </div>
           </div>
 
-          <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-2 mobile-touch-target">
+          <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-2 min-h-[48px] overflow-hidden">
             <div className="text-center">
               <div className="stat-label text-xs mb-1 truncate">EMA 20</div>
               <div className="text-xs sm:text-sm font-black font-mono text-bitcoin-white break-words">
@@ -508,7 +508,7 @@ export default function TradeGenerationEngine() {
             </div>
           </div>
 
-          <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-3 mobile-touch-target">
+          <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-3 min-h-[48px] overflow-hidden">
             <div className="text-center">
               <div className="stat-label text-xs mb-1 truncate">EMA 50</div>
               <div className="text-xs sm:text-sm font-black font-mono text-bitcoin-white break-words">
@@ -521,9 +521,9 @@ export default function TradeGenerationEngine() {
 
         {/* Additional Technical Indicators Row */}
         {(tradeSignal.technicalIndicators?.atr || tradeSignal.technicalIndicators?.stochastic || tradeSignal.technicalIndicators?.bollinger) && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 mt-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 mt-3 overflow-hidden">
             {tradeSignal.technicalIndicators?.atr && (
-              <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-1 mobile-touch-target">
+              <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-1 min-h-[48px] overflow-hidden">
                 <div className="text-center">
                   <div className="stat-label text-xs mb-1 truncate">ATR</div>
                   <div className="text-xs sm:text-sm font-black font-mono text-bitcoin-white break-words">
@@ -535,7 +535,7 @@ export default function TradeGenerationEngine() {
             )}
             
             {tradeSignal.technicalIndicators?.stochastic && (
-              <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-2 mobile-touch-target">
+              <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-2 min-h-[48px] overflow-hidden">
                 <div className="text-center">
                   <div className="stat-label text-xs mb-1 truncate">Stochastic</div>
                   <div className={`text-base sm:text-lg font-black font-mono break-words ${tradeSignal.technicalIndicators.stochastic === 'OVERBOUGHT' ? 'text-bitcoin-orange' : tradeSignal.technicalIndicators.stochastic === 'OVERSOLD' ? 'text-bitcoin-orange' : 'text-bitcoin-white'}`}>
@@ -547,7 +547,7 @@ export default function TradeGenerationEngine() {
             )}
             
             {tradeSignal.technicalIndicators?.bollinger && (
-              <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-3 mobile-touch-target">
+              <div className="stat-card p-2 sm:p-3 rounded-xl animate-fade-in-delay-3 min-h-[48px] overflow-hidden">
                 <div className="text-center">
                   <div className="stat-label text-xs mb-1 truncate">Bollinger</div>
                   <div className="text-base sm:text-lg font-black font-mono text-bitcoin-white break-words">
@@ -562,77 +562,77 @@ export default function TradeGenerationEngine() {
 
         
         {/* Market Conditions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          <div className="stat-card p-3 sm:p-4 rounded-xl animate-slide-up">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 overflow-hidden">
+          <div className="stat-card p-3 sm:p-4 rounded-xl animate-slide-up overflow-hidden">
             <div className="text-center">
-              <div className="stat-label text-xs sm:text-sm mb-2">MARKET CONDITIONS</div>
-              <div className="text-xs sm:text-sm text-bitcoin-white leading-relaxed break-words">{tradeSignal.marketConditions}</div>
+              <div className="stat-label text-xs sm:text-sm mb-2 truncate">MARKET CONDITIONS</div>
+              <div className="text-xs sm:text-sm text-bitcoin-white leading-relaxed break-words line-clamp-3">{tradeSignal.marketConditions}</div>
             </div>
           </div>
 
-          <div className="stat-card p-3 sm:p-4 rounded-xl animate-slide-up-delay">
+          <div className="stat-card p-3 sm:p-4 rounded-xl animate-slide-up-delay overflow-hidden">
             <div className="text-center">
-              <div className="stat-label text-xs sm:text-sm mb-2">EXPECTED DURATION</div>
-              <div className="stat-value text-base sm:text-lg break-words">{tradeSignal.expectedDuration}</div>
+              <div className="stat-label text-xs sm:text-sm mb-2 truncate">EXPECTED DURATION</div>
+              <div className="stat-value text-base sm:text-lg break-words truncate">{tradeSignal.expectedDuration}</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* AI Analysis Section */}
-      <div className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
-        <h4 className="text-base sm:text-lg font-black text-bitcoin-white text-center border-b-2 border-bitcoin-orange pb-2 sm:pb-3 animate-slide-up break-words" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="space-y-4 sm:space-y-6 mt-4 sm:mt-6 overflow-hidden">
+        <h4 className="text-base sm:text-lg font-black text-bitcoin-white text-center border-b-2 border-bitcoin-orange pb-2 sm:pb-3 animate-slide-up break-words px-2" style={{ fontFamily: 'Inter, sans-serif' }}>
           🤖 AI Analysis & Reasoning
         </h4>
         
         <div className="space-y-3 sm:space-y-4">
-          <div className="stat-card p-3 sm:p-4 rounded-xl animate-fade-in-delay-1">
-            <div className="flex items-center space-x-2 mb-2 sm:mb-3">
+          <div className="stat-card p-3 sm:p-4 rounded-xl animate-fade-in-delay-1 overflow-hidden">
+            <div className="flex items-center space-x-2 mb-2 sm:mb-3 min-w-0">
               <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-bitcoin-orange flex-shrink-0" />
-              <h5 className="text-xs sm:text-sm font-bold text-bitcoin-white">Market Analysis</h5>
+              <h5 className="text-xs sm:text-sm font-bold text-bitcoin-white truncate">Market Analysis</h5>
             </div>
-            <p className="text-xs sm:text-sm text-bitcoin-white-80 leading-relaxed break-words">{tradeSignal.analysis}</p>
+            <p className="text-xs sm:text-sm text-bitcoin-white-80 leading-relaxed break-words line-clamp-6">{tradeSignal.analysis}</p>
           </div>
 
-          <div className="stat-card p-3 sm:p-4 rounded-xl animate-fade-in-delay-2">
-            <div className="flex items-center space-x-2 mb-2 sm:mb-3">
+          <div className="stat-card p-3 sm:p-4 rounded-xl animate-fade-in-delay-2 overflow-hidden">
+            <div className="flex items-center space-x-2 mb-2 sm:mb-3 min-w-0">
               <Target className="h-4 w-4 sm:h-5 sm:w-5 text-bitcoin-orange flex-shrink-0" />
-              <h5 className="text-xs sm:text-sm font-bold text-bitcoin-white">Trade Reasoning</h5>
+              <h5 className="text-xs sm:text-sm font-bold text-bitcoin-white truncate">Trade Reasoning</h5>
             </div>
-            <p className="text-xs sm:text-sm text-bitcoin-white-80 leading-relaxed break-words">{tradeSignal.reasoning}</p>
+            <p className="text-xs sm:text-sm text-bitcoin-white-80 leading-relaxed break-words line-clamp-6">{tradeSignal.reasoning}</p>
           </div>
         </div>
 
         {/* Sentiment Analysis */}
         {tradeSignal.sentimentAnalysis && (
-          <div className="stat-card p-3 sm:p-4 rounded-xl animate-fade-in-delay-3">
-            <h5 className="text-xs sm:text-sm font-bold text-bitcoin-orange mb-2 break-words">Market Sentiment Analysis:</h5>
-            <p className="text-xs sm:text-sm text-bitcoin-white-80 leading-relaxed break-words">{tradeSignal.sentimentAnalysis}</p>
+          <div className="stat-card p-3 sm:p-4 rounded-xl animate-fade-in-delay-3 overflow-hidden">
+            <h5 className="text-xs sm:text-sm font-bold text-bitcoin-orange mb-2 break-words truncate">Market Sentiment Analysis:</h5>
+            <p className="text-xs sm:text-sm text-bitcoin-white-80 leading-relaxed break-words line-clamp-4">{tradeSignal.sentimentAnalysis}</p>
           </div>
         )}
 
         {/* News Impact Analysis */}
         {tradeSignal.newsImpact && (
-          <div className="stat-card p-3 sm:p-4 rounded-xl animate-fade-in-delay-1">
-            <h5 className="text-xs sm:text-sm font-bold text-bitcoin-orange mb-2 break-words">Live News Impact:</h5>
-            <p className="text-xs sm:text-sm text-bitcoin-white-80 leading-relaxed break-words">{tradeSignal.newsImpact}</p>
+          <div className="stat-card p-3 sm:p-4 rounded-xl animate-fade-in-delay-1 overflow-hidden">
+            <h5 className="text-xs sm:text-sm font-bold text-bitcoin-orange mb-2 break-words truncate">Live News Impact:</h5>
+            <p className="text-xs sm:text-sm text-bitcoin-white-80 leading-relaxed break-words line-clamp-4">{tradeSignal.newsImpact}</p>
           </div>
         )}
       </div>
 
       {/* Enhanced Data Quality Status */}
-      <div className="mt-4 sm:mt-6 p-3 sm:p-4 stat-card rounded-xl">
+      <div className="mt-4 sm:mt-6 p-3 sm:p-4 stat-card rounded-xl overflow-hidden">
         <div className="flex flex-col gap-2 text-xs sm:text-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-              <span className="px-3 py-2 rounded-lg border-2 border-bitcoin-orange font-bold text-bitcoin-orange bg-bitcoin-black min-h-[36px] flex items-center justify-center w-fit">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 min-w-0">
+              <span className="px-3 py-2 rounded-lg border-2 border-bitcoin-orange font-bold text-bitcoin-orange bg-bitcoin-black min-h-[48px] flex items-center justify-center w-fit flex-shrink-0">
                 🔴 RELIABLE LIVE DATA
               </span>
-              <span className="text-bitcoin-white-80 font-medium break-words">
+              <span className="text-bitcoin-white-80 font-medium break-words line-clamp-2">
                 Real-time {selectedCrypto === 'BTC' ? 'Bitcoin' : 'Ethereum'} data from CoinMarketCap/CoinGecko APIs
               </span>
             </div>
-            <span className="text-bitcoin-white-80 font-bold text-xs break-words">
+            <span className="text-bitcoin-white-80 font-bold text-xs break-words flex-shrink-0">
               Generated: {tradeSignal?.timestamp ? formatDate(tradeSignal.timestamp) : 'N/A'}
             </span>
           </div>
@@ -640,49 +640,49 @@ export default function TradeGenerationEngine() {
         
         {/* Data Quality Metrics */}
         {tradeSignal?.dataQuality && (
-          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-            <div className="bg-bitcoin-black p-2 sm:p-3 rounded-lg border-2 border-bitcoin-orange-20">
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs overflow-hidden">
+            <div className="bg-bitcoin-black p-2 sm:p-3 rounded-lg border-2 border-bitcoin-orange-20 overflow-hidden">
               <div className="font-bold text-bitcoin-orange mb-1 truncate">Exchanges</div>
-              <div className="text-bitcoin-white break-words">{tradeSignal.dataQuality.exchangesCovered || 'N/A'}</div>
+              <div className="text-bitcoin-white break-words truncate">{tradeSignal.dataQuality.exchangesCovered || 'N/A'}</div>
             </div>
-            <div className="bg-bitcoin-black p-2 sm:p-3 rounded-lg border-2 border-bitcoin-orange-20">
+            <div className="bg-bitcoin-black p-2 sm:p-3 rounded-lg border-2 border-bitcoin-orange-20 overflow-hidden">
               <div className="font-bold text-bitcoin-orange mb-1 truncate">Indicators</div>
-              <div className="text-bitcoin-white break-words">{tradeSignal.dataQuality.technicalIndicators || 'N/A'}</div>
+              <div className="text-bitcoin-white break-words truncate">{tradeSignal.dataQuality.technicalIndicators || 'N/A'}</div>
             </div>
-            <div className="bg-bitcoin-black p-2 sm:p-3 rounded-lg border-2 border-bitcoin-orange-20">
+            <div className="bg-bitcoin-black p-2 sm:p-3 rounded-lg border-2 border-bitcoin-orange-20 overflow-hidden">
               <div className="font-bold text-bitcoin-orange mb-1 truncate">Sentiment</div>
-              <div className="text-bitcoin-white break-words">{tradeSignal.dataQuality.sentimentSources || 'N/A'}</div>
+              <div className="text-bitcoin-white break-words truncate">{tradeSignal.dataQuality.sentimentSources || 'N/A'}</div>
             </div>
-            <div className="bg-bitcoin-black p-2 sm:p-3 rounded-lg border-2 border-bitcoin-orange-20">
+            <div className="bg-bitcoin-black p-2 sm:p-3 rounded-lg border-2 border-bitcoin-orange-20 overflow-hidden">
               <div className="font-bold text-bitcoin-orange mb-1 truncate">Spread</div>
-              <div className="text-bitcoin-white">{tradeSignal.dataQuality.priceSpread ? tradeSignal.dataQuality.priceSpread.toFixed(3) + '%' : 'N/A'}</div>
+              <div className="text-bitcoin-white truncate">{tradeSignal.dataQuality.priceSpread ? tradeSignal.dataQuality.priceSpread.toFixed(3) + '%' : 'N/A'}</div>
             </div>
           </div>
         )}
         
-        <div className="mt-3 text-xs text-bitcoin-white-80 bg-bitcoin-black p-3 rounded-lg border-2 border-bitcoin-orange-20">
-          <strong className="break-words text-bitcoin-orange">Reliable Live Integration:</strong> <span className="break-words">This signal uses real-time data from CoinMarketCap (primary) or CoinGecko (fallback). All data is validated for accuracy and freshness before analysis.</span>
+        <div className="mt-3 text-xs text-bitcoin-white-80 bg-bitcoin-black p-3 rounded-lg border-2 border-bitcoin-orange-20 overflow-hidden">
+          <strong className="break-words text-bitcoin-orange">Reliable Live Integration:</strong> <span className="break-words line-clamp-3">This signal uses real-time data from CoinMarketCap (primary) or CoinGecko (fallback). All data is validated for accuracy and freshness before analysis.</span>
         </div>
         
         {/* Arbitrage & Liquidity Analysis */}
         {tradeSignal?.arbitrageOpportunity && (
-          <div className="mt-2 text-xs text-bitcoin-white-80 bg-bitcoin-black p-3 rounded-lg border-2 border-bitcoin-orange-20">
-            <strong className="text-bitcoin-orange">Cross-Exchange Analysis:</strong> <span className="break-words">{tradeSignal.arbitrageOpportunity}</span>
+          <div className="mt-2 text-xs text-bitcoin-white-80 bg-bitcoin-black p-3 rounded-lg border-2 border-bitcoin-orange-20 overflow-hidden">
+            <strong className="text-bitcoin-orange">Cross-Exchange Analysis:</strong> <span className="break-words line-clamp-3">{tradeSignal.arbitrageOpportunity}</span>
           </div>
         )}
         
         {tradeSignal?.liquidityAnalysis && (
-          <div className="mt-2 text-xs text-bitcoin-white-80 bg-bitcoin-black p-3 rounded-lg border-2 border-bitcoin-orange-20">
-            <strong className="text-bitcoin-orange">Liquidity Assessment:</strong> <span className="break-words">{tradeSignal.liquidityAnalysis}</span>
+          <div className="mt-2 text-xs text-bitcoin-white-80 bg-bitcoin-black p-3 rounded-lg border-2 border-bitcoin-orange-20 overflow-hidden">
+            <strong className="text-bitcoin-orange">Liquidity Assessment:</strong> <span className="break-words line-clamp-3">{tradeSignal.liquidityAnalysis}</span>
           </div>
         )}
       </div>
 
       {/* Disclaimer */}
-      <div className="mt-4 sm:mt-6 p-3 sm:p-4 stat-card rounded-xl border-bitcoin-orange">
-        <div className="flex items-start space-x-2">
+      <div className="mt-4 sm:mt-6 p-3 sm:p-4 stat-card rounded-xl border-bitcoin-orange overflow-hidden">
+        <div className="flex items-start space-x-2 min-w-0">
           <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-bitcoin-orange mt-0.5 flex-shrink-0" />
-          <div className="text-xs sm:text-sm text-bitcoin-white-80 leading-relaxed break-words">
+          <div className="text-xs sm:text-sm text-bitcoin-white-80 leading-relaxed break-words min-w-0">
             <strong className="text-bitcoin-orange">Risk Disclaimer:</strong> This trade signal is generated by AI analysis and is for educational purposes only. 
             Cryptocurrency trading involves substantial risk of loss. Never risk more than you can afford to lose. 
             Past performance does not guarantee future results. Always conduct your own research and consider consulting with a financial advisor.

@@ -11,6 +11,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600;700&display=swap');
 
+/* Import Data Formatting Styles (Task 12.11) */
+@import './data-formatting.css';
+
 :root {
   /* ============================================
      BITCOIN SOVEREIGN COLOR PALETTE
@@ -5283,40 +5286,51 @@ Caesar API Coming Soon Animation */
   transform: translateY(-9px) rotate(-45deg);
 }
 
-/* FULL-SCREEN OVERLAY MENU */
+/* ============================================
+   FULL-SCREEN OVERLAY MENU
+   Mobile/Tablet: 320px-1023px
+   ============================================ */
 .menu-overlay {
   /* Fixed Position - Cover Entire Viewport */
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 100vw;
   height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
   
   /* Pure Black Background */
   background: var(--bitcoin-black);
   
   /* Z-index Above Everything */
-  z-index: 1000;
+  z-index: 9999;
   
   /* Centered Flex Layout */
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   gap: 1.5rem;
   
   /* Hidden by Default */
   opacity: 0;
   pointer-events: none;
+  visibility: hidden;
   
   /* Smooth Opacity Transition */
-  transition: opacity 0.4s ease;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
   
   /* Padding for Mobile */
   padding: 2rem 1.5rem;
   
-  /* Overflow */
+  /* Overflow - Allow Scrolling */
   overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  
+  /* Prevent body scroll when menu is open */
+  overscroll-behavior: contain;
 }
 
 /* Menu Overlay Active State */
@@ -5324,6 +5338,7 @@ Caesar API Coming Soon Animation */
   /* Show Menu */
   opacity: 1;
   pointer-events: all;
+  visibility: visible;
 }
 
 /* MENU ITEMS - LARGE ORANGE TEXT */
@@ -11178,6 +11193,259 @@ button,
    Verify confidence scores are visible
    ============================================ */
 
+/* MOBILE/TABLET ONLY - Crypto News Wire Component Fixes */
+@media (max-width: 1023px) {
+  
+  /* ============================================
+     CRYPTO NEWS WIRE MOBILE FIXES
+     ============================================ */
+  
+  /* News Card Container - Ensure proper containment */
+  .crypto-news-card,
+  .bitcoin-block {
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  
+  /* Article Headlines - Truncate with line-clamp */
+  .crypto-news-headline {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+    max-width: 100%;
+  }
+  
+  /* Article Summary - Truncate with line-clamp */
+  .crypto-news-summary {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+    max-width: 100%;
+  }
+  
+  /* Sentiment Badges - Ensure they fit within cards */
+  .sentiment-badge {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    touch-action: manipulation;
+  }
+  
+  /* News Source Logos - Scale properly */
+  .news-source-logo,
+  .crypto-news-source img {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+  
+  /* Timestamp and Metadata - Prevent overflow */
+  .news-timestamp,
+  .news-metadata {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  
+  /* Read More Buttons - Ensure accessibility */
+  .news-read-more {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 0.75rem 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    word-break: keep-all;
+    white-space: nowrap;
+  }
+  
+  /* Article Expansion/Collapse - Smooth transitions */
+  .news-article-expandable {
+    transition: max-height 0.5s ease-in-out, opacity 0.3s ease-in-out;
+    overflow: hidden;
+  }
+  
+  .news-article-expanded {
+    max-height: 100000px;
+    opacity: 1;
+  }
+  
+  .news-article-collapsed {
+    max-height: 0;
+    opacity: 0;
+  }
+  
+  /* News Grid - Single column on mobile */
+  .news-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    max-width: 100%;
+  }
+  
+  /* Featured Article - Full width */
+  .featured-article {
+    grid-column: 1;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  /* AI Insight Badge - Ensure visibility */
+  .ai-insight-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    min-height: 48px;
+    touch-action: manipulation;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  /* Category Header - Responsive text */
+  .news-category-header {
+    font-size: 1.5rem;
+    line-height: 1.2;
+    word-break: break-word;
+    max-width: 100%;
+  }
+  
+  /* Market Ticker - Ensure smooth scrolling */
+  .ticker-container {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+  
+  .ticker-item {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  
+  /* Collapsible Header Button - Full width */
+  .news-collapse-button {
+    width: 100%;
+    min-height: 48px;
+    touch-action: manipulation;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+  }
+  
+  /* Image Containers - Prevent overflow */
+  .news-image-container {
+    max-width: 100%;
+    overflow: hidden;
+    border-radius: 8px;
+  }
+  
+  .news-image-container img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+  
+  /* Flex Containers - Prevent overflow */
+  .news-flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    max-width: 100%;
+    min-width: 0;
+  }
+  
+  .news-flex-item {
+    flex-shrink: 1;
+    min-width: 0;
+    max-width: 100%;
+  }
+  
+  /* Source Attribution - Truncate long names */
+  .news-source-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px;
+  }
+  
+  /* API Status Badge - Responsive */
+  .api-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    max-width: 100%;
+    overflow: hidden;
+    flex-wrap: wrap;
+  }
+  
+  /* Feature Badges - Wrap on mobile */
+  .feature-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    background: var(--bitcoin-black);
+    border: 1px solid rgba(247, 147, 26, 0.3);
+    border-radius: 6px;
+    color: var(--bitcoin-white-80);
+  }
+  
+  /* Fix long URLs in news articles */
+  .news-url {
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+  
+  /* Prevent horizontal scroll from any element */
+  .crypto-herald-container,
+  .news-container {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+}
+
+/* TABLET SPECIFIC - Crypto News Wire */
+@media (min-width: 768px) and (max-width: 1023px) {
+  
+  /* Two-column grid on tablets */
+  .news-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+  
+  /* Featured article spans both columns */
+  .featured-article {
+    grid-column: 1 / -1;
+  }
+  
+  /* Larger text on tablets */
+  .crypto-news-headline {
+    font-size: 1.25rem;
+  }
+  
+  /* Larger buttons on tablets */
+  .news-read-more {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+  }
+}
+
 /* MOBILE/TABLET ONLY - Trade Generation Component Fixes */
 @media (max-width: 1023px) {
   
@@ -12991,3 +13259,4486 @@ ol[role="list"] {
 /* ============================================
    END OF MOBILE/TABLET GLOBAL VISUAL CONSISTENCY
    ============================================ */
+
+
+/* ============================================
+   MOBILE/TABLET VISUAL FIXES (320px-1023px)
+   Task 12: Deep Dive Visual Audit
+   CRITICAL: Desktop (1024px+) must remain unchanged
+   ============================================ */
+
+@media (max-width: 1023px) {
+  
+  /* ============================================
+     TASK 12.8: FIX FORM INPUT CONTROLS
+     CRITICAL: Password Toggle Button Overflow Fix
+     ============================================ */
+  
+  /* Password Input - Add padding for toggle button */
+  input[type="password"] {
+    padding-right: 56px !important; /* Space for toggle button */
+  }
+  
+  /* Password Toggle Button - Keep INSIDE input border */
+  /* Target button that comes after password input within relative container */
+  .relative input[type="password"] ~ button,
+  .relative input[type="text"] ~ button[aria-label*="password"] {
+    position: absolute;
+    right: 8px !important; /* Inside the input border (was right-3 = 12px) */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    background: transparent !important; /* Remove background to prevent orange square */
+    border-radius: 6px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  /* Password Toggle Button Hover State */
+  .relative input[type="password"] ~ button:hover,
+  .relative input[type="text"] ~ button[aria-label*="password"]:hover {
+    background: var(--bitcoin-orange-10) !important;
+  }
+  
+  /* Password Toggle Icon Sizing */
+  .relative input[type="password"] ~ button svg,
+  .relative input[type="text"] ~ button[aria-label*="password"] svg {
+    width: 20px;
+    height: 20px;
+    color: var(--bitcoin-orange);
+  }
+  
+  /* Email Input Icon - Ensure it stays inside border */
+  .relative input[type="email"] ~ svg {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    color: var(--bitcoin-white-60);
+    pointer-events: none;
+  }
+  
+  /* All Input Fields - Ensure proper sizing */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--bitcoin-black);
+    color: var(--bitcoin-white);
+    border: 2px solid var(--bitcoin-orange-20);
+    border-radius: 8px;
+    font-size: 1rem; /* Prevents iOS zoom */
+    transition: all 0.3s ease;
+  }
+  
+  /* Input Focus State */
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="password"]:focus {
+    outline: none;
+    border-color: var(--bitcoin-orange);
+    box-shadow: 0 0 0 3px rgba(247, 147, 26, 0.3);
+  }
+  
+  /* Checkbox Alignment */
+  input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+    background: var(--bitcoin-black);
+    border: 2px solid var(--bitcoin-orange-20);
+    border-radius: 4px;
+    cursor: pointer;
+    accent-color: var(--bitcoin-orange);
+  }
+  
+  /* Checkbox Label Alignment */
+  label:has(input[type="checkbox"]) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+  
+  /* Form Labels */
+  label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--bitcoin-white-80);
+    margin-bottom: 0.5rem;
+  }
+  
+  /* ============================================
+     TASK 12.10: ELEMENT SCALING AND FITTING
+     Ensure all elements fit within containers
+     ============================================ */
+  
+  /* Container Elements - Prevent overflow */
+  .container-element,
+  .bitcoin-block,
+  .bitcoin-block-subtle,
+  .bitcoin-block-orange {
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  
+  /* Icon Containers - Ensure icons fit */
+  .icon-container svg,
+  svg {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+  }
+  
+  /* Text Containers - Prevent overflow */
+  .text-container,
+  p,
+  span,
+  div {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+  }
+  
+  /* ============================================
+     TASK 12.9: SCROLL-BASED OVERLAYS AND MODALS
+     Ensure overlays cover full viewport
+     ============================================ */
+  
+  /* Modal Overlay - Full viewport coverage */
+  .modal-overlay,
+  [role="dialog"],
+  .mobile-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Modal Content - Fit within viewport */
+  .modal-content {
+    max-width: calc(100vw - 2rem);
+    max-height: calc(100vh - 2rem);
+    margin: 1rem;
+    overflow-y: auto;
+  }
+  
+  /* Modal Close Button - Accessible */
+  .modal-close,
+  [aria-label*="close"],
+  [aria-label*="Close"] {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bitcoin-orange);
+    color: var(--bitcoin-black);
+    border: 2px solid var(--bitcoin-orange);
+    border-radius: 8px;
+    cursor: pointer;
+    z-index: 10000;
+  }
+  
+  /* Prevent body scroll when modal is open */
+  body.modal-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+  }
+  
+  /* ============================================
+     TASK 12.11: DATA FORMATTING AND ALIGNMENT
+     Ensure data displays properly
+     ============================================ */
+  
+  /* Price Displays - Fit within containers */
+  .price-display,
+  .stat-value {
+    font-family: 'Roboto Mono', monospace;
+    font-size: clamp(1rem, 4vw, 2rem);
+    font-weight: 700;
+    color: var(--bitcoin-orange);
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Large Numbers - Responsive sizing */
+  .large-number {
+    font-size: clamp(1.25rem, 5vw, 2.5rem);
+    line-height: 1.2;
+  }
+  
+  /* Wallet Address Truncation */
+  .wallet-address {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.875rem;
+    word-break: break-all;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  
+  /* Table Cell Overflow */
+  table td,
+  table th {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px;
+  }
+  
+  /* ============================================
+     TASK 12.12: MENU AND NAVIGATION
+     Hamburger menu and navigation fixes
+     ============================================ */
+  
+  /* Hamburger Icon - Proper sizing */
+  .hamburger-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+  }
+  
+  /* Hamburger Lines */
+  .hamburger-line {
+    width: 24px;
+    height: 2px;
+    background: var(--bitcoin-orange);
+    transition: all 0.3s ease;
+  }
+  
+  /* Menu Overlay - Full screen */
+  .mobile-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--bitcoin-black);
+    z-index: 9999;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Menu Items - Proper alignment */
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    background: var(--bitcoin-black);
+    border: 1px solid var(--bitcoin-orange-20);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    min-height: 60px;
+  }
+  
+  /* Menu Item Hover */
+  .menu-item:hover,
+  .menu-item:active {
+    background: var(--bitcoin-orange);
+    color: var(--bitcoin-black);
+    border-color: var(--bitcoin-orange);
+  }
+  
+  /* Menu Item Icon */
+  .menu-item-icon {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+    color: var(--bitcoin-orange);
+  }
+  
+  /* Menu Item Active State */
+  .menu-item.active {
+    background: var(--bitcoin-orange);
+    color: var(--bitcoin-black);
+    border-color: var(--bitcoin-orange);
+  }
+  
+  .menu-item.active .menu-item-icon {
+    color: var(--bitcoin-black);
+  }
+  
+  /* ============================================
+     TASK 12.1: AUTHENTICATION PAGES
+     Login and registration form fixes
+     ============================================ */
+  
+  /* Auth Container - Proper sizing */
+  .auth-container {
+    max-width: 100%;
+    padding: 1rem;
+    margin: 0 auto;
+  }
+  
+  /* Auth Form - Proper spacing */
+  .auth-form {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  /* Auth Header Icon - Proper sizing */
+  .auth-header-icon {
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    background: var(--bitcoin-black);
+    border: 2px solid var(--bitcoin-orange);
+    border-radius: 50%;
+  }
+  
+  /* ============================================
+     TASK 12.2: LANDING PAGE
+     Hero section and feature cards
+     ============================================ */
+  
+  /* Hero Section - Proper sizing */
+  .hero-section {
+    padding: 2rem 1rem;
+    text-align: center;
+  }
+  
+  /* Feature Cards - Proper sizing */
+  .feature-card {
+    width: 100%;
+    max-width: 100%;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    background: var(--bitcoin-black);
+    border: 1px solid var(--bitcoin-orange);
+    border-radius: 12px;
+  }
+  
+  /* ============================================
+     TASK 12.3-12.7: PAGE-SPECIFIC FIXES
+     Bitcoin Report, Ethereum Report, News, Whale Watch, Trade Generation
+     ============================================ */
+  
+  /* Chart Containers - Fit within viewport */
+  .chart-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Stat Cards Grid - Single column on mobile */
+  .stat-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  /* News Cards - Proper sizing */
+  .news-card {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 1rem;
+  }
+  
+  /* Whale Transaction Cards - Proper sizing */
+  .whale-card {
+    width: 100%;
+    max-width: 100%;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Trade Signal Cards - Proper sizing */
+  .trade-signal-card {
+    width: 100%;
+    max-width: 100%;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* ============================================
+     GENERAL MOBILE OPTIMIZATIONS
+     ============================================ */
+  
+  /* Prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  
+  /* All containers - Prevent overflow */
+  * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Images - Responsive */
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  /* Buttons - Minimum touch target */
+  button,
+  a,
+  input[type="submit"],
+  input[type="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Text - Prevent overflow */
+  h1, h2, h3, h4, h5, h6, p, span, div {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Reduce padding on mobile */
+  .bitcoin-block,
+  .bitcoin-block-subtle,
+  .bitcoin-block-orange {
+    padding: 1rem;
+  }
+  
+  /* Smaller font sizes on mobile */
+  h1 {
+    font-size: 1.75rem; /* 28px */
+  }
+  
+  h2 {
+    font-size: 1.5rem; /* 24px */
+  }
+  
+  h3 {
+    font-size: 1.25rem; /* 20px */
+  }
+  
+  /* ============================================
+     ACCESSIBILITY - MOBILE FOCUS STATES
+     ============================================ */
+  
+  /* Focus states - Visible on mobile */
+  *:focus-visible {
+    outline: 2px solid var(--bitcoin-orange);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(247, 147, 26, 0.3);
+  }
+  
+  /* Button focus states */
+  button:focus-visible,
+  a:focus-visible {
+    outline: 2px solid var(--bitcoin-orange);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(247, 147, 26, 0.4);
+  }
+  
+}
+
+/* ============================================
+   END MOBILE/TABLET FIXES
+   Desktop (1024px+) remains unchanged
+   ============================================ */
+
+
+/* ============================================
+   TASK 12.1: AUTHENTICATION PAGES MOBILE FIXES
+   Comprehensive Visual Audit - Login & Registration
+   ============================================ */
+
+@media (max-width: 1023px) {
+  
+  /* ============================================
+     FORM INPUT CONTROLS - MOBILE OPTIMIZED
+     Ensure all form elements fit within containers
+     ============================================ */
+  
+  /* All Input Fields - Proper Sizing and Padding */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  textarea,
+  select {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 1rem !important; /* Prevents iOS zoom */
+    min-height: 48px !important; /* Touch target */
+    background: var(--bitcoin-black) !important;
+    color: var(--bitcoin-white) !important;
+    border: 2px solid var(--bitcoin-orange-20) !important;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  
+  /* Password Input - Extra Padding for Toggle Button */
+  input[type="password"] {
+    padding-right: 3.5rem !important; /* Space for toggle button */
+  }
+  
+  /* Input Focus State */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    border-color: var(--bitcoin-orange) !important;
+    outline: 2px solid var(--bitcoin-orange) !important;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(247, 147, 26, 0.3) !important;
+  }
+  
+  /* Input Error State */
+  input.error,
+  input[aria-invalid="true"],
+  textarea.error {
+    border-color: var(--bitcoin-orange-80) !important;
+    box-shadow: 0 0 0 3px rgba(247, 147, 26, 0.2) !important;
+  }
+  
+  /* ============================================
+     PASSWORD TOGGLE BUTTON - CRITICAL FIX
+     Ensure toggle stays INSIDE input field border
+     ============================================ */
+  
+  /* Password Toggle Button Container */
+  input[type="password"] + button,
+  input[type="password"] ~ button,
+  .password-toggle,
+  button[aria-label*="password"] {
+    position: absolute !important;
+    right: 0.75rem !important; /* Inside the input border */
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 40px !important;
+    height: 40px !important;
+    padding: 8px !important;
+    background: transparent !important;
+    border: none !important;
+    color: var(--bitcoin-orange) !important;
+    cursor: pointer;
+    z-index: 10 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: color 0.3s ease;
+  }
+  
+  /* Password Toggle Hover State */
+  input[type="password"] + button:hover,
+  input[type="password"] ~ button:hover,
+  .password-toggle:hover {
+    color: var(--bitcoin-white) !important;
+  }
+  
+  /* Password Toggle Icon Sizing */
+  input[type="password"] + button svg,
+  input[type="password"] ~ button svg,
+  .password-toggle svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  
+  /* ============================================
+     EMAIL INPUT ICON - PROPER POSITIONING
+     Ensure icon stays within input border
+     ============================================ */
+  
+  /* Email Icon Container */
+  input[type="email"] + svg,
+  input[type="email"] ~ svg,
+  .email-icon {
+    position: absolute !important;
+    right: 0.75rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 20px !important;
+    height: 20px !important;
+    color: var(--bitcoin-white-60) !important;
+    pointer-events: none !important;
+  }
+  
+  /* ============================================
+     CHECKBOX AND LABEL ALIGNMENT
+     Ensure proper alignment on mobile
+     ============================================ */
+  
+  /* Checkbox Container */
+  label[for*="remember"],
+  label[for*="checkbox"],
+  .checkbox-label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    cursor: pointer;
+  }
+  
+  /* Checkbox Input */
+  input[type="checkbox"] {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+    margin: 0 !important;
+    cursor: pointer;
+    accent-color: var(--bitcoin-orange) !important;
+    border: 2px solid var(--bitcoin-orange-20) !important;
+    border-radius: 4px;
+  }
+  
+  /* Checkbox Label Text */
+  input[type="checkbox"] + span,
+  .checkbox-label span {
+    color: var(--bitcoin-white-80) !important;
+    font-size: 0.875rem !important;
+    line-height: 1.4;
+    user-select: none;
+  }
+  
+  /* ============================================
+     FORM LABELS - CONSISTENT STYLING
+     ============================================ */
+  
+  /* All Form Labels */
+  label {
+    display: block !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    color: var(--bitcoin-white-80) !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  /* Required Field Indicator */
+  label span[class*="required"],
+  label .text-bitcoin-orange {
+    color: var(--bitcoin-orange) !important;
+    margin-left: 0.25rem;
+  }
+  
+  /* ============================================
+     ERROR MESSAGES - VISIBLE AND CLEAR
+     ============================================ */
+  
+  /* Error Message Container */
+  .error-message,
+  div[class*="error"],
+  div[class*="alert"] {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+    margin-top: 0.5rem !important;
+    padding: 0.75rem !important;
+    background: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    border-radius: 8px;
+    color: var(--bitcoin-orange) !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Error Icon */
+  .error-message svg,
+  div[class*="error"] svg {
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0 !important;
+    color: var(--bitcoin-orange) !important;
+  }
+  
+  /* ============================================
+     SUCCESS MESSAGES - VISIBLE AND CLEAR
+     ============================================ */
+  
+  /* Success Message Container */
+  .success-message,
+  div[class*="success"] {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+    margin-top: 0.5rem !important;
+    padding: 0.75rem !important;
+    background: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    border-radius: 8px;
+    color: var(--bitcoin-white-80) !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Success Icon */
+  .success-message svg,
+  div[class*="success"] svg {
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0 !important;
+    color: var(--bitcoin-orange) !important;
+  }
+  
+  /* ============================================
+     PASSWORD STRENGTH INDICATOR
+     Ensure proper display on mobile
+     ============================================ */
+  
+  /* Password Strength Container */
+  .password-strength,
+  div[class*="strength"] {
+    margin-top: 0.75rem !important;
+    padding: 0.75rem !important;
+    background: var(--bitcoin-black) !important;
+    border: 1px solid var(--bitcoin-orange-20) !important;
+    border-radius: 8px;
+  }
+  
+  /* Strength Bar Container */
+  .strength-bar,
+  div[class*="strength-bar"] {
+    display: flex !important;
+    gap: 0.25rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+  
+  /* Individual Strength Bar Segment */
+  .strength-bar > div {
+    height: 4px !important;
+    flex: 1 !important;
+    border-radius: 2px;
+    transition: background-color 0.3s ease;
+  }
+  
+  /* Requirements Checklist */
+  .password-requirements,
+  div[class*="requirements"] {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+  
+  /* Individual Requirement Item */
+  .requirement-item,
+  div[class*="requirement"] {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    font-size: 0.75rem !important;
+    color: var(--bitcoin-white-60) !important;
+  }
+  
+  /* Requirement Met */
+  .requirement-item.met,
+  div[class*="requirement"].met {
+    color: var(--bitcoin-orange) !important;
+  }
+  
+  /* Requirement Icon */
+  .requirement-item svg {
+    width: 12px !important;
+    height: 12px !important;
+    flex-shrink: 0 !important;
+  }
+  
+  /* ============================================
+     FORM BUTTONS - MOBILE OPTIMIZED
+     ============================================ */
+  
+  /* Submit Buttons */
+  form button[type="submit"],
+  .form-submit,
+  .btn-submit {
+    width: 100% !important;
+    min-height: 56px !important;
+    padding: 1rem 1.5rem !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+  }
+  
+  /* Submit Button Hover */
+  form button[type="submit"]:hover:not(:disabled) {
+    background: var(--bitcoin-black) !important;
+    color: var(--bitcoin-orange) !important;
+    box-shadow: 0 0 30px rgba(247, 147, 26, 0.5) !important;
+    transform: scale(1.02);
+  }
+  
+  /* Submit Button Active */
+  form button[type="submit"]:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+  
+  /* Submit Button Disabled */
+  form button[type="submit"]:disabled {
+    background: var(--bitcoin-black) !important;
+    color: var(--bitcoin-orange-30) !important;
+    border-color: var(--bitcoin-orange-30) !important;
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  
+  /* Secondary Form Buttons */
+  form button[type="button"],
+  .form-button-secondary {
+    width: 100% !important;
+    min-height: 48px !important;
+    padding: 0.75rem 1.5rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    background: transparent !important;
+    color: var(--bitcoin-orange) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  /* Secondary Button Hover */
+  form button[type="button"]:hover:not(:disabled) {
+    background: var(--bitcoin-orange) !important;
+    color: var(--bitcoin-black) !important;
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.3) !important;
+  }
+  
+  /* ============================================
+     LOADING SPINNER - VISIBLE ON MOBILE
+     ============================================ */
+  
+  /* Loading Spinner */
+  .loading-spinner,
+  div[class*="spinner"],
+  div[class*="loading"] {
+    width: 20px !important;
+    height: 20px !important;
+    border: 2px solid var(--bitcoin-black) !important;
+    border-top-color: transparent !important;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  
+  /* Spinner in Orange Button */
+  .btn-bitcoin-primary .loading-spinner,
+  button[class*="primary"] .loading-spinner {
+    border-color: var(--bitcoin-black) !important;
+    border-top-color: transparent !important;
+  }
+  
+  /* Spinner in Secondary Button */
+  .btn-bitcoin-secondary .loading-spinner,
+  button[class*="secondary"] .loading-spinner {
+    border-color: var(--bitcoin-orange) !important;
+    border-top-color: transparent !important;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  /* ============================================
+     RATE LIMIT WARNING - MOBILE DISPLAY
+     ============================================ */
+  
+  /* Rate Limit Container */
+  .rate-limit-warning,
+  div[class*="rate-limit"] {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+    padding: 1rem !important;
+    margin-bottom: 1.5rem !important;
+    background: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    border-radius: 8px;
+  }
+  
+  /* Rate Limit Icon */
+  .rate-limit-warning svg {
+    width: 20px !important;
+    height: 20px !important;
+    flex-shrink: 0 !important;
+    color: var(--bitcoin-orange) !important;
+  }
+  
+  /* Rate Limit Text */
+  .rate-limit-warning p {
+    color: var(--bitcoin-white-80) !important;
+    font-size: 0.875rem !important;
+    margin: 0 !important;
+  }
+  
+  /* Countdown Timer */
+  .countdown-timer,
+  span[class*="countdown"] {
+    font-family: 'Roboto Mono', monospace !important;
+    font-weight: 700 !important;
+    color: var(--bitcoin-orange) !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Progress Bar */
+  .progress-bar,
+  div[class*="progress"] {
+    height: 8px !important;
+    background: var(--bitcoin-orange-10) !important;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 0.5rem !important;
+  }
+  
+  /* Progress Bar Fill */
+  .progress-bar-fill,
+  div[class*="progress"] > div {
+    height: 100% !important;
+    background: var(--bitcoin-orange) !important;
+    transition: width 1s linear;
+  }
+  
+  /* ============================================
+     ACCESS GATE HEADER - MOBILE OPTIMIZED
+     ============================================ */
+  
+  /* Lock Icon Container */
+  .access-gate-icon,
+  div[class*="icon-container"] {
+    width: 64px !important;
+    height: 64px !important;
+    margin: 0 auto 1.5rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: var(--bitcoin-black) !important;
+    border: 2px solid var(--bitcoin-orange) !important;
+    border-radius: 50%;
+  }
+  
+  /* Lock Icon */
+  .access-gate-icon svg {
+    width: 32px !important;
+    height: 32px !important;
+    color: var(--bitcoin-orange) !important;
+    filter: drop-shadow(0 0 10px rgba(247, 147, 26, 0.5));
+  }
+  
+  /* Access Gate Title */
+  .access-gate-title,
+  .access-gate h1,
+  .access-gate h2 {
+    font-size: 1.75rem !important;
+    font-weight: 800 !important;
+    color: var(--bitcoin-white) !important;
+    text-align: center;
+    margin-bottom: 0.75rem !important;
+  }
+  
+  /* Access Gate Description */
+  .access-gate-description,
+  .access-gate p {
+    font-size: 0.875rem !important;
+    color: var(--bitcoin-white-60) !important;
+    text-align: center;
+    margin-bottom: 1.5rem !important;
+  }
+  
+  /* ============================================
+     FORM SPACING - MOBILE OPTIMIZED
+     ============================================ */
+  
+  /* Form Container */
+  form {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Form Field Spacing */
+  form > div,
+  .form-field,
+  .form-group {
+    margin-bottom: 1.25rem !important;
+  }
+  
+  /* Last Form Field */
+  form > div:last-of-type,
+  .form-field:last-of-type {
+    margin-bottom: 0 !important;
+  }
+  
+  /* Form Section Spacing */
+  form section,
+  .form-section {
+    margin-bottom: 2rem !important;
+  }
+  
+  /* ============================================
+     RESPONSIVE CONTAINER WIDTHS
+     ============================================ */
+  
+  /* Form Container Max Width */
+  .auth-form-container,
+  .access-gate-form,
+  div[class*="form-container"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 1rem !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Inner Form Wrapper */
+  .auth-form-wrapper,
+  .form-wrapper {
+    width: 100% !important;
+    max-width: 480px !important;
+    margin: 0 auto !important;
+  }
+  
+  /* ============================================
+     TABLET SPECIFIC ADJUSTMENTS (768px-1023px)
+     ============================================ */
+  
+  @media (min-width: 768px) and (max-width: 1023px) {
+    /* Slightly larger form elements on tablets */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    textarea {
+      padding: 1rem 1.25rem !important;
+      font-size: 1.0625rem !important;
+      min-height: 52px !important;
+    }
+    
+    /* Larger buttons on tablets */
+    form button[type="submit"] {
+      min-height: 60px !important;
+      font-size: 1.0625rem !important;
+    }
+    
+    /* Larger icons on tablets */
+    .access-gate-icon {
+      width: 80px !important;
+      height: 80px !important;
+    }
+    
+    .access-gate-icon svg {
+      width: 40px !important;
+      height: 40px !important;
+    }
+  }
+}
+
+/* ============================================
+   END OF TASK 12.1: AUTHENTICATION PAGES FIXES
+   ============================================ */
+
+
+/* ============================================
+   LANDING PAGE MOBILE/TABLET OPTIMIZATIONS
+   Container Fitting & Visual Alignment
+   ============================================ */
+
+@media (max-width: 1023px) {
+  /* Landing Page - Global Container Overflow Prevention */
+  .landing-page-container {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  
+  /* Hero Section - Ensure proper text wrapping */
+  .landing-hero {
+    overflow: hidden;
+    max-width: 100%;
+  }
+  
+  .landing-hero h1 {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  .landing-hero p {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Live Market Data Banner - Prevent horizontal scroll */
+  .market-data-banner {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+  
+  .market-data-banner .container {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Platform Stats - Ensure cards fit within grid */
+  .platform-stats-grid {
+    overflow: hidden;
+  }
+  
+  .platform-stat-card {
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  .platform-stat-card .stat-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .platform-stat-card .stat-description {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+  }
+  
+  /* Data Sources Showcase - Prevent card overflow */
+  .data-sources-grid {
+    overflow: hidden;
+  }
+  
+  .data-source-card {
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  .data-source-card .source-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .data-source-card .source-description {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+  }
+  
+  /* Technology Stack - Ensure proper containment */
+  .technology-grid {
+    overflow: hidden;
+  }
+  
+  .technology-card {
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  .technology-card h3 {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  .technology-card p {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  .technology-card .tech-stat {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  
+  /* Features Grid - Ensure cards fit properly */
+  .features-grid {
+    overflow: hidden;
+  }
+  
+  .feature-card {
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  .feature-card .feature-title {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  .feature-card .feature-description {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+  }
+  
+  .feature-card .feature-benefit {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Key Differentiators - Ensure list items wrap properly */
+  .differentiators-section {
+    overflow: hidden;
+  }
+  
+  .differentiators-section h3 {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  .differentiators-section li {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Call to Action - Ensure text fits */
+  .cta-section {
+    overflow: hidden;
+  }
+  
+  .cta-section h2 {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  .cta-section p {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Footer - Ensure proper alignment */
+  .landing-footer {
+    overflow: hidden;
+    max-width: 100%;
+  }
+  
+  .landing-footer .data-source-list {
+    overflow-x: hidden;
+    flex-wrap: wrap;
+  }
+  
+  .landing-footer .data-source-list span {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  /* CoinGecko Logo - Ensure proper scaling */
+  .coingecko-logo {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .coingecko-logo svg {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Flex Container Fixes - Prevent overflow */
+  .flex-container-safe {
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  .flex-item-safe {
+    min-width: 0;
+    flex-shrink: 1;
+    overflow: hidden;
+  }
+  
+  /* Grid Container Fixes - Prevent overflow */
+  .grid-container-safe {
+    overflow: hidden;
+  }
+  
+  .grid-item-safe {
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  /* Icon Sizing - Ensure icons don't overflow */
+  .landing-icon {
+    flex-shrink: 0;
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Badge/Tag Fixes - Ensure proper truncation */
+  .landing-badge {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  
+  /* Spacing Consistency - Mobile/Tablet */
+  .landing-section {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .landing-section-tight {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
+/* Extra Small Mobile (320px-479px) - Additional Constraints */
+@media (max-width: 479px) {
+  /* Reduce padding further on very small screens */
+  .landing-section {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  
+  /* Ensure hero text scales down appropriately */
+  .landing-hero h1 {
+    font-size: 2rem !important;
+    line-height: 1.2;
+  }
+  
+  /* Reduce stat card padding */
+  .platform-stat-card {
+    padding: 1rem !important;
+  }
+  
+  /* Reduce feature card padding */
+  .feature-card {
+    padding: 1rem !important;
+  }
+  
+  /* Ensure market data banner fits */
+  .market-data-banner {
+    font-size: 0.875rem;
+  }
+  
+  .market-data-banner .price-display {
+    font-size: 1.25rem !important;
+  }
+}
+
+/* Tablet Specific (768px-1023px) - Refinements */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Slightly larger padding on tablets */
+  .landing-section {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  
+  /* Allow 2-column layouts on tablets */
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .data-sources-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+
+/* ============================================
+   BITCOIN REPORT PAGE - MOBILE/TABLET FIXES
+   Task 12.3: Comprehensive Visual Audit
+   ============================================ */
+
+/* Mobile/Tablet Only (320px-1023px) */
+@media (max-width: 1023px) {
+  
+  /* ============================================
+     CHART CONTAINER FIXES
+     Ensure charts fit within viewport
+     ============================================ */
+  
+  /* Trading Chart Container - Prevent Horizontal Scroll */
+  .bitcoin-block .trading-chart-container,
+  .bitcoin-block [class*="chart"],
+  .bitcoin-block canvas {
+    max-width: 100% !important;
+    width: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+  }
+  
+  /* Chart Wrapper - Ensure Containment */
+  .chart-wrapper,
+  .trading-chart-wrapper {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+    position: relative;
+  }
+  
+  /* Chart Legend - Prevent Overflow */
+  .chart-legend,
+  [class*="legend"] {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Chart Tooltips - Keep Within Viewport */
+  .chart-tooltip,
+  [class*="tooltip"] {
+    max-width: calc(100vw - 2rem) !important;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Chart Controls - Ensure Accessibility */
+  .chart-controls,
+  [class*="chart-control"] {
+    min-height: 48px !important;
+    min-width: 48px !important;
+    touch-action: manipulation;
+  }
+  
+  /* ============================================
+     TECHNICAL INDICATOR CARDS - GRID FIXES
+     Ensure proper alignment and sizing
+     ============================================ */
+  
+  /* Technical Indicators Grid - Mobile Stack */
+  .bitcoin-block .grid.grid-cols-1.md\:grid-cols-2.xl\:grid-cols-3 {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+  
+  /* Indicator Cards - Prevent Overflow */
+  .bitcoin-block-subtle {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    min-width: 0 !important;
+  }
+  
+  /* Indicator Card Content - Text Truncation */
+  .bitcoin-block-subtle .stat-label,
+  .bitcoin-block-subtle .stat-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  
+  /* Indicator Values - Monospace Containment */
+  .bitcoin-block-subtle .font-mono {
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+  
+  /* ============================================
+     STAT CARDS - SIZING AND ALIGNMENT
+     Ensure consistent card heights and widths
+     ============================================ */
+  
+  /* Stat Card Grid - Mobile Optimization */
+  .stat-grid,
+  .stat-grid-4,
+  .stat-grid-3,
+  .stat-grid-2 {
+    display: grid !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* 4-Column Grid - Mobile: 2 Columns */
+  .stat-grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  /* 3-Column Grid - Mobile: 1 Column */
+  .stat-grid-3 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* 2-Column Grid - Mobile: 1 Column */
+  .stat-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Stat Card - Consistent Sizing */
+  .stat-card {
+    min-height: 80px !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    padding: 0.75rem !important;
+  }
+  
+  /* Stat Card Label - Truncation */
+  .stat-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    font-size: 0.75rem !important;
+  }
+  
+  /* Stat Card Value - Responsive Sizing */
+  .stat-value {
+    font-size: clamp(1rem, 4vw, 1.5rem) !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  
+  /* ============================================
+     SUPPLY/DEMAND ZONE CARDS - CONTAINMENT
+     Ensure zone cards fit within containers
+     ============================================ */
+  
+  /* Zone Card Container - Prevent Overflow */
+  .bitcoin-block-subtle.border-l-4 {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    min-width: 0 !important;
+  }
+  
+  /* Zone Level Price - Responsive Font Size */
+  .bitcoin-block-subtle .font-bold.text-sm.sm\:text-base {
+    font-size: clamp(0.875rem, 3vw, 1rem) !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  
+  /* Zone Strength Badge - Prevent Overflow */
+  .bitcoin-block-subtle .px-2.py-1.rounded {
+    font-size: clamp(0.625rem, 2.5vw, 0.75rem) !important;
+    padding: 0.25rem 0.5rem !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  /* Zone Source Label - Truncation */
+  .bitcoin-block-subtle .text-bitcoin-white-60.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    min-width: 0;
+  }
+  
+  /* Zone Volume Display - Responsive */
+  .bitcoin-block-subtle .font-mono {
+    font-size: clamp(0.625rem, 2.5vw, 0.75rem) !important;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* ============================================
+     PRICE DISPLAYS - OVERFLOW PREVENTION
+     Ensure price displays fit within containers
+     ============================================ */
+  
+  /* Price Display - Responsive Sizing */
+  .price-display,
+  .price-display-sm,
+  .price-display-lg {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  
+  /* Small Price Display - Mobile Optimization */
+  .price-display-sm {
+    font-size: clamp(1rem, 5vw, 1.5rem) !important;
+  }
+  
+  /* Large Price Display - Mobile Optimization */
+  .price-display-lg {
+    font-size: clamp(1.5rem, 6vw, 2.5rem) !important;
+  }
+  
+  /* Price Container - Flex Containment */
+  .stat-card .price-display,
+  .stat-card .price-display-sm {
+    min-width: 0 !important;
+    flex-shrink: 1 !important;
+  }
+  
+  /* ============================================
+     ANALYZE BUTTONS - TOUCH TARGET SIZING
+     Ensure buttons fit within containers
+     ============================================ */
+  
+  /* Analyze Button - Minimum Touch Target */
+  .btn-bitcoin-primary,
+  .btn-bitcoin-secondary {
+    min-height: 48px !important;
+    min-width: 48px !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.875rem !important;
+    white-space: nowrap;
+  }
+  
+  /* Button Text - Prevent Overflow */
+  .btn-bitcoin-primary span,
+  .btn-bitcoin-secondary span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  
+  /* Button Container - Flex Wrap */
+  .flex.items-center.space-x-2 button {
+    flex-shrink: 0;
+  }
+  
+  /* ============================================
+     DATA TABLES - HORIZONTAL SCROLL
+     Ensure tables scroll horizontally if needed
+     ============================================ */
+  
+  /* Table Container - Scrollable */
+  .table-container,
+  .bitcoin-block table {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Table - Minimum Width */
+  table {
+    min-width: 100% !important;
+    table-layout: auto !important;
+  }
+  
+  /* Table Cells - Text Truncation */
+  td, th {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px;
+  }
+  
+  /* Table Scroll Indicator */
+  .table-container::after {
+    content: "← Scroll →";
+    display: block;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--bitcoin-orange);
+    padding: 0.5rem;
+    opacity: 0.6;
+  }
+  
+  /* ============================================
+     TRADING SIGNALS - CARD LAYOUT
+     Ensure signal cards fit properly
+     ============================================ */
+  
+  /* Trading Signal Card - Mobile Stack */
+  .bitcoin-block-subtle .flex.flex-col.sm\:flex-row {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+  
+  /* Signal Type Badge - Full Width on Mobile */
+  .bitcoin-block-subtle .flex.items-center.space-x-2 {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  /* Signal Reasoning Text - Word Wrap */
+  .bitcoin-block-subtle .text-sm.text-bitcoin-white-80 {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  /* ============================================
+     MARKET SENTIMENT - GRID FIXES
+     Ensure sentiment cards align properly
+     ============================================ */
+  
+  /* Sentiment Grid - Mobile: 2 Columns */
+  .grid.grid-cols-2.md\:grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+  
+  /* Fear & Greed Slider - Mobile Optimization */
+  .bitcoin-block-subtle .relative.w-full.h-8 {
+    height: 2rem !important;
+    touch-action: manipulation;
+  }
+  
+  /* Sentiment Card - Consistent Height */
+  .bitcoin-block-subtle.min-h-\[80px\] {
+    min-height: 80px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+  }
+  
+  /* ============================================
+     EXPANDABLE SECTIONS - TOUCH OPTIMIZATION
+     Ensure expand/collapse buttons work well
+     ============================================ */
+  
+  /* Expandable Button - Full Width Touch Target */
+  .bitcoin-block-subtle.hover\:border-bitcoin-orange {
+    min-height: 56px !important;
+    touch-action: manipulation;
+    cursor: pointer;
+  }
+  
+  /* Expand Icon - Visible Size */
+  .bitcoin-block-subtle svg {
+    min-width: 20px !important;
+    min-height: 20px !important;
+    flex-shrink: 0;
+  }
+  
+  /* Expanded Content - Smooth Animation */
+  .animate-slide-down {
+    animation: slideDown 0.3s ease-out;
+    overflow: hidden;
+  }
+  
+  @keyframes slideDown {
+    from {
+      max-height: 0;
+      opacity: 0;
+    }
+    to {
+      max-height: 2000px;
+      opacity: 1;
+    }
+  }
+  
+  /* ============================================
+     PREDICTIONS GRID - MOBILE STACK
+     Ensure prediction cards fit properly
+     ============================================ */
+  
+  /* Predictions Grid - Mobile: 1 Column */
+  .grid.grid-cols-1.sm\:grid-cols-3 {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+  
+  /* Prediction Card - Overflow Prevention */
+  .bitcoin-block-subtle.overflow-hidden {
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+  
+  /* Prediction Value - Responsive Font */
+  .font-mono.text-xl.md\:text-2xl {
+    font-size: clamp(1.25rem, 5vw, 1.5rem) !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* ============================================
+     ENHANCED MARKET DATA - GRID FIXES
+     Ensure real-time data cards fit properly
+     ============================================ */
+  
+  /* Market Data Grid - Mobile Stack */
+  .stat-grid.stat-grid-3 {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+  
+  /* Order Book Card - Prevent Overflow */
+  .bitcoin-block-subtle .space-y-1.md\:space-y-2 {
+    gap: 0.25rem !important;
+  }
+  
+  /* Market Data Values - Responsive */
+  .bitcoin-block-subtle .flex.justify-between {
+    gap: 0.5rem;
+    min-width: 0;
+  }
+  
+  .bitcoin-block-subtle .flex.justify-between span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  
+  /* ============================================
+     PAGE HEADER - MOBILE OPTIMIZATION
+     Ensure header fits properly
+     ============================================ */
+  
+  /* Page Header - Stack on Mobile */
+  .bitcoin-block .flex.items-center.justify-between {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+  }
+  
+  /* Header Title - Responsive Font */
+  .bitcoin-block h1 {
+    font-size: clamp(1.5rem, 5vw, 2rem) !important;
+  }
+  
+  /* Header Badges - Wrap on Mobile */
+  .bitcoin-block .flex.items-center.space-x-2 {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  /* ============================================
+     GENERAL CONTAINMENT RULES
+     Ensure all content stays within bounds
+     ============================================ */
+  
+  /* Bitcoin Block - Overflow Prevention */
+  .bitcoin-block {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+  }
+  
+  /* Container - Responsive Padding */
+  .container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  /* Flex Items - Shrinkable */
+  .flex > * {
+    min-width: 0 !important;
+  }
+  
+  /* Grid Items - Shrinkable */
+  .grid > * {
+    min-width: 0 !important;
+  }
+  
+  /* Text Elements - Word Breaking */
+  p, span, div {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Monospace Text - Break Long Strings */
+  .font-mono {
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+  
+  /* ============================================
+     ACCESSIBILITY - TOUCH TARGETS
+     Ensure all interactive elements are accessible
+     ============================================ */
+  
+  /* Minimum Touch Target Size */
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+  
+  /* Touch Manipulation */
+  button,
+  a,
+  .clickable {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(247, 147, 26, 0.3);
+  }
+  
+  /* Focus Visible - Enhanced for Mobile */
+  *:focus-visible {
+    outline: 3px solid var(--bitcoin-orange) !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 4px rgba(247, 147, 26, 0.3) !important;
+  }
+}
+
+/* ============================================
+   TABLET SPECIFIC FIXES (768px-1023px)
+   Additional optimizations for tablet devices
+   ============================================ */
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  
+  /* Technical Indicators - 2 Column Grid on Tablet */
+  .bitcoin-block .grid.grid-cols-1.md\:grid-cols-2.xl\:grid-cols-3 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem !important;
+  }
+  
+  /* Stat Grid - 2 Columns on Tablet */
+  .stat-grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  /* Predictions - 3 Columns on Tablet */
+  .grid.grid-cols-1.sm\:grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  
+  /* Sentiment Grid - 4 Columns on Tablet */
+  .grid.grid-cols-2.md\:grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+
+/* ============================================
+   SMALL MOBILE DEVICES (320px-480px)
+   Extra optimizations for smallest screens
+   ============================================ */
+
+@media (max-width: 480px) {
+  
+  /* Reduce Padding Further */
+  .bitcoin-block {
+    padding: 0.75rem !important;
+  }
+  
+  .bitcoin-block-subtle {
+    padding: 0.5rem !important;
+  }
+  
+  /* Smaller Font Sizes */
+  .stat-value {
+    font-size: clamp(0.875rem, 3.5vw, 1.25rem) !important;
+  }
+  
+  .price-display-sm {
+    font-size: clamp(0.875rem, 4vw, 1.25rem) !important;
+  }
+  
+  /* Single Column Everything */
+  .stat-grid-4,
+  .stat-grid-3,
+  .stat-grid-2,
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Compact Buttons */
+  .btn-bitcoin-primary,
+  .btn-bitcoin-secondary {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+
+/* ============================================
+   ETHEREUM REPORT PAGE - MOBILE/TABLET FIXES
+   Comprehensive visual fixes for Ethereum analysis page
+   ============================================ */
+
+@media (max-width: 1023px) {
+  
+  /* Ethereum Report - Page Header */
+  .ethereum-report-header {
+    overflow: hidden;
+    max-width: 100%;
+  }
+  
+  .ethereum-report-header h1 {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Ethereum Analysis - Container Overflow Prevention */
+  .eth-market-analysis {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+  
+  /* Ethereum - Price Overview Grid - Ensure 2 columns on mobile */
+  .eth-price-overview,
+  .stat-grid.stat-grid-4 {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+    overflow: hidden;
+  }
+  
+  .eth-price-overview .stat-card,
+  .stat-grid.stat-grid-4 .stat-card {
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  .eth-price-overview .price-display,
+  .stat-grid .price-display {
+    font-size: clamp(1.25rem, 4vw, 1.75rem) !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .eth-price-overview .stat-value,
+  .stat-grid .stat-value {
+    font-size: clamp(1rem, 3.5vw, 1.25rem) !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Ethereum - Technical Indicators Grid - Single column on mobile */
+  .eth-technical-indicators,
+  .grid.grid-cols-1.md\:grid-cols-2.xl\:grid-cols-3 {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+    overflow: hidden;
+  }
+  
+  .eth-technical-indicators .bitcoin-block-subtle,
+  .grid.grid-cols-1.md\:grid-cols-2.xl\:grid-cols-3 .bitcoin-block-subtle {
+    min-width: 0;
+    overflow: hidden;
+    padding: 0.75rem;
+  }
+  
+  /* Ethereum - Icon Sizing - Prevent overflow */
+  .eth-market-analysis svg,
+  .bitcoin-block svg {
+    flex-shrink: 0 !important;
+    width: 1rem !important;
+    height: 1rem !important;
+  }
+  
+  .eth-market-analysis h3 svg,
+  .bitcoin-block h3 svg {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+  }
+  
+  /* Ethereum - Supply/Demand Zones - Single column on mobile */
+  .eth-supply-demand-zones .zone-grid,
+  .grid.grid-cols-1.sm\:grid-cols-2 {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+  
+  .eth-supply-demand-zones .zone-card {
+    min-width: 0;
+    overflow: hidden;
+    padding: 0.75rem;
+  }
+  
+  .eth-supply-demand-zones .zone-level {
+    font-size: clamp(0.875rem, 3vw, 1rem) !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Ethereum - Trading Signals */
+  .eth-trading-signals .signal-card {
+    min-width: 0;
+    overflow: hidden;
+    padding: 0.75rem;
+  }
+  
+  .eth-trading-signals .signal-reasoning {
+    font-size: clamp(0.75rem, 2.5vw, 0.875rem) !important;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+  
+  /* Ethereum - Enhanced Market Data - Single column on mobile */
+  .eth-enhanced-market-data .market-data-grid,
+  .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-3 {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+  
+  .eth-enhanced-market-data .data-card {
+    min-width: 0;
+    overflow: hidden;
+    padding: 0.75rem;
+  }
+  
+  /* Ethereum - Price Predictions - Single column on mobile */
+  .eth-price-predictions .prediction-grid,
+  .grid.grid-cols-1.sm\:grid-cols-3 {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+  
+  .eth-price-predictions .prediction-card {
+    min-width: 0;
+    overflow: hidden;
+    padding: 0.75rem;
+  }
+  
+  .eth-price-predictions .prediction-target {
+    font-size: clamp(1.25rem, 4vw, 1.5rem) !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Ethereum - Market Sentiment - 2 columns on mobile */
+  .eth-market-sentiment .sentiment-grid,
+  .grid.grid-cols-2.md\:grid-cols-4 {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+  
+  .eth-market-sentiment .sentiment-card {
+    min-width: 0;
+    overflow: hidden;
+    padding: 0.75rem;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .eth-market-sentiment .sentiment-value {
+    font-size: clamp(1rem, 3.5vw, 1.125rem) !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Ethereum - Fear & Greed Slider */
+  .eth-fear-greed-slider {
+    min-height: 80px;
+    overflow: hidden;
+    padding: 0.75rem;
+  }
+  
+  .eth-fear-greed-slider .slider-container {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  /* Ethereum - Trading Chart Container - Prevent horizontal scroll */
+  .eth-trading-chart-container,
+  .eth-hidden-pivot-container {
+    overflow-x: hidden !important;
+    overflow-y: visible;
+    max-width: 100% !important;
+  }
+  
+  .eth-trading-chart-container .chart-wrapper,
+  .eth-hidden-pivot-container .chart-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden;
+  }
+  
+  /* Ethereum - Expandable Section Buttons */
+  .eth-expandable-button {
+    min-height: 56px;
+    overflow: hidden;
+    padding: 1rem;
+    touch-action: manipulation;
+  }
+  
+  .eth-expandable-button h3 {
+    font-size: clamp(1rem, 3.5vw, 1.125rem) !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .eth-expandable-button p {
+    font-size: clamp(0.75rem, 2.5vw, 0.875rem) !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Ethereum - News Impact */
+  .eth-news-impact .news-card {
+    min-width: 0;
+    overflow: hidden;
+    padding: 0.75rem;
+  }
+  
+  .eth-news-impact .news-headline {
+    font-size: clamp(0.875rem, 3vw, 1rem) !important;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  
+  /* Ethereum - Last Updated Timestamp */
+  .eth-last-updated {
+    font-size: clamp(0.75rem, 2.5vw, 0.875rem) !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+  }
+  
+  /* Ethereum - All Text Elements - Prevent Overflow */
+  .bitcoin-block .stat-label,
+  .bitcoin-block-subtle .stat-label {
+    font-size: clamp(0.75rem, 2.5vw, 0.875rem) !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Ethereum - All Flex Containers - Allow Shrinking */
+  .bitcoin-block .flex,
+  .bitcoin-block-subtle .flex {
+    min-width: 0;
+  }
+  
+  .bitcoin-block .flex > *,
+  .bitcoin-block-subtle .flex > * {
+    min-width: 0;
+  }
+  
+  /* Ethereum - All Grid Containers - Prevent Overflow */
+  .bitcoin-block .grid,
+  .bitcoin-block-subtle .grid {
+    overflow: hidden;
+  }
+  
+  .bitcoin-block .grid > *,
+  .bitcoin-block-subtle .grid > * {
+    min-width: 0;
+    overflow: hidden;
+  }
+}
+
+/* Tablet Specific (768px-1023px) - Ethereum Report Refinements */
+@media (min-width: 768px) and (max-width: 1023px) {
+  
+  /* Ethereum - Technical Indicators - 2 Column Grid on Tablet */
+  .eth-technical-indicators,
+  .grid.grid-cols-1.md\:grid-cols-2.xl\:grid-cols-3 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem !important;
+  }
+  
+  /* Ethereum - Enhanced Market Data - 2 Column Grid on Tablet */
+  .eth-enhanced-market-data .market-data-grid,
+  .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-3 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  /* Ethereum - Price Predictions - 3 Columns on Tablet */
+  .eth-price-predictions .prediction-grid,
+  .grid.grid-cols-1.sm\:grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  
+  /* Ethereum - Market Sentiment - 4 Columns on Tablet */
+  .eth-market-sentiment .sentiment-grid,
+  .grid.grid-cols-2.md\:grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+  
+  /* Ethereum - Supply/Demand Zones - 2 Columns on Tablet */
+  .eth-supply-demand-zones .zone-grid,
+  .grid.grid-cols-1.sm\:grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+
+/* ===================================================================
+   WHALE WATCH PAGE - MOBILE/TABLET VISUAL FIXES (Task 12.6)
+   Target: 320px-1023px (Mobile and Tablet Only)
+   Desktop (1024px+) Unaffected
+   =================================================================== */
+
+@media (max-width: 1023px) {
+  /* Whale Watch Container - Prevent Overflow */
+  .whale-watch-initial-state,
+  .whale-watch-dashboard {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+  
+  /* Transaction Cards - Containment */
+  .whale-watch-dashboard .bitcoin-block {
+    overflow: hidden;
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Whale Amount Display - Prevent Overflow */
+  .whale-watch-dashboard .price-display {
+    font-size: clamp(1.5rem, 5vw, 2.5rem) !important;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+  }
+  
+  /* Wallet Address Truncation */
+  .whale-watch-dashboard .font-mono.break-all {
+    word-break: break-all;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    display: block;
+  }
+  
+  /* Ensure addresses truncate with ellipsis on very small screens */
+  @media (max-width: 375px) {
+    .whale-watch-dashboard .font-mono.break-all {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+    }
+  }
+  
+  /* Analyze Buttons - Touch Target Compliance */
+  .whale-watch-dashboard button {
+    min-height: 48px !important;
+    min-width: 48px !important;
+    touch-action: manipulation;
+  }
+  
+  /* Button Text - Prevent Overflow */
+  .whale-watch-dashboard button span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    display: block;
+  }
+  
+  /* Transaction Details Grid - Responsive */
+  .whale-watch-dashboard .grid {
+    gap: 0.75rem;
+  }
+  
+  /* Timestamp - Prevent Overflow */
+  .whale-watch-dashboard .text-xs.text-bitcoin-white-60 {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+  }
+  
+  /* Blockchain Explorer Links - Accessible */
+  .whale-watch-dashboard a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem;
+    word-break: break-word;
+  }
+  
+  /* Analysis Overlay - Proper Display */
+  .whale-watch-dashboard .border-2.border-bitcoin-orange.rounded-lg {
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  
+  /* Caesar AI Analysis Results - Containment */
+  .whale-watch-dashboard .space-y-3,
+  .whale-watch-dashboard .space-y-4 {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Analysis Text - Readable and Contained */
+  .whale-watch-dashboard .text-bitcoin-white-80,
+  .whale-watch-dashboard .text-bitcoin-white {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    line-height: 1.6;
+  }
+  
+  /* Model Badge - Responsive */
+  .whale-watch-dashboard .flex.items-center.gap-2.flex-wrap {
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  /* Confidence Badge - Prevent Overflow */
+  .whale-watch-dashboard .px-3.py-1\\.5.rounded {
+    font-size: clamp(0.625rem, 2vw, 0.75rem);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  
+  /* Deep Dive Progress - Containment */
+  .whale-watch-dashboard .animate-pulse {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Progress Bar - Responsive */
+  .whale-watch-dashboard .w-full.h-2 {
+    max-width: 100%;
+  }
+  
+  /* Stage List - Prevent Overflow */
+  .whale-watch-dashboard .space-y-3 .flex.items-center {
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  .whale-watch-dashboard .space-y-3 .flex.items-center span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+  }
+  
+  /* Key Findings List - Containment */
+  .whale-watch-dashboard ul.space-y-1 li,
+  .whale-watch-dashboard ul.space-y-2 li {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+  }
+  
+  /* Sources Links - Accessible */
+  .whale-watch-dashboard .space-y-1 a {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    display: block;
+    padding: 0.5rem 0;
+  }
+  
+  /* Strategic Intelligence Box - Containment */
+  .whale-watch-dashboard .bg-bitcoin-orange.text-bitcoin-black {
+    max-width: 100%;
+    overflow-x: hidden;
+    word-break: break-word;
+  }
+  
+  /* Thinking Section - Expandable Content */
+  .whale-watch-dashboard .whitespace-pre-wrap {
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  
+  /* Stats Grid - Responsive */
+  .whale-watch-dashboard .stat-card {
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  .whale-watch-dashboard .stat-value {
+    font-size: clamp(1.5rem, 5vw, 3rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Active Analysis Banner - Containment */
+  .whale-watch-dashboard .animate-pulse .flex.items-center {
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  /* Error Banner - Containment */
+  .whale-watch-dashboard .border.border-bitcoin-orange.rounded-lg {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Flex Containers - Prevent Overflow */
+  .whale-watch-dashboard .flex {
+    min-width: 0;
+  }
+  
+  .whale-watch-dashboard .flex-1 {
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  /* Grid Containers - Prevent Overflow */
+  .whale-watch-dashboard .grid {
+    min-width: 0;
+  }
+  
+  .whale-watch-dashboard .grid > * {
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  /* Ensure all text in cards is contained */
+  .whale-watch-dashboard .bitcoin-block * {
+    max-width: 100%;
+  }
+  
+  /* Transaction Type Label - Responsive */
+  .whale-watch-dashboard .text-lg.font-bold {
+    font-size: clamp(1rem, 4vw, 1.125rem);
+  }
+  
+  /* Description Text - Readable */
+  .whale-watch-dashboard .text-sm.text-bitcoin-white-80 {
+    font-size: clamp(0.875rem, 3vw, 0.875rem);
+    line-height: 1.5;
+  }
+  
+  /* Impact Badge - Prevent Overflow */
+  .whale-watch-dashboard .px-2.py-1 {
+    font-size: clamp(0.625rem, 2vw, 0.75rem);
+    white-space: nowrap;
+  }
+  
+  /* Icon Containers - Fixed Size */
+  .whale-watch-dashboard .w-16.h-16 {
+    flex-shrink: 0;
+  }
+  
+  /* Lucide Icons - Prevent Overflow */
+  .whale-watch-dashboard svg {
+    flex-shrink: 0;
+  }
+  
+  /* Deep Dive Button - Full Width on Mobile */
+  @media (max-width: 640px) {
+    .whale-watch-dashboard .btn-bitcoin-primary,
+    .whale-watch-dashboard .btn-bitcoin-secondary {
+      width: 100%;
+    }
+  }
+  
+  /* Analysis Metadata - Responsive */
+  .whale-watch-dashboard .flex.flex-col.md\\:flex-row {
+    gap: 1rem;
+  }
+  
+  /* Ensure no horizontal scroll */
+  .whale-watch-dashboard {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  
+  /* Container queries for nested elements */
+  .whale-watch-dashboard .container {
+    max-width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Prevent text from breaking container */
+  .whale-watch-dashboard p,
+  .whale-watch-dashboard span,
+  .whale-watch-dashboard div {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Monospace text - Special handling */
+  .whale-watch-dashboard .font-mono {
+    word-break: break-all;
+    overflow-wrap: anywhere;
+  }
+  
+  /* Large numbers - Responsive sizing */
+  .whale-watch-dashboard .text-2xl,
+  .whale-watch-dashboard .text-3xl {
+    font-size: clamp(1.25rem, 5vw, 1.875rem);
+  }
+  
+  /* Extra small screens - Additional constraints */
+  @media (max-width: 375px) {
+    .whale-watch-dashboard .p-6 {
+      padding: 1rem;
+    }
+    
+    .whale-watch-dashboard .p-4 {
+      padding: 0.75rem;
+    }
+    
+    .whale-watch-dashboard .space-x-4 > * + * {
+      margin-left: 0.5rem;
+    }
+    
+    .whale-watch-dashboard .gap-4 {
+      gap: 0.5rem;
+    }
+  }
+}
+
+
+/* ============================================
+   MODAL AND OVERLAY SYSTEM
+   Mobile/Tablet: 320px-1023px
+   ============================================ */
+
+/* Base Modal Overlay - Full Viewport Coverage */
+@media (max-width: 1023px) {
+  .modal-overlay,
+  [role="dialog"],
+  .overlay,
+  .popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 9998;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  
+  /* Active Modal Overlay */
+  .modal-overlay.active,
+  [role="dialog"][aria-hidden="false"],
+  .overlay.active,
+  .popup-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  /* Modal Container */
+  .modal-container,
+  .modal-content,
+  [role="dialog"] > div {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    background: var(--bitcoin-black);
+    border: 2px solid var(--bitcoin-orange);
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(247, 147, 26, 0.5);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    z-index: 9999;
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+  }
+  
+  /* Active Modal Container */
+  .modal-overlay.active .modal-container,
+  .modal-overlay.active .modal-content,
+  [role="dialog"][aria-hidden="false"] > div {
+    transform: scale(1);
+  }
+  
+  /* Modal Header */
+  .modal-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bitcoin-black);
+    border-bottom: 2px solid var(--bitcoin-orange);
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+  }
+  
+  /* Modal Title */
+  .modal-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--bitcoin-white);
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Modal Close Button */
+  .modal-close,
+  .modal-close-btn,
+  [aria-label*="close" i],
+  [aria-label*="Close" i] {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 2px solid var(--bitcoin-orange);
+    border-radius: 8px;
+    color: var(--bitcoin-orange);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+  }
+  
+  .modal-close:hover,
+  .modal-close-btn:hover,
+  [aria-label*="close" i]:hover,
+  [aria-label*="Close" i]:hover {
+    background: var(--bitcoin-orange);
+    color: var(--bitcoin-black);
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.5);
+    transform: scale(1.05);
+  }
+  
+  .modal-close:active,
+  .modal-close-btn:active {
+    transform: scale(0.95);
+  }
+  
+  /* Modal Body */
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1.5rem;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* Modal Footer */
+  .modal-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    background: var(--bitcoin-black);
+    border-top: 1px solid var(--bitcoin-orange-20);
+    padding: 1rem 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    flex-shrink: 0;
+  }
+  
+  /* Whale Analysis Modal Specific Styles */
+  .whale-analysis-modal {
+    max-width: 800px;
+  }
+  
+  .whale-analysis-modal .modal-body {
+    padding: 1rem;
+  }
+  
+  /* Trade Signal Modal Specific Styles */
+  .trade-signal-modal {
+    max-width: 700px;
+  }
+  
+  /* News Article Expansion Modal */
+  .news-article-modal {
+    max-width: 900px;
+  }
+  
+  .news-article-modal .modal-body {
+    padding: 2rem 1.5rem;
+  }
+  
+  /* Chart Fullscreen Modal */
+  .chart-fullscreen-modal {
+    max-width: 100vw;
+    max-height: 100vh;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+  }
+  
+  .chart-fullscreen-modal .modal-body {
+    padding: 0;
+  }
+  
+  /* Error/Success Message Modals */
+  .message-modal {
+    max-width: 400px;
+  }
+  
+  .message-modal .modal-body {
+    text-align: center;
+    padding: 2rem 1.5rem;
+  }
+  
+  /* Prevent Body Scroll When Modal is Open */
+  body.modal-open,
+  body.overlay-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Backdrop Click to Close */
+  .modal-overlay[data-backdrop="true"],
+  .overlay[data-backdrop="true"] {
+    cursor: pointer;
+  }
+  
+  .modal-overlay[data-backdrop="true"] .modal-container,
+  .modal-overlay[data-backdrop="true"] .modal-content,
+  .overlay[data-backdrop="true"] > div {
+    cursor: default;
+  }
+  
+  /* Smooth Animations */
+  @keyframes modalFadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+  
+  @keyframes modalFadeOut {
+    from {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.95) translateY(-20px);
+    }
+  }
+  
+  .modal-container.animating-in,
+  .modal-content.animating-in {
+    animation: modalFadeIn 0.3s ease forwards;
+  }
+  
+  .modal-container.animating-out,
+  .modal-content.animating-out {
+    animation: modalFadeOut 0.3s ease forwards;
+  }
+  
+  /* Z-Index Management */
+  .modal-overlay {
+    z-index: 9998;
+  }
+  
+  .modal-container,
+  .modal-content {
+    z-index: 9999;
+  }
+  
+  /* Multiple Modals Support */
+  .modal-overlay.stacked {
+    z-index: 10000;
+  }
+  
+  .modal-overlay.stacked .modal-container,
+  .modal-overlay.stacked .modal-content {
+    z-index: 10001;
+  }
+  
+  /* Accessibility - Focus Trap */
+  .modal-container:focus,
+  .modal-content:focus {
+    outline: 2px solid var(--bitcoin-orange);
+    outline-offset: 2px;
+  }
+  
+  /* Loading State in Modal */
+  .modal-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 3rem 1.5rem;
+  }
+  
+  .modal-loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--bitcoin-orange-20);
+    border-top-color: var(--bitcoin-orange);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .modal-loading-text {
+    color: var(--bitcoin-white-80);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+}
+
+/* ============================================
+   HAMBURGER MENU OVERLAY ENHANCEMENTS
+   Mobile/Tablet: 320px-1023px
+   ============================================ */
+@media (max-width: 1023px) {
+  /* Ensure hamburger menu overlay covers full viewport */
+  .mobile-menu-overlay,
+  .hamburger-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    background: var(--bitcoin-black);
+    z-index: 9999;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  
+  /* Active State */
+  .mobile-menu-overlay.active,
+  .hamburger-menu-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  /* Menu Content Container */
+  .mobile-menu-content,
+  .hamburger-menu-content {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+  }
+  
+  /* Menu Header */
+  .mobile-menu-header,
+  .hamburger-menu-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bitcoin-black);
+    border-bottom: 2px solid var(--bitcoin-orange);
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  /* Menu Items Container */
+  .mobile-menu-items,
+  .hamburger-menu-items {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+  }
+  
+  /* Menu Item Card */
+  .mobile-menu-item,
+  .hamburger-menu-item {
+    background: var(--bitcoin-black);
+    border: 1px solid var(--bitcoin-orange-20);
+    border-radius: 12px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .mobile-menu-item:hover,
+  .hamburger-menu-item:hover,
+  .mobile-menu-item.active,
+  .hamburger-menu-item.active {
+    border-color: var(--bitcoin-orange);
+    background: var(--bitcoin-orange);
+    color: var(--bitcoin-black);
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.3);
+    transform: scale(1.02);
+  }
+  
+  .mobile-menu-item:active,
+  .hamburger-menu-item:active {
+    transform: scale(0.98);
+  }
+  
+  /* Menu Item Icon */
+  .mobile-menu-item-icon,
+  .hamburger-menu-item-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    color: var(--bitcoin-orange);
+  }
+  
+  .mobile-menu-item:hover .mobile-menu-item-icon,
+  .hamburger-menu-item:hover .hamburger-menu-item-icon,
+  .mobile-menu-item.active .mobile-menu-item-icon,
+  .hamburger-menu-item.active .hamburger-menu-item-icon {
+    color: var(--bitcoin-black);
+  }
+  
+  /* Menu Item Content */
+  .mobile-menu-item-content,
+  .hamburger-menu-item-content {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  /* Menu Item Title */
+  .mobile-menu-item-title,
+  .hamburger-menu-item-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--bitcoin-white);
+    margin-bottom: 0.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .mobile-menu-item:hover .mobile-menu-item-title,
+  .hamburger-menu-item:hover .hamburger-menu-item-title,
+  .mobile-menu-item.active .mobile-menu-item-title,
+  .hamburger-menu-item.active .hamburger-menu-item-title {
+    color: var(--bitcoin-black);
+  }
+  
+  /* Menu Item Description */
+  .mobile-menu-item-description,
+  .hamburger-menu-item-description {
+    font-size: 0.875rem;
+    color: var(--bitcoin-white-60);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .mobile-menu-item:hover .mobile-menu-item-description,
+  .hamburger-menu-item:hover .hamburger-menu-item-description,
+  .mobile-menu-item.active .mobile-menu-item-description,
+  .hamburger-menu-item.active .hamburger-menu-item-description {
+    color: rgba(0, 0, 0, 0.7);
+  }
+  
+  /* Menu Item Arrow */
+  .mobile-menu-item-arrow,
+  .hamburger-menu-item-arrow {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    color: var(--bitcoin-orange);
+  }
+  
+  .mobile-menu-item:hover .mobile-menu-item-arrow,
+  .hamburger-menu-item:hover .hamburger-menu-item-arrow,
+  .mobile-menu-item.active .mobile-menu-item-arrow,
+  .hamburger-menu-item.active .hamburger-menu-item-arrow {
+    color: var(--bitcoin-black);
+  }
+  
+  /* Prevent Body Scroll When Menu is Open */
+  body.menu-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* ============================================
+   SCROLL LOCK UTILITY
+   Prevents background scrolling when overlays are open
+   ============================================ */
+@media (max-width: 1023px) {
+  /* Apply to body when any overlay is active */
+  body.scroll-locked {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    -webkit-overflow-scrolling: auto;
+  }
+  
+  /* Ensure the locked body doesn't shift */
+  body.scroll-locked {
+    padding-right: 0 !important;
+  }
+}
+
+/* ============================================
+   ESCAPE KEY AND BACKDROP CLICK HANDLERS
+   Accessibility and UX improvements
+   ============================================ */
+@media (max-width: 1023px) {
+  /* Visual feedback for backdrop */
+  .modal-overlay[data-backdrop-clickable="true"]:hover,
+  .overlay[data-backdrop-clickable="true"]:hover {
+    background: rgba(0, 0, 0, 0.9);
+  }
+  
+  /* Prevent clicks on modal content from closing */
+  .modal-container,
+  .modal-content,
+  .mobile-menu-content,
+  .hamburger-menu-content {
+    pointer-events: auto;
+  }
+  
+  /* Allow backdrop clicks to close */
+  .modal-overlay,
+  .overlay,
+  .mobile-menu-overlay,
+  .hamburger-menu-overlay {
+    pointer-events: auto;
+  }
+}
+
+/* ============================================
+   MOBILE-SPECIFIC MODAL ADJUSTMENTS
+   Extra small screens (320px-480px)
+   ============================================ */
+@media (max-width: 480px) {
+  .modal-container,
+  .modal-content {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+  
+  .modal-header {
+    padding: 0.875rem 1rem;
+  }
+  
+  .modal-title {
+    font-size: 1.125rem;
+  }
+  
+  .modal-body {
+    padding: 1rem;
+  }
+  
+  .modal-footer {
+    padding: 0.875rem 1rem;
+    flex-direction: column;
+  }
+  
+  .modal-footer button {
+    width: 100%;
+  }
+  
+  /* Hamburger menu adjustments */
+  .mobile-menu-item,
+  .hamburger-menu-item {
+    padding: 0.875rem;
+  }
+  
+  .mobile-menu-item-title,
+  .hamburger-menu-item-title {
+    font-size: 0.9375rem;
+  }
+  
+  .mobile-menu-item-description,
+  .hamburger-menu-item-description {
+    font-size: 0.8125rem;
+  }
+}
+
+/* ============================================
+   TABLET-SPECIFIC MODAL ADJUSTMENTS
+   Medium screens (768px-1023px)
+   ============================================ */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .modal-container,
+  .modal-content {
+    max-width: 700px;
+  }
+  
+  .whale-analysis-modal {
+    max-width: 900px;
+  }
+  
+  .news-article-modal {
+    max-width: 1000px;
+  }
+  
+  /* Hamburger menu adjustments */
+  .mobile-menu-items,
+  .hamburger-menu-items {
+    gap: 1rem;
+  }
+  
+  .mobile-menu-item,
+  .hamburger-menu-item {
+    padding: 1.25rem;
+  }
+  
+  .mobile-menu-item-title,
+  .hamburger-menu-item-title {
+    font-size: 1.125rem;
+  }
+}
+
+
+/* ===================================================================
+   TASK 12.10: ELEMENT SCALING AND FITTING FIXES
+   Target: 320px-1023px (Mobile and Tablet Only)
+   Desktop (1024px+) Unaffected
+   
+   Objective: Ensure ALL elements scale properly and fit within
+   their designated areas (orange borders, containers, etc.)
+   =================================================================== */
+
+@media (max-width: 1023px) {
+  
+  /* ============================================
+     GLOBAL ELEMENT CONTAINMENT
+     Ensure all elements fit within containers
+     ============================================ */
+  
+  /* All Container Elements - Prevent Overflow */
+  .container-element,
+  .bitcoin-block *,
+  .bitcoin-block-subtle *,
+  .bitcoin-block-orange * {
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  
+  /* Ensure all elements respect container boundaries */
+  * {
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+  
+  /* ============================================
+     ICON SIZING AND CONTAINMENT
+     Fix icon sizing to fit within containers
+     ============================================ */
+  
+  /* Icon Containers - Prevent Overflow */
+  .icon-container,
+  .icon-wrapper,
+  [class*="icon-"],
+  .lucide-icon {
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  /* SVG Icons - Fit Within Container */
+  .icon-container svg,
+  .icon-wrapper svg,
+  [class*="icon-"] svg,
+  .lucide-icon svg,
+  svg {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    flex-shrink: 0;
+  }
+  
+  /* Specific Icon Sizes - Ensure Containment */
+  .w-4.h-4 svg,
+  .w-5.h-5 svg,
+  .w-6.h-6 svg,
+  .w-8.h-8 svg,
+  .w-10.h-10 svg,
+  .w-12.h-12 svg,
+  .w-16.h-16 svg {
+    max-width: 100%;
+    max-height: 100%;
+  }
+  
+  /* Icon + Text Combinations - Prevent Overflow */
+  .flex.items-center.gap-2 svg,
+  .flex.items-center.gap-3 svg,
+  .inline-flex.items-center svg {
+    flex-shrink: 0;
+    max-width: 24px;
+    max-height: 24px;
+  }
+  
+  /* ============================================
+     BUTTON SCALING AND TEXT CONTAINMENT
+     Ensure buttons scale properly with text content
+     ============================================ */
+  
+  /* All Buttons - Prevent Text Overflow */
+  button,
+  .btn,
+  .btn-bitcoin-primary,
+  .btn-bitcoin-secondary,
+  .btn-bitcoin-tertiary,
+  .mobile-btn-active,
+  .mobile-btn-inactive {
+    max-width: 100%;
+    overflow: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    text-overflow: ellipsis;
+  }
+  
+  /* Button Text - Ensure Containment */
+  button span,
+  .btn span,
+  button > *,
+  .btn > * {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+  }
+  
+  /* Button with Icon + Text - Proper Spacing */
+  button.flex.items-center,
+  .btn.flex.items-center {
+    gap: 0.5rem;
+  }
+  
+  button.flex.items-center svg,
+  .btn.flex.items-center svg {
+    flex-shrink: 0;
+    max-width: 20px;
+    max-height: 20px;
+  }
+  
+  button.flex.items-center span,
+  .btn.flex.items-center span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Long Button Text - Wrap on Small Screens */
+  @media (max-width: 375px) {
+    button,
+    .btn {
+      white-space: normal;
+      line-height: 1.4;
+      padding-top: 0.625rem;
+      padding-bottom: 0.625rem;
+    }
+  }
+  
+  /* ============================================
+     BADGES AND TAGS CONTAINMENT
+     Verify badges and tags fit within containers
+     ============================================ */
+  
+  /* Badge Elements - Prevent Overflow */
+  .badge,
+  .tag,
+  .pill,
+  .label,
+  [class*="badge-"],
+  [class*="tag-"],
+  .px-2.py-1,
+  .px-3.py-1,
+  .px-3.py-1\\.5 {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+  }
+  
+  /* Badge Text - Responsive Sizing */
+  .badge,
+  .tag,
+  .pill,
+  .label {
+    font-size: clamp(0.625rem, 2vw, 0.75rem);
+  }
+  
+  /* Badge Icons - Fixed Size */
+  .badge svg,
+  .tag svg,
+  .pill svg,
+  .label svg {
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+  }
+  
+  /* Sentiment Badges - Specific Handling */
+  .sentiment-badge,
+  .confidence-badge,
+  .status-badge {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* ============================================
+     LOGO AND BRANDING ELEMENT CONTAINMENT
+     Fix any logo or branding element overflow
+     ============================================ */
+  
+  /* Logo Containers - Prevent Overflow */
+  .logo,
+  .logo-container,
+  .brand,
+  .brand-container,
+  [class*="logo-"],
+  header .logo,
+  nav .logo {
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Logo Images - Fit Within Container */
+  .logo img,
+  .logo-container img,
+  .brand img,
+  .brand-container img,
+  header .logo img,
+  nav .logo img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+  
+  /* Logo SVG - Fit Within Container */
+  .logo svg,
+  .logo-container svg,
+  .brand svg,
+  .brand-container svg {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+  }
+  
+  /* Bitcoin Symbol Logo - Specific Sizing */
+  .bitcoin-symbol-logo {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    max-width: 100%;
+  }
+  
+  /* ============================================
+     STAT CARD VALUE CONTAINMENT
+     Check stat card values fit within cards
+     ============================================ */
+  
+  /* Stat Card Containers - Prevent Overflow */
+  .stat-card,
+  .metric-card,
+  .data-card,
+  [class*="stat-"],
+  .bitcoin-block .stat-card {
+    max-width: 100%;
+    overflow: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Stat Values - Responsive Sizing */
+  .stat-value,
+  .metric-value,
+  .data-value,
+  .stat-card .value,
+  .stat-card .number {
+    font-size: clamp(1.25rem, 5vw, 2rem);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Large Stat Values - Extra Responsive */
+  .stat-value.text-3xl,
+  .stat-value.text-4xl,
+  .stat-value.text-5xl {
+    font-size: clamp(1.5rem, 6vw, 3rem) !important;
+  }
+  
+  /* Stat Labels - Prevent Overflow */
+  .stat-label,
+  .metric-label,
+  .data-label,
+  .stat-card .label {
+    font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Stat Card Grid - Responsive */
+  .stat-grid,
+  .metric-grid,
+  .grid.grid-cols-2,
+  .grid.grid-cols-3,
+  .grid.grid-cols-4 {
+    gap: 0.75rem;
+  }
+  
+  /* ============================================
+     CHART LEGEND CONTAINMENT
+     Ensure chart legends fit within chart containers
+     ============================================ */
+  
+  /* Chart Containers - Prevent Overflow */
+  .chart-container,
+  .chart-wrapper,
+  .trading-chart,
+  [class*="chart-"] {
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-y: visible;
+  }
+  
+  /* Chart Legend - Fit Within Container */
+  .chart-legend,
+  .legend,
+  .chart-container .legend,
+  .trading-chart .legend {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+  
+  /* Legend Items - Prevent Overflow */
+  .legend-item,
+  .chart-legend-item {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+  }
+  
+  /* Legend Text - Responsive Sizing */
+  .legend-item span,
+  .chart-legend-item span {
+    font-size: clamp(0.625rem, 2vw, 0.75rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Legend Color Indicator - Fixed Size */
+  .legend-item::before,
+  .chart-legend-item::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    border-radius: 2px;
+  }
+  
+  /* Chart Canvas - Responsive */
+  .chart-container canvas,
+  .chart-wrapper canvas,
+  .trading-chart canvas {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  
+  /* ============================================
+     TOOLTIP OVERFLOW PREVENTION
+     Fix any tooltip overflow issues
+     ============================================ */
+  
+  /* Tooltip Containers - Prevent Overflow */
+  .tooltip,
+  .popover,
+  .hint,
+  [role="tooltip"],
+  [class*="tooltip-"] {
+    max-width: 90vw;
+    overflow: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    z-index: 10000;
+  }
+  
+  /* Tooltip Content - Responsive Sizing */
+  .tooltip-content,
+  .popover-content {
+    max-width: 100%;
+    overflow: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+    padding: 0.5rem 0.75rem;
+  }
+  
+  /* Tooltip Arrow - Prevent Overflow */
+  .tooltip-arrow,
+  .popover-arrow {
+    flex-shrink: 0;
+  }
+  
+  /* Chart Tooltips - Specific Handling */
+  .chart-tooltip,
+  .trading-chart-tooltip {
+    max-width: 80vw;
+    overflow: hidden;
+    word-wrap: break-word;
+  }
+  
+  /* ============================================
+     DROPDOWN MENU CONTAINMENT
+     Verify dropdown menus fit within viewport
+     ============================================ */
+  
+  /* Dropdown Containers - Prevent Overflow */
+  .dropdown,
+  .dropdown-menu,
+  .select-menu,
+  [role="menu"],
+  [class*="dropdown-"] {
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Dropdown Items - Prevent Overflow */
+  .dropdown-item,
+  .menu-item,
+  [role="menuitem"] {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0.75rem 1rem;
+    min-height: 44px;
+  }
+  
+  /* Dropdown Item Text - Responsive */
+  .dropdown-item span,
+  .menu-item span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Dropdown with Icons - Proper Spacing */
+  .dropdown-item.flex,
+  .menu-item.flex {
+    gap: 0.5rem;
+  }
+  
+  .dropdown-item.flex svg,
+  .menu-item.flex svg {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+  }
+  
+  /* Select Dropdown - Native Styling */
+  select {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* ============================================
+     TEXT ELEMENT CONTAINMENT
+     Ensure all text fits within containers
+     ============================================ */
+  
+  /* All Text Containers - Prevent Overflow */
+  .text-container,
+  p,
+  span,
+  div,
+  h1, h2, h3, h4, h5, h6 {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+  }
+  
+  /* Long Words - Break Anywhere */
+  .break-words,
+  .word-break-all {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* URLs and Addresses - Break All */
+  .url,
+  .address,
+  .hash,
+  .font-mono {
+    word-break: break-all;
+    overflow-wrap: anywhere;
+  }
+  
+  /* Headings - Responsive Sizing */
+  h1 {
+    font-size: clamp(1.75rem, 6vw, 2.5rem);
+  }
+  
+  h2 {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+  }
+  
+  h3 {
+    font-size: clamp(1.25rem, 4vw, 1.5rem);
+  }
+  
+  h4 {
+    font-size: clamp(1.125rem, 3.5vw, 1.25rem);
+  }
+  
+  h5 {
+    font-size: clamp(1rem, 3vw, 1.125rem);
+  }
+  
+  h6 {
+    font-size: clamp(0.875rem, 2.5vw, 1rem);
+  }
+  
+  /* ============================================
+     FLEX AND GRID LAYOUT CONTAINMENT
+     Ensure flex/grid items don't overflow
+     ============================================ */
+  
+  /* All Flex Containers - Allow Shrinking */
+  .flex,
+  [class*="flex-"] {
+    min-width: 0;
+  }
+  
+  /* All Flex Items - Allow Shrinking */
+  .flex > *,
+  [class*="flex-"] > * {
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  /* Flex-1 Items - Specific Handling */
+  .flex-1 {
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  /* All Grid Containers - Prevent Overflow */
+  .grid,
+  [class*="grid-"] {
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  /* All Grid Items - Allow Shrinking */
+  .grid > *,
+  [class*="grid-"] > * {
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  /* ============================================
+     IMAGE AND MEDIA CONTAINMENT
+     Ensure all images fit within containers
+     ============================================ */
+  
+  /* All Images - Fit Within Container */
+  img,
+  picture,
+  .image,
+  .img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+  }
+  
+  /* Background Images - Cover Without Overflow */
+  .bg-image,
+  [class*="bg-"] {
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+  }
+  
+  /* Video Elements - Fit Within Container */
+  video {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* ============================================
+     ORANGE BORDER CONTAINMENT
+     Ensure all content stays within orange borders
+     ============================================ */
+  
+  /* Bitcoin Block Variants - Strict Containment */
+  .bitcoin-block,
+  .bitcoin-block-subtle,
+  .bitcoin-block-orange {
+    overflow: hidden;
+    max-width: 100%;
+    position: relative;
+  }
+  
+  /* All Children of Bitcoin Blocks - Contained */
+  .bitcoin-block > *,
+  .bitcoin-block-subtle > *,
+  .bitcoin-block-orange > * {
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  /* Nested Bitcoin Blocks - Proper Spacing */
+  .bitcoin-block .bitcoin-block,
+  .bitcoin-block-subtle .bitcoin-block-subtle {
+    margin: 0.5rem 0;
+  }
+  
+  /* ============================================
+     PRICE DISPLAY CONTAINMENT
+     Ensure price displays fit within containers
+     ============================================ */
+  
+  /* Price Display Elements - Responsive */
+  .price-display,
+  .price,
+  .amount,
+  .value,
+  [class*="price-"] {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+  }
+  
+  /* Large Price Displays - Extra Responsive */
+  .price-display-lg,
+  .price.text-4xl,
+  .price.text-5xl {
+    font-size: clamp(2rem, 7vw, 3rem) !important;
+  }
+  
+  /* Small Price Displays - Readable */
+  .price-display-sm,
+  .price.text-sm {
+    font-size: clamp(0.875rem, 3vw, 1rem) !important;
+  }
+  
+  /* ============================================
+     TABLE CONTAINMENT
+     Ensure tables fit within containers
+     ============================================ */
+  
+  /* Table Wrappers - Horizontal Scroll */
+  .table-wrapper,
+  .table-container {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Tables - Prevent Overflow */
+  table {
+    max-width: 100%;
+    table-layout: fixed;
+  }
+  
+  /* Table Cells - Truncate Content */
+  td, th {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  
+  /* ============================================
+     FORM ELEMENT CONTAINMENT
+     Ensure form elements fit within containers
+     ============================================ */
+  
+  /* All Form Elements - Prevent Overflow */
+  input,
+  textarea,
+  select {
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  
+  /* Input Groups - Proper Spacing */
+  .input-group,
+  .form-group {
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  /* Input Labels - Prevent Overflow */
+  label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+  }
+  
+  /* ============================================
+     EXTRA SMALL SCREENS (320px-375px)
+     Additional constraints for smallest devices
+     ============================================ */
+  
+  @media (max-width: 375px) {
+    /* Reduce padding on smallest screens */
+    .bitcoin-block,
+    .bitcoin-block-subtle,
+    .bitcoin-block-orange {
+      padding: 0.875rem;
+    }
+    
+    /* Smaller gaps */
+    .gap-4 {
+      gap: 0.5rem;
+    }
+    
+    .gap-6 {
+      gap: 0.75rem;
+    }
+    
+    /* Smaller font sizes */
+    .text-lg {
+      font-size: 1rem;
+    }
+    
+    .text-xl {
+      font-size: 1.125rem;
+    }
+    
+    .text-2xl {
+      font-size: 1.25rem;
+    }
+    
+    /* Tighter spacing */
+    .space-x-4 > * + * {
+      margin-left: 0.5rem;
+    }
+    
+    .space-y-4 > * + * {
+      margin-top: 0.5rem;
+    }
+  }
+  
+  /* ============================================
+     TABLET SPECIFIC (768px-1023px)
+     Slightly larger elements on tablets
+     ============================================ */
+  
+  @media (min-width: 768px) and (max-width: 1023px) {
+    /* Slightly larger padding on tablets */
+    .bitcoin-block,
+    .bitcoin-block-subtle,
+    .bitcoin-block-orange {
+      padding: 1.25rem;
+    }
+    
+    /* Larger touch targets */
+    button,
+    .btn {
+      min-height: 52px;
+      min-width: 52px;
+    }
+    
+    /* Larger icons */
+    .icon-container svg,
+    .icon-wrapper svg {
+      max-width: 28px;
+      max-height: 28px;
+    }
+    
+    /* Larger badges */
+    .badge,
+    .tag,
+    .pill {
+      font-size: 0.8125rem;
+    }
+  }
+  
+  /* ============================================
+     PERFORMANCE OPTIMIZATION
+     Reduce repaints and reflows
+     ============================================ */
+  
+  /* Use GPU acceleration for transforms */
+  .bitcoin-block,
+  .bitcoin-block-subtle,
+  .bitcoin-block-orange,
+  button,
+  .btn {
+    will-change: transform;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+  
+  /* Smooth scrolling for containers */
+  .overflow-auto,
+  .overflow-x-auto,
+  .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  /* ============================================
+     ACCESSIBILITY ENHANCEMENTS
+     Ensure all elements are accessible
+     ============================================ */
+  
+  /* Focus States - Visible */
+  *:focus-visible {
+    outline: 2px solid var(--bitcoin-orange);
+    outline-offset: 2px;
+  }
+  
+  /* Touch Targets - Minimum Size */
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  [role="button"],
+  [role="link"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* High Contrast Mode Support */
+  @media (prefers-contrast: high) {
+    .bitcoin-block,
+    .bitcoin-block-subtle,
+    .bitcoin-block-orange {
+      border-width: 2px;
+    }
+    
+    button,
+    .btn {
+      border-width: 3px;
+    }
+  }
+  
+  /* Reduced Motion Support */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ============================================
+   END OF TASK 12.10 FIXES
+   ============================================ */
+
+/* ============================================
+   HAMBURGER MENU BUTTON ENHANCEMENTS
+   Improved Visual Feedback and Animations
+   ============================================ */
+
+@media (max-width: 1023px) {
+  /* Hamburger Menu Button */
+  .hamburger-menu-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Hamburger Button Hover State */
+  .hamburger-menu-button:hover {
+    background-color: rgba(247, 147, 26, 0.15) !important;
+    transform: scale(1.05);
+  }
+  
+  /* Hamburger Button Active State */
+  .hamburger-menu-button.active {
+    background-color: rgba(247, 147, 26, 0.2) !important;
+  }
+  
+  /* Hamburger Button Focus State */
+  .hamburger-menu-button:focus-visible {
+    outline: 3px solid var(--bitcoin-orange) !important;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 5px rgba(247, 147, 26, 0.3) !important;
+  }
+  
+  /* ============================================
+     MOBILE MENU ITEM CARD ENHANCEMENTS
+     Improved Alignment and Visual Hierarchy
+     ============================================ */
+  
+  /* Menu Item Card Base */
+  .mobile-menu-item-card {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Menu Item Card Hover Effects */
+  .mobile-menu-item-card:hover .mobile-menu-item-icon {
+    border-color: var(--bitcoin-orange) !important;
+    background-color: rgba(247, 147, 26, 0.05);
+    transform: scale(1.1);
+  }
+  
+  .mobile-menu-item-card:hover .mobile-menu-item-arrow {
+    transform: translateX(4px);
+    color: var(--bitcoin-white);
+  }
+  
+  /* Menu Item Card Active State */
+  .mobile-menu-item-card.active,
+  .mobile-menu-item-card[aria-current="page"] {
+    background-color: var(--bitcoin-orange) !important;
+    border-color: var(--bitcoin-orange) !important;
+    box-shadow: 0 0 30px rgba(247, 147, 26, 0.5);
+  }
+  
+  .mobile-menu-item-card.active .mobile-menu-item-icon,
+  .mobile-menu-item-card[aria-current="page"] .mobile-menu-item-icon {
+    background-color: var(--bitcoin-black);
+    border-color: var(--bitcoin-orange);
+  }
+  
+  .mobile-menu-item-card.active .mobile-menu-item-icon svg,
+  .mobile-menu-item-card[aria-current="page"] .mobile-menu-item-icon svg {
+    color: var(--bitcoin-orange);
+  }
+  
+  .mobile-menu-item-card.active .mobile-menu-item-title,
+  .mobile-menu-item-card[aria-current="page"] .mobile-menu-item-title {
+    color: var(--bitcoin-black) !important;
+  }
+  
+  .mobile-menu-item-card.active .mobile-menu-item-description,
+  .mobile-menu-item-card[aria-current="page"] .mobile-menu-item-description {
+    color: var(--bitcoin-black) !important;
+    opacity: 0.8;
+  }
+  
+  .mobile-menu-item-card.active .mobile-menu-item-arrow,
+  .mobile-menu-item-card[aria-current="page"] .mobile-menu-item-arrow {
+    color: var(--bitcoin-black) !important;
+  }
+  
+  /* ============================================
+     MENU ICON ALIGNMENT
+     Ensure Icons Align Perfectly with Text
+     ============================================ */
+  
+  .mobile-menu-item-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .mobile-menu-item-icon svg {
+    flex-shrink: 0;
+  }
+  
+  /* ============================================
+     MENU CONTENT ALIGNMENT
+     Prevent Text Overflow and Ensure Proper Spacing
+     ============================================ */
+  
+  .mobile-menu-item-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.25rem;
+  }
+  
+  .mobile-menu-item-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .mobile-menu-item-description {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+  }
+  
+  /* ============================================
+     MENU SCROLLING ENHANCEMENTS
+     Smooth Scrolling with Proper Overflow Handling
+     ============================================ */
+  
+  /* Custom Scrollbar for Menu */
+  .mobile-menu-items::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .mobile-menu-items::-webkit-scrollbar-track {
+    background: var(--bitcoin-black);
+    border-left: 1px solid var(--bitcoin-orange-20);
+  }
+  
+  .mobile-menu-items::-webkit-scrollbar-thumb {
+    background: var(--bitcoin-orange-30);
+    border-radius: 3px;
+  }
+  
+  .mobile-menu-items::-webkit-scrollbar-thumb:hover {
+    background: var(--bitcoin-orange-50);
+  }
+  
+  /* Smooth Scrolling */
+  .mobile-menu-items {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* ============================================
+     MENU ANIMATIONS
+     Smooth Slide Down and Fade In Effects
+     ============================================ */
+  
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-slideDown {
+    animation: slideDown 0.3s ease-out;
+  }
+  
+  /* Staggered Animation for Menu Items */
+  .mobile-menu-item-card {
+    animation: fadeInUp 0.3s ease-out both;
+  }
+  
+  /* ============================================
+     MENU CLOSE BUTTON ACCESSIBILITY
+     Ensure Close Button is Always Accessible
+     ============================================ */
+  
+  .menu-close-button {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--bitcoin-black);
+    border-bottom: 2px solid var(--bitcoin-orange);
+  }
+  
+  /* ============================================
+     TABLET SPECIFIC MENU ENHANCEMENTS (768px-1023px)
+     Larger Touch Targets and Better Spacing
+     ============================================ */
+  
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .mobile-menu-item-card {
+      min-height: 72px;
+      padding: 1.25rem;
+    }
+    
+    .mobile-menu-item-icon {
+      width: 56px;
+      height: 56px;
+    }
+    
+    .mobile-menu-item-icon svg {
+      width: 28px;
+      height: 28px;
+    }
+    
+    .mobile-menu-item-title {
+      font-size: 1.125rem;
+    }
+    
+    .mobile-menu-item-description {
+      font-size: 0.9375rem;
+    }
+    
+    .mobile-menu-item-arrow svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+  
+  /* ============================================
+     MENU OVERLAY BACKDROP
+     Improved Visual Separation
+     ============================================ */
+  
+  .menu-overlay-backdrop {
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+}
+
+/* ============================================
+   MENU FOCUS TRAP
+   Ensure Keyboard Navigation Works Properly
+   ============================================ */
+
+@media (max-width: 1023px) {
+  .mobile-menu-item-card:focus-visible {
+    outline: 3px solid var(--bitcoin-orange) !important;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 5px rgba(247, 147, 26, 0.4) !important;
+  }
+}
+
+/* ============================================
+   GLOBAL ANIMATIONS
+   Reusable Animation Keyframes
+   ============================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Animation Utilities */
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-fadeOut {
+  animation: fadeOut 0.3s ease-out;
+}

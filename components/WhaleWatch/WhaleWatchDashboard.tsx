@@ -1184,7 +1184,7 @@ export default function WhaleWatchDashboard() {
   // Initial state - no data loaded yet
   if (!whaleData && !loading && !error) {
     return (
-      <div className="bg-bitcoin-black border border-bitcoin-orange rounded-lg p-4 md:p-6 whale-watch-initial-state">
+      <div className="whale-watch-initial-state whale-watch-dashboard bg-bitcoin-black border border-bitcoin-orange rounded-lg p-4 md:p-6">
         <div className="flex flex-col items-center justify-center min-h-[400px] md:min-h-[300px] py-6">
           <div className="text-center max-w-2xl w-full px-2">
             {/* Whale emoji - properly sized for mobile */}
@@ -1223,7 +1223,7 @@ export default function WhaleWatchDashboard() {
   // Loading state
   if (loading && !whaleData) {
     return (
-      <div className="bg-bitcoin-black border border-bitcoin-orange rounded-lg p-6">
+      <div className="whale-watch-dashboard bg-bitcoin-black border border-bitcoin-orange rounded-lg p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <RefreshCw className="h-12 w-12 text-bitcoin-orange animate-spin mx-auto mb-4" />
@@ -1236,7 +1236,7 @@ export default function WhaleWatchDashboard() {
   }
 
   return (
-    <div className="bg-bitcoin-black border border-bitcoin-orange rounded-lg p-4 md:p-6">
+    <div className="whale-watch-dashboard bg-bitcoin-black border border-bitcoin-orange rounded-lg p-4 md:p-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 space-y-4 md:space-y-0">
         <div>

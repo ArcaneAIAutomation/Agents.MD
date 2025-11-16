@@ -342,8 +342,8 @@ const CryptoHerald: React.FC = () => {
   }
 
   return (
-    <div className="w-full bg-bitcoin-black mx-auto bitcoin-sovereign-theme">
-      <div className="p-4 md:p-6 lg:p-8 bg-bitcoin-black">
+    <div className="w-full bg-bitcoin-black mx-auto bitcoin-sovereign-theme crypto-herald-container">
+      <div className="p-4 md:p-6 lg:p-8 bg-bitcoin-black news-container">
         {/* Bitcoin Sovereign Header - Fully Responsive Layout */}
         <div className="pb-4 md:pb-6 lg:pb-8 mb-6 md:mb-8 bg-bitcoin-black">
           <div className="text-center max-w-7xl mx-auto px-2 sm:px-4">
@@ -626,7 +626,7 @@ const CryptoHerald: React.FC = () => {
           <div className="mb-6">
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="w-full p-6 hover:shadow-bitcoin-glow transition-all flex items-center justify-between group cursor-pointer"
+              className="w-full p-6 hover:shadow-bitcoin-glow transition-all flex items-center justify-between group cursor-pointer news-collapse-button"
               style={{ 
                 backgroundColor: '#000000 !important',
                 border: '1px solid #F7931A !important',
@@ -659,8 +659,8 @@ const CryptoHerald: React.FC = () => {
 
         {/* News Sections - Collapsible with smooth animation */}
         <div 
-          className={`transition-all duration-500 ease-in-out overflow-hidden ${
-            isExpanded ? 'max-h-[100000px] opacity-100' : 'max-h-0 opacity-0'
+          className={`transition-all duration-500 ease-in-out overflow-hidden news-article-expandable ${
+            isExpanded ? 'max-h-[100000px] opacity-100 news-article-expanded' : 'max-h-0 opacity-0 news-article-collapsed'
           }`}
         >
           {!data?.meta?.error && Object.entries(articlesByCategory).map(([category, articles], categoryIndex) => {
@@ -682,35 +682,35 @@ const CryptoHerald: React.FC = () => {
               <div className="p-4 md:p-6 space-y-6">
                 {categoryIndex === 0 && categoryArticles.length > 0 && (
                   /* Featured Article - Only for first category */
-                  <div className="bitcoin-block bg-bitcoin-black p-4 md:p-6 hover:shadow-bitcoin-glow transition-all">
+                  <div className="bitcoin-block bg-bitcoin-black p-4 md:p-6 hover:shadow-bitcoin-glow transition-all featured-article">
                     {/* Clickable Headline */}
                     {categoryArticles[0].url ? (
                       <a 
                         href={categoryArticles[0].url} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-bitcoin-orange hover:text-bitcoin-white transition-colors block"
+                        className="text-bitcoin-orange hover:text-bitcoin-white transition-colors block crypto-news-headline"
                       >
                         <h3 className="text-xl md:text-2xl lg:text-3xl font-black mb-4 hover:underline cursor-pointer text-bitcoin-white font-sans">
                           {categoryArticles[0].headline}
                         </h3>
                       </a>
                     ) : (
-                      <h3 className="text-xl md:text-2xl lg:text-3xl font-black mb-4 text-bitcoin-white font-sans">
+                      <h3 className="text-xl md:text-2xl lg:text-3xl font-black mb-4 text-bitcoin-white font-sans crypto-news-headline">
                         {categoryArticles[0].headline}
                       </h3>
                     )}
-                    <div className="flex flex-wrap items-center gap-3 md:gap-4 mb-4">
-                      <span className={`px-3 py-2 border rounded font-bold text-sm min-h-[48px] flex items-center touch-manipulation ${
+                    <div className="flex flex-wrap items-center gap-3 md:gap-4 mb-4 news-flex-container">
+                      <span className={`px-3 py-2 border rounded font-bold text-sm min-h-[48px] flex items-center touch-manipulation sentiment-badge ${
                         categoryArticles[0].sentiment === 'Bullish' ? 'border-bitcoin-orange text-bitcoin-orange bg-bitcoin-black' :
                         categoryArticles[0].sentiment === 'Bearish' ? 'border-bitcoin-orange-30 text-bitcoin-white-60 bg-bitcoin-black' :
                         'border-bitcoin-orange-20 text-bitcoin-white-80 bg-bitcoin-black'
                       }`}>
                         {categoryArticles[0].sentiment.toUpperCase()}
                       </span>
-                      <span className="text-sm font-bold text-bitcoin-white-60">BY {categoryArticles[0].source.toUpperCase()}</span>
+                      <span className="text-sm font-bold text-bitcoin-white-60 news-source-name">BY {categoryArticles[0].source.toUpperCase()}</span>
                       {categoryArticles[0].aiSummary && (
-                        <div className="flex items-center space-x-2 bg-bitcoin-black border border-bitcoin-orange-30 rounded px-3 py-2 min-h-[48px] touch-manipulation">
+                        <div className="flex items-center space-x-2 bg-bitcoin-black border border-bitcoin-orange-30 rounded px-3 py-2 min-h-[48px] touch-manipulation ai-insight-badge">
                           <Sparkles className="h-4 w-4 text-bitcoin-orange" />
                           <span className="text-sm font-bold text-bitcoin-orange">AI INSIGHT</span>
                         </div>
@@ -723,12 +723,12 @@ const CryptoHerald: React.FC = () => {
                         </p>
                       </div>
                     )}
-                    <p className="text-base md:text-lg leading-relaxed mb-4 text-bitcoin-white-80 font-sans">
+                    <p className="text-base md:text-lg leading-relaxed mb-4 text-bitcoin-white-80 font-sans crypto-news-summary">
                       {categoryArticles[0].summary}
                     </p>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                       <div className="flex items-center space-x-4 text-sm">
-                        <span className="font-bold text-bitcoin-orange font-mono">
+                        <span className="font-bold text-bitcoin-orange font-mono news-timestamp">
                           {formatDate(categoryArticles[0].publishedAt)}
                         </span>
                       </div>
@@ -737,7 +737,7 @@ const CryptoHerald: React.FC = () => {
                           href={categoryArticles[0].url} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="btn-bitcoin-primary px-4 py-3 text-sm min-h-[48px] flex items-center justify-center touch-manipulation"
+                          className="btn-bitcoin-primary px-4 py-3 text-sm min-h-[48px] flex items-center justify-center touch-manipulation news-read-more"
                         >
                           READ MORE
                         </a>
@@ -747,7 +747,7 @@ const CryptoHerald: React.FC = () => {
                 )}
 
                 {/* Other Articles - Single column on mobile */}
-                <div className="grid grid-cols-1 gap-6">
+                <div className="grid grid-cols-1 gap-6 news-grid">
                   {/* For first category, show articles starting from index 1 (skip featured article) */}
                   {/* For other categories, show all articles starting from index 0 */}
                   {(categoryIndex === 0 ? categoryArticles.slice(1) : categoryArticles).map((article: CryptoArticle, index: number) => (
@@ -762,7 +762,7 @@ const CryptoHerald: React.FC = () => {
                           href={article.url} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="text-bitcoin-orange hover:text-bitcoin-white transition-colors block mb-2"
+                          className="text-bitcoin-orange hover:text-bitcoin-white transition-colors block mb-2 crypto-news-headline"
                         >
                           <TypewriterText 
                             text={article.headline}
@@ -777,23 +777,23 @@ const CryptoHerald: React.FC = () => {
                           text={article.headline}
                           speed={50}
                           delay={0}
-                          className="font-black text-base md:text-lg mb-2 leading-tight block text-bitcoin-white font-sans"
+                          className="font-black text-base md:text-lg mb-2 leading-tight block text-bitcoin-white font-sans crypto-news-headline"
                           showCursor={false}
                         />
                       )}
-                      <div className="flex flex-wrap items-center gap-2 mb-3">
-                        <span className={`px-3 py-2 border rounded text-sm font-bold min-h-[48px] flex items-center touch-manipulation ${
+                      <div className="flex flex-wrap items-center gap-2 mb-3 news-flex-container">
+                        <span className={`px-3 py-2 border rounded text-sm font-bold min-h-[48px] flex items-center touch-manipulation sentiment-badge ${
                           article.sentiment === 'Bullish' ? 'border-bitcoin-orange text-bitcoin-orange bg-bitcoin-black' :
                           article.sentiment === 'Bearish' ? 'border-bitcoin-orange-30 text-bitcoin-white-60 bg-bitcoin-black' :
                           'border-bitcoin-orange-20 text-bitcoin-white-80 bg-bitcoin-black'
                         }`}>
                           {article.sentiment}
                         </span>
-                        <span className="text-sm font-bold text-bitcoin-white-60">
+                        <span className="text-sm font-bold text-bitcoin-white-60 news-source-name">
                           {article.source.toUpperCase()}
                         </span>
                         {article.aiSummary && (
-                          <div className="flex items-center space-x-1 bg-bitcoin-black border border-bitcoin-orange-30 rounded px-3 py-2 min-h-[48px] touch-manipulation">
+                          <div className="flex items-center space-x-1 bg-bitcoin-black border border-bitcoin-orange-30 rounded px-3 py-2 min-h-[48px] touch-manipulation ai-insight-badge">
                             <Sparkles className="h-4 w-4 text-bitcoin-orange" />
                             <span className="text-sm font-bold text-bitcoin-orange">AI</span>
                           </div>
@@ -806,11 +806,11 @@ const CryptoHerald: React.FC = () => {
                           </p>
                         </div>
                       )}
-                      <p className="text-sm md:text-base mb-3 text-bitcoin-white-80 leading-relaxed font-sans">
+                      <p className="text-sm md:text-base mb-3 text-bitcoin-white-80 leading-relaxed font-sans crypto-news-summary">
                         {article.summary.substring(0, 150)}...
                       </p>
                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-                        <span className="text-sm text-bitcoin-orange font-medium font-mono">
+                        <span className="text-sm text-bitcoin-orange font-medium font-mono news-timestamp">
                           {formatDate(article.publishedAt)}
                         </span>
                         {article.url && (
@@ -818,7 +818,7 @@ const CryptoHerald: React.FC = () => {
                             href={article.url} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="btn-bitcoin-secondary px-4 py-3 text-sm rounded min-h-[48px] flex items-center justify-center touch-manipulation"
+                            className="btn-bitcoin-secondary px-4 py-3 text-sm rounded min-h-[48px] flex items-center justify-center touch-manipulation news-read-more"
                           >
                             📖 READ ORIGINAL
                           </a>

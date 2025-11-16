@@ -98,7 +98,7 @@ export default function Header() {
           {shouldShowMobileMenu && (
             <button
               onClick={toggleMobileMenu}
-              className="p-2 rounded-md hover:bg-bitcoin-orange-10 focus:outline-none focus:ring-2 focus:ring-bitcoin-orange transition-colors"
+              className={`hamburger-menu-button p-2 rounded-md hover:bg-bitcoin-orange-10 focus:outline-none focus:ring-2 focus:ring-bitcoin-orange transition-all duration-300 ${isMobileMenuOpen ? 'active' : ''}`}
               style={{ 
                 minWidth: `${minTouchTargetSize}px`,
                 minHeight: `${minTouchTargetSize}px`,
@@ -108,18 +108,19 @@ export default function Header() {
               aria-expanded={isMobileMenuOpen}
             >
               <svg
-                className="w-6 h-6"
+                className="w-7 h-7 transition-transform duration-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
+                style={{ strokeWidth: 2.5 }}
               >
                 {isMobileMenuOpen ? (
                   // X icon when menu is open
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2}
+                    strokeWidth={2.5}
                     d="M6 18L18 6M6 6l12 12"
                   />
                 ) : (
@@ -127,7 +128,7 @@ export default function Header() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2}
+                    strokeWidth={2.5}
                     d="M4 6h16M4 12h16M4 18h16"
                   />
                 )}
@@ -185,24 +186,62 @@ export default function Header() {
 
         {/* Mobile Navigation Menu */}
         {shouldShowMobileMenu && isMobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-bitcoin-black border-b-2 border-bitcoin-orange shadow-[0_0_20px_rgba(247,147,26,0.3)] z-50">
-            <nav className="px-4 py-4 space-y-2">
-              {navigationItems.map((item) => (
+          <div className="md:hidden absolute top-full left-0 right-0 bg-bitcoin-black border-b-2 border-bitcoin-orange shadow-[0_0_20px_rgba(247,147,26,0.3)] z-50 animate-slideDown">
+            <nav className="px-4 py-4 space-y-3 max-h-[calc(100vh-200px)] overflow-y-auto">
+              {navigationItems.map((item, index) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => handleNavClick(item.href)}
-                  className="block bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg hover:border-bitcoin-orange hover:shadow-[0_0_15px_rgba(247,147,26,0.3)] transition-all"
+                  className="mobile-menu-item-card block bg-bitcoin-black border border-bitcoin-orange-20 rounded-xl hover:border-bitcoin-orange hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] transition-all duration-300"
                   style={{ 
-                    minHeight: `${minTouchTargetSize}px`
+                    minHeight: `${minTouchTargetSize + 16}px`,
+                    animationDelay: `${index * 50}ms`
                   }}
                 >
-                  <div className="flex items-center px-3 py-3">
-                    <div>
-                      <div className="font-bold text-base text-bitcoin-white">{item.label}</div>
-                      <div className="text-sm text-bitcoin-white-60">
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    {/* Menu Icon */}
+                    <div className="mobile-menu-item-icon flex-shrink-0 w-12 h-12 rounded-lg bg-bitcoin-black border-2 border-bitcoin-orange-20 flex items-center justify-center transition-all duration-300">
+                      <svg 
+                        className="w-6 h-6 text-bitcoin-orange" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                        strokeWidth={2.5}
+                      >
+                        <path 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" 
+                        />
+                      </svg>
+                    </div>
+                    
+                    {/* Menu Content */}
+                    <div className="mobile-menu-item-content flex-1 min-w-0">
+                      <div className="mobile-menu-item-title font-bold text-base text-bitcoin-white mb-1 truncate">
+                        {item.label}
+                      </div>
+                      <div className="mobile-menu-item-description text-sm text-bitcoin-white-60 line-clamp-1">
                         {item.description}
                       </div>
+                    </div>
+                    
+                    {/* Arrow Indicator */}
+                    <div className="mobile-menu-item-arrow flex-shrink-0 text-bitcoin-orange transition-transform duration-300">
+                      <svg 
+                        className="w-5 h-5" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                        strokeWidth={2.5}
+                      >
+                        <path 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          d="M9 5l7 7-7 7" 
+                        />
+                      </svg>
                     </div>
                   </div>
                 </Link>
@@ -272,12 +311,13 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu Overlay Backdrop */}
       {shouldShowMobileMenu && isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-75 z-40 md:hidden"
+          className="menu-overlay-backdrop fixed inset-0 bg-black bg-opacity-80 z-40 md:hidden transition-opacity duration-300"
           onClick={closeMobileMenu}
           aria-hidden="true"
+          style={{ animation: 'fadeIn 0.3s ease-out' }}
         />
       )}
     </header>
