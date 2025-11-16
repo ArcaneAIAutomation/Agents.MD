@@ -1,0 +1,670 @@
+/* ============================================
+   TASK 11: COMPREHENSIVE CONTAINER FITTING & VISUAL ALIGNMENT
+   Mobile/Tablet Only (320px-1023px)
+   CRITICAL: Ensures ALL content fits within containers
+   ============================================ */
+
+/* ============================================
+   11.1 GLOBAL CONTAINER OVERFLOW PREVENTION
+   Prevent horizontal scroll on all mobile/tablet devices
+   ============================================ */
+
+@media (max-width: 1023px) {
+  
+  /* Prevent horizontal scroll on body and html */
+  html,
+  body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    box-sizing: border-box;
+  }
+  
+  /* Apply box-sizing globally */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box !important;
+  }
+  
+  /* All top-level containers must not exceed viewport */
+  #__next,
+  main,
+  .container,
+  .wrapper,
+  [class*="container"] {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* ============================================
+     11.2 BITCOIN BLOCK CONTAINER CONTAINMENT
+     All bitcoin-block containers must clip overflow
+     ============================================ */
+  
+  .bitcoin-block,
+  .bitcoin-block-subtle,
+  .bitcoin-block-orange,
+  [class*="bitcoin-block"] {
+    overflow: hidden !important;
+    max-width: 100% !important;
+    padding: 1rem !important; /* Reduced from 1.5rem for mobile */
+    border: 1px solid var(--bitcoin-orange) !important;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Nested bitcoin-blocks */
+  .bitcoin-block .bitcoin-block,
+  .bitcoin-block-subtle .bitcoin-block-subtle {
+    padding: 0.75rem !important;
+  }
+  
+  /* ============================================
+     11.3 TEXT CONTAINMENT & TRUNCATION SYSTEM
+     Prevent text from breaking container boundaries
+     ============================================ */
+  
+  /* All text containers must break words if needed */
+  p, span, div, h1, h2, h3, h4, h5, h6,
+  .text, .content, .description {
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto;
+    max-width: 100%;
+  }
+  
+  /* Single-line truncation with ellipsis */
+  .truncate,
+  [class*="truncate"] {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 100%;
+  }
+  
+  /* Multi-line truncation (2 lines) */
+  .line-clamp-2 {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    word-break: break-word;
+  }
+  
+  /* Multi-line truncation (3 lines) */
+  .line-clamp-3 {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 3 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    word-break: break-word;
+  }
+  
+  /* Multi-line truncation (4 lines) */
+  .line-clamp-4 {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 4 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    word-break: break-word;
+  }
+  
+  /* Long URLs and wallet addresses */
+  .break-all,
+  [class*="address"],
+  [class*="hash"],
+  [class*="url"] {
+    word-break: break-all !important;
+    overflow-wrap: break-word !important;
+  }
+  
+  /* Monospace data (prices, addresses) */
+  .font-mono,
+  [class*="mono"],
+  code,
+  pre {
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: pre-wrap !important;
+    max-width: 100%;
+  }
+  
+  /* Headlines must not break container */
+  h1, h2, h3, h4, h5, h6 {
+    max-width: 100%;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+  }
+  
+  /* ============================================
+     11.4 IMAGE & MEDIA SCALING
+     All images must scale to container width
+     ============================================ */
+  
+  /* All images scale to container */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+    display: block;
+  }
+  
+  /* Images within fixed containers */
+  .image-container img,
+  [class*="image"] img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    object-position: center;
+  }
+  
+  /* Chart images */
+  .chart img,
+  [class*="chart"] img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  
+  /* Icons */
+  svg {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* News article images */
+  .news-image,
+  .article-image,
+  [class*="news"] img,
+  [class*="article"] img {
+    max-width: 100% !important;
+    height: auto !important;
+    border-radius: 8px;
+  }
+  
+  /* Logo and branding */
+  .logo,
+  [class*="logo"] {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* ============================================
+     11.5 TABLE & DATA DISPLAY RESPONSIVENESS
+     Tables must scroll horizontally if needed
+     ============================================ */
+  
+  /* Wrap all tables in scrollable container */
+  table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Table container wrapper */
+  .table-container,
+  [class*="table-wrapper"] {
+    overflow-x: auto !important;
+    overflow-y: hidden;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--bitcoin-orange-20);
+    border-radius: 8px;
+  }
+  
+  /* Table cells truncate long content */
+  td, th {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px; /* Reasonable max width */
+  }
+  
+  /* Scroll indicator for tables */
+  .table-container::after {
+    content: '→ Scroll';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--bitcoin-orange);
+    color: var(--bitcoin-black);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    opacity: 0.8;
+    pointer-events: none;
+  }
+  
+  /* ============================================
+     11.6 CHART & GRAPH CONTAINER FITTING
+     Charts must fit within viewport
+     ============================================ */
+  
+  /* Chart containers */
+  .chart-container,
+  [class*="chart"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden;
+  }
+  
+  /* Chart responsive height */
+  .chart-responsive {
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    position: relative;
+  }
+  
+  .chart-responsive > * {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Chart legend */
+  .chart-legend {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Chart tooltips */
+  .chart-tooltip {
+    max-width: 90vw !important;
+    word-wrap: break-word;
+  }
+  
+  /* ============================================
+     11.7 BUTTON & CONTROL SIZING
+     All buttons meet 48px minimum touch target
+     ============================================ */
+  
+  /* All buttons minimum touch target */
+  button,
+  a[role="button"],
+  [role="button"],
+  .btn,
+  [class*="btn"] {
+    min-height: 48px !important;
+    min-width: 48px !important;
+    padding: 0.75rem 1rem !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    word-wrap: break-word;
+    text-align: center;
+  }
+  
+  /* Button text must not overflow */
+  button span,
+  .btn span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  
+  /* Icon + text buttons */
+  button svg + span,
+  .btn svg + span {
+    margin-left: 0.5rem;
+    flex: 1;
+    min-width: 0;
+  }
+  
+  /* Button spacing */
+  button + button,
+  .btn + .btn {
+    margin-left: 8px;
+  }
+  
+  /* Stacked buttons */
+  .button-group-vertical button,
+  .button-group-vertical .btn {
+    margin-left: 0;
+    margin-top: 8px;
+  }
+  
+  .button-group-vertical button:first-child,
+  .button-group-vertical .btn:first-child {
+    margin-top: 0;
+  }
+  
+  /* ============================================
+     11.8 FORM INPUT & FIELD CONTAINMENT
+     All inputs fit within containers
+     ============================================ */
+  
+  /* All input fields */
+  input,
+  textarea,
+  select {
+    max-width: 100% !important;
+    width: 100%;
+    font-size: 16px !important; /* Prevents iOS zoom */
+    padding: 0.75rem !important;
+    box-sizing: border-box;
+  }
+  
+  /* Labels */
+  label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Error messages */
+  .error-message,
+  [class*="error"] {
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Form groups */
+  .form-group,
+  [class*="form-group"] {
+    max-width: 100%;
+    margin-bottom: 1rem;
+  }
+  
+  /* ============================================
+     11.9 CARD & STAT DISPLAY ALIGNMENT
+     All cards align properly in layouts
+     ============================================ */
+  
+  /* Stat cards */
+  .stat-card,
+  [class*="stat-card"] {
+    max-width: 100%;
+    overflow: hidden;
+    padding: 1rem !important;
+  }
+  
+  /* Card content overflow */
+  .stat-card > *,
+  [class*="card"] > * {
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  /* Price displays */
+  .price-display,
+  [class*="price"] {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Stat labels and values */
+  .stat-label,
+  .stat-value {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Zone cards */
+  .zone-card,
+  [class*="zone"] {
+    max-width: 100%;
+    overflow: hidden;
+    padding: 1rem !important;
+  }
+  
+  /* Whale transaction cards */
+  .whale-card,
+  [class*="whale"] {
+    max-width: 100%;
+    overflow: hidden;
+    padding: 1rem !important;
+  }
+  
+  /* News cards */
+  .news-card,
+  [class*="news-card"] {
+    max-width: 100%;
+    overflow: hidden;
+    padding: 1rem !important;
+  }
+  
+  /* Trade signal cards */
+  .trade-card,
+  [class*="trade-card"] {
+    max-width: 100%;
+    overflow: hidden;
+    padding: 1rem !important;
+  }
+  
+  /* ============================================
+     11.10 NAVIGATION & MENU CONTAINMENT
+     Menu must cover full viewport
+     ============================================ */
+  
+  /* Hamburger menu overlay */
+  .mobile-menu-overlay,
+  [class*="menu-overlay"] {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Menu items */
+  .mobile-menu-item,
+  [class*="menu-item"] {
+    max-width: 100%;
+    overflow: hidden;
+    padding: 1rem;
+  }
+  
+  /* Menu item text */
+  .mobile-menu-item-title,
+  .mobile-menu-item-description {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Menu icons */
+  .mobile-menu-item-icon {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+  }
+  
+  /* ============================================
+     11.11 HEADER & FOOTER ALIGNMENT
+     Header/footer must fit within viewport
+     ============================================ */
+  
+  /* Header */
+  header,
+  .header,
+  [class*="header"] {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    padding: 1rem !important;
+  }
+  
+  /* Header content */
+  header > *,
+  .header > * {
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  /* Logo in header */
+  header .logo,
+  .header .logo {
+    max-width: 150px;
+    height: auto;
+  }
+  
+  /* Header prices */
+  header .price,
+  .header .price {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Footer */
+  footer,
+  .footer,
+  [class*="footer"] {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    padding: 1rem !important;
+  }
+  
+  /* Footer content */
+  footer > *,
+  .footer > * {
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  /* ============================================
+     11.12 FLEX & GRID LAYOUT CONTAINMENT
+     Flex/grid items must shrink properly
+     ============================================ */
+  
+  /* All flex items */
+  .flex > *,
+  [class*="flex"] > * {
+    min-width: 0 !important; /* Allows proper shrinking */
+    flex-shrink: 1;
+  }
+  
+  /* All grid items */
+  .grid > *,
+  [class*="grid"] > * {
+    min-width: 0 !important; /* Allows proper shrinking */
+    overflow: hidden;
+  }
+  
+  /* Flex containers */
+  .flex,
+  [class*="flex"] {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Grid containers */
+  .grid,
+  [class*="grid"] {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Grid layouts stack on mobile */
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4,
+  [class*="grid-cols"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Stat grids */
+  .stat-grid,
+  .stat-grid-2,
+  .stat-grid-3,
+  .stat-grid-4 {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem;
+  }
+  
+  /* ============================================
+     11.13 SPACING & PADDING OPTIMIZATION
+     Reduce padding on mobile
+     ============================================ */
+  
+  /* Container padding */
+  .container,
+  .wrapper,
+  [class*="container"] {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  /* Bitcoin blocks */
+  .bitcoin-block,
+  .bitcoin-block-subtle,
+  .bitcoin-block-orange {
+    padding: 1rem !important; /* Reduced from 1.5rem */
+  }
+  
+  /* Cards */
+  .card,
+  [class*="card"] {
+    padding: 1rem !important;
+  }
+  
+  /* Sections */
+  section {
+    padding: 1rem !important;
+  }
+  
+  /* Consistent spacing between elements */
+  .space-y-1 > * + * { margin-top: 0.25rem !important; }
+  .space-y-2 > * + * { margin-top: 0.5rem !important; }
+  .space-y-3 > * + * { margin-top: 0.75rem !important; }
+  .space-y-4 > * + * { margin-top: 1rem !important; }
+  .space-y-6 > * + * { margin-top: 1.5rem !important; }
+  .space-y-8 > * + * { margin-top: 2rem !important; }
+  
+  /* Gap utilities */
+  .gap-1 { gap: 0.25rem !important; }
+  .gap-2 { gap: 0.5rem !important; }
+  .gap-3 { gap: 0.75rem !important; }
+  .gap-4 { gap: 1rem !important; }
+  .gap-6 { gap: 1.5rem !important; }
+  .gap-8 { gap: 2rem !important; }
+  
+  /* ============================================
+     TABLET SPECIFIC (768px-1023px)
+     Slightly larger spacing for tablets
+     ============================================ */
+  
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .bitcoin-block,
+    .bitcoin-block-subtle,
+    .bitcoin-block-orange {
+      padding: 1.25rem !important;
+    }
+    
+    .card,
+    [class*="card"] {
+      padding: 1.25rem !important;
+    }
+    
+    /* Two-column grids on tablets */
+    .grid-cols-3,
+    .grid-cols-4 {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    .stat-grid-3,
+    .stat-grid-4 {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+  }
+}
+
+/* ============================================
+   END OF TASK 11 CONTAINER CONTAINMENT
+   ============================================ */
