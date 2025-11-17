@@ -244,11 +244,11 @@ export default function AccessGate({ onAccessGranted }: AccessGateProps) {
                 Choose an option to access the platform:
               </p>
               
-              <div className="space-y-4">
+              <div className="flex flex-col items-center space-y-4">
                 {/* PRIMARY BUTTON - Solid Orange (Register) */}
                 <button
                   onClick={switchToRegister}
-                  className="btn-bitcoin-primary w-full"
+                  className="btn-bitcoin-primary w-full max-w-md"
                   disabled={authLoading}
                 >
                   <Lock className="w-5 h-5" />
@@ -258,7 +258,7 @@ export default function AccessGate({ onAccessGranted }: AccessGateProps) {
                 {/* SECONDARY BUTTON - Orange Outline (Login) */}
                 <button
                   onClick={switchToLogin}
-                  className="btn-bitcoin-secondary w-full"
+                  className="btn-bitcoin-secondary w-full max-w-md"
                   disabled={authLoading}
                 >
                   <CheckCircle className="w-5 h-5" />
@@ -268,7 +268,7 @@ export default function AccessGate({ onAccessGranted }: AccessGateProps) {
                 {/* TERTIARY BUTTON - White Outline (Request Access) */}
                 <button
                   onClick={() => setMode('request-access')}
-                  className="btn-bitcoin-tertiary w-full"
+                  className="btn-bitcoin-tertiary w-full max-w-md"
                   disabled={authLoading}
                 >
                   <Mail className="w-5 h-5" />
