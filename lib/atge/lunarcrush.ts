@@ -143,6 +143,58 @@ function setCache<T>(key: string, data: T): void {
 }
 
 // ============================================================================
+// ERROR HANDLING & RETRY LOGIC
+// ============================================================================
+
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
+const REQUEST_TIMEOUT_MS = 10000;
+
+/**
+ * Retry a function with exponential backoff
+ */
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  retries: number = MAX_RETRIES,
+  delay: number = RETRY_DELAY_MS
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries === 0) {
+      throw error;
+    }
+    
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Don't retry on certain errors
+    if (errorMessage.includes('Bitcoin-only') || errorMessage.includes('Invalid')) {
+      throw error;
+    }
+    
+    console.warn(`[LunarCrush] Retry attempt (${MAX_RETRIES - retries + 1}/${MAX_RETRIES}) after ${delay}ms`);
+    
+    await new Promise(resolve => setTimeout(resolve, delay));
+    return retryWithBackoff(fn, retries - 1, delay * 2); // Exponential backoff
+  }
+}
+
+/**
+ * Wrap MCP call with timeout
+ */
+async function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number = REQUEST_TIMEOUT_MS
+): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error('Request timeout')), timeoutMs)
+    )
+  ]);
+}
+
+// ============================================================================
 // CORE FUNCTIONS
 // ============================================================================
 
@@ -161,10 +213,20 @@ export async function getLunarCrushData(symbol: string): Promise<LunarCrushTopic
   if (cached) return cached;
   
   try {
-    // Fetch Bitcoin data from LunarCrush MCP
-    const data = await mcp_LunarCrush_Topic({ topic: 'bitcoin' });
+    // Fetch Bitcoin data from LunarCrush MCP with retry and timeout
+    const data = await retryWithBackoff(async () => {
+      return await withTimeout(
+        mcp_LunarCrush_Topic({ topic: 'bitcoin' }),
+        REQUEST_TIMEOUT_MS
+      );
+    });
     
-    // Format response
+    // Validate response data
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid response from LunarCrush API');
+    }
+    
+    // Format response with safe defaults
     const formatted: LunarCrushTopicData = {
       galaxyScore: data.galaxy_score || 0,
       altRank: data.alt_rank || 0,
@@ -187,15 +249,30 @@ export async function getLunarCrushData(symbol: string): Promise<LunarCrushTopic
       volume24h: data.volume_24h || 0,
       marketCap: data.market_cap || 0,
       symbol: data.symbol || symbol,
-      name: data.name || topic,
+      name: data.name || 'Bitcoin',
       lastUpdated: new Date()
     };
     
     setCache(cacheKey, formatted);
     return formatted;
   } catch (error) {
-    console.error('[LunarCrush] Error fetching topic data:', error);
-    throw new Error(`Failed to fetch LunarCrush data for ${symbol}`);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[LunarCrush] Error fetching topic data:', {
+      symbol,
+      error: errorMessage,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Provide more specific error messages
+    if (errorMessage.includes('timeout')) {
+      throw new Error(`LunarCrush API timeout for ${symbol}`);
+    } else if (errorMessage.includes('rate limit')) {
+      throw new Error(`LunarCrush API rate limit exceeded for ${symbol}`);
+    } else if (errorMessage.includes('network')) {
+      throw new Error(`Network error connecting to LunarCrush API for ${symbol}`);
+    } else {
+      throw new Error(`Failed to fetch LunarCrush data for ${symbol}: ${errorMessage}`);
+    }
   }
 }
 
@@ -217,14 +294,24 @@ export async function getLunarCrushTimeSeries(
   if (cached) return cached;
   
   try {
-    // Fetch Bitcoin time series from LunarCrush MCP
-    const data = await mcp_LunarCrush_Topic_Time_Series({
-      topic: 'bitcoin',
-      interval,
-      metrics: ['galaxy_score', 'alt_rank', 'sentiment', 'social_volume', 'close']
+    // Fetch Bitcoin time series from LunarCrush MCP with retry and timeout
+    const data = await retryWithBackoff(async () => {
+      return await withTimeout(
+        mcp_LunarCrush_Topic_Time_Series({
+          topic: 'bitcoin',
+          interval,
+          metrics: ['galaxy_score', 'alt_rank', 'sentiment', 'social_volume', 'close']
+        }),
+        REQUEST_TIMEOUT_MS
+      );
     });
     
-    // Format response
+    // Validate response data
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid response from LunarCrush API');
+    }
+    
+    // Format response with safe defaults
     const formatted: LunarCrushTimeSeriesData = {
       timestamps: data.timestamps?.map((t: string) => new Date(t)) || [],
       galaxyScores: data.galaxy_scores || [],
@@ -237,8 +324,22 @@ export async function getLunarCrushTimeSeries(
     setCache(cacheKey, formatted);
     return formatted;
   } catch (error) {
-    console.error('[LunarCrush] Error fetching time series:', error);
-    throw new Error(`Failed to fetch LunarCrush time series for ${symbol}`);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[LunarCrush] Error fetching time series:', {
+      symbol,
+      interval,
+      error: errorMessage,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Provide more specific error messages
+    if (errorMessage.includes('timeout')) {
+      throw new Error(`LunarCrush API timeout for ${symbol} time series`);
+    } else if (errorMessage.includes('rate limit')) {
+      throw new Error(`LunarCrush API rate limit exceeded for ${symbol} time series`);
+    } else {
+      throw new Error(`Failed to fetch LunarCrush time series for ${symbol}: ${errorMessage}`);
+    }
   }
 }
 
@@ -260,13 +361,24 @@ export async function getLunarCrushPosts(
   if (cached) return cached;
   
   try {
-    // Fetch Bitcoin posts from LunarCrush MCP
-    const data = await mcp_LunarCrush_Topic_Posts({
-      topic: 'bitcoin',
-      interval
+    // Fetch Bitcoin posts from LunarCrush MCP with retry and timeout
+    const data = await retryWithBackoff(async () => {
+      return await withTimeout(
+        mcp_LunarCrush_Topic_Posts({
+          topic: 'bitcoin',
+          interval
+        }),
+        REQUEST_TIMEOUT_MS
+      );
     });
     
-    // Format response
+    // Validate response data
+    if (!data || !Array.isArray(data.posts)) {
+      console.warn('[LunarCrush] Invalid posts response, returning empty array');
+      return [];
+    }
+    
+    // Format response with safe defaults
     const formatted: LunarCrushPost[] = (data.posts || []).slice(0, 5).map((post: any) => ({
       id: post.id || '',
       text: post.text || '',
@@ -281,8 +393,16 @@ export async function getLunarCrushPosts(
     setCache(cacheKey, formatted);
     return formatted;
   } catch (error) {
-    console.error('[LunarCrush] Error fetching posts:', error);
-    return []; // Return empty array on error
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[LunarCrush] Error fetching posts:', {
+      symbol,
+      interval,
+      error: errorMessage,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Return empty array on error (posts are non-critical)
+    return [];
   }
 }
 
@@ -297,32 +417,56 @@ export async function getLunarCrushAnalysis(symbol: string): Promise<LunarCrushA
   }
   
   try {
-    // Fetch all Bitcoin data in parallel
-    const [currentMetrics, timeSeries, topPosts] = await Promise.all([
+    // Fetch all Bitcoin data in parallel with individual error handling
+    const [currentMetrics, timeSeries, topPosts] = await Promise.allSettled([
       getLunarCrushData(symbol),
       getLunarCrushTimeSeries(symbol, '1w'),
       getLunarCrushPosts(symbol, '1d')
     ]);
     
+    // Handle failed requests gracefully
+    if (currentMetrics.status === 'rejected') {
+      console.error('[LunarCrush] Failed to fetch current metrics:', currentMetrics.reason);
+      throw new Error('Failed to fetch current metrics - required for analysis');
+    }
+    
+    if (timeSeries.status === 'rejected') {
+      console.error('[LunarCrush] Failed to fetch time series:', timeSeries.reason);
+      throw new Error('Failed to fetch time series - required for analysis');
+    }
+    
+    // Posts are optional, use empty array if failed
+    const posts = topPosts.status === 'fulfilled' ? topPosts.value : [];
+    if (topPosts.status === 'rejected') {
+      console.warn('[LunarCrush] Failed to fetch posts (non-critical):', topPosts.reason);
+    }
+    
     // Analyze trends
-    const trends = analyzeTrends(timeSeries);
+    const trends = analyzeTrends(timeSeries.value);
     
     // Detect signals
-    const signals = detectSignals(currentMetrics, timeSeries);
+    const signals = detectSignals(currentMetrics.value, timeSeries.value);
     
     // Generate AI context
-    const aiContext = formatAIContext(currentMetrics, trends, signals, topPosts);
+    const aiContext = formatAIContext(currentMetrics.value, trends, signals, posts);
     
     return {
-      currentMetrics,
+      currentMetrics: currentMetrics.value,
       trends,
       signals,
-      topPosts,
+      topPosts: posts,
       aiContext
     };
   } catch (error) {
-    console.error('[LunarCrush] Error in comprehensive analysis:', error);
-    throw error;
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[LunarCrush] Error in comprehensive analysis:', {
+      symbol,
+      error: errorMessage,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Provide specific error message
+    throw new Error(`Failed to generate LunarCrush analysis for ${symbol}: ${errorMessage}`);
   }
 }
 

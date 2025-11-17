@@ -32,6 +32,9 @@ import DerivativesPanel from './DerivativesPanel';
 import DeFiMetricsPanel from './DeFiMetricsPanel';
 import IntelligenceReportGenerator from './IntelligenceReportGenerator';
 import DataPreviewModal from './DataPreviewModal';
+import VeritasConfidenceScoreBadge from './VeritasConfidenceScoreBadge';
+import DataQualitySummary from './DataQualitySummary';
+import ValidationAlertsPanel from './ValidationAlertsPanel';
 import { useProgressiveLoading } from '../../hooks/useProgressiveLoading';
 import { useUCIEMobile, useAdaptiveRequestStrategy } from '../../hooks/useUCIEMobile';
 import { useSwipeGesture } from '../../hooks/useSwipeGesture';
@@ -80,6 +83,7 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
   const [realTimeEnabled, setRealTimeEnabled] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [collapsedSections, setCollapsedSections] = useState<Set<TabId>>(new Set());
+  const [showValidationDetails, setShowValidationDetails] = useState(false);
   
   // Data Preview Modal State
   const [showPreview, setShowPreview] = useState(true); // Show preview on mount
@@ -640,6 +644,47 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
             <span>Data Quality: {dataQuality}%</span>
           </div>
         </div>
+
+        {/* Veritas Validation Display (Conditional) */}
+        {analysisData?.veritasValidation && (
+          <div className="mb-6 space-y-4">
+            {/* Validation Toggle Button */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-bitcoin-white">
+                Data Validation
+              </h2>
+              <button
+                onClick={() => {
+                  setShowValidationDetails(!showValidationDetails);
+                  haptic.buttonPress();
+                }}
+                className="bg-transparent text-bitcoin-orange border-2 border-bitcoin-orange font-semibold uppercase px-4 py-2 rounded-lg transition-all hover:bg-bitcoin-orange hover:text-bitcoin-black min-h-[44px]"
+              >
+                {showValidationDetails ? 'Hide Details' : 'Show Validation Details'}
+              </button>
+            </div>
+
+            {/* Confidence Score Badge (Always Visible) */}
+            <VeritasConfidenceScoreBadge 
+              validation={analysisData.veritasValidation}
+            />
+
+            {/* Detailed Validation Components (Conditional) */}
+            {showValidationDetails && (
+              <div className="space-y-4">
+                {/* Data Quality Summary */}
+                <DataQualitySummary 
+                  validation={analysisData.veritasValidation}
+                />
+
+                {/* Validation Alerts Panel */}
+                <ValidationAlertsPanel 
+                  validation={analysisData.veritasValidation}
+                />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Show only Caesar Analysis - No Tabs */}
         <div className="mb-8">

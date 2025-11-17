@@ -1,77 +1,44 @@
-/**
- * Check Access Codes Status
- * 
- * This script displays all access codes and their redemption status
- */
-
-import * as dotenv from 'dotenv';
-import * as path from 'path';
-
-// Load environment variables
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
-
 import { query } from '../lib/db';
 
 async function checkAccessCodes() {
-  console.log('🔍 Checking Access Codes Status\n');
-
   try {
-    // Get all access codes
-    const result = await query(`
-      SELECT 
-        code,
-        redeemed,
-        redeemed_by,
-        redeemed_at,
-        created_at
-      FROM access_codes
-      ORDER BY created_at DESC
-    `);
-
-    const codes = result.rows;
-    const available = codes.filter(c => !c.redeemed);
-    const redeemed = codes.filter(c => c.redeemed);
-
-    console.log('📊 Summary:');
-    console.log(`   Total Codes: ${codes.length}`);
-    console.log(`   Available: ${available.length}`);
-    console.log(`   Redeemed: ${redeemed.length}\n`);
-
-    if (available.length > 0) {
-      console.log('✅ Available Access Codes:');
-      available.forEach((code, index) => {
-        const createdDate = new Date(code.created_at).toLocaleDateString();
-        console.log(`   ${index + 1}. ${code.code} (created: ${createdDate})`);
-      });
-      console.log('');
+    console.log('🔍 Checking Access Codes Status...\n');
+    
+    const result = await query(
+      'SELECT code, redeemed, redeemed_by, redeemed_at FROM access_codes ORDER BY id'
+    );
+    
+    console.log('Code                          | Redeemed | Redeemed By | Redeemed At');
+    console.log('------------------------------|----------|-------------|------------');
+    
+    result.rows.forEach((row: any) => {
+      const code = row.code.padEnd(30);
+      const redeemed = row.redeemed ? 'Yes     ' : 'No      ';
+      const redeemedBy = (row.redeemed_by || 'N/A').toString().padEnd(11);
+      const redeemedAt = row.redeemed_at 
+        ? new Date(row.redeemed_at).toISOString().split('T')[0] 
+        : 'N/A';
+      
+      console.log(`${code} | ${redeemed} | ${redeemedBy} | ${redeemedAt}`);
+    });
+    
+    const available = result.rows.filter((r: any) => !r.redeemed).length;
+    const redeemed = result.rows.filter((r: any) => r.redeemed).length;
+    
+    console.log(`\n📊 Summary:`);
+    console.log(`   Total Codes: ${result.rows.length}`);
+    console.log(`   Available: ${available}`);
+    console.log(`   Redeemed: ${redeemed}`);
+    
+    if (available === 0) {
+      console.log('\n⚠️  WARNING: All access codes have been redeemed!');
+    } else {
+      console.log(`\n✅ ${available} access codes are still available for use.`);
     }
-
-    if (redeemed.length > 0) {
-      console.log('🔒 Redeemed Access Codes:');
-      redeemed.forEach((code, index) => {
-        const redeemedDate = new Date(code.redeemed_at).toLocaleDateString();
-        console.log(`   ${index + 1}. ${code.code} (redeemed: ${redeemedDate})`);
-      });
-      console.log('');
-    }
-
-    // Get user count
-    const userResult = await query('SELECT COUNT(*) as count FROM users');
-    const userCount = userResult.rows[0].count;
-
-    console.log('👥 User Statistics:');
-    console.log(`   Total Users: ${userCount}`);
-    console.log(`   Codes Redeemed: ${redeemed.length}`);
-    console.log(`   Codes Available: ${available.length}\n`);
-
-    if (available.length === 0) {
-      console.log('⚠️  WARNING: No available access codes!');
-      console.log('   Generate more codes with: npx tsx scripts/generate-access-codes.ts\n');
-    }
-
+    
     process.exit(0);
   } catch (error) {
-    console.error('❌ Failed to check access codes:', error);
+    console.error('❌ Error checking access codes:', error);
     process.exit(1);
   }
 }

@@ -69,6 +69,9 @@ export interface TradeSignal {
     priceChange24h: number;
     high24h: number;
     low24h: number;
+    socialSentimentScore?: number; // 0-100 from LunarCrush
+    whaleActivityCount?: number; // Count of large transactions (>50 BTC) in last 24h
+    fearGreedIndex?: number; // 0-100 from Alternative.me (0=Extreme Fear, 100=Extreme Greed)
     timestamp: Date;
   };
   

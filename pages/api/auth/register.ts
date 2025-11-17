@@ -81,7 +81,7 @@ async function registerHandler(
     // SUBTASK 3.1: Verify access code exists and is not redeemed
     // ========================================================================
     const codeResult = await query(
-      'SELECT id, code, redeemed, redeemed_by, redeemed_at FROM access_codes WHERE code = $1',
+      'SELECT id, code, redeemed, redeemed_by, redeemed_at FROM access_codes WHERE UPPER(code) = UPPER($1)',
       [normalizedCode]
     );
 

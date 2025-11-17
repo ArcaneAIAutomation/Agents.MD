@@ -17,6 +17,33 @@ export default function TradeDetailModal({
 }: TradeDetailModalProps) {
   if (!isOpen || !trade) return null;
 
+  // Safety check for critical trade fields
+  const hasCriticalData = trade.id && trade.symbol && trade.entryPrice !== undefined;
+  
+  if (!hasCriticalData) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-bitcoin-black bg-opacity-90">
+        <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl max-w-md w-full p-6">
+          <div className="text-center">
+            <AlertCircle size={48} className="text-bitcoin-orange mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-bitcoin-white mb-2">
+              Incomplete Trade Data
+            </h2>
+            <p className="text-bitcoin-white-60 mb-6">
+              This trade is missing critical information and cannot be displayed properly.
+            </p>
+            <button
+              onClick={onClose}
+              className="bg-bitcoin-orange text-bitcoin-black font-bold uppercase tracking-wider px-8 py-3 rounded-lg transition-all hover:bg-bitcoin-black hover:text-bitcoin-orange hover:shadow-[0_0_30px_rgba(247,147,26,0.5)]"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Format currency
   const formatCurrency = (amount: number) => {
     const sign = amount >= 0 ? '+' : '';
@@ -274,16 +301,24 @@ export default function TradeDetailModal({
                   <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
                     RSI (14)
                   </p>
-                  <p className={`text-2xl font-bold font-mono ${
-                    trade.indicators.rsiSignal === 'overbought' ? 'text-red-500' :
-                    trade.indicators.rsiSignal === 'oversold' ? 'text-bitcoin-orange' :
-                    'text-bitcoin-white'
-                  }`}>
-                    {trade.indicators.rsiValue.toFixed(2)}
-                  </p>
-                  <p className="text-bitcoin-white-60 text-xs mt-1 uppercase">
-                    {trade.indicators.rsiSignal}
-                  </p>
+                  {trade.indicators.rsiValue !== undefined && trade.indicators.rsiValue !== null ? (
+                    <>
+                      <p className={`text-2xl font-bold font-mono ${
+                        trade.indicators.rsiSignal === 'overbought' ? 'text-red-500' :
+                        trade.indicators.rsiSignal === 'oversold' ? 'text-bitcoin-orange' :
+                        'text-bitcoin-white'
+                      }`}>
+                        {trade.indicators.rsiValue.toFixed(2)}
+                      </p>
+                      <p className="text-bitcoin-white-60 text-xs mt-1 uppercase">
+                        {trade.indicators.rsiSignal || 'neutral'}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-2xl font-bold text-bitcoin-white-60 font-mono">
+                      N/A
+                    </p>
+                  )}
                 </div>
 
                 {/* MACD */}
@@ -291,16 +326,24 @@ export default function TradeDetailModal({
                   <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
                     MACD
                   </p>
-                  <p className={`text-2xl font-bold font-mono ${
-                    trade.indicators.macdSignal === 'bullish' ? 'text-bitcoin-orange' :
-                    trade.indicators.macdSignal === 'bearish' ? 'text-red-500' :
-                    'text-bitcoin-white'
-                  }`}>
-                    {trade.indicators.macdValue.toFixed(2)}
-                  </p>
-                  <p className="text-bitcoin-white-60 text-xs mt-1 uppercase">
-                    {trade.indicators.macdSignal}
-                  </p>
+                  {trade.indicators.macdValue !== undefined && trade.indicators.macdValue !== null ? (
+                    <>
+                      <p className={`text-2xl font-bold font-mono ${
+                        trade.indicators.macdSignal === 'bullish' ? 'text-bitcoin-orange' :
+                        trade.indicators.macdSignal === 'bearish' ? 'text-red-500' :
+                        'text-bitcoin-white'
+                      }`}>
+                        {trade.indicators.macdValue.toFixed(2)}
+                      </p>
+                      <p className="text-bitcoin-white-60 text-xs mt-1 uppercase">
+                        {trade.indicators.macdSignal || 'neutral'}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-2xl font-bold text-bitcoin-white-60 font-mono">
+                      N/A
+                    </p>
+                  )}
                 </div>
 
                 {/* EMA 20 */}
@@ -308,12 +351,20 @@ export default function TradeDetailModal({
                   <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
                     EMA 20
                   </p>
-                  <p className="text-2xl font-bold text-bitcoin-white font-mono">
-                    ${trade.indicators.ema20.toFixed(2)}
-                  </p>
-                  <p className="text-bitcoin-white-60 text-xs mt-1">
-                    Short-term trend
-                  </p>
+                  {trade.indicators.ema20 !== undefined && trade.indicators.ema20 !== null ? (
+                    <>
+                      <p className="text-2xl font-bold text-bitcoin-white font-mono">
+                        ${trade.indicators.ema20.toFixed(2)}
+                      </p>
+                      <p className="text-bitcoin-white-60 text-xs mt-1">
+                        Short-term trend
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-2xl font-bold text-bitcoin-white-60 font-mono">
+                      N/A
+                    </p>
+                  )}
                 </div>
 
                 {/* EMA 50 */}
@@ -321,12 +372,20 @@ export default function TradeDetailModal({
                   <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
                     EMA 50
                   </p>
-                  <p className="text-2xl font-bold text-bitcoin-white font-mono">
-                    ${trade.indicators.ema50.toFixed(2)}
-                  </p>
-                  <p className="text-bitcoin-white-60 text-xs mt-1">
-                    Medium-term trend
-                  </p>
+                  {trade.indicators.ema50 !== undefined && trade.indicators.ema50 !== null ? (
+                    <>
+                      <p className="text-2xl font-bold text-bitcoin-white font-mono">
+                        ${trade.indicators.ema50.toFixed(2)}
+                      </p>
+                      <p className="text-bitcoin-white-60 text-xs mt-1">
+                        Medium-term trend
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-2xl font-bold text-bitcoin-white-60 font-mono">
+                      N/A
+                    </p>
+                  )}
                 </div>
 
                 {/* EMA 200 */}
@@ -334,12 +393,20 @@ export default function TradeDetailModal({
                   <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
                     EMA 200
                   </p>
-                  <p className="text-2xl font-bold text-bitcoin-white font-mono">
-                    ${trade.indicators.ema200.toFixed(2)}
-                  </p>
-                  <p className="text-bitcoin-white-60 text-xs mt-1">
-                    Long-term trend
-                  </p>
+                  {trade.indicators.ema200 !== undefined && trade.indicators.ema200 !== null ? (
+                    <>
+                      <p className="text-2xl font-bold text-bitcoin-white font-mono">
+                        ${trade.indicators.ema200.toFixed(2)}
+                      </p>
+                      <p className="text-bitcoin-white-60 text-xs mt-1">
+                        Long-term trend
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-2xl font-bold text-bitcoin-white-60 font-mono">
+                      N/A
+                    </p>
+                  )}
                 </div>
 
                 {/* ATR */}
@@ -347,12 +414,20 @@ export default function TradeDetailModal({
                   <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
                     ATR (14)
                   </p>
-                  <p className="text-2xl font-bold text-bitcoin-white font-mono">
-                    ${trade.indicators.atr.toFixed(2)}
-                  </p>
-                  <p className="text-bitcoin-white-60 text-xs mt-1">
-                    Volatility measure
-                  </p>
+                  {trade.indicators.atr !== undefined && trade.indicators.atr !== null ? (
+                    <>
+                      <p className="text-2xl font-bold text-bitcoin-white font-mono">
+                        ${trade.indicators.atr.toFixed(2)}
+                      </p>
+                      <p className="text-bitcoin-white-60 text-xs mt-1">
+                        Volatility measure
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-2xl font-bold text-bitcoin-white-60 font-mono">
+                      N/A
+                    </p>
+                  )}
                 </div>
 
                 {/* Bollinger Bands */}
@@ -360,26 +435,34 @@ export default function TradeDetailModal({
                   <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
                     Bollinger Bands
                   </p>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <p className="text-bitcoin-white-60 text-xs mb-1">Upper</p>
-                      <p className="text-lg font-bold text-bitcoin-white font-mono">
-                        ${trade.indicators.bollingerUpper.toFixed(2)}
-                      </p>
+                  {trade.indicators.bollingerUpper !== undefined && trade.indicators.bollingerUpper !== null &&
+                   trade.indicators.bollingerMiddle !== undefined && trade.indicators.bollingerMiddle !== null &&
+                   trade.indicators.bollingerLower !== undefined && trade.indicators.bollingerLower !== null ? (
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <p className="text-bitcoin-white-60 text-xs mb-1">Upper</p>
+                        <p className="text-lg font-bold text-bitcoin-white font-mono">
+                          ${trade.indicators.bollingerUpper.toFixed(2)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-bitcoin-white-60 text-xs mb-1">Middle</p>
+                        <p className="text-lg font-bold text-bitcoin-orange font-mono">
+                          ${trade.indicators.bollingerMiddle.toFixed(2)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-bitcoin-white-60 text-xs mb-1">Lower</p>
+                        <p className="text-lg font-bold text-bitcoin-white font-mono">
+                          ${trade.indicators.bollingerLower.toFixed(2)}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-bitcoin-white-60 text-xs mb-1">Middle</p>
-                      <p className="text-lg font-bold text-bitcoin-orange font-mono">
-                        ${trade.indicators.bollingerMiddle.toFixed(2)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-bitcoin-white-60 text-xs mb-1">Lower</p>
-                      <p className="text-lg font-bold text-bitcoin-white font-mono">
-                        ${trade.indicators.bollingerLower.toFixed(2)}
-                      </p>
-                    </div>
-                  </div>
+                  ) : (
+                    <p className="text-2xl font-bold text-bitcoin-white-60 font-mono text-center">
+                      N/A
+                    </p>
+                  )}
                 </div>
 
                 {/* Volume */}
@@ -387,12 +470,20 @@ export default function TradeDetailModal({
                   <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
                     Avg Volume
                   </p>
-                  <p className="text-2xl font-bold text-bitcoin-white font-mono">
-                    {(trade.indicators.volumeAvg / 1000000).toFixed(2)}M
-                  </p>
-                  <p className="text-bitcoin-white-60 text-xs mt-1">
-                    20-period average
-                  </p>
+                  {trade.indicators.volumeAvg !== undefined && trade.indicators.volumeAvg !== null ? (
+                    <>
+                      <p className="text-2xl font-bold text-bitcoin-white font-mono">
+                        {(trade.indicators.volumeAvg / 1000000).toFixed(2)}M
+                      </p>
+                      <p className="text-bitcoin-white-60 text-xs mt-1">
+                        20-period average
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-2xl font-bold text-bitcoin-white-60 font-mono">
+                      N/A
+                    </p>
+                  )}
                 </div>
               </div>
             ) : (
@@ -544,85 +635,243 @@ export default function TradeDetailModal({
           ) : null}
 
           {/* Market Snapshot at Generation */}
-          {trade.snapshot && (
-            <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-xl p-6">
-              <h3 className="text-xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
-                <BarChart3 size={24} className="text-bitcoin-orange" />
-                Market Snapshot at Generation
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* Price */}
-                <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-4">
-                  <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
-                    Price
-                  </p>
-                  <p className="text-2xl font-bold text-bitcoin-white font-mono">
-                    ${trade.snapshot.price.toFixed(2)}
-                  </p>
-                </div>
+          <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-xl p-6">
+            <h3 className="text-xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
+              <BarChart3 size={24} className="text-bitcoin-orange" />
+              Market Snapshot at Generation
+            </h3>
+            {trade.snapshot ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Price */}
+                  <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-4">
+                    <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
+                      Price
+                    </p>
+                    {trade.snapshot.price !== undefined && trade.snapshot.price !== null ? (
+                      <p className="text-2xl font-bold text-bitcoin-white font-mono">
+                        ${trade.snapshot.price.toFixed(2)}
+                      </p>
+                    ) : (
+                      <p className="text-2xl font-bold text-bitcoin-white-60 font-mono">
+                        N/A
+                      </p>
+                    )}
+                  </div>
 
-                {/* 24h Change */}
-                <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-4">
-                  <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
-                    24h Change
-                  </p>
-                  <p className={`text-2xl font-bold font-mono ${
-                    trade.snapshot.priceChange24h >= 0 ? 'text-bitcoin-orange' : 'text-red-500'
-                  }`}>
-                    {formatCurrency(trade.snapshot.priceChange24h)}
-                  </p>
-                  <p className={`text-sm font-semibold mt-1 ${
-                    trade.snapshot.priceChange24h >= 0 ? 'text-bitcoin-orange' : 'text-red-500'
-                  }`}>
-                    ({formatPercentage((trade.snapshot.priceChange24h / trade.snapshot.price) * 100)})
-                  </p>
-                </div>
+                  {/* 24h Change */}
+                  <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-4">
+                    <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
+                      24h Change
+                    </p>
+                    {trade.snapshot.priceChange24h !== undefined && trade.snapshot.priceChange24h !== null ? (
+                      <>
+                        <p className={`text-2xl font-bold font-mono ${
+                          trade.snapshot.priceChange24h >= 0 ? 'text-bitcoin-orange' : 'text-red-500'
+                        }`}>
+                          {formatCurrency(trade.snapshot.priceChange24h)}
+                        </p>
+                        {trade.snapshot.price && (
+                          <p className={`text-sm font-semibold mt-1 ${
+                            trade.snapshot.priceChange24h >= 0 ? 'text-bitcoin-orange' : 'text-red-500'
+                          }`}>
+                            ({formatPercentage((trade.snapshot.priceChange24h / trade.snapshot.price) * 100)})
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-2xl font-bold text-bitcoin-white-60 font-mono">
+                        N/A
+                      </p>
+                    )}
+                  </div>
 
-                {/* 24h Volume */}
-                <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-4">
-                  <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
-                    24h Volume
-                  </p>
-                  <p className="text-2xl font-bold text-bitcoin-white font-mono">
-                    ${(trade.snapshot.volume24h / 1000000000).toFixed(2)}B
-                  </p>
-                </div>
+                  {/* 24h Volume */}
+                  <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-4">
+                    <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
+                      24h Volume
+                    </p>
+                    {trade.snapshot.volume24h !== undefined && trade.snapshot.volume24h !== null ? (
+                      <p className="text-2xl font-bold text-bitcoin-white font-mono">
+                        ${(trade.snapshot.volume24h / 1000000000).toFixed(2)}B
+                      </p>
+                    ) : (
+                      <p className="text-2xl font-bold text-bitcoin-white-60 font-mono">
+                        N/A
+                      </p>
+                    )}
+                  </div>
 
-                {/* Market Cap */}
-                <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-4">
-                  <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
-                    Market Cap
-                  </p>
-                  <p className="text-2xl font-bold text-bitcoin-white font-mono">
-                    ${(trade.snapshot.marketCap / 1000000000).toFixed(2)}B
-                  </p>
-                </div>
+                  {/* Market Cap */}
+                  <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-4">
+                    <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
+                      Market Cap
+                    </p>
+                    {trade.snapshot.marketCap !== undefined && trade.snapshot.marketCap !== null ? (
+                      <p className="text-2xl font-bold text-bitcoin-white font-mono">
+                        ${(trade.snapshot.marketCap / 1000000000).toFixed(2)}B
+                      </p>
+                    ) : (
+                      <p className="text-2xl font-bold text-bitcoin-white-60 font-mono">
+                        N/A
+                      </p>
+                    )}
+                  </div>
 
-                {/* 24h High */}
-                <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-4">
-                  <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
-                    24h High
-                  </p>
-                  <p className="text-2xl font-bold text-bitcoin-orange font-mono">
-                    ${trade.snapshot.high24h.toFixed(2)}
-                  </p>
-                </div>
+                  {/* 24h High */}
+                  <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-4">
+                    <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
+                      24h High
+                    </p>
+                    {trade.snapshot.high24h !== undefined && trade.snapshot.high24h !== null ? (
+                      <p className="text-2xl font-bold text-bitcoin-orange font-mono">
+                        ${trade.snapshot.high24h.toFixed(2)}
+                      </p>
+                    ) : (
+                      <p className="text-2xl font-bold text-bitcoin-white-60 font-mono">
+                        N/A
+                      </p>
+                    )}
+                  </div>
 
-                {/* 24h Low */}
-                <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-4">
-                  <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
-                    24h Low
-                  </p>
-                  <p className="text-2xl font-bold text-red-500 font-mono">
-                    ${trade.snapshot.low24h.toFixed(2)}
-                  </p>
+                  {/* 24h Low */}
+                  <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-4">
+                    <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
+                      24h Low
+                    </p>
+                    {trade.snapshot.low24h !== undefined && trade.snapshot.low24h !== null ? (
+                      <p className="text-2xl font-bold text-red-500 font-mono">
+                        ${trade.snapshot.low24h.toFixed(2)}
+                      </p>
+                    ) : (
+                      <p className="text-2xl font-bold text-bitcoin-white-60 font-mono">
+                        N/A
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Social Sentiment */}
+                  <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-4">
+                    <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
+                      Social Sentiment
+                    </p>
+                    {trade.snapshot.socialSentimentScore !== undefined ? (
+                      <>
+                        <p className="text-2xl font-bold text-bitcoin-orange font-mono">
+                          {trade.snapshot.socialSentimentScore}/100
+                        </p>
+                        <p className={`text-sm font-semibold mt-1 ${
+                          trade.snapshot.socialSentimentScore >= 70 ? 'text-bitcoin-orange' :
+                          trade.snapshot.socialSentimentScore >= 55 ? 'text-bitcoin-white' :
+                          trade.snapshot.socialSentimentScore >= 45 ? 'text-bitcoin-white-60' :
+                          'text-red-500'
+                        }`}>
+                          {trade.snapshot.socialSentimentScore >= 70 ? 'Very Positive' :
+                           trade.snapshot.socialSentimentScore >= 55 ? 'Positive' :
+                           trade.snapshot.socialSentimentScore >= 45 ? 'Neutral' :
+                           trade.snapshot.socialSentimentScore >= 30 ? 'Negative' : 'Very Negative'}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-2xl font-bold text-bitcoin-white-60 font-mono">
+                          N/A
+                        </p>
+                        <p className="text-bitcoin-white-60 text-xs mt-1">
+                          Data unavailable
+                        </p>
+                      </>
+                    )}
+                    <p className="text-bitcoin-white-60 text-xs mt-1">
+                      LunarCrush
+                    </p>
+                  </div>
+
+                  {/* Whale Activity */}
+                  <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-4">
+                    <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
+                      Whale Transactions
+                    </p>
+                    {trade.snapshot.whaleActivityCount !== undefined ? (
+                      <>
+                        <p className="text-2xl font-bold text-bitcoin-white font-mono">
+                          {trade.snapshot.whaleActivityCount}
+                        </p>
+                        <p className="text-sm font-semibold mt-1 text-bitcoin-white-60">
+                          {trade.snapshot.whaleActivityCount === 0 ? 'No activity' :
+                           trade.snapshot.whaleActivityCount === 1 ? 'Low activity' :
+                           trade.snapshot.whaleActivityCount <= 5 ? 'Moderate activity' :
+                           trade.snapshot.whaleActivityCount <= 10 ? 'High activity' : 'Very high activity'}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-2xl font-bold text-bitcoin-white-60 font-mono">
+                          N/A
+                        </p>
+                        <p className="text-bitcoin-white-60 text-xs mt-1">
+                          Data unavailable
+                        </p>
+                      </>
+                    )}
+                    <p className="text-bitcoin-white-60 text-xs mt-1">
+                      Last 24h (&gt;50 BTC)
+                    </p>
+                  </div>
+
+                  {/* Fear & Greed Index */}
+                  <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-4">
+                    <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
+                      Fear & Greed Index
+                    </p>
+                    {trade.snapshot.fearGreedIndex !== undefined ? (
+                      <>
+                        <p className="text-2xl font-bold text-bitcoin-white font-mono">
+                          {trade.snapshot.fearGreedIndex}
+                        </p>
+                        <p className={`text-sm font-semibold mt-1 ${
+                          trade.snapshot.fearGreedIndex >= 76 ? 'text-bitcoin-orange' :
+                          trade.snapshot.fearGreedIndex >= 56 ? 'text-bitcoin-orange' :
+                          trade.snapshot.fearGreedIndex >= 45 ? 'text-bitcoin-white' :
+                          trade.snapshot.fearGreedIndex >= 25 ? 'text-red-500' :
+                          'text-red-500'
+                        }`}>
+                          {trade.snapshot.fearGreedIndex >= 76 ? 'Extreme Greed' :
+                           trade.snapshot.fearGreedIndex >= 56 ? 'Greed' :
+                           trade.snapshot.fearGreedIndex >= 45 ? 'Neutral' :
+                           trade.snapshot.fearGreedIndex >= 25 ? 'Fear' : 'Extreme Fear'}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-2xl font-bold text-bitcoin-white-60 font-mono">
+                          N/A
+                        </p>
+                        <p className="text-bitcoin-white-60 text-xs mt-1">
+                          Data unavailable
+                        </p>
+                      </>
+                    )}
+                    <p className="text-bitcoin-white-60 text-xs mt-1">
+                      Alternative.me
+                    </p>
+                  </div>
                 </div>
+                <p className="text-bitcoin-white-60 text-xs mt-4">
+                  Snapshot taken at: {new Date(trade.snapshot.timestamp).toLocaleString()}
+                </p>
+              </>
+            ) : (
+              <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-8 text-center">
+                <p className="text-bitcoin-white-60">
+                  Market snapshot data not available for this trade.
+                </p>
+                <p className="text-bitcoin-white-60 text-sm mt-2">
+                  This data will be captured for future trades.
+                </p>
               </div>
-              <p className="text-bitcoin-white-60 text-xs mt-4">
-                Snapshot taken at: {new Date(trade.snapshot.timestamp).toLocaleString()}
-              </p>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Data Source and Quality Score */}
           <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-xl p-6">
@@ -636,24 +885,45 @@ export default function TradeDetailModal({
                   Data Source
                 </p>
                 <p className="text-bitcoin-white font-bold">
-                  {trade.result?.dataSource || 'CoinMarketCap'}
+                  {trade.result?.dataSource || 'Pending'}
                 </p>
+                {!trade.result?.dataSource && (
+                  <p className="text-xs text-bitcoin-white-60 mt-1">
+                    Backtesting in progress
+                  </p>
+                )}
               </div>
               <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-4">
                 <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
                   Data Resolution
                 </p>
                 <p className="text-bitcoin-white font-bold">
-                  {trade.result?.dataResolution || '1-minute intervals'}
+                  {trade.result?.dataResolution || 'Pending'}
                 </p>
+                {!trade.result?.dataResolution && (
+                  <p className="text-xs text-bitcoin-white-60 mt-1">
+                    Backtesting in progress
+                  </p>
+                )}
               </div>
               <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-4">
                 <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-2">
                   Quality Score
                 </p>
                 <p className="text-bitcoin-orange font-bold font-mono text-2xl">
-                  {trade.result?.dataQualityScore ? `${trade.result.dataQualityScore}%` : '100%'}
+                  {trade.result?.dataQualityScore !== undefined 
+                    ? `${trade.result.dataQualityScore}%`
+                    : 'N/A'}
                 </p>
+                {trade.result?.dataQualityScore !== undefined && (
+                  <p className={`text-xs mt-1 font-semibold ${
+                    trade.result.dataQualityScore >= 70 ? 'text-bitcoin-orange' : 'text-bitcoin-white'
+                  }`}>
+                    {trade.result.dataQualityScore >= 90 ? 'Excellent' :
+                     trade.result.dataQualityScore >= 70 ? 'Good' :
+                     trade.result.dataQualityScore >= 50 ? 'Fair' : 'Poor'}
+                  </p>
+                )}
               </div>
             </div>
           </div>

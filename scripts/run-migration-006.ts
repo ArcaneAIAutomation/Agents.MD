@@ -1,58 +1,64 @@
 /**
- * Run Migration 006: Fix ucie_openai_analysis UNIQUE constraint
- * 
- * This migration recreates the ucie_openai_analysis table with a proper
- * named UNIQUE constraint to fix the ON CONFLICT error.
+ * Run Migration 006: Add Unique Constraint to ATGE Historical Prices
  */
 
-import { readFileSync } from 'fs';
-import { join } from 'path';
 import { query } from '../lib/db';
+import * as fs from 'fs';
+import * as path from 'path';
 
-async function runMigration() {
-  console.log('🚀 Running Migration 006: Fix ucie_openai_analysis UNIQUE constraint...\n');
-  
+async function runMigration006() {
+  console.log('🚀 Running Migration 006: Add Unique Constraint...\n');
+
   try {
-    // Read migration file
-    const migrationPath = join(process.cwd(), 'migrations', '006_fix_openai_analysis_constraint.sql');
-    const migrationSQL = readFileSync(migrationPath, 'utf-8');
-    
-    console.log('📄 Migration file loaded');
-    console.log('⚠️  WARNING: This will drop and recreate the ucie_openai_analysis table');
-    console.log('⚠️  All existing OpenAI summaries will be lost (they will be regenerated)\n');
-    
-    // Execute migration
-    console.log('🔧 Executing migration...');
-    await query(migrationSQL);
-    
-    console.log('✅ Migration 006 completed successfully!\n');
-    
-    // Verify the constraint exists
-    console.log('🔍 Verifying UNIQUE constraint...');
-    const result = await query(`
-      SELECT constraint_name, constraint_type
-      FROM information_schema.table_constraints
-      WHERE table_name = 'ucie_openai_analysis'
-        AND constraint_type = 'UNIQUE'
-    `);
-    
-    if (result.rows.length > 0) {
-      console.log('✅ UNIQUE constraint verified:');
-      result.rows.forEach(row => {
-        console.log(`   - ${row.constraint_name} (${row.constraint_type})`);
-      });
+    // Read the migration file
+    const migrationPath = path.join(process.cwd(), 'migrations', '006_add_unique_constraint_historical_prices.sql');
+    const migrationSQL = fs.readFileSync(migrationPath, 'utf-8');
+
+    // Extract the ALTER TABLE statement (skip comments and BEGIN/COMMIT)
+    const alterStatement = `ALTER TABLE atge_historical_prices
+ADD CONSTRAINT unique_historical_price 
+UNIQUE (symbol, timestamp, timeframe)`;
+
+    console.log('Executing migration...');
+    await query(alterStatement);
+    console.log('✅ Migration executed successfully!\n');
+
+    // Verify the constraint was added
+    console.log('Verifying constraint...');
+    const verifyResult = await query(
+      `SELECT
+        conname as constraint_name,
+        pg_get_constraintdef(oid) as constraint_definition
+      FROM pg_constraint
+      WHERE conrelid = 'atge_historical_prices'::regclass
+        AND conname = 'unique_historical_price'`
+    );
+
+    if (verifyResult.rows.length > 0) {
+      console.log('✅ Constraint verified:');
+      console.log(`   Name: ${verifyResult.rows[0].constraint_name}`);
+      console.log(`   Definition: ${verifyResult.rows[0].constraint_definition}\n`);
     } else {
-      console.log('❌ WARNING: UNIQUE constraint not found!');
+      console.log('❌ Constraint not found after migration\n');
     }
-    
-    console.log('\n🎉 Migration complete! The ucie_openai_analysis table is now ready.');
-    console.log('📝 Next: Deploy to Vercel and test data collection');
-    
-    process.exit(0);
-  } catch (error) {
-    console.error('❌ Migration failed:', error);
-    process.exit(1);
+
+    console.log('🎉 Migration 006 complete!');
+
+  } catch (error: any) {
+    if (error.code === '42P16') {
+      console.log('⚠️  Constraint already exists - skipping migration');
+      console.log('✅ Migration 006 already applied\n');
+    } else {
+      console.error('❌ Migration failed:', error.message);
+      throw error;
+    }
   }
 }
 
-runMigration();
+// Run migration
+runMigration006()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error('Fatal error:', error);
+    process.exit(1);
+  });
