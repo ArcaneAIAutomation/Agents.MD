@@ -16,7 +16,7 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
-import { callOpenAI } from '../../lib/openai';
+import { callOpenAI } from '../../../../lib/openai';
 import { getCachedAnalysis, AnalysisType } from '../../../../lib/ucie/cacheUtils';
 import { query } from '../../../../lib/db';
 import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
