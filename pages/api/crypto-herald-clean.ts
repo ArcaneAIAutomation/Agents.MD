@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
+import { callOpenAI } from '../../lib/openai';
 
 // Initialize OpenAI with latest model
 const openai = new OpenAI({
@@ -186,9 +187,7 @@ async function generateCryptoNewsWithChatGPT() {
   try {
     console.log('🤖 Generating crypto news with ChatGPT...');
     
-    const completion = await openai.chat.completions.create({
-      model: OPENAI_MODEL,
-      messages: [
+    const result = await callOpenAI([
         {
           role: "system",
           content: `You are a professional cryptocurrency news generator. Create 15 realistic, current crypto news headlines and summaries based on actual market trends, regulatory developments, and technological advances.
@@ -215,12 +214,9 @@ async function generateCryptoNewsWithChatGPT() {
           role: "user",
           content: `Generate 15 current cryptocurrency news stories based on recent market trends and developments.`
         }
-      ],
-      temperature: 0.7,
-      max_tokens: 3000
-    });
+      ], 3000);
 
-    const aiContent = completion.choices[0]?.message?.content;
+    const aiContent = result.content;
     if (aiContent) {
       try {
         const cleanContent = aiContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
@@ -269,9 +265,7 @@ async function enhanceArticlesWithChatGPT(articles: any[]) {
     for (let i = 0; i < articles.length; i += batchSize) {
       const batch = articles.slice(i, i + batchSize);
       
-      const completion = await openai.chat.completions.create({
-        model: OPENAI_MODEL,
-        messages: [
+      const result = await callOpenAI([
           {
             role: "system",
             content: `You are an expert cryptocurrency news analyst. Enhance the provided news articles with professional analysis, market impact assessment, and trading relevance. 
@@ -292,12 +286,9 @@ async function enhanceArticlesWithChatGPT(articles: any[]) {
               source: a.source 
             })))}`
           }
-        ],
-        temperature: 0.3,
-        max_tokens: 2000
-      });
+        ], 2000);
 
-      const aiContent = completion.choices[0]?.message?.content;
+      const aiContent = result.content;
       if (aiContent) {
         try {
           const cleanContent = aiContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();

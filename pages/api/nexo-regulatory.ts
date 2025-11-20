@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
+import { callOpenAI } from '../../lib/openai';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -90,9 +91,7 @@ export default async function handler(
     
     try {
       // AI-powered analysis of real news data
-      const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
+      const result = await callOpenAI([
           {
             role: "system",
             content: `You are a financial regulatory analyst specializing EXCLUSIVELY in Nexo.com and UK financial regulations. 
@@ -125,12 +124,9 @@ export default async function handler(
             role: "user",
             content: "Generate current NEXO-SPECIFIC UK regulatory updates with detailed analysis of how regulations affect Nexo's crypto lending platform operations in the UK market. Focus exclusively on Nexo compliance requirements."
           }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000
-      });
+        ], 2000);
 
-      const content = completion.choices[0]?.message?.content;
+      const content = result.content;
       if (content) {
         updates = JSON.parse(content);
         // Mark as live data if we have real news

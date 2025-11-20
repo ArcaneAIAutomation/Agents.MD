@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
+import { callOpenAI } from '../../lib/openai';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -210,7 +211,7 @@ Please think through this systematically, then provide your final trade recommen
       // Note: o1 models don't use temperature or max_tokens parameters
     });
 
-    const tradeSignal = JSON.parse(completion.choices[0].message.content || '{}');
+    const tradeSignal = JSON.parse(result.content || '{}');
     
     // Validate and enhance the trade signal
     if (tradeSignal.entryPrice && tradeSignal.stopLoss && tradeSignal.takeProfit) {

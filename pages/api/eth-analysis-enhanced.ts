@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
+import { callOpenAI } from '../../lib/openai';
 
 // Initialize OpenAI with latest model
 const openai = new OpenAI({
@@ -1120,9 +1121,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       try {
         console.log('🤖 Generating ETH AI analysis with', OPENAI_MODEL);
         
-        const completion = await openai.chat.completions.create({
-          model: OPENAI_MODEL,
-          messages: [
+        const result = await callOpenAI([
             {
               role: "system",
               content: "You are a professional Ethereum and DeFi analyst. Provide a brief 2-3 sentence analysis based on the market data. Return only plain text, no JSON."
@@ -1131,12 +1130,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               role: "user",
               content: `Ethereum is at $${currentPrice.toLocaleString()} with ${realData.price.change24h}% 24h change. RSI is ${getRSIValue(technicalIndicators.rsi).toFixed(1)} and Fear & Greed Index is ${realData.fearGreedIndex?.value || 50}/100. Consider DeFi ecosystem impact. Provide professional analysis.`
             }
-          ],
-          temperature: 0.3,
-          max_tokens: 200
-        });
+          ], 200);
         
-        aiAnalysis = completion.choices[0]?.message?.content || null;
+        aiAnalysis = result.content || null;
         console.log('✅ ETH AI analysis generated');
       } catch (aiError) {
         console.error('❌ OpenAI failed:', aiError);

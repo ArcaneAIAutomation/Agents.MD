@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
+import { callOpenAI } from '../../lib/openai';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -434,9 +435,7 @@ async function generateReliableTradeSignal(liveData: any) {
   }
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || "gpt-4o-2024-08-06",
-      messages: [
+    const result = await callOpenAI([
         {
           role: "system",
           content: `You are an expert cryptocurrency trader analyzing LIVE market data from ${liveData.dataSource}.
@@ -509,11 +508,10 @@ Return JSON format:
   "timestamp": "${new Date().toISOString()}"
 }`
         }
-      ]
-    });
+      ], 1000);
 
     // Clean and parse response
-    let responseContent = completion.choices[0].message.content || '{}';
+    let responseContent = result.content || '{}';
     responseContent = responseContent.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
     responseContent = responseContent.replace(/^[^{]*({.*})[^}]*$/s, '$1');
 

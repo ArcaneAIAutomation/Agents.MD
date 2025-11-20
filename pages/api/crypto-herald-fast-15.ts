@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
+import { callOpenAI } from '../../lib/openai';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -221,9 +222,7 @@ async function generateFastCryptoNews(count: number) {
   try {
     console.log(`🤖 Generating ${count} crypto stories with ChatGPT...`);
     
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-2024-08-06',
-      messages: [
+    const result = await callOpenAI([
         {
           role: "system",
           content: `Generate ${count} realistic cryptocurrency news headlines and summaries. Focus on current market trends, Bitcoin, Ethereum, DeFi, regulation, and institutional adoption. Return a JSON array.`
@@ -232,12 +231,9 @@ async function generateFastCryptoNews(count: number) {
           role: "user",
           content: `Create ${count} crypto news stories with headlines and 2-sentence summaries.`
         }
-      ],
-      temperature: 0.7,
-      max_tokens: 1500
-    });
+      ], 1500);
 
-    const aiContent = completion.choices[0]?.message?.content;
+    const aiContent = result.content;
     if (aiContent) {
       try {
         const cleanContent = aiContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();

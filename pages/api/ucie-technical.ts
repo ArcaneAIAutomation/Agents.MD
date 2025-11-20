@@ -18,6 +18,7 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
+import { callOpenAI } from '../../lib/openai';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -221,7 +222,7 @@ export default async function handler(
       response_format: { type: 'json_object' },
     });
 
-    const content = completion.choices[0]?.message?.content;
+    const content = result.content;
 
     if (!content) {
       throw new Error('No response from OpenAI');

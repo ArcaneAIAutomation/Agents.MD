@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
+import { callOpenAI } from '../../lib/openai';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -118,9 +119,7 @@ async function generateSimpleTradeSignal(marketData: any) {
   try {
     console.log('🤖 Generating simple trade signal...');
     
-    const completion = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || "gpt-4o-2024-08-06",
-      messages: [
+    const result = await callOpenAI([
         {
           role: "system",
           content: `You are an expert cryptocurrency trader. Generate a high-probability trade signal based on the provided market data.
@@ -173,10 +172,9 @@ Generate a trade signal with proper risk management (minimum 2:1 risk/reward rat
   "timestamp": "${new Date().toISOString()}"
 }`
         }
-      ]
-    });
+      ], 1000);
 
-    const tradeSignal = JSON.parse(completion.choices[0].message.content || '{}');
+    const tradeSignal = JSON.parse(result.content || '{}');
     
     // Validate and calculate risk/reward
     if (tradeSignal.entryPrice && tradeSignal.stopLoss && tradeSignal.takeProfit) {

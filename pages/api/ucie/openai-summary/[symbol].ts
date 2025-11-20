@@ -15,6 +15,7 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
+import { callOpenAI } from '../../lib/openai';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
@@ -230,9 +231,7 @@ async function handler(
     // Generate OpenAI summary
     console.log(`📝 Sending ${fullContext.length} chars to OpenAI...`);
     
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-5',
-      messages: [
+    const result = await callOpenAI([
         {
           role: 'system',
           content: `You are a cryptocurrency analysis expert. Summarize the provided data comprehensively for Caesar AI research. Focus on:
@@ -250,12 +249,9 @@ Be concise but comprehensive. Use bullet points for clarity.`
           role: 'user',
           content: `Analyze and summarize this ${symbolUpper} data:\n\n${fullContext}`
         }
-      ],
-      temperature: 0.3,
-      max_completion_tokens: 2000
-    });
+      ], 1000);
     
-    const summaryText = completion.choices[0]?.message?.content || '';
+    const summaryText = result.content || '';
     
     console.log(`✅ OpenAI summary generated (${summaryText.length} chars)`);
     

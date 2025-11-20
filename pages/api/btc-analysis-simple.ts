@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
+import { callOpenAI } from '../../lib/openai';
 
 // Initialize OpenAI with latest model
 const openai = new OpenAI({
@@ -408,7 +409,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           max_tokens: 800
         });
 
-        const aiContent = completion.choices[0]?.message?.content;
+        const aiContent = result.content;
         if (aiContent) {
           try {
             console.log('🔍 Raw AI response length:', aiContent.length);

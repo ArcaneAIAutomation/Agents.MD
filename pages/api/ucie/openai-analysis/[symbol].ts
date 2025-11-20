@@ -16,6 +16,7 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
+import { callOpenAI } from '../../lib/openai';
 import { getCachedAnalysis, AnalysisType } from '../../../../lib/ucie/cacheUtils';
 import { query } from '../../../../lib/db';
 import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
@@ -197,9 +198,7 @@ async function handler(
     console.log(`🤖 Generating OpenAI GPT-4o analysis...`);
     const generationStart = Date.now();
     
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-5',
-      messages: [
+    const result = await callOpenAI([
         {
           role: 'system',
           content: `You are an expert cryptocurrency analyst. Provide a comprehensive analysis based on the collected data. Structure your analysis as follows:
@@ -247,12 +246,9 @@ Be professional, data-driven, and actionable. Use bullet points for clarity.`
           role: 'user',
           content: context
         }
-      ],
-      temperature: 0.7,
-      max_completion_tokens: 2000 // Comprehensive analysis
-    });
+      ], 1000);
 
-    const analysis = completion.choices[0].message.content || 'Analysis generation failed';
+    const analysis = result.content || 'Analysis generation failed';
     const generationTime = Date.now() - generationStart;
     
     console.log(`✅ OpenAI analysis generated in ${generationTime}ms`);
