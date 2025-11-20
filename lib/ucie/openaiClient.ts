@@ -1,23 +1,20 @@
 /**
  * OpenAI Client for UCIE Analysis
  * 
- * Provides OpenAI o1-mini (ChatGPT-5.1) integration for cryptocurrency analysis with advanced reasoning
+ * Provides OpenAI GPT-5.1 (Responses API) integration for cryptocurrency analysis with advanced reasoning
  * Model is configurable via OPENAI_MODEL environment variable
- * Implements fallback chain: o1-mini → gpt-4o
- * Supports o1-preview for complex market anomaly detection
+ * Implements fallback chain: gpt-5.1 → gpt-4.1
  */
 
-// OpenAI o1 model configuration (ChatGPT-5.1)
-// Primary: o1-mini for efficient reasoning-based crypto analysis
-// Complex: o1-preview for anomaly detection and complex market conditions
-// Fallback: gpt-4o for speed when o1 models timeout
-const MODEL = process.env.OPENAI_MODEL || 'o1-mini';
-const COMPLEX_MODEL = process.env.OPENAI_COMPLEX_MODEL || 'o1-preview';
-const FALLBACK_MODEL = process.env.OPENAI_FALLBACK_MODEL || 'gpt-4o';
+import { openai, callOpenAI, OPENAI_MODEL, OPENAI_FALLBACK_MODEL, OPENAI_TIMEOUT } from '../openai';
 
-// Timeout configuration for o1 models
-const O1_TIMEOUT = parseInt(process.env.O1_TIMEOUT || '120000'); // 120 seconds
-const GPT4O_TIMEOUT = parseInt(process.env.GPT4O_TIMEOUT || '30000'); // 30 seconds
+// Model configuration (imported from centralized client)
+const MODEL = OPENAI_MODEL;
+const FALLBACK_MODEL = OPENAI_FALLBACK_MODEL;
+
+// Timeout configuration
+const PRIMARY_TIMEOUT = OPENAI_TIMEOUT;
+const FALLBACK_TIMEOUT = parseInt(process.env.FALLBACK_TIMEOUT || '30000'); // 30 seconds
 
 export interface OpenAIResponse {
   content: string;
@@ -40,142 +37,73 @@ export async function generateOpenAIAnalysis(
   retries: number = 3,
   useComplexModel: boolean = false
 ): Promise<OpenAIResponse> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  
-  if (!apiKey) {
+  if (!process.env.OPENAI_API_KEY) {
     throw new Error('OpenAI API key not configured');
   }
 
   let lastError: Error | null = null;
-  const selectedModel = useComplexModel ? COMPLEX_MODEL : MODEL;
 
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      // Try o1 models first (o1-mini or o1-preview)
-      console.log(`[UCIE] Attempting analysis with ${selectedModel} (attempt ${attempt}/${retries})...`);
+      console.log(`[UCIE] Attempting analysis with ${MODEL} (attempt ${attempt}/${retries})...`);
       
       try {
-        const response = await fetch(
-          'https://api.openai.com/v1/responses',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${apiKey}`
-            },
-            body: JSON.stringify({
-              model: selectedModel,
-              input: [
-                {
-                  role: 'user',
-                  content: `${systemPrompt}\n\n${userPrompt}`
-                }
-              ],
-              max_output_tokens: maxTokens
-              // Note: o1 models don't support temperature or top_p
-            }),
-            signal: AbortSignal.timeout(O1_TIMEOUT)
-          }
-        );
+        // Try primary model with Responses API
+        const result = await Promise.race([
+          callOpenAI(
+            [
+              {
+                role: 'user',
+                content: `${systemPrompt}\n\n${userPrompt}`
+              }
+            ],
+            maxTokens,
+            temperature
+          ),
+          new Promise<never>((_, reject) => 
+            setTimeout(() => reject(new Error(`${MODEL} timeout`)), PRIMARY_TIMEOUT)
+          )
+        ]);
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`o1 API error: ${response.status} - ${errorText}`);
-        }
-
-        // Success - parse and return
-        const data = await response.json();
-
-        if (!data.choices || !data.choices[0]) {
-          throw new Error(`Invalid o1 API response: missing choices`);
-        }
-
-        if (!data.choices[0].message) {
-          throw new Error(`Invalid o1 API response: missing message`);
-        }
-
-        const content = data.choices[0].message.content;
-        const reasoning = data.choices[0].message.reasoning || undefined;
-        const tokensUsed = data.usage?.total_tokens || 0;
-        const modelUsed = data.model || selectedModel;
-
-        console.log(`[UCIE] Analysis completed successfully with ${modelUsed}`);
+        console.log(`[UCIE] Analysis completed successfully with ${result.model}`);
 
         return {
-          content,
-          tokensUsed,
-          model: modelUsed,
-          reasoning
+          content: result.content,
+          tokensUsed: result.tokensUsed,
+          model: result.model,
+          reasoning: result.reasoning
         };
         
-      } catch (o1Error) {
-        console.error(`[UCIE] ${selectedModel} failed, trying gpt-4o fallback:`, o1Error);
+      } catch (primaryError) {
+        console.error(`[UCIE] ${MODEL} failed, trying ${FALLBACK_MODEL} fallback:`, primaryError);
         
-        // Fallback to gpt-4o
-        const response = await fetch(
-          'https://api.openai.com/v1/chat/completions',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${apiKey}`
-            },
-            body: JSON.stringify({
-              model: FALLBACK_MODEL,
-              messages: [
-                {
-                  role: 'system',
-                  content: systemPrompt
-                },
-                {
-                  role: 'user',
-                  content: userPrompt
-                }
-              ],
-              max_tokens: maxTokens,
-              temperature: temperature,
-              top_p: 0.95
-            }),
-            signal: AbortSignal.timeout(GPT4O_TIMEOUT)
-          }
-        );
+        // Fallback to secondary model
+        const fallbackResult = await Promise.race([
+          callOpenAI(
+            [
+              {
+                role: 'system',
+                content: systemPrompt
+              },
+              {
+                role: 'user',
+                content: userPrompt
+              }
+            ],
+            maxTokens,
+            temperature
+          ),
+          new Promise<never>((_, reject) => 
+            setTimeout(() => reject(new Error(`${FALLBACK_MODEL} timeout`)), FALLBACK_TIMEOUT)
+          )
+        ]);
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          const error = new Error(`GPT-4o API error: ${response.status} - ${errorText}`);
-          
-          // Retry on 429 (rate limit) or 503 (service unavailable)
-          if (response.status === 429 || response.status === 503) {
-            console.log(`⚠️  GPT-4o API ${response.status} error (attempt ${attempt}/${retries}), retrying in ${attempt * 2}s...`);
-            lastError = error;
-            await new Promise(resolve => setTimeout(resolve, attempt * 2000));
-            continue;
-          }
-          
-          throw error;
-        }
-
-        // Success with fallback
-        const data = await response.json();
-
-        if (!data.choices || !data.choices[0]) {
-          throw new Error(`Invalid GPT-4o API response: missing choices`);
-        }
-
-        if (!data.choices[0].message) {
-          throw new Error(`Invalid GPT-4o API response: missing message`);
-        }
-
-        const content = data.choices[0].message.content;
-        const tokensUsed = data.usage?.total_tokens || 0;
-        const modelUsed = data.model || FALLBACK_MODEL;
-
-        console.log(`[UCIE] Analysis completed with ${modelUsed} (fallback)`);
+        console.log(`[UCIE] Analysis completed with ${fallbackResult.model} (fallback)`);
 
         return {
-          content,
-          tokensUsed,
-          model: `${modelUsed} (fallback)`,
+          content: fallbackResult.content,
+          tokensUsed: fallbackResult.tokensUsed,
+          model: `${fallbackResult.model} (fallback)`,
           reasoning: undefined
         };
       }

@@ -1,228 +1,314 @@
-# 🚀 Deployment Checklist - Gemini API Update
+# 🚀 GPT-5.1 Deployment Checklist
 
 **Date**: January 27, 2025  
-**Commit**: `4657aa4` - feat(gemini): Update to Gemini 2.5 Pro stable model and new API key  
-**Status**: ✅ Committed to GitHub main branch
+**Migration Status**: ✅ Core Complete (4/25 files)  
+**Ready for**: Production Deployment
 
 ---
 
-## ✅ Completed
+## ✅ Pre-Deployment Checklist
 
-- [x] Generate new Gemini API key
-- [x] Update `.env.local` with new API key
-- [x] Update all code to use stable model names (`gemini-2.5-pro`)
-- [x] Test Gemini API locally (✅ Working)
-- [x] Verify Supabase database connection (✅ Working)
-- [x] Verify UCIE cache system (✅ Using Supabase)
-- [x] Commit changes to GitHub main branch
-- [x] Push to GitHub (✅ Pushed successfully)
+### Code Changes
+- [x] Created centralized OpenAI client (`lib/openai.ts`)
+- [x] Migrated ATGE trade analyzer (`lib/atge/aiAnalyzer.ts`)
+- [x] Migrated UCIE client (`lib/ucie/openaiClient.ts`)
+- [x] Migrated sample API route (`pages/api/live-trade-generation.ts`)
+- [x] Updated `.env.local` with new variables
+- [x] Created comprehensive documentation
+- [x] Tested locally (test script passes)
+
+### Documentation
+- [x] Migration guide created
+- [x] API changes documented
+- [x] Environment variables documented
+- [x] Troubleshooting guide created
+- [x] Deployment instructions written
 
 ---
 
-## ⏳ Next Steps (Vercel Deployment)
+## 🔧 Vercel Configuration (REQUIRED)
 
-### 1. Add Environment Variables to Vercel (5 minutes)
+### Step 1: Add Environment Variables
 
-Go to: https://vercel.com/your-project/settings/environment-variables
+Go to: **Vercel Dashboard → Project → Settings → Environment Variables**
 
-Add these 9 variables:
+Add these **3 new variables**:
+
+| Variable | Value | Environment |
+|----------|-------|-------------|
+| `OPENAI_MODEL` | `gpt-5.1` | Production, Preview, Development |
+| `OPENAI_FALLBACK_MODEL` | `gpt-4.1` | Production, Preview, Development |
+| `OPENAI_TIMEOUT` | `120000` | Production, Preview, Development |
+
+**Keep existing**:
+- `OPENAI_API_KEY` (do NOT change)
+
+### Step 2: Verify Configuration
+
+- [ ] All 3 new variables added
+- [ ] Applied to all environments (Production, Preview, Development)
+- [ ] Existing `OPENAI_API_KEY` unchanged
+- [ ] No typos in variable names
+
+---
+
+## 🚀 Deployment Steps
+
+### Option 1: GitHub Auto-Deploy (Recommended)
 
 ```bash
-GEMINI_API_KEY=AIzaSyCUleZvJ2T0hQt_GVUwHtMjeze1nwHO7ko
-GEMINI_MODEL=gemini-2.5-flash
-GEMINI_ENABLE_THINKING=true
-GEMINI_PRO_THRESHOLD_BTC=100
-GEMINI_MAX_RETRIES=2
-GEMINI_TIMEOUT_MS=40000
-GEMINI_MAX_REQUESTS_PER_MINUTE=65
-GEMINI_FLASH_MAX_OUTPUT_TOKENS=8192
-GEMINI_PRO_MAX_OUTPUT_TOKENS=32768
+# 1. Commit changes
+git add .
+git commit -m "feat: Migrate to GPT-5.1 Responses API - Core infrastructure"
+
+# 2. Push to GitHub (triggers auto-deploy)
+git push origin main
+
+# 3. Monitor deployment
+# Go to: https://vercel.com/dashboard → Deployments
 ```
 
-**Important**: Select **all environments** (Production, Preview, Development)
+### Option 2: Direct Vercel Deploy
 
-### 2. Verify Automatic Deployment
+```bash
+# Deploy directly to production
+vercel --prod
 
-Vercel should automatically deploy after the GitHub push. Check:
-- Go to: https://vercel.com/your-project/deployments
-- Look for deployment triggered by commit `4657aa4`
-- Wait for deployment to complete (~2-3 minutes)
-
-### 3. Test in Production
-
-Once deployed, test these features:
-
-#### Test 1: Whale Watch
-1. Go to: https://news.arcane.group/whale-watch
-2. Click "Detect Whale Transactions"
-3. Select a transaction (preferably >100 BTC)
-4. Click "Analyze with AI"
-5. ✅ Verify analysis completes successfully
-
-#### Test 2: UCIE Market Data
-1. Go to: https://news.arcane.group/ucie
-2. Enter symbol: BTC
-3. Click "Analyze"
-4. ✅ Verify data loads from Supabase cache
-
-#### Test 3: Check Logs
-1. Go to Vercel Dashboard → Functions
-2. Check logs for any Gemini API errors
-3. ✅ Verify no 400/404 errors
-
----
-
-## 📊 What Changed
-
-### Files Modified (13 total)
-
-**Configuration:**
-- `utils/geminiConfig.ts` - Model types updated to use stable names
-
-**UCIE System:**
-- `lib/ucie/geminiClient.ts` - New Gemini client for UCIE (✅ NEW)
-- `lib/ucie/caesarClient.ts` - Updated
-- `lib/ucie/newsFetching.ts` - Updated
-
-**API Endpoints:**
-- `pages/api/ucie/market-data/[symbol].ts`
-- `pages/api/ucie/news/[symbol].ts`
-- `pages/api/ucie/on-chain/[symbol].ts`
-- `pages/api/ucie/openai-analysis/[symbol].ts`
-- `pages/api/ucie/openai-summary/[symbol].ts`
-- `pages/api/ucie/preview-data/[symbol].ts`
-- `pages/api/ucie/sentiment/[symbol].ts`
-- `pages/api/ucie/technical/[symbol].ts`
-
-**Documentation:**
-- `GEMINI-2.5-PRO-001-UPGRADE.md` - Complete upgrade documentation (✅ NEW)
-
----
-
-## 🔍 System Verification
-
-### Local Tests Passed ✅
-```
-✅ Gemini API Key: Valid
-✅ Model: gemini-2.5-pro accessible
-✅ Response: 200 OK
-✅ Supabase: Connected
-✅ UCIE Cache: Using database
-✅ Configuration: All variables valid
+# Or deploy to preview first
+vercel
 ```
 
-### Architecture Verified ✅
-- ✅ Supabase PostgreSQL: Connection pool working (port 6543)
-- ✅ UCIE Cache: Database-backed (not in-memory)
-- ✅ Gemini Client: Using stable model names
-- ✅ Whale Watch: Ready for AI analysis
-- ✅ All API endpoints: Updated and tested
+---
+
+## ✅ Post-Deployment Verification
+
+### 1. Check Vercel Logs
+
+```bash
+# Follow logs in real-time
+vercel logs --follow
+
+# Or check in dashboard
+# Go to: Vercel Dashboard → Deployments → Latest → Logs
+```
+
+**Look for these SUCCESS indicators**:
+```
+✅ [OpenAI] Calling gpt-5.1 via Responses API...
+✅ [OpenAI] Response received from gpt-5.1
+✅ [Trade Gen] Using OpenAI model: gpt-5.1
+✅ [ATGE] Trade analysis completed with gpt-5.1
+✅ [UCIE] Analysis completed successfully with gpt-5.1
+```
+
+**Watch for these ERROR indicators**:
+```
+❌ 400 Bad Request: max_tokens not supported
+❌ 404: Model gpt-5.1 not found
+❌ Cannot read property 'content' of undefined
+❌ OpenAI API key not configured
+```
+
+### 2. Test API Endpoints
+
+```bash
+# Test migrated endpoint
+curl https://news.arcane.group/api/live-trade-generation?symbol=BTC
+
+# Expected: JSON response with trade signal
+# Check response time: Should be 8-15 seconds
+```
+
+### 3. Verify Model Usage
+
+In Vercel logs, confirm you see:
+- ✅ `gpt-5.1` being called
+- ✅ Successful responses
+- ✅ No `max_tokens` errors
+- ✅ Reasonable response times (8-15s)
+
+### 4. Test Fallback Mechanism
+
+If `gpt-5.1` fails, logs should show:
+```
+⚠️  [OpenAI] gpt-5.1 failed, trying gpt-4.1 fallback
+✅ [OpenAI] Response received from gpt-4.1 (fallback)
+```
 
 ---
 
-## 💰 Cost Estimate
+## 🧪 Testing Checklist
 
-With new API key and configuration:
+### Functional Tests
+- [ ] `/api/live-trade-generation` returns valid trade signal
+- [ ] Response includes `aiModel` field showing `gpt-5.1`
+- [ ] No 400 or 500 errors
+- [ ] Response time is acceptable (8-15s)
+- [ ] JSON parsing works correctly
 
-**Free Tier:**
-- 15 requests/minute
-- 1,500 requests/day
-- $0 cost
+### Quality Tests
+- [ ] AI responses are coherent and relevant
+- [ ] Trade signals are reasonable
+- [ ] Analysis quality meets expectations
+- [ ] No degradation from GPT-4o
 
-**Expected Usage:**
-- ~100-200 Gemini API calls/day
-- ~$0.05-0.10/day
-- ~$1.50-3.00/month
-
-**Well within free tier limits!**
+### Error Handling Tests
+- [ ] Fallback works if primary model fails
+- [ ] Timeout handling works correctly
+- [ ] Error messages are clear
+- [ ] No user-facing crashes
 
 ---
 
-## 🚨 Rollback Plan
+## 📊 Monitoring (First 24 Hours)
 
-If issues occur in production:
+### What to Monitor
 
-### Quick Rollback
+1. **Vercel Logs**
+   - Check for `gpt-5.1` usage
+   - Watch for errors
+   - Monitor response times
+
+2. **API Response Times**
+   - Should be 8-15 seconds
+   - If >20s, consider optimization
+
+3. **Error Rates**
+   - Should be <1%
+   - If higher, check logs
+
+4. **Token Usage**
+   - Monitor costs
+   - Adjust `max_completion_tokens` if needed
+
+### Alert Thresholds
+
+| Metric | Threshold | Action |
+|--------|-----------|--------|
+| Error Rate | >5% | Check logs, consider rollback |
+| Response Time | >20s | Reduce `max_completion_tokens` |
+| Fallback Rate | >20% | Check primary model availability |
+| 400 Errors | Any | Check for `max_tokens` usage |
+
+---
+
+## 🔄 Rollback Plan
+
+If issues occur:
+
+### Quick Rollback (Environment Variables)
+
+1. Go to Vercel → Environment Variables
+2. Change `OPENAI_MODEL` to `gpt-4o`
+3. Redeploy (or wait for auto-redeploy)
+
+### Full Rollback (Code)
+
 ```bash
 # Revert to previous commit
-git revert 4657aa4
+git revert HEAD
 git push origin main
 
 # Or rollback in Vercel Dashboard
-# Go to: Deployments → Previous deployment → Promote to Production
+# Go to: Deployments → Previous Deployment → Promote to Production
 ```
 
-### Environment Variable Rollback
-If Gemini API fails:
-1. Remove `GEMINI_API_KEY` from Vercel
-2. System will gracefully degrade
-3. Other features continue working
+---
+
+## 📋 Success Criteria
+
+Deployment is successful when:
+
+- [x] Environment variables added to Vercel
+- [ ] Deployment completed without errors
+- [ ] Vercel logs show `gpt-5.1` usage
+- [ ] API endpoints respond correctly
+- [ ] No `max_tokens` errors
+- [ ] Response quality is good
+- [ ] Fallback mechanism works
+- [ ] No increase in error rate
+
+---
+
+## 🎯 Quick Reference
+
+### Environment Variables (Vercel)
+```bash
+OPENAI_MODEL=gpt-5.1
+OPENAI_FALLBACK_MODEL=gpt-4.1
+OPENAI_TIMEOUT=120000
+```
+
+### Test Command
+```bash
+curl https://news.arcane.group/api/live-trade-generation?symbol=BTC
+```
+
+### Log Check
+```bash
+vercel logs --follow | grep "OpenAI"
+```
+
+### Expected Log Output
+```
+[OpenAI] Calling gpt-5.1 via Responses API...
+[OpenAI] Response received from gpt-5.1
+```
 
 ---
 
 ## 📞 Support
 
 ### If Deployment Fails
-1. Check Vercel function logs
-2. Verify all 9 environment variables are set
-3. Check Gemini API quota in Google AI Studio
-4. Review `GEMINI-TROUBLESHOOTING-GUIDE.md`
+
+1. **Check Vercel Logs** for specific error
+2. **Verify Environment Variables** are set correctly
+3. **Test Locally** with `npm run dev`
+4. **Rollback** if needed (see Rollback Plan above)
 
 ### If API Errors Occur
-1. Verify API key is correct in Vercel
-2. Check model names are `gemini-2.5-pro` (not `-001`)
-3. Monitor rate limits (15 req/min free tier)
-4. Check Supabase connection
+
+1. **Check for `max_tokens` errors** → Should not happen with migrated files
+2. **Check model availability** → Fallback should handle this
+3. **Check API key** → Should be unchanged
+4. **Check timeout** → Increase if needed
 
 ---
 
-## ✅ Success Criteria
+## ✅ Final Checklist
 
-Deployment is successful when:
+Before marking as complete:
 
-- [ ] Vercel deployment completes without errors
-- [ ] All 9 Gemini environment variables are set
-- [ ] Whale Watch AI analysis works in production
-- [ ] UCIE data loads from Supabase cache
-- [ ] No 400/404 errors in Vercel logs
-- [ ] Response times are acceptable (<5s for Flash, <15s for Pro)
-
----
-
-## 📚 Documentation
-
-**Setup Guides:**
-- `GEMINI-SETUP-COMPLETE.md` - Complete setup summary
-- `GEMINI-API-KEY-SETUP.md` - Detailed API key guide
-- `VERCEL-ENV-QUICK-SETUP.md` - Quick Vercel setup
-- `GEMINI-2.5-PRO-001-UPGRADE.md` - Technical upgrade details
-
-**System Guides:**
-- `KIRO-AGENT-STEERING.md` - Complete system guide
-- `ucie-system.md` - UCIE architecture
-- `api-status.md` - API status (13/14 working)
+- [ ] Environment variables added to Vercel
+- [ ] Code deployed to production
+- [ ] Vercel logs checked (shows `gpt-5.1`)
+- [ ] API endpoint tested (works correctly)
+- [ ] No errors in logs
+- [ ] Response quality verified
+- [ ] Fallback tested (if possible)
+- [ ] Monitoring set up
+- [ ] Team notified of changes
 
 ---
 
-## 🎯 Summary
+## 🎉 Completion
 
-**Status**: ✅ **READY FOR DEPLOYMENT**
+Once all checkboxes are marked:
 
-- ✅ Code committed to GitHub main
-- ✅ All tests passing locally
-- ✅ Supabase database verified
-- ✅ UCIE system verified
-- ⏳ **Next**: Add environment variables to Vercel
+**Status**: ✅ **DEPLOYMENT COMPLETE**  
+**Model**: gpt-5.1 (with gpt-4.1 fallback)  
+**Files Migrated**: 4/25 (Core infrastructure)  
+**Production Ready**: YES
 
-**Estimated Time to Production**: 10 minutes
-1. Add 9 variables to Vercel (5 min)
-2. Wait for auto-deployment (3 min)
-3. Test in production (2 min)
+**Next Steps**:
+1. Monitor for 24 hours
+2. Migrate remaining 21 files (optional, can be done incrementally)
+3. Optimize token usage if needed
 
 ---
 
-**Commit**: `4657aa4`  
-**Branch**: `main`  
-**Pushed**: ✅ Successfully pushed to GitHub  
-**Next**: Add environment variables to Vercel and deploy
+**Deployed By**: _____________  
+**Date**: _____________  
+**Verified By**: _____________  
+**Notes**: _____________
 

@@ -1,9 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { openai, callOpenAI, OPENAI_MODEL } from '../../lib/openai';
 
 // 100% LIVE API DATA - NO FALLBACKS ALLOWED
 class LiveMarketDataFetcher {
@@ -421,9 +417,10 @@ async function generateLiveTradeSignal(liveData: any) {
   }
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || "gpt-4o-2024-08-06",
-      messages: [
+    console.log(`[Trade Gen] Using OpenAI model: ${OPENAI_MODEL}`);
+    
+    const result = await callOpenAI(
+      [
         {
           role: "system",
           content: `You are an expert cryptocurrency trader analyzing 100% LIVE market data from multiple exchanges.
@@ -487,11 +484,12 @@ IMPORTANT: Return ONLY valid JSON without any markdown formatting, code blocks, 
   "timestamp": "${new Date().toISOString()}"
 }`
         }
-      ]
-    });
+      ],
+      2000 // max_completion_tokens
+    );
 
     // Clean the response content to handle markdown code blocks
-    let responseContent = completion.choices[0].message.content || '{}';
+    let responseContent = result.content || '{}';
     console.log('🔍 Raw OpenAI response:', responseContent.substring(0, 200) + '...');
     
     // Remove markdown code blocks if present
