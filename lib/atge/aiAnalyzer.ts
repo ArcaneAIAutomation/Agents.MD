@@ -129,7 +129,7 @@ Be honest, analytical, and specific. Use data-driven reasoning.
 ${prompt}`
             }
           ],
-          max_completion_tokens: 2000
+          max_output_tokens: 2000
         }),
         new Promise<never>((_, reject) => 
           setTimeout(() => reject(new Error('o1-mini timeout')), O1_TIMEOUT)
@@ -184,7 +184,7 @@ Be honest, analytical, and specific. Use data-driven reasoning.`
               content: prompt
             }
           ],
-          max_completion_tokens: 2000,
+          max_tokens: 2000, // gpt-4o uses max_tokens, not max_output_tokens
           response_format: { type: 'json_object' }
         }),
         new Promise<never>((_, reject) => 

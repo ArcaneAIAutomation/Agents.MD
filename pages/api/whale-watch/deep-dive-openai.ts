@@ -343,7 +343,7 @@ Be extremely specific with numbers, prices, and actionable recommendations. Focu
               content: `You are an expert cryptocurrency analyst with advanced reasoning capabilities. Analyze this whale transaction and respond only with valid JSON.\n\n${prompt}`
             }
           ],
-          max_completion_tokens: 2000
+          max_output_tokens: 2000
           // Note: o1 models don't support temperature or response_format
         }),
         signal: AbortSignal.timeout(O1_TIMEOUT),

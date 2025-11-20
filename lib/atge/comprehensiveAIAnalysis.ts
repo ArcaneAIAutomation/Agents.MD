@@ -180,7 +180,7 @@ Provide your analysis in a structured format with clear reasoning.`;
           content: prompt
         }
       ],
-      max_completion_tokens: 2000
+      max_output_tokens: 2000
     }),
     signal: AbortSignal.timeout(120000) // 120 second timeout for fetch itself
   });

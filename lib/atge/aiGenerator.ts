@@ -215,7 +215,7 @@ async function generateWithO1(context: string, symbol: string, useComplexModel: 
             content: createO1Prompt(context)
           }
         ],
-        max_completion_tokens: 2000 // o1 models may need more tokens for reasoning
+        max_output_tokens: 2000 // o1 models may need more tokens for reasoning
       }),
       signal: controller.signal
     });
@@ -351,7 +351,7 @@ async function generateWithGPT4o(context: string, symbol: string): Promise<Trade
           }
         ],
         response_format: { type: 'json_object' }, // Force JSON mode
-        max_completion_tokens: 1000
+        max_tokens: 1000 // gpt-4o uses max_tokens, not max_output_tokens
       }),
       signal: controller.signal
     });

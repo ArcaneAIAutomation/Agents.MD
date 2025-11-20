@@ -71,7 +71,7 @@ export async function generateOpenAIAnalysis(
                   content: `${systemPrompt}\n\n${userPrompt}`
                 }
               ],
-              max_completion_tokens: maxTokens
+              max_output_tokens: maxTokens
               // Note: o1 models don't support temperature or top_p
             }),
             signal: AbortSignal.timeout(O1_TIMEOUT)
