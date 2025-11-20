@@ -162,7 +162,7 @@ ${input.newsHeadlines.slice(0, 5).map((h, i) => `${i + 1}. ${h}`).join('\n')}` :
 
 Provide your analysis in a structured format with clear reasoning.`;
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  const response = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -170,7 +170,7 @@ Provide your analysis in a structured format with clear reasoning.`;
     },
     body: JSON.stringify({
       model: MODEL,
-      messages: [
+      input: [
         {
           role: 'system',
           content: 'You are an expert cryptocurrency trading analyst with deep knowledge of technical analysis, market sentiment, and on-chain metrics. Provide detailed, actionable trading recommendations.'

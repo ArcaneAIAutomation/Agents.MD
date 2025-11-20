@@ -56,7 +56,7 @@ export async function generateOpenAIAnalysis(
       
       try {
         const response = await fetch(
-          'https://api.openai.com/v1/chat/completions',
+          'https://api.openai.com/v1/responses',
           {
             method: 'POST',
             headers: {
@@ -65,7 +65,7 @@ export async function generateOpenAIAnalysis(
             },
             body: JSON.stringify({
               model: selectedModel,
-              messages: [
+              input: [
                 {
                   role: 'user',
                   content: `${systemPrompt}\n\n${userPrompt}`

@@ -329,7 +329,7 @@ Be extremely specific with numbers, prices, and actionable recommendations. Focu
 
     try {
       // Try o1 models first
-      response = await fetch('https://api.openai.com/v1/chat/completions', {
+      response = await fetch('https://api.openai.com/v1/responses', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -337,7 +337,7 @@ Be extremely specific with numbers, prices, and actionable recommendations. Focu
         },
         body: JSON.stringify({
           model: selectedModel,
-          messages: [
+          input: [
             {
               role: 'user',
               content: `You are an expert cryptocurrency analyst with advanced reasoning capabilities. Analyze this whale transaction and respond only with valid JSON.\n\n${prompt}`

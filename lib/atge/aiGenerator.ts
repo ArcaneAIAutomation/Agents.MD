@@ -201,7 +201,7 @@ async function generateWithO1(context: string, symbol: string, useComplexModel: 
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -209,7 +209,7 @@ async function generateWithO1(context: string, symbol: string, useComplexModel: 
       },
       body: JSON.stringify({
         model: selectedModel,
-        messages: [
+        input: [
           {
             role: 'user',
             content: createO1Prompt(context)
