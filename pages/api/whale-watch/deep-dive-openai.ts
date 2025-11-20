@@ -3,9 +3,23 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 /**
  * OpenAI Deep Dive Analysis API
  * 
- * Uses GPT-4o for comprehensive whale transaction analysis
+ * Uses OpenAI o1-mini (ChatGPT-5.1) for comprehensive whale transaction analysis with advanced reasoning
+ * Implements fallback to gpt-4o if o1 models timeout
+ * Supports o1-preview for complex transaction patterns
  * with real blockchain data
  */
+
+// OpenAI o1 model configuration (ChatGPT-5.1)
+// Primary: o1-mini for reasoning-based whale transaction analysis
+// Complex: o1-preview for unusual transaction patterns
+// Fallback: gpt-4o for speed when o1 models timeout
+const MODEL = process.env.OPENAI_MODEL || 'o1-mini';
+const COMPLEX_MODEL = process.env.OPENAI_COMPLEX_MODEL || 'o1-preview';
+const FALLBACK_MODEL = process.env.OPENAI_FALLBACK_MODEL || 'gpt-4o';
+
+// Timeout configuration
+const O1_TIMEOUT = parseInt(process.env.O1_TIMEOUT || '120000'); // 120 seconds
+const GPT4O_TIMEOUT = parseInt(process.env.GPT4O_TIMEOUT || '30000'); // 30 seconds
 
 interface DeepDiveRequest {
   txHash: string;
@@ -289,76 +303,156 @@ Provide comprehensive JSON analysis:
 
 Be extremely specific with numbers, prices, and actionable recommendations. Focus on what traders need to know RIGHT NOW.`;
 
-    // Call OpenAI API
+    // Call OpenAI API with o1 models
     const openaiApiKey = process.env.OPENAI_API_KEY;
     if (!openaiApiKey) {
       throw new Error('OPENAI_API_KEY not configured');
     }
 
-    console.log(`📡 Calling OpenAI API (GPT-4o)...`);
+    // Detect if this is a complex transaction pattern
+    const isComplexPattern = whale.amount > 1000 || // Very large transaction
+                            fromAddressData.transactionCount > 10000 || // High-activity address
+                            toAddressData.transactionCount > 10000;
+    
+    const selectedModel = isComplexPattern ? COMPLEX_MODEL : MODEL;
+    
+    if (isComplexPattern) {
+      console.log(`🔍 Complex transaction pattern detected, using ${COMPLEX_MODEL}`);
+    }
+
+    console.log(`📡 Calling OpenAI API (${selectedModel})...`);
     const openaiStart = Date.now();
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openaiApiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert cryptocurrency analyst. Respond only with valid JSON.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000,
-        response_format: { type: 'json_object' }
-      }),
-      signal: AbortSignal.timeout(15000),
-    });
+    let response: Response;
+    let modelUsed = selectedModel;
+    let reasoning: string | undefined;
 
-    const openaiTime = Date.now() - openaiStart;
-    console.log(`✅ OpenAI responded in ${openaiTime}ms with status ${response.status}`);
+    try {
+      // Try o1 models first
+      response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openaiApiKey}`,
+        },
+        body: JSON.stringify({
+          model: selectedModel,
+          messages: [
+            {
+              role: 'user',
+              content: `You are an expert cryptocurrency analyst with advanced reasoning capabilities. Analyze this whale transaction and respond only with valid JSON.\n\n${prompt}`
+            }
+          ],
+          max_completion_tokens: 2000
+          // Note: o1 models don't support temperature or response_format
+        }),
+        signal: AbortSignal.timeout(O1_TIMEOUT),
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`❌ OpenAI API error: ${response.status}`);
-      throw new Error(`OpenAI API error: ${response.status}`);
-    }
+      const openaiTime = Date.now() - openaiStart;
+      console.log(`✅ ${selectedModel} responded in ${openaiTime}ms with status ${response.status}`);
 
-    const data = await response.json();
-    const analysisText = data.choices?.[0]?.message?.content;
+      if (!response.ok) {
+        throw new Error(`${selectedModel} API error: ${response.status}`);
+      }
 
-    if (!analysisText) {
-      throw new Error('No response from OpenAI');
-    }
+      const data = await response.json();
+      const analysisText = data.choices?.[0]?.message?.content;
+      reasoning = data.choices?.[0]?.message?.reasoning;
 
-    const analysis = JSON.parse(analysisText);
+      if (!analysisText) {
+        throw new Error(`No response from ${selectedModel}`);
+      }
 
-    const processingTime = Date.now() - startTime;
-    console.log(`✅ OpenAI Deep Dive completed in ${processingTime}ms`);
+      const analysis = JSON.parse(analysisText);
 
-    return res.status(200).json({
-      success: true,
-      analysis,
-      blockchainData: {
-        sourceAddress: fromAddressData,
-        destinationAddress: toAddressData,
-      },
-      metadata: {
-        model: 'gpt-4o',
-        provider: 'OpenAI',
-        processingTime,
+      const processingTime = Date.now() - startTime;
+      console.log(`✅ OpenAI Deep Dive completed with ${selectedModel} in ${processingTime}ms`);
+
+      return res.status(200).json({
+        success: true,
+        analysis,
+        blockchainData: {
+          sourceAddress: fromAddressData,
+          destinationAddress: toAddressData,
+        },
+        metadata: {
+          model: modelUsed,
+          provider: 'OpenAI',
+          processingTime,
+          timestamp: new Date().toISOString(),
+          reasoning: reasoning ? 'Available' : undefined,
+        },
         timestamp: new Date().toISOString(),
-      },
-      timestamp: new Date().toISOString(),
-    });
+      });
+
+    } catch (o1Error) {
+      console.error(`❌ ${selectedModel} failed, trying gpt-4o fallback:`, o1Error);
+      
+      // Fallback to gpt-4o
+      response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openaiApiKey}`,
+        },
+        body: JSON.stringify({
+          model: FALLBACK_MODEL,
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert cryptocurrency analyst. Respond only with valid JSON.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 2000,
+          response_format: { type: 'json_object' }
+        }),
+        signal: AbortSignal.timeout(GPT4O_TIMEOUT),
+      });
+
+      const openaiTime = Date.now() - openaiStart;
+      console.log(`✅ ${FALLBACK_MODEL} responded in ${openaiTime}ms with status ${response.status}`);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`❌ ${FALLBACK_MODEL} API error: ${response.status}`);
+        throw new Error(`${FALLBACK_MODEL} API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const analysisText = data.choices?.[0]?.message?.content;
+
+      if (!analysisText) {
+        throw new Error(`No response from ${FALLBACK_MODEL}`);
+      }
+
+      const analysis = JSON.parse(analysisText);
+      modelUsed = `${FALLBACK_MODEL} (fallback)`;
+
+      const processingTime = Date.now() - startTime;
+      console.log(`✅ OpenAI Deep Dive completed with ${FALLBACK_MODEL} (fallback) in ${processingTime}ms`);
+
+      return res.status(200).json({
+        success: true,
+        analysis,
+        blockchainData: {
+          sourceAddress: fromAddressData,
+          destinationAddress: toAddressData,
+        },
+        metadata: {
+          model: modelUsed,
+          provider: 'OpenAI',
+          processingTime,
+          timestamp: new Date().toISOString(),
+        },
+        timestamp: new Date().toISOString(),
+      });
+    }
 
   } catch (error) {
     const processingTime = Date.now() - startTime;
