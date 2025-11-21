@@ -172,7 +172,7 @@ async function fetchCryptoNews() {
     console.log('News fetch error:', error);
     apiStatus.source = 'System';
     apiStatus.status = 'Error';
-    apiStatus.message = `Network error: ${error?.message || 'Unknown error'} - using fallback data`;
+    apiStatus.message = `Network error: ${error?.message || 'Unknown error'} - unable to fetch data`;
     apiStatus.isRateLimit = false;
     return { articles: null, apiStatus };
   }
@@ -504,44 +504,10 @@ async function getMarketTicker() {
     }
     
   } catch (error) {
-    console.error('💥 CoinMarketCap ticker fetch failed:', error);
-    
-    // Fallback: Try a simple price API as last resort
-    try {
-      console.log('🔄 Trying fallback price API...');
-      
-      const fallbackData = [
-        { symbol: 'BTC', name: 'Bitcoin', price: 67500, change: 2.5 },
-        { symbol: 'ETH', name: 'Ethereum', price: 2650, change: 1.8 },
-        { symbol: 'BNB', name: 'BNB', price: 315, change: -0.5 },
-        { symbol: 'SOL', name: 'Solana', price: 145, change: 3.2 }
-      ];
-      
-      // Try to get at least BTC price from a simple endpoint
-      try {
-        const btcResponse = await fetch('https://api.coinbase.com/v2/exchange-rates?currency=BTC', {
-          signal: AbortSignal.timeout(5000)
-        });
-        
-        if (btcResponse.ok) {
-          const btcData = await btcResponse.json();
-          const btcPrice = parseFloat(btcData.data.rates.USD);
-          if (btcPrice > 0) {
-            fallbackData[0].price = btcPrice;
-            console.log('✅ Got live BTC price from Coinbase:', btcPrice);
-          }
-        }
-      } catch (coinbaseError) {
-        console.log('⚠️ Coinbase fallback also failed');
-      }
-      
-      console.log('📊 Using fallback ticker data');
-      return fallbackData;
-      
-    } catch (fallbackError) {
-      console.error('💥 All ticker sources failed:', fallbackError);
-      return [];
-    }
+    console.error('❌ CoinMarketCap ticker fetch failed:', error);
+    // ✅ 99% ACCURACY RULE: Return empty array instead of fake ticker data
+    console.error('❌ Unable to fetch accurate ticker data');
+    return [];
   }
 }
 

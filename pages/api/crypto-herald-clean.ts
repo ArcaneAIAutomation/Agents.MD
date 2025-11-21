@@ -172,7 +172,7 @@ async function fetchCryptoNews() {
     console.log('News fetch error:', error);
     apiStatus.source = 'System';
     apiStatus.status = 'Error';
-    apiStatus.message = `Network error: ${error?.message || 'Unknown error'} - using fallback data`;
+    apiStatus.message = `Network error: ${error?.message || 'Unknown error'} - unable to fetch data`;
     apiStatus.isRateLimit = false;
     return { articles: null, apiStatus };
   }
@@ -562,15 +562,9 @@ async function getMarketTicker() {
     return tickerData;
     
   } catch (error) {
-    console.error('💥 CoinGecko ticker fetch failed:', error);
-    
-    // Fallback ticker data
-    return [
-      { symbol: 'BTC', name: 'Bitcoin', price: 114500, change: 2.5 },
-      { symbol: 'ETH', name: 'Ethereum', price: 4140, change: 1.8 },
-      { symbol: 'BNB', name: 'BNB', price: 315, change: -0.5 },
-      { symbol: 'SOL', name: 'Solana', price: 145, change: 3.2 }
-    ];
+    console.error('❌ CoinGecko ticker fetch failed:', error);
+    // ✅ 99% ACCURACY RULE: Return empty array instead of fake ticker data
+    return [];
   }
 }
 

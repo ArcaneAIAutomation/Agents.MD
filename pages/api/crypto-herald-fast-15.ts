@@ -71,13 +71,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       tickerData = await Promise.race([tickerPromise, tickerTimeout]);
     } catch (error) {
-      console.log('Using fallback ticker data');
-      tickerData = [
-        { symbol: 'BTC', name: 'Bitcoin', price: 114500, change: 2.5 },
-        { symbol: 'ETH', name: 'Ethereum', price: 4140, change: 1.8 },
-        { symbol: 'BNB', name: 'BNB', price: 315, change: -0.5 },
-        { symbol: 'SOL', name: 'Solana', price: 145, change: 3.2 }
-      ];
+      console.error('❌ Unable to fetch accurate ticker data:', error);
+      // ✅ 99% ACCURACY RULE: Return empty array instead of fake data
+      tickerData = [];
     }
 
     const response = {
@@ -110,10 +106,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       success: true,
       data: {
         articles: emergencyArticles,
-        marketTicker: [
-          { symbol: 'BTC', name: 'Bitcoin', price: 114500, change: 2.5 },
-          { symbol: 'ETH', name: 'Ethereum', price: 4140, change: 1.8 }
-        ],
+        marketTicker: [], // ✅ 99% ACCURACY RULE: No fake ticker data
         apiStatus: {
           source: 'Emergency Fallback',
           status: 'Fallback',

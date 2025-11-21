@@ -383,7 +383,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         apiStatus: {
           source: 'Error Handler',
           status: 'Error',
-          message: 'System error - Using fallback data',
+          message: 'System error - Unable to fetch data',
           isRateLimit: false
         },
         meta: {

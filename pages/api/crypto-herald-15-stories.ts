@@ -221,13 +221,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (error.name === 'AbortError') {
         console.error('❌ Market ticker request timed out after 15 seconds');
       }
-      // Fallback ticker data
-      tickerData = [
-        { symbol: 'BTC', name: 'Bitcoin', price: 67000, change: 2.5 },
-        { symbol: 'ETH', name: 'Ethereum', price: 2650, change: 1.8 },
-        { symbol: 'BNB', name: 'BNB', price: 315, change: -0.5 },
-        { symbol: 'SOL', name: 'Solana', price: 145, change: 3.2 }
-      ];
+      // ✅ 99% ACCURACY RULE: Return empty array instead of fake ticker data
+      tickerData = [];
     }
 
     // Check if we have any live articles - if not, return error
