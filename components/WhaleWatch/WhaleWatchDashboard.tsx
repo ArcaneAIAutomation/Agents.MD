@@ -221,7 +221,8 @@ export default function WhaleWatchDashboard() {
     const completionPercentage = currentIndex >= 0 ? Math.round(((currentIndex + 1) / stages.length) * 100) : 0;
     
     // Calculate estimated time remaining
-    const estimatedTotalTime = 12.5; // Average of 10-15 seconds
+    // ✅ EXTENDED: 30 minutes for comprehensive deep analysis (was 10-15 seconds)
+    const estimatedTotalTime = 1800; // 30 minutes (1800 seconds)
     const timePerStage = estimatedTotalTime / stages.length;
     const estimatedTimeRemaining = Math.max(0, Math.round(estimatedTotalTime - (elapsedTime / 1000)));
     
@@ -1181,7 +1182,7 @@ export default function WhaleWatchDashboard() {
             
             {/* Details */}
             <p className="text-xs md:text-sm text-bitcoin-white-60 mb-6 md:mb-6 leading-relaxed px-2">
-              AI analysis powered by ChatGPT 5.1 (Latest) • Deep dive analysis with blockchain data • Typically completes in 10-15 seconds
+              AI analysis powered by GPT-4o • Deep dive analysis with blockchain data • Comprehensive analysis takes up to 30 minutes
             </p>
             
             {/* Button */}
@@ -1223,7 +1224,7 @@ export default function WhaleWatchDashboard() {
             🐋 Bitcoin Whale Watch
           </h2>
           <p className="text-sm text-bitcoin-white-60 mt-1">
-            Live tracking of large BTC transactions (&gt;50 BTC) • ChatGPT 5.1 (Latest) analysis: 10-15 seconds
+            Live tracking of large BTC transactions (&gt;50 BTC) • GPT-4o deep analysis: up to 30 minutes
           </p>
         </div>
         
@@ -1254,9 +1255,9 @@ export default function WhaleWatchDashboard() {
           <div className="flex items-center">
             <RefreshCw className="h-5 w-5 text-bitcoin-orange animate-spin mr-3 flex-shrink-0" />
             <div className="flex-1">
-              <p className="text-bitcoin-white font-bold">🤖 ChatGPT 5.1 (Latest) Analysis in Progress</p>
+              <p className="text-bitcoin-white font-bold">🤖 GPT-4o Deep Analysis in Progress</p>
               <p className="text-bitcoin-white-80 text-sm">
-                Other transactions are temporarily disabled to prevent API overload. This typically takes 10-15 seconds.
+                Other transactions are temporarily disabled to prevent API overload. Comprehensive analysis takes up to 30 minutes.
               </p>
             </div>
           </div>
@@ -1416,7 +1417,7 @@ export default function WhaleWatchDashboard() {
                     </button>
                     
                     <p className="text-xs text-bitcoin-white-60 text-center">
-                      🔬 Comprehensive analysis with blockchain data • Typically completes in 10-15 seconds
+                      🔬 Comprehensive analysis with blockchain data • Takes up to 30 minutes for deep insights
                     </p>
                   </div>
                   
@@ -1450,7 +1451,7 @@ export default function WhaleWatchDashboard() {
                           Deep dive analysis with blockchain data in progress
                         </p>
                         <p className="text-bitcoin-white-60 text-xs text-center">
-                          ChatGPT 5.1 (Latest) • Advanced reasoning • Typically completes in 10-15 seconds
+                          GPT-4o • Advanced reasoning • Comprehensive analysis up to 30 minutes
                         </p>
                       </div>
                     </div>

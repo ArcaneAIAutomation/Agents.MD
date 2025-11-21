@@ -234,8 +234,8 @@ export default function Home() {
       title: 'Bitcoin Whale Watch',
       icon: '🐋',
       path: '/whale-watch',
-      description: 'Track large Bitcoin transactions with ChatGPT 5.1 (Latest) deep dive analysis',
-      stats: ['50+ BTC', 'ChatGPT 5.1', '10-15 Sec'],
+      description: 'Track large Bitcoin transactions with GPT-4o deep dive analysis',
+      stats: ['50+ BTC', 'GPT-4o', '30 Min'],
       benefits: [
         'Real-time whale transaction detection',
         'AI research on market impact',

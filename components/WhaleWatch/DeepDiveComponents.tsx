@@ -153,7 +153,7 @@ export const DeepDiveProgress: React.FC<DeepDiveProgressProps> = ({ stage, onCan
       <div className="mt-4 pt-4 border-t border-bitcoin-orange-20 flex items-center justify-between">
         <p className="text-sm text-bitcoin-white-60 flex items-center gap-2">
           <AlertTriangle className="w-4 h-4" />
-          Estimated time: 10-15 seconds
+          Estimated time: up to 30 minutes
         </p>
         
         {onCancel && (

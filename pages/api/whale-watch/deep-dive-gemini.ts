@@ -338,45 +338,44 @@ Acknowledge these limitations in your analysis and adjust confidence scores acco
 Be transparent about which aspects of the analysis are based on complete data vs. inference.`;
     }
 
-    // Step 4: Call ChatGPT 5.1 (Latest) with extended context and timeout protection
-    console.log('🤖 Calling ChatGPT 5.1 (Latest) for Deep Dive analysis...');
+    // Step 4: Call GPT-4o with extended context and 30-minute timeout
+    console.log('🤖 Calling GPT-4o for Deep Dive analysis...');
     
     // Add JSON format instruction to prompt
     const jsonPrompt = prompt + '\n\nIMPORTANT: Return ONLY valid JSON. Do not include any markdown formatting, code blocks, or explanatory text. Just the raw JSON object.';
     
-    // Use ChatGPT 5.1 (Latest) for Deep Dive analysis with REDUCED tokens to avoid timeout
-    console.log(`📊 Using model: gpt-5.1 (ChatGPT 5.1 Latest)`);
+    // ✅ FIXED: Use GPT-4o with extended timeout (30 minutes)
+    console.log(`📊 Using model: gpt-4o (OpenAI's most capable model)`);
     
-    // Wrap in Promise.race to enforce 50-second timeout (10s buffer before Vercel's 60s limit)
+    // ✅ EXTENDED: 30-minute timeout for comprehensive analysis (was 50 seconds)
     const openaiResponse = await Promise.race([
       callOpenAI(
         jsonPrompt,
-        6000, // REDUCED to 6000 tokens for faster response (avoid 60s timeout)
-        'low', // Low reasoning effort for speed
-        'medium' // Medium verbosity for balance
+        8000, // Increased to 8000 tokens for comprehensive analysis
+        'medium', // Medium reasoning effort for quality
+        'high' // High verbosity for detailed analysis
       ),
       new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('OpenAI API timeout after 50 seconds')), 50000)
+        setTimeout(() => reject(new Error('OpenAI API timeout after 30 minutes')), 1800000) // 30 minutes
       )
     ]);
 
-    console.log('📡 ChatGPT 5.1 API response received');
+    console.log('📡 GPT-4o API response received');
 
     // Extract and parse response
     const responseText = openaiResponse.content;
     
     if (!responseText) {
-      throw new Error('No response text from ChatGPT 5.1 API');
+      throw new Error('No response text from GPT-4o API');
     }
 
     let analysis;
     try {
-      // Clean up response text (remove markdown if present)
-      const jsonText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      analysis = JSON.parse(jsonText);
+      // ✅ FIXED: Parse JSON response (gpt-4o returns clean JSON with response_format)
+      analysis = JSON.parse(responseText);
     } catch (parseError) {
-      console.error('❌ Failed to parse ChatGPT 5.1 response as JSON:', responseText.substring(0, 500));
-      throw new Error('Failed to parse ChatGPT 5.1 Deep Dive response');
+      console.error('❌ Failed to parse GPT-4o response as JSON:', responseText.substring(0, 500));
+      throw new Error('Failed to parse GPT-4o Deep Dive response');
     }
 
     // Calculate processing time
@@ -394,14 +393,14 @@ Be transparent about which aspects of the analysis are based on complete data vs
         patterns: deepDiveData.patterns,
       } : undefined,
       metadata: {
-        model: openaiResponse.model || 'gpt-5.1',
+        model: openaiResponse.model || 'gpt-4o',
         analysisType: 'deep-dive',
-        provider: 'OpenAI ChatGPT 5.1 (Latest)',
+        provider: 'OpenAI GPT-4o',
         timestamp: new Date().toISOString(),
         processingTime: processingTime,
         dataSourcesUsed: blockchainDataAvailable 
-          ? ['blockchain.com', 'chatgpt-5.1']
-          : ['chatgpt-5.1'],
+          ? ['blockchain.com', 'gpt-4o']
+          : ['gpt-4o'],
         blockchainDataAvailable: blockchainDataAvailable,
         dataSourceLimitations: dataSourceLimitations.length > 0 
           ? dataSourceLimitations 
