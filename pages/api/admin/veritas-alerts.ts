@@ -1,19 +1,16 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiResponse } from 'next';
 import { query } from '../../../lib/db';
-import { verifyAuth } from '../../../lib/auth/jwt';
+import { withAuth, AuthenticatedRequest } from '../../../middleware/auth';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   // Only allow GET requests
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    // Verify authentication
-    const authResult = await verifyAuth(req);
-    if (!authResult.success) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+    // User is already authenticated by withAuth middleware
+    // req.user is available with { id, email }
 
     // Get filter parameter
     const { filter = 'pending' } = req.query;
@@ -46,3 +43,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 }
+
+export default withAuth(handler);
