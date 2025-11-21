@@ -93,6 +93,7 @@ interface DeepDiveAnalysisResponse {
 
 /**
  * Fetch current Bitcoin price from market data API
+ * ✅ 99% ACCURACY RULE: Throws error if unable to fetch accurate price
  */
 async function getCurrentBitcoinPrice(): Promise<number> {
   try {
@@ -117,8 +118,9 @@ async function getCurrentBitcoinPrice(): Promise<number> {
     
     throw new Error('Invalid BTC price in response');
   } catch (error) {
-    console.warn('⚠️ Failed to fetch live BTC price, using fallback:', error);
-    return 95000; // Fallback price
+    // ✅ CORRECT: Throw error instead of returning fake data
+    console.error('❌ Failed to fetch live BTC price:', error);
+    throw new Error(`Unable to fetch accurate BTC price: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
@@ -296,9 +298,19 @@ export default async function handler(
       );
     }
 
-    // Step 2: Get current Bitcoin price
-    const currentBtcPrice = await getCurrentBitcoinPrice();
-    console.log(`💰 Current BTC price: $${currentBtcPrice.toLocaleString()}`);
+    // Step 2: Get current Bitcoin price (CRITICAL: Must have accurate price)
+    let currentBtcPrice: number;
+    try {
+      currentBtcPrice = await getCurrentBitcoinPrice();
+      console.log(`💰 Current BTC price: $${currentBtcPrice.toLocaleString()}`);
+    } catch (priceError) {
+      console.error('❌ Unable to fetch accurate BTC price:', priceError);
+      return res.status(500).json({
+        success: false,
+        error: 'Unable to fetch accurate Bitcoin price. Analysis requires real-time price data. Please try again.',
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     // Step 3: Build enhanced prompt with blockchain context
     let prompt = buildDeepDivePrompt(

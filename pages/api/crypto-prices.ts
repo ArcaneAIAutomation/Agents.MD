@@ -140,19 +140,9 @@ function convertCoinGeckoData(data: any): CryptoPriceData[] {
   return prices;
 }
 
-// Fallback prices (updated realistic market approximations as of August 2025)
-function getFallbackPrices(): CryptoPriceData[] {
-  return [
-    { symbol: 'BTC', name: 'Bitcoin', price: 64800, change24h: 2.1, lastUpdated: new Date().toISOString() },
-    { symbol: 'ETH', name: 'Ethereum', price: 2650, change24h: -0.8, lastUpdated: new Date().toISOString() },
-    { symbol: 'SOL', name: 'Solana', price: 150, change24h: 1.5, lastUpdated: new Date().toISOString() },
-    { symbol: 'ADA', name: 'Cardano', price: 0.45, change24h: 3.2, lastUpdated: new Date().toISOString() },
-    { symbol: 'XRP', name: 'XRP', price: 0.58, change24h: 1.1, lastUpdated: new Date().toISOString() },
-    { symbol: 'DOT', name: 'Polkadot', price: 4.20, change24h: -1.2, lastUpdated: new Date().toISOString() },
-    { symbol: 'AVAX', name: 'Avalanche', price: 28.50, change24h: 4.5, lastUpdated: new Date().toISOString() },
-    { symbol: 'LINK', name: 'Chainlink', price: 11.80, change24h: 2.7, lastUpdated: new Date().toISOString() }
-  ];
-}
+// ✅ REMOVED: getFallbackPrices() function
+// 99% ACCURACY RULE: No fallback data allowed
+// If APIs fail, return error instead of fake data
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<PriceResponse>) {
   try {
@@ -193,30 +183,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       }
     }
     
-    // If both APIs fail, use fallback prices
-    console.log('⚠️ Both APIs failed, using fallback prices');
-    const fallbackPrices = getFallbackPrices();
+    // ✅ 99% ACCURACY RULE: Return error instead of fallback data
+    console.error('❌ Both APIs failed - no accurate data available');
+    console.error(`   CoinMarketCap error: ${cmcResult.error}`);
+    console.error(`   CoinGecko error: ${coinGeckoResult.error}`);
     
-    res.status(200).json({
-      prices: fallbackPrices,
-      success: true,
-      source: 'Fallback Data',
+    return res.status(500).json({
+      prices: [],
+      success: false,
+      source: 'Error',
       lastUpdated: new Date().toISOString(),
-      error: `CoinMarketCap: ${cmcResult.error}, CoinGecko: ${coinGeckoResult.error}`
+      error: 'Unable to fetch accurate cryptocurrency prices. Both CoinMarketCap and CoinGecko APIs failed. Please try again in a few moments.'
     });
     
   } catch (error: any) {
-    console.error('Crypto Prices API error:', error.message);
+    console.error('❌ Crypto Prices API error:', error.message);
     
-    // Always return fallback data on error
-    const fallbackPrices = getFallbackPrices();
-    
-    res.status(200).json({
-      prices: fallbackPrices,
+    // ✅ 99% ACCURACY RULE: Return error instead of fallback data
+    return res.status(500).json({
+      prices: [],
       success: false,
-      source: 'Fallback Data (Error)',
+      source: 'Error',
       lastUpdated: new Date().toISOString(),
-      error: error.message
+      error: `Unable to fetch accurate cryptocurrency prices: ${error.message}. Please try again.`
     });
   }
 }
