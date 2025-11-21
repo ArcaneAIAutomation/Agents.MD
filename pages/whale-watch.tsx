@@ -7,7 +7,7 @@ export default function WhaleWatchPage() {
     <>
       <Head>
         <title>Bitcoin Whale Watch - Bitcoin Sovereign Technology</title>
-        <meta name="description" content="Real-time tracking of large Bitcoin transactions with Caesar AI analysis" />
+        <meta name="description" content="Real-time tracking of large Bitcoin transactions with ChatGPT 5.1 (Latest) deep dive analysis" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -32,7 +32,7 @@ export default function WhaleWatchPage() {
                   <div className="text-sm text-bitcoin-white-60">BTC Threshold</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-bitcoin-orange font-mono">Caesar</div>
+                  <div className="text-2xl font-bold text-bitcoin-orange font-mono">ChatGPT 5.1</div>
                   <div className="text-sm text-bitcoin-white-60">AI Analysis</div>
                 </div>
                 <div className="text-center">

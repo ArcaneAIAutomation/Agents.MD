@@ -7,7 +7,7 @@ export default function TradeGenerationPage() {
     <>
       <Head>
         <title>AI Trade Generation Engine - Bitcoin Sovereign Technology</title>
-        <meta name="description" content="GPT-4o powered trading signals with confidence scoring and risk management" />
+        <meta name="description" content="ChatGPT 5.1 (Latest) powered trading signals with advanced reasoning and risk management" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -22,13 +22,13 @@ export default function TradeGenerationPage() {
                 🤖 AI Trade Generation Engine
               </h1>
               <p className="text-sm text-bitcoin-white-60 italic mt-2">
-                Advanced algorithmic trading signals powered by GPT-4o artificial intelligence
+                Advanced algorithmic trading signals powered by ChatGPT 5.1 (Latest) with deep reasoning
               </p>
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-bitcoin-orange font-mono">GPT-4o</div>
+                  <div className="text-2xl font-bold text-bitcoin-orange font-mono">ChatGPT 5.1</div>
                   <div className="text-sm text-bitcoin-white-60">AI Model</div>
                 </div>
                 <div className="text-center">

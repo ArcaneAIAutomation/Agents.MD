@@ -51,7 +51,7 @@ export default function Home() {
   };
 
   const platformStats = [
-    { label: 'AI Models', value: '4+', icon: Brain, description: 'GPT-4o, Gemini, Caesar AI, Sentiment' },
+    { label: 'AI Models', value: '4+', icon: Brain, description: 'ChatGPT 5.1, Gemini, Caesar AI, Sentiment' },
     { label: 'Data Sources', value: '17+', icon: Database, description: 'Market, News, Social, DeFi, Blockchain' },
     { label: 'Live APIs', value: '24/7', icon: Activity, description: 'Real-time data aggregation' },
     { label: 'Secure Auth', value: '100%', icon: Lock, description: 'JWT + bcrypt encryption' }
@@ -102,7 +102,7 @@ export default function Home() {
       category: 'AI & Research',
       icon: Brain,
       sources: [
-        { name: 'OpenAI GPT-4o', description: 'Advanced market analysis', status: 'Live' },
+        { name: 'ChatGPT 5.1 (Latest)', description: 'Advanced reasoning and analysis', status: 'Live' },
         { name: 'Google Gemini', description: 'Multi-modal AI intelligence', status: 'Live' },
         { name: 'Caesar AI', description: 'Deep research engine', status: 'Live' }
       ]
@@ -111,8 +111,8 @@ export default function Home() {
 
   const technologies = [
     {
-      name: 'GPT-4o AI Engine',
-      description: 'Advanced language model for market analysis, trade generation, and sentiment scoring',
+      name: 'ChatGPT 5.1 (Latest)',
+      description: 'Advanced reasoning model for market analysis, trade generation, and deep dive intelligence',
       icon: Brain,
       color: 'text-bitcoin-orange',
       stats: ['Real-time Analysis', 'Trade Signals', 'Risk Management']
@@ -194,11 +194,11 @@ export default function Home() {
       title: 'AI Trade Generation Engine',
       icon: '🤖',
       path: '/trade-generation',
-      description: 'GPT-4o powered trading signals with step-by-step reasoning and risk management',
-      stats: ['GPT-4o AI', 'Live Signals', 'Risk Managed'],
+      description: 'ChatGPT 5.1 (Latest) powered trading signals with advanced reasoning and risk management',
+      stats: ['ChatGPT 5.1', 'Live Signals', 'Risk Managed'],
       benefits: [
-        'AI-powered trade recommendations',
-        'Confidence scoring and reasoning',
+        'AI-powered trade recommendations with deep reasoning',
+        'Confidence scoring and step-by-step analysis',
         'Automated stop-loss & take-profit',
         'Multi-timeframe analysis (15m-1d)'
       ],
@@ -234,8 +234,8 @@ export default function Home() {
       title: 'Bitcoin Whale Watch',
       icon: '🐋',
       path: '/whale-watch',
-      description: 'Track large Bitcoin transactions with Caesar AI-powered context analysis',
-      stats: ['50+ BTC', 'Caesar AI', '5-7 Min'],
+      description: 'Track large Bitcoin transactions with ChatGPT 5.1 (Latest) deep dive analysis',
+      stats: ['50+ BTC', 'ChatGPT 5.1', '10-15 Sec'],
       benefits: [
         'Real-time whale transaction detection',
         'AI research on market impact',
@@ -250,8 +250,8 @@ export default function Home() {
     <>
       <Head>
         <title>Bitcoin Sovereign Technology - 17+ Data Sources | 4 AI Models | Crypto Intelligence</title>
-        <meta name="description" content="Advanced cryptocurrency intelligence platform powered by GPT-4o, Gemini, and Caesar AI. 17+ data sources including CoinGecko, Blockchain.com, Kraken, LunarCrush, CoinGlass, and DeFiLlama." />
-        <meta name="keywords" content="bitcoin, cryptocurrency, AI trading, market analysis, whale tracking, GPT-4o, Gemini AI, Caesar AI, Blockchain.com, LunarCrush, CoinGlass, DeFiLlama" />
+        <meta name="description" content="Advanced cryptocurrency intelligence platform powered by ChatGPT 5.1 (Latest), Gemini, and Caesar AI. 17+ data sources including CoinGecko, Blockchain.com, Kraken, LunarCrush, CoinGlass, and DeFiLlama." />
+        <meta name="keywords" content="bitcoin, cryptocurrency, AI trading, market analysis, whale tracking, ChatGPT 5.1, Gemini AI, Caesar AI, Blockchain.com, LunarCrush, CoinGlass, DeFiLlama" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -345,7 +345,7 @@ export default function Home() {
               The Most Comprehensive Cryptocurrency Intelligence Platform
             </p>
             <p className="text-base md:text-lg text-bitcoin-white-60 max-w-3xl mx-auto break-words px-2">
-              Powered by GPT-4o, Gemini AI, Caesar Research Engine, and 17+ premium data sources including CoinGecko, Blockchain.com, Kraken, LunarCrush, CoinGlass, DeFiLlama, and more
+              Powered by ChatGPT 5.1 (Latest), Gemini AI, Caesar Research Engine, and 17+ premium data sources including CoinGecko, Blockchain.com, Kraken, LunarCrush, CoinGlass, DeFiLlama, and more
             </p>
           </div>
 
@@ -530,7 +530,7 @@ export default function Home() {
                 <ul className="space-y-3 text-bitcoin-white-80">
                   <li className="flex items-start gap-2 min-w-0">
                     <span className="text-bitcoin-orange mt-1 flex-shrink-0">●</span>
-                    <span className="break-words flex-1 min-w-0"><strong>GPT-4o:</strong> Advanced language model for market analysis, trade generation, and sentiment scoring</span>
+                    <span className="break-words flex-1 min-w-0"><strong>ChatGPT 5.1 (Latest):</strong> Advanced reasoning model for market analysis, trade generation, and deep dive intelligence</span>
                   </li>
                   <li className="flex items-start gap-2 min-w-0">
                     <span className="text-bitcoin-orange mt-1 flex-shrink-0">●</span>
@@ -648,7 +648,7 @@ export default function Home() {
                 <span className="flex-shrink-0">•</span>
                 <span className="whitespace-nowrap">NewsAPI</span>
                 <span className="flex-shrink-0">•</span>
-                <span className="whitespace-nowrap">OpenAI</span>
+                <span className="whitespace-nowrap">ChatGPT 5.1</span>
                 <span className="flex-shrink-0">•</span>
                 <span className="whitespace-nowrap">Gemini AI</span>
                 <span className="flex-shrink-0">•</span>
@@ -694,7 +694,7 @@ export default function Home() {
                 © 2025 Bitcoin Sovereign Technology. All rights reserved.
               </p>
               <p className="text-xs text-bitcoin-white-60 mt-2 break-words px-2">
-                Powered by GPT-4o, Gemini AI, Caesar AI, and 17+ premium data sources
+                Powered by ChatGPT 5.1 (Latest), Gemini AI, Caesar AI, and 17+ premium data sources
               </p>
             </div>
           </div>

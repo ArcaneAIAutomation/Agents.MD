@@ -57,7 +57,7 @@ export default function AnalyzePage() {
         <title>{symbol.toUpperCase()} Analysis | UCIE | Bitcoin Sovereign Technology</title>
         <meta 
           name="description" 
-          content={`Comprehensive analysis of ${symbol.toUpperCase()} with AI-powered research, real-time data, and multi-dimensional intelligence.`} 
+          content={`Comprehensive analysis of ${symbol.toUpperCase()} with ChatGPT 5.1 (Latest) powered research, real-time data, and multi-dimensional intelligence.`} 
         />
       </Head>
       

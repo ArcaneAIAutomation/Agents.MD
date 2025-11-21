@@ -22,7 +22,7 @@ export default function CryptoNewsPage() {
                 📰 Crypto News Wire
               </h1>
               <p className="text-sm text-bitcoin-white-60 italic mt-2">
-                Real-time cryptocurrency news aggregation with AI-powered sentiment analysis
+                Real-time cryptocurrency news aggregation with ChatGPT 5.1 (Latest) powered sentiment analysis
               </p>
             </div>
             <div className="p-6">

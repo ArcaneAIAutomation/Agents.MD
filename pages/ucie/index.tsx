@@ -19,7 +19,7 @@ export default function UCIEHomePage() {
     <Layout>
       <Head>
         <title>Universal Crypto Intelligence Engine (UCIE) | Bitcoin Sovereign Technology</title>
-        <meta name="description" content="The most advanced cryptocurrency analysis platform. AI-powered research, real-time data, and comprehensive intelligence for any token." />
+        <meta name="description" content="The most advanced cryptocurrency analysis platform. ChatGPT 5.1 (Latest) powered research, real-time data, and comprehensive intelligence for any token." />
       </Head>
 
       <div className="min-h-screen bg-bitcoin-black py-8 px-4">
@@ -34,7 +34,7 @@ export default function UCIEHomePage() {
             </p>
             <p className="text-lg text-bitcoin-white-80 max-w-3xl mx-auto">
               The most advanced cryptocurrency analysis platform in existence. 
-              AI-powered research, real-time data from 15+ sources, and 95%+ quality intelligence for Bitcoin and Ethereum.
+              ChatGPT 5.1 (Latest) powered research, real-time data from 15+ sources, and 95%+ quality intelligence for Bitcoin and Ethereum.
             </p>
           </div>
 
@@ -107,7 +107,7 @@ export default function UCIEHomePage() {
             <FeatureCard
               icon={<Brain className="w-8 h-8" />}
               title="AI-Powered Research"
-              description="Caesar AI conducts deep research with source verification and comprehensive analysis."
+              description="ChatGPT 5.1 (Latest) and Caesar AI conduct deep research with source verification and comprehensive analysis."
             />
             <FeatureCard
               icon={<BarChart3 className="w-8 h-8" />}
