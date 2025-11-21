@@ -294,11 +294,31 @@ Be specific with numbers and actionable recommendations.`;
       }
 
       const data = await response.json();
-      analysisText = data.choices?.[0]?.message?.content;
+      
+      // ✅ FIXED: Better logging and response handling for GPT-5.1
+      console.log(`📊 GPT-5.1 Response keys:`, Object.keys(data));
+      if (data.choices && data.choices[0]) {
+        console.log(`📊 Choice[0] keys:`, Object.keys(data.choices[0]));
+        if (data.choices[0].message) {
+          console.log(`📊 Message keys:`, Object.keys(data.choices[0].message));
+          console.log(`📊 Message content type:`, typeof data.choices[0].message.content);
+          console.log(`📊 Message content length:`, data.choices[0].message.content?.length || 0);
+        }
+      }
+      
+      // Try multiple possible response formats
+      analysisText = data.choices?.[0]?.message?.content || 
+                     data.choices?.[0]?.text || 
+                     data.content ||
+                     data.message?.content;
 
       if (!analysisText) {
-        throw new Error(`No response from ${model}`);
+        console.error(`❌ No content found. Full response:`, JSON.stringify(data, null, 2).substring(0, 1000));
+        throw new Error(`No response from ${model}. Response has keys: ${Object.keys(data).join(', ')}`);
       }
+      
+      console.log(`✅ Got GPT-5.1 response text (${analysisText.length} chars)`);
+      console.log(`📝 First 300 chars:`, analysisText.substring(0, 300));
 
     } else {
       // GPT-4o uses standard parameters
