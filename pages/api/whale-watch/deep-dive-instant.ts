@@ -281,7 +281,7 @@ Be specific with numbers and actionable recommendations.`;
           max_completion_tokens: 2000, // ✅ CORRECT for GPT-5.1
           // Note: GPT-5.1 doesn't support temperature or response_format
         }),
-        signal: AbortSignal.timeout(120000), // 2 minutes for GPT-5.1
+        signal: AbortSignal.timeout(1800000), // 30 minutes for GPT-5.1 comprehensive analysis
       });
 
       const openaiTime = Date.now() - openaiStart;

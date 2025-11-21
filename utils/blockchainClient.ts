@@ -49,22 +49,29 @@ export class BlockchainClient {
    */
   async getUnconfirmedTransactions(): Promise<BitcoinTransaction[]> {
     try {
-      const url = `${this.baseUrl}/unconfirmed-transactions?format=json&cors=true`;
+      console.log(`📡 Fetching unconfirmed transactions from ${this.baseUrl}/unconfirmed-transactions`);
+      const url = `${this.baseUrl}/unconfirmed-transactions?format=json`;
       
       const response = await fetch(url, {
-        headers: this.apiKey ? {
-          'Authorization': `Bearer ${this.apiKey}`
-        } : {}
+        headers: {
+          'Accept': 'application/json',
+          ...(this.apiKey ? { 'Authorization': `Bearer ${this.apiKey}` } : {})
+        },
+        signal: AbortSignal.timeout(10000) // 10 second timeout
       });
 
       if (!response.ok) {
+        console.error(`❌ Blockchain.com API error: ${response.status}`);
         throw new Error(`Blockchain.com API error: ${response.status}`);
       }
 
       const data = await response.json();
-      return data.txs || [];
+      const txs = data.txs || [];
+      console.log(`✅ Fetched ${txs.length} unconfirmed transactions`);
+      return txs;
     } catch (error) {
-      console.error('Error fetching unconfirmed transactions:', error);
+      console.error('❌ Error fetching unconfirmed transactions:', error);
+      // Return empty array instead of throwing - allow detection to continue with confirmed txs
       return [];
     }
   }
@@ -74,17 +81,24 @@ export class BlockchainClient {
    */
   async getLatestBlock(): Promise<any> {
     try {
-      const url = `${this.baseUrl}/latestblock?cors=true`;
+      console.log(`📡 Fetching latest block from ${this.baseUrl}/latestblock`);
+      const url = `${this.baseUrl}/latestblock`;
       
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: { 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(10000) // 10 second timeout
+      });
       
       if (!response.ok) {
+        console.error(`❌ Blockchain.com API error: ${response.status}`);
         throw new Error(`Blockchain.com API error: ${response.status}`);
       }
 
-      return await response.json();
+      const block = await response.json();
+      console.log(`✅ Latest block: ${block.height} (${block.hash?.substring(0, 20)}...)`);
+      return block;
     } catch (error) {
-      console.error('Error fetching latest block:', error);
+      console.error('❌ Error fetching latest block:', error);
       return null;
     }
   }
@@ -94,18 +108,25 @@ export class BlockchainClient {
    */
   async getBlockTransactions(blockHash: string): Promise<BitcoinTransaction[]> {
     try {
-      const url = `${this.baseUrl}/rawblock/${blockHash}?cors=true`;
+      console.log(`📡 Fetching block transactions for ${blockHash.substring(0, 20)}...`);
+      const url = `${this.baseUrl}/rawblock/${blockHash}`;
       
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: { 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(15000) // 15 second timeout (blocks can be large)
+      });
       
       if (!response.ok) {
+        console.error(`❌ Blockchain.com API error: ${response.status}`);
         throw new Error(`Blockchain.com API error: ${response.status}`);
       }
 
       const data = await response.json();
-      return data.tx || [];
+      const txs = data.tx || [];
+      console.log(`✅ Fetched ${txs.length} transactions from block`);
+      return txs;
     } catch (error) {
-      console.error('Error fetching block transactions:', error);
+      console.error('❌ Error fetching block transactions:', error);
       return [];
     }
   }
