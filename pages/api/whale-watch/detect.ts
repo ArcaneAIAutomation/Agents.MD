@@ -40,7 +40,7 @@ export default async function handler(
     console.log(`🐋 Detecting whale transactions (>${thresholdBTC} BTC) in last ${blocksToScan} block(s)...`);
 
     // Get current BTC price from CoinMarketCap
-    let btcPrice = 45000; // Default fallback
+    let btcPrice: number; // ✅ No fallback - must fetch accurate price
     try {
       const priceResponse = await fetch(
         `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=BTC`,
