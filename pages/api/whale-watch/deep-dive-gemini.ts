@@ -326,21 +326,27 @@ Acknowledge these limitations in your analysis and adjust confidence scores acco
 Be transparent about which aspects of the analysis are based on complete data vs. inference.`;
     }
 
-    // Step 4: Call ChatGPT 5.1 (Latest) with extended context
+    // Step 4: Call ChatGPT 5.1 (Latest) with extended context and timeout protection
     console.log('🤖 Calling ChatGPT 5.1 (Latest) for Deep Dive analysis...');
     
     // Add JSON format instruction to prompt
     const jsonPrompt = prompt + '\n\nIMPORTANT: Return ONLY valid JSON. Do not include any markdown formatting, code blocks, or explanatory text. Just the raw JSON object.';
     
-    // Use ChatGPT 5.1 (Latest) for Deep Dive analysis
+    // Use ChatGPT 5.1 (Latest) for Deep Dive analysis with REDUCED tokens to avoid timeout
     console.log(`📊 Using model: gpt-5.1 (ChatGPT 5.1 Latest)`);
     
-    const openaiResponse = await callOpenAI(
-      jsonPrompt,
-      16000, // Max output tokens for comprehensive analysis
-      'medium', // Reasoning effort: balanced speed and depth
-      'high' // Verbosity: detailed analysis
-    );
+    // Wrap in Promise.race to enforce 50-second timeout (10s buffer before Vercel's 60s limit)
+    const openaiResponse = await Promise.race([
+      callOpenAI(
+        jsonPrompt,
+        6000, // REDUCED to 6000 tokens for faster response (avoid 60s timeout)
+        'low', // Low reasoning effort for speed
+        'medium' // Medium verbosity for balance
+      ),
+      new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('OpenAI API timeout after 50 seconds')), 50000)
+      )
+    ]);
 
     console.log('📡 ChatGPT 5.1 API response received');
 
