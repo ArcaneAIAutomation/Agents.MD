@@ -27,7 +27,8 @@ async function fetchCoinMarketCapPrices(): Promise<{ success: boolean; data?: an
       throw new Error('CoinMarketCap API key not configured');
     }
     
-    const symbols = 'BTC,ETH,SOL,ADA,XRP,DOT,AVAX,LINK';
+    // ✅ BITCOIN-FIRST: Only fetch BTC and ETH (for Ethereum Report)
+    const symbols = 'BTC,ETH';
     const url = `${CMC_BASE_URL}/v1/cryptocurrency/quotes/latest?symbol=${symbols}`;
     
     console.log('Fetching from CoinMarketCap:', url);

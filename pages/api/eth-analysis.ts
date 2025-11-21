@@ -727,16 +727,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       advancedPredictions = await predictionEngine.generateAdvancedPredictions(currentPrice);
       console.log('✅ Advanced ETH predictions generated successfully');
     } catch (predictionError) {
-      console.error('⚠️ Advanced ETH predictions failed, using fallback:', predictionError);
-      // Create fallback predictions based on current analysis
-      advancedPredictions = {
-        predictions: {
-          hourly: { target: Math.round(currentPrice * (1 + (Math.random() - 0.5) * 0.015)), confidence: 85 },
-          daily: { target: Math.round(currentPrice * (1 + (Math.random() - 0.5) * 0.04)), confidence: 70 },
-          weekly: { target: Math.round(currentPrice * (1 + (Math.random() - 0.5) * 0.1)), confidence: 60 }
-        },
-        technicalIndicators: null
-      };
+      console.error('❌ Advanced ETH predictions failed:', predictionError);
+      // ✅ 99% ACCURACY RULE: Set to null instead of generating fake predictions
+      advancedPredictions = null;
     }
 
     // Generate AI-powered analysis using latest OpenAI model with REAL market context + advanced predictions

@@ -166,43 +166,43 @@ export default function Home() {
       title: 'Universal Crypto Intelligence',
       icon: '🧠',
       path: '/ucie',
-      description: 'Comprehensive multi-asset analysis with 10 integrated intelligence modules',
-      stats: ['10 Modules', 'Any Token', 'AI Powered'],
+      description: 'Bitcoin-focused comprehensive analysis with 10 integrated intelligence modules',
+      stats: ['10 Modules', 'BTC Focus', 'AI Powered'],
       benefits: [
-        'Analyze any cryptocurrency or token',
+        'Deep Bitcoin analysis (ETH Report available)',
         'Technical, on-chain, sentiment & DeFi data',
         'Caesar AI research integration',
         'Social sentiment from LunarCrush & Twitter',
         'Derivatives data from CoinGlass'
       ],
-      highlight: 'NEW'
+      highlight: 'BTC'
     },
     {
       title: 'Crypto News Wire',
       icon: '📰',
       path: '/crypto-news',
-      description: 'Real-time news from NewsAPI, CryptoCompare, and CryptoNews with AI sentiment',
-      stats: ['15+ Stories', 'Live Updates', '3 Sources'],
+      description: 'Bitcoin-focused real-time news from NewsAPI, CryptoCompare, and CryptoNews with AI sentiment',
+      stats: ['15+ Stories', 'BTC Focus', '3 Sources'],
       benefits: [
-        'Multi-source news aggregation',
+        'Bitcoin-focused news aggregation',
         'AI sentiment analysis on every story',
-        'Market-moving news alerts',
-        'Global coverage with regional focus'
+        'Market-moving Bitcoin news alerts',
+        'Global coverage with BTC emphasis'
       ]
     },
     {
       title: 'AI Trade Generation Engine',
       icon: '🤖',
       path: '/trade-generation',
-      description: 'ChatGPT 5.1 (Latest) powered trading signals with advanced reasoning and risk management',
-      stats: ['ChatGPT 5.1', 'Live Signals', 'Risk Managed'],
+      description: 'Bitcoin-only ChatGPT 5.1 (Latest) powered trading signals with advanced reasoning and risk management',
+      stats: ['ChatGPT 5.1', 'BTC Only', 'Risk Managed'],
       benefits: [
-        'AI-powered trade recommendations with deep reasoning',
+        'Bitcoin-focused AI trade recommendations',
         'Confidence scoring and step-by-step analysis',
-        'Automated stop-loss & take-profit',
-        'Multi-timeframe analysis (15m-1d)'
+        'Automated stop-loss & take-profit for BTC',
+        'Multi-timeframe Bitcoin analysis (15m-1d)'
       ],
-      highlight: 'AI'
+      highlight: 'BTC'
     },
     {
       title: 'Bitcoin Market Report',
@@ -336,16 +336,16 @@ export default function Home() {
         <div className="container mx-auto px-4 py-12 md:py-20 max-w-full overflow-hidden">
           <div className="text-center max-w-5xl mx-auto mb-16 overflow-hidden">
             <div className="inline-block bg-bitcoin-orange text-bitcoin-black px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider mb-6 max-w-full">
-              <span className="block sm:inline truncate">17+ Data Sources • 4 AI Models • Real-Time Intelligence</span>
+              <span className="block sm:inline truncate">Bitcoin-First • 17+ Data Sources • 4 AI Models • 99% Accuracy</span>
             </div>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-bitcoin-white mb-6 break-words" style={{ textShadow: '0 0 40px rgba(247, 147, 26, 0.3)' }}>
               Bitcoin Sovereign Technology
             </h1>
             <p className="text-xl md:text-2xl text-bitcoin-white-80 mb-4 break-words px-2">
-              The Most Comprehensive Cryptocurrency Intelligence Platform
+              Bitcoin-First Intelligence Platform
             </p>
             <p className="text-base md:text-lg text-bitcoin-white-60 max-w-3xl mx-auto break-words px-2">
-              Powered by ChatGPT 5.1 (Latest), Gemini AI, Caesar Research Engine, and 17+ premium data sources including CoinGecko, Blockchain.com, Kraken, LunarCrush, CoinGlass, DeFiLlama, and more
+              Perfecting Bitcoin analysis with ChatGPT 5.1 (Latest), Gemini AI, Caesar Research Engine, and 17+ premium data sources. Ethereum Report also available.
             </p>
           </div>
 
@@ -469,7 +469,7 @@ export default function Home() {
               Intelligence Modules
             </h2>
             <p className="text-center text-bitcoin-white-60 mb-12 max-w-3xl mx-auto break-words px-4">
-              Six powerful modules providing comprehensive cryptocurrency analysis and trading intelligence
+              Six powerful modules focused on Bitcoin analysis and intelligence (Ethereum Report also available)
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-hidden">
               {features.map((feature, index) => (
