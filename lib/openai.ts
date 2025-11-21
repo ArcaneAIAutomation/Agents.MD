@@ -165,5 +165,7 @@ export async function createChatCompletion(
   temperature?: number
 ) {
   console.warn('[OpenAI] Using legacy createChatCompletion wrapper - consider migrating to callOpenAI()');
-  return callOpenAI(messages, maxTokens, temperature);
+  // Note: temperature parameter is ignored in GPT-5.1 Responses API
+  // Use reasoning_effort and verbosity instead
+  return callOpenAI(messages, maxTokens, undefined, undefined);
 }

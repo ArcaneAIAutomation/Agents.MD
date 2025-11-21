@@ -162,8 +162,8 @@ export default function LoginForm({ onSuccess, onError, onSwitchToRegister }: Lo
   return (
     <div className="w-full max-w-md mx-auto">
       {/* Header */}
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-bitcoin-black border-2 border-bitcoin-orange">
+      <div className="flex flex-col items-center justify-center text-center mb-8">
+        <div className="flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-bitcoin-black border-2 border-bitcoin-orange">
           <Lock className="w-8 h-8 text-bitcoin-orange" style={{ filter: 'drop-shadow(0 0 10px rgba(247, 147, 26, 0.5))' }} />
         </div>
         <h2 className="text-2xl font-bold text-bitcoin-white mb-2">
@@ -335,7 +335,7 @@ export default function LoginForm({ onSuccess, onError, onSwitchToRegister }: Lo
         </button>
 
         {/* Switch to Register */}
-        <div className="text-center mt-6">
+        <div className="flex flex-col items-center justify-center text-center mt-6">
           <p className="text-sm text-bitcoin-white-60 mb-3">
             Don't have an account?
           </p>

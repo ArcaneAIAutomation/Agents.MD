@@ -204,8 +204,8 @@ export default function AccessGate({ onAccessGranted }: AccessGateProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-bitcoin-black">
       <div className="w-full max-w-6xl mx-auto px-4 py-8 overflow-y-auto max-h-screen">
         {/* Logo/Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-bitcoin-black border-2 border-bitcoin-orange">
+        <div className="flex flex-col items-center justify-center text-center mb-8">
+          <div className="flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-bitcoin-black border-2 border-bitcoin-orange">
             <Lock className="w-10 h-10 text-bitcoin-orange" style={{ filter: 'drop-shadow(0 0 20px rgba(247, 147, 26, 0.5))' }} />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-bitcoin-white mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>

@@ -193,12 +193,12 @@ export default function WhaleWatchDashboard() {
                    hover:scale-105 active:scale-95 min-h-[48px] w-full md:w-auto ${
                      isDisabled ? 'pointer-events-none' : ''
                    }`}
-        title={isDisabled ? 'Please wait for the current analysis to complete' : 'Deep blockchain analysis with Gemini 2.5 Pro'}
+        title={isDisabled ? 'Please wait for the current analysis to complete' : 'Deep blockchain analysis with ChatGPT 5.1 (Latest)'}
       >
         <Search className="w-5 h-5" />
         <span className="flex flex-col items-start">
           <span className="text-sm uppercase">🔬 Deep Dive Analysis</span>
-          <span className="text-xs font-normal opacity-80">Gemini 2.5 Pro + Blockchain Data</span>
+          <span className="text-xs font-normal opacity-80">ChatGPT 5.1 (Latest) + Blockchain Data</span>
         </span>
         {isAnalyzing && <Loader className="w-4 h-4 animate-spin" />}
       </button>
@@ -286,7 +286,7 @@ export default function WhaleWatchDashboard() {
             </p>
           </div>
           <p className="text-xs text-bitcoin-white-60 text-center mb-3">
-            Gemini 2.5 Pro • Extended blockchain analysis • Real transaction data
+            ChatGPT 5.1 (Latest) • Extended blockchain analysis • Real transaction data
           </p>
           
           {/* Cancel Button */}
@@ -297,12 +297,12 @@ export default function WhaleWatchDashboard() {
                      transition-all shadow-[0_0_15px_rgba(247,147,26,0.3)] 
                      hover:shadow-[0_0_25px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 
                      min-h-[44px] uppercase text-sm"
-            title="Cancel Deep Dive and use standard Gemini Flash analysis"
+            title="Cancel Deep Dive analysis"
           >
-            ✕ Cancel Deep Dive
+            ✕ Cancel Analysis
           </button>
           <p className="text-xs text-bitcoin-white-60 text-center mt-2">
-            Will fallback to Gemini 2.5 Flash (instant analysis)
+            Analysis will be cancelled and you can retry
           </p>
         </div>
       </div>
@@ -317,10 +317,10 @@ export default function WhaleWatchDashboard() {
     
     return (
       <div className="space-y-4">
-        {/* Model Badge - Gemini 2.5 Pro Deep Dive */}
+        {/* Model Badge - ChatGPT 5.1 (Latest) Deep Dive */}
         <div className="flex items-center gap-2 flex-wrap">
           <span className="px-3 py-1.5 bg-bitcoin-orange text-bitcoin-black rounded font-bold text-xs uppercase shadow-[0_0_30px_rgba(247,147,26,0.6)]">
-            🔬 Gemini 2.5 Pro - Deep Dive
+            🤖 ChatGPT 5.1 (Latest) - Deep Dive
           </span>
           {whale.metadata?.processingTime && (
             <span className="flex items-center gap-1 text-bitcoin-white-60 text-xs font-mono">
@@ -1202,7 +1202,7 @@ export default function WhaleWatchDashboard() {
             
             {/* Details */}
             <p className="text-xs md:text-sm text-bitcoin-white-60 mb-6 md:mb-6 leading-relaxed px-2">
-              AI analysis powered by Caesar API • Analysis takes 5-7 minutes typically (max 10 minutes) • Will timeout if not completed
+              AI analysis powered by ChatGPT 5.1 (Latest) • Deep dive analysis with blockchain data • Typically completes in 10-15 seconds
             </p>
             
             {/* Button */}
@@ -1244,7 +1244,7 @@ export default function WhaleWatchDashboard() {
             🐋 Bitcoin Whale Watch
           </h2>
           <p className="text-sm text-bitcoin-white-60 mt-1">
-            Live tracking of large BTC transactions (&gt;50 BTC) • Caesar AI analysis: 5-7 min (max 10 min timeout)
+            Live tracking of large BTC transactions (&gt;50 BTC) • ChatGPT 5.1 (Latest) analysis: 10-15 seconds
           </p>
         </div>
         
@@ -1275,9 +1275,9 @@ export default function WhaleWatchDashboard() {
           <div className="flex items-center">
             <RefreshCw className="h-5 w-5 text-bitcoin-orange animate-spin mr-3 flex-shrink-0" />
             <div className="flex-1">
-              <p className="text-bitcoin-white font-bold">🤖 Caesar AI Analysis in Progress</p>
+              <p className="text-bitcoin-white font-bold">🤖 ChatGPT 5.1 (Latest) Analysis in Progress</p>
               <p className="text-bitcoin-white-80 text-sm">
-                Other transactions are temporarily disabled to prevent API overload. This typically takes 5-7 minutes.
+                Other transactions are temporarily disabled to prevent API overload. This typically takes 10-15 seconds.
               </p>
             </div>
           </div>
@@ -1409,73 +1409,36 @@ export default function WhaleWatchDashboard() {
                 <div className="mt-4 pt-4 border-t border-bitcoin-orange">
                   <div className="space-y-3">
                     <p className="text-sm text-bitcoin-white-80 text-center font-semibold">
-                      Choose AI Analysis Provider:
+                      AI Analysis:
                     </p>
                     
-                    {/* Deep Dive Button (only for >= 100 BTC) */}
-                    {whale.amount >= 100 && (
-                      <div className="mb-3">
-                        <DeepDiveButton
-                          whale={whale}
-                          onAnalyze={() => analyzeDeepDive(whale)}
-                          isAnalyzing={analyzingTx === whale.txHash}
-                          isDisabled={isDisabled}
-                        />
-                        <p className="text-xs text-bitcoin-white-60 text-center mt-2">
-                          🔬 Recommended for large transactions • Includes blockchain data analysis
-                        </p>
-                      </div>
-                    )}
+                    {/* ChatGPT 5.1 (Latest) Button - Single Option */}
+                    <button
+                      onClick={() => analyzeDeepDive(whale)}
+                      disabled={analyzingTx === whale.txHash || isDisabled}
+                      className={`w-full btn-bitcoin-primary py-4 rounded-lg transition-all font-bold uppercase text-sm shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[48px] ${
+                        isDisabled
+                          ? 'opacity-30 cursor-not-allowed'
+                          : ''
+                      } disabled:opacity-50`}
+                      title={isDisabled ? 'Please wait for the current analysis to complete' : 'Deep dive analysis with ChatGPT 5.1 (Latest)'}
+                    >
+                      {analyzingTx === whale.txHash ? (
+                        <span className="flex items-center justify-center">
+                          <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                          Starting Analysis...
+                        </span>
+                      ) : (
+                        <span className="flex flex-col items-center">
+                          <span className="text-base">🤖 ChatGPT 5.1 (Latest)</span>
+                          <span className="text-xs font-normal opacity-80">Deep Dive Analysis • Blockchain Data</span>
+                        </span>
+                      )}
+                    </button>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {/* Caesar AI Button */}
-                      <button
-                        onClick={() => analyzeTransaction(whale, 'caesar')}
-                        disabled={analyzingTx === whale.txHash || isDisabled}
-                        className={`btn-bitcoin-primary py-3 rounded-lg transition-all font-bold uppercase text-sm shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[48px] ${
-                          isDisabled
-                            ? 'opacity-30 cursor-not-allowed'
-                            : ''
-                        } disabled:opacity-50`}
-                        title={isDisabled ? 'Please wait for the current analysis to complete' : 'Deep research analysis (5-7 min)'}
-                      >
-                        {analyzingTx === whale.txHash ? (
-                          <span className="flex items-center justify-center">
-                            <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-                            Starting...
-                          </span>
-                        ) : (
-                          <span className="flex flex-col items-center">
-                            <span>🔬 Caesar AI</span>
-                            <span className="text-xs font-normal opacity-80">Deep Research</span>
-                          </span>
-                        )}
-                      </button>
-
-                      {/* Gemini AI Button */}
-                      <button
-                        onClick={() => analyzeTransaction(whale, 'gemini')}
-                        disabled={analyzingTx === whale.txHash || isDisabled}
-                        className={`btn-bitcoin-secondary py-3 rounded-lg transition-all font-bold uppercase text-sm shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[48px] ${
-                          isDisabled
-                            ? 'opacity-30 cursor-not-allowed'
-                            : ''
-                        } disabled:opacity-50`}
-                        title={isDisabled ? 'Please wait for the current analysis to complete' : 'Instant AI analysis'}
-                      >
-                        {analyzingTx === whale.txHash ? (
-                          <span className="flex items-center justify-center">
-                            <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-                            Starting...
-                          </span>
-                        ) : (
-                          <span className="flex flex-col items-center">
-                            <span>⚡ Gemini 2.5 Flash</span>
-                            <span className="text-xs font-normal opacity-80">Instant Analysis</span>
-                          </span>
-                        )}
-                      </button>
-                    </div>
+                    <p className="text-xs text-bitcoin-white-60 text-center">
+                      🔬 Comprehensive analysis with blockchain data • Typically completes in 10-15 seconds
+                    </p>
                   </div>
                   
                   {isDisabled && (
@@ -1501,41 +1464,15 @@ export default function WhaleWatchDashboard() {
                         <div className="flex items-center">
                           <RefreshCw className="h-5 w-5 text-bitcoin-orange animate-spin mr-2" />
                           <span className="text-bitcoin-white font-medium">
-                            {whale.analysisProvider === 'gemini' 
-                              ? '⚡ Gemini 2.5 Flash is analyzing...' 
-                              : whale.analysisProvider === 'caesar'
-                              ? '🤖 Caesar AI is researching...'
-                              : '🤖 AI Analysis in progress...'}
+                            🤖 ChatGPT 5.1 (Latest) is analyzing...
                           </span>
                         </div>
-                        {whale.analysisProvider === 'gemini' ? (
-                          <>
-                            <p className="text-bitcoin-white-80 text-sm text-center">
-                              Deep market intelligence analysis in progress
-                            </p>
-                            <p className="text-bitcoin-white-60 text-xs text-center">
-                              Gemini 2.5 Flash • Advanced reasoning • Typically completes in 2-5 seconds
-                            </p>
-                          </>
-                        ) : whale.analysisProvider === 'caesar' ? (
-                          <>
-                            <p className="text-bitcoin-white-80 text-sm text-center">
-                              This typically takes 5-7 minutes with deep research (max 10 minutes)
-                            </p>
-                            <p className="text-bitcoin-white-60 text-xs text-center">
-                              Checking status every 60 seconds • Analyzing market data, news, and historical patterns
-                            </p>
-                          </>
-                        ) : (
-                          <>
-                            <p className="text-bitcoin-white-80 text-sm text-center">
-                              AI-powered analysis in progress
-                            </p>
-                            <p className="text-bitcoin-white-60 text-xs text-center">
-                              Processing transaction data and market context
-                            </p>
-                          </>
-                        )}
+                        <p className="text-bitcoin-white-80 text-sm text-center">
+                          Deep dive analysis with blockchain data in progress
+                        </p>
+                        <p className="text-bitcoin-white-60 text-xs text-center">
+                          ChatGPT 5.1 (Latest) • Advanced reasoning • Typically completes in 10-15 seconds
+                        </p>
                       </div>
                     </div>
                   )}
@@ -1550,33 +1487,18 @@ export default function WhaleWatchDashboard() {
                       <span className="text-bitcoin-white font-medium">Analysis failed</span>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      <button
-                        onClick={() => analyzeTransaction(whale, 'caesar')}
-                        disabled={isDisabled}
-                        className={`btn-bitcoin-primary px-4 py-2 rounded transition-all text-xs uppercase font-bold shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[44px] ${
-                          isDisabled
-                            ? 'opacity-30 cursor-not-allowed'
-                            : ''
-                        }`}
-                        title={isDisabled ? 'Please wait for the current analysis to complete' : 'Retry with Caesar AI'}
-                      >
-                        Retry Caesar AI
-                      </button>
-                      
-                      <button
-                        onClick={() => analyzeTransaction(whale, 'gemini')}
-                        disabled={isDisabled}
-                        className={`btn-bitcoin-secondary px-4 py-2 rounded transition-all text-xs uppercase font-bold shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[44px] ${
-                          isDisabled
-                            ? 'opacity-30 cursor-not-allowed'
-                            : ''
-                        }`}
-                        title={isDisabled ? 'Please wait for the current analysis to complete' : 'Retry with Gemini AI'}
-                      >
-                        Retry Gemini AI
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => analyzeDeepDive(whale)}
+                      disabled={isDisabled}
+                      className={`w-full btn-bitcoin-primary px-4 py-3 rounded-lg transition-all text-sm uppercase font-bold shadow-[0_0_20px_rgba(247,147,26,0.3)] hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[48px] ${
+                        isDisabled
+                          ? 'opacity-30 cursor-not-allowed'
+                          : ''
+                      }`}
+                      title={isDisabled ? 'Please wait for the current analysis to complete' : 'Retry with ChatGPT 5.1 (Latest)'}
+                    >
+                      🔄 Retry with ChatGPT 5.1 (Latest)
+                    </button>
                     
                     {isDisabled && (
                       <p className="text-xs text-bitcoin-white-60 mt-2 text-center">
