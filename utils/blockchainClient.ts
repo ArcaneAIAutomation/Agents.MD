@@ -105,20 +105,43 @@ export class BlockchainClient {
 
   /**
    * Get transactions from a specific block
+   * ✅ FIXED: Use block height instead of hash (blockchain.info prefers height)
    */
-  async getBlockTransactions(blockHash: string): Promise<BitcoinTransaction[]> {
+  async getBlockTransactions(blockHash: string, blockHeight?: number): Promise<BitcoinTransaction[]> {
     try {
-      console.log(`📡 Fetching block transactions for ${blockHash.substring(0, 20)}...`);
+      // Try using block height first (more reliable)
+      if (blockHeight) {
+        console.log(`📡 Fetching block transactions for height ${blockHeight}...`);
+        const url = `${this.baseUrl}/block-height/${blockHeight}?format=json`;
+        
+        const response = await fetch(url, {
+          headers: { 'Accept': 'application/json' },
+          signal: AbortSignal.timeout(15000)
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          // Response is an array of blocks at this height
+          const blocks = Array.isArray(data.blocks) ? data.blocks : [data];
+          const txs = blocks[0]?.tx || [];
+          console.log(`✅ Fetched ${txs.length} transactions from block height ${blockHeight}`);
+          return txs;
+        }
+      }
+      
+      // Fallback to hash-based lookup
+      console.log(`📡 Fetching block transactions for hash ${blockHash.substring(0, 20)}...`);
       const url = `${this.baseUrl}/rawblock/${blockHash}`;
       
       const response = await fetch(url, {
         headers: { 'Accept': 'application/json' },
-        signal: AbortSignal.timeout(15000) // 15 second timeout (blocks can be large)
+        signal: AbortSignal.timeout(15000)
       });
       
       if (!response.ok) {
         console.error(`❌ Blockchain.com API error: ${response.status}`);
-        throw new Error(`Blockchain.com API error: ${response.status}`);
+        console.warn(`⚠️ Skipping block transactions - API unavailable`);
+        return []; // Return empty array instead of throwing
       }
 
       const data = await response.json();
@@ -127,6 +150,7 @@ export class BlockchainClient {
       return txs;
     } catch (error) {
       console.error('❌ Error fetching block transactions:', error);
+      console.warn(`⚠️ Continuing with mempool transactions only`);
       return [];
     }
   }

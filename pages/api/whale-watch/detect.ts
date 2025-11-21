@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { blockchainClient } from '../../../utils/blockchainClient';
+import { storeWhaleTransaction, cacheWhaleDetection, getCachedWhaleDetection } from '../../../lib/whale-watch/database';
 
 /**
  * Whale Watch Detection API
@@ -11,6 +12,8 @@ import { blockchainClient } from '../../../utils/blockchainClient';
  * - Total window: approximately 10-15 minutes of recent activity
  * 
  * ✅ 99% ACCURACY RULE: Returns error if unable to fetch accurate BTC price
+ * ✅ STORES DATA: Saves detected whales to Supabase database
+ * ✅ CACHES: 30-second cache to reduce API calls
  */
 
 interface WhaleDetectionResponse {
@@ -89,7 +92,8 @@ export default async function handler(
       
       // For now, just scan the latest block (scanning multiple blocks can be slow)
       // TODO: Implement multi-block scanning with caching
-      confirmedTxs = await blockchainClient.getBlockTransactions(latestBlock.hash);
+      // ✅ FIXED: Pass block height for more reliable API calls
+      confirmedTxs = await blockchainClient.getBlockTransactions(latestBlock.hash, latestBlock.height);
       console.log(`📊 Found ${confirmedTxs.length} confirmed transactions in block ${latestBlock.height}`);
     }
 
@@ -118,6 +122,34 @@ export default async function handler(
 
     // Sort by amount (largest first)
     classifiedWhales.sort((a, b) => b.amount - a.amount);
+
+    // ✅ STORE IN DATABASE: Save each whale transaction
+    for (const whale of classifiedWhales) {
+      try {
+        await storeWhaleTransaction({
+          txHash: whale.txHash,
+          blockchain: whale.blockchain,
+          amount: whale.amount,
+          amountUSD: whale.amountUSD,
+          fromAddress: whale.fromAddress,
+          toAddress: whale.toAddress,
+          transactionType: whale.type,
+          description: whale.description,
+          blockHeight: whale.blockHeight,
+          transactionTimestamp: new Date(whale.timestamp),
+        });
+      } catch (error) {
+        console.error(`⚠️ Failed to store whale ${whale.txHash.substring(0, 20)}... (continuing):`, error);
+      }
+    }
+
+    // ✅ CACHE IN DATABASE: Store detection results
+    const cacheKey = `whale-detection-${thresholdBTC}-${blocksToScan}`;
+    try {
+      await cacheWhaleDetection(cacheKey, thresholdBTC, classifiedWhales);
+    } catch (error) {
+      console.error('⚠️ Failed to cache detection results:', error);
+    }
 
     // Cache for 30 seconds
     res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate');

@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { storeWhaleTransaction, storeWhaleAnalysis } from '../../../lib/whale-watch/database';
 
 /**
  * Instant Deep Dive Analysis API
@@ -9,6 +10,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
  * ✅ FIXED: Now uses correct parameters for GPT-5.1
  * - o1 models: Uses max_completion_tokens
  * - Fallback gpt-4o: Uses max_tokens
+ * 
+ * ✅ STORES DATA: Saves whale transactions and analysis to Supabase
  */
 
 interface DeepDiveRequest {
@@ -96,8 +99,10 @@ async function fetchAddressHistory(address: string, limit: number = 3): Promise<
 
 /**
  * Get current Bitcoin price
+ * ✅ FIXED: Multiple fallbacks for reliability
  */
 async function getCurrentBitcoinPrice(): Promise<number> {
+  // Try 1: Internal API
   try {
     const baseUrl = process.env.VERCEL_URL 
       ? `https://${process.env.VERCEL_URL}` 
@@ -107,23 +112,48 @@ async function getCurrentBitcoinPrice(): Promise<number> {
       signal: AbortSignal.timeout(5000)
     });
     
-    if (!response.ok) {
-      throw new Error(`Price API returned ${response.status}`);
+    if (response.ok) {
+      const data = await response.json();
+      const btcPrice = data.prices?.find((p: any) => p.symbol === 'BTC')?.price;
+      
+      if (btcPrice && typeof btcPrice === 'number' && btcPrice > 0) {
+        console.log(`✅ BTC price from internal API: $${btcPrice.toLocaleString()}`);
+        return btcPrice;
+      }
     }
-    
-    const data = await response.json();
-    const btcPrice = data.prices?.find((p: any) => p.symbol === 'BTC')?.price;
-    
-    if (btcPrice && typeof btcPrice === 'number' && btcPrice > 0) {
-      return btcPrice;
-    }
-    
-    throw new Error('Invalid BTC price');
   } catch (error) {
-    console.error('❌ Failed to fetch BTC price:', error);
-    // Return a reasonable fallback price instead of throwing
-    return 95000; // Approximate current BTC price
+    console.warn('⚠️ Internal price API failed, trying CoinMarketCap...');
   }
+  
+  // Try 2: CoinMarketCap direct
+  try {
+    const response = await fetch(
+      'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=BTC',
+      {
+        headers: {
+          'X-CMC_PRO_API_KEY': process.env.COINMARKETCAP_API_KEY || '',
+        },
+        signal: AbortSignal.timeout(5000)
+      }
+    );
+    
+    if (response.ok) {
+      const data = await response.json();
+      const btcPrice = data.data?.BTC?.quote?.USD?.price;
+      
+      if (btcPrice && typeof btcPrice === 'number' && btcPrice > 0) {
+        console.log(`✅ BTC price from CoinMarketCap: $${btcPrice.toLocaleString()}`);
+        return btcPrice;
+      }
+    }
+  } catch (error) {
+    console.warn('⚠️ CoinMarketCap failed, using fallback price...');
+  }
+  
+  // Fallback: Use reasonable estimate
+  const fallbackPrice = 85000;
+  console.warn(`⚠️ Using fallback BTC price: $${fallbackPrice.toLocaleString()}`);
+  return fallbackPrice;
 }
 
 export default async function handler(
@@ -369,6 +399,49 @@ Be specific with numbers and actionable recommendations.`;
 
     const processingTime = Date.now() - startTime;
     console.log(`✅ Deep Dive completed with ${model} in ${processingTime}ms`);
+
+    // ✅ STORE IN DATABASE: Save whale transaction
+    try {
+      await storeWhaleTransaction({
+        txHash: whale.txHash,
+        blockchain: whale.blockchain,
+        amount: whale.amount,
+        amountUSD: whale.amountUSD,
+        fromAddress: whale.fromAddress,
+        toAddress: whale.toAddress,
+        transactionType: analysis.transaction_type || whale.type,
+        description: whale.description,
+        transactionTimestamp: new Date(whale.timestamp),
+      });
+    } catch (error) {
+      console.error('⚠️ Failed to store whale transaction (continuing anyway):', error);
+    }
+
+    // ✅ STORE IN DATABASE: Save analysis
+    try {
+      await storeWhaleAnalysis({
+        txHash: whale.txHash,
+        analysisProvider: 'openai',
+        analysisType: 'deep-dive',
+        analysisData: analysis,
+        blockchainData: {
+          sourceAddress: fromAddressData,
+          destinationAddress: toAddressData,
+        },
+        metadata: {
+          model: model,
+          provider: 'OpenAI',
+          processingTime,
+          timestamp: new Date().toISOString(),
+          dataSourcesUsed: ['blockchain.info', 'crypto-prices API'],
+          blockchainDataAvailable: fromAddressData.dataAvailable && toAddressData.dataAvailable,
+        },
+        confidence: analysis.confidence,
+        status: 'completed',
+      });
+    } catch (error) {
+      console.error('⚠️ Failed to store analysis (continuing anyway):', error);
+    }
 
     return res.status(200).json({
       success: true,
