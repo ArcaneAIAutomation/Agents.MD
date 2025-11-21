@@ -208,9 +208,10 @@ interface GeminiAnalysisResponse {
 
 /**
  * Fetch current Bitcoin price from market data API
- * Uses the internal crypto-prices API with fallback to static price
+ * ✅ 99% ACCURACY RULE: Throws error if unable to fetch accurate price
  * 
  * @returns Current BTC price in USD
+ * @throws Error if price cannot be fetched
  */
 async function getCurrentBitcoinPrice(): Promise<number> {
   try {
@@ -237,9 +238,8 @@ async function getCurrentBitcoinPrice(): Promise<number> {
     
     throw new Error('Invalid BTC price in response');
   } catch (error) {
-    console.warn('⚠️ Failed to fetch live BTC price, using fallback:', error);
-    // Fallback to reasonable estimate
-    return 95000; // Fallback price
+    console.error('❌ Failed to fetch BTC price:', error);
+    throw new Error(`Unable to fetch accurate BTC price: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 

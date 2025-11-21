@@ -272,8 +272,8 @@ async function getCurrentBitcoinPrice(): Promise<number> {
     
     throw new Error('Invalid BTC price in response');
   } catch (error) {
-    console.warn('⚠️ Failed to fetch live BTC price, using fallback:', error);
-    return 95000;
+    console.error('❌ Failed to fetch BTC price:', error);
+    throw new Error(`Unable to fetch accurate BTC price: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 

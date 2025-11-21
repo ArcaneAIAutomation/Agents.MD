@@ -9,6 +9,8 @@ import { blockchainClient } from '../../../utils/blockchainClient';
  * - Unconfirmed transactions in mempool (last few minutes)
  * - Latest confirmed block (last ~10 minutes)
  * - Total window: approximately 10-15 minutes of recent activity
+ * 
+ * ✅ 99% ACCURACY RULE: Returns error if unable to fetch accurate BTC price
  */
 
 interface WhaleDetectionResponse {
@@ -40,7 +42,8 @@ export default async function handler(
     console.log(`🐋 Detecting whale transactions (>${thresholdBTC} BTC) in last ${blocksToScan} block(s)...`);
 
     // Get current BTC price from CoinMarketCap
-    let btcPrice: number; // ✅ No fallback - must fetch accurate price
+    // ✅ 99% ACCURACY RULE: Must have accurate price for whale detection
+    let btcPrice: number;
     try {
       const priceResponse = await fetch(
         `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=BTC`,
@@ -51,13 +54,25 @@ export default async function handler(
         }
       );
       
-      if (priceResponse.ok) {
-        const priceData = await priceResponse.json();
-        btcPrice = priceData.data.BTC.quote.USD.price;
-        console.log(`💰 Current BTC price: $${btcPrice.toLocaleString()}`);
+      if (!priceResponse.ok) {
+        throw new Error(`CMC API returned ${priceResponse.status}`);
       }
+      
+      const priceData = await priceResponse.json();
+      btcPrice = priceData.data.BTC.quote.USD.price;
+      
+      if (!btcPrice || typeof btcPrice !== 'number' || btcPrice <= 0) {
+        throw new Error('Invalid BTC price from CMC');
+      }
+      
+      console.log(`💰 Current BTC price: $${btcPrice.toLocaleString()}`);
     } catch (error) {
-      console.error('Failed to fetch BTC price, using fallback');
+      console.error('❌ Failed to fetch accurate BTC price:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Unable to fetch accurate Bitcoin price. Whale detection requires real-time price data. Please try again.',
+        timestamp: new Date().toISOString(),
+      });
     }
 
     // Get unconfirmed transactions from mempool (last few minutes)
