@@ -5,10 +5,11 @@ import {
   type TransactionPatterns,
   type DeepDiveDataResult 
 } from '../../../utils/blockchainData';
+import { callOpenAI } from '../../../lib/openai';
 
 /**
- * Deep Dive Gemini AI Whale Transaction Analysis API
- * Uses Google's Gemini 2.5 Pro with blockchain data integration
+ * Deep Dive ChatGPT 5.1 (Latest) Whale Transaction Analysis API
+ * Uses OpenAI's ChatGPT 5.1 (Latest) with blockchain data integration
  * for comprehensive whale transaction analysis
  */
 
@@ -325,85 +326,39 @@ Acknowledge these limitations in your analysis and adjust confidence scores acco
 Be transparent about which aspects of the analysis are based on complete data vs. inference.`;
     }
 
-    // Step 4: Call Gemini 2.5 Pro with extended context
-    console.log('🤖 Calling Gemini 2.5 Pro for Deep Dive analysis...');
-    const geminiApiKey = process.env.GEMINI_API_KEY;
+    // Step 4: Call ChatGPT 5.1 (Latest) with extended context
+    console.log('🤖 Calling ChatGPT 5.1 (Latest) for Deep Dive analysis...');
     
-    if (!geminiApiKey) {
-      throw new Error('GEMINI_API_KEY environment variable is not set');
-    }
+    // Add JSON format instruction to prompt
+    const jsonPrompt = prompt + '\n\nIMPORTANT: Return ONLY valid JSON. Do not include any markdown formatting, code blocks, or explanatory text. Just the raw JSON object.';
     
-    // Use Gemini 2.5 Pro for Deep Dive analysis
-    const model = 'gemini-2.5-pro';
-    console.log(`📊 Using model: ${model}`);
+    // Use ChatGPT 5.1 (Latest) for Deep Dive analysis
+    console.log(`📊 Using model: gpt-5.1 (ChatGPT 5.1 Latest)`);
     
-    const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }],
-          generationConfig: {
-            temperature: 0.8,
-            topK: 64,
-            topP: 0.95,
-            maxOutputTokens: 32768, // Extended for comprehensive Deep Dive analysis
-            candidateCount: 1,
-            responseMimeType: 'application/json', // Request JSON response
-          },
-          safetySettings: [
-            {
-              category: "HARM_CATEGORY_HARASSMENT",
-              threshold: "BLOCK_NONE"
-            },
-            {
-              category: "HARM_CATEGORY_HATE_SPEECH",
-              threshold: "BLOCK_NONE"
-            },
-            {
-              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-              threshold: "BLOCK_NONE"
-            },
-            {
-              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-              threshold: "BLOCK_NONE"
-            }
-          ]
-        }),
-        signal: AbortSignal.timeout(8000), // 8 second timeout (Vercel has 10s limit)
-      }
+    const openaiResponse = await callOpenAI(
+      jsonPrompt,
+      16000, // Max output tokens for comprehensive analysis
+      'medium', // Reasoning effort: balanced speed and depth
+      'high' // Verbosity: detailed analysis
     );
 
-    if (!geminiResponse.ok) {
-      const errorText = await geminiResponse.text();
-      console.error('❌ Gemini API error:', geminiResponse.status, errorText);
-      throw new Error(`Gemini API error: ${geminiResponse.status}`);
-    }
-
-    const geminiData = await geminiResponse.json();
-    console.log('📡 Gemini API response received');
+    console.log('📡 ChatGPT 5.1 API response received');
 
     // Extract and parse response
-    const responseText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+    const responseText = openaiResponse.content;
     
     if (!responseText) {
-      throw new Error('No response text from Gemini API');
+      throw new Error('No response text from ChatGPT 5.1 API');
     }
 
     let analysis;
     try {
+      // Clean up response text (remove markdown if present)
       const jsonText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       analysis = JSON.parse(jsonText);
     } catch (parseError) {
-      console.error('❌ Failed to parse Gemini response as JSON:', responseText);
-      throw new Error('Failed to parse Gemini Deep Dive response');
+      console.error('❌ Failed to parse ChatGPT 5.1 response as JSON:', responseText.substring(0, 500));
+      throw new Error('Failed to parse ChatGPT 5.1 Deep Dive response');
     }
 
     // Calculate processing time
@@ -421,14 +376,14 @@ Be transparent about which aspects of the analysis are based on complete data vs
         patterns: deepDiveData.patterns,
       } : undefined,
       metadata: {
-        model: 'gemini-2.5-pro',
+        model: openaiResponse.model || 'gpt-5.1',
         analysisType: 'deep-dive',
-        provider: 'Google Gemini',
+        provider: 'OpenAI ChatGPT 5.1 (Latest)',
         timestamp: new Date().toISOString(),
         processingTime: processingTime,
         dataSourcesUsed: blockchainDataAvailable 
-          ? ['blockchain.com', 'gemini-2.5-pro']
-          : ['gemini-2.5-pro'],
+          ? ['blockchain.com', 'chatgpt-5.1']
+          : ['chatgpt-5.1'],
         blockchainDataAvailable: blockchainDataAvailable,
         dataSourceLimitations: dataSourceLimitations.length > 0 
           ? dataSourceLimitations 
