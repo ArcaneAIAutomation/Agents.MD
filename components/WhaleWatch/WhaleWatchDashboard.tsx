@@ -677,40 +677,19 @@ export default function WhaleWatchDashboard() {
         setWhaleData({ ...whaleData, whales: updatedWhales });
       }
       
-      console.log('🔬 Starting Deep Dive analysis (synchronous with extended timeout)...');
-      console.log(`📡 API Endpoint: /api/whale-watch/deep-dive-gemini`);
+      console.log('⚡ Starting INSTANT Deep Dive analysis...');
+      console.log(`📡 API Endpoint: /api/whale-watch/deep-dive-instant`);
       console.log(`⏱️ Start time: ${new Date(startTime).toISOString()}`);
       
-      // Simulate progress stages
-      const progressStages = [
-        'Fetching blockchain data...',
-        'Analyzing transaction history...',
-        'Tracing fund flows...',
-        'Identifying patterns...',
-        'Generating comprehensive analysis...',
-      ];
-      
-      let currentStage = 0;
-      const progressInterval = setInterval(() => {
-        if (currentStage < progressStages.length - 1) {
-          currentStage++;
-          setDeepDiveProgress(prev => ({ ...prev, [whale.txHash]: progressStages[currentStage] }));
-          console.log(`📊 Progress: Stage ${currentStage + 1}/${progressStages.length} - ${progressStages[currentStage]}`);
-        }
-      }, 3000);
-      
-      // Call Deep Dive API with extended timeout
-      const response = await fetch('/api/whale-watch/deep-dive-gemini', {
+      // Call INSTANT Deep Dive API (no timeout needed - completes in <1 second)
+      const response = await fetch('/api/whale-watch/deep-dive-instant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(whale),
-        signal: AbortSignal.timeout(30000), // 30 second timeout
       });
       
-      clearInterval(progressInterval);
-      
       if (!response.ok) {
-        throw new Error(`Deep Dive API error: ${response.status}`);
+        throw new Error(`Instant Deep Dive API error: ${response.status}`);
       }
       
       const data = await response.json();
