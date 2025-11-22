@@ -460,6 +460,30 @@ Be specific with numbers and actionable recommendations.`;
       blockchainDataAvailable: fromAddressData.dataAvailable && toAddressData.dataAvailable,
     };
 
+    // ✅ FIX: Convert confidence from decimal (0-1) to integer (0-100)
+    let confidenceInt = 0;
+    if (analysis.confidence !== undefined && analysis.confidence !== null) {
+      const confidenceValue = typeof analysis.confidence === 'string' 
+        ? parseFloat(analysis.confidence) 
+        : analysis.confidence;
+      
+      // If confidence is between 0-1 (decimal), convert to 0-100
+      if (confidenceValue >= 0 && confidenceValue <= 1) {
+        confidenceInt = Math.round(confidenceValue * 100);
+      } 
+      // If confidence is already 0-100, use as-is
+      else if (confidenceValue >= 0 && confidenceValue <= 100) {
+        confidenceInt = Math.round(confidenceValue);
+      }
+      // Default to 0 if invalid
+      else {
+        console.warn(`⚠️ Invalid confidence value: ${analysis.confidence}, defaulting to 0`);
+        confidenceInt = 0;
+      }
+    }
+    
+    console.log(`📊 Confidence: ${analysis.confidence} → ${confidenceInt}%`);
+
     await query(
       `UPDATE whale_analysis 
        SET status = $1,
@@ -474,7 +498,7 @@ Be specific with numbers and actionable recommendations.`;
         JSON.stringify(analysis),
         JSON.stringify({ sourceAddress: fromAddressData, destinationAddress: toAddressData }),
         JSON.stringify(metadata),
-        analysis.confidence,
+        confidenceInt,
         parseInt(jobId)
       ]
     );
