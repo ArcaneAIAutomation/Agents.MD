@@ -170,11 +170,17 @@ export default async function handler(
   const startTime = Date.now();
 
   try {
-    console.log(`🔄 Background Deep Dive processor started`);
+    console.log(`🔄 ========================================`);
+    console.log(`🔄 Background Deep Dive processor STARTED`);
+    console.log(`🔄 Time: ${new Date().toISOString()}`);
+    console.log(`🔄 ========================================`);
     
     const { jobId, whale } = req.body as { jobId: string; whale: DeepDiveRequest };
     
+    console.log(`📊 Received request body:`, JSON.stringify({ jobId, whale: whale?.txHash }, null, 2));
+    
     if (!jobId) {
+      console.error(`❌ Missing jobId in request body`);
       return res.status(400).json({
         success: false,
         error: 'Missing jobId',
@@ -182,13 +188,24 @@ export default async function handler(
       });
     }
     
+    console.log(`📊 Job ${jobId}: Updating status to 'analyzing'...`);
+    
     // Update status to analyzing
-    await query(
-      'UPDATE whale_analysis SET status = $1, updated_at = NOW() WHERE id = $2',
+    const updateResult = await query(
+      'UPDATE whale_analysis SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING id, status',
       ['analyzing', parseInt(jobId)]
     );
     
-    console.log(`📊 Job ${jobId}: Status updated to analyzing`);
+    if (updateResult.rows.length === 0) {
+      console.error(`❌ Job ${jobId} not found in database`);
+      return res.status(404).json({
+        success: false,
+        error: 'Job not found',
+        timestamp: new Date().toISOString(),
+      });
+    }
+    
+    console.log(`✅ Job ${jobId}: Status updated to 'analyzing'`, updateResult.rows[0]);
 
     if (!whale.txHash || !whale.fromAddress || !whale.toAddress) {
       console.error(`❌ Missing required fields`);
@@ -326,7 +343,7 @@ Be specific with numbers and actionable recommendations.`;
           max_completion_tokens: 2000, // ✅ CORRECT for GPT-5.1
           // Note: GPT-5.1 doesn't support temperature or response_format
         }),
-        signal: AbortSignal.timeout(1800000), // 30 minutes for GPT-5.1 comprehensive analysis
+        signal: AbortSignal.timeout(50000), // 50 seconds (Vercel Hobby limit is 60s)
       });
 
       const openaiTime = Date.now() - openaiStart;

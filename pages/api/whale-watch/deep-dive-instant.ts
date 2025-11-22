@@ -62,20 +62,31 @@ export default async function handler(
     const jobId = result.rows[0].id;
     console.log(`✅ Created job ${jobId} for ${whale.txHash.substring(0, 20)}`);
 
-    // Trigger background processing (Vercel will handle this)
+    // ✅ FIXED: Actually trigger the background processing
+    // We need to await this to ensure it starts, but return immediately
     const baseUrl = process.env.VERCEL_URL 
       ? `https://${process.env.VERCEL_URL}` 
       : 'http://localhost:3000';
     
-    // Fire and forget - don't wait for response
-    fetch(`${baseUrl}/api/whale-watch/deep-dive-process`, {
+    console.log(`🚀 Triggering background processor at ${baseUrl}/api/whale-watch/deep-dive-process`);
+    
+    // Start processing but don't wait for completion
+    // This ensures the request is actually sent
+    const processingPromise = fetch(`${baseUrl}/api/whale-watch/deep-dive-process`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ jobId, whale }),
+    }).then(response => {
+      if (response.ok) {
+        console.log(`✅ Background processor started for job ${jobId}`);
+      } else {
+        console.error(`❌ Background processor failed: ${response.status}`);
+      }
     }).catch(error => {
       console.error('⚠️ Failed to trigger background processing:', error);
     });
 
+    // Return immediately with jobId
     return res.status(200).json({
       success: true,
       jobId: jobId.toString(),
