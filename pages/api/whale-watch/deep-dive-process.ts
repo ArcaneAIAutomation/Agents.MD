@@ -427,8 +427,42 @@ Be specific with numbers and actionable recommendations.`;
       }
     }
 
-    // Parse JSON response
-    const analysis = JSON.parse(analysisText);
+    // ✅ ROBUST JSON PARSING: Handle GPT-5.1 quirks
+    let analysis: any;
+    try {
+      // Try direct parse first
+      analysis = JSON.parse(analysisText);
+    } catch (parseError) {
+      console.warn(`⚠️ Initial JSON parse failed, attempting cleanup...`);
+      console.log(`📝 Raw response (first 500 chars):`, analysisText.substring(0, 500));
+      console.log(`📝 Raw response (last 500 chars):`, analysisText.substring(Math.max(0, analysisText.length - 500)));
+      
+      try {
+        // Clean up common GPT-5.1 JSON issues
+        let cleanedText = analysisText
+          .trim()
+          // Remove markdown code blocks if present
+          .replace(/^```json\s*/i, '')
+          .replace(/^```\s*/i, '')
+          .replace(/\s*```$/i, '')
+          // Fix trailing commas in arrays
+          .replace(/,(\s*])/g, '$1')
+          // Fix trailing commas in objects
+          .replace(/,(\s*})/g, '$1')
+          // Remove any text before first {
+          .replace(/^[^{]*({)/s, '$1')
+          // Remove any text after last }
+          .replace(/(})[^}]*$/s, '$1');
+        
+        console.log(`🔧 Cleaned JSON (first 500 chars):`, cleanedText.substring(0, 500));
+        analysis = JSON.parse(cleanedText);
+        console.log(`✅ JSON parse succeeded after cleanup`);
+      } catch (cleanupError) {
+        console.error(`❌ JSON cleanup failed:`, cleanupError);
+        console.error(`📝 Full response text:`, analysisText);
+        throw new Error(`Invalid JSON from ${model}: ${parseError instanceof Error ? parseError.message : 'Parse failed'}`);
+      }
+    }
 
     const processingTime = Date.now() - startTime;
     console.log(`✅ Deep Dive completed with ${model} in ${processingTime}ms`);
