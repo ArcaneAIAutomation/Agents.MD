@@ -61,8 +61,51 @@ export async function analyzeOnChainData(
       true // request JSON format
     );
 
-    // Parse JSON response
-    const insights = JSON.parse(result.content);
+    // ✅ BULLETPROOF JSON PARSING: Handle malformed JSON from GPT-5.1
+    let insights: OnChainInsights;
+    try {
+      // Try direct parse first (fast path)
+      insights = JSON.parse(result.content);
+      console.log(`✅ Direct JSON parse succeeded`);
+    } catch (parseError) {
+      console.warn(`⚠️ Initial JSON parse failed, engaging cleanup...`);
+      
+      try {
+        // PHASE 1: Basic cleanup
+        let cleanedText = result.content.trim();
+        
+        // PHASE 2: Remove markdown and extra text
+        cleanedText = cleanedText
+          .replace(/^```json\s*/i, '')
+          .replace(/^```\s*/i, '')
+          .replace(/\s*```$/i, '')
+          .replace(/^[^{]*({)/s, '$1')
+          .replace(/(})[^}]*$/s, '$1');
+        
+        // PHASE 3: Fix trailing commas
+        for (let i = 0; i < 5; i++) {
+          cleanedText = cleanedText
+            .replace(/,(\s*])/g, '$1')
+            .replace(/,(\s*})/g, '$1');
+        }
+        
+        // PHASE 4: Fix unterminated strings (common GPT-5.1 issue)
+        // Find and close any unterminated strings
+        cleanedText = cleanedText.replace(/"([^"]*?)$/gm, '"$1"');
+        
+        console.log(`🔧 Attempting parse after cleanup...`);
+        insights = JSON.parse(cleanedText);
+        console.log(`✅ JSON parse succeeded after cleanup`);
+        
+      } catch (cleanupError) {
+        console.error(`❌ Cleanup failed, using fallback insights`);
+        console.error(`   Parse error:`, parseError instanceof Error ? parseError.message : String(parseError));
+        console.error(`   Response length:`, result.content.length);
+        console.error(`   First 500 chars:`, result.content.substring(0, 500));
+        return generateBasicOnChainInsights(onChainData);
+      }
+    }
+    
     return insights;
 
   } catch (error) {
