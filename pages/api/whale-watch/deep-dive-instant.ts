@@ -44,35 +44,83 @@ export default async function handler(
 
     console.log(`🚀 Starting async Deep Dive for ${whale.txHash.substring(0, 20)}...`);
 
-    // Create job in database
-    const result = await query(
-      `INSERT INTO whale_analysis 
-       (tx_hash, analysis_provider, analysis_type, analysis_data, status)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id`,
-      [
-        whale.txHash,
-        'openai',
-        'deep-dive',
-        JSON.stringify({ whale }), // Store whale data for processing
-        'pending'
-      ]
+    // ✅ CHECK FOR EXISTING ANALYSIS
+    const existingAnalysis = await query(
+      `SELECT id, status, analysis_data, created_at
+       FROM whale_analysis
+       WHERE tx_hash = $1 
+         AND analysis_provider = $2 
+         AND analysis_type = $3
+       ORDER BY created_at DESC
+       LIMIT 1`,
+      [whale.txHash, 'openai', 'deep-dive']
     );
 
-    const jobId = result.rows[0].id;
-    console.log(`✅ Created job ${jobId} for ${whale.txHash.substring(0, 20)}`);
+    let jobId: number;
 
-    // ✅ FIXED: Actually trigger the background processing
-    // We need to await this to ensure it starts, but return immediately
+    if (existingAnalysis.rows.length > 0) {
+      const existing = existingAnalysis.rows[0];
+      console.log(`📊 Found existing analysis: Job ${existing.id}, Status: ${existing.status}`);
+
+      if (existing.status === 'completed') {
+        // Analysis already completed - return existing jobId
+        console.log(`✅ Analysis already completed, returning existing job ${existing.id}`);
+        return res.status(200).json({
+          success: true,
+          jobId: existing.id.toString(),
+          timestamp: new Date().toISOString(),
+        });
+      } else if (existing.status === 'analyzing' || existing.status === 'pending') {
+        // Analysis in progress - return existing jobId
+        console.log(`⏳ Analysis already in progress, returning existing job ${existing.id}`);
+        return res.status(200).json({
+          success: true,
+          jobId: existing.id.toString(),
+          timestamp: new Date().toISOString(),
+        });
+      } else if (existing.status === 'failed') {
+        // Previous analysis failed - delete and create new one
+        console.log(`🔄 Previous analysis failed, deleting and creating new job...`);
+        await query(
+          'DELETE FROM whale_analysis WHERE id = $1',
+          [existing.id]
+        );
+        
+        // Create new job
+        const result = await query(
+          `INSERT INTO whale_analysis 
+           (tx_hash, analysis_provider, analysis_type, analysis_data, status)
+           VALUES ($1, $2, $3, $4, $5)
+           RETURNING id`,
+          [whale.txHash, 'openai', 'deep-dive', JSON.stringify({ whale }), 'pending']
+        );
+        jobId = result.rows[0].id;
+        console.log(`✅ Created new job ${jobId} after deleting failed one`);
+      }
+    } else {
+      // No existing analysis - create new job
+      console.log(`📝 No existing analysis found, creating new job...`);
+      const result = await query(
+        `INSERT INTO whale_analysis 
+         (tx_hash, analysis_provider, analysis_type, analysis_data, status)
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING id`,
+        [whale.txHash, 'openai', 'deep-dive', JSON.stringify({ whale }), 'pending']
+      );
+      jobId = result.rows[0].id;
+      console.log(`✅ Created job ${jobId} for ${whale.txHash.substring(0, 20)}`);
+    }
+
+    // ✅ TRIGGER BACKGROUND PROCESSING (only for new/failed jobs)
+    // For completed/in-progress jobs, we already returned above
     const baseUrl = process.env.VERCEL_URL 
       ? `https://${process.env.VERCEL_URL}` 
       : 'http://localhost:3000';
     
-    console.log(`🚀 Triggering background processor at ${baseUrl}/api/whale-watch/deep-dive-process`);
+    console.log(`🚀 Triggering background processor for job ${jobId}...`);
     
     // Start processing but don't wait for completion
-    // This ensures the request is actually sent
-    const processingPromise = fetch(`${baseUrl}/api/whale-watch/deep-dive-process`, {
+    fetch(`${baseUrl}/api/whale-watch/deep-dive-process`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ jobId, whale }),
