@@ -74,20 +74,30 @@ export async function callOpenAI(
     }
     
     // ✅ UPGRADED: Use GPT-5.1 with Responses API
-    const response = await openai.chat.completions.create({
+    // Convert messages to input string for Responses API
+    const inputText = messages.map(m => m.content).join('\n\n');
+    
+    const response = await openai.responses.create({
       model: OPENAI_MODEL,
-      messages: messages,
+      input: inputText,
       reasoning: {
         effort: effort
       },
-      max_tokens: maxOutputTokens,
-      temperature: 0.7,
-      ...(requestJsonFormat && { response_format: { type: 'json_object' } })
+      max_output_tokens: maxOutputTokens,
+      ...(requestJsonFormat && { 
+        text: { 
+          format: 'json_object' 
+        } 
+      })
     });
     
-    // ✅ BULLETPROOF: Use utility functions for parsing
-    const content = extractResponseText(response, process.env.NODE_ENV === 'development');
-    validateResponseText(content, OPENAI_MODEL, response);
+    // ✅ BULLETPROOF: Extract from Responses API format
+    // Responses API returns output_text directly
+    const content = response.output_text || '';
+    
+    if (!content) {
+      throw new Error('No output_text in GPT-5.1 response');
+    }
     
     console.log(`[OpenAI] Response received from ${response.model} (${content.length} chars)`);
     
@@ -101,11 +111,11 @@ export async function callOpenAI(
   } catch (error: any) {
     console.error(`[OpenAI] Error calling ${OPENAI_MODEL}:`, error.message);
     
-    // Fallback to gpt-4o if GPT-5.1 fails
-    if (error.message?.includes('model') || error.message?.includes('quota') || error.status === 404) {
-      console.log(`[OpenAI] Trying fallback model: ${OPENAI_FALLBACK_MODEL}`);
+    // Fallback to gpt-4o using Chat Completions API if GPT-5.1 fails
+    if (error.message?.includes('model') || error.message?.includes('quota') || error.status === 404 || error.status === 400) {
+      console.log(`[OpenAI] Trying fallback model: ${OPENAI_FALLBACK_MODEL} (Chat Completions API)`);
       
-      // Convert input to messages format
+      // Convert input to messages format for Chat Completions API
       let messages: Array<{ role: string; content: string }>;
       if (typeof input === 'string') {
         messages = [{ role: 'user', content: input }];
@@ -113,6 +123,7 @@ export async function callOpenAI(
         messages = input;
       }
       
+      // Use Chat Completions API for gpt-4o (doesn't support Responses API)
       const fallbackResponse = await openai.chat.completions.create({
         model: OPENAI_FALLBACK_MODEL,
         messages: messages,
