@@ -1,7 +1,7 @@
 /**
  * AI-Powered News Impact Assessment for UCIE
  * 
- * Uses GPT-4o to analyze news articles and generate:
+ * ✅ UPGRADED: Uses GPT-5.1 to analyze news articles and generate:
  * - Impact scores (Bullish/Bearish/Neutral)
  * - Confidence scores
  * - Market implication summaries
@@ -9,6 +9,7 @@
  */
 
 import { NewsArticle } from './newsFetching';
+import { callOpenAI } from '../openai';
 
 export interface NewsImpactAssessment {
   articleId: string;
@@ -26,7 +27,8 @@ export interface AssessedNewsArticle extends NewsArticle {
 }
 
 /**
- * Assess impact of a single news article using GPT-4o
+ * Assess impact of a single news article using GPT-5.1
+ * ✅ UPGRADED: Fast analysis with low reasoning effort
  */
 export async function assessNewsImpact(
   article: NewsArticle,
@@ -42,44 +44,20 @@ export async function assessNewsImpact(
   try {
     const prompt = buildAssessmentPrompt(article, symbol);
     
-    // ✅ FIXED: Reduced timeout from 15s to 8s for faster processing
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const systemPrompt = 'You are a cryptocurrency market analyst specializing in news impact assessment. Analyze news articles and provide structured JSON responses with impact analysis.';
     
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a cryptocurrency market analyst specializing in news impact assessment. Analyze news articles and provide structured JSON responses with impact analysis.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 500,
-        response_format: { type: 'json_object' }
-      }),
-      signal: controller.signal
-    });
+    // ✅ UPGRADED: Use shared OpenAI client with GPT-5.1
+    const result = await callOpenAI(
+      [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: prompt }
+      ],
+      600, // max tokens
+      'low', // reasoning effort (fast news analysis)
+      true // request JSON format
+    );
     
-    clearTimeout(timeoutId);
-    
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    const content = data.choices[0].message.content;
-    const parsed = JSON.parse(content);
+    const parsed = JSON.parse(result.content);
     
     return {
       articleId: article.id,

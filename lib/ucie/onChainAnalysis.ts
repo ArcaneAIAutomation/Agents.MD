@@ -2,8 +2,10 @@
  * On-Chain Data AI Analysis
  * 
  * Provides AI-powered interpretation of blockchain data
- * Uses GPT-4o-mini for fast, accurate analysis
+ * ✅ UPGRADED: Uses GPT-5.1 with medium reasoning for accurate analysis
  */
+
+import { callOpenAI } from '../openai';
 
 export interface OnChainInsights {
   whaleActivityAnalysis: string;
@@ -19,7 +21,7 @@ export interface OnChainInsights {
 
 /**
  * Analyze Bitcoin on-chain data using AI
- * Fast analysis using GPT-4o-mini (~2-3 seconds)
+ * ✅ UPGRADED: Analysis using GPT-5.1 with medium reasoning (~3-5 seconds)
  */
 export async function analyzeOnChainData(
   onChainData: any
@@ -35,19 +37,7 @@ export async function analyzeOnChainData(
     // Build context from on-chain data
     const context = buildOnChainContext(onChainData);
     
-    // Call GPT-4o-mini for fast analysis
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `You are a blockchain analyst. Analyze Bitcoin on-chain data and provide actionable insights. Return ONLY valid JSON with this structure:
+    const systemPrompt = `You are a blockchain analyst. Analyze Bitcoin on-chain data and provide actionable insights. Return ONLY valid JSON with this structure:
 {
   "whaleActivityAnalysis": "2-3 sentence analysis of whale movements",
   "exchangeFlowAnalysis": "2-3 sentence analysis of exchange deposits/withdrawals",
@@ -58,32 +48,21 @@ export async function analyzeOnChainData(
     "factors": ["factor 1", "factor 2"]
   },
   "tradingImplications": "2-3 sentence trading implications"
-}`
-          },
-          {
-            role: 'user',
-            content: context
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 500
-      }),
-      signal: AbortSignal.timeout(5000) // 5 second timeout
-    });
+}`;
 
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const content = data.choices[0]?.message?.content;
-    
-    if (!content) {
-      throw new Error('No content in OpenAI response');
-    }
+    // ✅ UPGRADED: Use shared OpenAI client with GPT-5.1
+    const result = await callOpenAI(
+      [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: context }
+      ],
+      600, // max tokens
+      'medium', // reasoning effort (balanced analysis)
+      true // request JSON format
+    );
 
     // Parse JSON response
-    const insights = JSON.parse(content);
+    const insights = JSON.parse(result.content);
     return insights;
 
   } catch (error) {

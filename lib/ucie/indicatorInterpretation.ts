@@ -1,9 +1,10 @@
 /**
  * AI-Powered Technical Indicator Interpretation
- * Uses GPT-4o to provide plain-language explanations of technical indicators
+ * ✅ UPGRADED: Uses GPT-5.1 to provide plain-language explanations of technical indicators
  * Requirements: 7.2
  */
 
+import { callOpenAI } from '../openai';
 import {
   RSIResult,
   MACDResult,
@@ -46,6 +47,7 @@ export interface TechnicalIndicatorSummary {
 
 /**
  * Generate AI-powered interpretation of all technical indicators
+ * ✅ UPGRADED: Uses GPT-5.1 with medium reasoning for balanced analysis
  */
 export async function interpretTechnicalIndicators(
   symbol: string,
@@ -55,38 +57,21 @@ export async function interpretTechnicalIndicators(
   try {
     const prompt = buildInterpretationPrompt(symbol, indicators, currentPrice);
     
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages: [
-          {
-            role: 'system',
-            content: `You are an expert cryptocurrency technical analyst. Provide clear, actionable interpretations of technical indicators in plain language. Focus on what the indicators mean for traders and investors. Be concise but thorough.`
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 1000
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const aiResponse = data.choices[0].message.content;
+    const systemPrompt = `You are an expert cryptocurrency technical analyst. Provide clear, actionable interpretations of technical indicators in plain language. Focus on what the indicators mean for traders and investors. Be concise but thorough.`;
+    
+    // ✅ UPGRADED: Use shared OpenAI client with GPT-5.1
+    const result = await callOpenAI(
+      [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: prompt }
+      ],
+      1200, // max tokens
+      'medium', // reasoning effort (balanced technical analysis)
+      false // plain text response (not JSON)
+    );
 
     // Parse AI response into structured format
-    return parseAIResponse(aiResponse, indicators);
+    return parseAIResponse(result.content, indicators);
   } catch (error) {
     console.error('Error interpreting indicators with AI:', error);
     
