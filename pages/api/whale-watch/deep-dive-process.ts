@@ -341,18 +341,21 @@ Be specific with numbers and actionable recommendations.`;
       throw new Error('OPENAI_API_KEY not configured');
     }
 
-    // ✅ FIXED: Use correct model from environment (gpt-5.1)
-    const model = process.env.OPENAI_MODEL || 'gpt-4o';
-    console.log(`📡 Calling OpenAI API (${model})...`);
+    // ✅ MIGRATED TO RESPONSES API: Proper GPT-5.1 implementation
+    const model = process.env.OPENAI_MODEL || 'gpt-5.1';
+    const reasoningEffort = process.env.OPENAI_REASONING_EFFORT || 'medium'; // none, low, medium, high
+    
+    console.log(`📡 Calling OpenAI Responses API with ${model} (reasoning: ${reasoningEffort})...`);
     const openaiStart = Date.now();
 
     let response: Response;
     let analysisText: string;
 
-    // ✅ FIXED: Handle both GPT-5.1 and GPT-4o with correct parameters
-    if (model.includes('gpt-5.1') || model.includes('o1')) {
-      // GPT-5.1 / o1 models use different endpoint and parameters
-      response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // ✅ GPT-5.1 with Responses API (PROPER IMPLEMENTATION)
+    if (model === 'gpt-5.1' || model.includes('gpt-5')) {
+      console.log(`🚀 Using Responses API for ${model}`);
+      
+      response = await fetch('https://api.openai.com/v1/responses', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -360,52 +363,41 @@ Be specific with numbers and actionable recommendations.`;
         },
         body: JSON.stringify({
           model: model,
-          messages: [
-            {
-              role: 'user',
-              content: `You are an expert cryptocurrency analyst. Analyze this whale transaction and respond only with valid JSON.\n\n${prompt}`
-            }
-          ],
-          max_completion_tokens: 6000, // ✅ INCREASED: GPT-5.1 needs more tokens for reasoning + output
-          // Note: GPT-5.1 doesn't support temperature or response_format
+          input: `You are an expert cryptocurrency analyst. Analyze this whale transaction and respond only with valid JSON.\n\n${prompt}`,
+          reasoning: {
+            effort: reasoningEffort // none, low, medium, high
+          },
+          text: {
+            verbosity: 'medium' // low, medium, high
+          },
+          max_output_tokens: 6000,
         }),
-        signal: AbortSignal.timeout(45000), // 45 seconds (safer margin for Vercel 60s limit)
+        signal: AbortSignal.timeout(60000), // 60 seconds for Responses API
       });
 
       const openaiTime = Date.now() - openaiStart;
-      console.log(`✅ ${model} responded in ${openaiTime}ms with status ${response.status}`);
+      console.log(`✅ ${model} Responses API responded in ${openaiTime}ms with status ${response.status}`);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`❌ ${model} API error: ${response.status}`, errorText);
-        throw new Error(`${model} API error: ${response.status}`);
+        console.error(`❌ ${model} Responses API error: ${response.status}`, errorText);
+        throw new Error(`${model} Responses API error: ${response.status}`);
       }
 
       const data = await response.json();
       
-      // ✅ FIXED: Better logging and response handling for GPT-5.1
-      console.log(`📊 GPT-5.1 Response keys:`, Object.keys(data));
-      if (data.choices && data.choices[0]) {
-        console.log(`📊 Choice[0] keys:`, Object.keys(data.choices[0]));
-        if (data.choices[0].message) {
-          console.log(`📊 Message keys:`, Object.keys(data.choices[0].message));
-          console.log(`📊 Message content type:`, typeof data.choices[0].message.content);
-          console.log(`📊 Message content length:`, data.choices[0].message.content?.length || 0);
-        }
-      }
+      // ✅ Responses API uses different response structure
+      console.log(`📊 Responses API keys:`, Object.keys(data));
       
-      // Try multiple possible response formats
-      analysisText = data.choices?.[0]?.message?.content || 
-                     data.choices?.[0]?.text || 
-                     data.content ||
-                     data.message?.content;
+      // Extract output_text from Responses API
+      analysisText = data.output_text || data.text || data.content;
 
       if (!analysisText) {
-        console.error(`❌ No content found. Full response:`, JSON.stringify(data, null, 2).substring(0, 1000));
-        throw new Error(`No response from ${model}. Response has keys: ${Object.keys(data).join(', ')}`);
+        console.error(`❌ No output_text found. Full response:`, JSON.stringify(data, null, 2).substring(0, 1000));
+        throw new Error(`No response from ${model} Responses API. Response has keys: ${Object.keys(data).join(', ')}`);
       }
       
-      console.log(`✅ Got GPT-5.1 response text (${analysisText.length} chars)`);
+      console.log(`✅ Got ${model} response text (${analysisText.length} chars)`);
       console.log(`📝 First 300 chars:`, analysisText.substring(0, 300));
 
     } else {
