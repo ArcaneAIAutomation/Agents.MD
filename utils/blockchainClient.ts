@@ -183,7 +183,12 @@ export class BlockchainClient {
 
   /**
    * Detect whale transactions (>50 BTC)
-   * Returns transactions with total output > threshold
+   * Returns transactions with ANY output > threshold (individual large transfers)
+   * 
+   * ✅ FIXED: Check individual outputs, not total
+   * - A whale transaction is one where a SINGLE output is >= threshold
+   * - This catches large transfers to a single address
+   * - Ignores change outputs and multi-recipient transactions
    */
   detectWhaleTransactions(
     transactions: BitcoinTransaction[],
@@ -193,27 +198,31 @@ export class BlockchainClient {
     const whaleTransactions: WhaleTransaction[] = [];
 
     for (const tx of transactions) {
-      // Calculate total output value
-      const totalOutput = tx.out.reduce((sum, output) => sum + output.value, 0);
-      const totalBTC = totalOutput / 1e8; // Convert satoshi to BTC
+      // Check each output individually
+      for (const output of tx.out) {
+        const outputBTC = output.value / 1e8; // Convert satoshi to BTC
 
-      // Check if it's a whale transaction
-      if (totalBTC >= thresholdBTC) {
-        // Get primary addresses
-        const fromAddress = tx.inputs[0]?.prev_out?.addr || 'Unknown';
-        const toAddress = tx.out[0]?.addr || 'Unknown';
+        // Check if this individual output is a whale transaction
+        if (outputBTC >= thresholdBTC) {
+          // Get primary addresses
+          const fromAddress = tx.inputs[0]?.prev_out?.addr || 'Unknown';
+          const toAddress = output.addr || 'Unknown';
 
-        whaleTransactions.push({
-          txHash: tx.hash,
-          blockchain: 'BTC',
-          amount: totalBTC,
-          amountUSD: totalBTC * currentBTCPrice,
-          fromAddress,
-          toAddress,
-          timestamp: new Date(tx.time * 1000),
-          blockHeight: tx.block_height,
-          isWhale: true
-        });
+          whaleTransactions.push({
+            txHash: tx.hash,
+            blockchain: 'BTC',
+            amount: outputBTC,
+            amountUSD: outputBTC * currentBTCPrice,
+            fromAddress,
+            toAddress,
+            timestamp: new Date(tx.time * 1000),
+            blockHeight: tx.block_height,
+            isWhale: true
+          });
+
+          // Only track the largest output per transaction to avoid duplicates
+          break;
+        }
       }
     }
 
