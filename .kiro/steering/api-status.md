@@ -1,7 +1,8 @@
 # API Status & Configuration
 
-**Last Updated**: November 8, 2025  
-**Status**: 13/14 APIs Working (92.9%)
+**Last Updated**: January 27, 2025  
+**Status**: 13/14 APIs Working (92.9%)  
+**🆕 AI Upgrade**: GPT-5.1 deployed (Whale Watch complete)
 
 ---
 
@@ -71,13 +72,18 @@
    - Key: Configured
    - Usage: BTC blockchain, whale tracking
 
-#### AI Analysis (2/2) ✅
-1. **OpenAI GPT-4o** - Advanced analysis
-   - Status: ✅ Working (479-939ms)
+#### AI Analysis (2/2) ✅ + 🆕 GPT-5.1 Upgrade
+1. **OpenAI GPT-5.1** - 🆕 Enhanced reasoning (upgraded from GPT-4o)
+   - Status: ✅ Working (production ready)
    - Key: Configured (pay-per-use)
-   - Usage: Market analysis, trade signals
+   - Usage: Whale Watch deep dive, market analysis, trade signals
+   - Reasoning: Low (1-2s), Medium (3-5s), High (5-10s)
+   - Migration: Whale Watch ✅ Complete, UCIE 🔄 Ready
 
 2. **Gemini AI** - Fast analysis
+   - Status: ✅ Working (94-105ms)
+   - Key: Configured (free tier)
+   - Usage: Whale transaction analysis, thinking mode
    - Status: ✅ Working (94-105ms)
    - Key: Configured (free tier)
    - Usage: Whale transaction analysis, thinking mode

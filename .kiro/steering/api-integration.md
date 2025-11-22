@@ -42,8 +42,8 @@
 - **Blockchain.com API** - Bitcoin blockchain data
 - **🆕 Solana RPC API** - Solana blockchain data (SOL and SPL tokens)
 
-#### AI APIs (✅ All Working)
-- **OpenAI GPT-4o** - Advanced market analysis
+#### AI APIs (✅ All Working + 🆕 GPT-5.1 Upgrade)
+- **OpenAI GPT-5.1** - 🆕 Enhanced reasoning and analysis (upgraded from GPT-4o)
 - **Gemini AI** - Fast whale transaction analysis
 
 #### Derivatives APIs (⚠️ Limited)
@@ -67,6 +67,80 @@
 - ✅ Comprehensive API testing implemented (November 2025)
 - 🆕 Solana RPC API integration added (January 2025)
 - 🆕 Multi-provider Solana support (QuickNode, Alchemy, Helius) (January 2025)
+- 🆕 **GPT-5.1 Upgrade** - Whale Watch migrated, ready for project-wide rollout (January 2025)
+
+## 🆕 OpenAI GPT-5.1 Integration (January 2025)
+
+### Overview
+GPT-5.1 has replaced GPT-4o as the primary AI model, providing enhanced reasoning capabilities and better analysis quality.
+
+### Key Features
+- **Enhanced Reasoning**: Three effort levels (low, medium, high)
+- **Better Analysis**: Improved accuracy for complex financial data
+- **Bulletproof Parsing**: Utility functions handle all response formats
+- **Production Ready**: Successfully deployed in Whale Watch
+
+### Required Setup
+
+#### 1. Import Utility Functions
+```typescript
+import { extractResponseText, validateResponseText } from '../utils/openai';
+import OpenAI from 'openai';
+```
+
+#### 2. Initialize OpenAI Client
+```typescript
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  defaultHeaders: {
+    'OpenAI-Beta': 'responses=v1'
+  }
+});
+```
+
+#### 3. Make API Call
+```typescript
+const completion = await openai.chat.completions.create({
+  model: 'gpt-5.1',
+  messages: [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userPrompt }
+  ],
+  reasoning: {
+    effort: 'medium' // Choose: 'low', 'medium', or 'high'
+  },
+  temperature: 0.7,
+  max_tokens: 8000
+});
+
+// Bulletproof extraction
+const responseText = extractResponseText(completion, true); // true = debug mode
+validateResponseText(responseText, 'gpt-5.1', completion);
+```
+
+### Reasoning Effort Guidelines
+
+| Effort | Duration | Use Cases |
+|--------|----------|-----------|
+| **low** | 1-2s | News sentiment, simple categorization, quick summaries |
+| **medium** | 3-5s | Market analysis, technical indicators, risk assessment |
+| **high** | 5-10s | Whale analysis, complex trade signals, strategic decisions |
+
+### Migration Status
+
+#### ✅ Migrated
+- Whale Watch Deep Dive Analysis
+
+#### 🔄 Ready for Migration
+- UCIE Research Analysis
+- Trade Generation Engine
+- Technical Analysis
+- Risk Assessment
+
+### Documentation
+- **Complete Guide**: `GPT-5.1-MIGRATION-GUIDE.md`
+- **Utility Reference**: `OPENAI-RESPONSES-API-UTILITY.md`
+- **Example Implementation**: `pages/api/whale-watch/deep-dive-process.ts`
 
 ## Caesar API Integration
 

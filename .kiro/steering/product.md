@@ -5,7 +5,7 @@
 ## Core Features
 
 ### Trading Intelligence
-- **AI Trade Generation Engine**: GPT-4o powered trading signals with step-by-step reasoning
+- **AI Trade Generation Engine**: 🆕 GPT-5.1 powered trading signals with enhanced reasoning (upgraded from GPT-4o)
 - **Real-time Trading Zones**: Live supply/demand analysis using order book data from multiple exchanges
 - **Multi-timeframe Analysis**: 15m, 1h, 4h, 1d technical analysis with confidence scoring
 - **Risk Management**: Automated stop-loss, take-profit, and risk-reward ratio calculations
@@ -18,6 +18,7 @@
 
 ### Whale Watch Intelligence
 - **Bitcoin Whale Tracking**: Real-time detection of large BTC transactions (>50 BTC)
+- **🆕 GPT-5.1 Deep Dive**: Enhanced whale transaction analysis with high reasoning mode
 - **Caesar AI Analysis**: Deep research and analysis of whale transactions with 5-7 minute processing
 - **Transaction Classification**: Automatic identification of exchange deposits, withdrawals, and whale-to-whale transfers
 - **Market Impact Assessment**: AI-powered analysis of potential market effects (Bearish/Bullish/Neutral)
@@ -58,6 +59,10 @@ The platform embodies **Bitcoin Sovereign Technology** principles with a pure bl
 
 ## Recently Launched
 
+- **🆕 GPT-5.1 AI Upgrade**: Enhanced reasoning and analysis quality (✅ Live - January 2025)
+  - Whale Watch Deep Dive migrated to GPT-5.1
+  - Bulletproof response parsing with utility functions
+  - Ready for project-wide rollout
 - **Secure User Authentication**: Complete authentication system with access codes, JWT tokens, and session management (✅ Live - January 2025)
 - **UCIE Database Integration**: Database-backed caching and context aggregation for AI analysis (✅ Complete - January 2025)
 - **Whale Watch Dashboard**: Live Bitcoin whale transaction tracking with Gemini AI analysis (✅ Live)
@@ -69,6 +74,11 @@ The platform embodies **Bitcoin Sovereign Technology** principles with a pure bl
 
 ## Upcoming Features
 
+- **🔄 GPT-5.1 Migration**: Migrate remaining features to GPT-5.1
+  - UCIE Research Analysis
+  - Trade Generation Engine
+  - Technical Analysis
+  - Risk Assessment
 - **Admin Dashboard**: User and access code management interface
 - **Password Reset**: Email-based password recovery system
 - **Email Verification**: Verify user email addresses on registration

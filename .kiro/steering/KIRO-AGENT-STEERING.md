@@ -13,7 +13,7 @@ Agents.MD (Bitcoin Sovereign Technology) is a comprehensive cryptocurrency intel
 - **UCIE**: Universal Crypto Intelligence Engine (comprehensive multi-source analysis)
 - **Secure Authentication**: Access code-based user system with session management
 - **Multi-Source Data**: 13+ API integrations (92.9% uptime)
-- **AI-Powered Analysis**: Caesar AI, OpenAI GPT-4o, Gemini AI
+- **AI-Powered Analysis**: Caesar AI, OpenAI GPT-5.1, Gemini AI
 
 ---
 
@@ -124,6 +124,67 @@ const apiKey = process.env.COINGECKO_API_KEY;
 // ❌ WRONG
 const apiKey = 'hardcoded-key';
 ```
+
+### Rule #5: GPT-5.1 Integration (NEW - January 2025)
+
+**When working with OpenAI APIs, ALWAYS use GPT-5.1 with bulletproof response parsing.**
+
+**Why**: GPT-5.1 provides enhanced reasoning and better analysis quality than GPT-4o.
+
+#### Required Imports
+```typescript
+import { extractResponseText, validateResponseText } from '../utils/openai';
+import OpenAI from 'openai';
+```
+
+#### OpenAI Client Setup
+```typescript
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  defaultHeaders: {
+    'OpenAI-Beta': 'responses=v1'
+  }
+});
+```
+
+#### API Call Pattern
+```typescript
+const completion = await openai.chat.completions.create({
+  model: 'gpt-5.1',
+  messages: [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userPrompt }
+  ],
+  reasoning: {
+    effort: 'medium' // 'low', 'medium', or 'high'
+  },
+  temperature: 0.7,
+  max_tokens: 8000
+});
+
+// Bulletproof extraction
+const responseText = extractResponseText(completion, true); // true = debug mode
+validateResponseText(responseText, 'gpt-5.1', completion);
+```
+
+#### Reasoning Effort Guidelines
+- **`low`** (1-2s): News sentiment, simple categorization
+- **`medium`** (3-5s): Market analysis, technical indicators, risk assessment
+- **`high`** (5-10s): Whale analysis, complex trade signals, strategic decisions
+
+**NEVER**:
+- ❌ Use `gpt-4o` for new features (migrate to `gpt-5.1`)
+- ❌ Access `completion.choices[0].message.content` directly
+- ❌ Skip response validation
+
+**ALWAYS**:
+- ✅ Use `gpt-5.1` model
+- ✅ Use `extractResponseText()` for parsing
+- ✅ Use `validateResponseText()` for validation
+- ✅ Enable debug mode during development
+- ✅ Choose appropriate reasoning effort level
+
+**See**: `GPT-5.1-MIGRATION-GUIDE.md` for complete migration instructions.
 
 ---
 
@@ -485,6 +546,7 @@ Additionally:
 5. **product.md** - Product overview
 6. **authentication.md** - Auth system guide
 7. **api-status.md** - API status and configuration
+8. **GPT-5.1-MIGRATION-GUIDE.md** - GPT-5.1 upgrade guide (NEW)
 
 ### UCIE-Specific Documentation
 1. **UCIE-EXECUTION-ORDER-SPECIFICATION.md** - AI execution order

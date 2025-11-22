@@ -24,7 +24,7 @@
 ## Backend & APIs
 - **Next.js API Routes** - Serverless functions with error handling and fallbacks
 - **Fetch API** - Native HTTP client with timeout and retry logic
-- **OpenAI GPT-4o** - Advanced AI-powered market analysis and trade generation
+- **OpenAI GPT-5.1** - 🆕 Enhanced AI with reasoning mode (upgraded from GPT-4o)
 - **Gemini AI** - Fast whale transaction analysis with thinking mode
 - **Multiple Data Sources (13/14 Working - 92.9%)**:
   - **CoinMarketCap API** - Primary market data source ✅
@@ -95,12 +95,19 @@ npm run analyze      # Bundle analysis with mobile metrics
 ## Environment Setup
 - Copy `.env.example` to `.env.local`
 - **Required API keys**: 
-  - `OPENAI_API_KEY` - GPT-4o for AI analysis
+  - `OPENAI_API_KEY` - GPT-5.1 for AI analysis (upgraded from GPT-4o)
   - `NEWS_API_KEY` - Real-time news aggregation
   - `COINMARKETCAP_API_KEY` - Primary market data
 - **Optional API keys**:
   - `COINGECKO_API_KEY` - Fallback market data
   - `CRYPTOCOMPARE_API_KEY` - Additional news source
+
+## AI Integration (GPT-5.1)
+- **Model**: `gpt-5.1` with OpenAI Responses API
+- **Reasoning Modes**: Low (1-2s), Medium (3-5s), High (5-10s)
+- **Utility Functions**: `utils/openai.ts` - Bulletproof response parsing
+- **Migration Guide**: See `GPT-5.1-MIGRATION-GUIDE.md`
+- **Current Status**: ✅ Whale Watch migrated, ready for project-wide rollout
 
 ## Build Configuration
 - **TypeScript**: Errors ignored during build for faster deployment (`ignoreBuildErrors: true`)
