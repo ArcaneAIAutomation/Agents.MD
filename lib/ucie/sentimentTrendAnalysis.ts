@@ -2,8 +2,10 @@
  * Sentiment Trend Analysis
  * 
  * Provides AI-powered analysis of social sentiment trends
- * Uses GPT-4o-mini for fast, accurate analysis
+ * ✅ UPGRADED: Uses GPT-5.1 with low reasoning effort for fast analysis
  */
+
+import { callOpenAI } from '../openai';
 
 export interface SentimentTrendInsights {
   trendAnalysis: string;
@@ -16,7 +18,7 @@ export interface SentimentTrendInsights {
 
 /**
  * Analyze sentiment trends using AI
- * Fast analysis using GPT-4o-mini (~2-3 seconds)
+ * ✅ UPGRADED: Fast analysis using GPT-5.1 with low reasoning (~1-2 seconds)
  */
 export async function analyzeSentimentTrends(
   sentimentData: any
@@ -30,18 +32,7 @@ export async function analyzeSentimentTrends(
   try {
     const context = buildSentimentContext(sentimentData);
     
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `You are a social sentiment analyst. Analyze cryptocurrency social sentiment and provide actionable insights. Return ONLY valid JSON with this structure:
+    const systemPrompt = `You are a social sentiment analyst. Analyze cryptocurrency social sentiment and provide actionable insights. Return ONLY valid JSON with this structure:
 {
   "trendAnalysis": "2-3 sentence analysis of sentiment trend",
   "momentumIndicator": "accelerating|stable|decelerating",
@@ -49,31 +40,20 @@ export async function analyzeSentimentTrends(
   "influencerSentiment": "2 sentence summary of influencer sentiment",
   "keyNarratives": ["narrative 1", "narrative 2", "narrative 3"],
   "tradingImplications": "2-3 sentence trading implications"
-}`
-          },
-          {
-            role: 'user',
-            content: context
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 400
-      }),
-      signal: AbortSignal.timeout(5000)
-    });
+}`;
 
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
-    }
+    // ✅ UPGRADED: Use shared OpenAI client with GPT-5.1
+    const result = await callOpenAI(
+      [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: context }
+      ],
+      500, // max tokens (reduced for fast response)
+      'low', // reasoning effort (fast analysis)
+      true // request JSON format
+    );
 
-    const data = await response.json();
-    const content = data.choices[0]?.message?.content;
-    
-    if (!content) {
-      throw new Error('No content in OpenAI response');
-    }
-
-    return JSON.parse(content);
+    return JSON.parse(result.content);
 
   } catch (error) {
     console.error('AI sentiment analysis failed:', error);
