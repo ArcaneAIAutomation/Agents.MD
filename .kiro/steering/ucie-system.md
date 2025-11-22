@@ -11,14 +11,15 @@
 
 **Universal Crypto Intelligence Engine (UCIE)** is a comprehensive cryptocurrency analysis platform that combines:
 - Real-time market data from 13+ APIs
-- AI-powered research (Caesar AI, OpenAI GPT-4o, Gemini AI)
+- AI-powered research (Caesar AI, 🆕 OpenAI GPT-5.1, Gemini AI)
 - On-chain analytics (whale tracking, **exchange flow detection**, holder distribution)
 - Social sentiment analysis (Twitter, Reddit, LunarCrush) with **trend calculation**
 - Technical analysis (15+ indicators)
 - Risk assessment and predictions
 - DeFi metrics and derivatives data
 
-**🆕 Latest Enhancement (Jan 27, 2025):**
+**🆕 Latest Enhancements (Jan 27, 2025):**
+- ✅ **GPT-5.1 Upgrade**: Enhanced AI reasoning (ready for UCIE migration)
 - ✅ Sentiment trend now calculated from distribution data
 - ✅ Exchange deposit/withdrawal detection (15+ major exchanges)
 - ✅ Cold wallet movement tracking
@@ -532,6 +533,104 @@ Before considering work complete:
 
 ---
 
+## 🆕 GPT-5.1 Integration for UCIE (January 2025)
+
+### Overview
+UCIE is ready to migrate from GPT-4o to GPT-5.1 for enhanced AI analysis quality.
+
+### Why Upgrade?
+- ✅ **Better reasoning**: Enhanced analysis with thinking mode
+- ✅ **Higher accuracy**: Improved market predictions and insights
+- ✅ **Bulletproof parsing**: Utility functions handle all response formats
+- ✅ **Production proven**: Successfully deployed in Whale Watch
+
+### Migration Priority
+1. **High Priority**: UCIE Research Analysis (`/api/ucie/research/[symbol]`)
+2. **Medium Priority**: Technical Analysis, Risk Assessment
+3. **Low Priority**: Simple categorization tasks
+
+### Implementation Pattern for UCIE
+
+```typescript
+// pages/api/ucie/research/[symbol].ts
+import { extractResponseText, validateResponseText } from '../../../utils/openai';
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  defaultHeaders: {
+    'OpenAI-Beta': 'responses=v1'
+  }
+});
+
+export default async function handler(req, res) {
+  const { symbol } = req.query;
+  
+  // 1. Check cache
+  const cached = await getCachedAnalysis(symbol, 'research');
+  if (cached) return res.json(cached);
+  
+  // 2. Get ALL cached data
+  const context = await getComprehensiveContext(symbol);
+  
+  // 3. Verify data quality
+  if (context.dataQuality < 70) {
+    return res.status(202).json({
+      error: 'Insufficient data',
+      dataQuality: context.dataQuality
+    });
+  }
+  
+  // 4. Format context
+  const contextPrompt = formatContextForAI(context);
+  
+  // 5. Call GPT-5.1 with complete context
+  const completion = await openai.chat.completions.create({
+    model: 'gpt-5.1',
+    messages: [
+      { role: 'system', content: 'You are a crypto market analyst...' },
+      { role: 'user', content: contextPrompt }
+    ],
+    reasoning: {
+      effort: 'medium' // Balanced for UCIE analysis
+    },
+    temperature: 0.7,
+    max_tokens: 8000
+  });
+  
+  // 6. Bulletproof extraction
+  const responseText = extractResponseText(completion, true);
+  validateResponseText(responseText, 'gpt-5.1', completion);
+  
+  // 7. Parse and cache
+  const analysis = JSON.parse(responseText);
+  await setCachedAnalysis(symbol, 'research', analysis, 86400, 100);
+  
+  return res.json(analysis);
+}
+```
+
+### Reasoning Effort for UCIE
+- **`medium`** (recommended): Balanced speed and quality for market analysis
+- **`high`**: For complex multi-factor analysis (use sparingly due to cost)
+- **`low`**: Not recommended for UCIE (insufficient depth)
+
+### Migration Checklist
+- [ ] Import utility functions from `utils/openai.ts`
+- [ ] Update OpenAI client with Responses API header
+- [ ] Change model from `gpt-4o` to `gpt-5.1`
+- [ ] Add reasoning effort level
+- [ ] Use `extractResponseText()` for parsing
+- [ ] Use `validateResponseText()` for validation
+- [ ] Enable debug mode during testing
+- [ ] Test with real data
+- [ ] Monitor Vercel logs
+- [ ] Update cache TTL if needed
+
+**See**: `GPT-5.1-MIGRATION-GUIDE.md` for complete migration instructions.
+
+---
+
 ## 🚀 Quick Start for New Work
 
 ### Before Starting Any UCIE Work:
@@ -540,6 +639,7 @@ Before considering work complete:
 2. **Verify database is working**: `npx tsx scripts/verify-database-storage.ts`
 3. **Check current status**: Read `UCIE-STATUS-REPORT.md`
 4. **Understand execution order**: Read `UCIE-EXECUTION-ORDER-SPECIFICATION.md`
+5. **🆕 Review GPT-5.1 upgrade**: Read `GPT-5.1-MIGRATION-GUIDE.md`
 
 ### When Adding New Features:
 
