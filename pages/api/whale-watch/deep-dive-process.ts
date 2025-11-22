@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { query } from '../../../lib/db';
 import { storeWhaleTransaction, storeWhaleAnalysis } from '../../../lib/whale-watch/database';
 
 /**
