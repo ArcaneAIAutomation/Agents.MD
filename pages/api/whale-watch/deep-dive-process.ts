@@ -341,7 +341,7 @@ Be specific with numbers and actionable recommendations.`;
               content: `You are an expert cryptocurrency analyst. Analyze this whale transaction and respond only with valid JSON.\n\n${prompt}`
             }
           ],
-          max_completion_tokens: 2000, // ✅ CORRECT for GPT-5.1
+          max_completion_tokens: 6000, // ✅ INCREASED: GPT-5.1 needs more tokens for reasoning + output
           // Note: GPT-5.1 doesn't support temperature or response_format
         }),
         signal: AbortSignal.timeout(45000), // 45 seconds (safer margin for Vercel 60s limit)
