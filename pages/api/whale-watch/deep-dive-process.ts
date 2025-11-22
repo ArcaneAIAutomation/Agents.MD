@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { query } from '../../../lib/db';
 import { storeWhaleTransaction, storeWhaleAnalysis } from '../../../lib/whale-watch/database';
 import { identifyAddresses, formatArkhamDataForPrompt, determineTransactionType } from '../../../lib/arkham/client';
+import { extractResponseText, validateResponseText } from '../../../utils/openai';
 
 /**
  * Deep Dive Analysis Background Processor
@@ -386,16 +387,14 @@ Be specific with numbers and actionable recommendations.`;
 
       const data = await response.json();
       
-      // ✅ Responses API uses different response structure
+      // ✅ BULLETPROOF: Extract text using utility function
       console.log(`📊 Responses API keys:`, Object.keys(data));
       
-      // Extract output_text from Responses API
-      analysisText = data.output_text || data.text || data.content;
-
-      if (!analysisText) {
-        console.error(`❌ No output_text found. Full response:`, JSON.stringify(data, null, 2).substring(0, 1000));
-        throw new Error(`No response from ${model} Responses API. Response has keys: ${Object.keys(data).join(', ')}`);
-      }
+      // Use bulletproof extraction utility with debug logging
+      analysisText = extractResponseText(data, true);
+      
+      // Validate extraction succeeded
+      validateResponseText(analysisText, model, data);
       
       console.log(`✅ Got ${model} response text (${analysisText.length} chars)`);
       console.log(`📝 First 300 chars:`, analysisText.substring(0, 300));
