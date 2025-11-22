@@ -58,7 +58,8 @@ export async function generateOpenAIAnalysis(
               }
             ],
             maxTokens,
-            temperature
+            'medium', // reasoning effort: 'low', 'medium', 'high'
+            true // request JSON format
           ),
           new Promise<never>((_, reject) => 
             setTimeout(() => reject(new Error(`${MODEL} timeout`)), PRIMARY_TIMEOUT)
@@ -91,7 +92,8 @@ export async function generateOpenAIAnalysis(
               }
             ],
             maxTokens,
-            temperature
+            'low', // reasoning effort: use 'low' for faster fallback
+            true // request JSON format
           ),
           new Promise<never>((_, reject) => 
             setTimeout(() => reject(new Error(`${FALLBACK_MODEL} timeout`)), FALLBACK_TIMEOUT)
