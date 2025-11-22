@@ -8,12 +8,13 @@ import { storeWhaleTransaction, cacheWhaleDetection, getCachedWhaleDetection } f
  * 
  * Time Period Scanned:
  * - Unconfirmed transactions in mempool (last few minutes)
- * - Latest confirmed block (last ~10 minutes)
- * - Total window: approximately 10-15 minutes of recent activity
+ * - Last 3 confirmed blocks (~30 minutes of activity)
+ * - Total window: approximately 30-35 minutes of recent activity
  * 
  * ✅ 99% ACCURACY RULE: Returns error if unable to fetch accurate BTC price
  * ✅ STORES DATA: Saves detected whales to Supabase database
  * ✅ CACHES: 30-second cache to reduce API calls
+ * ✅ ENHANCED: Scans 30 minutes of transactions for better whale detection
  */
 
 interface WhaleDetectionResponse {
@@ -82,20 +83,10 @@ export default async function handler(
     const unconfirmedTxs = await blockchainClient.getUnconfirmedTransactions();
     console.log(`📊 Found ${unconfirmedTxs.length} unconfirmed transactions in mempool`);
 
-    // Get latest block(s) to scan recent confirmed transactions
-    // Each block = ~10 minutes, so 6 blocks = ~1 hour
-    const latestBlock = await blockchainClient.getLatestBlock();
-    let confirmedTxs: any[] = [];
-    
-    if (latestBlock && latestBlock.hash) {
-      console.log(`📦 Fetching transactions from latest ${blocksToScan} block(s) starting at height ${latestBlock.height}`);
-      
-      // For now, just scan the latest block (scanning multiple blocks can be slow)
-      // TODO: Implement multi-block scanning with caching
-      // ✅ FIXED: Pass block height for more reliable API calls
-      confirmedTxs = await blockchainClient.getBlockTransactions(latestBlock.hash, latestBlock.height);
-      console.log(`📊 Found ${confirmedTxs.length} confirmed transactions in block ${latestBlock.height}`);
-    }
+    // Get transactions from last 30 minutes (3 blocks)
+    // ✅ ENHANCED: Scan multiple recent blocks for better whale detection
+    const confirmedTxs = await blockchainClient.getRecentTransactions(30);
+    console.log(`📊 Found ${confirmedTxs.length} confirmed transactions in last 30 minutes`);
 
     // Combine unconfirmed and recent confirmed transactions
     const allTransactions = [...unconfirmedTxs, ...confirmedTxs];

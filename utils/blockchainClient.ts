@@ -156,6 +156,54 @@ export class BlockchainClient {
   }
 
   /**
+   * Get transactions from last 30 minutes
+   * Bitcoin blocks are ~10 minutes apart, so we scan last 3 blocks
+   * 
+   * ✅ ENHANCED: Scan multiple recent blocks for 30-minute window
+   */
+  async getRecentTransactions(minutes: number = 30): Promise<BitcoinTransaction[]> {
+    try {
+      // Calculate how many blocks to scan (Bitcoin: ~10 min per block)
+      const blocksToScan = Math.ceil(minutes / 10);
+      console.log(`📦 Scanning last ${blocksToScan} blocks (~${minutes} minutes)...`);
+
+      const latestBlock = await this.getLatestBlock();
+      if (!latestBlock || !latestBlock.height) {
+        console.error('❌ Could not get latest block');
+        return [];
+      }
+
+      const allTransactions: BitcoinTransaction[] = [];
+      const startHeight = latestBlock.height;
+
+      // Fetch transactions from multiple recent blocks
+      for (let i = 0; i < blocksToScan; i++) {
+        const blockHeight = startHeight - i;
+        console.log(`📡 Fetching block ${i + 1}/${blocksToScan} (height ${blockHeight})...`);
+
+        try {
+          const txs = await this.getBlockTransactions('', blockHeight);
+          allTransactions.push(...txs);
+          console.log(`✅ Block ${blockHeight}: ${txs.length} transactions`);
+        } catch (error) {
+          console.error(`⚠️ Failed to fetch block ${blockHeight}, continuing...`);
+        }
+
+        // Small delay to avoid rate limiting
+        if (i < blocksToScan - 1) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
+
+      console.log(`✅ Total transactions from last ${minutes} minutes: ${allTransactions.length}`);
+      return allTransactions;
+    } catch (error) {
+      console.error('❌ Error fetching recent transactions:', error);
+      return [];
+    }
+  }
+
+  /**
    * Get address balance
    */
   async getAddressBalance(address: string): Promise<number> {
