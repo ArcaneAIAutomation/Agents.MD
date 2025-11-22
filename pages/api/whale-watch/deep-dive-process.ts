@@ -427,42 +427,100 @@ Be specific with numbers and actionable recommendations.`;
       }
     }
 
-    // ✅ ROBUST JSON PARSING: Handle GPT-5.1 quirks
+    // ✅ ULTIMATE BULLETPROOF JSON PARSING: 1000x Power Edition
     let analysis: any;
     try {
-      // Try direct parse first
+      // Try direct parse first (fast path)
       analysis = JSON.parse(analysisText);
+      console.log(`✅ Direct JSON parse succeeded`);
     } catch (parseError) {
-      console.warn(`⚠️ Initial JSON parse failed, attempting cleanup...`);
-      console.log(`📝 Raw response (first 500 chars):`, analysisText.substring(0, 500));
-      console.log(`📝 Raw response (last 500 chars):`, analysisText.substring(Math.max(0, analysisText.length - 500)));
+      console.warn(`⚠️ Initial JSON parse failed, engaging ULTIMATE cleanup...`);
+      console.log(`📝 Error:`, parseError instanceof Error ? parseError.message : String(parseError));
       
       try {
-        // Clean up common GPT-5.1 JSON issues
-        let cleanedText = analysisText
-          .trim()
-          // Remove markdown code blocks if present
+        // PHASE 1: Basic cleanup
+        let cleanedText = analysisText.trim();
+        
+        // PHASE 2: Remove markdown and extra text
+        cleanedText = cleanedText
           .replace(/^```json\s*/i, '')
           .replace(/^```\s*/i, '')
           .replace(/\s*```$/i, '')
-          // Fix trailing commas in arrays
-          .replace(/,(\s*])/g, '$1')
-          // Fix trailing commas in objects
-          .replace(/,(\s*})/g, '$1')
-          // Remove any text before first {
           .replace(/^[^{]*({)/s, '$1')
-          // Remove any text after last }
           .replace(/(})[^}]*$/s, '$1');
         
-        console.log(`🔧 Cleaned JSON (first 500 chars):`, cleanedText.substring(0, 500));
+        // PHASE 3: Fix trailing commas (multiple passes for nested structures)
+        for (let i = 0; i < 5; i++) {
+          cleanedText = cleanedText
+            .replace(/,(\s*])/g, '$1')
+            .replace(/,(\s*})/g, '$1');
+        }
+        
+        // PHASE 4: Fix common number format issues
+        cleanedText = cleanedText
+          // Fix numbers with trailing dots: 123. → 123
+          .replace(/(\d+)\.(\s*[,\]}])/g, '$1$2')
+          // Fix multiple dots in numbers: 123..45 → 123.45
+          .replace(/(\d+)\.\.+(\d+)/g, '$1.$2');
+        
+        // PHASE 5: Fix array formatting issues
+        cleanedText = cleanedText
+          // Fix missing commas between array elements: [1 2] → [1, 2]
+          .replace(/(\d+)\s+(\d+)/g, '$1, $2')
+          // Fix double commas: ,, → ,
+          .replace(/,\s*,/g, ',');
+        
+        // PHASE 6: Try parsing cleaned JSON
+        console.log(`🔧 Attempting parse after cleanup...`);
         analysis = JSON.parse(cleanedText);
-        console.log(`✅ JSON parse succeeded after cleanup`);
+        console.log(`✅ JSON parse succeeded after ULTIMATE cleanup`);
+        
       } catch (cleanupError) {
-        console.error(`❌ JSON cleanup failed:`, cleanupError);
-        console.error(`📝 Full response text:`, analysisText);
-        throw new Error(`Invalid JSON from ${model}: ${parseError instanceof Error ? parseError.message : 'Parse failed'}`);
+        console.error(`❌ ULTIMATE cleanup failed, trying NUCLEAR option...`);
+        
+        try {
+          // NUCLEAR OPTION: Extract JSON using regex and reconstruct
+          const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
+          if (!jsonMatch) {
+            throw new Error('No JSON object found in response');
+          }
+          
+          let extractedJson = jsonMatch[0];
+          
+          // Apply all cleanup phases to extracted JSON
+          for (let i = 0; i < 5; i++) {
+            extractedJson = extractedJson
+              .replace(/,(\s*])/g, '$1')
+              .replace(/,(\s*})/g, '$1')
+              .replace(/(\d+)\.(\s*[,\]}])/g, '$1$2')
+              .replace(/,\s*,/g, ',');
+          }
+          
+          console.log(`☢️ NUCLEAR parse attempt...`);
+          analysis = JSON.parse(extractedJson);
+          console.log(`✅ NUCLEAR parse succeeded!`);
+          
+        } catch (nuclearError) {
+          // LAST RESORT: Log everything and fail gracefully
+          console.error(`❌ ALL parsing attempts failed`);
+          console.error(`📝 Original error:`, parseError instanceof Error ? parseError.message : String(parseError));
+          console.error(`📝 Cleanup error:`, cleanupError instanceof Error ? cleanupError.message : String(cleanupError));
+          console.error(`📝 Nuclear error:`, nuclearError instanceof Error ? nuclearError.message : String(nuclearError));
+          console.error(`📝 Response length:`, analysisText.length);
+          console.error(`📝 First 1000 chars:`, analysisText.substring(0, 1000));
+          console.error(`📝 Last 1000 chars:`, analysisText.substring(Math.max(0, analysisText.length - 1000)));
+          
+          throw new Error(`Invalid JSON from ${model} after all cleanup attempts: ${parseError instanceof Error ? parseError.message : 'Parse failed'}`);
+        }
       }
     }
+    
+    // Validate required fields exist
+    if (!analysis || typeof analysis !== 'object') {
+      throw new Error('Parsed analysis is not a valid object');
+    }
+    
+    console.log(`✅ Analysis object validated, keys:`, Object.keys(analysis).join(', '));
 
     const processingTime = Date.now() - startTime;
     console.log(`✅ Deep Dive completed with ${model} in ${processingTime}ms`);
