@@ -344,7 +344,7 @@ Be specific with numbers and actionable recommendations.`;
           max_completion_tokens: 2000, // ✅ CORRECT for GPT-5.1
           // Note: GPT-5.1 doesn't support temperature or response_format
         }),
-        signal: AbortSignal.timeout(50000), // 50 seconds (Vercel Hobby limit is 60s)
+        signal: AbortSignal.timeout(45000), // 45 seconds (safer margin for Vercel 60s limit)
       });
 
       const openaiTime = Date.now() - openaiStart;
@@ -494,15 +494,25 @@ Be specific with numbers and actionable recommendations.`;
 
   } catch (error) {
     const processingTime = Date.now() - startTime;
-    console.error(`❌ Deep Dive error after ${processingTime}ms:`, error);
+    console.error(`❌ ========================================`);
+    console.error(`❌ Deep Dive FAILED after ${processingTime}ms`);
+    console.error(`❌ Error type: ${error?.constructor?.name}`);
+    console.error(`❌ Error message: ${error instanceof Error ? error.message : String(error)}`);
+    console.error(`❌ Full error:`, error);
+    console.error(`❌ Stack trace:`, error instanceof Error ? error.stack : 'No stack trace');
+    console.error(`❌ ========================================`);
     
     let errorMessage = 'Deep Dive analysis failed';
     
     if (error instanceof Error) {
       if (error.message.includes('timeout') || error.message.includes('abort')) {
-        errorMessage = 'Analysis timed out';
+        errorMessage = 'Analysis timed out - try upgrading to Vercel Pro for longer execution time';
       } else if (error.message.includes('API key')) {
         errorMessage = 'OpenAI API key issue';
+      } else if (error.message.includes('rate limit')) {
+        errorMessage = 'OpenAI rate limit exceeded';
+      } else if (error.message.includes('model')) {
+        errorMessage = `Model error: ${error.message}`;
       } else {
         errorMessage = error.message;
       }
@@ -518,9 +528,14 @@ Be specific with numbers and actionable recommendations.`;
                analysis_data = $2,
                updated_at = NOW()
            WHERE id = $3`,
-          ['failed', JSON.stringify({ error: errorMessage }), parseInt(jobId)]
+          ['failed', JSON.stringify({ 
+            error: errorMessage,
+            errorType: error?.constructor?.name,
+            timestamp: new Date().toISOString(),
+            processingTime
+          }), parseInt(jobId)]
         );
-        console.log(`❌ Job ${jobId}: Marked as failed`);
+        console.log(`❌ Job ${jobId}: Marked as failed with error: ${errorMessage}`);
       } catch (dbError) {
         console.error('❌ Failed to update job status:', dbError);
       }
