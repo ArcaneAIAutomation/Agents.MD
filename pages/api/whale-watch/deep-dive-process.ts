@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { query } from '../../../lib/db';
 import { storeWhaleTransaction, storeWhaleAnalysis } from '../../../lib/whale-watch/database';
+import { identifyAddresses, formatArkhamDataForPrompt, determineTransactionType } from '../../../lib/arkham/client';
 
 /**
  * Deep Dive Analysis Background Processor
@@ -231,8 +232,24 @@ export default async function handler(
     const blockchainTime = Date.now() - blockchainStart;
     console.log(`✅ Blockchain data fetched in ${blockchainTime}ms`);
 
-    // Get current BTC price
-    const currentBtcPrice = await getCurrentBitcoinPrice();
+    // Get Arkham Intelligence and BTC price in parallel
+    const [arkhamData, currentBtcPrice] = await Promise.all([
+      identifyAddresses([whale.fromAddress, whale.toAddress]),
+      getCurrentBitcoinPrice(),
+    ]);
+    
+    // Extract Arkham intelligence
+    const fromArkham = arkhamData.get(whale.fromAddress);
+    const toArkham = arkhamData.get(whale.toAddress);
+    
+    console.log(`🔍 Arkham Intelligence:`);
+    console.log(`   From: ${fromArkham?.entity?.name || 'Unknown'} (${fromArkham?.entity?.type || 'unknown'})`);
+    console.log(`   To: ${toArkham?.entity?.name || 'Unknown'} (${toArkham?.entity?.type || 'unknown'})`);
+    
+    // Determine transaction type using Arkham intelligence
+    const transactionType = determineTransactionType(fromArkham, toArkham);
+    console.log(`   Detected Type: ${transactionType}`);
+    
     console.log(`✅ BTC price: $${currentBtcPrice.toLocaleString()}`);
 
     // Build comprehensive prompt
@@ -254,6 +271,7 @@ export default async function handler(
 
 📊 SOURCE ADDRESS INTELLIGENCE:
 - Address: ${fromAddressData.address}
+- Arkham ID: ${formatArkhamDataForPrompt(fromArkham)}
 - Balance: ${fromAddressData.finalBalance} BTC
 - Total Transactions: ${fromAddressData.transactionCount}
 - Total Received: ${fromAddressData.totalReceived} BTC
@@ -263,12 +281,19 @@ ${recentTxDetails || 'No recent transactions'}
 
 📊 DESTINATION ADDRESS INTELLIGENCE:
 - Address: ${toAddressData.address}
+- Arkham ID: ${formatArkhamDataForPrompt(toArkham)}
 - Balance: ${toAddressData.finalBalance} BTC
 - Total Transactions: ${toAddressData.transactionCount}
 - Total Received: ${toAddressData.totalReceived} BTC
 - Total Sent: ${toAddressData.totalSent} BTC
 Recent Activity:
 ${destTxDetails || 'No recent transactions'}
+
+🔍 ARKHAM INTELLIGENCE ANALYSIS:
+- Detected Transaction Type: ${transactionType}
+- Source Entity: ${fromArkham?.entity?.name || 'Unknown'}
+- Destination Entity: ${toArkham?.entity?.name || 'Unknown'}
+- Use this Arkham intelligence to enhance your analysis accuracy
 
 🎯 DEEP DIVE ANALYSIS REQUIRED:
 
