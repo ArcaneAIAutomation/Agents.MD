@@ -32,7 +32,7 @@ export const openai = new OpenAI({
 // Model configuration
 // ✅ UPGRADED: Using gpt-5.1 (enhanced reasoning, better analysis)
 export const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-5.1';
-export const OPENAI_FALLBACK_MODEL = process.env.OPENAI_FALLBACK_MODEL || 'gpt-4o';
+export const OPENAI_FALLBACK_MODEL = process.env.OPENAI_FALLBACK_MODEL || 'gpt-5-mini';
 
 // Reasoning effort configuration
 // Options: "low" (1-2s), "medium" (3-5s), "high" (5-10s)
@@ -79,16 +79,16 @@ export async function callOpenAI(
     
     const response = await openai.responses.create({
       model: OPENAI_MODEL,
-      input: inputText,
+      input: requestJsonFormat 
+        ? `You are an expert analyst. Respond only with valid JSON.\n\n${inputText}`
+        : inputText,
       reasoning: {
         effort: effort
       },
-      max_output_tokens: maxOutputTokens,
-      ...(requestJsonFormat && { 
-        text: { 
-          format: 'json_object' 
-        } 
-      })
+      text: {
+        verbosity: 'medium' // low, medium, high
+      },
+      max_output_tokens: maxOutputTokens
     });
     
     // ✅ BULLETPROOF: Extract from Responses API format
@@ -111,38 +111,56 @@ export async function callOpenAI(
   } catch (error: any) {
     console.error(`[OpenAI] Error calling ${OPENAI_MODEL}:`, error.message);
     
-    // Fallback to gpt-4o using Chat Completions API if GPT-5.1 fails
+    // Fallback to gpt-5-mini using Responses API if GPT-5.1 fails
     if (error.message?.includes('model') || error.message?.includes('quota') || error.status === 404 || error.status === 400) {
-      console.log(`[OpenAI] Trying fallback model: ${OPENAI_FALLBACK_MODEL} (Chat Completions API)`);
+      console.log(`[OpenAI] Trying fallback model: ${OPENAI_FALLBACK_MODEL} (Responses API)`);
       
-      // Convert input to messages format for Chat Completions API
-      let messages: Array<{ role: string; content: string }>;
-      if (typeof input === 'string') {
-        messages = [{ role: 'user', content: input }];
-      } else {
-        messages = input;
+      try {
+        // Convert input to messages format
+        let messages: Array<{ role: string; content: string }>;
+        if (typeof input === 'string') {
+          messages = [{ role: 'user', content: input }];
+        } else {
+          messages = input;
+        }
+        
+        // Convert messages to input string for Responses API
+        const inputText = messages.map(m => m.content).join('\n\n');
+        
+        // Use Responses API for gpt-5-mini (GPT-5 family model)
+        const fallbackResponse = await openai.responses.create({
+          model: OPENAI_FALLBACK_MODEL,
+          input: requestJsonFormat 
+            ? `You are an expert analyst. Respond only with valid JSON.\n\n${inputText}`
+            : inputText,
+          reasoning: {
+            effort: 'low' // Use low reasoning for faster fallback
+          },
+          text: {
+            verbosity: 'medium'
+          },
+          max_output_tokens: maxOutputTokens
+        });
+        
+        const content = fallbackResponse.output_text || '';
+        
+        if (!content) {
+          throw new Error('No output_text in fallback response');
+        }
+        
+        console.log(`[OpenAI] Fallback response received from ${fallbackResponse.model}`);
+        
+        return {
+          content,
+          tokensUsed: fallbackResponse.usage?.total_tokens || 0,
+          model: `${fallbackResponse.model} (fallback)`,
+          reasoning: 'low',
+          responseId: fallbackResponse.id,
+        };
+      } catch (fallbackError: any) {
+        console.error(`[OpenAI] Fallback also failed:`, fallbackError.message);
+        throw new Error(`Both ${OPENAI_MODEL} and ${OPENAI_FALLBACK_MODEL} failed: ${error.message}`);
       }
-      
-      // Use Chat Completions API for gpt-4o (doesn't support Responses API)
-      const fallbackResponse = await openai.chat.completions.create({
-        model: OPENAI_FALLBACK_MODEL,
-        messages: messages,
-        max_tokens: maxOutputTokens,
-        temperature: 0.7,
-        ...(requestJsonFormat && { response_format: { type: 'json_object' } })
-      });
-      
-      const content = fallbackResponse.choices[0]?.message?.content || '';
-      
-      console.log(`[OpenAI] Fallback response received from ${fallbackResponse.model}`);
-      
-      return {
-        content,
-        tokensUsed: fallbackResponse.usage?.total_tokens || 0,
-        model: `${fallbackResponse.model} (fallback)`,
-        reasoning: undefined,
-        responseId: fallbackResponse.id,
-      };
     }
     
     throw error;
