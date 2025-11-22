@@ -56,19 +56,19 @@ export async function analyzeOnChainData(
         { role: 'system', content: systemPrompt },
         { role: 'user', content: context }
       ],
-      600, // max tokens
-      'medium', // reasoning effort (balanced analysis)
+      2000, // max tokens (increased from 600 to prevent truncation)
+      'low', // reasoning effort (faster, less likely to truncate)
       true // request JSON format
     );
 
-    // ✅ BULLETPROOF JSON PARSING: Handle malformed JSON from GPT-5.1
+    // ✅ ULTIMATE BULLETPROOF JSON PARSING: Handle truncated/malformed JSON from GPT-5.1
     let insights: OnChainInsights;
     try {
       // Try direct parse first (fast path)
       insights = JSON.parse(result.content);
       console.log(`✅ Direct JSON parse succeeded`);
     } catch (parseError) {
-      console.warn(`⚠️ Initial JSON parse failed, engaging cleanup...`);
+      console.warn(`⚠️ Initial JSON parse failed, engaging ULTIMATE cleanup...`);
       
       try {
         // PHASE 1: Basic cleanup
@@ -82,26 +82,58 @@ export async function analyzeOnChainData(
           .replace(/^[^{]*({)/s, '$1')
           .replace(/(})[^}]*$/s, '$1');
         
-        // PHASE 3: Fix trailing commas
+        // PHASE 3: Fix trailing commas (multiple passes)
         for (let i = 0; i < 5; i++) {
           cleanedText = cleanedText
             .replace(/,(\s*])/g, '$1')
             .replace(/,(\s*})/g, '$1');
         }
         
-        // PHASE 4: Fix unterminated strings (common GPT-5.1 issue)
-        // Find and close any unterminated strings
-        cleanedText = cleanedText.replace(/"([^"]*?)$/gm, '"$1"');
+        // PHASE 4: NUCLEAR - Fix truncated/unterminated strings
+        // Count opening and closing braces/brackets
+        const openBraces = (cleanedText.match(/{/g) || []).length;
+        const closeBraces = (cleanedText.match(/}/g) || []).length;
+        const openBrackets = (cleanedText.match(/\[/g) || []).length;
+        const closeBrackets = (cleanedText.match(/]/g) || []).length;
         
-        console.log(`🔧 Attempting parse after cleanup...`);
+        // Close any unterminated strings first
+        const quoteCount = (cleanedText.match(/"/g) || []).length;
+        if (quoteCount % 2 !== 0) {
+          // Odd number of quotes - add closing quote
+          cleanedText += '"';
+          console.log(`   Fixed unterminated string`);
+        }
+        
+        // Close any unclosed arrays
+        for (let i = 0; i < (openBrackets - closeBrackets); i++) {
+          cleanedText += ']';
+          console.log(`   Added missing ]`);
+        }
+        
+        // Close any unclosed objects
+        for (let i = 0; i < (openBraces - closeBraces); i++) {
+          cleanedText += '}';
+          console.log(`   Added missing }`);
+        }
+        
+        // PHASE 5: Final comma cleanup after adding closures
+        for (let i = 0; i < 3; i++) {
+          cleanedText = cleanedText
+            .replace(/,(\s*])/g, '$1')
+            .replace(/,(\s*})/g, '$1');
+        }
+        
+        console.log(`🔧 Attempting parse after ULTIMATE cleanup...`);
         insights = JSON.parse(cleanedText);
-        console.log(`✅ JSON parse succeeded after cleanup`);
+        console.log(`✅ JSON parse succeeded after ULTIMATE cleanup`);
         
       } catch (cleanupError) {
-        console.error(`❌ Cleanup failed, using fallback insights`);
+        console.error(`❌ ULTIMATE cleanup failed, using fallback insights`);
         console.error(`   Parse error:`, parseError instanceof Error ? parseError.message : String(parseError));
+        console.error(`   Cleanup error:`, cleanupError instanceof Error ? cleanupError.message : String(cleanupError));
         console.error(`   Response length:`, result.content.length);
         console.error(`   First 500 chars:`, result.content.substring(0, 500));
+        console.error(`   Last 200 chars:`, result.content.substring(Math.max(0, result.content.length - 200)));
         return generateBasicOnChainInsights(onChainData);
       }
     }
