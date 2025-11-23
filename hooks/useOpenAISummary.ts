@@ -133,15 +133,15 @@ export const useOpenAISummary = (symbol: string): UseOpenAISummaryReturn => {
         updateProgress(elapsed);
       }, 1000);
 
-      // Step 2: Poll for results
-      const maxAttempts = 600; // 30 minutes (600 × 3 seconds)
+      // Step 2: Poll for results (every 5 seconds, max 3 minutes)
+      const maxAttempts = 36; // 3 minutes (36 × 5 seconds = 180 seconds)
       let attempts = 0;
 
       const poll = async () => {
         if (attempts >= maxAttempts) {
           cleanup();
           setStatus('error');
-          setError('Analysis timeout after 30 minutes. Please try again.');
+          setError('Analysis timeout after 3 minutes. Please try again.');
           return;
         }
 
@@ -202,9 +202,9 @@ export const useOpenAISummary = (symbol: string): UseOpenAISummaryReturn => {
             return;
           }
 
-          // Still processing (queued or processing), poll again in 3 seconds
-          console.log(`⏳ Job ${newJobId} still ${pollData.status}, polling again in 3s...`);
-          pollingTimeoutRef.current = setTimeout(poll, 3000);
+          // Still processing (queued or processing), poll again in 5 seconds
+          console.log(`⏳ Job ${newJobId} still ${pollData.status}, polling again in 5s...`);
+          pollingTimeoutRef.current = setTimeout(poll, 5000);
 
         } catch (pollError: any) {
           // Check if this was an abort (user cancelled)

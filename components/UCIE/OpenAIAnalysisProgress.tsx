@@ -35,8 +35,8 @@ export const OpenAIAnalysisProgress: React.FC<OpenAIAnalysisProgressProps> = ({
     ? Math.round(((currentIndex + 1) / stages.length) * 100) 
     : 0;
 
-  // Estimated total time: 2-10 minutes (use 5 minutes as average)
-  const estimatedTotalTime = 300; // 5 minutes (300 seconds)
+  // Estimated total time: 3 minutes max (GPT-5.1 with low reasoning)
+  const estimatedTotalTime = 180; // 3 minutes (180 seconds)
   const estimatedTimeRemaining = Math.max(0, Math.round(estimatedTotalTime - elapsedTime));
 
   // Format time display
