@@ -428,7 +428,7 @@ async function handler(
       console.log(`✅ Summary also stored in ucie_openai_analysis table`);
       
     } catch (error) {
-      console.error('❌ Failed to generate OpenAI GPT-4o summary:', error);
+      console.error('❌ Failed to generate GPT-5.1 summary:', error);
       console.error('   Error type:', error instanceof Error ? error.constructor.name : typeof error);
       console.error('   Error message:', error instanceof Error ? error.message : String(error));
       console.error('   Error stack:', error instanceof Error ? error.stack : 'N/A');
@@ -870,9 +870,9 @@ async function generateAISummary(
     context += `Note: The following data sources are unavailable: ${apiStatus.failed.join(', ')}\n`;
   }
 
-  // ✅ Generate summary with OpenAI GPT-4o (latest model)
+  // ✅ Generate summary with GPT-5.1 (latest model with reasoning)
   try {
-    console.log(`🤖 Generating OpenAI GPT-4o summary...`);
+    console.log(`🤖 Generating GPT-5.1 summary...`);
     console.log(`   Context length: ${context.length} chars`);
     
     // Import OpenAI client
@@ -888,19 +888,25 @@ async function generateAISummary(
 
 Use ONLY the data provided. Be specific with numbers and percentages.`;
     
-    // Generate analysis with OpenAI GPT-4o
-    const response = await generateOpenAIAnalysis(
+    // ✅ BULLETPROOF: Add 45-second timeout to prevent Vercel 60s timeout
+    const analysisPromise = generateOpenAIAnalysis(
       systemPrompt,
       context,
       4000, // Max tokens
       0.7   // Temperature
     );
     
-    console.log(`✅ OpenAI GPT-4o summary generated (${response.content.length} chars, ${response.tokensUsed} tokens)`);
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('GPT-5.1 analysis timeout (45s)')), 45000);
+    });
+    
+    const response = await Promise.race([analysisPromise, timeoutPromise]);
+    
+    console.log(`✅ GPT-5.1 summary generated (${response.content.length} chars, ${response.tokensUsed} tokens)`);
     return response.content;
     
   } catch (error) {
-    console.error('OpenAI GPT-4o summary error (using fallback):', error);
+    console.error('GPT-5.1 summary error (using fallback):', error);
     console.error('   Error type:', error instanceof Error ? error.constructor.name : typeof error);
     console.error('   Error message:', error instanceof Error ? error.message : String(error));
     // Fallback to basic summary (instant, no API call)
