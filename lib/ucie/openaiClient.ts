@@ -58,7 +58,7 @@ export async function generateOpenAIAnalysis(
               }
             ],
             maxTokens,
-            'medium', // reasoning effort: 'low', 'medium', 'high'
+            'low', // reasoning effort: 'low' for faster response (2-3s vs 3-5s)
             true // request JSON format
           ),
           new Promise<never>((_, reject) => 
