@@ -1540,71 +1540,79 @@ function RecommendationsSection({ recommendations, loading, error, onRetry }: Re
 
   return (
     <div className="bg-bitcoin-black border border-bitcoin-orange rounded-xl p-6">
+      {/* Header */}
       <div className="mb-6">
-        <h3 className="text-xl font-bold text-bitcoin-white mb-2">💡 Recommendations</h3>
+        <h3 className="text-2xl font-bold text-bitcoin-white mb-2">💡 Recommendations</h3>
         <p className="text-sm text-bitcoin-white-60 italic">
-          Top {topRecommendations.length} actionable insights to improve your trading performance
+          Top {topRecommendations.length} actionable insights to improve your trading strategy
         </p>
       </div>
 
+      {/* Recommendations List */}
       <div className="space-y-4">
         {topRecommendations.map((rec, index) => (
           <div 
             key={index} 
-            className={`bg-bitcoin-black border-2 rounded-xl p-5 transition-all hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] ${
+            className={`bg-bitcoin-black border rounded-lg p-5 transition-all hover:shadow-[0_0_20px_rgba(247,147,26,0.2)] ${
               rec.priority === 'high' 
-                ? 'border-bitcoin-orange' 
+                ? 'border-bitcoin-orange border-2' 
                 : rec.priority === 'medium'
-                ? 'border-bitcoin-orange-20'
+                ? 'border-bitcoin-orange-20 border-2'
                 : 'border-bitcoin-orange-10'
             }`}
           >
-            {/* Header with Priority and Confidence */}
+            {/* Priority Badge and Confidence */}
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
-                <span className="text-bitcoin-orange font-bold text-2xl">#{index + 1}</span>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider ${
-                      rec.priority === 'high'
-                        ? 'bg-bitcoin-orange text-bitcoin-black'
-                        : rec.priority === 'medium'
-                        ? 'bg-bitcoin-orange-20 text-bitcoin-orange'
-                        : 'bg-bitcoin-orange-10 text-bitcoin-white-60'
-                    }`}>
-                      {rec.priority} Priority
-                    </span>
-                    <span className="text-bitcoin-white-60 text-xs uppercase font-semibold tracking-wider">
-                      {rec.category.replace('_', ' ')}
-                    </span>
-                  </div>
-                </div>
+                {/* Priority Badge */}
+                <span className={`px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider ${
+                  rec.priority === 'high'
+                    ? 'bg-bitcoin-orange text-bitcoin-black shadow-[0_0_15px_rgba(247,147,26,0.4)]'
+                    : rec.priority === 'medium'
+                    ? 'bg-bitcoin-orange-20 text-bitcoin-orange'
+                    : 'bg-bitcoin-orange-10 text-bitcoin-white-60'
+                }`}>
+                  {rec.priority} Impact
+                </span>
+                
+                {/* Category Badge */}
+                <span className="text-bitcoin-white-60 text-xs uppercase font-semibold tracking-wider">
+                  {rec.category.replace('_', ' ')}
+                </span>
               </div>
+              
+              {/* Confidence Score */}
               <div className="text-right">
-                <div className={`font-mono font-bold text-2xl ${
-                  rec.priority === 'high' ? 'text-bitcoin-orange' : 'text-bitcoin-white'
+                <div className={`font-mono font-bold text-xl ${
+                  rec.confidence >= 80 
+                    ? 'text-bitcoin-orange' 
+                    : rec.confidence >= 60 
+                    ? 'text-bitcoin-white' 
+                    : 'text-bitcoin-white-60'
                 }`}>
                   {rec.confidence}%
                 </div>
-                <div className="text-bitcoin-white-60 text-xs uppercase tracking-wider">confidence</div>
+                <div className="text-bitcoin-white-60 text-xs uppercase tracking-wide">
+                  Confidence
+                </div>
               </div>
             </div>
             
             {/* Recommendation Text */}
-            <div className="mb-3">
-              <p className="text-bitcoin-white text-base leading-relaxed">
-                {rec.recommendation}
-              </p>
-            </div>
+            <p className="text-bitcoin-white text-base leading-relaxed mb-3">
+              {rec.recommendation}
+            </p>
             
             {/* Potential Impact */}
-            <div className="pt-3 border-t border-bitcoin-orange-20">
+            <div className="pt-3 border-t border-bitcoin-orange-10">
               <div className="flex items-start gap-2">
-                <span className="text-bitcoin-orange font-bold text-sm uppercase tracking-wider flex-shrink-0">
+                <span className="text-bitcoin-orange font-bold text-sm uppercase tracking-wide flex-shrink-0">
                   Potential Impact:
                 </span>
-                <span className={`font-semibold text-sm ${
-                  rec.priority === 'high' ? 'text-bitcoin-orange' : 'text-bitcoin-white-80'
+                <span className={`text-sm font-semibold ${
+                  rec.priority === 'high' 
+                    ? 'text-bitcoin-orange' 
+                    : 'text-bitcoin-white-80'
                 }`}>
                   {rec.potentialImpact}
                 </span>
@@ -1614,12 +1622,12 @@ function RecommendationsSection({ recommendations, loading, error, onRetry }: Re
         ))}
       </div>
 
-      {/* Info Note */}
+      {/* Footer Note */}
       <div className="mt-6 pt-4 border-t border-bitcoin-orange-20">
-        <p className="text-bitcoin-white-60 text-xs">
-          <span className="font-semibold text-bitcoin-orange">Note:</span> Recommendations are generated based on 
-          statistical analysis of your completed trades. High-priority recommendations have the greatest potential 
-          to improve your win rate and profitability.
+        <p className="text-bitcoin-white-60 text-xs leading-relaxed">
+          <span className="font-semibold text-bitcoin-orange">Note:</span> Recommendations are generated based on historical trade data analysis. 
+          High-impact recommendations (highlighted in orange) have the greatest potential to improve your trading performance. 
+          Confidence scores indicate the statistical reliability of each recommendation.
         </p>
       </div>
     </div>

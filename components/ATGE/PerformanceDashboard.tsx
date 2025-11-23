@@ -135,8 +135,9 @@ export default function PerformanceDashboard({
       const data = await response.json();
 
       if (data.success) {
+        const timestamp = new Date().toLocaleTimeString();
         setRefreshMessage(
-          `✅ Verified ${data.verified} trades. ${data.updated} updated.`
+          `✅ Verified ${data.verified} trades. ${data.updated} updated. (${timestamp})`
         );
         
         // Also refresh the performance stats after verification

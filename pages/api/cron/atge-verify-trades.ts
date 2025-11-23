@@ -126,10 +126,24 @@ export default async function handler(
   
   console.log('🔄 [ATGE Cron] Trade verification cron job triggered');
   
+  const startTime = Date.now();
+  
   try {
     // Call verification logic internally
     // Requirements: 2.1 - Call /api/atge/verify-trades logic internally
     const verificationResult = await verifyAllTrades();
+    
+    // Log successful execution
+    // Requirements: Task 47 - Check Vercel logs for errors
+    await logCronExecution(
+      'atge-verify-trades',
+      verificationResult.success,
+      verificationResult.verified,
+      verificationResult.updated,
+      verificationResult.failed,
+      verificationResult.errors.join('; ') || null,
+      0
+    );
     
     // Requirements: 2.1 - Log verification summary to console
     console.log('📊 [ATGE Cron] Verification summary:', {
@@ -196,11 +210,51 @@ export default async function handler(
   } catch (error) {
     console.error('❌ [ATGE Cron] Trade verification failed:', error);
     
+    // Log failed execution
+    // Requirements: Task 47 - Check Vercel logs for errors
+    await logCronExecution(
+      'atge-verify-trades',
+      false,
+      0,
+      0,
+      0,
+      error instanceof Error ? error.message : 'Unknown error',
+      0
+    );
+    
     return res.status(500).json({
       success: false,
       message: 'Trade verification failed',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
+  }
+}
+
+// ============================================================================
+// LOGGING FUNCTIONS
+// ============================================================================
+
+/**
+ * Log cron execution to database
+ * Requirements: Task 47 - Check Vercel logs for errors
+ */
+async function logCronExecution(
+  cronJob: string,
+  success: boolean,
+  tradesVerified: number,
+  tradesUpdated: number,
+  tradesFailed: number,
+  errorMessage: string | null,
+  retryAttempt: number
+): Promise<void> {
+  try {
+    await query(
+      `SELECT log_cron_execution($1, $2, $3, $4, $5, $6, $7)`,
+      [cronJob, success, tradesVerified, tradesUpdated, tradesFailed, errorMessage, retryAttempt]
+    );
+  } catch (error) {
+    // Don't fail the cron job if logging fails
+    console.error('[ATGE Cron] Failed to log execution:', error);
   }
 }
 

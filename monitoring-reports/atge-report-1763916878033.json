@@ -1,0 +1,33 @@
+{
+  "timestamp": "2025-11-23T16:54:38.030Z",
+  "deployment": {
+    "status": "healthy",
+    "lastDeployment": "2025-11-23T16:54:37.983Z",
+    "errors": 0
+  },
+  "cronJobs": {
+    "lastRun": "2025-11-23T11:00:43.542Z",
+    "successRate": "100.00",
+    "failures": 0
+  },
+  "trades": {
+    "total": 7,
+    "active": 0,
+    "verified": 7,
+    "accuracy": "0.00"
+  },
+  "apiCosts": {
+    "openai": {
+      "estimatedCost": 0,
+      "requestCount": 0
+    },
+    "coinmarketcap": {
+      "requestCount": 8,
+      "remainingCredits": "Check CMC dashboard"
+    }
+  },
+  "alerts": [
+    "⚠️ WARNING: Cron job hasn't run in 5.9 hours",
+    "⚠️ WARNING: Trade accuracy is 0.00% (may indicate verification issues)"
+  ]
+}

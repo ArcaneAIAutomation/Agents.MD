@@ -89,8 +89,6 @@ interface TradeAnalysisContext {
     priceChange24h: number;
     volume24h: number;
     marketCap: number;
-    high24h: number;
-    low24h: number;
     socialSentimentScore?: number;
     whaleActivityCount?: number;
     fearGreedIndex?: number;
@@ -175,7 +173,6 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
         -- Market Snapshot
         ms.current_price, ms.price_change_24h, 
         ms.volume_24h as snapshot_volume, ms.market_cap,
-        ms.high_24h, ms.low_24h,
         ms.social_sentiment_score, ms.whale_activity_count, ms.fear_greed_index,
         ms.snapshot_at
         
@@ -293,8 +290,6 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
         priceChange24h: row.price_change_24h ? parseFloat(row.price_change_24h) : 0,
         volume24h: row.snapshot_volume ? parseFloat(row.snapshot_volume) : 0,
         marketCap: row.market_cap ? parseFloat(row.market_cap) : 0,
-        high24h: row.high_24h ? parseFloat(row.high_24h) : parseFloat(row.current_price),
-        low24h: row.low_24h ? parseFloat(row.low_24h) : parseFloat(row.current_price),
         socialSentimentScore: row.social_sentiment_score ? parseFloat(row.social_sentiment_score) : undefined,
         whaleActivityCount: row.whale_activity_count,
         fearGreedIndex: row.fear_greed_index,

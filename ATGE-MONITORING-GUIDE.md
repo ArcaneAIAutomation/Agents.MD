@@ -8,477 +8,608 @@
 
 ## Overview
 
-The AI Trade Generation Engine (ATGE) includes a comprehensive production monitoring system that tracks:
-- **Error Tracking**: All errors with severity levels and context
-- **API Performance**: Response times and slow operations
-- **Database Performance**: Query times and trade statistics
-- **User Feedback**: Ratings, comments, and feature requests
+This guide provides comprehensive instructions for monitoring the ATGE (AI Trade Generation Engine) system in production. The monitoring system tracks:
+
+- ✅ Vercel cron job execution (hourly trade verification)
+- ✅ Trade verification status and performance
+- ✅ OpenAI API costs and usage
+- ✅ CoinMarketCap/CoinGecko API usage
+- ✅ System health and errors
+- ✅ Automated alerts for issues
 
 ---
 
-## Architecture
+## Monitoring Tools
 
-### Database Tables
+### 1. Command-Line Monitoring Script
 
-#### 1. `atge_error_logs`
-Stores all errors that occur in the system.
+**Location**: `scripts/monitor-atge-production.ts`
 
-**Columns**:
-- `id` (UUID) - Primary key
-- `timestamp` (TIMESTAMP) - When error occurred
-- `error_type` (VARCHAR) - Type: api, database, generation, backtesting, analysis, frontend
-- `error_message` (TEXT) - Error message
-- `error_stack` (TEXT) - Stack trace
-- `user_id` (UUID) - User who encountered error (nullable)
-- `trade_signal_id` (UUID) - Related trade signal (nullable)
-- `context` (JSONB) - Additional context
-- `severity` (VARCHAR) - Severity: low, medium, high, critical
-
-**Indexes**:
-- `idx_atge_error_logs_timestamp` - For time-based queries
-- `idx_atge_error_logs_error_type` - For filtering by type
-- `idx_atge_error_logs_severity` - For filtering by severity
-
-#### 2. `atge_performance_metrics`
-Stores performance measurements for all operations.
-
-**Columns**:
-- `id` (UUID) - Primary key
-- `timestamp` (TIMESTAMP) - When metric was recorded
-- `metric_type` (VARCHAR) - Type: api_response, database_query, generation_time, backtest_time, analysis_time
-- `metric_name` (VARCHAR) - Name of operation
-- `value` (DECIMAL) - Measured value
-- `unit` (VARCHAR) - Unit: ms, seconds, count
-- `user_id` (UUID) - User who triggered operation (nullable)
-- `trade_signal_id` (UUID) - Related trade signal (nullable)
-- `metadata` (JSONB) - Additional metadata
-
-**Indexes**:
-- `idx_atge_performance_metrics_timestamp` - For time-based queries
-- `idx_atge_performance_metrics_metric_type` - For filtering by type
-- `idx_atge_performance_metrics_value` - For finding slowest operations
-
-#### 3. `atge_user_feedback`
-Stores user feedback and ratings.
-
-**Columns**:
-- `id` (UUID) - Primary key
-- `timestamp` (TIMESTAMP) - When feedback was submitted
-- `user_id` (UUID) - User who submitted feedback
-- `feedback_type` (VARCHAR) - Type: trade_accuracy, ui_experience, performance, feature_request, bug_report
-- `rating` (INTEGER) - Rating 1-5 (nullable)
-- `comment` (TEXT) - User comment (nullable)
-- `trade_signal_id` (UUID) - Related trade signal (nullable)
-- `metadata` (JSONB) - Additional metadata
-
-**Indexes**:
-- `idx_atge_user_feedback_timestamp` - For time-based queries
-- `idx_atge_user_feedback_user_id` - For user-specific queries
-- `idx_atge_user_feedback_feedback_type` - For filtering by type
-- `idx_atge_user_feedback_rating` - For rating analysis
-
----
-
-## API Endpoints
-
-### 1. Get Monitoring Statistics
-
-```
-GET /api/atge/monitoring/stats?timeRange=24h
+**Usage**:
+```bash
+# Run monitoring report
+npx tsx scripts/monitor-atge-production.ts
 ```
 
-**Query Parameters**:
-- `timeRange` (optional): '1h' | '24h' | '7d' | '30d' (default: '24h')
+**Features**:
+- Generates comprehensive monitoring report
+- Checks all system components
+- Identifies issues and provides recommendations
+- Saves report to `monitoring-reports/` directory
+- Returns exit code 1 if critical issues detected
 
-**Response**:
-```json
-{
-  "success": true,
-  "timeRange": "24h",
-  "stats": {
-    "errors": {
-      "total": 15,
-      "byType": {
-        "api": 5,
-        "database": 3,
-        "generation": 7
-      },
-      "bySeverity": {
-        "low": 8,
-        "medium": 5,
-        "high": 2,
-        "critical": 0
-      },
-      "recentErrors": [...]
-    },
-    "performance": {
-      "averageApiResponseTime": 245.5,
-      "averageDatabaseQueryTime": 12.3,
-      "averageGenerationTime": 8500.0,
-      "averageBacktestTime": 15000.0,
-      "averageAnalysisTime": 120000.0,
-      "slowestOperations": [...]
-    },
-    "database": {
-      "totalTrades": 1250,
-      "activeTrades": 45,
-      "completedTrades": 1205,
-      "averageTradeSuccessRate": 67.5
-    },
-    "userFeedback": {
-      "totalFeedback": 89,
-      "averageRating": 4.2,
-      "byType": {
-        "trade_accuracy": 45,
-        "ui_experience": 20,
-        "performance": 15,
-        "feature_request": 9
-      },
-      "recentFeedback": [...]
-    }
-  },
-  "timestamp": "2025-01-27T10:30:00Z"
-}
+**Output Example**:
+```
+═══════════════════════════════════════════════════════════
+  ATGE PRODUCTION MONITORING REPORT
+═══════════════════════════════════════════════════════════
+Generated: 1/27/2025, 10:30:00 AM
+
+📅 CRON JOB STATUS
+─────────────────────────────────────────────────────────
+Last Run: 1/27/2025, 10:00:00 AM
+Runs Today: 10
+Failures (24h): 0
+✅ Cron job running as expected
+
+📊 TRADE VERIFICATION
+─────────────────────────────────────────────────────────
+Active Trades: 15
+Verified (24h): 240
+Failed Verifications: 2
+Avg Verification Time: 12s
+✅ Verification performance within target
+
+💰 API COSTS (OpenAI)
+─────────────────────────────────────────────────────────
+API Calls (24h): 25
+Estimated Cost (24h): $0.35
+Monthly Projection: $10.50
+✅ Costs within budget
+
+📈 MARKET DATA API USAGE
+─────────────────────────────────────────────────────────
+CoinMarketCap Calls: 180
+CoinGecko Calls: 60
+Failure Rate: 0.83%
+✅ API reliability good
+
+🏥 SYSTEM HEALTH
+─────────────────────────────────────────────────────────
+Database: ✅ Connected
+Recent Errors: 0
+Performance Issues: 0
+
+═══════════════════════════════════════════════════════════
+✅ ALL SYSTEMS OPERATIONAL
+═══════════════════════════════════════════════════════════
 ```
 
-### 2. Submit User Feedback
+### 2. API Monitoring Endpoint
 
-```
-POST /api/atge/monitoring/feedback
-```
+**Endpoint**: `GET /api/atge/monitoring`
 
-**Request Body**:
-```json
-{
-  "feedbackType": "trade_accuracy",
-  "rating": 5,
-  "comment": "Great trade signal! Hit TP2 in 3 hours.",
-  "tradeSignalId": "uuid-here",
-  "metadata": {
-    "profitPercentage": 8.5
-  }
-}
+**Usage**:
+```bash
+# Fetch monitoring data
+curl https://news.arcane.group/api/atge/monitoring
 ```
 
 **Response**:
 ```json
 {
-  "success": true,
-  "message": "Feedback submitted successfully"
-}
-```
-
----
-
-## Monitoring Functions
-
-### Error Tracking
-
-```typescript
-import { logError, trackError } from '../lib/atge/monitoring';
-
-// Manual error logging
-await logError({
-  timestamp: new Date(),
-  errorType: 'api',
-  errorMessage: 'Failed to fetch market data',
-  errorStack: error.stack,
-  userId: 'user-uuid',
-  context: { symbol: 'BTC', endpoint: '/api/market-data' },
-  severity: 'high'
-});
-
-// Automatic error tracking wrapper
-try {
-  // Your code
-} catch (error) {
-  await trackError('api', error as Error, { symbol: 'BTC' }, 'high');
-  throw error;
-}
-```
-
-### Performance Tracking
-
-```typescript
-import { trackPerformance } from '../lib/atge/monitoring';
-
-// Track performance of any async operation
-const result = await trackPerformance(
-  'fetch_market_data',
-  'api_response',
-  async () => {
-    return await fetchMarketData('BTC');
+  "timestamp": "2025-01-27T10:30:00.000Z",
+  "cronJobStatus": {
+    "lastRun": "2025-01-27T10:00:00.000Z",
+    "runsToday": 10,
+    "failuresLast24h": 0,
+    "status": "healthy"
   },
-  { symbol: 'BTC', userId: 'user-uuid' }
-);
+  "tradeVerification": {
+    "totalActiveTrades": 15,
+    "verifiedLast24h": 240,
+    "failedVerifications": 2,
+    "averageVerificationTime": 12,
+    "status": "healthy"
+  },
+  "apiCosts": {
+    "openaiCalls": 25,
+    "estimatedCost": 0.35,
+    "monthlyProjection": 10.50,
+    "status": "healthy"
+  },
+  "marketDataAPI": {
+    "coinMarketCapCalls": 180,
+    "coinGeckoCalls": 60,
+    "failureRate": 0.83,
+    "status": "healthy"
+  },
+  "systemHealth": {
+    "databaseConnected": true,
+    "recentErrors": 0,
+    "performanceIssues": 0,
+    "status": "healthy"
+  },
+  "overallStatus": "healthy",
+  "alerts": []
+}
 ```
 
-### User Feedback
+### 3. Monitoring Dashboard Component
 
-```typescript
-import { logUserFeedback } from '../lib/atge/monitoring';
+**Component**: `components/ATGE/MonitoringDashboard.tsx`
 
-await logUserFeedback({
-  timestamp: new Date(),
-  userId: 'user-uuid',
-  feedbackType: 'trade_accuracy',
-  rating: 5,
-  comment: 'Excellent trade signal!',
-  tradeSignalId: 'trade-uuid'
-});
-```
-
----
-
-## Monitoring Dashboard
-
-### React Component
-
-```typescript
+**Usage**:
+```tsx
 import MonitoringDashboard from '../components/ATGE/MonitoringDashboard';
 
 function AdminPage() {
   return (
     <div>
-      <h1>ATGE Monitoring</h1>
+      <h1>ATGE System Monitoring</h1>
       <MonitoringDashboard />
     </div>
   );
 }
 ```
 
-### Features
-
-1. **Error Statistics**
-   - Total errors by time range
-   - Breakdown by error type
-   - Breakdown by severity
-   - Recent errors with details
-
-2. **Performance Metrics**
-   - Average API response time
-   - Average database query time
-   - Average generation time
-   - Average backtesting time
-   - Average analysis time
-   - Slowest operations list
-
-3. **Database Statistics**
-   - Total trades
-   - Active trades
-   - Completed trades
-   - Success rate
-
-4. **User Feedback**
-   - Total feedback count
-   - Average rating
-   - Breakdown by feedback type
-   - Recent feedback with comments
+**Features**:
+- Real-time monitoring data display
+- Auto-refresh every 5 minutes
+- Visual status indicators (green/yellow/red)
+- Alert notifications
+- Manual refresh button
 
 ---
 
-## Alerting
+## Monitoring Metrics
 
-### Critical Error Alerts
+### 1. Cron Job Status
 
-When a critical error occurs, the system can send alerts via:
-- Email (implement with Resend/SendGrid)
-- Slack (implement with Slack webhooks)
-- PagerDuty (implement with PagerDuty API)
+**What it monitors**:
+- Last execution time
+- Number of runs today (should be ~24)
+- Failed verifications in last 24 hours
 
-**Implementation**:
-```typescript
-// In lib/atge/monitoring.ts
-async function sendCriticalErrorAlert(error: ErrorLog): Promise<void> {
-  // TODO: Implement alert system
-  // Example: Send email
-  await sendEmail({
-    to: 'admin@example.com',
-    subject: '🚨 ATGE Critical Error',
-    body: `
-      Error Type: ${error.errorType}
-      Message: ${error.errorMessage}
-      Time: ${error.timestamp}
-      User: ${error.userId}
-      Trade: ${error.tradeSignalId}
-    `
-  });
-}
+**Thresholds**:
+- ✅ **Healthy**: 12+ runs today
+- ⚠️ **Warning**: 6-11 runs today
+- ❌ **Error**: <6 runs today
+
+**Common Issues**:
+- Cron job not configured in Vercel
+- CRON_SECRET mismatch
+- Function timeout
+
+### 2. Trade Verification
+
+**What it monitors**:
+- Total active trades
+- Trades verified in last 24 hours
+- Failed verifications
+- Average verification time
+
+**Thresholds**:
+- ✅ **Healthy**: Avg time ≤30s
+- ⚠️ **Warning**: Avg time >30s
+
+**Common Issues**:
+- API rate limits
+- Network timeouts
+- Invalid trade data
+
+### 3. API Costs (OpenAI)
+
+**What it monitors**:
+- API calls in last 24 hours
+- Estimated cost for 24 hours
+- Monthly cost projection
+
+**Thresholds**:
+- ✅ **Healthy**: Monthly projection ≤$100
+- ⚠️ **Warning**: Monthly projection $100-$150
+- ❌ **Error**: Monthly projection >$150
+
+**Cost Breakdown**:
+- Trade signal generation: ~$0.01 per call
+- Trade analysis: ~$0.02 per call
+- Target: <$100/month total
+
+### 4. Market Data API
+
+**What it monitors**:
+- CoinMarketCap API calls
+- CoinGecko API calls
+- API failure rate
+
+**Thresholds**:
+- ✅ **Healthy**: Failure rate ≤5%
+- ⚠️ **Warning**: Failure rate 5-10%
+- ❌ **Error**: Failure rate >10%
+
+**Common Issues**:
+- API key expired
+- Rate limit exceeded
+- Network connectivity
+
+### 5. System Health
+
+**What it monitors**:
+- Database connectivity
+- Recent errors
+- Performance issues
+
+**Thresholds**:
+- ✅ **Healthy**: Database connected, no errors
+- ❌ **Error**: Database disconnected or errors present
+
+---
+
+## Alert System
+
+### Alert Severities
+
+1. **CRITICAL**: System is down or non-functional
+   - Database disconnected
+   - All API calls failing
+
+2. **HIGH**: Major functionality impaired
+   - Cron job not running
+   - API costs exceeding budget
+   - High API failure rate
+
+3. **MEDIUM**: Degraded performance
+   - Slow verification times
+   - Approaching cost limits
+
+4. **LOW**: Minor issues
+   - Occasional API failures
+   - Non-critical warnings
+
+### Alert Actions
+
+Each alert includes:
+- **Message**: Description of the issue
+- **Action**: Recommended fix
+
+**Example Alert**:
+```
+[HIGH] Monthly cost projection ($125.50) exceeds $100 budget
+Action: Review API usage and optimize calls
 ```
 
 ---
 
-## Performance Thresholds
+## Vercel Monitoring
 
-### Recommended Thresholds
+### 1. Check Cron Job Logs
 
-| Metric | Warning | Critical |
-|--------|---------|----------|
-| API Response Time | > 500ms | > 1000ms |
-| Database Query Time | > 100ms | > 500ms |
-| Generation Time | > 15s | > 30s |
-| Backtesting Time | > 30s | > 60s |
-| Analysis Time | > 3min | > 5min |
-| Error Rate | > 5% | > 10% |
-| Success Rate | < 60% | < 50% |
+**Steps**:
+1. Go to https://vercel.com/dashboard
+2. Select project → Deployments
+3. Click latest deployment → Functions
+4. Find `/api/cron/atge-verify-trades`
+5. View execution logs
 
-### Monitoring Alerts
+**What to look for**:
+- Execution frequency (should be hourly)
+- Execution duration (should be <30s)
+- Error messages
+- Success/failure status
 
-Set up alerts when metrics exceed thresholds:
+### 2. Check Function Logs
 
-```typescript
-// Example: Check if API response time is too high
-const stats = await getPerformanceStats('1h');
-if (stats.averageApiResponseTime > 1000) {
-  await sendAlert({
-    severity: 'critical',
-    message: `API response time is ${stats.averageApiResponseTime}ms (threshold: 1000ms)`
-  });
-}
+**Steps**:
+1. Go to Vercel dashboard
+2. Select project → Logs
+3. Filter by function: `/api/atge/verify-trades`
+4. Check for errors or warnings
+
+**Common Log Messages**:
 ```
+✅ "Verified 15 trades successfully"
+⚠️ "CoinMarketCap API rate limit exceeded, using CoinGecko"
+❌ "Failed to verify trade: Network timeout"
+```
+
+### 3. Monitor Function Duration
+
+**Target**: <30 seconds for verification
+**Max**: 60 seconds (function timeout)
+
+**If exceeding target**:
+- Optimize database queries
+- Reduce API calls
+- Implement parallel processing
 
 ---
 
-## Database Maintenance
+## Database Monitoring
 
-### Cleanup Old Data
-
-To prevent database bloat, periodically clean up old monitoring data:
+### Check Trade Verification Status
 
 ```sql
--- Delete error logs older than 90 days
-DELETE FROM atge_error_logs 
-WHERE timestamp < NOW() - INTERVAL '90 days';
+-- Active trades
+SELECT COUNT(*) 
+FROM trade_signals 
+WHERE status = 'active' AND expires_at > NOW();
 
--- Delete performance metrics older than 30 days
-DELETE FROM atge_performance_metrics 
-WHERE timestamp < NOW() - INTERVAL '30 days';
+-- Verified trades (last 24h)
+SELECT COUNT(*) 
+FROM trade_results 
+WHERE last_verified_at >= NOW() - INTERVAL '24 hours';
 
--- Keep user feedback indefinitely (or set your own retention)
+-- Failed verifications (last 24h)
+SELECT COUNT(*) 
+FROM trade_results 
+WHERE verification_data_source = 'failed' 
+  AND last_verified_at >= NOW() - INTERVAL '24 hours';
 ```
 
-### Scheduled Cleanup Job
+### Check Cron Job Execution
 
-Create a cron job to run cleanup:
+```sql
+-- Last verification time
+SELECT MAX(last_verified_at) 
+FROM trade_results;
 
-```typescript
-// pages/api/cron/cleanup-monitoring-data.ts
-export default async function handler(req, res) {
-  // Verify CRON_SECRET
-  if (req.headers['authorization'] !== `Bearer ${process.env.CRON_SECRET}`) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  // Delete old data
-  await query(`DELETE FROM atge_error_logs WHERE timestamp < NOW() - INTERVAL '90 days'`);
-  await query(`DELETE FROM atge_performance_metrics WHERE timestamp < NOW() - INTERVAL '30 days'`);
-
-  return res.status(200).json({ success: true });
-}
-```
-
-Add to `vercel.json`:
-```json
-{
-  "crons": [
-    {
-      "path": "/api/cron/cleanup-monitoring-data",
-      "schedule": "0 2 * * *"
-    }
-  ]
-}
+-- Verifications per hour (last 24h)
+SELECT 
+  DATE_TRUNC('hour', last_verified_at) as hour,
+  COUNT(*) as verifications
+FROM trade_results
+WHERE last_verified_at >= NOW() - INTERVAL '24 hours'
+GROUP BY hour
+ORDER BY hour DESC;
 ```
 
 ---
 
-## Best Practices
+## Cost Monitoring
 
-### 1. Error Logging
+### OpenAI API Costs
 
-- **Always log errors** with appropriate severity
-- **Include context** (user ID, trade ID, symbol, etc.)
-- **Log stack traces** for debugging
-- **Don't log sensitive data** (passwords, API keys, etc.)
+**Tracking**:
+1. Go to https://platform.openai.com/usage
+2. View usage for current month
+3. Compare with projections
 
-### 2. Performance Tracking
+**Cost Breakdown**:
+- GPT-5.1 with medium reasoning: ~$0.01 per trade signal
+- GPT-5.1 with high reasoning: ~$0.02 per analysis
+- Target: <$100/month total
 
-- **Track all critical operations** (API calls, database queries, AI generation)
-- **Use consistent metric names** for easy analysis
-- **Include metadata** for filtering and analysis
-- **Don't track trivial operations** (simple calculations, etc.)
+**Optimization Tips**:
+- Use medium reasoning for trade signals (not high)
+- Cache analysis results
+- Limit analysis to completed trades only
+- Batch API calls when possible
 
-### 3. User Feedback
+### CoinMarketCap API Usage
 
-- **Make feedback easy** to submit
-- **Encourage feedback** after trade completion
-- **Respond to feedback** when appropriate
-- **Use feedback** to improve the system
+**Tracking**:
+1. Go to https://pro.coinmarketcap.com/account
+2. View API usage dashboard
+3. Check remaining credits
 
-### 4. Monitoring Dashboard
+**Rate Limits**:
+- Free tier: 333 calls/day
+- Paid tier: Varies by plan
 
-- **Check daily** for critical errors
-- **Review performance trends** weekly
-- **Analyze user feedback** regularly
-- **Set up alerts** for critical issues
+**Optimization Tips**:
+- Cache price data (5-10 minutes)
+- Use CoinGecko as fallback
+- Batch requests when possible
 
 ---
 
 ## Troubleshooting
 
-### High Error Rate
+### Issue: Cron Job Not Running
 
-1. Check recent errors in monitoring dashboard
-2. Identify common error types
-3. Review error context and stack traces
-4. Fix underlying issues
-5. Deploy fixes and monitor
+**Symptoms**:
+- `runsToday` < 12
+- `lastRun` is old or null
 
-### Slow Performance
+**Solutions**:
+1. Check Vercel cron configuration in `vercel.json`
+2. Verify CRON_SECRET environment variable
+3. Check function logs for errors
+4. Redeploy if needed
 
-1. Check slowest operations in monitoring dashboard
-2. Identify bottlenecks (API, database, AI)
-3. Optimize slow operations
-4. Add caching where appropriate
-5. Monitor improvements
+### Issue: High API Costs
 
-### Low Success Rate
+**Symptoms**:
+- `monthlyProjection` > $100
+- High `openaiCalls` count
 
-1. Review failed trades in database
-2. Analyze AI reasoning for failed trades
-3. Check market conditions during failures
-4. Adjust AI parameters if needed
-5. Monitor success rate improvements
+**Solutions**:
+1. Review reasoning effort levels (use medium, not high)
+2. Reduce analysis frequency
+3. Cache results longer
+4. Limit analysis to important trades only
+
+### Issue: High API Failure Rate
+
+**Symptoms**:
+- `failureRate` > 5%
+- Many failed verifications
+
+**Solutions**:
+1. Check API keys are valid
+2. Verify rate limits not exceeded
+3. Check network connectivity
+4. Implement better retry logic
+
+### Issue: Slow Verification
+
+**Symptoms**:
+- `averageVerificationTime` > 30s
+- Function timeouts
+
+**Solutions**:
+1. Optimize database queries
+2. Reduce API calls
+3. Implement parallel processing
+4. Increase function timeout (if needed)
 
 ---
 
-## Integration Checklist
+## Automated Monitoring
 
-- [x] Database tables created
-- [x] Monitoring functions implemented
-- [x] API endpoints created
-- [x] React dashboard component created
-- [x] Error tracking integrated into generate API
-- [x] Performance tracking integrated into generate API
-- [ ] Alert system implemented (email/Slack)
-- [ ] Cleanup cron job configured
-- [ ] Monitoring dashboard deployed
-- [ ] Team trained on monitoring system
+### Set Up Automated Checks
+
+**Option 1: Cron Job**
+```bash
+# Add to crontab (runs every hour)
+0 * * * * cd /path/to/project && npx tsx scripts/monitor-atge-production.ts >> /var/log/atge-monitoring.log 2>&1
+```
+
+**Option 2: GitHub Actions**
+```yaml
+# .github/workflows/monitor.yml
+name: ATGE Monitoring
+on:
+  schedule:
+    - cron: '0 * * * *'  # Every hour
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run monitoring
+        run: npx tsx scripts/monitor-atge-production.ts
+```
+
+**Option 3: Vercel Cron**
+```json
+// vercel.json
+{
+  "crons": [
+    {
+      "path": "/api/atge/monitoring-check",
+      "schedule": "0 * * * *"
+    }
+  ]
+}
+```
+
+### Set Up Alerts
+
+**Option 1: Email Alerts**
+- Use SendGrid or similar service
+- Send email when alerts detected
+- Include alert details and actions
+
+**Option 2: Slack Alerts**
+- Use Slack webhook
+- Post to monitoring channel
+- Tag relevant team members
+
+**Option 3: PagerDuty**
+- Integrate with PagerDuty
+- Create incidents for critical alerts
+- On-call rotation
 
 ---
 
-## Next Steps
+## Best Practices
 
-1. **Run database migration** to create monitoring tables
-2. **Deploy monitoring API endpoints** to production
-3. **Integrate monitoring** into all ATGE functions
-4. **Set up alerts** for critical errors
-5. **Configure cleanup cron job** for data retention
-6. **Train team** on monitoring dashboard usage
-7. **Establish monitoring routine** (daily checks, weekly reviews)
+### Daily Monitoring
+
+1. **Check monitoring dashboard** (5 minutes)
+   - Review overall status
+   - Check for alerts
+   - Verify cron job running
+
+2. **Review cost projections** (2 minutes)
+   - Check monthly projection
+   - Verify within budget
+   - Adjust if needed
+
+3. **Check API health** (2 minutes)
+   - Verify low failure rate
+   - Check rate limits
+   - Review error logs
+
+### Weekly Monitoring
+
+1. **Review trends** (15 minutes)
+   - Compare week-over-week metrics
+   - Identify patterns
+   - Plan optimizations
+
+2. **Check database performance** (10 minutes)
+   - Review query performance
+   - Check table sizes
+   - Optimize if needed
+
+3. **Review API costs** (10 minutes)
+   - Analyze cost breakdown
+   - Identify optimization opportunities
+   - Implement improvements
+
+### Monthly Monitoring
+
+1. **Generate monthly report** (30 minutes)
+   - Compile all metrics
+   - Calculate totals
+   - Document issues and fixes
+
+2. **Review and optimize** (1 hour)
+   - Analyze performance trends
+   - Implement optimizations
+   - Update monitoring thresholds
+
+3. **Plan improvements** (1 hour)
+   - Identify areas for improvement
+   - Plan feature enhancements
+   - Schedule maintenance
+
+---
+
+## Monitoring Checklist
+
+### Daily
+- [ ] Check monitoring dashboard
+- [ ] Review alerts
+- [ ] Verify cron job running
+- [ ] Check API costs
+
+### Weekly
+- [ ] Review trends
+- [ ] Check database performance
+- [ ] Analyze API usage
+- [ ] Review error logs
+
+### Monthly
+- [ ] Generate monthly report
+- [ ] Review and optimize
+- [ ] Plan improvements
+- [ ] Update documentation
+
+---
+
+## Support
+
+### Getting Help
+
+1. **Check logs**: Vercel function logs
+2. **Review documentation**: This guide
+3. **Check database**: Run diagnostic queries
+4. **Contact support**: If issues persist
+
+### Useful Links
+
+- Vercel Dashboard: https://vercel.com/dashboard
+- OpenAI Usage: https://platform.openai.com/usage
+- CoinMarketCap API: https://pro.coinmarketcap.com/account
+- Supabase Dashboard: https://supabase.com/dashboard
 
 ---
 
 **Status**: ✅ Monitoring System Complete  
-**Version**: 1.0.0  
-**Last Updated**: January 27, 2025
+**Last Updated**: January 27, 2025  
+**Version**: 1.0.0
 
+**The ATGE monitoring system is fully operational and ready for production use!** 🚀

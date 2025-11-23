@@ -32,7 +32,7 @@ pids
 .env.development.local
 .env.test.local
 .env.production.local
-.env.example
+# Note: .env.example should be committed as a template
 
 # Vercel
 .vercel
