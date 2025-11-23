@@ -164,6 +164,10 @@ export interface MarketSnapshot {
   socialContributors24h?: number;
   correlationScore?: number;
   
+  // Bitcoin On-Chain Metrics (Glassnode)
+  soprValue?: number;
+  mvrvZScore?: number;
+  
   // Timestamps
   snapshotAt: Date;
   createdAt: Date;
@@ -436,7 +440,7 @@ export async function storeTechnicalIndicators(
 // ============================================================================
 
 /**
- * Store market snapshot with LunarCrush data
+ * Store market snapshot with LunarCrush data and Glassnode metrics
  */
 export async function storeMarketSnapshot(
   snapshot: Omit<MarketSnapshot, 'id' | 'createdAt'>
@@ -450,6 +454,7 @@ export async function storeMarketSnapshot(
       sentiment_positive, sentiment_negative, sentiment_neutral,
       social_volume_24h, social_posts_24h, social_interactions_24h,
       social_contributors_24h, correlation_score,
+      sopr_value, mvrv_z_score,
       snapshot_at
     ) VALUES (
       $1,
@@ -459,7 +464,8 @@ export async function storeMarketSnapshot(
       $12, $13, $14,
       $15, $16, $17,
       $18, $19,
-      $20
+      $20, $21,
+      $22
     )
     RETURNING *
   `, [
@@ -470,6 +476,7 @@ export async function storeMarketSnapshot(
     snapshot.sentimentPositive, snapshot.sentimentNegative, snapshot.sentimentNeutral,
     snapshot.socialVolume24h, snapshot.socialPosts24h, snapshot.socialInteractions24h,
     snapshot.socialContributors24h, snapshot.correlationScore,
+    snapshot.soprValue, snapshot.mvrvZScore,
     snapshot.snapshotAt
   ]);
   
@@ -628,6 +635,9 @@ function mapMarketSnapshotFromDb(row: any): MarketSnapshot {
     socialInteractions24h: row.social_interactions_24h,
     socialContributors24h: row.social_contributors_24h,
     correlationScore: row.correlation_score ? parseFloat(row.correlation_score) : undefined,
+    // Glassnode on-chain metrics
+    soprValue: row.sopr_value ? parseFloat(row.sopr_value) : undefined,
+    mvrvZScore: row.mvrv_z_score ? parseFloat(row.mvrv_z_score) : undefined,
     snapshotAt: new Date(row.snapshot_at),
     createdAt: new Date(row.created_at)
   };

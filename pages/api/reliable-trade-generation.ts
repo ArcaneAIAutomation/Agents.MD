@@ -1,10 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import OpenAI from 'openai';
-import { callOpenAI } from '../../lib/openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { openai, callOpenAI, OPENAI_MODEL } from '../../lib/openai';
 
 // Reliable Live Data Fetcher - CoinMarketCap Primary, CoinGecko Fallback
 class ReliableLiveDataFetcher {

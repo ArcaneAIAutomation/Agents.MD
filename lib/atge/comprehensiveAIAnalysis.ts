@@ -1,8 +1,8 @@
 /**
  * Comprehensive AI Analysis for ATGE
  * 
- * Uses OpenAI o1-mini (ChatGPT-5.1) and Google Gemini 2.5 Pro for advanced reasoning-based trade analysis
- * Model is configurable via OPENAI_MODEL environment variable
+ * Uses OpenAI GPT-5.1 with Responses API and Google Gemini 2.5 Pro for advanced reasoning-based trade analysis
+ * Implements bulletproof response parsing with extractResponseText() and validateResponseText()
  * Combines data from ALL available sources:
  * - CoinMarketCap, CoinGecko, Kraken (Market Data)
  * - Binance (Technical Indicators)
@@ -11,24 +11,22 @@
  * - NewsAPI (News Sentiment)
  * - Caesar API (Market Intelligence)
  * 
- * Implements fallback chain: o1-mini → gpt-4o → Gemini AI
+ * Implements fallback chain: GPT-5.1 → Gemini AI
  * 
  * Requirements: 1.1-1.10, 2.1-2.10
  */
 
 import { TechnicalIndicatorsV2 } from './technicalIndicatorsV2';
+import { extractResponseText, validateResponseText } from '../../utils/openai';
+import OpenAI from 'openai';
 
-// OpenAI o1 model configuration (ChatGPT-5.1)
-// Primary: o1-mini for efficient multi-source reasoning
-// Complex: o1-preview for anomaly detection and complex market conditions
-// Fallback: gpt-4o for speed when o1 models timeout
-const MODEL = process.env.OPENAI_MODEL || 'o1-mini';
-const COMPLEX_MODEL = process.env.OPENAI_COMPLEX_MODEL || 'o1-preview';
-const FALLBACK_MODEL = process.env.OPENAI_FALLBACK_MODEL || 'gpt-4o';
+// OpenAI GPT-5.1 configuration with Responses API
+const MODEL = 'gpt-5.1';
+const REASONING_EFFORT = 'medium'; // Balanced speed and quality for trade signals
 
-// Timeout configuration for o1 models
-const O1_TIMEOUT = parseInt(process.env.O1_TIMEOUT || '120000'); // 120 seconds
-const GPT4O_TIMEOUT = parseInt(process.env.GPT4O_TIMEOUT || '30000'); // 30 seconds
+// Timeout configuration
+const GPT51_TIMEOUT = parseInt(process.env.GPT51_TIMEOUT || '30000'); // 30 seconds
+const GEMINI_TIMEOUT = parseInt(process.env.GEMINI_TIMEOUT || '30000'); // 30 seconds
 
 interface MarketData {
   symbol: string;
@@ -110,8 +108,8 @@ interface ComprehensiveAnalysisOutput {
 }
 
 /**
- * Generate comprehensive AI analysis using OpenAI ChatGPT-5.1-mini
- * Model is configurable via OPENAI_MODEL environment variable
+ * Generate comprehensive AI analysis using OpenAI GPT-5.1 with Responses API
+ * Uses bulletproof response parsing with extractResponseText() and validateResponseText()
  */
 async function generateOpenAIAnalysis(input: ComprehensiveAnalysisInput): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -119,7 +117,17 @@ async function generateOpenAIAnalysis(input: ComprehensiveAnalysisInput): Promis
     throw new Error('OpenAI API key not configured');
   }
 
-  const prompt = `You are an expert cryptocurrency trading analyst. Analyze the following data for ${input.symbol} on the ${input.timeframe} timeframe and provide a comprehensive trading recommendation.
+  // Initialize OpenAI client with Responses API headers
+  const openai = new OpenAI({
+    apiKey: apiKey,
+    defaultHeaders: {
+      'OpenAI-Beta': 'responses=v1'
+    }
+  });
+
+  const systemPrompt = 'You are an expert cryptocurrency trading analyst with deep knowledge of technical analysis, market sentiment, and on-chain metrics. Provide detailed, actionable trading recommendations.';
+
+  const userPrompt = `You are an expert cryptocurrency trading analyst. Analyze the following data for ${input.symbol} on the ${input.timeframe} timeframe and provide a comprehensive trading recommendation.
 
 **MARKET DATA** (Source: ${input.marketData.source})
 - Current Price: $${input.marketData.currentPrice.toLocaleString()}
@@ -162,45 +170,27 @@ ${input.newsHeadlines.slice(0, 5).map((h, i) => `${i + 1}. ${h}`).join('\n')}` :
 
 Provide your analysis in a structured format with clear reasoning.`;
 
-  const response = await fetch('https://api.openai.com/v1/responses', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`
+  // Call GPT-5.1 with medium reasoning effort
+  const completion = await openai.chat.completions.create({
+    model: MODEL,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt }
+    ],
+    reasoning: {
+      effort: REASONING_EFFORT
     },
-    body: JSON.stringify({
-      model: MODEL,
-      input: [
-        {
-          role: 'system',
-          content: 'You are an expert cryptocurrency trading analyst with deep knowledge of technical analysis, market sentiment, and on-chain metrics. Provide detailed, actionable trading recommendations.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      max_output_tokens: 2000
-    }),
-    signal: AbortSignal.timeout(120000) // 120 second timeout for fetch itself
+    temperature: 0.7,
+    max_tokens: 2000
   });
 
-  if (!response.ok) {
-    throw new Error(`OpenAI o1-mini API error: ${response.status}`);
-  }
-
-  const data = await response.json();
+  // Bulletproof extraction with debug mode enabled
+  const responseText = extractResponseText(completion as any, true);
   
-  // Extract reasoning if available from o1 models
-  const reasoning = data.choices[0].message.reasoning || null;
-  const content = data.choices[0].message.content;
+  // Validate response is not empty
+  validateResponseText(responseText, MODEL, completion);
   
-  // Combine content with reasoning chain if available
-  if (reasoning) {
-    return `${content}\n\n[o1 Reasoning Process]: ${reasoning}`;
-  }
-  
-  return content;
+  return responseText;
 }
 
 /**
@@ -383,31 +373,31 @@ export async function generateComprehensiveAnalysis(
   );
   const riskRewardRatio = rewardAmount / riskAmount;
   
-  // Generate AI analysis - ChatGPT-5.1-mini primary (120s timeout), Gemini 2.5 Pro fallback (120s timeout)
-  console.log(`[ATGE] Calling OpenAI ${MODEL} for primary analysis (120s timeout for maximum accuracy)...`);
+  // Generate AI analysis - GPT-5.1 primary (30s timeout), Gemini 2.5 Pro fallback (30s timeout)
+  console.log(`[ATGE] Calling OpenAI ${MODEL} with ${REASONING_EFFORT} reasoning effort (30s timeout)...`);
   let openAIAnalysis = '';
   let geminiAnalysis = '';
   let aiModelsUsed: string[] = [];
   
-  // Use ChatGPT-5.1-mini as primary with 120-second timeout for maximum accuracy
+  // Use GPT-5.1 as primary with 30-second timeout
   try {
     openAIAnalysis = await Promise.race([
       generateOpenAIAnalysis(input),
       new Promise<string>((_, reject) => 
-        setTimeout(() => reject(new Error(`OpenAI ${MODEL} timeout after 120 seconds`)), 120000)
+        setTimeout(() => reject(new Error(`OpenAI ${MODEL} timeout after ${GPT51_TIMEOUT}ms`)), GPT51_TIMEOUT)
       )
     ]);
     aiModelsUsed.push(`OpenAI ${MODEL}`);
     console.log(`[ATGE] OpenAI ${MODEL} analysis completed successfully`);
   } catch (gptErr) {
-    console.error(`[ATGE] OpenAI ${MODEL} analysis failed, trying Gemini 2.5 Pro with timeout:`, gptErr);
+    console.error(`[ATGE] OpenAI ${MODEL} analysis failed, trying Gemini 2.5 Pro fallback:`, gptErr);
     
-    // Fallback to Gemini 2.5 Pro with 120-second timeout for maximum accuracy
+    // Fallback to Gemini 2.5 Pro with 30-second timeout
     try {
       geminiAnalysis = await Promise.race([
         generateGeminiAnalysis(input),
         new Promise<string>((_, reject) => 
-          setTimeout(() => reject(new Error('Gemini 2.5 Pro timeout after 120 seconds')), 120000)
+          setTimeout(() => reject(new Error(`Gemini 2.5 Pro timeout after ${GEMINI_TIMEOUT}ms`)), GEMINI_TIMEOUT)
         )
       ]);
       aiModelsUsed.push('Google Gemini 2.5 Pro (Fallback)');
@@ -419,10 +409,10 @@ export async function generateComprehensiveAnalysis(
     }
   }
   
-  // Combine AI reasoning (ChatGPT-5.1-mini primary, Gemini 2.5 Pro fallback)
+  // Combine AI reasoning (GPT-5.1 primary, Gemini 2.5 Pro fallback)
   const aiReasoning = `**COMPREHENSIVE AI ANALYSIS**
 
-${openAIAnalysis ? `**OpenAI ${MODEL} Analysis (Primary):**
+${openAIAnalysis ? `**OpenAI ${MODEL} Analysis (Primary - ${REASONING_EFFORT} reasoning):**
 ${openAIAnalysis}` : ''}
 
 ${geminiAnalysis ? `**Google Gemini 2.5 Pro Analysis (Fallback):**

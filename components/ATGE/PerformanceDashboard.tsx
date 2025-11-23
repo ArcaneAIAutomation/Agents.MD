@@ -4,6 +4,7 @@ import PerformanceSummaryCard, { PerformanceStats } from './PerformanceSummaryCa
 import ProofOfPerformance, { ProofStats } from './ProofOfPerformance';
 import VisualAnalytics, { AnalyticsData } from './VisualAnalytics';
 import AdvancedMetrics, { AdvancedMetricsData } from './AdvancedMetrics';
+import RecentTradeHistory from './RecentTradeHistory';
 
 interface PerformanceDashboardProps {
   symbol: string;
@@ -48,6 +49,8 @@ export default function PerformanceDashboard({
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(false); // Disabled by default
+  const [refreshingTrades, setRefreshingTrades] = useState(false);
+  const [refreshMessage, setRefreshMessage] = useState<string | null>(null);
 
   // Fetch performance statistics
   const fetchPerformanceStats = async () => {
@@ -112,6 +115,51 @@ export default function PerformanceDashboard({
     setAutoRefresh(prev => !prev);
   };
 
+  // Handle refresh trades (verify all active trades)
+  const handleRefreshTrades = async () => {
+    try {
+      setRefreshingTrades(true);
+      setRefreshMessage(null);
+
+      const response = await fetch('/api/atge/verify-trades', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to verify trades');
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setRefreshMessage(
+          `✅ Verified ${data.verified} trades. ${data.updated} updated.`
+        );
+        
+        // Also refresh the performance stats after verification
+        await fetchPerformanceStats();
+        
+        // Clear message after 5 seconds
+        setTimeout(() => setRefreshMessage(null), 5000);
+      } else {
+        throw new Error(data.errors?.[0] || 'Verification failed');
+      }
+    } catch (err) {
+      console.error('Error refreshing trades:', err);
+      setRefreshMessage(
+        `❌ ${err instanceof Error ? err.message : 'Failed to verify trades'}`
+      );
+      
+      // Clear error message after 5 seconds
+      setTimeout(() => setRefreshMessage(null), 5000);
+    } finally {
+      setRefreshingTrades(false);
+    }
+  };
+
   // Error state
   if (error && !loading) {
     return (
@@ -151,20 +199,16 @@ export default function PerformanceDashboard({
           </div>
 
           <div className={`flex items-center gap-2 md:gap-3 ${isMobile ? 'flex-col w-full' : ''}`}>
-            {/* Auto-refresh toggle - Disabled by default, greyed out */}
+            {/* Refresh Trades button - Verify all active trades */}
             <button
-              onClick={toggleAutoRefresh}
-              disabled={true}
-              className={`flex items-center justify-center gap-2 px-4 py-2 min-h-[48px] rounded-lg font-semibold text-sm transition-all cursor-not-allowed opacity-50 ${isMobile ? 'w-full' : ''} ${
-                autoRefresh
-                  ? 'bg-bitcoin-orange text-bitcoin-black'
-                  : 'bg-bitcoin-black border border-bitcoin-orange-20 text-bitcoin-white-60'
-              }`}
-              title="Auto-refresh is disabled. Use manual refresh instead."
+              onClick={handleRefreshTrades}
+              disabled={refreshingTrades}
+              className={`flex items-center justify-center gap-2 bg-bitcoin-orange text-bitcoin-black font-bold px-4 py-2 min-h-[48px] rounded-lg transition-all hover:bg-bitcoin-black hover:text-bitcoin-orange hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] disabled:opacity-50 disabled:cursor-not-allowed ${isMobile ? 'w-full' : ''}`}
+              title="Verify all active trades against live market data"
             >
-              <RefreshCw size={16} className={autoRefresh ? 'animate-spin' : ''} />
+              <RefreshCw size={16} className={refreshingTrades ? 'animate-spin' : ''} />
               <span className={isMobile ? 'text-xs' : ''}>
-                Auto-Refresh {autoRefresh ? 'On' : 'Off'}
+                {refreshingTrades ? 'Verifying...' : 'Refresh Trades'}
               </span>
             </button>
 
@@ -173,16 +217,28 @@ export default function PerformanceDashboard({
               onClick={handleRefresh}
               disabled={loading}
               className={`flex items-center justify-center gap-2 bg-bitcoin-orange text-bitcoin-black font-bold px-4 py-2 min-h-[48px] rounded-lg transition-all hover:bg-bitcoin-black hover:text-bitcoin-orange hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] disabled:opacity-50 disabled:cursor-not-allowed ${isMobile ? 'w-full' : ''}`}
+              title="Refresh performance statistics"
             >
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-              <span className={isMobile ? 'text-xs' : ''}>Refresh</span>
+              <span className={isMobile ? 'text-xs' : ''}>
+                {loading ? 'Loading...' : 'Refresh Stats'}
+              </span>
             </button>
           </div>
         </div>
 
+        {/* Refresh message */}
+        {refreshMessage && (
+          <div className="mt-4 pt-4 border-t border-bitcoin-orange-20">
+            <p className={`text-bitcoin-orange font-semibold ${isMobile ? 'text-xs text-center' : 'text-sm'}`}>
+              {refreshMessage}
+            </p>
+          </div>
+        )}
+
         {/* Last updated timestamp */}
         {lastUpdated && (
-          <div className="mt-4 pt-4 border-t border-bitcoin-orange-20">
+          <div className={`${refreshMessage ? 'mt-2' : 'mt-4'} pt-4 border-t border-bitcoin-orange-20`}>
             <p className={`text-bitcoin-white-60 ${isMobile ? 'text-xs text-center' : 'text-xs'}`}>
               Last Updated: {isMobile ? lastUpdated.toLocaleTimeString() : lastUpdated.toLocaleString()}
               {autoRefresh && !isMobile && ' • Auto-refreshing every 30 seconds'}
@@ -214,6 +270,12 @@ export default function PerformanceDashboard({
       <AdvancedMetrics
         data={advancedMetrics}
         loading={loading}
+      />
+
+      {/* Recent Trade History */}
+      <RecentTradeHistory
+        symbol={symbol}
+        lastGeneratedAt={lastGeneratedAt}
       />
 
       {/* Disclaimer - Mobile Optimized */}

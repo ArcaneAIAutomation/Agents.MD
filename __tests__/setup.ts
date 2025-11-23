@@ -6,6 +6,14 @@
 
 import '@testing-library/jest-dom';
 
+// Add OpenAI shim for Node.js environment
+import 'openai/shims/node';
+
+// Add TextEncoder/TextDecoder for Node.js environment (required by pg)
+import { TextEncoder, TextDecoder } from 'util';
+global.TextEncoder = TextEncoder as any;
+global.TextDecoder = TextDecoder as any;
+
 // Mock window.matchMedia for responsive tests
 Object.defineProperty(window, 'matchMedia', {
   writable: true,

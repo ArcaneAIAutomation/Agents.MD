@@ -18,6 +18,7 @@ import { getLunarCrushAnalysis } from '../../../lib/atge/lunarcrush';
 import { generateTradeSignal } from '../../../lib/atge/aiGenerator';
 import { generateComprehensiveAnalysis } from '../../../lib/atge/comprehensiveAIAnalysis';
 import { fetchHistoricalData } from '../../../lib/atge/historicalData';
+import { fetchBitcoinOnChainMetrics } from '../../../lib/atge/glassnode';
 import {
   storeTradeSignal,
   storeTechnicalIndicators,
@@ -131,13 +132,14 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
     // Fetch all market data in parallel with performance tracking
     // CRITICAL: Force fresh data for trade generation (no cache)
     // Use V2 indicators for accurate, timeframe-specific calculations
-    const [marketData, technicalIndicators, sentimentData, onChainData] = await measureExecutionTime(
+    const [marketData, technicalIndicators, sentimentData, onChainData, bitcoinMetrics] = await measureExecutionTime(
       async () => {
         return await Promise.all([
           getMarketData(symbol, true), // Force fresh data (no cache)
           getTechnicalIndicatorsV2(symbol, timeframe), // V2 with timeframe support (always fresh from Binance)
           getSentimentData(symbol), // Already includes LunarCrush data
-          getOnChainData(symbol)
+          getOnChainData(symbol),
+          fetchBitcoinOnChainMetrics(symbol) // Fetch SOPR and MVRV Z-Score (Bitcoin only, graceful for others)
         ]);
       },
       'fetch_market_data',
@@ -147,6 +149,9 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
 
     console.log(`[ATGE] Data fetching completed (including LunarCrush from sentiment data)`);
     console.log(`[ATGE] Technical indicators from ${technicalIndicators.dataSource} (quality: ${technicalIndicators.dataQuality}%)`);
+    if (bitcoinMetrics.sopr !== null || bitcoinMetrics.mvrvZScore !== null) {
+      console.log(`[ATGE] Bitcoin on-chain metrics: SOPR=${bitcoinMetrics.sopr}, MVRV Z-Score=${bitcoinMetrics.mvrvZScore}`);
+    }
 
     // Generate comprehensive AI analysis with OpenAI GPT-4o + Gemini AI
     console.log(`[ATGE] Starting comprehensive AI analysis (OpenAI GPT-4o + Gemini AI)...`);
@@ -196,7 +201,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
       riskRewardRatio: comprehensiveAnalysis.riskRewardRatio,
       marketCondition: comprehensiveAnalysis.marketCondition,
       aiReasoning: comprehensiveAnalysis.aiReasoning,
-      aiModelVersion: 'OpenAI ChatGPT 5.1 + Google Gemini 2.5 Pro',
+      aiModelVersion: 'OpenAI GPT-5.1 + Google Gemini 2.5 Pro',
       generatedAt,
       expiresAt
     });
@@ -225,7 +230,7 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
       candleCount: technicalIndicators.candleCount
     });
 
-    // Store market snapshot with LunarCrush data from sentimentData
+    // Store market snapshot with LunarCrush data from sentimentData and Bitcoin on-chain metrics
     await storeMarketSnapshot({
       tradeSignalId: storedSignal.id,
       currentPrice: marketData.currentPrice,
@@ -247,6 +252,9 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
       socialInteractions24h: undefined, // Not available in basic API
       socialContributors24h: undefined, // Not available in basic API
       correlationScore: undefined, // Not available in basic API
+      // Bitcoin On-Chain Metrics (from Glassnode API - Bitcoin only)
+      soprValue: bitcoinMetrics.sopr,
+      mvrvZScore: bitcoinMetrics.mvrvZScore,
       snapshotAt: new Date()
     });
 

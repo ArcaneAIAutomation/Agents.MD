@@ -72,6 +72,8 @@ export interface TradeSignal {
     socialSentimentScore?: number; // 0-100 from LunarCrush
     whaleActivityCount?: number; // Count of large transactions (>50 BTC) in last 24h
     fearGreedIndex?: number; // 0-100 from Alternative.me (0=Extreme Fear, 100=Extreme Greed)
+    soprValue?: number; // Spent Output Profit Ratio (Bitcoin only)
+    mvrvZScore?: number; // Market Value to Realized Value Z-Score (Bitcoin only)
     timestamp: Date;
   };
   
@@ -98,6 +100,15 @@ export interface TradeSignal {
     dataSource?: string;
     dataResolution?: string;
     dataQualityScore?: number;
+    // AI Analysis (Phase 3)
+    aiAnalysis?: string | {
+      summary: string;
+      successFactors?: string[];
+      failureFactors?: string[];
+      recommendations?: string[];
+      confidence?: number;
+    };
+    aiAnalysisGeneratedAt?: Date;
   };
 }
 

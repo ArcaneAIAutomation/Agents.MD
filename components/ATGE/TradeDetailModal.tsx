@@ -1,12 +1,252 @@
-import React from 'react';
-import { X, TrendingUp, Target, Clock, Brain, BarChart3, Database, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, TrendingUp, Target, Clock, Brain, BarChart3, Database, CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { TradeSignal } from './TradeRow';
+import ReactMarkdown from 'react-markdown';
 
 interface TradeDetailModalProps {
   trade: TradeSignal | null;
   isOpen: boolean;
   onClose: () => void;
   className?: string;
+}
+
+interface AIAnalysisSectionProps {
+  trade: TradeSignal;
+}
+
+function AIAnalysisSection({ trade }: AIAnalysisSectionProps) {
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [analysis, setAnalysis] = useState<{
+    summary: string;
+    successFactors?: string[];
+    failureFactors?: string[];
+    recommendations?: string[];
+    confidence?: number;
+  } | null>(null);
+
+  // Check if analysis already exists (from trade.result.aiAnalysis)
+  const hasExistingAnalysis = trade.result?.aiAnalysis;
+
+  const handleAnalyzeTrade = async () => {
+    setIsAnalyzing(true);
+    setAnalysisError(null);
+
+    try {
+      const response = await fetch(`/api/atge/analyze-trade?tradeId=${trade.id}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to analyze trade');
+      }
+
+      const data = await response.json();
+      
+      if (data.success && data.analysis) {
+        setAnalysis(data.analysis);
+      } else {
+        throw new Error(data.error || 'Analysis failed');
+      }
+    } catch (error) {
+      console.error('Analysis error:', error);
+      setAnalysisError(error instanceof Error ? error.message : 'Failed to analyze trade');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  // Parse existing analysis if available
+  React.useEffect(() => {
+    if (hasExistingAnalysis && !analysis) {
+      try {
+        const parsed = typeof hasExistingAnalysis === 'string' 
+          ? JSON.parse(hasExistingAnalysis)
+          : hasExistingAnalysis;
+        setAnalysis(parsed);
+      } catch (error) {
+        console.error('Failed to parse existing analysis:', error);
+      }
+    }
+  }, [hasExistingAnalysis, analysis]);
+
+  return (
+    <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-xl p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-xl font-bold text-bitcoin-white flex items-center gap-2">
+          <Brain size={24} className="text-bitcoin-orange" />
+          AI Analysis of Outcome
+        </h3>
+        
+        {!analysis && !isAnalyzing && (
+          <button
+            onClick={handleAnalyzeTrade}
+            className="bg-bitcoin-orange text-bitcoin-black font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-all hover:bg-bitcoin-black hover:text-bitcoin-orange hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] text-sm"
+          >
+            Analyze Trade
+          </button>
+        )}
+      </div>
+
+      {/* Loading State */}
+      {isAnalyzing && (
+        <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-8 text-center">
+          <Loader2 size={48} className="text-bitcoin-orange mx-auto mb-4 animate-spin" />
+          <p className="text-bitcoin-white font-bold mb-2">
+            Analyzing Trade with GPT-5.1...
+          </p>
+          <p className="text-bitcoin-white-60 text-sm">
+            This may take 5-10 seconds. Please wait.
+          </p>
+        </div>
+      )}
+
+      {/* Error State */}
+      {analysisError && !isAnalyzing && (
+        <div className="bg-red-500 bg-opacity-10 border-2 border-red-500 rounded-lg p-6">
+          <div className="flex items-start gap-3">
+            <AlertCircle size={24} className="text-red-500 flex-shrink-0 mt-1" />
+            <div className="flex-1">
+              <p className="text-red-500 font-bold mb-2">
+                Analysis Failed
+              </p>
+              <p className="text-bitcoin-white-80 text-sm mb-4">
+                {analysisError}
+              </p>
+              <button
+                onClick={handleAnalyzeTrade}
+                className="bg-bitcoin-orange text-bitcoin-black font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-all hover:bg-bitcoin-black hover:text-bitcoin-orange hover:shadow-[0_0_20px_rgba(247,147,26,0.3)] text-sm"
+              >
+                Retry Analysis
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Analysis Display */}
+      {analysis && !isAnalyzing && (
+        <div className="space-y-4">
+          {/* Confidence Score */}
+          {analysis.confidence !== undefined && (
+            <div className="bg-bitcoin-orange bg-opacity-10 border-2 border-bitcoin-orange rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-bitcoin-white-60 text-sm font-semibold uppercase tracking-wider">
+                  Analysis Confidence
+                </span>
+                <span className="text-2xl font-bold text-bitcoin-orange font-mono">
+                  {analysis.confidence}%
+                </span>
+              </div>
+              <div className="mt-2">
+                <div className="w-full bg-bitcoin-black border border-bitcoin-orange-20 rounded-full h-2">
+                  <div 
+                    className="bg-bitcoin-orange h-full rounded-full transition-all"
+                    style={{ width: `${analysis.confidence}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Summary */}
+          <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-4">
+            <h4 className="text-bitcoin-white font-bold mb-3 flex items-center gap-2">
+              <Brain size={18} className="text-bitcoin-orange" />
+              Analysis Summary
+            </h4>
+            <div className="prose prose-invert prose-sm max-w-none">
+              <ReactMarkdown
+                className="text-bitcoin-white-80 leading-relaxed"
+                components={{
+                  p: ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,
+                  ul: ({ children }) => <ul className="list-disc list-inside space-y-1 mb-3">{children}</ul>,
+                  ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-3">{children}</ol>,
+                  li: ({ children }) => <li className="text-bitcoin-white-80">{children}</li>,
+                  strong: ({ children }) => <strong className="text-bitcoin-orange font-bold">{children}</strong>,
+                  em: ({ children }) => <em className="text-bitcoin-white italic">{children}</em>,
+                  code: ({ children }) => <code className="bg-bitcoin-black px-2 py-1 rounded text-bitcoin-orange font-mono text-sm">{children}</code>,
+                }}
+              >
+                {analysis.summary}
+              </ReactMarkdown>
+            </div>
+          </div>
+
+          {/* Success Factors */}
+          {analysis.successFactors && analysis.successFactors.length > 0 && (
+            <div className="bg-bitcoin-orange bg-opacity-10 border-2 border-bitcoin-orange rounded-lg p-4">
+              <h4 className="text-bitcoin-orange font-bold mb-3 flex items-center gap-2">
+                <CheckCircle size={18} className="text-bitcoin-orange" />
+                Success Factors
+              </h4>
+              <ul className="space-y-2">
+                {analysis.successFactors.map((factor, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-1">•</span>
+                    <span className="text-bitcoin-white-80 text-sm">{factor}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Failure Factors */}
+          {analysis.failureFactors && analysis.failureFactors.length > 0 && (
+            <div className="bg-red-500 bg-opacity-10 border-2 border-red-500 rounded-lg p-4">
+              <h4 className="text-red-500 font-bold mb-3 flex items-center gap-2">
+                <XCircle size={18} className="text-red-500" />
+                Failure Factors
+              </h4>
+              <ul className="space-y-2">
+                {analysis.failureFactors.map((factor, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <span className="text-red-500 mt-1">•</span>
+                    <span className="text-bitcoin-white-80 text-sm">{factor}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Recommendations */}
+          {analysis.recommendations && analysis.recommendations.length > 0 && (
+            <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-4">
+              <h4 className="text-bitcoin-white font-bold mb-3 flex items-center gap-2">
+                <Target size={18} className="text-bitcoin-orange" />
+                Recommendations
+              </h4>
+              <ul className="space-y-2">
+                {analysis.recommendations.map((rec, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-1">→</span>
+                    <span className="text-bitcoin-white-80 text-sm">{rec}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* No Analysis Yet */}
+      {!analysis && !isAnalyzing && !analysisError && (
+        <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-6 text-center">
+          <Brain size={48} className="text-bitcoin-orange mx-auto mb-4 opacity-50" />
+          <p className="text-bitcoin-white-80 mb-2">
+            AI-powered analysis of why this trade {trade.status === 'completed_success' ? 'succeeded' : 'failed'} is not yet available.
+          </p>
+          <p className="text-bitcoin-white-60 text-sm mb-4">
+            Click "Analyze Trade" to generate a comprehensive analysis including:
+          </p>
+          <ul className="text-bitcoin-white-60 text-sm space-y-1 mb-4">
+            <li>• Key factors that contributed to the outcome</li>
+            <li>• Market conditions during the trade</li>
+            <li>• Technical indicator analysis</li>
+            <li>• Recommendations for future trades</li>
+          </ul>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function TradeDetailModal({
@@ -615,23 +855,7 @@ export default function TradeDetailModal({
 
           {/* AI Analysis of Outcome */}
           {trade.status === 'completed_success' || trade.status === 'completed_failure' ? (
-            <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-xl p-6">
-              <h3 className="text-xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
-                <Brain size={24} className="text-bitcoin-orange" />
-                AI Analysis of Outcome
-              </h3>
-              <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-4">
-                <p className="text-bitcoin-white-80 leading-relaxed">
-                  AI-powered analysis of why this trade {trade.status === 'completed_success' ? 'succeeded' : 'failed'} will be displayed here once the AI analysis feature is implemented. This will include:
-                </p>
-                <ul className="text-bitcoin-white-60 text-sm mt-3 space-y-1 ml-4">
-                  <li>• Key factors that contributed to the outcome</li>
-                  <li>• Market conditions during the trade</li>
-                  <li>• Technical indicator analysis</li>
-                  <li>• Recommendations for future trades</li>
-                </ul>
-              </div>
-            </div>
+            <AIAnalysisSection trade={trade} />
           ) : null}
 
           {/* Market Snapshot at Generation */}
@@ -872,6 +1096,136 @@ export default function TradeDetailModal({
               </div>
             )}
           </div>
+
+          {/* Bitcoin On-Chain Metrics (SOPR & MVRV) - Bitcoin Only */}
+          {trade.symbol === 'BTC' && trade.snapshot && (trade.snapshot.soprValue !== undefined || trade.snapshot.mvrvZScore !== undefined) && (
+            <div className="bg-bitcoin-orange bg-opacity-10 border-2 border-bitcoin-orange rounded-xl p-6">
+              <h3 className="text-xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
+                <BarChart3 size={24} className="text-bitcoin-orange" />
+                Bitcoin On-Chain Metrics
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* SOPR (Spent Output Profit Ratio) */}
+                {trade.snapshot.soprValue !== undefined && trade.snapshot.soprValue !== null ? (
+                  <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-6">
+                    <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-3">
+                      SOPR (Spent Output Profit Ratio)
+                    </p>
+                    <p className={`text-4xl font-bold font-mono mb-3 ${
+                      trade.snapshot.soprValue > 1 ? 'text-bitcoin-orange' :
+                      trade.snapshot.soprValue < 1 ? 'text-red-500' :
+                      'text-bitcoin-white'
+                    }`}>
+                      {trade.snapshot.soprValue.toFixed(4)}
+                    </p>
+                    <div className="space-y-2">
+                      <div className={`px-3 py-2 rounded-lg border-2 ${
+                        trade.snapshot.soprValue > 1 
+                          ? 'bg-bitcoin-orange bg-opacity-10 border-bitcoin-orange' 
+                          : 'bg-red-500 bg-opacity-10 border-red-500'
+                      }`}>
+                        <p className={`font-bold text-sm ${
+                          trade.snapshot.soprValue > 1 ? 'text-bitcoin-orange' : 'text-red-500'
+                        }`}>
+                          {trade.snapshot.soprValue > 1 ? '📈 BULLISH SIGNAL' : '📉 BEARISH SIGNAL'}
+                        </p>
+                      </div>
+                      <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-3">
+                        <p className="text-bitcoin-white-80 text-sm leading-relaxed">
+                          {trade.snapshot.soprValue > 1 
+                            ? 'SOPR > 1 indicates that Bitcoin holders are spending coins at a profit. This suggests confidence in the market and is typically a bullish signal.'
+                            : 'SOPR < 1 indicates that Bitcoin holders are spending coins at a loss. This suggests capitulation or fear in the market and is typically a bearish signal.'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-lg p-6">
+                    <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-3">
+                      SOPR (Spent Output Profit Ratio)
+                    </p>
+                    <p className="text-4xl font-bold font-mono text-bitcoin-white-60 mb-3">
+                      N/A
+                    </p>
+                    <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-3">
+                      <p className="text-bitcoin-white-60 text-sm">
+                        SOPR data not available for this trade. This metric will be captured for future Bitcoin trades.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* MVRV Z-Score */}
+                {trade.snapshot.mvrvZScore !== undefined && trade.snapshot.mvrvZScore !== null ? (
+                  <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-6">
+                    <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-3">
+                      MVRV Z-Score
+                    </p>
+                    <p className={`text-4xl font-bold font-mono mb-3 ${
+                      trade.snapshot.mvrvZScore > 7 ? 'text-red-500' :
+                      trade.snapshot.mvrvZScore < 0 ? 'text-bitcoin-orange' :
+                      'text-bitcoin-white'
+                    }`}>
+                      {trade.snapshot.mvrvZScore.toFixed(2)}
+                    </p>
+                    <div className="space-y-2">
+                      <div className={`px-3 py-2 rounded-lg border-2 ${
+                        trade.snapshot.mvrvZScore > 7 
+                          ? 'bg-red-500 bg-opacity-10 border-red-500'
+                          : trade.snapshot.mvrvZScore < 0
+                          ? 'bg-bitcoin-orange bg-opacity-10 border-bitcoin-orange'
+                          : 'bg-bitcoin-white-60 bg-opacity-10 border-bitcoin-white-60'
+                      }`}>
+                        <p className={`font-bold text-sm ${
+                          trade.snapshot.mvrvZScore > 7 
+                            ? 'text-red-500'
+                            : trade.snapshot.mvrvZScore < 0
+                            ? 'text-bitcoin-orange'
+                            : 'text-bitcoin-white'
+                        }`}>
+                          {trade.snapshot.mvrvZScore > 7 
+                            ? '⚠️ OVERVALUED'
+                            : trade.snapshot.mvrvZScore < 0
+                            ? '💎 UNDERVALUED'
+                            : '⚖️ FAIR VALUE'}
+                        </p>
+                      </div>
+                      <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-3">
+                        <p className="text-bitcoin-white-80 text-sm leading-relaxed">
+                          {trade.snapshot.mvrvZScore > 7 
+                            ? 'MVRV Z-Score > 7 indicates Bitcoin is significantly overvalued relative to its realized value. Historically, this has marked market tops and suggests caution.'
+                            : trade.snapshot.mvrvZScore < 0
+                            ? 'MVRV Z-Score < 0 indicates Bitcoin is undervalued relative to its realized value. Historically, this has marked market bottoms and presents potential buying opportunities.'
+                            : 'MVRV Z-Score between 0 and 7 indicates Bitcoin is fairly valued relative to its realized value. The market is neither extremely overheated nor oversold.'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-lg p-6">
+                    <p className="text-bitcoin-white-60 text-xs font-semibold uppercase tracking-wider mb-3">
+                      MVRV Z-Score
+                    </p>
+                    <p className="text-4xl font-bold font-mono text-bitcoin-white-60 mb-3">
+                      N/A
+                    </p>
+                    <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-3">
+                      <p className="text-bitcoin-white-60 text-sm">
+                        MVRV Z-Score data not available for this trade. This metric will be captured for future Bitcoin trades.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-4 p-3 bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg">
+                <p className="text-bitcoin-white-60 text-xs">
+                  <span className="font-bold">Note:</span> These on-chain metrics are Bitcoin-specific and provide insights into holder behavior and market valuation. They are captured at the time of trade generation.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Data Source and Quality Score */}
           <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-xl p-6">

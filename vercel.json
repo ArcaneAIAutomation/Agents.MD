@@ -93,6 +93,10 @@
     {
       "path": "/api/cron/check-expired-trades",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/atge-verify-trades",
+      "schedule": "0 * * * *"
     }
   ],
   "env": {
