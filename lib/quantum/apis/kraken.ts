@@ -54,11 +54,28 @@ export async function fetchKrakenData(pair: string = 'XBTUSD'): Promise<KrakenRe
           throw new Error(`Kraken API error: ${data.error.join(', ')}`);
         }
         
-        if (!data.result || !data.result[pair]) {
-          throw new Error('Invalid Kraken API response structure');
+        if (!data.result) {
+          throw new Error('Invalid Kraken API response structure: missing result');
         }
         
-        const ticker = data.result[pair];
+        // Kraken always returns XXBTZUSD as the key, regardless of input pair format
+        // Try multiple possible keys
+        const possibleKeys = ['XXBTZUSD', pair, 'XBTUSD', 'BTCUSD'];
+        let ticker = null;
+        let foundKey = null;
+        
+        for (const key of possibleKeys) {
+          if (data.result[key]) {
+            ticker = data.result[key];
+            foundKey = key;
+            break;
+          }
+        }
+        
+        if (!ticker) {
+          const availableKeys = Object.keys(data.result);
+          throw new Error(`Invalid Kraken API response structure: expected one of [${possibleKeys.join(', ')}], got [${availableKeys.join(', ')}]`);
+        }
         
         return {
           price: parseFloat(ticker.c[0]), // Last trade closed price

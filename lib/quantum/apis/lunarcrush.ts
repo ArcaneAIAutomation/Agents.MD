@@ -41,7 +41,8 @@ export async function fetchLunarCrushData(symbol: string = 'BTC'): Promise<Lunar
           throw new Error('LUNARCRUSH_API_KEY not configured');
         }
         
-        const url = `https://api.lunarcrush.com/v2?data=assets&symbol=${symbol}`;
+        // Use LunarCrush v4 API endpoint (correct endpoint)
+        const url = `https://lunarcrush.com/api4/public/coins/${symbol}/v1`;
         
         const response = await fetch(url, {
           method: 'GET',
@@ -57,12 +58,12 @@ export async function fetchLunarCrushData(symbol: string = 'BTC'): Promise<Lunar
         
         const data = await response.json();
         
-        // Validate response structure
-        if (!data.data || data.data.length === 0) {
+        // Validate response structure (v4 API format)
+        if (!data || !data.data) {
           throw new Error('Invalid LunarCrush API response structure');
         }
         
-        const asset = data.data[0];
+        const asset = data.data;
         
         return {
           sentiment: asset.sentiment || 50,
