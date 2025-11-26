@@ -7,9 +7,10 @@ import EmailVerificationPending from './auth/EmailVerificationPending';
 
 interface AccessGateProps {
   onAccessGranted?: () => void;
+  children?: React.ReactNode;
 }
 
-export default function AccessGate({ onAccessGranted }: AccessGateProps) {
+export default function AccessGate({ onAccessGranted, children }: AccessGateProps) {
   const { 
     isAuthenticated, 
     isLoading: authLoading, 
@@ -66,9 +67,9 @@ export default function AccessGate({ onAccessGranted }: AccessGateProps) {
     }
   }, [successMessage]);
 
-  // Don't render if authenticated
+  // Render children if authenticated
   if (isAuthenticated) {
-    return null;
+    return <>{children}</>;
   }
 
   // Show verification pending if email is waiting for verification

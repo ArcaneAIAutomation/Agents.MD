@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Zap, TrendingUp, Activity } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Zap, TrendingUp, Activity, Database, AlertTriangle } from 'lucide-react';
 import TradeGenerationButton from './TradeGenerationButton';
 import PerformanceDashboard from './PerformanceDashboard';
 import TradeDetailModal from './TradeDetailModal';
@@ -24,6 +24,76 @@ export default function QuantumBTCDashboard({ className = '' }: QuantumBTCDashbo
   const [selectedTradeId, setSelectedTradeId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [latestTrade, setLatestTrade] = useState<any>(null);
+  const [dbReady, setDbReady] = useState(false);
+  const [dbChecking, setDbChecking] = useState(true);
+  const [dbError, setDbError] = useState<string | null>(null);
+  const [initializingDb, setInitializingDb] = useState(false);
+
+  // Check database readiness on mount
+  useEffect(() => {
+    checkDatabaseReadiness();
+  }, []);
+
+  const checkDatabaseReadiness = async () => {
+    try {
+      setDbChecking(true);
+      setDbError(null);
+      
+      const response = await fetch('/api/quantum/monitoring');
+      const data = await response.json();
+      
+      if (response.ok) {
+        setDbReady(true);
+      } else if (data.error?.includes('does not exist') || data.error?.includes('relation')) {
+        setDbReady(false);
+        setDbError('Database tables need to be initialized. Click "Initialize Database" to set up Quantum BTC.');
+      } else {
+        throw new Error(data.error || 'Failed to check database status');
+      }
+    } catch (err) {
+      console.error('Database check failed:', err);
+      setDbError(err instanceof Error ? err.message : 'Failed to connect to database');
+      setDbReady(false);
+    } finally {
+      setDbChecking(false);
+    }
+  };
+
+  const initializeDatabase = async () => {
+    try {
+      setInitializingDb(true);
+      setDbError(null);
+      
+      const response = await fetch('/api/admin/run-quantum-migrations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to initialize database');
+      }
+      
+      if (!data.verification?.ready) {
+        throw new Error('Some database tables failed to create. Check console for details.');
+      }
+      
+      // Wait for tables to be fully ready
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Recheck database
+      await checkDatabaseReadiness();
+      
+    } catch (err) {
+      console.error('Database initialization failed:', err);
+      setDbError(err instanceof Error ? err.message : 'Failed to initialize database');
+    } finally {
+      setInitializingDb(false);
+    }
+  };
 
   // Mock data quality for demonstration
   const mockDataQuality = {
@@ -79,6 +149,56 @@ export default function QuantumBTCDashboard({ className = '' }: QuantumBTCDashbo
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+        {/* Database Status Banner */}
+        {dbChecking && (
+          <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
+            <div className="flex items-center space-x-3">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-bitcoin-orange"></div>
+              <span className="text-bitcoin-white-80">Checking database status...</span>
+            </div>
+          </div>
+        )}
+
+        {dbError && (
+          <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <AlertTriangle className="h-5 w-5 text-red-400 flex-shrink-0" />
+                <span className="text-red-300">{dbError}</span>
+              </div>
+              {!dbReady && dbError.includes('initialized') && (
+                <button
+                  onClick={initializeDatabase}
+                  disabled={initializingDb}
+                  className="px-4 py-2 bg-bitcoin-orange hover:bg-orange-600 disabled:bg-orange-800 disabled:cursor-not-allowed text-bitcoin-black font-bold rounded-lg transition-colors flex items-center space-x-2 flex-shrink-0 ml-4"
+                >
+                  {initializingDb ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-bitcoin-black"></div>
+                      <span>Initializing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Database className="h-4 w-4" />
+                      <span>Initialize Database</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {dbReady && !dbChecking && (
+          <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
+            <div className="flex items-center space-x-3">
+              <div className="h-5 w-5 bg-green-500 rounded-full flex items-center justify-center">
+                <div className="h-2 w-2 bg-bitcoin-black rounded-full"></div>
+              </div>
+              <span className="text-green-300 font-bold">Database Ready - All Systems Operational</span>
+            </div>
+          </div>
+        )}
         {/* Trade Generation Section */}
         <section>
           <div className="bg-bitcoin-black border border-bitcoin-orange rounded-xl p-6">
