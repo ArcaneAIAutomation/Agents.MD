@@ -96,7 +96,7 @@ export default async function handler(
 
   try {
     // Parse request body
-    const { symbol, timeframe = '1h' } as RefreshDataRequest = req.body;
+    const { symbol, timeframe = '1h' } = req.body as RefreshDataRequest;
 
     // Validate symbol
     if (!symbol || typeof symbol !== 'string') {
