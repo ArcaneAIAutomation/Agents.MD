@@ -1,0 +1,36 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/einstein/*": ["./*"],
+      "@/einstein/coordinator/*": ["./coordinator/*"],
+      "@/einstein/data/*": ["./data/*"],
+      "@/einstein/analysis/*": ["./analysis/*"],
+      "@/einstein/workflow/*": ["./workflow/*"],
+      "@/einstein/visualization/*": ["./visualization/*"]
+    },
+    "outDir": "../../dist/einstein",
+    "rootDir": ".",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": false
+  },
+  "include": [
+    "./**/*.ts",
+    "./**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
+}

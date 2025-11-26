@@ -97,6 +97,10 @@
     {
       "path": "/api/cron/atge-verify-trades",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/quantum/validate-btc-trades",
+      "schedule": "0 * * * *"
     }
   ],
   "env": {

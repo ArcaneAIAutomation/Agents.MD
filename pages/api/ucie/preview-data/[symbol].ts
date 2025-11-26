@@ -888,9 +888,14 @@ async function generateAISummary(
 
 Use ONLY the data provided. Be specific with numbers and percentages.`;
     
-    // ✅ EINSTEIN'S SOLUTION: Try quick analysis first (45s), use fallback if timeout
-    // Note: Vercel has 60s hard limit, so we can't wait 3 minutes in one request
-    // For longer analysis, use async polling pattern (separate endpoint)
+    // ✅ EINSTEIN'S SOLUTION: Extended timeout for GPT-5.1 reasoning mode
+    // GPT-5.1 with 'low' reasoning effort typically takes 2-5 seconds
+    // But can take up to 30 seconds under load or with complex analysis
+    // Extended timeout to 120 seconds (2 minutes) to allow for:
+    // - API queue time
+    // - Reasoning computation
+    // - Response generation
+    // - Network latency
     const analysisPromise = generateOpenAIAnalysis(
       systemPrompt,
       context,
@@ -899,7 +904,7 @@ Use ONLY the data provided. Be specific with numbers and percentages.`;
     );
     
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('GPT-5.1 analysis timeout (45s) - using fallback')), 45000);
+      setTimeout(() => reject(new Error('GPT-5.1 analysis timeout (120s) - using fallback')), 120000); // ✅ 120 seconds (2 minutes)
     });
     
     try {
@@ -908,7 +913,7 @@ Use ONLY the data provided. Be specific with numbers and percentages.`;
       return response.content;
     } catch (timeoutError) {
       // If timeout, log and use fallback (don't throw - graceful degradation)
-      console.warn(`⚠️ GPT-5.1 timed out after 45s, using fallback summary`);
+      console.warn(`⚠️ GPT-5.1 timed out after 120s, using fallback summary`);
       throw timeoutError; // Let outer catch handle fallback
     }
     

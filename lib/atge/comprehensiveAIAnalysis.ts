@@ -273,8 +273,9 @@ function calculateTradeLevels(input: ComprehensiveAnalysisInput): {
   // TP2: 2.5x risk (moderate)
   const tp2Price = entryPrice + (riskAmount * 2.5);
   
-  // TP3: 4x risk (aggressive, near Bollinger upper band)
-  const tp3Price = Math.min(entryPrice + (riskAmount * 4), bbUpper);
+  // TP3: 4x risk (aggressive) - FIXED: removed Math.min() cap that was causing TP3 to be lower than TP1/TP2
+  // For long positions, TP3 should ALWAYS be higher than TP1 and TP2
+  const tp3Price = entryPrice + (riskAmount * 4);
   
   return {
     entryPrice: Math.round(entryPrice * 100) / 100,

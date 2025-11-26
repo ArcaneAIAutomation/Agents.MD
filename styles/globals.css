@@ -17742,3 +17742,613 @@ ol[role="list"] {
 .animate-fadeOut {
   animation: fadeOut 0.3s ease-out;
 }
+
+
+/* ============================================
+   EINSTEIN BRANDING - TRADE ENGINE SPECIFIC
+   Enhanced styling for Einstein 100000x Engine
+   ============================================ */
+
+/* Einstein Logo/Icon Styling */
+.einstein-icon {
+  color: var(--bitcoin-orange);
+  filter: drop-shadow(0 0 8px rgba(247, 147, 26, 0.4));
+}
+
+/* Einstein Header Accent */
+.einstein-header {
+  position: relative;
+  padding-left: 1rem;
+  border-left: 4px solid var(--bitcoin-orange);
+}
+
+.einstein-header::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--bitcoin-orange) 0%, transparent 100%);
+}
+
+/* Einstein Badge - "100000x" Branding */
+.einstein-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bitcoin-orange);
+  color: var(--bitcoin-black);
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  box-shadow: 0 0 15px rgba(247, 147, 26, 0.3);
+}
+
+/* Einstein Glow Effect - Enhanced for branding */
+.einstein-glow {
+  box-shadow: 0 0 30px rgba(247, 147, 26, 0.5),
+              0 0 60px rgba(247, 147, 26, 0.2);
+  animation: einstein-pulse 3s ease-in-out infinite;
+}
+
+@keyframes einstein-pulse {
+  0%, 100% {
+    box-shadow: 0 0 30px rgba(247, 147, 26, 0.5),
+                0 0 60px rgba(247, 147, 26, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(247, 147, 26, 0.6),
+                0 0 80px rgba(247, 147, 26, 0.3);
+  }
+}
+
+/* Einstein Text Glow - For "Einstein" text */
+.einstein-text-glow {
+  color: var(--bitcoin-orange);
+  text-shadow: 0 0 20px rgba(247, 147, 26, 0.5),
+               0 0 40px rgba(247, 147, 26, 0.3);
+  font-weight: 800;
+}
+
+/* Einstein Card - Enhanced block styling */
+.einstein-card {
+  background: var(--bitcoin-black);
+  border: 2px solid var(--bitcoin-orange);
+  border-radius: 12px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.einstein-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    var(--bitcoin-orange) 50%, 
+    transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.einstein-card:hover {
+  box-shadow: 0 0 30px rgba(247, 147, 26, 0.4);
+  border-color: var(--bitcoin-orange);
+}
+
+.einstein-card:hover::before {
+  opacity: 1;
+}
+
+/* Einstein Stat Display - For key metrics */
+.einstein-stat {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--bitcoin-orange);
+  text-shadow: 0 0 20px rgba(247, 147, 26, 0.4);
+  line-height: 1;
+}
+
+.einstein-stat-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--bitcoin-white-60);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 0.5rem;
+}
+
+/* Einstein Progress Bar - For loading states */
+.einstein-progress {
+  width: 100%;
+  height: 4px;
+  background: var(--bitcoin-orange-20);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.einstein-progress-bar {
+  height: 100%;
+  background: var(--bitcoin-orange);
+  box-shadow: 0 0 10px rgba(247, 147, 26, 0.5);
+  animation: einstein-progress 2s ease-in-out infinite;
+}
+
+@keyframes einstein-progress {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+/* Einstein Divider - Styled separator */
+.einstein-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--bitcoin-orange-20) 20%,
+    var(--bitcoin-orange) 50%,
+    var(--bitcoin-orange-20) 80%,
+    transparent 100%);
+  margin: 1.5rem 0;
+}
+
+/* Einstein Button Enhancement - Additional styling for Einstein buttons */
+.einstein-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.einstein-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.einstein-button:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Einstein Modal Overlay - Enhanced modal styling */
+.einstein-modal-overlay {
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(8px);
+}
+
+/* Einstein Tab Active State */
+.einstein-tab-active {
+  background: var(--bitcoin-orange);
+  color: var(--bitcoin-black);
+  border-bottom: 3px solid var(--bitcoin-orange);
+  box-shadow: 0 0 20px rgba(247, 147, 26, 0.3);
+}
+
+/* Einstein Tooltip */
+.einstein-tooltip {
+  background: var(--bitcoin-orange);
+  color: var(--bitcoin-black);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  box-shadow: 0 0 15px rgba(247, 147, 26, 0.4);
+  position: relative;
+}
+
+.einstein-tooltip::before {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid var(--bitcoin-orange);
+}
+
+/* Einstein Loading Spinner - Enhanced spinner */
+.einstein-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--bitcoin-orange-20);
+  border-top-color: var(--bitcoin-orange);
+  border-radius: 50%;
+  animation: einstein-spin 1s linear infinite;
+}
+
+@keyframes einstein-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Einstein Success State */
+.einstein-success {
+  background: var(--bitcoin-orange-10);
+  border: 2px solid var(--bitcoin-orange);
+  color: var(--bitcoin-orange);
+  padding: 1rem;
+  border-radius: 8px;
+  animation: einstein-success-pulse 0.5s ease-out;
+}
+
+@keyframes einstein-success-pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Einstein Error State */
+.einstein-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 2px solid #ef4444;
+  color: #ef4444;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+/* Einstein Confidence Badge - For confidence scores */
+.einstein-confidence-high {
+  background: var(--bitcoin-orange);
+  color: var(--bitcoin-black);
+}
+
+.einstein-confidence-medium {
+  background: var(--bitcoin-orange-50);
+  color: var(--bitcoin-white);
+}
+
+.einstein-confidence-low {
+  background: var(--bitcoin-orange-20);
+  color: var(--bitcoin-white-80);
+}
+
+/* Einstein Mobile Optimizations */
+@media (max-width: 768px) {
+  .einstein-stat {
+    font-size: 1.5rem;
+  }
+  
+  .einstein-card {
+    padding: 1rem;
+  }
+  
+  .einstein-badge {
+    font-size: 0.625rem;
+    padding: 0.2rem 0.5rem;
+  }
+}
+
+
+/* ============================================
+   DATA CHANGE ANIMATIONS - EINSTEIN TRADE ENGINE
+   Visual indicators for data updates and changes
+   Requirements: 13.3
+   ============================================ */
+
+/* Data Change Animation - Orange Glow Pulse */
+@keyframes data-change {
+  0% {
+    box-shadow: 0 0 0 rgba(247, 147, 26, 0);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.5);
+    transform: scale(1.02);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.5);
+    transform: scale(1);
+  }
+}
+
+.animate-data-change {
+  animation: data-change 0.5s ease-out;
+}
+
+/* Fade In Animation - For "Updated" Badge */
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Fade Out Animation - After 3 Seconds */
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.animate-fade-out {
+  animation: fade-out 0.5s ease-in forwards;
+}
+
+/* Glow Pulse Animation - Continuous for Changed Data */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(247, 147, 26, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(247, 147, 26, 0.6);
+  }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* Highlight Flash Animation - Quick Flash on Change */
+@keyframes highlight-flash {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(247, 147, 26, 0.2);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.animate-highlight-flash {
+  animation: highlight-flash 0.6s ease-out;
+}
+
+/* Updated Badge Slide In */
+@keyframes badge-slide-in {
+  0% {
+    opacity: 0;
+    transform: translateX(20px) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.animate-badge-slide-in {
+  animation: badge-slide-in 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Data Value Change Animation - Number Transition */
+@keyframes value-change {
+  0% {
+    color: var(--bitcoin-white);
+  }
+  50% {
+    color: var(--bitcoin-orange);
+    text-shadow: 0 0 20px rgba(247, 147, 26, 0.6);
+  }
+  100% {
+    color: var(--bitcoin-white);
+  }
+}
+
+.animate-value-change {
+  animation: value-change 1s ease-out;
+}
+
+/* Shimmer Effect - For Loading/Updating State */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(247, 147, 26, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* ============================================
+   DATA CHANGE UTILITY CLASSES
+   ============================================ */
+
+/* Changed Data Container */
+.data-changed {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* Changed Data Glow */
+.data-changed-glow {
+  box-shadow: 0 0 20px rgba(247, 147, 26, 0.5);
+  border-color: var(--bitcoin-orange);
+}
+
+/* Changed Data Text */
+.data-changed-text {
+  color: var(--bitcoin-orange);
+  text-shadow: 0 0 15px rgba(247, 147, 26, 0.3);
+}
+
+/* Updated Badge Base Style */
+.updated-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  z-index: 10;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  background-color: var(--bitcoin-orange);
+  color: var(--bitcoin-black);
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--bitcoin-orange);
+  box-shadow: 0 0 15px rgba(247, 147, 26, 0.6);
+  white-space: nowrap;
+}
+
+/* Updated Badge with Animation */
+.updated-badge-animated {
+  animation: badge-slide-in 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+             fade-out 0.5s ease-in 2.5s forwards;
+}
+
+/* Data Refresh Indicator */
+.data-refreshing {
+  position: relative;
+  overflow: hidden;
+}
+
+.data-refreshing::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(247, 147, 26, 0.15) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  pointer-events: none;
+}
+
+/* ============================================
+   MOBILE OPTIMIZATIONS FOR ANIMATIONS
+   ============================================ */
+
+@media (max-width: 768px) {
+  /* Reduce animation intensity on mobile for performance */
+  .animate-data-change {
+    animation-duration: 0.4s;
+  }
+  
+  .animate-glow-pulse {
+    animation-duration: 2.5s;
+  }
+  
+  /* Smaller glow effects on mobile */
+  .data-changed-glow {
+    box-shadow: 0 0 15px rgba(247, 147, 26, 0.4);
+  }
+  
+  /* Adjust badge position for mobile */
+  .updated-badge {
+    top: -6px;
+    right: -6px;
+    font-size: 0.5625rem;
+    padding: 0.1875rem 0.375rem;
+  }
+}
+
+/* ============================================
+   REDUCED MOTION SUPPORT
+   Respect user's motion preferences
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Disable all animations for users who prefer reduced motion */
+  .animate-data-change,
+  .animate-fade-in,
+  .animate-fade-out,
+  .animate-glow-pulse,
+  .animate-highlight-flash,
+  .animate-badge-slide-in,
+  .animate-value-change,
+  .animate-shimmer {
+    animation: none !important;
+  }
+  
+  /* Keep visual indicators but remove motion */
+  .data-changed-glow {
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.5);
+    transition: none;
+  }
+  
+  .updated-badge-animated {
+    animation: none !important;
+    opacity: 1;
+  }
+  
+  /* Instant transitions instead of animations */
+  .data-changed {
+    transition: none;
+  }
+}
+
+/* ============================================
+   HIGH CONTRAST MODE SUPPORT
+   ============================================ */
+
+@media (prefers-contrast: high) {
+  /* Stronger visual indicators in high contrast mode */
+  .data-changed-glow {
+    box-shadow: 0 0 30px rgba(247, 147, 26, 0.8);
+    border: 2px solid var(--bitcoin-orange);
+  }
+  
+  .updated-badge {
+    border: 2px solid var(--bitcoin-black);
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.9);
+  }
+  
+  .data-changed-text {
+    text-shadow: 0 0 20px rgba(247, 147, 26, 0.5);
+    font-weight: 700;
+  }
+}

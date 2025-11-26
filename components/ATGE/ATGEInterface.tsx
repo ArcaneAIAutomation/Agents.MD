@@ -175,18 +175,24 @@ export default function ATGEInterface({ className = '' }: ATGEInterfaceProps) {
 
   return (
     <div className={`space-y-4 md:space-y-6 ${className}`}>
-      {/* Header - Mobile Optimized */}
-      <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-4 md:p-6">
+      {/* Header - Mobile Optimized with Einstein Branding */}
+      <div className="einstein-card einstein-glow">
         <div className={`flex items-center gap-3 mb-4 ${isMobile ? 'flex-col text-center' : ''}`}>
-          <TrendingUp 
-            size={isMobile ? 28 : 32} 
-            className={`text-bitcoin-orange ${isMobile ? 'mb-2' : ''}`} 
-          />
-          <div className={isMobile ? 'w-full' : ''}>
-            <h1 className={`font-bold text-bitcoin-white ${isMobile ? 'text-xl' : 'text-2xl md:text-3xl'}`}>
+          <div className="einstein-icon">
+            <TrendingUp 
+              size={isMobile ? 28 : 32} 
+              className={isMobile ? 'mb-2' : ''} 
+            />
+          </div>
+          <div className={isMobile ? 'w-full' : 'flex-1'}>
+            <h1 className={`font-bold einstein-text-glow ${isMobile ? 'text-xl' : 'text-2xl md:text-3xl'}`}>
               AI Trade Generation Engine
             </h1>
-            <p className={`text-bitcoin-white-80 font-medium ${isMobile ? 'text-xs mt-1' : 'text-sm mt-1'}`}>
+            <div className="flex items-center gap-2 mt-2 flex-wrap justify-center md:justify-start">
+              <span className="einstein-badge">EINSTEIN POWERED</span>
+              <span className="einstein-badge">GPT-5.1 + GEMINI 2.5</span>
+            </div>
+            <p className={`text-bitcoin-white-80 font-medium ${isMobile ? 'text-xs mt-2' : 'text-sm mt-2'}`}>
               {isMobile ? (
                 <>Advanced AI-powered trade signals with 100% real data backtesting</>
               ) : (
@@ -240,13 +246,13 @@ export default function ATGEInterface({ className = '' }: ATGEInterfaceProps) {
           </div>
         )}
 
-        {/* How It Works Section */}
-        <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4 mt-4">
-          <h3 className="text-bitcoin-white font-bold text-sm mb-2 flex items-center gap-2">
-            <span className="text-bitcoin-orange">⚡</span> How It Works
+        {/* How It Works Section - Einstein Styled */}
+        <div className="einstein-card mt-4">
+          <h3 className="text-bitcoin-white font-bold text-sm mb-3 einstein-header">
+            How Einstein Engine Works
           </h3>
           <p className="text-bitcoin-white-60 text-xs leading-relaxed">
-            The Ultimate AI Trade Generation Engine uses <span className="text-bitcoin-orange font-semibold">Dual AI Analysis</span> (OpenAI ChatGPT 5.1 + Google Gemini 2.5 Pro) to analyze real-time data from <span className="text-bitcoin-orange font-semibold">13 APIs</span>: Market data (CoinMarketCap, CoinGecko, Kraken), Technical indicators (Binance - 500 candles), Social sentiment (LunarCrush, Twitter, Reddit), On-chain metrics (Blockchain.com, Etherscan), and News (NewsAPI). Each trade includes entry price, 3 take-profit levels, stop loss, timeframe (15m/1h/4h/1d), confidence score, and comprehensive AI reasoning. All data is <span className="text-bitcoin-orange font-semibold">force-refreshed</span> for 100% real-time accuracy with complete data source attribution.
+            The Ultimate AI Trade Generation Engine uses <span className="einstein-text-glow font-semibold" style={{ fontSize: '0.75rem' }}>Dual AI Analysis</span> (OpenAI ChatGPT 5.1 + Google Gemini 2.5 Pro) to analyze real-time data from <span className="text-bitcoin-orange font-semibold">13 APIs</span>: Market data (CoinMarketCap, CoinGecko, Kraken), Technical indicators (Binance - 500 candles), Social sentiment (LunarCrush, Twitter, Reddit), On-chain metrics (Blockchain.com, Etherscan), and News (NewsAPI). Each trade includes entry price, 3 take-profit levels, stop loss, timeframe (15m/1h/4h/1d), confidence score, and comprehensive AI reasoning. All data is <span className="text-bitcoin-orange font-semibold">force-refreshed</span> for 100% real-time accuracy with complete data source attribution.
           </p>
         </div>
 

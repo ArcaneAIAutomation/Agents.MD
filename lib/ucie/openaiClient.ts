@@ -49,6 +49,10 @@ export async function generateOpenAIAnalysis(
       
       try {
         // Try primary model with Responses API
+        // ✅ EINSTEIN FIX: Use 'medium' reasoning for better quality analysis
+        // 'low' = 1-2s (too fast, lower quality)
+        // 'medium' = 3-5s (balanced, good quality) ← RECOMMENDED
+        // 'high' = 5-10s (best quality, slower)
         const result = await Promise.race([
           callOpenAI(
             [
@@ -58,7 +62,7 @@ export async function generateOpenAIAnalysis(
               }
             ],
             maxTokens,
-            'low', // reasoning effort: 'low' for faster response (2-3s vs 3-5s)
+            'medium', // ✅ reasoning effort: 'medium' for balanced speed/quality (3-5s)
             true // request JSON format
           ),
           new Promise<never>((_, reject) => 

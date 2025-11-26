@@ -82,6 +82,7 @@ const Navigation = forwardRef<NavigationRef>((props, ref) => {
   const menuItems = [
     { name: 'Home', path: '/', icon: Home, emoji: '🏠', description: 'Dashboard Overview' },
     { name: 'Universal Intelligence', path: '/ucie', icon: Brain, emoji: '🧠', description: 'Multi-Asset Crypto Analysis' },
+    { name: 'Quantum BTC', path: '/quantum-btc', icon: Zap, emoji: '⚡', description: 'Quantum Bitcoin Intelligence Engine' },
     { name: 'Crypto News Wire', path: '/crypto-news', icon: Newspaper, emoji: '📰', description: 'Real-Time News & Sentiment' },
     { name: 'AI Trade Engine', path: '/atge', icon: Zap, emoji: '⚡', description: 'AI-Powered Trade Signals' },
     // COMMENTED OUT - Keep for future reference

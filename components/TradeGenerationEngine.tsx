@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { TrendingUp, TrendingDown, Target, Shield, Brain, RefreshCw, AlertTriangle, DollarSign, Activity, BarChart3 } from 'lucide-react'
 import { useUltimateTradeGeneration } from '../hooks/useApiData'
+import EinsteinGenerateButton from './Einstein/EinsteinGenerateButton'
 
 export interface TradeSignal {
   id: string
@@ -224,11 +225,29 @@ export default function TradeGenerationEngine() {
           </div>
           
           {!isAuthenticated ? (
-            <div className="max-w-sm mx-auto animate-slide-up-delay-3">
+            <div className="max-w-sm mx-auto animate-slide-up-delay-3 space-y-4">
+              {/* Einstein Button - Prominent placement */}
+              <div className="relative group">
+                <EinsteinGenerateButton
+                  onClick={handleUnlock}
+                  loading={false}
+                  disabled={false}
+                  className="w-full py-4 text-base animate-glow"
+                />
+                {/* Tooltip explaining Einstein features */}
+                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-full max-w-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
+                  <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-3 shadow-[0_0_20px_rgba(247,147,26,0.3)]">
+                    <p className="text-xs text-bitcoin-white-80 text-center leading-relaxed">
+                      <strong className="text-bitcoin-orange">Einstein 100000x Engine:</strong> Advanced AI-powered trade generation with GPT-5.1 high reasoning, comprehensive multi-source data validation, and user approval workflow.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
               {!showPasswordInput ? (
                 <button 
                   onClick={handleUnlock}
-                  className="btn-bitcoin-primary w-full py-4 px-6 rounded-xl flex items-center justify-center text-base min-h-[56px] touch-manipulation transform hover:scale-105 hover:shadow-bitcoin-glow animate-glow"
+                  className="btn-bitcoin-secondary w-full py-4 px-6 rounded-xl flex items-center justify-center text-base min-h-[56px] touch-manipulation transform hover:scale-105 hover:shadow-bitcoin-glow"
                 >
                   <Shield className="h-5 w-5 mr-3" />
                   <span>UNLOCK TRADE ENGINE</span>
@@ -279,13 +298,34 @@ export default function TradeGenerationEngine() {
               )}
             </div>
           ) : (
-            <button 
-              onClick={handleGenerateClick}
-              className="btn-bitcoin-primary w-full max-w-sm mx-auto py-4 px-6 rounded-xl flex items-center justify-center text-base min-h-[56px] touch-manipulation transform hover:scale-105 hover:shadow-bitcoin-glow animate-glow"
-            >
-              <Brain className="h-5 w-5 mr-3 animate-pulse" />
-              <span>GENERATE TRADE SIGNAL</span>
-            </button>
+            <div className="max-w-sm mx-auto space-y-4">
+              {/* Einstein Button - Primary action when authenticated */}
+              <div className="relative group">
+                <EinsteinGenerateButton
+                  onClick={handleGenerateClick}
+                  loading={loading}
+                  disabled={loading}
+                  className="w-full py-4 text-base animate-glow"
+                />
+                {/* Tooltip explaining Einstein features */}
+                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-full max-w-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
+                  <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-3 shadow-[0_0_20px_rgba(247,147,26,0.3)]">
+                    <p className="text-xs text-bitcoin-white-80 text-center leading-relaxed">
+                      <strong className="text-bitcoin-orange">Einstein Features:</strong> GPT-5.1 AI analysis, 13+ API data sources, 90%+ data quality validation, multi-timeframe analysis, and comprehensive risk management.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Legacy button for backward compatibility */}
+              <button 
+                onClick={handleGenerateClick}
+                className="btn-bitcoin-secondary w-full py-4 px-6 rounded-xl flex items-center justify-center text-base min-h-[56px] touch-manipulation transform hover:scale-105"
+              >
+                <Brain className="h-5 w-5 mr-3" />
+                <span>LEGACY GENERATION</span>
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -325,21 +365,45 @@ export default function TradeGenerationEngine() {
             </div>
             <div className="min-w-0 flex-1">
               <h2 className="text-base sm:text-lg md:text-xl font-black text-bitcoin-white animate-slide-up break-words" style={{ fontFamily: 'Inter, sans-serif' }}>
-                📈 AI Trade Generation Engine
+                📈 Einstein Trade Engine
               </h2>
               <p className="text-xs sm:text-sm text-bitcoin-white-80 animate-slide-up-delay break-words">
-                Advanced algorithmic trading signals powered by artificial intelligence
+                Einstein 100000x AI-powered trade generation with GPT-5.1 reasoning
               </p>
             </div>
           </div>
           
-          <button
-            onClick={handleGenerateClick}
-            className="btn-bitcoin-primary p-2 sm:p-3 rounded-xl min-h-[44px] min-w-[44px] sm:min-h-[48px] sm:min-w-[48px] touch-manipulation transition-all duration-300 transform hover:scale-110 animate-glow flex-shrink-0"
-            title="Generate new signal"
-          >
-            <RefreshCw className="h-4 w-4 sm:h-5 sm:w-5" />
-          </button>
+          <div className="flex gap-2 flex-shrink-0">
+            {/* Einstein Button - Compact version in header */}
+            <div className="relative group hidden sm:block">
+              <button
+                onClick={handleGenerateClick}
+                disabled={loading}
+                className="bg-bitcoin-orange text-bitcoin-black border-2 border-bitcoin-orange font-bold px-4 py-2 rounded-lg min-h-[48px] flex items-center gap-2 transition-all duration-300 hover:bg-bitcoin-black hover:text-bitcoin-orange hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Generate Einstein signal"
+              >
+                <Brain className="h-5 w-5" />
+                <span className="text-sm">EINSTEIN</span>
+              </button>
+              {/* Tooltip */}
+              <div className="absolute right-0 top-full mt-2 w-64 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
+                <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-3 shadow-[0_0_20px_rgba(247,147,26,0.3)]">
+                  <p className="text-xs text-bitcoin-white-80 leading-relaxed">
+                    <strong className="text-bitcoin-orange">Einstein Engine:</strong> Generate new signal with advanced AI analysis and comprehensive data validation.
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Legacy refresh button */}
+            <button
+              onClick={handleGenerateClick}
+              className="btn-bitcoin-primary p-2 sm:p-3 rounded-xl min-h-[44px] min-w-[44px] sm:min-h-[48px] sm:min-w-[48px] touch-manipulation transition-all duration-300 transform hover:scale-110 animate-glow flex-shrink-0"
+              title="Refresh signal"
+            >
+              <RefreshCw className="h-4 w-4 sm:h-5 sm:w-5" />
+            </button>
+          </div>
         </div>
         
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs sm:text-sm">
