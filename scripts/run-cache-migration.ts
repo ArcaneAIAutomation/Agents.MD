@@ -1,129 +1,84 @@
 /**
- * Run Quantum API Cache Migration
- * 
- * Creates the quantum_api_cache table for API response caching.
- * Task: 12.4 - Optimize API calls
+ * Emergency script to create quantum_api_cache table in production
+ * Fixes: relation "quantum_api_cache" does not exist error
  */
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { query } from '../lib/db';
 
-async function runMigration() {
-  console.log('🚀 Running Quantum API Cache Migration...\n');
+async function runCacheMigration() {
+  console.log('🚀 Running quantum_api_cache table migration...\n');
   
   try {
-    // Read migration file
-    const migrationPath = join(process.cwd(), 'migrations', 'quantum-btc', '007_create_api_cache_table.sql');
+    // Read the migration file
+    const migrationPath = join(process.cwd(), 'migrations/quantum-btc/007_create_api_cache_table.sql');
     const migrationSQL = readFileSync(migrationPath, 'utf-8');
     
-    // Split into individual statements
-    const statements = migrationSQL
-      .split(';')
-      .map(s => s.trim())
-      .filter(s => s.length > 0 && !s.startsWith('--'));
+    console.log('📄 Migration file loaded successfully');
+    console.log('📍 Path:', migrationPath);
+    console.log('');
     
-    console.log(`📝 Found ${statements.length} SQL statements\n`);
+    // Execute the migration
+    console.log('⚙️  Executing migration...');
+    await query(migrationSQL);
     
-    // Execute each statement
-    for (let i = 0; i < statements.length; i++) {
-      const statement = statements[i];
-      
-      // Skip comments
-      if (statement.startsWith('--') || statement.startsWith('/*')) {
-        continue;
-      }
-      
-      console.log(`⚙️  Executing statement ${i + 1}/${statements.length}...`);
-      
-      try {
-        await query(statement);
-        console.log(`   ✅ Success\n`);
-      } catch (error: any) {
-        // Ignore "already exists" errors
-        if (error.message.includes('already exists')) {
-          console.log(`   ⚠️  Already exists (skipping)\n`);
-        } else {
-          throw error;
-        }
-      }
-    }
+    console.log('✅ Migration executed successfully!\n');
     
-    // Verify table created
+    // Verify the table was created
     console.log('🔍 Verifying table creation...');
-    const result = await query(`
+    const verifyResult = await query(`
       SELECT table_name, column_name, data_type 
       FROM information_schema.columns 
       WHERE table_name = 'quantum_api_cache'
-      ORDER BY ordinal_position
+      ORDER BY ordinal_position;
     `);
     
-    if (result.rows.length === 0) {
-      throw new Error('Table quantum_api_cache was not created');
+    if (verifyResult.rows.length > 0) {
+      console.log('✅ Table verified! Columns:');
+      verifyResult.rows.forEach(row => {
+        console.log(`   - ${row.column_name} (${row.data_type})`);
+      });
+      console.log('');
+    } else {
+      console.error('❌ Table verification failed - no columns found');
+      process.exit(1);
     }
-    
-    console.log(`✅ Table quantum_api_cache created with ${result.rows.length} columns:\n`);
-    for (const row of result.rows) {
-      console.log(`   - ${row.column_name}: ${row.data_type}`);
-    }
-    
-    // Verify indexes
-    console.log('\n🔍 Verifying indexes...');
-    const indexResult = await query(`
-      SELECT indexname 
-      FROM pg_indexes 
-      WHERE tablename = 'quantum_api_cache'
-    `);
-    
-    console.log(`✅ Created ${indexResult.rows.length} indexes:\n`);
-    for (const row of indexResult.rows) {
-      console.log(`   - ${row.indexname}`);
-    }
-    
-    // Test cache operations
-    console.log('\n🧪 Testing cache operations...');
     
     // Test insert
+    console.log('🧪 Testing table with sample insert...');
     await query(`
       INSERT INTO quantum_api_cache (
         symbol, cache_type, data, data_quality_score, expires_at
       ) VALUES (
-        'BTC', 'test', '{"test": true}', 100, NOW() + INTERVAL '60 seconds'
+        'TEST', 'test', '{"test": true}', 100, NOW() + INTERVAL '1 minute'
       )
-      ON CONFLICT (symbol, cache_type) DO UPDATE SET data = EXCLUDED.data
+      ON CONFLICT (symbol, cache_type) 
+      DO UPDATE SET created_at = NOW();
     `);
-    console.log('   ✅ Insert test passed');
+    console.log('✅ Test insert successful');
     
-    // Test select
-    const selectResult = await query(`
-      SELECT * FROM quantum_api_cache WHERE symbol = 'BTC' AND cache_type = 'test'
-    `);
-    console.log(`   ✅ Select test passed (found ${selectResult.rows.length} row)`);
+    // Clean up test data
+    await query("DELETE FROM quantum_api_cache WHERE symbol = 'TEST'");
+    console.log('✅ Test data cleaned up\n');
     
-    // Test delete
-    await query(`
-      DELETE FROM quantum_api_cache WHERE symbol = 'BTC' AND cache_type = 'test'
-    `);
-    console.log('   ✅ Delete test passed');
+    console.log('🎉 Migration complete! The quantum_api_cache table is ready.');
+    console.log('');
+    console.log('📊 Next steps:');
+    console.log('   1. The cache system will now work automatically');
+    console.log('   2. API responses will be cached for 5 minutes');
+    console.log('   3. Trade generation should be much faster (<100ms with cache)');
+    console.log('');
     
-    console.log('\n🎉 Migration complete! Cache system is ready.\n');
+    process.exit(0);
     
-    console.log('📊 Next Steps:');
-    console.log('   1. Cache system is now operational');
-    console.log('   2. API calls will be automatically cached');
-    console.log('   3. Monitor cache hit rates for optimization');
-    console.log('   4. Set up daily cleanup: SELECT cleanup_expired_quantum_cache();\n');
-    
-  } catch (error) {
-    console.error('\n❌ Migration failed:', error);
+  } catch (error: any) {
+    console.error('❌ Migration failed:', error.message);
+    console.error('');
+    console.error('Error details:', error);
     process.exit(1);
   }
 }
 
-// Run migration
-runMigration()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error('Fatal error:', error);
-    process.exit(1);
-  });
+// Run the migration
+runCacheMigration();

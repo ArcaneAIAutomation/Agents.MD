@@ -10,35 +10,46 @@ import { AggregatedMarketData } from './dataAggregator';
 
 /**
  * Store aggregated market data in database cache
+ * Gracefully handles missing table (returns without error)
  */
 export async function cacheMarketData(data: AggregatedMarketData): Promise<void> {
-  console.log('[Cache] 💾 Storing market data in database...');
-  
-  const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
-  
-  const sql = `
-    INSERT INTO quantum_api_cache (
-      symbol, cache_type, data, data_quality_score, expires_at
-    ) VALUES (
-      $1, $2, $3, $4, $5
-    )
-    ON CONFLICT (symbol, cache_type) 
-    DO UPDATE SET 
-      data = EXCLUDED.data,
-      data_quality_score = EXCLUDED.data_quality_score,
-      created_at = NOW(),
-      expires_at = EXCLUDED.expires_at
-  `;
-  
-  await query(sql, [
-    'BTC',
-    'market-data',
-    JSON.stringify(data),
-    data.dataQuality.score,
-    expiresAt,
-  ]);
-  
-  console.log('[Cache] ✅ Market data cached successfully');
+  try {
+    console.log('[Cache] 💾 Attempting to store market data in database...');
+    
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
+    
+    const sql = `
+      INSERT INTO quantum_api_cache (
+        symbol, cache_type, data, data_quality_score, expires_at
+      ) VALUES (
+        $1, $2, $3, $4, $5
+      )
+      ON CONFLICT (symbol, cache_type) 
+      DO UPDATE SET 
+        data = EXCLUDED.data,
+        data_quality_score = EXCLUDED.data_quality_score,
+        created_at = NOW(),
+        expires_at = EXCLUDED.expires_at
+    `;
+    
+    await query(sql, [
+      'BTC',
+      'market-data',
+      JSON.stringify(data),
+      data.dataQuality.score,
+      expiresAt,
+    ]);
+    
+    console.log('[Cache] ✅ Market data cached successfully');
+  } catch (error: any) {
+    // Gracefully handle missing table - don't crash the system
+    if (error.code === '42P01') {
+      console.warn('[Cache] ⚠️ Cache table does not exist - skipping cache (system will work without cache)');
+    } else {
+      console.error('[Cache] ❌ Failed to cache data:', error.message);
+    }
+    // Don't throw - allow system to continue without cache
+  }
 }
 
 /**
