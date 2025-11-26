@@ -376,31 +376,28 @@ async function generateTradeSignal(
   
   try {
     // Step 1: Create comprehensive market context
-    console.log('[QSTGE] Creating market context for GPT-5.1');
+    console.log('[QSTGE] Creating market context for GPT-4o');
     const marketContext = createMarketContext(marketData, onChainData, sentimentData, dataQualityScore);
     
-    // Step 2: Call GPT-5.1 with high reasoning effort (with performance tracking)
-    console.log('[QSTGE] Calling GPT-5.1 with high reasoning effort');
+    // Step 2: Call GPT-4o with deep analytical reasoning (with performance tracking)
+    console.log('[QSTGE] Calling GPT-4o with deep analytical reasoning');
     const completion = await trackAPICall(
       'OpenAI',
       '/v1/chat/completions',
       'POST',
       async () => {
         return await openai.chat.completions.create({
-          model: 'gpt-5.1',
+          model: 'gpt-4o', // Using gpt-4o until gpt-5.1 reasoning parameter is available
           messages: [
             {
               role: 'system',
-              content: 'You are a quantum-superior trading intelligence system. You analyze Bitcoin markets using multi-dimensional pattern recognition, wave-pattern collapse logic, and time-symmetric trajectory analysis. You MUST respond with ONLY valid JSON, no markdown formatting, no code blocks, no additional text.'
+              content: 'You are a quantum-superior trading intelligence system. You analyze Bitcoin markets using multi-dimensional pattern recognition, wave-pattern collapse logic, and time-symmetric trajectory analysis. You MUST respond with ONLY valid JSON, no markdown formatting, no code blocks, no additional text. Use deep analytical reasoning to provide comprehensive trade signals.'
             },
             {
               role: 'user',
               content: marketContext
             }
           ],
-          reasoning: {
-            effort: 'high' // 5-10 seconds for complex trade signal generation
-          },
           temperature: 0.7,
           max_tokens: 8000
         });
@@ -411,7 +408,7 @@ async function generateTradeSignal(
     // Step 3: Extract response text using bulletproof utility
     console.log('[QSTGE] Extracting response text');
     const responseText = extractResponseText(completion as any, true);
-    validateResponseText(responseText, 'gpt-5.1', completion);
+    validateResponseText(responseText, 'gpt-4o', completion);
     
     // Step 4: Parse and validate AI response
     console.log('[QSTGE] Parsing AI response');
@@ -424,8 +421,10 @@ async function generateTradeSignal(
     const stopLoss = calculateStopLoss(currentPrice, aiAnalysis.stopLossPercent);
     
     // Step 6: Construct trade signal
+    // Generate proper UUID for PostgreSQL
+    const { randomUUID } = await import('crypto');
     const tradeSignal: TradeSignal = {
-      id: `trade_${Date.now()}_${userId.substring(0, 8)}`,
+      id: randomUUID(),
       symbol: 'BTC',
       entryZone,
       targets,
@@ -449,13 +448,15 @@ async function generateTradeSignal(
     return tradeSignal;
     
   } catch (error) {
-    console.error('[QSTGE] Failed to generate trade signal with GPT-5.1:', error);
+    console.error('[QSTGE] Failed to generate trade signal with GPT-4o:', error);
     
     // Fallback to basic trade signal if AI fails
     console.log('[QSTGE] Using fallback trade signal generation');
     
+    // Generate proper UUID for PostgreSQL
+    const { randomUUID } = await import('crypto');
     const tradeSignal: TradeSignal = {
-      id: `trade_${Date.now()}_${userId.substring(0, 8)}`,
+      id: randomUUID(),
       symbol: 'BTC',
       entryZone: {
         min: currentPrice * 0.98,
