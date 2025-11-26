@@ -41,7 +41,8 @@ export async function fetchLunarCrushData(symbol: string = 'BTC'): Promise<Lunar
           throw new Error('LUNARCRUSH_API_KEY not configured');
         }
         
-        // Use LunarCrush v4 API endpoint (correct endpoint)
+        // Use LunarCrush v4 API coins endpoint (verified working)
+        // Endpoint: https://lunarcrush.com/api4/public/coins/{symbol}/v1
         const url = `https://lunarcrush.com/api4/public/coins/${symbol}/v1`;
         
         const response = await fetch(url, {
