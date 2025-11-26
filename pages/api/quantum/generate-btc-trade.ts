@@ -16,6 +16,7 @@ import { extractResponseText, validateResponseText } from '../../../utils/openai
 import { trackAPICall, trackDatabaseQuery, performanceMonitor } from '../../../lib/quantum/performanceMonitor';
 import { aggregateMarketData, AggregatedMarketData } from '../../../lib/quantum/dataAggregator';
 import { cacheMarketData, getCachedMarketData } from '../../../lib/quantum/cacheService';
+import { createMarketContext } from '../../../lib/quantum/marketContextBuilder';
 
 // ============================================================================
 // TYPE DEFINITIONS
