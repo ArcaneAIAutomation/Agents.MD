@@ -167,62 +167,6 @@ async function collectMarketData(): Promise<{ quality: number; data: AggregatedM
 // ============================================================================
 
 /**
- * Create comprehensive market context for GPT-5.1 analysis
- */
-function createMarketContext(
-  marketData: any,
-  onChainData: any,
-  sentimentData: any,
-  dataQualityScore: number
-): string {
-  return `
-# Bitcoin Market Analysis Context
-
-## Current Market Data
-- **Price**: $${marketData.price.toLocaleString()}
-- **24h Volume**: $${marketData.volume.toLocaleString()}
-- **Market Cap**: $${marketData.marketCap.toLocaleString()}
-- **Data Quality Score**: ${dataQualityScore}%
-
-## On-Chain Metrics
-- **Mempool Size**: ${onChainData.mempoolSize.toLocaleString()} transactions
-- **Whale Transactions (24h)**: ${onChainData.whaleTransactions}
-- **Network Difficulty**: ${onChainData.difficulty.toLocaleString()}
-
-## Social Sentiment
-- **Sentiment Score**: ${sentimentData.sentiment}/100
-- **Social Dominance**: ${sentimentData.socialDominance}%
-- **Galaxy Score**: ${sentimentData.galaxyScore}/100
-
-## Analysis Requirements
-You are a quantum-superior trading intelligence system analyzing Bitcoin markets using multi-dimensional pattern recognition. Your task is to generate a comprehensive trade signal based on the above data.
-
-**CRITICAL**: You must respond with ONLY valid JSON. No markdown, no code blocks, no explanations outside the JSON structure.
-
-Return a JSON object with the following structure:
-{
-  "direction": "LONG" or "SHORT",
-  "entryZonePercent": {
-    "min": number (percentage below current price, e.g., -2 for 2% below),
-    "max": number (percentage above current price, e.g., 2 for 2% above),
-    "optimal": number (percentage from current price, e.g., 0 for current price)
-  },
-  "targetPercents": {
-    "tp1": number (percentage gain, e.g., 5 for 5% gain),
-    "tp2": number (percentage gain, e.g., 8 for 8% gain),
-    "tp3": number (percentage gain, e.g., 12 for 12% gain)
-  },
-  "stopLossPercent": number (percentage loss, e.g., -5 for 5% loss),
-  "timeframe": "1h" | "4h" | "1d" | "1w",
-  "confidence": number (0-100),
-  "quantumReasoning": "string (detailed multi-probability state analysis)",
-  "mathematicalJustification": "string (mathematical formulas and calculations)",
-  "wavePatternCollapse": "CONTINUATION" | "BREAK" | "UNCERTAIN"
-}
-`.trim();
-}
-
-/**
  * Parse GPT-5.1 response and extract trade parameters
  */
 function parseAIResponse(responseText: string): {
