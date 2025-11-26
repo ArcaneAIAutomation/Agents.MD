@@ -14,7 +14,7 @@
  * Task 40: Create coordinator class
  */
 
-import { DataCollectionModule } from '../data';
+import { DataCollectionModule } from '../data/index';
 import { GPT51AnalysisEngine } from '../analysis/gpt51';
 import { riskCalculator } from '../analysis/riskCalculator';
 import { approvalWorkflowManager } from '../workflow/approval';
