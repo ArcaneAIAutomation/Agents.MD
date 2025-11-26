@@ -308,7 +308,8 @@ function calculateStopLoss(
 }
 
 /**
- * Generate trade signal using GPT-4o with real aggregated market data
+ * Generate trade signal using GPT-5.1 with real aggregated market data
+ * Uses medium reasoning effort (3-5s) for balanced speed and quality
  */
 async function generateTradeSignal(
   userId: string,
@@ -321,18 +322,18 @@ async function generateTradeSignal(
   
   try {
     // Step 1: Create comprehensive market context with real data
-    console.log('[QSTGE] Creating market context for GPT-4o with real aggregated data');
+    console.log('[QSTGE] Creating market context for GPT-5.1 with real aggregated data');
     const marketContext = createMarketContext(aggregatedData);
     
-    // Step 2: Call GPT-4o with deep analytical reasoning (with performance tracking)
-    console.log('[QSTGE] Calling GPT-4o with deep analytical reasoning');
+    // Step 2: Call GPT-5.1 with deep analytical reasoning (with performance tracking)
+    console.log('[QSTGE] Calling GPT-5.1 with deep analytical reasoning (medium effort)');
     const completion = await trackAPICall(
       'OpenAI',
       '/v1/chat/completions',
       'POST',
       async () => {
         return await openai.chat.completions.create({
-          model: 'gpt-4o', // Using gpt-4o until gpt-5.1 reasoning parameter is available
+          model: 'gpt-5.1',
           messages: [
             {
               role: 'system',
@@ -343,6 +344,9 @@ async function generateTradeSignal(
               content: marketContext
             }
           ],
+          reasoning: {
+            effort: 'medium' // Balanced speed (3-5s) and quality for trade analysis
+          },
           temperature: 0.7,
           max_tokens: 8000
         });
@@ -353,7 +357,7 @@ async function generateTradeSignal(
     // Step 3: Extract response text using bulletproof utility
     console.log('[QSTGE] Extracting response text');
     const responseText = extractResponseText(completion as any, true);
-    validateResponseText(responseText, 'gpt-4o', completion);
+    validateResponseText(responseText, 'gpt-5.1', completion);
     
     // Step 4: Parse and validate AI response
     console.log('[QSTGE] Parsing AI response');
@@ -393,7 +397,7 @@ async function generateTradeSignal(
     return tradeSignal;
     
   } catch (error) {
-    console.error('[QSTGE] Failed to generate trade signal with GPT-4o:', error);
+    console.error('[QSTGE] Failed to generate trade signal with GPT-5.1:', error);
     
     // Fallback to basic trade signal if AI fails (using real data)
     console.log('[QSTGE] Using fallback trade signal generation with real market data');

@@ -3,6 +3,7 @@
  * 
  * Builds comprehensive market context from aggregated data
  * Handles missing data gracefully with fallbacks
+ * Optimized for GPT-5.1 with medium reasoning effort
  */
 
 import { AggregatedMarketData } from './dataAggregator';
