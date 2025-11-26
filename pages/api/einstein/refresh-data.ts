@@ -8,7 +8,7 @@
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { DataAccuracyVerifier } from '../../../lib/einstein/data/verifier';
+import { DataAccuracyVerifier } from '../../../lib/einstein/data';
 import type { Timeframe } from '../../../lib/einstein/types';
 
 // ============================================================================
