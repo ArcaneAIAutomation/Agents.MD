@@ -1,8 +1,13 @@
 /**
- * OpenAI Responses API Utilities
+ * OpenAI API Response Utilities
  * 
- * Bulletproof helpers for extracting text from GPT-5.1 Responses API
- * Handles multiple response formats and provides detailed debugging
+ * Bulletproof helpers for extracting text from OpenAI API responses
+ * Handles multiple response formats:
+ * - Standard Chat Completions API (gpt-4, gpt-4o, gpt-3.5-turbo)
+ * - Responses API (o1-preview, o1-mini with reasoning)
+ * - Legacy formats
+ * 
+ * Provides detailed debugging for troubleshooting
  */
 
 type ResponsesOutput = {
@@ -15,18 +20,25 @@ type ResponsesOutput = {
   output_text?: string;
   text?: string;
   content?: string;
+  // Standard Chat Completions API format
+  choices?: Array<{
+    message?: {
+      content?: string;
+    };
+  }>;
 };
 
 /**
- * Extract text from OpenAI Responses API response
+ * Extract text from OpenAI API response
  * 
  * Handles multiple response formats:
- * 1. Simple output_text (most common)
- * 2. Complex output array (GPT-5.1 with tools/reasoning)
- * 3. Legacy text field
- * 4. Legacy content field
+ * 1. Standard Chat Completions API (choices[0].message.content)
+ * 2. Responses API output_text (o1 models)
+ * 3. Responses API output array (o1 with reasoning/CoT)
+ * 4. Legacy text field
+ * 5. Legacy content field
  * 
- * @param res - Response from OpenAI Responses API
+ * @param res - Response from OpenAI API (any format)
  * @param debug - Enable detailed logging (default: false)
  * @returns Extracted text string (empty string if nothing found)
  */
@@ -39,13 +51,22 @@ export function extractResponseText(
     console.log('📊 Available keys:', Object.keys(res || {}).join(', '));
   }
   
-  // Try 1: Simple output_text (most common for GPT-5.1)
+  // Try 1: Standard Chat Completions API format (gpt-4, gpt-4o, gpt-3.5-turbo)
+  if (res?.choices && Array.isArray(res.choices) && res.choices.length > 0) {
+    const content = res.choices[0]?.message?.content;
+    if (typeof content === 'string') {
+      if (debug) console.log('✅ Using choices[0].message.content (Chat Completions API)');
+      return content;
+    }
+  }
+  
+  // Try 2: Simple output_text (Responses API - o1 models)
   if (typeof res?.output_text === 'string') {
-    if (debug) console.log('✅ Using output_text field');
+    if (debug) console.log('✅ Using output_text field (Responses API)');
     return res.output_text;
   }
   
-  // Try 2: Complex output array (GPT-5.1 with tools/reasoning/CoT)
+  // Try 3: Complex output array (Responses API with tools/reasoning/CoT)
   if (res?.output && Array.isArray(res.output)) {
     const chunks: string[] = [];
     
@@ -66,13 +87,13 @@ export function extractResponseText(
     }
   }
   
-  // Try 3: Legacy text field (older API versions)
+  // Try 4: Legacy text field (older API versions)
   if (typeof res?.text === 'string') {
     if (debug) console.log('✅ Using text field (legacy)');
     return res.text;
   }
   
-  // Try 4: Legacy content field (older API versions)
+  // Try 5: Legacy content field (older API versions)
   if (typeof res?.content === 'string') {
     if (debug) console.log('✅ Using content field (legacy)');
     return res.content;
