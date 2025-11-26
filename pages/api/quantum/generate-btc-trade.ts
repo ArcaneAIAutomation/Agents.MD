@@ -277,7 +277,7 @@ async function generateTradeSignal(
       'POST',
       async () => {
         return await openai.chat.completions.create({
-          model: 'gpt-5.1',
+          model: 'gpt-4o', // Using gpt-4o instead of gpt-5.1 (reasoning parameter only works with o1 models)
           messages: [
             {
               role: 'system',
@@ -288,11 +288,9 @@ async function generateTradeSignal(
               content: marketContext
             }
           ],
-          reasoning: {
-            effort: 'medium' // Balanced speed (3-5s) and quality for trade analysis
-          },
           temperature: 0.7,
           max_tokens: 8000
+          // Note: 'reasoning' parameter removed - only available in o1 models, not gpt-4o/gpt-5.1
         });
       },
       { userId }
