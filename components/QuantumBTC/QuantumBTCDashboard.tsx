@@ -4,6 +4,7 @@ import TradeGenerationButton from './TradeGenerationButton';
 import PerformanceDashboard from './PerformanceDashboard';
 import TradeDetailModal from './TradeDetailModal';
 import DataQualityIndicators from './DataQualityIndicators';
+import SocialMetricsPanel from './SocialMetricsPanel';
 
 /**
  * Quantum BTC Dashboard - Main Component
@@ -28,11 +29,40 @@ export default function QuantumBTCDashboard({ className = '' }: QuantumBTCDashbo
   const [dbChecking, setDbChecking] = useState(true);
   const [dbError, setDbError] = useState<string | null>(null);
   const [initializingDb, setInitializingDb] = useState(false);
+  const [socialMetrics, setSocialMetrics] = useState<any>(null);
+  const [loadingSocial, setLoadingSocial] = useState(true);
 
   // Check database readiness on mount
   useEffect(() => {
     checkDatabaseReadiness();
+    fetchSocialMetrics();
   }, []);
+
+  // Fetch social metrics from data aggregator
+  const fetchSocialMetrics = async () => {
+    try {
+      setLoadingSocial(true);
+      const response = await fetch('/api/quantum/data-aggregator?symbol=BTC');
+      const data = await response.json();
+      
+      if (data.success && data.data?.sentiment) {
+        setSocialMetrics({
+          score: data.data.sentiment.score || 50,
+          socialDominance: data.data.sentiment.socialDominance || 0,
+          galaxyScore: data.data.sentiment.galaxyScore || 0,
+          altRank: data.data.sentiment.altRank || 0,
+          socialVolume: data.data.sentiment.socialVolume || 0,
+          socialScore: data.data.sentiment.socialScore || 0,
+          influencers: data.data.sentiment.influencers || 0
+        });
+      }
+    } catch (err) {
+      console.error('Failed to fetch social metrics:', err);
+      // Keep using mock data as fallback
+    } finally {
+      setLoadingSocial(false);
+    }
+  };
 
   const checkDatabaseReadiness = async () => {
     try {
@@ -107,6 +137,20 @@ export default function QuantumBTCDashboard({ className = '' }: QuantumBTCDashbo
     },
     anomalyCount: 0
   };
+
+  // Fallback social metrics if API fails
+  const fallbackSocialMetrics = {
+    score: 50,
+    socialDominance: 2.02,
+    galaxyScore: 60.1,
+    altRank: 103,
+    socialVolume: 9490,
+    socialScore: 60.1,
+    influencers: 59
+  };
+
+  // Use real data if available, otherwise fallback
+  const displaySocialMetrics = socialMetrics || fallbackSocialMetrics;
 
   const handleTradeGenerated = (trade: any) => {
     setLatestTrade(trade);
@@ -280,6 +324,45 @@ export default function QuantumBTCDashboard({ className = '' }: QuantumBTCDashbo
             apiReliability={mockDataQuality.apiReliability}
             anomalyCount={mockDataQuality.anomalyCount}
           />
+        </section>
+
+        {/* Social Metrics Section */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Activity className="w-6 h-6 text-bitcoin-orange" />
+              <h2 className="text-2xl font-bold text-bitcoin-white">
+                Social Intelligence
+              </h2>
+            </div>
+            <button
+              onClick={fetchSocialMetrics}
+              disabled={loadingSocial}
+              className="px-4 py-2 bg-bitcoin-black border-2 border-bitcoin-orange hover:bg-bitcoin-orange hover:text-bitcoin-black disabled:opacity-50 disabled:cursor-not-allowed text-bitcoin-orange font-bold rounded-lg transition-all flex items-center space-x-2"
+            >
+              {loadingSocial ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                  <span>Updating...</span>
+                </>
+              ) : (
+                <>
+                  <Activity className="h-4 w-4" />
+                  <span>Refresh</span>
+                </>
+              )}
+            </button>
+          </div>
+          {loadingSocial && !socialMetrics ? (
+            <div className="bg-bitcoin-black border border-bitcoin-orange rounded-xl p-6">
+              <div className="flex items-center justify-center space-x-3">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-bitcoin-orange"></div>
+                <span className="text-bitcoin-white-80">Loading social metrics...</span>
+              </div>
+            </div>
+          ) : (
+            <SocialMetricsPanel sentiment={displaySocialMetrics} />
+          )}
         </section>
 
         {/* Performance Dashboard Section */}

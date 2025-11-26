@@ -240,7 +240,7 @@ export default function EinsteinAnalysisModal({
               <div className="mb-4">
                 <p className="text-bitcoin-white-60 text-sm font-semibold mb-3">Social Metrics</p>
                 
-                {/* LunarCrush Metrics */}
+                {/* LunarCrush Metrics - Enhanced with calculated social data */}
                 {analysis.sentiment.social?.lunarCrush && (
                   <div className="bg-bitcoin-orange bg-opacity-5 border border-bitcoin-orange-20 rounded-lg p-3 mb-3">
                     <div className="flex items-center justify-between mb-2">
@@ -263,21 +263,34 @@ export default function EinsteinAnalysisModal({
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-bitcoin-white-60">24h Volume:</span>
+                        <span className="text-bitcoin-white-60">Social Volume:</span>
                         <span className="text-bitcoin-white-80 font-mono">
-                          {analysis.sentiment.social.lunarCrush.volume24h?.toLocaleString() || 'N/A'}
+                          {analysis.sentiment.social.lunarCrush.socialVolume?.toLocaleString() || 
+                           analysis.sentiment.social.lunarCrush.volume24h?.toLocaleString() || 'N/A'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-bitcoin-white-60">Dominance:</span>
+                        <span className="text-bitcoin-white-80 font-mono">
+                          {analysis.sentiment.social.lunarCrush.socialDominance?.toFixed(2) || '0.00'}%
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-bitcoin-white-60">Influencers:</span>
+                        <span className="text-bitcoin-white-80 font-mono">
+                          {analysis.sentiment.social.lunarCrush.influencers || 0}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-bitcoin-white-60">Sentiment:</span>
                         <span className={`font-mono ${
-                          analysis.sentiment.social.lunarCrush.sentiment > 3 
+                          (analysis.sentiment.social.lunarCrush.sentiment || 50) > 60
                             ? 'text-bitcoin-orange' 
-                            : analysis.sentiment.social.lunarCrush.sentiment < 2 
-                            ? 'text-red-500' 
+                            : (analysis.sentiment.social.lunarCrush.sentiment || 50) < 40
+                            ? 'text-bitcoin-white-60' 
                             : 'text-bitcoin-white-80'
                         }`}>
-                          {analysis.sentiment.social.lunarCrush.sentiment?.toFixed(1) || 'N/A'}/5
+                          {analysis.sentiment.social.lunarCrush.sentiment || 50}/100
                         </span>
                       </div>
                     </div>
@@ -288,7 +301,7 @@ export default function EinsteinAnalysisModal({
                           analysis.sentiment.social.lunarCrush.trend === 'BULLISH' 
                             ? 'text-bitcoin-orange' 
                             : analysis.sentiment.social.lunarCrush.trend === 'BEARISH'
-                            ? 'text-red-500'
+                            ? 'text-bitcoin-white-60'
                             : 'text-bitcoin-white-80'
                         }`}>
                           {analysis.sentiment.social.lunarCrush.trend === 'BULLISH' ? '↗️ Bullish' : 
@@ -297,6 +310,11 @@ export default function EinsteinAnalysisModal({
                         </span>
                       </div>
                     )}
+                    <div className="mt-2 pt-2 border-t border-bitcoin-orange-20">
+                      <p className="text-bitcoin-white-60 text-xs italic">
+                        📊 Enhanced metrics calculated from Galaxy Score & Alt Rank
+                      </p>
+                    </div>
                   </div>
                 )}
 
