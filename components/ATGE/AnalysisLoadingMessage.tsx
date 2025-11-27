@@ -45,7 +45,7 @@ export default function AnalysisLoadingMessage({ symbol, timeframe }: AnalysisLo
     {
       icon: <Brain size={24} className="text-bitcoin-orange" />,
       title: 'Running AI Analysis',
-      description: 'OpenAI GPT-4o + Gemini AI',
+      description: 'OpenAI GPT-5.1 + Gemini AI',
       duration: 8
     },
     {
@@ -182,7 +182,7 @@ export default function AnalysisLoadingMessage({ symbol, timeframe }: AnalysisLo
           Blockchain.com
         </span>
         <span className="px-2 py-1 bg-bitcoin-black border border-bitcoin-orange-20 rounded text-xs text-bitcoin-orange font-bold">
-          OpenAI GPT-4o
+          OpenAI GPT-5.1
         </span>
         <span className="px-2 py-1 bg-bitcoin-black border border-bitcoin-orange-20 rounded text-xs text-bitcoin-orange font-bold">
           Gemini AI

@@ -1245,7 +1245,7 @@ export default function WhaleWatchDashboard() {
             
             {/* Details */}
             <p className="text-xs md:text-sm text-bitcoin-white-60 mb-6 md:mb-6 leading-relaxed px-2">
-              AI analysis powered by GPT-4o • Deep dive analysis with blockchain data • Comprehensive analysis takes up to 30 minutes
+              AI analysis powered by GPT-5.1 • Deep dive analysis with blockchain data • Comprehensive analysis takes up to 5 minutes
             </p>
             
             {/* Button */}
@@ -1287,7 +1287,7 @@ export default function WhaleWatchDashboard() {
             🐋 Bitcoin Whale Watch
           </h2>
           <p className="text-sm text-bitcoin-white-60 mt-1">
-            Live tracking of large BTC transactions (&gt;50 BTC) • GPT-4o deep analysis: up to 30 minutes
+            Live tracking of large BTC transactions (&gt;50 BTC) • GPT-5.1 deep analysis: up to 5 minutes
           </p>
         </div>
         
@@ -1318,9 +1318,9 @@ export default function WhaleWatchDashboard() {
           <div className="flex items-center">
             <RefreshCw className="h-5 w-5 text-bitcoin-orange animate-spin mr-3 flex-shrink-0" />
             <div className="flex-1">
-              <p className="text-bitcoin-white font-bold">🤖 GPT-4o Deep Analysis in Progress</p>
+              <p className="text-bitcoin-white font-bold">🤖 GPT-5.1 Deep Analysis in Progress</p>
               <p className="text-bitcoin-white-80 text-sm">
-                Other transactions are temporarily disabled to prevent API overload. Comprehensive analysis takes up to 30 minutes.
+                Other transactions are temporarily disabled to prevent API overload. Comprehensive analysis takes up to 5 minutes.
               </p>
             </div>
           </div>
@@ -1514,7 +1514,7 @@ export default function WhaleWatchDashboard() {
                           Deep dive analysis with blockchain data in progress
                         </p>
                         <p className="text-bitcoin-white-60 text-xs text-center">
-                          GPT-4o • Advanced reasoning • Comprehensive analysis up to 30 minutes
+                          GPT-5.1 • Enhanced reasoning • Comprehensive analysis up to 5 minutes
                         </p>
                       </div>
                     </div>
@@ -1691,12 +1691,12 @@ export default function WhaleWatchDashboard() {
                                     ? 'opacity-50 cursor-not-allowed'
                                     : ''
                                 }`}
-                                title="Analyze with GPT-4o"
+                                title="Analyze with GPT-5.1"
                               >
                                 <Search className="w-5 h-5" />
                                 <span className="flex flex-col items-start">
                                   <span className="text-xs">🤖 OpenAI Deep Dive</span>
-                                  <span className="text-[10px] font-normal opacity-80">GPT-4o Analysis</span>
+                                  <span className="text-[10px] font-normal opacity-80">GPT-5.1 Analysis</span>
                                 </span>
                                 {whale.deepDiveStatus === 'analyzing' && whale.deepDiveProvider === 'openai' && <Loader className="w-4 h-4 animate-spin" />}
                               </button>
@@ -1716,7 +1716,7 @@ export default function WhaleWatchDashboard() {
                                 {whale.deepDiveProvider === 'openai' ? '🤖' : '🔬'} Deep Dive Analysis Complete
                               </h4>
                               <p className="text-sm opacity-90">
-                                Comprehensive blockchain history analysis with {whale.deepDiveProvider === 'openai' ? 'GPT-4o' : 'Gemini 2.5 Flash'}
+                                Comprehensive blockchain history analysis with {whale.deepDiveProvider === 'openai' ? 'GPT-5.1' : 'Gemini 2.5 Flash'}
                               </p>
                               {whale.metadata?.processingTime && (
                                 <p className="text-xs opacity-75 mt-1">

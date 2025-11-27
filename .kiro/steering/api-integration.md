@@ -25,7 +25,7 @@
 #### News & Intelligence APIs (✅ All Working)
 - **NewsAPI** - Real-time cryptocurrency news aggregation
 - **Caesar API** - Advanced research and market intelligence
-- **OpenAI GPT-4o** - AI-powered analysis and trade signal generation
+- **OpenAI GPT-5.1** - 🆕 Enhanced AI with reasoning mode (upgraded from GPT-4o)
 
 #### Social Sentiment APIs (✅ All Working)
 - **LunarCrush API** - Social metrics, sentiment, galaxy score
@@ -72,7 +72,7 @@
 ## 🆕 OpenAI GPT-5.1 Integration (January 2025)
 
 ### Overview
-GPT-5.1 has replaced GPT-4o as the primary AI model, providing enhanced reasoning capabilities and better analysis quality.
+GPT-5.1 is now the primary AI model across all features, providing enhanced reasoning capabilities and better analysis quality than GPT-4o.
 
 ### Key Features
 - **Enhanced Reasoning**: Three effort levels (low, medium, high)

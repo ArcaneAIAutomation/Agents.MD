@@ -191,7 +191,7 @@ COINGLASS_API_KEY=configured (free tier)
 - Polygon: Polygonscan V2
 
 **AI Analysis**:
-- Complex: OpenAI GPT-4o (slower but comprehensive)
+- Primary: OpenAI GPT-5.1 (enhanced reasoning and comprehensive analysis)
 - Fast: Gemini AI (quick whale analysis)
 
 **Derivatives**:

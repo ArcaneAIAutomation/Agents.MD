@@ -372,7 +372,7 @@ const CryptoHerald: React.FC = () => {
                 REAL-TIME MARKET INTELLIGENCE & AI ANALYTICS
               </div>
               <div className="text-[10px] sm:text-xs md:text-sm text-bitcoin-white-60 font-sans flex flex-wrap justify-center gap-1 sm:gap-2">
-                <span className="whitespace-nowrap">Powered by GPT-4o</span>
+                <span className="whitespace-nowrap">Powered by GPT-5.1</span>
                 <span className="hidden sm:inline text-bitcoin-orange">•</span>
                 <span className="whitespace-nowrap">Live Order Book Analysis</span>
                 <span className="hidden md:inline text-bitcoin-orange">•</span>
@@ -414,7 +414,7 @@ const CryptoHerald: React.FC = () => {
                     <span className="bg-bitcoin-black border border-bitcoin-orange-30 px-2.5 sm:px-3 md:px-4 py-2 rounded text-[10px] sm:text-xs font-medium text-bitcoin-white-80 hover:border-bitcoin-orange transition-all whitespace-nowrap">Kraken API</span>
                     <span className="bg-bitcoin-black border border-bitcoin-orange-30 px-2.5 sm:px-3 md:px-4 py-2 rounded text-[10px] sm:text-xs font-medium text-bitcoin-white-80 hover:border-bitcoin-orange transition-all whitespace-nowrap">CoinGecko</span>
                     <span className="bg-bitcoin-black border border-bitcoin-orange-30 px-2.5 sm:px-3 md:px-4 py-2 rounded text-[10px] sm:text-xs font-medium text-bitcoin-white-80 hover:border-bitcoin-orange transition-all whitespace-nowrap">NewsAPI</span>
-                    <span className="bg-bitcoin-black border border-bitcoin-orange-30 px-2.5 sm:px-3 md:px-4 py-2 rounded text-[10px] sm:text-xs font-medium text-bitcoin-white-80 hover:border-bitcoin-orange transition-all whitespace-nowrap">OpenAI GPT-4o</span>
+                    <span className="bg-bitcoin-black border border-bitcoin-orange-30 px-2.5 sm:px-3 md:px-4 py-2 rounded text-[10px] sm:text-xs font-medium text-bitcoin-white-80 hover:border-bitcoin-orange transition-all whitespace-nowrap">OpenAI GPT-5.1</span>
                     <span className="bg-bitcoin-black border border-bitcoin-orange-30 px-2.5 sm:px-3 md:px-4 py-2 rounded text-[10px] sm:text-xs font-medium text-bitcoin-white-80 hover:border-bitcoin-orange transition-all whitespace-nowrap">CoinMarketCap</span>
                     <span className="bg-bitcoin-black border border-bitcoin-orange-30 px-2.5 sm:px-3 md:px-4 py-2 rounded text-[10px] sm:text-xs font-medium text-bitcoin-white-80 hover:border-bitcoin-orange transition-all whitespace-nowrap">Alpha Vantage</span>
                     <span className="bg-bitcoin-black border border-bitcoin-orange px-2.5 sm:px-3 md:px-4 py-2 rounded text-[10px] sm:text-xs font-medium text-bitcoin-orange hover:bg-bitcoin-orange hover:text-bitcoin-black transition-all whitespace-nowrap">

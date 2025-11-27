@@ -536,7 +536,7 @@ Before considering work complete:
 ## 🆕 GPT-5.1 Integration for UCIE (January 2025)
 
 ### Overview
-UCIE is ready to migrate from GPT-4o to GPT-5.1 for enhanced AI analysis quality.
+UCIE has been upgraded to GPT-5.1 for enhanced AI analysis quality (migrated from GPT-4o).
 
 ### Why Upgrade?
 - ✅ **Better reasoning**: Enhanced analysis with thinking mode
