@@ -93,10 +93,13 @@ async function createDatabaseTable(): Promise<boolean> {
       const indexes = await query(
         `SELECT indexname FROM pg_indexes WHERE tablename = 'ucie_jobs'`
       );
-      success(`Indexes created: ${indexes.length} indexes`);
-      indexes.forEach((idx: any) => {
-        info(`  - ${idx.indexname}`);
-      });
+      const indexCount = Array.isArray(indexes) ? indexes.length : 0;
+      success(`Indexes created: ${indexCount} indexes`);
+      if (Array.isArray(indexes)) {
+        indexes.forEach((idx: any) => {
+          info(`  - ${idx.indexname}`);
+        });
+      }
       
       return true;
     } else {
@@ -167,7 +170,7 @@ async function verifyVercelConfig(): Promise<boolean> {
     }
     
     // Check cron job
-    const ucieC ron = vercelConfig.crons?.find(
+    const ucieCron = vercelConfig.crons?.find(
       (c: any) => c.path === '/api/cron/process-ucie-jobs'
     );
     
