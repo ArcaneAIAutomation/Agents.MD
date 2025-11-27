@@ -115,7 +115,7 @@ async function authenticateRequest(req: NextApiRequest): Promise<{ userId: strin
 }
 
 // ============================================================================
-// OPENAI GPT-4O CLIENT
+// OPENAI GPT-5.1 CLIENT
 // ============================================================================
 
 const openai = new OpenAI({
@@ -164,7 +164,7 @@ async function collectMarketData(): Promise<{ quality: number; data: AggregatedM
 // ============================================================================
 
 /**
- * Parse GPT-4o response and extract trade parameters
+ * Parse GPT-5.1 response and extract trade parameters
  */
 function parseAIResponse(responseText: string): {
   direction: 'LONG' | 'SHORT';
@@ -249,8 +249,8 @@ function calculateStopLoss(
 }
 
 /**
- * Generate trade signal using GPT-4o with real aggregated market data
- * GPT-4o provides advanced analysis with optimal speed and quality balance
+ * Generate trade signal using GPT-5.1 with real aggregated market data
+ * GPT-5.1 provides Einstein-level analysis with advanced reasoning capabilities
  */
 async function generateTradeSignal(
   userId: string,
@@ -263,18 +263,18 @@ async function generateTradeSignal(
   
   try {
     // Step 1: Create comprehensive market context with real data
-    console.log('[QSTGE] Creating market context for GPT-4o with real aggregated data');
+    console.log('[QSTGE] Creating market context for GPT-5.1 with real aggregated data');
     const marketContext = createMarketContext(aggregatedData);
     
-    // Step 2: Call GPT-4o with deep analytical reasoning (with performance tracking)
-    console.log('[QSTGE] Calling GPT-4o for Einstein-level trade analysis');
+    // Step 2: Call GPT-5.1 with deep analytical reasoning (with performance tracking)
+    console.log('[QSTGE] Calling GPT-5.1 for Einstein-level trade analysis');
     const completion = await trackAPICall(
       'OpenAI',
       '/v1/chat/completions',
       'POST',
       async () => {
         return await openai.chat.completions.create({
-          model: 'gpt-4o', // GPT-4o: Latest OpenAI model with advanced reasoning capabilities
+          model: 'gpt-5.1', // GPT-5.1: Advanced AI model with Einstein-level reasoning capabilities
           messages: [
             {
               role: 'system',
@@ -295,7 +295,7 @@ async function generateTradeSignal(
     // Step 3: Extract response text using bulletproof utility
     console.log('[QSTGE] Extracting response text');
     const responseText = extractResponseText(completion as any, true);
-    validateResponseText(responseText, 'gpt-4o', completion);
+    validateResponseText(responseText, 'gpt-5.1', completion);
     
     // Step 4: Parse and validate AI response
     console.log('[QSTGE] Parsing AI response');
@@ -335,7 +335,7 @@ async function generateTradeSignal(
     return tradeSignal;
     
   } catch (error) {
-    console.error('[QSTGE] Failed to generate trade signal with GPT-4o:', error);
+    console.error('[QSTGE] Failed to generate trade signal with GPT-5.1:', error);
     
     // Fallback to basic trade signal if AI fails (using real data)
     console.log('[QSTGE] Using fallback trade signal generation with real market data');
