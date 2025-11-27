@@ -2,6 +2,11 @@
   "version": 2,
   "name": "agents-md-v2",
   "framework": "nextjs",
+  "build": {
+    "env": {
+      "VERCEL_PRO_ENABLED": "true"
+    }
+  },
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "installCommand": "npm install",
