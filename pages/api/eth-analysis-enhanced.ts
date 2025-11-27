@@ -1124,7 +1124,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const result = await callOpenAI([
             {
               role: "system",
-              content: "You are a professional Ethereum and DeFi analyst. Provide a brief 2-3 sentence analysis based on the market data. Return only plain text, no JSON."
+              content: "You are a professional Ethereum and DeFi analyst. Provide a brief 2-3 sentence analysis based on the market data."
             },
             {
               role: "user",
