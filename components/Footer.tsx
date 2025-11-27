@@ -14,9 +14,9 @@ export default function Footer() {
     }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 lg:py-12">
         {/* Header Section */}
-        <div className="text-center border-b-2 md:border-b-4 border-black pb-4 md:pb-6 lg:pb-8 mb-4 md:mb-6 lg:mb-8">
+        <div className="text-center border-b-2 md:border-b-4 border-black pb-4 md:border-b-0 md:pb-0 mb-4 md:mb-6 lg:mb-8">
           <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-black mb-2 md:mb-4 leading-tight" style={{ fontFamily: 'Times, serif' }}>
-            TRADING INTELLIGENCE HUB
+            BITCOIN SOVEREIGN TECHNOLOGY
           </h2>
           <p className="text-sm sm:text-base md:text-lg text-gray-800 font-bold max-w-3xl mx-auto px-2 leading-relaxed">
             Your comprehensive source for cryptocurrency market analysis, regulatory intelligence, and financial news
@@ -53,7 +53,7 @@ export default function Footer() {
             </h3>
             <div className="space-y-2 text-sm">
               <div className="min-h-[44px] flex items-center py-2 hover:bg-gray-100 rounded px-2 -mx-2 transition-colors duration-150 cursor-pointer touch-manipulation">
-                <p className="text-black font-bold">• OpenAI GPT-4 Analysis Engine</p>
+                <p className="text-black font-bold">• ChatGPT 5.1 (Latest) Analysis Engine</p>
               </div>
               <div className="min-h-[44px] flex items-center py-2 hover:bg-gray-100 rounded px-2 -mx-2 transition-colors duration-150 cursor-pointer touch-manipulation">
                 <p className="text-black font-bold">• Real-time Market Data Integration</p>
@@ -101,7 +101,7 @@ export default function Footer() {
           <div className="flex flex-col space-y-3 md:flex-row md:justify-between md:items-center md:space-y-0">
             <div className="text-center md:text-left">
               <p className="text-black font-black text-sm md:text-base lg:text-lg leading-tight" style={{ fontFamily: 'Times, serif' }}>
-                © {currentYear} TRADING INTELLIGENCE HUB
+                © {currentYear} BITCOIN SOVEREIGN TECHNOLOGY
               </p>
               <p className="text-gray-700 font-bold text-xs md:text-sm mt-1">
                 ALL RIGHTS RESERVED • POWERED BY ARTIFICIAL INTELLIGENCE
