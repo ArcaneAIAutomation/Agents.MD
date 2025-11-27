@@ -1,27 +1,32 @@
 /**
- * UCIE Technical Analysis API - OpenAI GPT-4o Powered
+ * UCIE Technical Analysis API - OpenAI GPT-5.1 Powered
  * 
- * Uses OpenAI to analyze market data and generate technical insights
+ * Uses OpenAI GPT-5.1 with enhanced reasoning to analyze market data
  * Faster than Caesar AI (30 seconds vs 10 minutes)
  * 
  * Endpoint: POST /api/ucie-technical
  * Body: { symbol, marketData, newsData }
  * 
  * Features:
- * - GPT-4o powered technical analysis
+ * - GPT-5.1 powered technical analysis with medium reasoning
  * - RSI, MACD, EMA calculations
  * - Support/resistance levels
  * - Trend analysis
  * - Volume analysis
  * - 30-second response time
+ * 
+ * Updated: November 27, 2025 - Migrated to GPT-5.1
  */
 
 import { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
-import { callOpenAI } from '../../lib/openai';
+import { extractResponseText, validateResponseText } from '../../utils/openai';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  defaultHeaders: {
+    'OpenAI-Beta': 'responses=v1'
+  }
 });
 
 interface TechnicalRequest {
@@ -202,11 +207,11 @@ export default async function handler(
     const userPrompt = buildTechnicalPrompt(technicalData);
     const systemPrompt = buildSystemPrompt();
 
-    console.log(`📤 Sending request to OpenAI GPT-4o...`);
+    console.log(`📤 Sending request to OpenAI GPT-5.1 with medium reasoning...`);
 
-    // Call OpenAI API
+    // Call OpenAI API with GPT-5.1 and reasoning
     const completion = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4o-2024-08-06',
+      model: 'gpt-5.1',
       messages: [
         {
           role: 'system',
@@ -217,21 +222,22 @@ export default async function handler(
           content: userPrompt,
         },
       ],
+      reasoning: {
+        effort: 'medium' // 3-5 seconds for technical analysis
+      },
       temperature: 0.3, // Lower temperature for more consistent technical analysis
-      max_tokens: 2000,
+      max_tokens: 4000,
       response_format: { type: 'json_object' },
     });
 
-    const content = result.content;
+    // Bulletproof response extraction
+    const responseText = extractResponseText(completion, true); // Debug mode enabled
+    validateResponseText(responseText, 'gpt-5.1', completion);
 
-    if (!content) {
-      throw new Error('No response from OpenAI');
-    }
-
-    console.log(`✅ OpenAI analysis complete`);
+    console.log(`✅ OpenAI GPT-5.1 analysis complete`);
 
     // Parse JSON response
-    const analysis = JSON.parse(content);
+    const analysis = JSON.parse(responseText);
 
     // Return analysis
     return res.status(200).json({

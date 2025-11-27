@@ -18352,3 +18352,176 @@ ol[role="list"] {
     font-weight: 700;
   }
 }
+
+
+/* ============================================
+   BITCOIN NEWS WIRE ANIMATIONS
+   ============================================ */
+
+/* Scrolling ticker animation - seamless loop */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 30s linear infinite;
+}
+
+/* Pause animation on hover */
+.ticker-paused {
+  animation-play-state: paused !important;
+}
+
+/* Live pulse animation for indicators */
+@keyframes live-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
+
+.animate-live-pulse {
+  animation: live-pulse 2s ease-in-out infinite;
+}
+
+/* Bitcoin glow effect for ticker */
+.shadow-bitcoin-glow {
+  box-shadow: 0 0 20px rgba(247, 147, 26, 0.3);
+}
+
+/* Hover glow enhancement */
+.hover\:shadow-bitcoin-glow:hover {
+  box-shadow: 0 0 30px rgba(247, 147, 26, 0.5);
+}
+
+/* Ticker container styles */
+.ticker-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* News collapse button styles */
+.news-collapse-button {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.news-collapse-button:hover {
+  transform: translateY(-2px);
+}
+
+/* Feature badge styles */
+.feature-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background-color: #000000;
+  border: 1px solid rgba(247, 147, 26, 0.3);
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+}
+
+/* Responsive feature badges */
+@media (min-width: 768px) {
+  .feature-badge {
+    background-color: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    padding: 0;
+  }
+}
+
+/* Article card animations */
+@keyframes article-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.article-card {
+  animation: article-fade-in 0.5s ease-out;
+}
+
+/* Stagger animation for multiple articles */
+.article-card:nth-child(1) { animation-delay: 0.1s; }
+.article-card:nth-child(2) { animation-delay: 0.2s; }
+.article-card:nth-child(3) { animation-delay: 0.3s; }
+.article-card:nth-child(4) { animation-delay: 0.4s; }
+.article-card:nth-child(5) { animation-delay: 0.5s; }
+
+/* Social metrics pulse */
+@keyframes metric-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.metric-pulse {
+  animation: metric-pulse 2s ease-in-out infinite;
+}
+
+/* AI analysis expand animation */
+@keyframes expand-analysis {
+  from {
+    max-height: 0;
+    opacity: 0;
+  }
+  to {
+    max-height: 1000px;
+    opacity: 1;
+  }
+}
+
+.expand-analysis {
+  animation: expand-analysis 0.3s ease-out;
+}
+
+/* Loading shimmer for news cards */
+@keyframes news-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.news-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.1) 0%,
+    rgba(247, 147, 26, 0.1) 50%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+  background-size: 200% 100%;
+  animation: news-shimmer 2s ease-in-out infinite;
+}
+
+/* ============================================
+   END BITCOIN NEWS WIRE ANIMATIONS
+   ============================================ */

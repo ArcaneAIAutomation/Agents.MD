@@ -1,276 +1,161 @@
 /**
- * Social Sentiment API Endpoint for UCIE
+ * UCIE Sentiment Analysis API Endpoint
  * 
- * Fetches and aggregates social sentiment data from multiple sources:
- * - LunarCrush for social metrics
- * - Twitter for tweet analysis
- * - Reddit for subreddit sentiment
+ * GET /api/ucie/sentiment/BTC
+ * GET /api/ucie/sentiment/ETH
  * 
- * Returns comprehensive sentiment analysis with trends and influencers
+ * Returns comprehensive social sentiment analysis with:
+ * - LunarCrush metrics (social score, galaxy score, social dominance)
+ * - Twitter/X sentiment (disabled due to rate limits)
+ * - Reddit sentiment
+ * - Aggregated sentiment score
  * 
- * Requirements: 5.1, 5.2, 5.3, 14.3
+ * Uses database-backed caching (TTL: 5 minutes)
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import {
-  fetchAggregatedSocialSentiment,
-  type LunarCrushData,
-  type TwitterMetrics,
-  type RedditMetrics,
-} from '../../../../lib/ucie/socialSentimentClients';
-import {
-  aggregateSentimentData,
-  type AggregatedSentiment,
-} from '../../../../lib/ucie/sentimentAnalysis';
-import {
-  trackInfluencers,
-  type InfluencerMetrics,
-} from '../../../../lib/ucie/influencerTracking';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
-import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
-import {
-  validateSocialSentiment,
-  type VeritasValidationResult,
-} from '../../../../lib/ucie/veritas/validators/socialSentimentValidator';
+import { fetchAggregatedSocialSentiment } from '../../../../lib/ucie/socialSentimentClients';
 
-// ============================================================================
-// Type Definitions
-// ============================================================================
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
-interface SentimentResponse {
-  success: boolean;
-  symbol: string;
-  timestamp: string;
-  sentiment: AggregatedSentiment;
-  influencers: InfluencerMetrics;
-  trendInsights?: any; // ✅ NEW: AI-powered trend analysis
-  sources: {
-    lunarCrush: boolean;
-    twitter: boolean;
-    reddit: boolean;
-  };
-  dataQuality: number; // 0-100
-  cached: boolean;
-  veritasValidation?: VeritasValidationResult; // ✅ NEW: Optional Veritas validation (Requirements: 16.2, 16.3)
-  error?: string;
+  const { symbol } = req.query;
+
+  if (!symbol || typeof symbol !== 'string') {
+    return res.status(400).json({ error: 'Symbol parameter is required' });
+  }
+
+  const symbolUpper = symbol.toUpperCase();
+
+  try {
+    console.log(`📊 UCIE Sentiment API called for ${symbolUpper}`);
+
+    // 1. Check cache first (5 minute TTL)
+    const cached = await getCachedAnalysis(symbolUpper, 'sentiment');
+    if (cached) {
+      console.log(`✅ Cache hit for ${symbolUpper}/sentiment`);
+      return res.status(200).json({
+        success: true,
+        data: cached,
+        cached: true,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    console.log(`❌ Cache miss for ${symbolUpper}/sentiment - fetching fresh data`);
+
+    // 2. Fetch fresh sentiment data from all sources
+    const sentimentData = await fetchAggregatedSocialSentiment(symbolUpper);
+
+    // 3. Calculate aggregated sentiment score
+    const scores: number[] = [];
+    let totalWeight = 0;
+
+    // LunarCrush (weight: 50%)
+    if (sentimentData.lunarCrush) {
+      scores.push(sentimentData.lunarCrush.sentimentScore * 0.5);
+      totalWeight += 0.5;
+    }
+
+    // Reddit (weight: 30%)
+    if (sentimentData.reddit) {
+      scores.push((sentimentData.reddit.sentiment / 100) * 0.3);
+      totalWeight += 0.3;
+    }
+
+    // Twitter disabled (weight: 20%) - causes timeouts
+    // if (sentimentData.twitter) {
+    //   scores.push((sentimentData.twitter.sentiment / 100) * 0.2);
+    //   totalWeight += 0.2;
+    // }
+
+    const overallScore = totalWeight > 0
+      ? Math.round(scores.reduce((sum, score) => sum + score, 0) / totalWeight * 100)
+      : 50; // Neutral if no data
+
+    // 4. Format response
+    const response = {
+      symbol: symbolUpper,
+      overallScore,
+      sentiment: overallScore > 60 ? 'bullish' : overallScore < 40 ? 'bearish' : 'neutral',
+      
+      // LunarCrush data
+      lunarCrush: sentimentData.lunarCrush ? {
+        socialScore: sentimentData.lunarCrush.socialScore,
+        galaxyScore: sentimentData.lunarCrush.galaxyScore,
+        sentimentScore: sentimentData.lunarCrush.sentimentScore,
+        socialVolume: sentimentData.lunarCrush.socialVolume,
+        socialVolumeChange24h: sentimentData.lunarCrush.socialVolumeChange24h,
+        socialDominance: sentimentData.lunarCrush.socialDominance,
+        altRank: sentimentData.lunarCrush.altRank,
+        mentions: sentimentData.lunarCrush.mentions,
+        interactions: sentimentData.lunarCrush.interactions,
+        contributors: sentimentData.lunarCrush.contributors,
+        trendingScore: sentimentData.lunarCrush.trendingScore
+      } : null,
+      
+      // Reddit data
+      reddit: sentimentData.reddit ? {
+        mentions24h: sentimentData.reddit.mentions24h,
+        sentiment: sentimentData.reddit.sentiment,
+        topPosts: sentimentData.reddit.topPosts.slice(0, 5),
+        activeSubreddits: sentimentData.reddit.activeSubreddits,
+        postsPerDay: sentimentData.reddit.postsPerDay,
+        commentsPerDay: sentimentData.reddit.commentsPerDay
+      } : null,
+      
+      // Twitter disabled
+      twitter: null,
+      
+      // Data quality
+      dataQuality: calculateDataQuality(sentimentData),
+      
+      timestamp: new Date().toISOString()
+    };
+
+    // 5. Cache the result (5 minutes = 300 seconds)
+    await setCachedAnalysis(
+      symbolUpper,
+      'sentiment',
+      response,
+      300, // 5 minutes
+      response.dataQuality
+    );
+
+    console.log(`✅ Sentiment data fetched and cached for ${symbolUpper} (quality: ${response.dataQuality}%)`);
+
+    // 6. Return response
+    return res.status(200).json({
+      success: true,
+      data: response,
+      cached: false,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error(`❌ UCIE Sentiment API Error for ${symbolUpper}:`, error);
+    
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to fetch sentiment data',
+      details: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
 }
-
-interface ErrorResponse {
-  success: false;
-  error: string;
-  symbol?: string;
-}
-
-// Cache TTL: 5 minutes (social data updates every few minutes)
-const CACHE_TTL = 5 * 60; // 300 seconds
-
-// ============================================================================
-// Data Quality Calculation
-// ============================================================================
 
 /**
  * Calculate data quality score based on available sources
- * ✅ UPDATED: Twitter removed (unreliable), only LunarCrush + Reddit
  */
-function calculateDataQuality(
-  lunarCrush: LunarCrushData | null,
-  twitter: TwitterMetrics | null,
-  reddit: RedditMetrics | null
-): number {
-  let score = 0;
-  let maxScore = 0;
-
-  // LunarCrush (60 points) - Primary source, aggregates Twitter data
-  maxScore += 60;
-  if (lunarCrush) {
-    score += 60;
-    // Bonus for high social score
-    if (lunarCrush.socialScore && lunarCrush.socialScore > 70) score += 10;
-  }
-
-  // Reddit (40 points) - Secondary source
-  maxScore += 40;
-  if (reddit) {
-    score += 40;
-    // Bonus for high mention count
-    if (reddit.mentions24h > 50) score += 10;
-  }
-
-  // Twitter is disabled (causes timeouts)
-  // LunarCrush already aggregates Twitter data, so no data loss
-
-  return Math.min(100, Math.round((score / maxScore) * 100));
+function calculateDataQuality(data: any): number {
+  let quality = 0;
+  
+  if (data.lunarCrush) quality += 50; // LunarCrush is primary source
+  if (data.reddit) quality += 30; // Reddit is secondary
+  if (data.twitter) quality += 20; // Twitter is tertiary (disabled)
+  
+  return quality;
 }
-
-// ============================================================================
-// Main API Handler
-// ============================================================================
-
-async function handler(
-  req: AuthenticatedRequest,
-  res: NextApiResponse<SentimentResponse | ErrorResponse>
-) {
-  // Get user info if authenticated (for database tracking)
-  const userId = req.user?.id || 'anonymous';
-  const userEmail = req.user?.email;
-
-  // Only allow GET requests
-  if (req.method !== 'GET') {
-    return res.status(405).json({
-      success: false,
-      error: 'Method not allowed',
-    });
-  }
-
-  try {
-    // Extract and validate symbol
-    const { symbol } = req.query;
-
-    if (!symbol || typeof symbol !== 'string') {
-      return res.status(400).json({
-        success: false,
-        error: 'Symbol parameter is required',
-      });
-    }
-
-    const normalizedSymbol = symbol.toUpperCase();
-
-    // ✅ CHECK FOR REFRESH PARAMETER: Skip cache for live data
-    const forceRefresh = req.query.refresh === 'true';
-    
-    if (forceRefresh) {
-      console.log(`🔄 LIVE DATA MODE: Bypassing cache for ${normalizedSymbol} sentiment`);
-    }
-
-    // Check database cache first (skip if refresh=true)
-    if (!forceRefresh) {
-      const cachedData = await getCachedAnalysis(normalizedSymbol, 'sentiment');
-      if (cachedData) {
-        console.log(`✅ Cache hit for ${normalizedSymbol} sentiment`);
-        return res.status(200).json({
-          ...cachedData,
-          cached: true,
-        });
-      }
-    }
-
-    // Fetch social sentiment data from all sources
-    console.log(`Fetching social sentiment for ${normalizedSymbol}...`);
-    
-    const { lunarCrush, twitter, reddit } = await fetchAggregatedSocialSentiment(normalizedSymbol);
-
-    // Check if we have any data
-    if (!lunarCrush && !twitter && !reddit) {
-      return res.status(404).json({
-        success: false,
-        error: `No social sentiment data found for ${normalizedSymbol}`,
-        symbol: normalizedSymbol,
-      });
-    }
-
-    // Aggregate sentiment data
-    const sentiment = aggregateSentimentData(lunarCrush, twitter, reddit);
-
-    // Track influencers
-    const twitterInfluencers = twitter?.influencers || [];
-    const redditInfluencers = []; // Reddit influencer tracking would be implemented here
-    
-    const influencerData = trackInfluencers(twitterInfluencers, redditInfluencers);
-
-    // Calculate data quality
-    const dataQuality = calculateDataQuality(lunarCrush, twitter, reddit);
-
-    // ✅ ENHANCEMENT: Add AI-powered sentiment trend analysis
-    let trendInsights = null;
-    console.log(`🤖 Adding AI trend analysis to sentiment data...`);
-    try {
-      const { analyzeSentimentTrends } = await import('../../../../lib/ucie/sentimentTrendAnalysis');
-      trendInsights = await analyzeSentimentTrends({
-        sentiment,
-        volumeMetrics: sentiment.volumeMetrics,
-        influencers: influencerData.metrics,
-        sources: {
-          lunarCrush: !!lunarCrush,
-          twitter: !!twitter,
-          reddit: !!reddit
-        }
-      });
-      console.log(`✅ AI sentiment trend analysis complete`);
-    } catch (error) {
-      console.error(`⚠️ AI sentiment analysis failed:`, error);
-      // Continue without AI insights
-    }
-
-    // Build response
-    const response: SentimentResponse = {
-      success: true,
-      symbol: normalizedSymbol,
-      timestamp: new Date().toISOString(),
-      sentiment,
-      influencers: influencerData.metrics,
-      trendInsights, // ✅ NEW: AI-powered trend analysis
-      sources: {
-        lunarCrush: !!lunarCrush,
-        twitter: !!twitter,
-        reddit: !!reddit,
-      },
-      dataQuality,
-      cached: false,
-    };
-
-    // ✅ VERITAS PROTOCOL: Optional validation when feature flag enabled (Requirements: 16.2, 16.3)
-    if (process.env.ENABLE_VERITAS_PROTOCOL === 'true') {
-      try {
-        console.log(`🔍 Veritas Protocol enabled - validating social sentiment for ${normalizedSymbol}...`);
-        
-        // Run validation with timeout protection (5 seconds max)
-        const validationPromise = validateSocialSentiment(normalizedSymbol, {
-          lunarCrush,
-          twitter,
-          reddit,
-          sentiment
-        });
-        
-        const timeoutPromise = new Promise<null>((resolve) => 
-          setTimeout(() => resolve(null), 5000)
-        );
-        
-        const validation = await Promise.race([validationPromise, timeoutPromise]);
-        
-        if (validation) {
-          // Add validation results to response (optional field)
-          response.veritasValidation = validation;
-          console.log(`✅ Veritas validation complete: confidence=${validation.confidence}%, alerts=${validation.alerts.length}`);
-        } else {
-          console.warn('⚠️ Veritas validation timeout - continuing without validation');
-        }
-      } catch (error) {
-        // Graceful degradation: validation failure doesn't break the response
-        console.error('⚠️ Veritas validation failed:', error);
-        console.log('Continuing with standard response (no validation)');
-      }
-    }
-
-    // Cache the response in database (skip if refresh=true for live data)
-    if (!forceRefresh) {
-      await setCachedAnalysis(normalizedSymbol, 'sentiment', response, CACHE_TTL, dataQuality, userId, userEmail);
-      console.log(`💾 Cached ${normalizedSymbol} sentiment for ${CACHE_TTL}s`);
-    } else {
-      console.log(`⚡ LIVE DATA: Not caching ${normalizedSymbol} sentiment`);
-    }
-
-    // Return response
-    return res.status(200).json(response);
-
-  } catch (error) {
-    console.error('Error in sentiment API:', error);
-
-    return res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Internal server error',
-    });
-  }
-}
-
-// Export with optional authentication middleware (for user tracking)
-export default withOptionalAuth(handler);

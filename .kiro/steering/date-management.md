@@ -2,50 +2,123 @@
 
 **Priority**: 🚨 **CRITICAL** - Incorrect dates destroy document credibility  
 **Status**: ✅ **ACTIVE ENFORCEMENT**  
-**Version**: 1.0.0  
-**Created**: January 27, 2025  
-**Current Date**: **January 27, 2025** (Monday)
+**Version**: 2.0.0  
+**Created**: November 27, 2025  
+**Last Updated**: November 27, 2025
 
 ---
 
-## 🚨 THE PROBLEM
+## 🎯 CRITICAL RULE: ALWAYS CHECK SYSTEM CONTEXT FIRST
 
-**CRITICAL ISSUE IDENTIFIED**: Multiple documentation files across the project contain **incorrect future dates** that make no logical sense.
+**BEFORE writing ANY date in ANY document:**
 
-### Examples of Incorrect Dates Found:
+1. ✅ **READ the `<current_date_and_time>` section** at the start of EVERY conversation
+2. ✅ **USE that exact date** - do NOT guess or assume
+3. ✅ **VERIFY the format** - Pay attention to day/month order (UK vs US format)
+
+### Example System Context:
+
+```xml
+<current_date_and_time>
+Date: November 27, 2025
+Day of Week: Thursday
+</current_date_and_time>
+```
+
+**This means TODAY is November 27, 2025** ← Use this date!
+
+---
+
+## 🚨 COMMON MISTAKES TO AVOID
+
+### Mistake #1: Confusing Date Formats
+
+```markdown
+❌ WRONG: Reading "27/11/2025" as "January 27, 2025"
+✅ CORRECT: "27/11/2025" = November 27, 2025 (UK format: DD/MM/YYYY)
+
+❌ WRONG: Reading "11/27/2025" as "November 27, 2025" 
+✅ CORRECT: "11/27/2025" = November 27, 2025 (US format: MM/DD/YYYY)
+```
+
+**Solution**: Always use full month names to avoid confusion!
+
+### Mistake #2: Using Wrong Year
+
+```markdown
+❌ WRONG: "Last Updated: August 20, 2025" (when work was done in 2024)
+✅ CORRECT: "Last Updated: August 20, 2024"
+
+❌ WRONG: "Last Updated: January 27, 2025" (when today is November 27, 2025)
+✅ CORRECT: "Last Updated: November 27, 2025"
+```
+
+**Solution**: Check the system context date FIRST!
+
+### Mistake #3: Hardcoding Dates in Steering Files
+
+```markdown
+❌ WRONG: "Current Date: January 27, 2025" (hardcoded in steering file)
+✅ CORRECT: "Check system context for current date"
+```
+
+**Solution**: This steering file should NOT contain a hardcoded "current date"!
+
+---
+
+## 📅 HOW TO GET THE CORRECT DATE
+
+### Step 1: Find System Context
+
+At the start of EVERY conversation, you receive:
+
+```xml
+<current_date_and_time>
+Date: November 27, 2025
+Day of Week: Thursday
+</current_date_and_time>
+```
+
+### Step 2: Parse the Date Correctly
+
+```
+"Date: November 27, 2025"
+        ^^^^^^^^  ^^  ^^^^
+        Month    Day  Year
+```
+
+### Step 3: Use This Format in Documents
+
+```markdown
+✅ CORRECT:
+**Last Updated**: November 27, 2025
+**Created**: November 27, 2025
+**Date**: November 27, 2025
+```
+
+---
+
+## 🚨 THE PROBLEM (Historical Context)
+
+**CRITICAL ISSUE IDENTIFIED**: Multiple documentation files across the project contain **incorrect dates**.
+
+### Examples of Past Mistakes:
 
 ```markdown
 ❌ WRONG: "Last Updated: August 20, 2025" (in AGENTS.md)
 ✅ CORRECT: "Last Updated: August 20, 2024"
+   Reason: Work was done in August 2024, not 2025
 
-❌ WRONG: "Last Updated: October 8, 2025" (in multiple files)
-✅ CORRECT: "Last Updated: October 8, 2024"
-
-❌ WRONG: "Last Updated: November 25, 2025" (in quantum-btc-super-spec)
-✅ CORRECT: "Last Updated: November 25, 2024"
-
-❌ WRONG: "Last Updated: November 17, 2025" (in COINGECKO test results)
-✅ CORRECT: "Last Updated: November 17, 2024"
+❌ WRONG: "Last Updated: January 27, 2025" (when today is November 27, 2025)
+✅ CORRECT: "Last Updated: November 27, 2025"
+   Reason: Misread the date format (confused 27/11 with 27/01)
 ```
 
 ### Why This Happened:
 
-When documents were created in **2024** (August, October, November), they were incorrectly timestamped with **2025** instead of **2024**. This creates confusion and makes the documentation appear unreliable.
-
----
-
-## 📅 CURRENT DATE REFERENCE
-
-**ALWAYS USE THIS AS YOUR SOURCE OF TRUTH:**
-
-```
-Current Date: January 27, 2025
-Current Month: January 2025
-Current Year: 2025
-Day of Week: Monday
-```
-
-**When in doubt, ALWAYS verify the current date from the system context provided at the start of each conversation.**
+1. **Year confusion**: Documents created in 2024 were dated 2025
+2. **Month confusion**: Misreading date formats (DD/MM vs MM/DD)
+3. **Not checking system context**: Assuming dates instead of verifying
 
 ---
 
@@ -404,16 +477,23 @@ When creating or updating ANY document:
 
 ## 📚 QUICK REFERENCE
 
-### Current Date Information
+### How to Get Current Date
 
+**DO NOT use hardcoded dates from this file!**
+
+Instead:
+1. ✅ Check `<current_date_and_time>` in system context
+2. ✅ Parse the date carefully (watch for DD/MM vs MM/DD)
+3. ✅ Use full month names to avoid confusion
+
+### Example:
+```xml
+<current_date_and_time>
+Date: November 27, 2025
+Day of Week: Thursday
+</current_date_and_time>
 ```
-Today: January 27, 2025 (Monday)
-This Week: January 20-26, 2025
-This Month: January 2025
-This Quarter: Q1 2025
-This Year: 2025
-Last Year: 2024
-```
+**This means: November 27, 2025 is TODAY**
 
 ### Date Format Templates
 
@@ -466,11 +546,23 @@ This date management system is successful when:
 
 **If you're unsure about a date:**
 
-1. Check the system context at the start of the conversation
-2. Verify the current date: **January 27, 2025**
-3. Use git history to check file creation dates
-4. When in doubt, use today's date for "Last Updated"
-5. Ask for clarification if the date is critical
+1. ✅ **FIRST**: Check `<current_date_and_time>` in system context
+2. ✅ **SECOND**: Parse the date carefully (full month name, day, year)
+3. ✅ **THIRD**: Use git history to check file creation dates if needed
+4. ✅ **FOURTH**: When in doubt, ask the user for clarification
+5. ❌ **NEVER**: Guess or assume the date
+
+---
+
+## 🎯 AGENT CHECKLIST
+
+**Before writing ANY date:**
+
+- [ ] I have read the `<current_date_and_time>` section in system context
+- [ ] I have parsed the date correctly (Month Day, Year format)
+- [ ] I am using the full month name (not numbers)
+- [ ] I have verified this is the correct date for this document
+- [ ] I am NOT using a hardcoded date from this steering file
 
 ---
 
@@ -478,8 +570,14 @@ This date management system is successful when:
 **Priority**: **CRITICAL**  
 **Compliance**: **MANDATORY**
 
-**Remember**: Incorrect dates destroy credibility. Always verify before writing!
+**Remember**: 
+1. **ALWAYS check system context FIRST**
+2. **NEVER hardcode dates**
+3. **USE full month names** (November, not 11)
+4. **Incorrect dates destroy credibility**
 
 ---
 
-*This steering file was created on January 27, 2025 to address systematic date accuracy issues across the project.*
+*This steering file was created on November 27, 2025 to address systematic date accuracy issues across the project.*
+
+*Version 2.0.0 - Updated November 27, 2025 to emphasize checking system context and avoiding date format confusion.*
