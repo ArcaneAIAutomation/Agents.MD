@@ -21,6 +21,7 @@ import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cache
 import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 import { isVeritasEnabled } from '../../../../lib/ucie/veritas/utils/featureFlags';
 import { validateMarketData, type VeritasValidationResult } from '../../../../lib/ucie/veritas/validators/marketDataValidator';
+import { validateBitcoinOnly } from '../../../../lib/ucie/btcOnlyValidator';
 
 // Cache TTL: 5 minutes (balances freshness with performance)
 const CACHE_TTL = 5 * 60; // 300 seconds
@@ -111,8 +112,25 @@ async function handler(
 
   const { symbol } = req.query;
 
-  // Validate symbol parameter
-  if (!symbol || typeof symbol !== 'string') {
+  // Validate Bitcoin-only
+  const validation = validateBitcoinOnly(symbol as string);
+  if (!validation.valid) {
+    return res.status(400).json({
+      success: false,
+      symbol: symbol as string || '',
+      priceAggregation: {} as PriceAggregation,
+      dataQuality: 0,
+      sources: [],
+      cached: false,
+      timestamp: new Date().toISOString(),
+      error: validation.error
+    });
+  }
+
+  const normalizedSymbol = validation.normalized!; // Always 'BTC'
+
+  // Additional validation check
+  if (!normalizedSymbol) {
     return res.status(400).json({
       success: false,
       symbol: '',

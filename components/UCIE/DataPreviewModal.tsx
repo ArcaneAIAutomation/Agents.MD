@@ -120,7 +120,10 @@ export default function DataPreviewModal({
               Data Collection Preview
             </h2>
             <p className="text-sm text-bitcoin-white-60 mt-1">
-              Review collected data before proceeding with Caesar AI analysis
+              Review collected data before Caesar AI analysis (Phase 4)
+            </p>
+            <p className="text-xs text-bitcoin-orange mt-1">
+              All data cached in database • 13+ sources • Complete context for AI
             </p>
           </div>
           <button

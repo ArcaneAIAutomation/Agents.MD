@@ -245,9 +245,13 @@ export default function ProgressiveLoadingScreen({
           <h1 className="text-4xl md:text-5xl font-bold text-bitcoin-white mb-2">
             {symbol} Analysis
           </h1>
-          <p className="text-bitcoin-orange font-mono text-xl">
+          <p className="text-bitcoin-orange font-mono text-xl mb-3">
             Universal Crypto Intelligence Engine
           </p>
+          <div className="text-sm text-bitcoin-white-60 space-y-1">
+            <p>13+ Data Sources • Database-Backed Cache • Caesar AI Research</p>
+            <p className="text-xs">Phase 1-3: Data Collection → Phase 4: AI Analysis</p>
+          </div>
         </div>
 
         {/* Main Progress Card */}
@@ -255,7 +259,7 @@ export default function ProgressiveLoadingScreen({
           {/* Status Message */}
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-bitcoin-white mb-2">
-              {status.status === 'complete' ? 'Analysis complete! Ready for Caesar AI deep research.' : status.message}
+              {status.status === 'complete' ? 'Data Collection Complete! Ready for Caesar AI Analysis.' : status.message}
             </h2>
             <div className="flex items-center justify-center gap-4 text-bitcoin-white-60">
               <span className="text-sm">
@@ -265,15 +269,20 @@ export default function ProgressiveLoadingScreen({
                 <>
                   <span className="text-sm">•</span>
                   <span className="text-sm">
-                    Est. Total: ~5 minutes
+                    Est. Total: ~5 minutes (Data + AI)
                   </span>
                 </>
               )}
             </div>
             {status.status === 'complete' && (
-              <div className="mt-3 flex items-center justify-center gap-2 text-bitcoin-orange font-semibold animate-pulse">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-sm">Opening data preview automatically...</span>
+              <div className="mt-3 space-y-2">
+                <div className="flex items-center justify-center gap-2 text-bitcoin-orange font-semibold animate-pulse">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span className="text-sm">Opening data preview automatically...</span>
+                </div>
+                <p className="text-xs text-bitcoin-white-60">
+                  All data cached in database • Caesar AI will analyze with complete context
+                </p>
               </div>
             )}
           </div>

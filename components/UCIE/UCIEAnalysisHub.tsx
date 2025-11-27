@@ -35,6 +35,7 @@ import DataPreviewModal from './DataPreviewModal';
 import VeritasConfidenceScoreBadge from './VeritasConfidenceScoreBadge';
 import DataQualitySummary from './DataQualitySummary';
 import ValidationAlertsPanel from './ValidationAlertsPanel';
+import { OpenAIAnalysis } from './OpenAIAnalysis';
 import { useProgressiveLoading } from '../../hooks/useProgressiveLoading';
 import { useUCIEMobile, useAdaptiveRequestStrategy } from '../../hooks/useUCIEMobile';
 import { useSwipeGesture } from '../../hooks/useSwipeGesture';
@@ -552,14 +553,14 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
                 Collecting Data for {symbol}
               </h2>
               <p className="text-sm md:text-base text-bitcoin-white-80">
-                Fetching data from 15+ sources...
+                Fetching data from 13+ sources and caching in database...
               </p>
               <div className="mt-4">
                 <div className="text-4xl md:text-5xl font-mono font-bold text-bitcoin-orange">
                   {Math.round(overallProgress)}%
                 </div>
                 <div className="text-sm text-bitcoin-white-60 mt-1">
-                  Phase {currentPhase} of 4
+                  Phase {currentPhase} of 4 • AI Analysis in Phase 4
                 </div>
               </div>
             </div>
@@ -569,14 +570,23 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
               {renderLoadingPhases()}
             </div>
 
-            {/* Mobile-specific loading tip */}
-            {mobileCapabilities.isMobile && (
-              <div className="mt-6 p-3 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded-lg">
-                <p className="text-xs text-bitcoin-white-80 text-center">
-                  💡 Tip: Critical data loads first for faster insights
-                </p>
+            {/* System Information */}
+            <div className="mt-6 p-4 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded-lg space-y-2">
+              <p className="text-xs text-bitcoin-white-80 text-center font-semibold">
+                🔄 UCIE System Architecture
+              </p>
+              <div className="text-xs text-bitcoin-white-60 space-y-1">
+                <p>• Phase 1-3: Fetch & cache all data sources in database</p>
+                <p>• Phase 4: AI analysis with complete context (Caesar AI)</p>
+                <p>• Database-backed caching for persistence</p>
+                <p>• Data quality verification before AI analysis</p>
               </div>
-            )}
+              {mobileCapabilities.isMobile && (
+                <p className="text-xs text-bitcoin-white-80 text-center pt-2 border-t border-bitcoin-orange-20">
+                  💡 Critical data loads first for faster mobile insights
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -617,7 +627,7 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
     );
   }
 
-  // After loading completes, show only Caesar analysis (no tabs)
+  // After loading completes, show ALL data panels + GPT-5.1 + Caesar option
   const content = (
     <div className="min-h-screen bg-bitcoin-black py-4 md:py-8 px-2 md:px-4">
       <div className="max-w-7xl mx-auto">
@@ -633,15 +643,42 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
               </button>
             )}
             <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-bitcoin-white">
-              {symbol} Caesar AI Analysis
+              {symbol} Complete Analysis
             </h1>
           </div>
 
-          {/* Last Update Info */}
-          <div className="flex items-center gap-4 text-sm text-bitcoin-white-60">
-            <span>Last updated: {lastUpdate.toLocaleTimeString()}</span>
-            <span>•</span>
-            <span>Data Quality: {dataQuality}%</span>
+          {/* System Status Banner */}
+          <div className="mb-4 p-4 bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-xl">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex-1">
+                <h3 className="text-sm font-bold text-bitcoin-orange uppercase mb-2">
+                  Universal Crypto Intelligence Engine (UCIE)
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-bitcoin-white-80">
+                  <div>
+                    <span className="text-bitcoin-white-60">Data Sources:</span> 13+ APIs
+                  </div>
+                  <div>
+                    <span className="text-bitcoin-white-60">Storage:</span> Database-backed cache
+                  </div>
+                  <div>
+                    <span className="text-bitcoin-white-60">AI Engine:</span> Caesar AI (Phase 4)
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 text-sm">
+                <div className="text-center">
+                  <div className="text-bitcoin-white-60 text-xs">Last Updated</div>
+                  <div className="text-bitcoin-white font-mono">{lastUpdate.toLocaleTimeString()}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-bitcoin-white-60 text-xs">Data Quality</div>
+                  <div className={`text-xl font-bold font-mono ${dataQuality >= 90 ? 'text-bitcoin-orange' : 'text-bitcoin-white'}`}>
+                    {dataQuality}%
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -686,14 +723,141 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
           </div>
         )}
 
-        {/* Show only Caesar Analysis - No Tabs */}
-        <div className="mb-8">
-          <CaesarAnalysisContainer 
-            symbol={symbol} 
-            jobId={analysisData?.research?.jobId}
-            progressiveLoadingComplete={!loading}
-            previewData={previewData} // ✅ Pass preview data to Caesar
-          />
+        {/* Show ALL Data Panels (Mobile: Collapsible, Desktop: Sections) */}
+        <div className="space-y-6">
+          {/* Overview Section */}
+          <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6">
+            <h2 className="text-2xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
+              <TrendingUp className="w-6 h-6 text-bitcoin-orange" />
+              Overview
+            </h2>
+            {renderOverview()}
+          </div>
+
+          {/* Market Data Section */}
+          {analysisData?.['market-data'] || analysisData?.marketData ? (
+            <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6">
+              <h2 className="text-2xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
+                <DollarSign className="w-6 h-6 text-bitcoin-orange" />
+                Market Data
+              </h2>
+              <MarketDataPanel symbol={symbol} data={analysisData['market-data'] || analysisData.marketData} />
+            </div>
+          ) : null}
+
+          {/* Technical Analysis Section */}
+          {analysisData?.technical ? (
+            <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6">
+              <h2 className="text-2xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
+                <BarChart3 className="w-6 h-6 text-bitcoin-orange" />
+                Technical Analysis
+              </h2>
+              <TechnicalAnalysisPanel symbol={symbol} data={analysisData.technical} />
+            </div>
+          ) : null}
+
+          {/* Social Sentiment Section */}
+          {analysisData?.sentiment ? (
+            <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6">
+              <h2 className="text-2xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
+                <Share2 className="w-6 h-6 text-bitcoin-orange" />
+                Social Sentiment
+              </h2>
+              <SocialSentimentPanel symbol={symbol} data={analysisData.sentiment} />
+            </div>
+          ) : null}
+
+          {/* News Section */}
+          {analysisData?.news ? (
+            <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6">
+              <h2 className="text-2xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
+                <Newspaper className="w-6 h-6 text-bitcoin-orange" />
+                News & Intelligence
+              </h2>
+              <NewsPanel symbol={symbol} data={analysisData.news} />
+            </div>
+          ) : null}
+
+          {/* On-Chain Analytics Section */}
+          {analysisData?.['on-chain'] || analysisData?.onChain ? (
+            <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6">
+              <h2 className="text-2xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
+                <Activity className="w-6 h-6 text-bitcoin-orange" />
+                On-Chain Analytics
+              </h2>
+              <OnChainAnalyticsPanel symbol={symbol} data={analysisData['on-chain'] || analysisData.onChain} />
+            </div>
+          ) : null}
+
+          {/* Risk Assessment Section */}
+          {analysisData?.risk ? (
+            <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6">
+              <h2 className="text-2xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
+                <Shield className="w-6 h-6 text-bitcoin-orange" />
+                Risk Assessment
+              </h2>
+              <RiskAssessmentPanel symbol={symbol} data={analysisData.risk} />
+            </div>
+          ) : null}
+
+          {/* DeFi Metrics Section */}
+          {analysisData?.defi ? (
+            <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6">
+              <h2 className="text-2xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
+                <Coins className="w-6 h-6 text-bitcoin-orange" />
+                DeFi Metrics
+              </h2>
+              <DeFiMetricsPanel symbol={symbol} data={analysisData.defi} />
+            </div>
+          ) : null}
+
+          {/* Derivatives Section */}
+          {analysisData?.derivatives ? (
+            <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6">
+              <h2 className="text-2xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
+                <AlertTriangle className="w-6 h-6 text-bitcoin-orange" />
+                Derivatives
+              </h2>
+              <DerivativesPanel symbol={symbol} data={analysisData.derivatives} />
+            </div>
+          ) : null}
+
+          {/* Predictions Section */}
+          {analysisData?.predictions ? (
+            <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6">
+              <h2 className="text-2xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
+                <Target className="w-6 h-6 text-bitcoin-orange" />
+                Predictions & AI
+              </h2>
+              <PredictiveModelPanel symbol={symbol} data={analysisData.predictions} />
+            </div>
+          ) : null}
+
+          {/* GPT-5.1 Analysis Section */}
+          <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6">
+            <h2 className="text-2xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
+              <Brain className="w-6 h-6 text-bitcoin-orange" />
+              GPT-5.1 AI Analysis
+            </h2>
+            <OpenAIAnalysis symbol={symbol} />
+          </div>
+
+          {/* Caesar AI Deep Dive Section */}
+          <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6">
+            <h2 className="text-2xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
+              <Brain className="w-6 h-6 text-bitcoin-orange" />
+              Caesar AI Deep Dive Research
+            </h2>
+            <p className="text-bitcoin-white-80 mb-4">
+              Review all data and GPT-5.1 analysis above, then activate Caesar AI for comprehensive deep dive research (15-20 minutes).
+            </p>
+            <CaesarAnalysisContainer 
+              symbol={symbol} 
+              jobId={analysisData?.research?.jobId}
+              progressiveLoadingComplete={!loading}
+              previewData={previewData} // ✅ Pass preview data to Caesar
+            />
+          </div>
         </div>
       </div>
     </div>

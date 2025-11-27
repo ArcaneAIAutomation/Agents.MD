@@ -16,6 +16,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { query, queryOne } from '../../../lib/db';
 import { withOptionalAuth, AuthenticatedRequest } from '../../../middleware/auth';
+import { validateBitcoinOnly } from '../../../lib/ucie/btcOnlyValidator';
 
 interface StartAnalysisRequest {
   symbol: string;
@@ -46,15 +47,17 @@ async function handler(
   try {
     const { symbol, forceRefresh = false } = req.body as StartAnalysisRequest;
 
-    if (!symbol) {
+    // Validate Bitcoin-only
+    const validation = validateBitcoinOnly(symbol);
+    if (!validation.valid) {
       return res.status(400).json({
         success: false,
-        error: 'Symbol is required',
+        error: validation.error,
         timestamp: new Date().toISOString()
       });
     }
 
-    const normalizedSymbol = symbol.toUpperCase();
+    const normalizedSymbol = validation.normalized!; // Always 'BTC'
     const userId = req.user?.id || 'anonymous';
 
     console.log(`🚀 Starting UCIE analysis for ${normalizedSymbol} (user: ${userId})`);

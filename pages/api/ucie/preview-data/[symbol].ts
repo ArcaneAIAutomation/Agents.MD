@@ -870,60 +870,13 @@ async function generateAISummary(
     context += `Note: The following data sources are unavailable: ${apiStatus.failed.join(', ')}\n`;
   }
 
-  // ✅ Generate summary with GPT-5.1 (latest model with reasoning)
-  try {
-    console.log(`🤖 Generating GPT-5.1 summary...`);
-    console.log(`   Context length: ${context.length} chars`);
-    
-    // Import OpenAI client
-    const { generateOpenAIAnalysis } = await import('../../../../lib/ucie/openaiClient');
-    
-    // System prompt for OpenAI
-    const systemPrompt = `You are a professional cryptocurrency analyst. Provide a comprehensive analysis of ${symbol} with these sections:
-
-1. EXECUTIVE SUMMARY (300 words)
-2. MARKET ANALYSIS (400 words)
-3. TECHNICAL ANALYSIS (400 words)
-4. RISK ASSESSMENT & OUTLOOK (300 words)
-
-Use ONLY the data provided. Be specific with numbers and percentages.`;
-    
-    // ✅ EINSTEIN'S SOLUTION: Extended timeout for GPT-5.1 reasoning mode
-    // GPT-5.1 with 'low' reasoning effort typically takes 2-5 seconds
-    // But can take up to 30 seconds under load or with complex analysis
-    // Extended timeout to 120 seconds (2 minutes) to allow for:
-    // - API queue time
-    // - Reasoning computation
-    // - Response generation
-    // - Network latency
-    const analysisPromise = generateOpenAIAnalysis(
-      systemPrompt,
-      context,
-      4000, // Max tokens
-      0.7   // Temperature
-    );
-    
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('GPT-5.1 analysis timeout (120s) - using fallback')), 120000); // ✅ 120 seconds (2 minutes)
-    });
-    
-    try {
-      const response = await Promise.race([analysisPromise, timeoutPromise]);
-      console.log(`✅ GPT-5.1 summary generated (${response.content.length} chars, ${response.tokensUsed} tokens)`);
-      return response.content;
-    } catch (timeoutError) {
-      // If timeout, log and use fallback (don't throw - graceful degradation)
-      console.warn(`⚠️ GPT-5.1 timed out after 120s, using fallback summary`);
-      throw timeoutError; // Let outer catch handle fallback
-    }
-    
-  } catch (error) {
-    console.error('GPT-5.1 summary error (using fallback):', error);
-    console.error('   Error type:', error instanceof Error ? error.constructor.name : typeof error);
-    console.error('   Error message:', error instanceof Error ? error.message : String(error));
-    // Fallback to basic summary (instant, no API call)
-    return generateFallbackSummary(symbol, collectedData, apiStatus);
-  }
+  // ✅ UCIE SYSTEM: Return instant fallback summary for preview
+  // GPT-5.1 analysis will run asynchronously after data collection
+  // User will see GPT-5.1 analysis before activating Caesar AI
+  console.log(`📊 Data collection complete. GPT-5.1 analysis will run asynchronously.`);
+  
+  // Return instant fallback summary (GPT-5.1 runs separately)
+  return generateFallbackSummary(symbol, collectedData, apiStatus);
 }
 
 /**

@@ -20,6 +20,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { query, queryOne } from '../../../lib/db';
 import { setCachedAnalysis } from '../../../lib/ucie/cacheUtils';
 import { getComprehensiveContext, formatContextForAI } from '../../../lib/ucie/contextAggregator';
+import { isBitcoin } from '../../../lib/ucie/btcOnlyValidator';
 
 interface ProcessorResponse {
   success: boolean;
@@ -134,6 +135,11 @@ async function processJobPhase(job: any) {
   const { id, symbol, phase } = job;
 
   try {
+    // Validate Bitcoin-only
+    if (!isBitcoin(symbol)) {
+      throw new Error(`UCIE only supports Bitcoin (BTC). Symbol "${symbol}" is not supported.`);
+    }
+
     console.log(`🔧 Processing phase: ${phase} for ${symbol}`);
 
     // Phase 1: Market Data (15-20s)
