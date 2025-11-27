@@ -5,7 +5,7 @@
   "build": {
     "env": {
       "VERCEL_PRO_ENABLED": "true",
-      "DEPLOYMENT_TIMESTAMP": "2025-11-27T22:00:00Z"
+      "DEPLOYMENT_TIMESTAMP": "2025-11-27T22:15:00Z"
     }
   },
   "buildCommand": "npm run build",
