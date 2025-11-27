@@ -120,10 +120,10 @@ export default function DataPreviewModal({
               Data Collection Preview
             </h2>
             <p className="text-sm text-bitcoin-white-60 mt-1">
-              Review collected data before Caesar AI analysis (Phase 4)
+              Review collected data and ChatGPT 5.1 analysis before proceeding
             </p>
             <p className="text-xs text-bitcoin-orange mt-1">
-              All data cached in database • 13+ sources • Complete context for AI
+              All data cached in database • 13+ sources • Ready for full analysis
             </p>
           </div>
           <button
@@ -214,23 +214,70 @@ export default function DataPreviewModal({
                   Data Sources
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {preview.apiStatus.working.map((api) => (
-                    <div key={api} className="flex items-center gap-2">
+                  {/* Market Data */}
+                  <div className="flex items-center gap-2">
+                    {preview.collectedData.marketData?.success ? (
                       <CheckCircle className="text-bitcoin-orange flex-shrink-0" size={20} />
-                      <span className="text-bitcoin-white-80 capitalize">
-                        {api.replace(/([A-Z])/g, ' $1').trim()}
-                      </span>
-                    </div>
-                  ))}
-                  {preview.apiStatus.failed.map((api) => (
-                    <div key={api} className="flex items-center gap-2">
+                    ) : (
                       <XCircle className="text-bitcoin-white-60 flex-shrink-0" size={20} />
-                      <span className="text-bitcoin-white-60 capitalize line-through">
-                        {api.replace(/([A-Z])/g, ' $1').trim()}
-                      </span>
-                    </div>
-                  ))}
+                    )}
+                    <span className={preview.collectedData.marketData?.success ? 'text-bitcoin-white-80' : 'text-bitcoin-white-60 line-through'}>
+                      Market Data
+                    </span>
+                  </div>
+
+                  {/* Technical */}
+                  <div className="flex items-center gap-2">
+                    {preview.collectedData.technical?.success ? (
+                      <CheckCircle className="text-bitcoin-orange flex-shrink-0" size={20} />
+                    ) : (
+                      <XCircle className="text-bitcoin-white-60 flex-shrink-0" size={20} />
+                    )}
+                    <span className={preview.collectedData.technical?.success ? 'text-bitcoin-white-80' : 'text-bitcoin-white-60 line-through'}>
+                      Technical
+                    </span>
+                  </div>
+
+                  {/* News */}
+                  <div className="flex items-center gap-2">
+                    {preview.collectedData.news?.success ? (
+                      <CheckCircle className="text-bitcoin-orange flex-shrink-0" size={20} />
+                    ) : (
+                      <XCircle className="text-bitcoin-white-60 flex-shrink-0" size={20} />
+                    )}
+                    <span className={preview.collectedData.news?.success ? 'text-bitcoin-white-80' : 'text-bitcoin-white-60 line-through'}>
+                      News
+                    </span>
+                  </div>
+
+                  {/* Sentiment */}
+                  <div className="flex items-center gap-2">
+                    {preview.collectedData.sentiment?.success ? (
+                      <CheckCircle className="text-bitcoin-orange flex-shrink-0" size={20} />
+                    ) : (
+                      <XCircle className="text-bitcoin-white-60 flex-shrink-0" size={20} />
+                    )}
+                    <span className={preview.collectedData.sentiment?.success ? 'text-bitcoin-white-80' : 'text-bitcoin-white-60 line-through'}>
+                      Sentiment
+                    </span>
+                  </div>
+
+                  {/* On-Chain */}
+                  <div className="flex items-center gap-2">
+                    {preview.collectedData.onChain?.success ? (
+                      <CheckCircle className="text-bitcoin-orange flex-shrink-0" size={20} />
+                    ) : (
+                      <XCircle className="text-bitcoin-white-60 flex-shrink-0" size={20} />
+                    )}
+                    <span className={preview.collectedData.onChain?.success ? 'text-bitcoin-white-80' : 'text-bitcoin-white-60 line-through'}>
+                      On-Chain
+                    </span>
+                  </div>
                 </div>
+                <p className="text-xs text-bitcoin-white-60 mt-3 pt-3 border-t border-bitcoin-orange-20">
+                  {preview.apiStatus.working.length} of {preview.apiStatus.total} sources available • 
+                  {preview.apiStatus.successRate >= 80 ? ' Excellent' : preview.apiStatus.successRate >= 60 ? ' Good' : ' Fair'} data quality
+                </p>
               </div>
 
               {/* Market Overview */}
@@ -285,11 +332,11 @@ export default function DataPreviewModal({
                 </div>
               )}
 
-              {/* Gemini AI Analysis */}
+              {/* GPT-5.1 AI Analysis */}
               <div className="bg-bitcoin-black border border-bitcoin-orange rounded-lg p-4">
                 <h3 className="text-lg font-bold text-bitcoin-white mb-3 flex items-center gap-2">
                   <span className="text-bitcoin-orange">🤖</span>
-                  Gemini AI Analysis
+                  ChatGPT 5.1 AI Analysis
                   {preview.geminiAnalysis && (
                     <span className="text-xs text-bitcoin-white-60 font-normal ml-2">
                       ({preview.geminiAnalysis.split(' ').length.toLocaleString()} words)
@@ -301,6 +348,9 @@ export default function DataPreviewModal({
                     {preview.geminiAnalysis || preview.summary}
                   </div>
                 </div>
+                <p className="text-xs text-bitcoin-white-60 mt-3 pt-3 border-t border-bitcoin-orange-20">
+                  Powered by ChatGPT 5.1 (Latest) with enhanced reasoning • Real-time market data analysis
+                </p>
               </div>
 
               {/* Caesar Prompt Preview */}
@@ -337,25 +387,25 @@ export default function DataPreviewModal({
                   <li className="flex items-start gap-2">
                     <span className="text-bitcoin-orange mt-1">•</span>
                     <span>
-                      <strong className="text-bitcoin-white">Caesar AI Deep Analysis</strong> will use this data as context
+                      You'll see <strong className="text-bitcoin-white">all collected data panels</strong> with real-time information
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-bitcoin-orange mt-1">•</span>
                     <span>
-                      Research will take <strong className="text-bitcoin-white">5-7 minutes</strong> to complete
+                      <strong className="text-bitcoin-white">ChatGPT 5.1 AI Analysis</strong> button will be available for deeper insights (2-10 min)
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-bitcoin-orange mt-1">•</span>
                     <span>
-                      You'll receive comprehensive analysis on technology, team, partnerships, risks, and more
+                      Optional: <strong className="text-bitcoin-white">Caesar AI Deep Dive</strong> for comprehensive research (15-20 min)
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-bitcoin-orange mt-1">•</span>
                     <span>
-                      All findings will be backed by <strong className="text-bitcoin-white">source citations</strong>
+                      All analysis backed by <strong className="text-bitcoin-white">real-time data</strong> and source citations
                     </span>
                   </li>
                 </ul>
@@ -375,21 +425,21 @@ export default function DataPreviewModal({
             </button>
             <button
               onClick={() => preview && onContinue(preview)}
-              disabled={preview.dataQuality < 80}
+              disabled={preview.dataQuality < 60}
               className={`font-bold uppercase tracking-wider px-8 py-3 rounded-lg transition-all min-h-[48px] ${
-                preview.dataQuality < 80
+                preview.dataQuality < 60
                   ? 'bg-bitcoin-black text-bitcoin-white-60 border-2 border-bitcoin-white-60 cursor-not-allowed opacity-50'
                   : 'bg-bitcoin-orange text-bitcoin-black border-2 border-bitcoin-orange hover:bg-bitcoin-black hover:text-bitcoin-orange hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95'
               }`}
-              title={preview.dataQuality < 80 ? 'Data quality must be at least 80% to continue' : 'Continue with Caesar AI Analysis'}
+              title={preview.dataQuality < 60 ? 'Data quality must be at least 60% to continue' : 'Continue with Full Analysis'}
             >
-              {preview.dataQuality < 80 ? (
+              {preview.dataQuality < 60 ? (
                 <>
                   <AlertCircle className="inline-block mr-2" size={20} />
                   Insufficient Data ({preview.dataQuality}%)
                 </>
               ) : (
-                'Continue with Caesar AI Analysis →'
+                'Continue with Full Analysis →'
               )}
             </button>
           </div>
