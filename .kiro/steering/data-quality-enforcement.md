@@ -247,7 +247,7 @@ if (!validation.isValid || validation.accuracy < 99) {
 
 ```typescript
 // ✅ CORRECT
-const ANALYSIS_TIMEOUT = 60000; // 60 seconds
+const ANALYSIS_TIMEOUT = 300000; // 300 seconds (5 minutes) - Vercel Pro
 
 const analysisPromise = startAnalysis(txHash);
 const timeoutPromise = new Promise((_, reject) => 
