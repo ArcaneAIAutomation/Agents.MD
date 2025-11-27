@@ -33,23 +33,23 @@ export default function UCIEHomePage() {
               UCIE
             </p>
             <p className="text-lg text-bitcoin-white-80 max-w-3xl mx-auto">
-              The most advanced cryptocurrency analysis platform in existence. 
-              ChatGPT 5.1 (Latest) powered research, real-time data from 15+ sources, and 95%+ quality intelligence for Bitcoin and Ethereum.
+              The most advanced Bitcoin analysis platform in existence. 
+              ChatGPT 5.1 (Latest) powered research, real-time data from 13+ sources, and 95%+ quality intelligence focused exclusively on Bitcoin.
             </p>
           </div>
 
-          {/* Analysis Selection Buttons */}
+          {/* Analysis Selection - Bitcoin Only */}
           <div className="mb-12">
             <h2 className="text-2xl md:text-3xl font-bold text-bitcoin-white text-center mb-8">
-              Select Asset for Comprehensive Analysis
+              Bitcoin Comprehensive Analysis
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-              {/* Bitcoin Button */}
+            <div className="max-w-2xl mx-auto">
+              {/* Bitcoin Button - Centered */}
               <button
                 onClick={() => handleAnalyze('BTC')}
                 disabled={loading !== null}
-                className="group bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-8 transition-all hover:bg-bitcoin-orange hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[200px] flex flex-col items-center justify-center"
+                className="w-full group bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-8 transition-all hover:bg-bitcoin-orange hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[200px] flex flex-col items-center justify-center"
               >
                 {loading === 'BTC' ? (
                   <div className="flex flex-col items-center">
@@ -68,37 +68,19 @@ export default function UCIEHomePage() {
                       BTC
                     </p>
                     <div className="flex items-center gap-2 text-bitcoin-white-80 group-hover:text-bitcoin-black transition-colors">
-                      <span className="text-sm font-semibold">Start Analysis</span>
+                      <span className="text-sm font-semibold">Start Comprehensive Analysis</span>
                       <ArrowRight className="w-5 h-5" strokeWidth={2.5} />
                     </div>
                   </>
                 )}
               </button>
-
-              {/* Ethereum Button - DISABLED (Under Development) */}
-              <button
-                disabled
-                className="bg-bitcoin-black border-2 border-bitcoin-white-60 rounded-xl p-8 opacity-50 cursor-not-allowed min-h-[200px] flex flex-col items-center justify-center"
-                title="Ethereum analysis is under development"
-              >
-                <div className="w-20 h-20 mb-4 text-bitcoin-white-60">
-                  <Coins className="w-full h-full" strokeWidth={1.5} />
-                </div>
-                <h3 className="text-3xl font-bold text-bitcoin-white-60 mb-2">
-                  Ethereum
-                </h3>
-                <p className="text-xl font-mono text-bitcoin-white-60 mb-4">
-                  ETH
-                </p>
-                <div className="flex flex-col items-center gap-1 text-bitcoin-white-60">
-                  <span className="text-sm font-semibold">Start Analysis</span>
-                  <span className="text-xs">(Under Development)</span>
-                </div>
-              </button>
             </div>
 
             <p className="text-center text-bitcoin-white-60 mt-6 text-sm">
-              Click to launch comprehensive real-time analysis with 95%+ data quality
+              Click to launch comprehensive real-time Bitcoin analysis with 95%+ data quality
+            </p>
+            <p className="text-center text-bitcoin-white-60 mt-2 text-xs">
+              Focused exclusively on Bitcoin for maximum accuracy and depth
             </p>
           </div>
 
@@ -136,35 +118,29 @@ export default function UCIEHomePage() {
             />
           </div>
 
-          {/* Multi-Asset Support Banner */}
+          {/* Bitcoin Focus Banner */}
           <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-8 mb-12">
             <h3 className="text-3xl font-bold text-bitcoin-white mb-4 text-center">
-              🚀 Now Supporting 100+ Cryptocurrencies
+              🎯 Exclusively Focused on Bitcoin
             </h3>
             <p className="text-lg text-bitcoin-white-80 mb-6 text-center max-w-3xl mx-auto">
-              UCIE has expanded beyond BTC & ETH to support the top 100 cryptocurrencies by market cap.
-              Get comprehensive analysis for Layer 1s, Layer 2s, DeFi protocols, and more with intelligent
-              data source selection and quality scoring.
+              UCIE provides unparalleled depth and accuracy by focusing exclusively on Bitcoin.
+              Our specialized approach delivers 95%+ data quality with comprehensive analysis from 13+ sources,
+              ensuring you get the most accurate and actionable intelligence available.
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="bg-bitcoin-orange text-bitcoin-black px-4 py-3 rounded-lg font-bold text-center">
-                ✓ Bitcoin (BTC)
+                ✓ 95%+ Data Quality
               </div>
               <div className="bg-bitcoin-orange text-bitcoin-black px-4 py-3 rounded-lg font-bold text-center">
-                ✓ Ethereum (ETH)
+                ✓ 13+ Data Sources
               </div>
               <div className="bg-bitcoin-orange text-bitcoin-black px-4 py-3 rounded-lg font-bold text-center">
-                ✓ Solana (SOL)
-              </div>
-              <div className="bg-bitcoin-orange text-bitcoin-black px-4 py-3 rounded-lg font-bold text-center">
-                ✓ Cardano (ADA)
-              </div>
-              <div className="bg-bitcoin-orange text-bitcoin-black px-4 py-3 rounded-lg font-bold text-center">
-                ✓ 95+ More
+                ✓ ChatGPT 5.1 AI
               </div>
             </div>
             <p className="text-bitcoin-white-60 text-center text-sm">
-              Premium quality for BTC & ETH (95%+), excellent coverage for top 100 assets (70%+)
+              Maximum accuracy and depth through exclusive Bitcoin focus
             </p>
           </div>
 
