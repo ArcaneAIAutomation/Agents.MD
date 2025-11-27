@@ -17,9 +17,9 @@ const MODEL = process.env.OPENAI_MODEL || 'o1-mini';
 const COMPLEX_MODEL = process.env.OPENAI_COMPLEX_MODEL || 'o1-preview';
 const FALLBACK_MODEL = process.env.OPENAI_FALLBACK_MODEL || 'gpt-4o';
 
-// Timeout configuration
-const O1_TIMEOUT = parseInt(process.env.O1_TIMEOUT || '120000'); // 120 seconds
-const GPT4O_TIMEOUT = parseInt(process.env.GPT4O_TIMEOUT || '30000'); // 30 seconds
+// Timeout configuration - Vercel Pro allows 300 seconds
+const O1_TIMEOUT = parseInt(process.env.O1_TIMEOUT || '270000'); // 270 seconds (4.5 minutes)
+const GPT4O_TIMEOUT = parseInt(process.env.GPT4O_TIMEOUT || '270000'); // 270 seconds (4.5 minutes)
 
 interface DeepDiveRequest {
   txHash: string;

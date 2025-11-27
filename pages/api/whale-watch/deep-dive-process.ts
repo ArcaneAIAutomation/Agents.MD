@@ -387,7 +387,7 @@ CRITICAL INSTRUCTIONS:
           },
           max_output_tokens: 6000,
         }),
-        signal: AbortSignal.timeout(60000), // 60 seconds for Responses API
+        signal: AbortSignal.timeout(270000), // 270 seconds (4.5 minutes) - Vercel Pro allows 300s
       });
 
       const openaiTime = Date.now() - openaiStart;
@@ -437,7 +437,7 @@ CRITICAL INSTRUCTIONS:
           max_tokens: 2000, // ✅ CORRECT for GPT-4o
           response_format: { type: 'json_object' }
         }),
-        signal: AbortSignal.timeout(30000), // 30 seconds for GPT-4o
+        signal: AbortSignal.timeout(270000), // 270 seconds (4.5 minutes) - Vercel Pro allows 300s
       });
 
       const openaiTime = Date.now() - openaiStart;
