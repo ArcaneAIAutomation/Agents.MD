@@ -9,76 +9,82 @@
   "regions": ["lhr1"],
   "functions": {
     "pages/api/atge/generate.ts": {
-      "maxDuration": 300
+      "maxDuration": 600
     },
     "pages/api/**/*.ts": {
       "maxDuration": 300
     },
     "pages/api/ucie/market-data/**/*.ts": {
-      "maxDuration": 300
+      "maxDuration": 600
     },
     "pages/api/ucie/sentiment/**/*.ts": {
-      "maxDuration": 300
+      "maxDuration": 600
     },
     "pages/api/ucie/news/**/*.ts": {
-      "maxDuration": 300
+      "maxDuration": 600
     },
     "pages/api/ucie/technical/**/*.ts": {
-      "maxDuration": 300
+      "maxDuration": 600
     },
     "pages/api/ucie/on-chain/**/*.ts": {
-      "maxDuration": 300
+      "maxDuration": 600
     },
     "pages/api/ucie/risk/**/*.ts": {
-      "maxDuration": 300
+      "maxDuration": 600
     },
     "pages/api/ucie/predictions/**/*.ts": {
-      "maxDuration": 300
+      "maxDuration": 600
     },
     "pages/api/ucie/derivatives/**/*.ts": {
-      "maxDuration": 300
+      "maxDuration": 600
     },
     "pages/api/ucie/defi/**/*.ts": {
-      "maxDuration": 300
+      "maxDuration": 600
     },
     "pages/api/ucie/comprehensive/**/*.ts": {
-      "maxDuration": 300
+      "maxDuration": 900
     },
     "pages/api/ucie/collect-all-data/**/*.ts": {
-      "maxDuration": 300
+      "maxDuration": 900
     },
     "pages/api/ucie/preview-data/**/*.ts": {
-      "maxDuration": 300
+      "maxDuration": 900
     },
     "pages/api/ucie/preview-data/[symbol].ts": {
-      "maxDuration": 300
+      "maxDuration": 900
     },
     "pages/api/ucie/research/**/*.ts": {
-      "maxDuration": 300
+      "maxDuration": 900
     },
     "pages/api/ucie/caesar-research/**/*.ts": {
-      "maxDuration": 800
+      "maxDuration": 900
     },
     "pages/api/ucie/caesar-poll/**/*.ts": {
-      "maxDuration": 300
+      "maxDuration": 600
     },
     "pages/api/ucie/openai-summary/**/*.ts": {
-      "maxDuration": 300
+      "maxDuration": 600
     },
     "pages/api/ucie/gemini-summary/**/*.ts": {
-      "maxDuration": 300
+      "maxDuration": 600
+    },
+    "pages/api/ucie/openai-analysis/**/*.ts": {
+      "maxDuration": 600
+    },
+    "pages/api/ucie/preview-data-optimized/**/*.ts": {
+      "maxDuration": 900
     },
     "pages/api/whale-watch/deep-dive-process.ts": {
-      "maxDuration": 300
+      "maxDuration": 600
     },
     "pages/api/whale-watch/deep-dive-start.ts": {
-      "maxDuration": 300
+      "maxDuration": 600
     },
     "pages/api/whale-watch/deep-dive-poll.ts": {
       "maxDuration": 300
     },
     "pages/api/whale-watch/deep-dive-instant.ts": {
-      "maxDuration": 300
+      "maxDuration": 600
     }
   },
   "crons": [

@@ -80,11 +80,13 @@ Caesar AI was receiving incomplete data with "N/A" values for critical fields:
 
 **Execution Order**:
 ```
-Phase 1: Market Data → Cache in DB → ✅
-Phase 2: Sentiment & News → Cache in DB → ✅
-Phase 3: Technical, On-Chain, Risk, Predictions, Derivatives, DeFi → Cache in DB → ✅
-⏸️ CHECKPOINT: Verify data quality ≥ 70%
-Phase 4: Retrieve ALL data → Aggregate context → Call AI → ✅
+Phase 1: Market Data → Cache in DB → ✅ (2-3 minutes)
+Phase 2: Sentiment & News → Cache in DB → ✅ (3-4 minutes)
+Phase 3: Technical, On-Chain, Risk, Predictions, Derivatives, DeFi → Cache in DB → ✅ (3-4 minutes)
+⏸️ CHECKPOINT: Verify data quality ≥ 70% (30 seconds)
+Phase 4: Retrieve ALL data → Aggregate context → Call AI → ✅ (3-5 minutes)
+
+Total: 11-16 minutes (within Vercel Pro 900s limit)
 ```
 
 **NEVER**:
@@ -97,6 +99,28 @@ Phase 4: Retrieve ALL data → Aggregate context → Call AI → ✅
 - ✅ Verify data quality (minimum 70%)
 - ✅ Aggregate complete context
 - ✅ THEN call AI with full context
+
+### 🆕 Vercel Pro Timeout Configuration (November 27, 2025)
+
+**CRITICAL**: With Vercel Pro, we have increased timeouts to prevent failures:
+
+- **Critical UCIE Endpoints**: 900 seconds (15 minutes)
+  - `/api/ucie/comprehensive/**`
+  - `/api/ucie/preview-data/**`
+  - `/api/ucie/research/**`
+  - `/api/ucie/caesar-research/**`
+
+- **Standard UCIE Endpoints**: 600 seconds (10 minutes)
+  - All individual data source endpoints
+  - AI analysis endpoints
+  - Whale Watch endpoints
+
+**Why This Matters**:
+- Complete data collection from 13+ APIs (8-10 minutes)
+- AI analysis with full context (3-5 minutes)
+- Buffer for retries and network latency (1-2 minutes)
+
+**See**: `VERCEL-PRO-TIMEOUT-FIX-CRITICAL.md` for complete details
 
 ### Rule #2: Database is the Source of Truth
 
