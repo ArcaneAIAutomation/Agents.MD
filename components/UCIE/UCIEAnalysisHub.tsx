@@ -141,19 +141,33 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
     symbol,
     enabled: proceedWithAnalysis, // Only load if user clicked Continue
     onPhaseComplete: (phase, data) => {
-      console.log(`Phase ${phase} completed with data:`, data);
+      console.log(`✅ Phase ${phase} completed with data:`, data);
       setLastUpdate(new Date());
     },
     onAllComplete: (allData) => {
-      console.log('All phases completed:', allData);
-      // Calculate data quality based on successful endpoints
-      const totalEndpoints = loadingPhases.reduce((sum, p) => sum + p.endpoints.length, 0);
-      const successfulEndpoints = Object.keys(allData).length;
-      const quality = Math.round((successfulEndpoints / totalEndpoints) * 100);
+      console.log('🎉 All phases completed:', allData);
+      console.log('📊 Data keys available:', Object.keys(allData));
+      
+      // Calculate data quality based on successful data sources
+      const expectedSources = [
+        'market-data', 'sentiment', 'news', 'technical', 
+        'on-chain', 'risk', 'predictions', 'derivatives', 'defi'
+      ];
+      
+      const successfulSources = expectedSources.filter(source => {
+        const data = allData[source];
+        return data && typeof data === 'object' && Object.keys(data).length > 0;
+      });
+      
+      const quality = Math.round((successfulSources.length / expectedSources.length) * 100);
+      console.log(`📊 Data quality: ${quality}% (${successfulSources.length}/${expectedSources.length} sources)`);
+      console.log('✅ Successful sources:', successfulSources);
+      console.log('❌ Missing sources:', expectedSources.filter(s => !successfulSources.includes(s)));
+      
       setDataQuality(quality);
     },
     onError: (phase, errorMsg) => {
-      console.error(`Phase ${phase} error:`, errorMsg);
+      console.error(`❌ Phase ${phase} error:`, errorMsg);
       setError(`Phase ${phase} failed: ${errorMsg}`);
     },
   });
@@ -166,6 +180,30 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
     setProceedWithAnalysis(true);
     haptic.buttonPress();
   };
+
+  // Debug: Log analysis data changes
+  useEffect(() => {
+    if (analysisData) {
+      console.log('📊 UCIE Analysis Data Updated:', {
+        hasData: !!analysisData,
+        dataKeys: Object.keys(analysisData),
+        dataQuality,
+        loading,
+        error,
+        sampleData: {
+          marketData: analysisData['market-data'] ? 'Present' : 'Missing',
+          technical: analysisData.technical ? 'Present' : 'Missing',
+          sentiment: analysisData.sentiment ? 'Present' : 'Missing',
+          news: analysisData.news ? 'Present' : 'Missing',
+          onChain: analysisData['on-chain'] ? 'Present' : 'Missing',
+          risk: analysisData.risk ? 'Present' : 'Missing',
+          predictions: analysisData.predictions ? 'Present' : 'Missing',
+          derivatives: analysisData.derivatives ? 'Present' : 'Missing',
+          defi: analysisData.defi ? 'Present' : 'Missing',
+        }
+      });
+    }
+  }, [analysisData, dataQuality, loading, error]);
 
   const handlePreviewCancel = () => {
     setShowPreview(false);
