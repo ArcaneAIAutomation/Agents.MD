@@ -638,13 +638,11 @@ function calculateAPIStatus(collectedData: any) {
   }
 
   // 🔍 FORENSIC FIX: Sentiment structure is { success: true, data: { overallScore, ... } }
-  // This one DOES have .data nested
+  // This one DOES have .data nested - just check if data object exists and has content
   if (
     collectedData.sentiment?.success === true &&
     collectedData.sentiment?.data &&
-    (collectedData.sentiment.data.overallScore !== undefined ||
-     collectedData.sentiment.data.lunarCrush ||
-     collectedData.sentiment.data.reddit)
+    Object.keys(collectedData.sentiment.data).length > 0
   ) {
     working.push('Sentiment');
   } else {
@@ -676,11 +674,11 @@ function calculateAPIStatus(collectedData: any) {
   }
 
   // 🔍 FORENSIC FIX: On-Chain structure is { success: true, data: { dataQuality, ... } }
-  // This one DOES have .data nested
+  // This one DOES have .data nested - just check if data object exists and has content
   if (
     collectedData.onChain?.success === true &&
     collectedData.onChain?.data &&
-    collectedData.onChain.data.dataQuality > 0
+    Object.keys(collectedData.onChain.data).length > 0
   ) {
     working.push('On-Chain');
   } else {
