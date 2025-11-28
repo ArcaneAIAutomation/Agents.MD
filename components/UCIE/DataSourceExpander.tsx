@@ -85,7 +85,14 @@ export default function DataSourceExpander({ collectedData, apiStatus }: DataSou
         {dataSources.map((source) => {
           const isExpanded = expandedSources.has(source.id);
           const working = isWorking(source.id);
-          const hasData = source.data && source.data.success;
+          // ✅ FIX: Check if data exists (not just success flag)
+          const hasData = source.data && (
+            source.data.success || // API response format
+            source.data.symbol || // Direct data format
+            source.data.overallScore !== undefined || // Sentiment format
+            source.data.chain || // On-chain format
+            Object.keys(source.data).length > 0 // Any data
+          );
 
           return (
             <div
@@ -163,15 +170,17 @@ export default function DataSourceExpander({ collectedData, apiStatus }: DataSou
 
 // Render functions for each data type
 function renderMarketData(data: any) {
-  const agg = data.priceAggregation;
+  // ✅ FIX: Handle both API response format and direct data format
+  const actualData = data.data || data;
+  const agg = actualData.priceAggregation;
   
   return (
     <div className="space-y-3">
       <DataRow label="Aggregated Price" value={agg?.averagePrice ? `$${agg.averagePrice.toLocaleString()}` : '$N/A'} />
       <DataRow label="24h Volume" value={agg?.totalVolume24h ? `$${agg.totalVolume24h.toLocaleString()}` : '$N/A'} />
-      <DataRow label="Market Cap" value={data.marketData?.marketCap ? `$${data.marketData.marketCap.toLocaleString()}` : '$N/A'} />
+      <DataRow label="Market Cap" value={actualData.marketData?.marketCap ? `$${actualData.marketData.marketCap.toLocaleString()}` : '$N/A'} />
       <DataRow label="24h Change" value={agg?.averageChange24h ? `${agg.averageChange24h.toFixed(2)}%` : 'N/A%'} />
-      <DataRow label="Data Quality" value={`${data.dataQuality || 0}%`} />
+      <DataRow label="Data Quality" value={`${actualData.dataQuality || 0}%`} />
       
       {agg?.prices && agg.prices.length > 0 && (
         <div className="mt-3 pt-3 border-t border-bitcoin-orange-20">
@@ -193,45 +202,37 @@ function renderMarketData(data: any) {
 }
 
 function renderSentimentData(data: any) {
-  const sentiment = data.sentiment;
-  const sources = data.sources;
-  const distribution = sentiment?.distribution;
-  const trends24h = sentiment?.trends?.['24h'] || [];
+  // ✅ FIX: Handle both API response format and direct data format
+  const actualData = data.data || data; // API returns { success: true, data: {...} }
   
-  // Get recent trend (last 3 hours average)
-  const recentTrend = trends24h.slice(-3);
-  const recentAvgScore = recentTrend.length > 0 
-    ? recentTrend.reduce((sum: number, t: any) => sum + (t.score || 0), 0) / recentTrend.length
-    : sentiment?.overallScore || 0;
+  // The API returns: { overallScore, sentiment, lunarCrush, reddit, twitter, dataQuality }
+  const overallScore = actualData.overallScore || 50;
+  const sentimentLabel = actualData.sentiment || 'neutral';
+  const lunarCrush = actualData.lunarCrush;
+  const reddit = actualData.reddit;
   
-  // Determine trend based on recent average score
-  const getTrend = (score: number) => {
-    if (score > 5) return 'Bullish';
-    if (score < -5) return 'Bearish';
-    return 'Neutral';
-  };
+  // Use overallScore as the recent score
+  const recentAvgScore = overallScore;
   
+  // Determine trend based on overall score (0-100 scale)
   const getTrendDescription = (score: number) => {
-    if (score > 10) return 'Strongly Bullish';
-    if (score > 5) return 'Bullish';
-    if (score > 0) return 'Slightly Bullish';
-    if (score === 0) return 'Neutral';
-    if (score > -5) return 'Slightly Bearish';
-    if (score > -10) return 'Bearish';
+    if (score >= 80) return 'Strongly Bullish';
+    if (score >= 60) return 'Bullish';
+    if (score >= 55) return 'Slightly Bullish';
+    if (score >= 45) return 'Neutral';
+    if (score >= 40) return 'Slightly Bearish';
+    if (score >= 20) return 'Bearish';
     return 'Strongly Bearish';
   };
   
-  const trend = getTrend(recentAvgScore);
   const trendDescription = getTrendDescription(recentAvgScore);
-  const trendColor = recentAvgScore > 0 ? 'text-bitcoin-orange' : 
-                     recentAvgScore < 0 ? 'text-bitcoin-white-60' : 
+  const trendColor = recentAvgScore >= 60 ? 'text-bitcoin-orange' : 
+                     recentAvgScore <= 40 ? 'text-bitcoin-white-60' : 
                      'text-bitcoin-white';
   
-  // Calculate momentum (comparing last hour to previous hour)
-  const lastHour = trends24h.slice(-1)[0];
-  const prevHour = trends24h.slice(-2, -1)[0];
-  const momentum = lastHour && prevHour ? lastHour.score - prevHour.score : 0;
-  const momentumText = momentum > 0 ? '↑ Improving' : momentum < 0 ? '↓ Declining' : '→ Stable';
+  // Use LunarCrush volume change as momentum indicator
+  const momentum = lunarCrush?.socialVolumeChange24h || 0;
+  const momentumText = momentum > 0 ? `↑ +${momentum.toFixed(1)}%` : momentum < 0 ? `↓ ${momentum.toFixed(1)}%` : '→ Stable';
   const momentumColor = momentum > 0 ? 'text-bitcoin-orange' : momentum < 0 ? 'text-bitcoin-white-60' : 'text-bitcoin-white';
   
   return (
@@ -243,65 +244,75 @@ function renderSentimentData(data: any) {
         </span>
       </div>
       <DataRow 
-        label="Sentiment Score (3h avg)" 
-        value={recentAvgScore !== undefined ? `${recentAvgScore.toFixed(1)}/100` : 'N/A'} 
+        label="Overall Sentiment Score" 
+        value={`${recentAvgScore}/100`} 
       />
       <div className="flex justify-between items-center py-2 border-b border-bitcoin-orange-20">
-        <span className="text-sm text-bitcoin-white-60">Momentum</span>
+        <span className="text-sm text-bitcoin-white-60">Social Volume Change (24h)</span>
         <span className={`text-sm font-mono font-semibold ${momentumColor}`}>{momentumText}</span>
       </div>
-      <DataRow 
-        label="Confidence" 
-        value={sentiment?.confidence ? `${sentiment.confidence}%` : 'N/A'} 
-      />
-      <DataRow label="Data Quality" value={`${data.dataQuality || 0}%`} />
+      <DataRow label="Data Quality" value={`${actualData.dataQuality || 0}%`} />
       
-      {distribution && (
+      {lunarCrush && (
         <div className="mt-3 pt-3 border-t border-bitcoin-orange-20">
           <p className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-2">
-            Sentiment Distribution
+            LunarCrush Metrics
           </p>
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-bitcoin-white-80">Positive</span>
-              <span className="text-sm font-mono font-semibold text-bitcoin-orange">
-                {distribution.positive?.toFixed(1)}%
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-bitcoin-white-80">Neutral</span>
-              <span className="text-sm font-mono font-semibold text-bitcoin-white">
-                {distribution.neutral?.toFixed(1)}%
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-bitcoin-white-80">Negative</span>
-              <span className="text-sm font-mono font-semibold text-bitcoin-white-60">
-                {distribution.negative?.toFixed(1)}%
-              </span>
-            </div>
+            <DataRow 
+              label="Galaxy Score" 
+              value={`${lunarCrush.galaxyScore || 0}/100`} 
+            />
+            <DataRow 
+              label="Social Score" 
+              value={`${lunarCrush.socialScore || 0}/100`} 
+            />
+            <DataRow 
+              label="AltRank" 
+              value={`#${lunarCrush.altRank || 'N/A'}`} 
+            />
+            <DataRow 
+              label="Social Volume" 
+              value={`${(lunarCrush.socialVolume || 0).toLocaleString()}`} 
+            />
+            <DataRow 
+              label="Social Dominance" 
+              value={`${(lunarCrush.socialDominance || 0).toFixed(2)}%`} 
+            />
+            <DataRow 
+              label="Mentions" 
+              value={`${(lunarCrush.mentions || 0).toLocaleString()}`} 
+            />
+            <DataRow 
+              label="Interactions" 
+              value={`${(lunarCrush.interactions || 0).toLocaleString()}`} 
+            />
+            <DataRow 
+              label="Contributors" 
+              value={`${(lunarCrush.contributors || 0).toLocaleString()}`} 
+            />
           </div>
         </div>
       )}
       
-      {sources && (
+      {reddit && (
         <div className="mt-3 pt-3 border-t border-bitcoin-orange-20">
           <p className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-2">
-            Active Sources
+            Reddit Metrics
           </p>
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(sources).map(([source, active]) => (
-              <span
-                key={source}
-                className={`px-2 py-1 rounded text-xs font-semibold ${
-                  active
-                    ? 'bg-bitcoin-orange text-bitcoin-black'
-                    : 'bg-bitcoin-black border border-bitcoin-white-20 text-bitcoin-white-60'
-                }`}
-              >
-                {source}
-              </span>
-            ))}
+          <div className="space-y-2">
+            <DataRow 
+              label="Mentions (24h)" 
+              value={`${reddit.mentions24h || 0}`} 
+            />
+            <DataRow 
+              label="Sentiment" 
+              value={`${reddit.sentiment || 0}/100`} 
+            />
+            <DataRow 
+              label="Active Subreddits" 
+              value={reddit.activeSubreddits?.join(', ') || 'N/A'}
+            />
           </div>
         </div>
       )}
@@ -309,9 +320,14 @@ function renderSentimentData(data: any) {
   );
 }
 
+// Keep the old sources section if needed, but it's not in the current API response
+*/
+
 function renderTechnicalData(data: any) {
-  const indicators = data.indicators;
-  const signals = data.signals;
+  // ✅ FIX: Handle both API response format and direct data format
+  const actualData = data.data || data;
+  const indicators = actualData.indicators;
+  const signals = actualData.signals;
   const timeframe = data.timeframe || '1h';
   
   // Helper to get signal color
@@ -324,7 +340,7 @@ function renderTechnicalData(data: any) {
   return (
     <div className="space-y-3">
       <DataRow label="Timeframe" value={timeframe.toUpperCase()} />
-      <DataRow label="Data Quality" value={`${data.dataQuality || 0}%`} />
+      <DataRow label="Data Quality" value={`${actualData.dataQuality || 0}%`} />
       
       {signals && (
         <div className="mt-3 pt-3 border-t border-bitcoin-orange-20">
@@ -586,12 +602,14 @@ function renderTechnicalData(data: any) {
 }
 
 function renderNewsData(data: any) {
-  const articles = data.articles || [];
+  // ✅ FIX: Handle both API response format and direct data format
+  const actualData = data.data || data;
+  const articles = actualData.articles || [];
   
   return (
     <div className="space-y-3">
       <DataRow label="Articles Found" value={articles.length.toString()} />
-      <DataRow label="Data Quality" value={`${data.dataQuality || 0}%`} />
+      <DataRow label="Data Quality" value={`${actualData.dataQuality || 0}%`} />
       
       {articles.length > 0 && (
         <div className="mt-3 pt-3 border-t border-bitcoin-orange-20">
@@ -623,9 +641,11 @@ function renderNewsData(data: any) {
 }
 
 function renderOnChainData(data: any) {
-  const networkMetrics = data.networkMetrics;
-  const whaleActivity = data.whaleActivity;
-  const mempoolAnalysis = data.mempoolAnalysis;
+  // ✅ FIX: Handle both API response format and direct data format
+  const actualData = data.data || data; // API returns { success: true, data: {...} }
+  const networkMetrics = actualData.networkMetrics;
+  const whaleActivity = actualData.whaleActivity;
+  const mempoolAnalysis = actualData.mempoolAnalysis;
   
   // Format large numbers for readability
   const formatHashRate = (hashRate: number) => {
@@ -654,7 +674,7 @@ function renderOnChainData(data: any) {
   
   return (
     <div className="space-y-3">
-      <DataRow label="Data Quality" value={`${data.dataQuality || 0}%`} />
+      <DataRow label="Data Quality" value={`${actualData.dataQuality || 0}%`} />
       
       {networkMetrics && (
         <>
