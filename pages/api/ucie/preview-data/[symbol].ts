@@ -640,9 +640,10 @@ function calculateAPIStatus(collectedData: any) {
   const failed: string[] = [];
 
   // Market Data - Check for actual price data
+  // ✅ FIX: API returns { success: true, data: { priceAggregation, ... } }
   if (
     collectedData.marketData?.success === true &&
-    collectedData.marketData?.priceAggregation?.prices?.length > 0
+    collectedData.marketData?.data?.priceAggregation?.prices?.length > 0
   ) {
     working.push('Market Data');
   } else {
@@ -650,12 +651,13 @@ function calculateAPIStatus(collectedData: any) {
   }
 
   // Sentiment - Check for actual sentiment data
+  // ✅ FIX: API returns { success: true, data: { overallScore, lunarCrush, reddit, ... } }
   if (
     collectedData.sentiment?.success === true &&
-    (collectedData.sentiment?.sentiment?.overallScore > 0 ||
-     collectedData.sentiment?.sources?.lunarCrush === true ||
-     collectedData.sentiment?.sources?.twitter === true ||
-     collectedData.sentiment?.sources?.reddit === true)
+    collectedData.sentiment?.data &&
+    (collectedData.sentiment.data.overallScore !== undefined ||
+     collectedData.sentiment.data.lunarCrush ||
+     collectedData.sentiment.data.reddit)
   ) {
     working.push('Sentiment');
   } else {
@@ -663,16 +665,18 @@ function calculateAPIStatus(collectedData: any) {
   }
 
   // Technical - Check for actual indicators with proper validation
+  // ✅ FIX: API returns { success: true, data: { indicators, ... } }
   const hasTechnical = collectedData.technical?.success === true &&
-                       collectedData.technical?.indicators &&
-                       typeof collectedData.technical.indicators === 'object' &&
-                       Object.keys(collectedData.technical.indicators).length >= 6; // Should have at least 6 indicators
+                       collectedData.technical?.data?.indicators &&
+                       typeof collectedData.technical.data.indicators === 'object' &&
+                       Object.keys(collectedData.technical.data.indicators).length >= 6; // Should have at least 6 indicators
   
   console.log(`🔍 Technical validation:`, {
     exists: !!collectedData.technical,
     success: collectedData.technical?.success,
-    hasIndicators: !!collectedData.technical?.indicators,
-    indicatorCount: collectedData.technical?.indicators ? Object.keys(collectedData.technical.indicators).length : 0,
+    hasData: !!collectedData.technical?.data,
+    hasIndicators: !!collectedData.technical?.data?.indicators,
+    indicatorCount: collectedData.technical?.data?.indicators ? Object.keys(collectedData.technical.data.indicators).length : 0,
     hasTechnical
   });
   
@@ -683,9 +687,10 @@ function calculateAPIStatus(collectedData: any) {
   }
 
   // News - Check for actual articles
+  // ✅ FIX: API returns { success: true, data: { articles, ... } }
   if (
     collectedData.news?.success === true &&
-    collectedData.news?.articles?.length > 0
+    collectedData.news?.data?.articles?.length > 0
   ) {
     working.push('News');
   } else {
@@ -693,9 +698,11 @@ function calculateAPIStatus(collectedData: any) {
   }
 
   // On-Chain - Check for actual data quality
+  // ✅ FIX: API returns { success: true, data: { dataQuality, networkMetrics, whaleActivity, ... } }
   if (
     collectedData.onChain?.success === true &&
-    collectedData.onChain?.dataQuality > 0
+    collectedData.onChain?.data &&
+    collectedData.onChain.data.dataQuality > 0
   ) {
     working.push('On-Chain');
   } else {
