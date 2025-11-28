@@ -781,7 +781,7 @@ async function generateAISummary(
     }
   }
 
-  // ✅ FIXED: Sentiment - Use correct path (sentiment object)
+  // ✅ FIXED: Sentiment - Use correct path (sentiment object) + LunarCrush details
   if (sentimentData?.success && sentimentData?.sentiment) {
     const sentiment = sentimentData.sentiment;
     context += `Social Sentiment:\n`;
@@ -795,9 +795,36 @@ async function generateAISummary(
       context += `- Trend: ${trend}\n`;
       context += `- 24h Mentions: ${mentions.toLocaleString('en-US')}\n`;
       
+      // ✅ NEW: Include detailed LunarCrush data for GPT-5.1
+      if (sentimentData.lunarCrush) {
+        const lc = sentimentData.lunarCrush;
+        context += `\nLunarCrush Metrics:\n`;
+        context += `- Social Score: ${lc.socialScore || 0}/100\n`;
+        context += `- Galaxy Score: ${lc.galaxyScore || 0}/100\n`;
+        context += `- Sentiment Score: ${lc.sentimentScore || 0}/100\n`;
+        context += `- Social Volume: ${(lc.socialVolume || 0).toLocaleString('en-US')}\n`;
+        context += `- Social Volume Change 24h: ${(lc.socialVolumeChange24h || 0).toFixed(2)}%\n`;
+        context += `- Social Dominance: ${(lc.socialDominance || 0).toFixed(2)}%\n`;
+        context += `- AltRank: ${lc.altRank || 'N/A'}\n`;
+        context += `- Trending Score: ${lc.trendingScore || 0}/100\n`;
+        context += `- Interactions: ${(lc.interactions || 0).toLocaleString('en-US')}\n`;
+        context += `- Contributors: ${(lc.contributors || 0).toLocaleString('en-US')}\n`;
+      }
+      
+      // ✅ NEW: Include Reddit data if available
+      if (sentimentData.reddit) {
+        const reddit = sentimentData.reddit;
+        context += `\nReddit Metrics:\n`;
+        context += `- Mentions 24h: ${(reddit.mentions24h || 0).toLocaleString('en-US')}\n`;
+        context += `- Sentiment: ${reddit.sentiment || 0}/100\n`;
+        context += `- Active Subreddits: ${reddit.activeSubreddits?.join(', ') || 'N/A'}\n`;
+        context += `- Posts Per Day: ${reddit.postsPerDay || 0}\n`;
+        context += `- Comments Per Day: ${reddit.commentsPerDay || 0}\n`;
+      }
+      
       const sources = Object.keys(sentimentData.sources || {}).filter(k => sentimentData.sources[k]);
       if (sources.length > 0) {
-        context += `- Sources: ${sources.join(', ')}\n`;
+        context += `\nData Sources: ${sources.join(', ')}\n`;
       }
       context += `\n`;
     } catch (error) {
@@ -848,21 +875,73 @@ async function generateAISummary(
     context += `\n`;
   }
 
-  // ✅ FIXED: On-Chain - Use correct path (check multiple possible structures)
+  // ✅ FIXED: On-Chain - Use correct path + detailed Blockchain.com data
   if (onChainData?.success) {
+    context += `On-Chain Data (Blockchain.com):\n`;
+    
+    // ✅ NEW: Include detailed network metrics
+    if (onChainData.networkMetrics) {
+      const network = onChainData.networkMetrics;
+      context += `\nNetwork Metrics:\n`;
+      context += `- Latest Block Height: ${network.latestBlockHeight || 'N/A'}\n`;
+      context += `- Hash Rate: ${(network.hashRate || 0).toFixed(2)} TH/s\n`;
+      context += `- Difficulty: ${(network.difficulty || 0).toLocaleString('en-US')}\n`;
+      context += `- Mempool Size: ${(network.mempoolSize || 0).toLocaleString('en-US')} transactions\n`;
+      context += `- Mempool Bytes: ${((network.mempoolBytes || 0) / 1e6).toFixed(2)} MB\n`;
+      context += `- Average Fee Per Tx: ${(network.averageFeePerTx || 0).toLocaleString('en-US')} sats\n`;
+      context += `- Recommended Fee: ${network.recommendedFeePerVByte || 0} sat/vB\n`;
+      context += `- Total Circulating: ${((network.totalCirculating || 0) / 1e6).toFixed(2)}M BTC\n`;
+      context += `- Market Price: $${(network.marketPriceUSD || 0).toLocaleString('en-US')}\n`;
+    }
+    
+    // ✅ NEW: Include detailed whale activity with exchange flows
+    if (onChainData.whaleActivity) {
+      const whale = onChainData.whaleActivity;
+      context += `\nWhale Activity (${whale.timeframe || '12 hours'}):\n`;
+      context += `- Minimum Threshold: ${whale.minThreshold || '1000 BTC'}\n`;
+      context += `- Total Transactions: ${whale.summary?.totalTransactions || 0}\n`;
+      context += `- Total Value: ${((whale.summary?.totalValueUSD || 0) / 1e6).toFixed(2)}M USD\n`;
+      context += `- Total BTC Moved: ${(whale.summary?.totalValueBTC || 0).toLocaleString('en-US')} BTC\n`;
+      context += `- Largest Transaction: ${(whale.summary?.largestTransaction || 0).toLocaleString('en-US')} BTC\n`;
+      context += `- Average Size: ${(whale.summary?.averageSize || 0).toLocaleString('en-US')} BTC\n`;
+      
+      // ✅ CRITICAL: Exchange flow analysis (selling pressure vs accumulation)
+      context += `\nExchange Flow Analysis:\n`;
+      context += `- Exchange Deposits: ${whale.summary?.exchangeDeposits || 0} transactions (SELLING PRESSURE)\n`;
+      context += `- Exchange Withdrawals: ${whale.summary?.exchangeWithdrawals || 0} transactions (ACCUMULATION)\n`;
+      context += `- Cold Wallet Movements: ${whale.summary?.coldWalletMovements || 0} transactions\n`;
+      context += `- Net Flow: ${whale.summary?.netFlow || 0} (${whale.summary?.flowSentiment || 'neutral'})\n`;
+      
+      if (whale.summary?.netFlow) {
+        const netFlow = whale.summary.netFlow;
+        if (netFlow > 0) {
+          context += `- Flow Interpretation: BULLISH - More withdrawals than deposits (accumulation)\n`;
+        } else if (netFlow < 0) {
+          context += `- Flow Interpretation: BEARISH - More deposits than withdrawals (distribution)\n`;
+        } else {
+          context += `- Flow Interpretation: NEUTRAL - Balanced flows\n`;
+        }
+      }
+    }
+    
+    // ✅ NEW: Include mempool analysis
+    if (onChainData.mempoolAnalysis) {
+      const mempool = onChainData.mempoolAnalysis;
+      context += `\nMempool Analysis:\n`;
+      context += `- Congestion Level: ${mempool.congestion || 'unknown'}\n`;
+      context += `- Average Fee: ${mempool.averageFee || 0} sats\n`;
+      context += `- Recommended Fee: ${mempool.recommendedFee || 0} sat/vB\n`;
+    }
+    
+    // ✅ NEW: Include holder distribution if available
     if (onChainData.holderDistribution?.concentration) {
       const conc = onChainData.holderDistribution.concentration;
-      context += `On-Chain Data:\n`;
+      context += `\nHolder Distribution:\n`;
       context += `- Top 10 Holders: ${conc.top10Percentage?.toFixed(2) || 'N/A'}%\n`;
-      context += `- Distribution Score: ${conc.distributionScore || 'N/A'}/100\n\n`;
-    } else if (onChainData.whaleActivity) {
-      context += `On-Chain Data:\n`;
-      context += `- Whale Activity Detected\n`;
-      context += `- Data Quality: ${onChainData.dataQuality || 'N/A'}%\n\n`;
-    } else if (onChainData.dataQuality > 0) {
-      context += `On-Chain Data:\n`;
-      context += `- Data Quality: ${onChainData.dataQuality}%\n\n`;
+      context += `- Distribution Score: ${conc.distributionScore || 'N/A'}/100\n`;
     }
+    
+    context += `\nData Quality: ${onChainData.dataQuality || 0}%\n\n`;
   }
 
   // Failed APIs
