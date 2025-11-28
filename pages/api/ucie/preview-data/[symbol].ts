@@ -626,19 +626,19 @@ function calculateAPIStatus(collectedData: any) {
   const working: string[] = [];
   const failed: string[] = [];
 
-  // Market Data - Check for actual price data
-  // ✅ FIX: API returns { success: true, data: { priceAggregation, ... } }
+  // 🔍 FORENSIC FIX: Market Data structure is { success: true, symbol, priceAggregation, ... }
+  // NOT { success: true, data: { priceAggregation, ... } }
   if (
     collectedData.marketData?.success === true &&
-    collectedData.marketData?.data?.priceAggregation?.prices?.length > 0
+    collectedData.marketData?.priceAggregation?.prices?.length > 0
   ) {
     working.push('Market Data');
   } else {
     failed.push('Market Data');
   }
 
-  // Sentiment - Check for actual sentiment data
-  // ✅ FIX: API returns { success: true, data: { overallScore, lunarCrush, reddit, ... } }
+  // 🔍 FORENSIC FIX: Sentiment structure is { success: true, data: { overallScore, ... } }
+  // This one DOES have .data nested
   if (
     collectedData.sentiment?.success === true &&
     collectedData.sentiment?.data &&
@@ -651,21 +651,12 @@ function calculateAPIStatus(collectedData: any) {
     failed.push('Sentiment');
   }
 
-  // Technical - Check for actual indicators with proper validation
-  // ✅ FIX: API returns { success: true, data: { indicators, ... } }
+  // 🔍 FORENSIC FIX: Technical structure is { success: true, symbol, indicators, ... }
+  // NOT { success: true, data: { indicators, ... } }
   const hasTechnical = collectedData.technical?.success === true &&
-                       collectedData.technical?.data?.indicators &&
-                       typeof collectedData.technical.data.indicators === 'object' &&
-                       Object.keys(collectedData.technical.data.indicators).length >= 6; // Should have at least 6 indicators
-  
-  console.log(`🔍 Technical validation:`, {
-    exists: !!collectedData.technical,
-    success: collectedData.technical?.success,
-    hasData: !!collectedData.technical?.data,
-    hasIndicators: !!collectedData.technical?.data?.indicators,
-    indicatorCount: collectedData.technical?.data?.indicators ? Object.keys(collectedData.technical.data.indicators).length : 0,
-    hasTechnical
-  });
+                       collectedData.technical?.indicators &&
+                       typeof collectedData.technical.indicators === 'object' &&
+                       Object.keys(collectedData.technical.indicators).length >= 6;
   
   if (hasTechnical) {
     working.push('Technical');
@@ -673,19 +664,19 @@ function calculateAPIStatus(collectedData: any) {
     failed.push('Technical');
   }
 
-  // News - Check for actual articles
-  // ✅ FIX: API returns { success: true, data: { articles, ... } }
+  // 🔍 FORENSIC FIX: News structure is { success: true, symbol, articles, ... }
+  // NOT { success: true, data: { articles, ... } }
   if (
     collectedData.news?.success === true &&
-    collectedData.news?.data?.articles?.length > 0
+    collectedData.news?.articles?.length > 0
   ) {
     working.push('News');
   } else {
     failed.push('News');
   }
 
-  // On-Chain - Check for actual data quality
-  // ✅ FIX: API returns { success: true, data: { dataQuality, networkMetrics, whaleActivity, ... } }
+  // 🔍 FORENSIC FIX: On-Chain structure is { success: true, data: { dataQuality, ... } }
+  // This one DOES have .data nested
   if (
     collectedData.onChain?.success === true &&
     collectedData.onChain?.data &&
@@ -699,7 +690,7 @@ function calculateAPIStatus(collectedData: any) {
   return {
     working,
     failed,
-    total: 5, // ✅ 5 core sources (10 underlying APIs)
+    total: 5,
     successRate: Math.round((working.length / 5) * 100)
   };
 }
