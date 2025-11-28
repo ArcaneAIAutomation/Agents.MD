@@ -232,7 +232,7 @@ async function handler(
           normalizedSymbol,
           'market-data',
           collectedData.marketData,
-          2 * 60, // ✅ 2 minutes for fresh data
+          5 * 60, // ✅ 5 minutes - prices change frequently but not every second
           collectedData.marketData.dataQuality || 0,
           userId,
           userEmail
@@ -249,7 +249,7 @@ async function handler(
           normalizedSymbol,
           'sentiment',
           collectedData.sentiment,
-          2 * 60, // ✅ 2 minutes for fresh data
+          15 * 60, // ✅ 15 minutes - social sentiment changes slowly
           collectedData.sentiment.dataQuality || 0,
           userId,
           userEmail
@@ -266,7 +266,7 @@ async function handler(
           normalizedSymbol,
           'technical',
           collectedData.technical,
-          2 * 60, // ✅ 2 minutes for fresh data
+          5 * 60, // ✅ 5 minutes - technical indicators need fresh price data
           collectedData.technical.dataQuality || 0,
           userId,
           userEmail
@@ -283,7 +283,7 @@ async function handler(
           normalizedSymbol,
           'news',
           collectedData.news,
-          2 * 60, // ✅ 2 minutes for fresh data
+          30 * 60, // ✅ 30 minutes - news doesn't change that frequently
           collectedData.news.dataQuality || 0,
           userId,
           userEmail
@@ -300,7 +300,7 @@ async function handler(
           normalizedSymbol,
           'on-chain',
           collectedData.onChain,
-          2 * 60, // ✅ 2 minutes for fresh data
+          15 * 60, // ✅ 15 minutes - blockchain data is relatively stable
           collectedData.onChain.dataQuality || 0,
           userId,
           userEmail
@@ -323,46 +323,33 @@ async function handler(
       console.warn(`⚠️ Failed to store ${failed} responses`);
     }
 
-    // ✅ CRITICAL: Wait and VERIFY database is populated
-    // This ensures database is fully populated and indexed before AI analysis
-    console.log(`⏳ Waiting and verifying database is fully populated...`);
+    // ✅ CRITICAL: Wait for database transactions to commit
+    // PostgreSQL transactions need time to commit and become visible to other connections
+    console.log(`⏳ Waiting 2 seconds for database transactions to commit...`);
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
-    let verificationAttempts = 0;
-    const maxVerificationAttempts = 10;
-    let allDataVerified = false;
+    // ✅ VERIFY database is populated
+    console.log(`🔍 Verifying database population...`);
+    const verifyMarket = await getCachedAnalysis(normalizedSymbol, 'market-data');
+    const verifySentiment = await getCachedAnalysis(normalizedSymbol, 'sentiment');
+    const verifyTechnical = await getCachedAnalysis(normalizedSymbol, 'technical');
+    const verifyNews = await getCachedAnalysis(normalizedSymbol, 'news');
+    const verifyOnChain = await getCachedAnalysis(normalizedSymbol, 'on-chain');
     
-    while (verificationAttempts < maxVerificationAttempts && !allDataVerified) {
-      verificationAttempts++;
-      
-      // Wait 2 seconds between attempts
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Verify each data type is in database
-      const verifyMarket = await getCachedAnalysis(normalizedSymbol, 'market-data');
-      const verifySentiment = await getCachedAnalysis(normalizedSymbol, 'sentiment');
-      const verifyTechnical = await getCachedAnalysis(normalizedSymbol, 'technical');
-      const verifyNews = await getCachedAnalysis(normalizedSymbol, 'news');
-      const verifyOnChain = await getCachedAnalysis(normalizedSymbol, 'on-chain');
-      
-      const foundCount = [verifyMarket, verifySentiment, verifyTechnical, verifyNews, verifyOnChain]
-        .filter(d => d !== null).length;
-      
-      console.log(`   Verification attempt ${verificationAttempts}/${maxVerificationAttempts}: Found ${foundCount}/5 data types in database`);
-      
-      // Check if we have minimum required data (market + technical)
-      if (verifyMarket && verifyTechnical) {
-        allDataVerified = true;
-        console.log(`✅ Database verification complete! Found required data (market + technical)`);
-        break;
-      }
-      
-      if (verificationAttempts >= maxVerificationAttempts) {
-        console.warn(`⚠️ Database verification timeout after ${maxVerificationAttempts} attempts`);
-        console.warn(`   Found: Market=${!!verifyMarket}, Sentiment=${!!verifySentiment}, Technical=${!!verifyTechnical}, News=${!!verifyNews}, OnChain=${!!verifyOnChain}`);
-      }
+    const foundCount = [verifyMarket, verifySentiment, verifyTechnical, verifyNews, verifyOnChain]
+      .filter(d => d !== null).length;
+    
+    console.log(`✅ Database verification: Found ${foundCount}/5 data types`);
+    console.log(`   Market Data: ${verifyMarket ? '✅' : '❌'}`);
+    console.log(`   Sentiment: ${verifySentiment ? '✅' : '❌'}`);
+    console.log(`   Technical: ${verifyTechnical ? '✅' : '❌'}`);
+    console.log(`   News: ${verifyNews ? '✅' : '❌'}`);
+    console.log(`   On-Chain: ${verifyOnChain ? '✅' : '❌'}`);
+    
+    if (foundCount < 3) {
+      console.warn(`⚠️ Only ${foundCount}/5 data types found in database after storage!`);
+      console.warn(`   This may indicate a database write issue or transaction delay.`);
     }
-    
-    console.log(`✅ Database population and verification complete (${verificationAttempts} attempts, ${verificationAttempts * 2}s total)`);
 
     // ✅ CRITICAL: ALWAYS generate Gemini AI summary (no threshold)
     // This ensures users always see AI-generated analysis
