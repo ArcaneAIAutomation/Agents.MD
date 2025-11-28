@@ -203,10 +203,11 @@ export async function getAllCachedDataForCaesar(symbol: string): Promise<{
         sample: JSON.stringify(row.data).substring(0, 300)
       });
       
-      // ✅ FIX: Data is double-nested - row.data.data contains the actual data
-      // The database stores: {"cached":false,"data":{...actual data...}}
-      // We need to extract the inner "data" property
-      const actualData = row.data?.data || row.data;
+      // ✅ FIX: The database stores the raw response object directly
+      // APIs call: setCachedAnalysis(symbol, type, response, ttl, quality)
+      // where response = { symbol, overallScore, sentiment, lunarCrush, reddit, ... }
+      // So row.data IS the actual data (no wrapper)
+      const actualData = row.data;
       
       if (type === 'market-data') cachedData.marketData = actualData;
       else if (type === 'sentiment') cachedData.sentiment = actualData;
