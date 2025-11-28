@@ -5,17 +5,142 @@
  * GET /api/ucie/sentiment/ETH
  * 
  * Returns comprehensive social sentiment analysis with:
+ * - Fear & Greed Index (primary - always available)
  * - LunarCrush metrics (social score, galaxy score, social dominance)
- * - Twitter/X sentiment (disabled due to rate limits)
  * - Reddit sentiment
  * - Aggregated sentiment score
  * 
  * Uses database-backed caching (TTL: 5 minutes)
+ * ✅ FIXED: Direct API calls with proper timeouts (mirrors working BTC analysis pattern)
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
-import { fetchAggregatedSocialSentiment } from '../../../../lib/ucie/socialSentimentClients';
+
+/**
+ * Fetch Fear & Greed Index (ALWAYS AVAILABLE - Public API)
+ * This is the most reliable sentiment indicator
+ */
+async function fetchFearGreedIndex(): Promise<{ value: number; classification: string } | null> {
+  try {
+    const response = await fetch('https://api.alternative.me/fng/', {
+      signal: AbortSignal.timeout(5000)
+    });
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    return {
+      value: parseInt(data.data[0].value),
+      classification: data.data[0].value_classification
+    };
+  } catch (error) {
+    console.error('Fear & Greed Index fetch error:', error);
+    return null;
+  }
+}
+
+/**
+ * Fetch LunarCrush data (optional - may timeout)
+ */
+async function fetchLunarCrushData(symbol: string): Promise<any | null> {
+  const apiKey = process.env.LUNARCRUSH_API_KEY;
+  
+  if (!apiKey) {
+    console.warn('❌ LunarCrush API key not configured');
+    return null;
+  }
+
+  try {
+    const response = await fetch(
+      `https://lunarcrush.com/api4/public/coins/${symbol}/v1`,
+      {
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        signal: AbortSignal.timeout(5000), // Reduced from 10s
+      }
+    );
+
+    if (!response.ok) {
+      // Try public endpoint as fallback
+      const publicResponse = await fetch(
+        `https://lunarcrush.com/api4/public/coins/${symbol}/v1`,
+        {
+          headers: { 'Accept': 'application/json' },
+          signal: AbortSignal.timeout(5000),
+        }
+      );
+      
+      if (!publicResponse.ok) return null;
+      
+      const publicData = await publicResponse.json();
+      return publicData.data || null;
+    }
+
+    const data = await response.json();
+    return data.data || null;
+  } catch (error) {
+    console.error('LunarCrush fetch error:', error);
+    return null;
+  }
+}
+
+/**
+ * Fetch Reddit sentiment (optional - may timeout)
+ */
+async function fetchRedditSentiment(symbol: string): Promise<any | null> {
+  try {
+    const subreddits = ['cryptocurrency', 'CryptoMarkets', 'Bitcoin'];
+    const searchQuery = symbol.toLowerCase();
+    let totalPosts = 0;
+    let totalSentiment = 0;
+
+    for (const subreddit of subreddits) {
+      try {
+        const response = await fetch(
+          `https://www.reddit.com/r/${subreddit}/search.json?q=${searchQuery}&restrict_sr=1&sort=hot&limit=10&t=day`,
+          {
+            headers: {
+              'User-Agent': 'UCIE/1.0',
+              'Accept': 'application/json',
+            },
+            signal: AbortSignal.timeout(3000), // Reduced from 5s
+          }
+        );
+
+        if (!response.ok) continue;
+
+        const data = await response.json();
+        
+        if (data.data?.children) {
+          totalPosts += data.data.children.length;
+          // Simple sentiment: count upvotes vs downvotes
+          data.data.children.forEach((child: any) => {
+            const post = child.data;
+            const score = post.ups || 0;
+            totalSentiment += score > 0 ? 1 : score < 0 ? -1 : 0;
+          });
+        }
+      } catch (error) {
+        // Skip failed subreddit
+        continue;
+      }
+    }
+
+    if (totalPosts === 0) return null;
+
+    return {
+      mentions24h: totalPosts,
+      sentiment: Math.round((totalSentiment / totalPosts) * 50 + 50), // Convert to 0-100 scale
+      activeSubreddits: subreddits
+    };
+  } catch (error) {
+    console.error('Reddit fetch error:', error);
+    return null;
+  }
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -47,34 +172,50 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log(`❌ Cache miss for ${symbolUpper}/sentiment - fetching fresh data`);
 
-    // 2. Fetch fresh sentiment data from all sources
-    const sentimentData = await fetchAggregatedSocialSentiment(symbolUpper);
+    // 2. Fetch sentiment data from all sources IN PARALLEL (faster)
+    const [fearGreed, lunarCrush, reddit] = await Promise.allSettled([
+      fetchFearGreedIndex(),
+      fetchLunarCrushData(symbolUpper),
+      fetchRedditSentiment(symbolUpper)
+    ]);
+
+    // Extract results
+    const fearGreedData = fearGreed.status === 'fulfilled' ? fearGreed.value : null;
+    const lunarCrushData = lunarCrush.status === 'fulfilled' ? lunarCrush.value : null;
+    const redditData = reddit.status === 'fulfilled' ? reddit.value : null;
 
     // 3. Calculate aggregated sentiment score
     const scores: number[] = [];
     let totalWeight = 0;
 
-    // LunarCrush (weight: 50%)
-    if (sentimentData.lunarCrush) {
-      scores.push(sentimentData.lunarCrush.sentimentScore * 0.5);
-      totalWeight += 0.5;
+    // Fear & Greed Index (weight: 40%) - PRIMARY SOURCE
+    if (fearGreedData) {
+      scores.push(fearGreedData.value * 0.4);
+      totalWeight += 0.4;
     }
 
-    // Reddit (weight: 30%)
-    if (sentimentData.reddit) {
-      scores.push((sentimentData.reddit.sentiment / 100) * 0.3);
-      totalWeight += 0.3;
+    // LunarCrush (weight: 35%)
+    if (lunarCrushData) {
+      const lcSentiment = calculateLunarCrushSentiment(lunarCrushData);
+      scores.push(lcSentiment * 0.35);
+      totalWeight += 0.35;
     }
 
-    // Twitter disabled (weight: 20%) - causes timeouts
-    // if (sentimentData.twitter) {
-    //   scores.push((sentimentData.twitter.sentiment / 100) * 0.2);
-    //   totalWeight += 0.2;
-    // }
+    // Reddit (weight: 25%)
+    if (redditData) {
+      scores.push(redditData.sentiment * 0.25);
+      totalWeight += 0.25;
+    }
 
     const overallScore = totalWeight > 0
-      ? Math.round(scores.reduce((sum, score) => sum + score, 0) / totalWeight * 100)
+      ? Math.round(scores.reduce((sum, score) => sum + score, 0) / totalWeight)
       : 50; // Neutral if no data
+
+    // 4. Calculate data quality
+    let dataQuality = 0;
+    if (fearGreedData) dataQuality += 40; // Fear & Greed is most reliable
+    if (lunarCrushData) dataQuality += 35; // LunarCrush is secondary
+    if (redditData) dataQuality += 25; // Reddit is tertiary
 
     // 4. Format response
     const response = {
@@ -82,36 +223,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       overallScore,
       sentiment: overallScore > 60 ? 'bullish' : overallScore < 40 ? 'bearish' : 'neutral',
       
+      // Fear & Greed Index (PRIMARY)
+      fearGreedIndex: fearGreedData ? {
+        value: fearGreedData.value,
+        classification: fearGreedData.classification
+      } : null,
+      
       // LunarCrush data
-      lunarCrush: sentimentData.lunarCrush ? {
-        socialScore: sentimentData.lunarCrush.socialScore,
-        galaxyScore: sentimentData.lunarCrush.galaxyScore,
-        sentimentScore: sentimentData.lunarCrush.sentimentScore,
-        socialVolume: sentimentData.lunarCrush.socialVolume,
-        socialVolumeChange24h: sentimentData.lunarCrush.socialVolumeChange24h,
-        socialDominance: sentimentData.lunarCrush.socialDominance,
-        altRank: sentimentData.lunarCrush.altRank,
-        mentions: sentimentData.lunarCrush.mentions,
-        interactions: sentimentData.lunarCrush.interactions,
-        contributors: sentimentData.lunarCrush.contributors,
-        trendingScore: sentimentData.lunarCrush.trendingScore
+      lunarCrush: lunarCrushData ? {
+        socialScore: lunarCrushData.social_score || 0,
+        galaxyScore: lunarCrushData.galaxy_score || 0,
+        sentimentScore: calculateLunarCrushSentiment(lunarCrushData),
+        socialVolume: lunarCrushData.social_volume || 0,
+        socialVolumeChange24h: lunarCrushData.social_volume_change_24h || 0,
+        socialDominance: lunarCrushData.social_dominance || 0,
+        altRank: lunarCrushData.alt_rank || 0,
+        mentions: lunarCrushData.social_mentions || 0,
+        interactions: lunarCrushData.social_interactions || 0,
+        contributors: lunarCrushData.social_contributors || 0,
+        trendingScore: lunarCrushData.trending_score || 0
       } : null,
       
       // Reddit data
-      reddit: sentimentData.reddit ? {
-        mentions24h: sentimentData.reddit.mentions24h,
-        sentiment: sentimentData.reddit.sentiment,
-        topPosts: sentimentData.reddit.topPosts.slice(0, 5),
-        activeSubreddits: sentimentData.reddit.activeSubreddits,
-        postsPerDay: sentimentData.reddit.postsPerDay,
-        commentsPerDay: sentimentData.reddit.commentsPerDay
+      reddit: redditData ? {
+        mentions24h: redditData.mentions24h,
+        sentiment: redditData.sentiment,
+        activeSubreddits: redditData.activeSubreddits
       } : null,
       
-      // Twitter disabled
-      twitter: null,
-      
       // Data quality
-      dataQuality: calculateDataQuality(sentimentData),
+      dataQuality,
       
       timestamp: new Date().toISOString()
     };
@@ -126,6 +267,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     );
 
     console.log(`✅ Sentiment data fetched and cached for ${symbolUpper} (quality: ${response.dataQuality}%)`);
+    console.log(`   Fear & Greed: ${fearGreedData ? fearGreedData.value : 'N/A'}, LunarCrush: ${lunarCrushData ? 'OK' : 'N/A'}, Reddit: ${redditData ? 'OK' : 'N/A'}`);
 
     // 6. Return response
     return res.status(200).json({
@@ -148,14 +290,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 }
 
 /**
- * Calculate data quality score based on available sources
+ * Convert LunarCrush sentiment (0-5 scale) to 0-100 scale
  */
-function calculateDataQuality(data: any): number {
-  let quality = 0;
-  
-  if (data.lunarCrush) quality += 50; // LunarCrush is primary source
-  if (data.reddit) quality += 30; // Reddit is secondary
-  if (data.twitter) quality += 20; // Twitter is tertiary (disabled)
-  
-  return quality;
+function calculateLunarCrushSentiment(data: any): number {
+  const sentiment = data.sentiment || 3; // 3 is neutral
+  // Convert 0-5 scale to 0-100 scale
+  return Math.round((sentiment / 5) * 100);
 }
