@@ -33,22 +33,6 @@
       "schedule": "0 2 * * *"
     },
     {
-      "path": "/api/cron/update-tokens",
-      "schedule": "0 3 * * *"
-    },
-    {
-      "path": "/api/cron/check-expired-trades",
-      "schedule": "*/5 * * * *"
-    },
-    {
-      "path": "/api/cron/atge-verify-trades",
-      "schedule": "0 * * * *"
-    },
-    {
-      "path": "/api/quantum/validate-btc-trades",
-      "schedule": "0 * * * *"
-    },
-    {
       "path": "/api/cron/process-ucie-jobs",
       "schedule": "* * * * *"
     }

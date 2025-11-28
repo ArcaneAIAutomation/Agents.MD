@@ -79,8 +79,8 @@ async function handler(
     // Extract and validate symbol and session ID
     const { symbol, sessionId } = req.query;
     
-    // ✅ NEW: Extract collected data from request body (if POST)
-    const { collectedData } = req.body || {};
+    // ✅ NEW: Extract collected data and GPT analysis from request body (if POST)
+    const { collectedData, gptAnalysis } = req.body || {};
     
     if (!symbol || typeof symbol !== 'string') {
       return res.status(400).json({
@@ -281,6 +281,9 @@ async function handler(
       openaiSummary: allCachedData.openaiSummary?.summaryText || null,
       dataQuality: allCachedData.openaiSummary?.dataQuality || 0,
       apiStatus: allCachedData.openaiSummary?.apiStatus || null,
+      
+      // ✅ GPT-5.1 Analysis (if available)
+      gptAnalysis: gptAnalysis || null,
       
       // All cached analysis data (from database)
       marketData: allCachedData.marketData,

@@ -129,6 +129,7 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
         },
         body: JSON.stringify({
           collectedData: previewData?.collectedData, // ✅ Pass preview data to Caesar
+          gptAnalysis: previewData?.gptAnalysis, // ✅ Include GPT-5.1 analysis
           summary: previewData?.summary,
           dataQuality: previewData?.dataQuality,
           apiStatus: previewData?.apiStatus

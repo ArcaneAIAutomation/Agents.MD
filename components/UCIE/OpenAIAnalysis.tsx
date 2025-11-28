@@ -1,137 +1,239 @@
 /**
- * OpenAI Analysis Component
+ * OpenAI GPT-5.1 Analysis Component
  * 
- * Main orchestrator for GPT-5.1 analysis
- * Manages state and displays appropriate UI based on status
+ * Generates comprehensive analysis using GPT-5.1 after data collection
+ * Displays results and prepares Caesar prompt
  */
 
-import React from 'react';
-import { Brain, AlertCircle } from 'lucide-react';
-import { useOpenAISummary } from '../../hooks/useOpenAISummary';
-import { OpenAIAnalysisProgress } from './OpenAIAnalysisProgress';
-import { OpenAIAnalysisResults } from './OpenAIAnalysisResults';
+import React, { useState, useEffect } from 'react';
+import { Brain, RefreshCw, AlertTriangle } from 'lucide-react';
 
 interface OpenAIAnalysisProps {
   symbol: string;
-  className?: string;
+  collectedData: any;
+  onAnalysisComplete?: (analysis: any) => void;
 }
 
-export const OpenAIAnalysis: React.FC<OpenAIAnalysisProps> = ({ 
-  symbol,
-  className = '',
-}) => {
-  const {
-    status,
-    result,
-    error,
-    progress,
-    elapsedTime,
-    startAnalysis,
-    cancelAnalysis,
-    reset,
-  } = useOpenAISummary(symbol);
+export function OpenAIAnalysis({ symbol, collectedData, onAnalysisComplete }: OpenAIAnalysisProps) {
+  const [loading, setLoading] = useState(true);
+  const [analysis, setAnalysis] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
 
-  return (
-    <div className={`space-y-6 ${className}`}>
-      {/* Idle State - Show Start Button */}
-      {status === 'idle' && (
-        <div className="p-8 bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-xl text-center">
-          <Brain className="w-16 h-16 text-bitcoin-orange mx-auto mb-4" />
-          <h3 className="text-2xl font-bold text-bitcoin-white mb-3">
-            ChatGPT 5.1 AI Analysis
+  useEffect(() => {
+    if (collectedData) {
+      startAnalysis();
+    }
+  }, [collectedData, symbol]);
+
+  const startAnalysis = async () => {
+    try {
+      console.log(`🚀 Starting GPT-5.1 analysis for ${symbol}...`);
+      setLoading(true);
+      setError(null);
+      setProgress(10);
+
+      const response = await fetch(`/api/ucie/openai-analysis/${encodeURIComponent(symbol)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          collectedData,
+          symbol
+        }),
+      });
+
+      setProgress(50);
+
+      if (!response.ok) {
+        throw new Error(`Analysis failed: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setProgress(90);
+
+      if (!data.success) {
+        throw new Error(data.error || 'Analysis failed');
+      }
+
+      console.log(`✅ GPT-5.1 analysis complete:`, data.analysis);
+      setAnalysis(data.analysis);
+      setProgress(100);
+      setLoading(false);
+
+      if (onAnalysisComplete) {
+        onAnalysisComplete(data.analysis);
+      }
+
+    } catch (err) {
+      console.error(`❌ GPT-5.1 analysis failed:`, err);
+      setError(err instanceof Error ? err.message : 'Analysis failed');
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-8">
+        <div className="text-center">
+          <Brain className="w-16 h-16 text-bitcoin-orange mx-auto mb-4 animate-pulse" />
+          <h2 className="text-3xl font-bold text-bitcoin-white mb-2">
+            GPT-5.1 Analysis
+          </h2>
+          <p className="text-bitcoin-white-80 mb-6">
+            Analyzing {symbol} with advanced AI...
+          </p>
+          
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-semibold text-bitcoin-white-60 uppercase">
+                Progress
+              </span>
+              <span className="text-2xl font-mono font-bold text-bitcoin-orange">
+                {progress}%
+              </span>
+            </div>
+            <div className="w-full h-4 bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-bitcoin-orange transition-all duration-500"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="text-sm text-bitcoin-white-60">
+            Generating consensus, executive summary, and insights...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-xl p-8">
+        <div className="flex flex-col items-center text-center">
+          <AlertTriangle className="w-16 h-16 text-bitcoin-orange mb-4" />
+          <h3 className="text-2xl font-bold text-bitcoin-white mb-2">
+            Analysis Failed
           </h3>
-          <p className="text-bitcoin-white-80 mb-6 max-w-2xl mx-auto">
-            Get comprehensive market analysis powered by ChatGPT 5.1 (Latest) with enhanced reasoning. 
-            Analysis includes market outlook, key insights, opportunities, and risk factors.
+          <p className="text-bitcoin-white-80 mb-6 max-w-md">
+            {error}
           </p>
           <button
             onClick={startAnalysis}
-            className="px-8 py-4 bg-bitcoin-orange text-bitcoin-black font-bold rounded-lg 
-                     hover:bg-bitcoin-black hover:text-bitcoin-orange border-2 border-bitcoin-orange
-                     transition-all shadow-[0_0_20px_rgba(247,147,26,0.5)] 
-                     hover:shadow-[0_0_30px_rgba(247,147,26,0.6)] hover:scale-105 active:scale-95 
-                     min-h-[56px] uppercase text-base"
+            className="bg-bitcoin-orange text-bitcoin-black border-2 border-bitcoin-orange font-bold uppercase px-6 py-3 rounded-lg transition-all hover:bg-bitcoin-black hover:text-bitcoin-orange min-h-[48px]"
           >
-            <span className="flex items-center gap-3">
-              <Brain className="w-6 h-6" />
-              Start AI Analysis
-            </span>
+            <RefreshCw className="w-5 h-5 inline mr-2" />
+            Retry Analysis
           </button>
-          <p className="text-bitcoin-white-60 text-sm mt-4">
-            Analysis typically takes 2-10 minutes
-          </p>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* Starting State - Brief Loading */}
-      {status === 'starting' && (
-        <div className="p-8 bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl text-center">
-          <Brain className="w-16 h-16 text-bitcoin-orange mx-auto mb-4 animate-pulse" />
-          <h3 className="text-2xl font-bold text-bitcoin-white mb-3">
-            Initializing Analysis...
-          </h3>
-          <p className="text-bitcoin-white-80">
-            Setting up ChatGPT 5.1 analysis for {symbol}
-          </p>
-        </div>
-      )}
+  if (!analysis) return null;
 
-      {/* Polling State - Show Progress */}
-      {status === 'polling' && (
-        <OpenAIAnalysisProgress
-          progress={progress}
-          elapsedTime={elapsedTime}
-          onCancel={cancelAnalysis}
-        />
-      )}
-
-      {/* Completed State - Show Results */}
-      {status === 'completed' && result && (
-        <OpenAIAnalysisResults
-          result={result}
-          symbol={symbol}
-          onReset={reset}
-        />
-      )}
-
-      {/* Error State - Show Error Message */}
-      {status === 'error' && (
-        <div className="p-8 bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl">
-          <div className="flex items-start gap-4">
-            <AlertCircle className="w-8 h-8 text-bitcoin-orange flex-shrink-0 mt-1" />
+  return (
+    <div className="space-y-6">
+      {/* Consensus Recommendation */}
+      {analysis.consensus && (
+        <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6">
+          <h2 className="text-2xl font-bold text-bitcoin-white mb-4">
+            AI Consensus
+          </h2>
+          <div className="flex items-center gap-4 p-4 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded-lg">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-bitcoin-orange font-mono">
+                {analysis.consensus.overallScore}
+              </div>
+              <div className="text-xs text-bitcoin-white-60 uppercase">
+                Score
+              </div>
+            </div>
             <div className="flex-1">
-              <h3 className="text-xl font-bold text-bitcoin-white mb-3">
-                Analysis Failed
-              </h3>
-              <p className="text-bitcoin-white-80 mb-6">
-                {error || 'An unexpected error occurred during analysis.'}
-              </p>
-              <div className="flex gap-4">
-                <button
-                  onClick={startAnalysis}
-                  className="px-6 py-3 bg-bitcoin-orange text-bitcoin-black font-bold rounded-lg 
-                           hover:bg-bitcoin-black hover:text-bitcoin-orange border-2 border-bitcoin-orange
-                           transition-all shadow-[0_0_15px_rgba(247,147,26,0.3)] 
-                           hover:shadow-[0_0_25px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 
-                           min-h-[48px] uppercase text-sm"
-                >
-                  Retry Analysis
-                </button>
-                <button
-                  onClick={reset}
-                  className="px-6 py-3 bg-transparent text-bitcoin-orange border-2 border-bitcoin-orange 
-                           font-bold rounded-lg hover:bg-bitcoin-orange hover:text-bitcoin-black 
-                           transition-all shadow-[0_0_15px_rgba(247,147,26,0.3)] 
-                           hover:shadow-[0_0_25px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 
-                           min-h-[48px] uppercase text-sm"
-                >
-                  Cancel
-                </button>
+              <div className="text-xl font-bold text-bitcoin-white uppercase">
+                {analysis.consensus.recommendation}
+              </div>
+              <div className="text-sm text-bitcoin-white-80">
+                Confidence: {analysis.consensus.confidence}%
               </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Executive Summary */}
+      {analysis.executiveSummary && (
+        <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6">
+          <h2 className="text-2xl font-bold text-bitcoin-white mb-4">
+            Executive Summary
+          </h2>
+          <div className="space-y-4">
+            {analysis.executiveSummary.oneLineSummary && (
+              <p className="text-lg text-bitcoin-orange font-semibold">
+                {analysis.executiveSummary.oneLineSummary}
+              </p>
+            )}
+
+            {analysis.executiveSummary.topFindings && analysis.executiveSummary.topFindings.length > 0 && (
+              <div>
+                <h3 className="text-lg font-bold text-bitcoin-white mb-3">
+                  Key Findings
+                </h3>
+                <ul className="space-y-2">
+                  {analysis.executiveSummary.topFindings.map((finding: string, index: number) => (
+                    <li key={index} className="flex items-start gap-2 text-bitcoin-white-80">
+                      <span className="text-bitcoin-orange mt-1">•</span>
+                      <span>{finding}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {analysis.executiveSummary.opportunities && analysis.executiveSummary.opportunities.length > 0 && (
+                <div className="p-4 bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg">
+                  <h4 className="text-sm font-bold text-bitcoin-orange mb-2 uppercase">
+                    Opportunities
+                  </h4>
+                  <ul className="space-y-1 text-sm text-bitcoin-white-80">
+                    {analysis.executiveSummary.opportunities.map((opp: string, index: number) => (
+                      <li key={index}>• {opp}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {analysis.executiveSummary.risks && analysis.executiveSummary.risks.length > 0 && (
+                <div className="p-4 bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg">
+                  <h4 className="text-sm font-bold text-bitcoin-orange mb-2 uppercase">
+                    Risks
+                  </h4>
+                  <ul className="space-y-1 text-sm text-bitcoin-white-80">
+                    {analysis.executiveSummary.risks.map((risk: string, index: number) => (
+                      <li key={index}>• {risk}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Market Outlook */}
+      {analysis.marketOutlook && (
+        <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-xl p-6">
+          <h3 className="text-xl font-bold text-bitcoin-white mb-3">
+            Market Outlook (24-48h)
+          </h3>
+          <p className="text-bitcoin-white-80">
+            {analysis.marketOutlook}
+          </p>
+        </div>
+      )}
     </div>
   );
-};
+}

@@ -51,6 +51,38 @@ export function generateCryptoResearchQuery(symbol: string, contextData?: any): 
   if (contextData && Object.keys(contextData).length > 0) {
     contextSection = `\n**REAL-TIME MARKET CONTEXT:**\n\n`;
     
+    // ✅ GPT-5.1 Analysis (HIGHEST PRIORITY - Enhanced AI reasoning)
+    if (contextData.gptAnalysis) {
+      contextSection += `**=== GPT-5.1 PRELIMINARY ANALYSIS ===**\n`;
+      contextSection += `This analysis was generated using GPT-5.1 with enhanced reasoning capabilities.\n\n`;
+      
+      if (contextData.gptAnalysis.consensus) {
+        const c = contextData.gptAnalysis.consensus;
+        contextSection += `**Consensus:**\n`;
+        contextSection += `- Score: ${c.score}/100\n`;
+        contextSection += `- Recommendation: ${c.recommendation}\n`;
+        contextSection += `- Confidence: ${c.confidence}%\n`;
+        contextSection += `- Reasoning: ${c.reasoning}\n\n`;
+      }
+      
+      if (contextData.gptAnalysis.executiveSummary) {
+        const es = contextData.gptAnalysis.executiveSummary;
+        contextSection += `**Executive Summary:**\n`;
+        if (es.keyFindings?.length > 0) {
+          contextSection += `Key Findings:\n${es.keyFindings.map((f: string) => `  - ${f}`).join('\n')}\n`;
+        }
+        if (es.opportunities?.length > 0) {
+          contextSection += `Opportunities:\n${es.opportunities.map((o: string) => `  - ${o}`).join('\n')}\n`;
+        }
+        if (es.risks?.length > 0) {
+          contextSection += `Risks:\n${es.risks.map((r: string) => `  - ${r}`).join('\n')}\n`;
+        }
+        contextSection += `\n`;
+      }
+      
+      contextSection += `**Note:** Use this GPT-5.1 analysis as a foundation, but provide your own deeper insights and research.\n\n`;
+    }
+    
     // ✅ OpenAI Summary (PRIORITY - Most important context)
     if (contextData.openaiSummary) {
       contextSection += `**=== OPENAI ANALYSIS SUMMARY ===**\n`;

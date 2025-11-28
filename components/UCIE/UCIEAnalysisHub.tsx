@@ -90,6 +90,10 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
   const [showPreview, setShowPreview] = useState(true); // Show preview on mount
   const [proceedWithAnalysis, setProceedWithAnalysis] = useState(false);
   const [previewData, setPreviewData] = useState<any>(null); // ✅ Store preview data for Caesar
+  
+  // GPT-5.1 Analysis State
+  const [gptAnalysis, setGptAnalysis] = useState<any>(null);
+  const [showGptAnalysis, setShowGptAnalysis] = useState(false);
 
   // Mobile capabilities
   const mobileCapabilities = useUCIEMobile();
@@ -178,7 +182,22 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
     setPreviewData(preview); // ✅ Store preview data for Caesar
     setShowPreview(false);
     setProceedWithAnalysis(true);
+    setShowGptAnalysis(true); // ✅ Trigger GPT-5.1 analysis
     haptic.buttonPress();
+  };
+
+  // Handle GPT-5.1 analysis completion
+  const handleGPTAnalysisComplete = (analysis: any) => {
+    console.log('✅ GPT-5.1 analysis complete:', analysis);
+    setGptAnalysis(analysis);
+    
+    // Merge analysis into preview data for Caesar
+    if (previewData) {
+      setPreviewData({
+        ...previewData,
+        gptAnalysis: analysis
+      });
+    }
   };
 
   // Debug: Log analysis data changes
@@ -880,22 +899,50 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
             <OpenAIAnalysis symbol={symbol} />
           </div>
 
+          {/* GPT-5.1 Analysis Section */}
+          {showGptAnalysis && (
+            <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6 mb-6">
+              <h2 className="text-2xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
+                <Brain className="w-6 h-6 text-bitcoin-orange" />
+                GPT-5.1 AI Analysis
+              </h2>
+              <p className="text-bitcoin-white-80 mb-4">
+                Comprehensive AI analysis of all collected data using GPT-5.1 with enhanced reasoning.
+              </p>
+              <OpenAIAnalysis 
+                symbol={symbol}
+                collectedData={{
+                  marketData: analysisData?.['market-data'] || analysisData?.marketData,
+                  technical: analysisData?.technical,
+                  sentiment: analysisData?.sentiment,
+                  news: analysisData?.news,
+                  onChain: analysisData?.['on-chain'] || analysisData?.onChain,
+                  risk: analysisData?.risk,
+                  defi: analysisData?.defi
+                }}
+                onAnalysisComplete={handleGPTAnalysisComplete}
+              />
+            </div>
+          )}
+
           {/* Caesar AI Deep Dive Section */}
-          <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6">
-            <h2 className="text-2xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
-              <Brain className="w-6 h-6 text-bitcoin-orange" />
-              Caesar AI Deep Dive Research
-            </h2>
-            <p className="text-bitcoin-white-80 mb-4">
-              Review all data and GPT-5.1 analysis above, then activate Caesar AI for comprehensive deep dive research (15-20 minutes).
-            </p>
-            <CaesarAnalysisContainer 
-              symbol={symbol} 
-              jobId={analysisData?.research?.jobId}
-              progressiveLoadingComplete={!loading}
-              previewData={previewData} // ✅ Pass preview data to Caesar
-            />
-          </div>
+          {gptAnalysis && (
+            <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6">
+              <h2 className="text-2xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
+                <Brain className="w-6 h-6 text-bitcoin-orange" />
+                Caesar AI Deep Dive Research
+              </h2>
+              <p className="text-bitcoin-white-80 mb-4">
+                Review all data and GPT-5.1 analysis above, then activate Caesar AI for comprehensive deep dive research (15-20 minutes).
+              </p>
+              <CaesarAnalysisContainer 
+                symbol={symbol} 
+                jobId={analysisData?.research?.jobId}
+                progressiveLoadingComplete={!loading}
+                previewData={previewData} // ✅ Pass preview data with GPT analysis to Caesar
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
