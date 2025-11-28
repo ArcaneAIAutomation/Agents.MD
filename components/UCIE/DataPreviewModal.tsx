@@ -89,56 +89,12 @@ export default function DataPreviewModal({
       const data = await response.json();
 
       if (data.success) {
-        // 🔍 FORENSIC LOGGING: Trace exact data structure
-        console.log('🔍 RAW API RESPONSE:', {
-          success: data.success,
-          hasData: !!data.data,
-          dataKeys: data.data ? Object.keys(data.data) : []
-        });
-        
-        console.log('🔍 COLLECTED DATA STRUCTURE:', {
-          hasCollectedData: !!data.data?.collectedData,
-          collectedDataKeys: data.data?.collectedData ? Object.keys(data.data.collectedData) : [],
-          marketData: {
-            exists: !!data.data?.collectedData?.marketData,
-            success: data.data?.collectedData?.marketData?.success,
-            hasData: !!data.data?.collectedData?.marketData?.data
-          },
-          sentiment: {
-            exists: !!data.data?.collectedData?.sentiment,
-            success: data.data?.collectedData?.sentiment?.success,
-            hasData: !!data.data?.collectedData?.sentiment?.data
-          },
-          onChain: {
-            exists: !!data.data?.collectedData?.onChain,
-            success: data.data?.collectedData?.onChain?.success,
-            hasData: !!data.data?.collectedData?.onChain?.data
-          }
-        });
-        
-        console.log('🔍 API STATUS STRUCTURE:', {
-          hasApiStatus: !!data.data?.apiStatus,
-          working: data.data?.apiStatus?.working || [],
-          failed: data.data?.apiStatus?.failed || [],
-          total: data.data?.apiStatus?.total,
-          successRate: data.data?.apiStatus?.successRate
-        });
-        
         setPreview(data.data);
-        
         console.log('✅ Preview data loaded:', {
           dataQuality: data.data.dataQuality,
           sources: data.data.apiStatus.working.length,
           attempts: data.data.retryInfo?.attempts || 1,
           timestamp: data.data.timestamp
-        });
-        
-        // 🔍 FORENSIC LOGGING: Verify what was set in state
-        console.log('🔍 PREVIEW STATE SET:', {
-          hasPreview: !!data.data,
-          previewKeys: data.data ? Object.keys(data.data) : [],
-          collectedDataKeys: data.data?.collectedData ? Object.keys(data.data.collectedData) : [],
-          apiStatusWorking: data.data?.apiStatus?.working || []
         });
       } else {
         setError(data.error || 'Failed to load data preview');

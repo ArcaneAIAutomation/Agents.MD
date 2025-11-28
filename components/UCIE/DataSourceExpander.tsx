@@ -24,35 +24,6 @@ interface DataSourceExpanderProps {
 export default function DataSourceExpander({ collectedData, apiStatus }: DataSourceExpanderProps) {
   const [expandedSources, setExpandedSources] = useState<Set<string>>(new Set());
 
-  // 🔍 FORENSIC LOGGING: Log what DataSourceExpander receives
-  React.useEffect(() => {
-    console.log('🔍 DataSourceExpander RECEIVED PROPS:', {
-      hasCollectedData: !!collectedData,
-      collectedDataKeys: collectedData ? Object.keys(collectedData) : [],
-      hasApiStatus: !!apiStatus,
-      apiStatusWorking: apiStatus?.working || [],
-      apiStatusFailed: apiStatus?.failed || [],
-      marketData: {
-        exists: !!collectedData?.marketData,
-        success: collectedData?.marketData?.success,
-        hasData: !!collectedData?.marketData?.data,
-        dataKeys: collectedData?.marketData?.data ? Object.keys(collectedData.marketData.data) : []
-      },
-      sentiment: {
-        exists: !!collectedData?.sentiment,
-        success: collectedData?.sentiment?.success,
-        hasData: !!collectedData?.sentiment?.data,
-        dataKeys: collectedData?.sentiment?.data ? Object.keys(collectedData.sentiment.data) : []
-      },
-      onChain: {
-        exists: !!collectedData?.onChain,
-        success: collectedData?.onChain?.success,
-        hasData: !!collectedData?.onChain?.data,
-        dataKeys: collectedData?.onChain?.data ? Object.keys(collectedData.onChain.data) : []
-      }
-    });
-  }, [collectedData, apiStatus]);
-
   const toggleSource = (source: string) => {
     setExpandedSources(prev => {
       const newSet = new Set(prev);
@@ -99,31 +70,6 @@ export default function DataSourceExpander({ collectedData, apiStatus }: DataSou
       description: 'Blockchain analytics and whale activity'
     }
   ];
-
-  // 🔍 FORENSIC LOGGING: Log each data source status
-  React.useEffect(() => {
-    console.log('🔍 DATA SOURCES STATUS CHECK:');
-    dataSources.forEach(source => {
-      const working = isWorking(source.id);
-      const hasData = source.data && (
-        source.data.success ||
-        source.data.symbol ||
-        source.data.overallScore !== undefined ||
-        source.data.chain ||
-        Object.keys(source.data).length > 0
-      );
-      
-      console.log(`  ${source.id}:`, {
-        working,
-        hasData,
-        dataExists: !!source.data,
-        dataSuccess: source.data?.success,
-        dataKeys: source.data ? Object.keys(source.data) : [],
-        shouldDisplay: working && hasData,
-        apiStatusIncludes: apiStatus?.working?.includes(source.id)
-      });
-    });
-  }, [dataSources, apiStatus]);
 
   return (
     <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
