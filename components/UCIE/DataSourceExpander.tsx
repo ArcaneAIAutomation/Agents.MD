@@ -320,9 +320,6 @@ function renderSentimentData(data: any) {
   );
 }
 
-// Keep the old sources section if needed, but it's not in the current API response
-*/
-
 function renderTechnicalData(data: any) {
   // ✅ FIX: Handle both API response format and direct data format
   const actualData = data.data || data;
