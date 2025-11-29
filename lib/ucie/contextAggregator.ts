@@ -29,6 +29,7 @@ export interface ComprehensiveContext {
   defi: any | null;
   derivatives: any | null;
   research: any | null;
+  gptAnalysis: any | null; // ✅ NEW: GPT-5.1 analysis
   dataQuality: number;
   availableData: string[];
   timestamp: string;
@@ -58,7 +59,8 @@ export async function getComprehensiveContext(
     predictions,
     defi,
     derivatives,
-    research
+    research,
+    gptAnalysis
   ] = await Promise.all([
     getCachedAnalysis(symbol, 'market-data', userId),
     getCachedAnalysis(symbol, 'technical', userId),
@@ -69,7 +71,8 @@ export async function getComprehensiveContext(
     getCachedAnalysis(symbol, 'predictions', userId),
     getCachedAnalysis(symbol, 'defi', userId),
     getCachedAnalysis(symbol, 'derivatives', userId),
-    getCachedAnalysis(symbol, 'research', userId)
+    getCachedAnalysis(symbol, 'research', userId),
+    getCachedAnalysis(symbol, 'gpt-analysis', userId)
   ]);
 
   // Determine which data is available
@@ -82,6 +85,7 @@ export async function getComprehensiveContext(
   if (risk) availableData.push('risk');
   if (predictions) availableData.push('predictions');
   if (defi) availableData.push('defi');
+  if (gptAnalysis) availableData.push('gpt-analysis');
   if (derivatives) availableData.push('derivatives');
   if (research) availableData.push('research');
 
@@ -102,6 +106,7 @@ export async function getComprehensiveContext(
     defi,
     derivatives,
     research,
+    gptAnalysis,
     dataQuality,
     availableData,
     timestamp: new Date().toISOString()
@@ -281,6 +286,27 @@ export function formatContextForAI(context: ComprehensiveContext): string {
       prompt += `- **Long/Short Ratio**: ${context.derivatives.longShortRatio.current || 'N/A'} (${context.derivatives.longShortRatio.trend || 'N/A'})\n`;
     }
     prompt += `\n`;
+  }
+
+  // GPT-5.1 Analysis Section (PRIORITY - Show First)
+  if (context.gptAnalysis && context.gptAnalysis.analysis) {
+    prompt += `## 🤖 GPT-5.1 Analysis (Medium Reasoning)\n`;
+    prompt += `**Market Outlook**: ${context.gptAnalysis.analysis.marketOutlook || 'N/A'}\n\n`;
+    prompt += `**Sentiment Analysis**: ${context.gptAnalysis.analysis.sentimentAnalysis || 'N/A'}\n\n`;
+    prompt += `**Technical Signals**: ${context.gptAnalysis.analysis.technicalSignals || 'N/A'}\n\n`;
+    prompt += `**On-Chain Insights**: ${context.gptAnalysis.analysis.onChainInsights || 'N/A'}\n\n`;
+    prompt += `**Risk Assessment**: ${context.gptAnalysis.analysis.riskAssessment || 'N/A'}\n\n`;
+    prompt += `**Trading Recommendation**: ${context.gptAnalysis.analysis.tradingRecommendation || 'N/A'}\n\n`;
+    
+    if (context.gptAnalysis.analysis.keyFactors && context.gptAnalysis.analysis.keyFactors.length > 0) {
+      prompt += `**Key Factors**:\n`;
+      context.gptAnalysis.analysis.keyFactors.forEach((factor: string, i: number) => {
+        prompt += `${i + 1}. ${factor}\n`;
+      });
+    }
+    
+    prompt += `\n**Analysis Confidence**: ${context.gptAnalysis.analysis.confidence || 'N/A'}%\n`;
+    prompt += `**Data Quality**: ${context.gptAnalysis.dataQuality || 'N/A'}%\n\n`;
   }
 
   // Previous Research Section
