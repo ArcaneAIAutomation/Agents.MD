@@ -52,6 +52,8 @@ async function fetchLunarCrushData(symbol: string): Promise<any | null> {
   }
 
   try {
+    console.log(`📊 Fetching LunarCrush data for ${symbol}...`);
+    
     const response = await fetch(
       `https://lunarcrush.com/api4/public/coins/${symbol}/v1`,
       {
@@ -64,6 +66,7 @@ async function fetchLunarCrushData(symbol: string): Promise<any | null> {
     );
 
     if (!response.ok) {
+      console.warn(`❌ LunarCrush API returned ${response.status}`);
       // Try public endpoint as fallback
       const publicResponse = await fetch(
         `https://lunarcrush.com/api4/public/coins/${symbol}/v1`,
@@ -73,16 +76,52 @@ async function fetchLunarCrushData(symbol: string): Promise<any | null> {
         }
       );
       
-      if (!publicResponse.ok) return null;
+      if (!publicResponse.ok) {
+        console.warn(`❌ LunarCrush public API also returned ${publicResponse.status}`);
+        return null;
+      }
       
       const publicData = await publicResponse.json();
-      return publicData.data || null;
+      const data = publicData.data;
+      
+      // ✅ Log raw data for debugging
+      if (data) {
+        console.log(`✅ LunarCrush data (public):`, {
+          galaxy_score: data.galaxy_score,
+          social_volume: data.social_volume,
+          social_dominance: data.social_dominance,
+          social_contributors: data.social_contributors,
+          num_posts: data.num_posts,
+          interactions_24h: data.interactions_24h,
+          sentiment: data.sentiment
+        });
+      }
+      
+      return data || null;
     }
 
-    const data = await response.json();
-    return data.data || null;
+    const json = await response.json();
+    const data = json.data;
+    
+    if (!data) {
+      console.warn('❌ LunarCrush response missing data field');
+      return null;
+    }
+
+    // ✅ Log raw data for debugging
+    console.log(`✅ LunarCrush data (authenticated):`, {
+      galaxy_score: data.galaxy_score,
+      social_volume: data.social_volume,
+      social_dominance: data.social_dominance,
+      social_contributors: data.social_contributors,
+      num_posts: data.num_posts,
+      interactions_24h: data.interactions_24h,
+      sentiment: data.sentiment
+    });
+
+    return data;
   } catch (error) {
-    console.error('LunarCrush fetch error:', error);
+    console.error('❌ LunarCrush fetch error:', error);
     return null;
   }
 }
@@ -253,19 +292,47 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         classification: fearGreedData.classification
       } : null,
       
-      // LunarCrush data
+      // LunarCrush data (✅ FIXED: Correct API v4 field names)
       lunarCrush: lunarCrushData ? {
-        socialScore: lunarCrushData.social_score || 0,
+        // Core Scores
         galaxyScore: lunarCrushData.galaxy_score || 0,
-        sentimentScore: calculateLunarCrushSentiment(lunarCrushData),
-        socialVolume: lunarCrushData.social_volume || 0,
-        socialVolumeChange24h: lunarCrushData.social_volume_change_24h || 0,
-        socialDominance: lunarCrushData.social_dominance || 0,
         altRank: lunarCrushData.alt_rank || 0,
-        mentions: lunarCrushData.social_mentions || 0,
-        interactions: lunarCrushData.social_interactions || 0,
-        contributors: lunarCrushData.social_contributors || 0,
-        trendingScore: lunarCrushData.trending_score || 0
+        altRank30d: lunarCrushData.alt_rank_30d || 0,
+        
+        // Social Volume & Dominance (✅ FIXED: Correct field names)
+        socialVolume: lunarCrushData.social_volume || 0,
+        socialVolume24hChange: lunarCrushData.social_volume_24h_change || 0,
+        socialDominance: lunarCrushData.social_dominance || 0,
+        socialDominance24hChange: lunarCrushData.social_dominance_24h_change || 0,
+        
+        // Engagement Metrics (✅ FIXED: Correct field names)
+        socialContributors: lunarCrushData.social_contributors || 0,
+        socialContributors24hChange: lunarCrushData.social_contributors_24h_change || 0,
+        numPosts: lunarCrushData.num_posts || 0, // ✅ FIXED: Was social_mentions
+        numPosts24hChange: lunarCrushData.num_posts_24h_change || 0,
+        interactions24h: lunarCrushData.interactions_24h || 0, // ✅ FIXED: Was social_interactions
+        interactions24hChange: lunarCrushData.interactions_24h_change || 0,
+        
+        // Sentiment Metrics
+        sentiment: lunarCrushData.sentiment || 3, // 0-5 scale, 3 is neutral
+        sentimentAbsolute: lunarCrushData.sentiment_absolute || 3,
+        sentimentRelative: lunarCrushData.sentiment_relative || 3,
+        sentimentScore: calculateLunarCrushSentiment(lunarCrushData), // Convert to 0-100
+        
+        // Market Metrics
+        marketDominance: lunarCrushData.market_dominance || 0,
+        marketDominance24hChange: lunarCrushData.market_dominance_24h_change || 0,
+        
+        // Additional Metrics
+        correlationRank: lunarCrushData.correlation_rank || 0,
+        volatility: lunarCrushData.volatility || 0,
+        
+        // Categories & Tags
+        categories: lunarCrushData.categories || [],
+        tags: lunarCrushData.tags || [],
+        
+        // Timestamps
+        updated: lunarCrushData.updated || Math.floor(Date.now() / 1000)
       } : null,
       
       // Reddit data
