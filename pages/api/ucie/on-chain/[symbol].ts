@@ -151,18 +151,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const symbolUpper = symbol.toUpperCase();
 
   try {
-    console.log(`⛓️ UCIE On-Chain API called for ${symbolUpper}`);
+    // ✅ Check if refresh parameter is set to force fresh data
+    const forceRefresh = req.query.refresh === 'true';
+    console.log(`⛓️ UCIE On-Chain API called for ${symbolUpper}${forceRefresh ? ' (FORCING FRESH DATA)' : ''}`);
 
-    // 1. Check cache first (5 minute TTL)
-    const cached = await getCachedAnalysis(symbolUpper, 'on-chain');
-    if (cached) {
-      console.log(`✅ Cache hit for ${symbolUpper}/on-chain`);
-      return res.status(200).json({
-        success: true,
-        data: cached,
-        cached: true,
-        timestamp: new Date().toISOString()
-      });
+    // 1. Check cache first (5 minute TTL) - SKIP if refresh=true
+    if (!forceRefresh) {
+      const cached = await getCachedAnalysis(symbolUpper, 'on-chain');
+      if (cached) {
+        console.log(`✅ Cache hit for ${symbolUpper}/on-chain`);
+        return res.status(200).json({
+          success: true,
+          data: cached,
+          cached: true,
+          timestamp: new Date().toISOString()
+        });
+      }
+    } else {
+      console.log(`🔄 Refresh requested - bypassing cache for ${symbolUpper}/on-chain`);
     }
 
     console.log(`❌ Cache miss for ${symbolUpper}/on-chain - fetching fresh data`);
