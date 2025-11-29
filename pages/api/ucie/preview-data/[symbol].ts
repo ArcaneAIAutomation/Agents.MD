@@ -878,20 +878,27 @@ async function generateAISummary(
       context += `- Trend: ${trend}\n`;
       context += `- 24h Mentions: ${mentions.toLocaleString('en-US')}\n`;
       
-      // ✅ NEW: Include detailed LunarCrush data for GPT-5.1
+      // ✅ FIXED: Include detailed LunarCrush data with CORRECT field names
       if (sentimentData.lunarCrush) {
         const lc = sentimentData.lunarCrush;
         context += `\nLunarCrush Metrics:\n`;
-        context += `- Social Score: ${lc.socialScore || 0}/100\n`;
         context += `- Galaxy Score: ${lc.galaxyScore || 0}/100\n`;
         context += `- Sentiment Score: ${lc.sentimentScore || 0}/100\n`;
         context += `- Social Volume: ${(lc.socialVolume || 0).toLocaleString('en-US')}\n`;
-        context += `- Social Volume Change 24h: ${(lc.socialVolumeChange24h || 0).toFixed(2)}%\n`;
+        context += `- Social Volume Change 24h: ${(lc.socialVolume24hChange || 0).toFixed(2)}%\n`;
         context += `- Social Dominance: ${(lc.socialDominance || 0).toFixed(2)}%\n`;
+        context += `- Social Dominance Change 24h: ${(lc.socialDominance24hChange || 0).toFixed(2)}%\n`;
         context += `- AltRank: ${lc.altRank || 'N/A'}\n`;
-        context += `- Trending Score: ${lc.trendingScore || 0}/100\n`;
-        context += `- Interactions: ${(lc.interactions || 0).toLocaleString('en-US')}\n`;
-        context += `- Contributors: ${(lc.contributors || 0).toLocaleString('en-US')}\n`;
+        context += `- AltRank 30d: ${lc.altRank30d || 'N/A'}\n`;
+        context += `- Posts/Mentions: ${(lc.numPosts || 0).toLocaleString('en-US')}\n`;
+        context += `- Posts Change 24h: ${(lc.numPosts24hChange || 0).toFixed(2)}%\n`;
+        context += `- Interactions 24h: ${(lc.interactions24h || 0).toLocaleString('en-US')}\n`;
+        context += `- Interactions Change 24h: ${(lc.interactions24hChange || 0).toFixed(2)}%\n`;
+        context += `- Contributors: ${(lc.socialContributors || 0).toLocaleString('en-US')}\n`;
+        context += `- Contributors Change 24h: ${(lc.socialContributors24hChange || 0).toFixed(2)}%\n`;
+        context += `- Market Dominance: ${(lc.marketDominance || 0).toFixed(2)}%\n`;
+        context += `- Correlation Rank: ${lc.correlationRank || 'N/A'}\n`;
+        context += `- Volatility: ${((lc.volatility || 0) * 100).toFixed(2)}%\n`;
       }
       
       // ✅ NEW: Include Reddit data if available

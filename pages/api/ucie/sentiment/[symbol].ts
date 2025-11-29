@@ -116,8 +116,27 @@ async function fetchLunarCrushData(symbol: string): Promise<any | null> {
       social_contributors: data.social_contributors,
       num_posts: data.num_posts,
       interactions_24h: data.interactions_24h,
-      sentiment: data.sentiment
+      sentiment: data.sentiment,
+      alt_rank: data.alt_rank
     });
+    
+    // ✅ CRITICAL: Check if we're getting zeros and log warning
+    const hasZeros = 
+      data.social_volume === 0 &&
+      data.social_dominance === 0 &&
+      data.social_contributors === 0 &&
+      data.num_posts === 0 &&
+      data.interactions_24h === 0;
+    
+    if (hasZeros) {
+      console.warn(`⚠️ LunarCrush returned all zeros for ${symbol}!`);
+      console.warn(`   This might indicate:`);
+      console.warn(`   1. API rate limit reached`);
+      console.warn(`   2. Symbol not found in LunarCrush database`);
+      console.warn(`   3. API key has insufficient permissions`);
+      console.warn(`   4. API response structure changed`);
+      console.warn(`   Full response:`, JSON.stringify(data, null, 2));
+    }
 
     return data;
   } catch (error) {
