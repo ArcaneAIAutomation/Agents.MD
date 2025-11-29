@@ -149,20 +149,47 @@ export function formatContextForAI(context: ComprehensiveContext): string {
     prompt += `\n`;
   }
 
-  // Sentiment Analysis Section
+  // Sentiment Analysis Section (ENHANCED for GPT-5.1)
   if (context.sentiment) {
     prompt += `## 💭 Sentiment Analysis\n`;
-    prompt += `- **Overall Score**: ${context.sentiment.overallScore || 'N/A'}/100\n`;
-    if (context.sentiment.twitterSentiment !== undefined) {
-      prompt += `- **Twitter Sentiment**: ${context.sentiment.twitterSentiment}/100\n`;
+    prompt += `- **Overall Sentiment Score**: ${context.sentiment.overallScore || 'N/A'}/100 (${context.sentiment.sentiment || 'neutral'})\n`;
+    
+    // Fear & Greed Index (Primary Indicator)
+    if (context.sentiment.fearGreedIndex) {
+      prompt += `- **Fear & Greed Index**: ${context.sentiment.fearGreedIndex.value}/100 (${context.sentiment.fearGreedIndex.classification})\n`;
+      prompt += `  - This is the primary market sentiment indicator\n`;
     }
-    if (context.sentiment.redditSentiment !== undefined) {
-      prompt += `- **Reddit Sentiment**: ${context.sentiment.redditSentiment}/100\n`;
+    
+    // LunarCrush Social Metrics
+    if (context.sentiment.lunarCrush) {
+      prompt += `- **LunarCrush Social Metrics**:\n`;
+      prompt += `  - Social Score: ${context.sentiment.lunarCrush.socialScore || 'N/A'}/100\n`;
+      prompt += `  - Galaxy Score: ${context.sentiment.lunarCrush.galaxyScore || 'N/A'}/100\n`;
+      prompt += `  - Sentiment Score: ${context.sentiment.lunarCrush.sentimentScore || 'N/A'}/100\n`;
+      prompt += `  - Social Volume: ${context.sentiment.lunarCrush.socialVolume?.toLocaleString() || 'N/A'}\n`;
+      prompt += `  - Social Volume Change (24h): ${context.sentiment.lunarCrush.socialVolumeChange24h || 'N/A'}%\n`;
+      prompt += `  - Social Dominance: ${context.sentiment.lunarCrush.socialDominance || 'N/A'}%\n`;
+      prompt += `  - Alt Rank: ${context.sentiment.lunarCrush.altRank || 'N/A'}\n`;
+      prompt += `  - Trending Score: ${context.sentiment.lunarCrush.trendingScore || 'N/A'}/100\n`;
     }
-    if (context.sentiment.volumeChange24h !== undefined) {
-      prompt += `- **Social Volume Change**: ${context.sentiment.volumeChange24h}%\n`;
+    
+    // Reddit Community Sentiment
+    if (context.sentiment.reddit) {
+      prompt += `- **Reddit Community Sentiment**:\n`;
+      prompt += `  - Mentions (24h): ${context.sentiment.reddit.mentions24h || 'N/A'}\n`;
+      prompt += `  - Sentiment Score: ${context.sentiment.reddit.sentiment || 'N/A'}/100\n`;
+      prompt += `  - Active Subreddits: ${context.sentiment.reddit.activeSubreddits || 'N/A'}\n`;
     }
-    prompt += `\n`;
+    
+    // Twitter/X Sentiment (if available)
+    if (context.sentiment.twitter) {
+      prompt += `- **Twitter/X Sentiment**:\n`;
+      prompt += `  - Sentiment Score: ${context.sentiment.twitter.sentiment || 'N/A'}/100\n`;
+      prompt += `  - Tweet Volume: ${context.sentiment.twitter.volume?.toLocaleString() || 'N/A'}\n`;
+    }
+    
+    prompt += `- **Data Quality**: ${context.sentiment.dataQuality || 'N/A'}%\n`;
+    prompt += `\n**GPT-5.1 Analysis Guidance**: Analyze sentiment trends, social volume changes, and Fear & Greed Index to assess market psychology and potential price movements.\n\n`;
   }
 
   // News Section
