@@ -94,16 +94,30 @@ async function handler(
 
     // Cache the response in database (skip if refresh=true for live data)
     if (!forceRefresh) {
+      // ✅ FIX: Store unwrapped data (no API wrappers)
+      const unwrappedData = {
+        rsi: technicalData.rsi,
+        macd: technicalData.macd,
+        ema: technicalData.ema,
+        bollingerBands: technicalData.bollingerBands,
+        atr: technicalData.atr,
+        stochastic: technicalData.stochastic,
+        signals: technicalData.signals,
+        multiTimeframeConsensus: technicalData.multiTimeframeConsensus,
+        dataQuality: technicalData.dataQuality,
+        timestamp: technicalData.timestamp
+      };
+      
       await setCachedAnalysis(
         cacheKey,
         'technical',
-        technicalData,
+        unwrappedData,
         CACHE_TTL,
         technicalData.dataQuality,
         userId,
         userEmail
       );
-      console.log(`💾 Cached ${cacheKey} technical for ${CACHE_TTL}s`);
+      console.log(`💾 Cached ${cacheKey} technical for ${CACHE_TTL}s (unwrapped format)`);
     } else {
       console.log(`⚡ LIVE DATA: Not caching ${cacheKey} technical`);
     }

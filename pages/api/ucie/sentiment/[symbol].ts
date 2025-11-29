@@ -276,18 +276,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     };
 
     // 5. Cache the result (3 minutes = 180 seconds)
+    // ✅ FIX: Store unwrapped data (no API wrappers)
+    const unwrappedData = {
+      symbol: response.symbol,
+      overallScore: response.overallScore,
+      sentiment: response.sentiment,
+      fearGreedIndex: response.fearGreedIndex,
+      lunarCrush: response.lunarCrush,
+      reddit: response.reddit,
+      dataQuality: response.dataQuality,
+      timestamp: response.timestamp
+    };
+    
     await setCachedAnalysis(
       symbolUpper,
       'sentiment',
-      response,
+      unwrappedData,
       180, // 3 minutes
       response.dataQuality
     );
 
-    console.log(`✅ Sentiment data fetched and cached for ${symbolUpper} (quality: ${response.dataQuality}%)`);
+    console.log(`✅ Sentiment data fetched and cached for ${symbolUpper} (quality: ${response.dataQuality}%, unwrapped format)`);
     console.log(`   Fear & Greed: ${fearGreedData ? fearGreedData.value : 'N/A'}, LunarCrush: ${lunarCrushData ? 'OK' : 'N/A'}, Reddit: ${redditData ? 'OK' : 'N/A'}`);
 
-    // 6. Return response
+    // 6. Return response (with API wrappers for client)
     return res.status(200).json({
       success: true,
       data: response,

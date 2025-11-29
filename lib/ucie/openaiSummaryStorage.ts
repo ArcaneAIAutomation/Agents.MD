@@ -6,6 +6,7 @@
  */
 
 import { query } from '../db';
+import { unwrapComprehensiveContext } from './dataUnwrapper';
 
 export interface OpenAISummary {
   symbol: string;
@@ -225,7 +226,10 @@ export async function getAllCachedDataForCaesar(symbol: string): Promise<{
     const dataCount = Object.values(cachedData).filter(v => v !== null).length;
     console.log(`📊 Retrieved ${dataCount} cached data sources for ${symbol} (including OpenAI summary)`);
     
-    return cachedData;
+    // ✅ SAFETY: Auto-unwrap any old format data
+    const unwrappedContext = unwrapComprehensiveContext(cachedData);
+    
+    return unwrappedContext;
   } catch (error) {
     console.error('❌ Failed to get all cached data:', error);
     return {

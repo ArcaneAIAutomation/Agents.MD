@@ -192,17 +192,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // 3. Cache the result (3 minutes = 180 seconds)
+    // ✅ FIX: Store unwrapped data (no API wrappers)
+    const unwrappedData = {
+      networkMetrics: onChainData.networkMetrics,
+      whaleActivity: onChainData.whaleActivity,
+      mempoolAnalysis: onChainData.mempoolAnalysis,
+      holderDistribution: onChainData.holderDistribution,
+      exchangeFlows: onChainData.exchangeFlows,
+      smartContract: onChainData.smartContract,
+      dataQuality: onChainData.dataQuality,
+      timestamp: onChainData.timestamp,
+      chain: onChainData.chain
+    };
+    
     await setCachedAnalysis(
       symbolUpper,
       'on-chain',
-      onChainData,
+      unwrappedData,
       180, // 3 minutes
       onChainData.dataQuality
     );
 
-    console.log(`✅ On-chain data fetched and cached for ${symbolUpper} (quality: ${onChainData.dataQuality}%)`);
+    console.log(`✅ On-chain data fetched and cached for ${symbolUpper} (quality: ${onChainData.dataQuality}%, unwrapped format)`);
 
-    // 4. Return response
+    // 4. Return response (with API wrappers for client)
     return res.status(200).json({
       success: true,
       data: onChainData,

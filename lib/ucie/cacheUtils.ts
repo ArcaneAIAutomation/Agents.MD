@@ -6,6 +6,7 @@
  */
 
 import { query } from '../db';
+import { unwrapData, hasAPIWrappers } from './dataUnwrapper';
 
 /**
  * Analysis types supported by UCIE
@@ -85,7 +86,15 @@ export async function getCachedAnalysis(
     
     console.log(`✅ Cache hit for ${symbol}/${analysisType} (stored by: ${row.user_email}, age: ${ageSeconds}s, ttl: ${Math.floor(ttl / 1000)}s, quality: ${row.data_quality_score || 'N/A'})`);
     
-    return row.data;
+    // ✅ BACKWARD COMPATIBILITY: Auto-unwrap old format data
+    const cachedData = row.data;
+    
+    if (hasAPIWrappers(cachedData)) {
+      console.log(`🔓 Auto-unwrapping old format data for ${symbol}/${analysisType}`);
+      return unwrapData(cachedData, analysisType);
+    }
+    
+    return cachedData;
   } catch (error) {
     console.error(`❌ Failed to get cached analysis for ${symbol}/${analysisType}:`, error);
     return null;

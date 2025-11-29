@@ -264,8 +264,18 @@ async function handler(
 
     // Cache the response in database (skip if refresh=true for live data)
     if (!forceRefresh) {
-      await setCachedAnalysis(symbolUpper, 'news', response, CACHE_TTL, dataQuality, userId, userEmail);
-      console.log(`💾 Cached ${symbolUpper} news for ${CACHE_TTL}s`);
+      // ✅ FIX: Store unwrapped data (no API wrappers)
+      const unwrappedData = {
+        articles: response.articles,
+        summary: response.summary,
+        sources: response.sources,
+        dataQuality: response.dataQuality,
+        timestamp: response.timestamp,
+        veritasValidation: response.veritasValidation
+      };
+      
+      await setCachedAnalysis(symbolUpper, 'news', unwrappedData, CACHE_TTL, dataQuality, userId, userEmail);
+      console.log(`💾 Cached ${symbolUpper} news for ${CACHE_TTL}s (unwrapped format)`);
     } else {
       console.log(`⚡ LIVE DATA: Not caching ${symbolUpper} news`);
     }
