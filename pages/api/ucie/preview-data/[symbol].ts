@@ -621,10 +621,19 @@ async function fetchWithTimeout(url: string, timeout: number) {
 /**
  * Calculate API status with proper data validation
  * ✅ FIX #1: Validate actual data existence, not just success flags
+ * ✅ FIX #6: Check dataQuality field AND data content (handles both fresh and cached data)
  */
 function calculateAPIStatus(collectedData: any) {
   const working: string[] = [];
   const failed: string[] = [];
+
+  console.log('🔍 DEBUG: calculateAPIStatus called with:', {
+    marketData: collectedData.marketData ? 'present' : 'missing',
+    sentiment: collectedData.sentiment ? 'present' : 'missing',
+    technical: collectedData.technical ? 'present' : 'missing',
+    news: collectedData.news ? 'present' : 'missing',
+    onChain: collectedData.onChain ? 'present' : 'missing'
+  });
 
   // 🔍 FORENSIC FIX: Market Data structure is { success: true, symbol, priceAggregation, ... }
   // NOT { success: true, data: { priceAggregation, ... } }
@@ -633,20 +642,44 @@ function calculateAPIStatus(collectedData: any) {
     collectedData.marketData?.priceAggregation?.prices?.length > 0
   ) {
     working.push('Market Data');
+    console.log('✅ Market Data: VALID (has priceAggregation.prices)');
   } else {
     failed.push('Market Data');
+    console.log('❌ Market Data: INVALID', {
+      success: collectedData.marketData?.success,
+      hasPriceAggregation: !!collectedData.marketData?.priceAggregation,
+      pricesLength: collectedData.marketData?.priceAggregation?.prices?.length
+    });
   }
 
-  // 🔍 FORENSIC FIX: Sentiment structure is { success: true, data: { overallScore, ... } }
-  // This one DOES have .data nested - just check if data object exists and has content
+  // 🔍 FORENSIC FIX: Sentiment structure is { success: true, data: { overallScore, dataQuality, ... } }
+  // Check BOTH dataQuality field AND data content (handles fresh and cached data)
+  const sentimentData = collectedData.sentiment?.data;
+  const hasSentimentData = sentimentData && (
+    sentimentData.dataQuality > 0 || // Has dataQuality field (fresh data)
+    sentimentData.overallScore !== undefined || // Has overallScore (cached data)
+    Object.keys(sentimentData).length > 2 // Has multiple fields
+  );
+  
   if (
     collectedData.sentiment?.success === true &&
-    collectedData.sentiment?.data &&
-    Object.keys(collectedData.sentiment.data).length > 0
+    hasSentimentData
   ) {
     working.push('Sentiment');
+    console.log('✅ Sentiment: VALID', {
+      dataQuality: sentimentData?.dataQuality,
+      overallScore: sentimentData?.overallScore,
+      fieldCount: sentimentData ? Object.keys(sentimentData).length : 0
+    });
   } else {
     failed.push('Sentiment');
+    console.log('❌ Sentiment: INVALID', {
+      success: collectedData.sentiment?.success,
+      hasData: !!sentimentData,
+      dataQuality: sentimentData?.dataQuality,
+      overallScore: sentimentData?.overallScore,
+      fieldCount: sentimentData ? Object.keys(sentimentData).length : 0
+    });
   }
 
   // 🔍 FORENSIC FIX: Technical structure is { success: true, symbol, indicators, ... }
@@ -658,8 +691,14 @@ function calculateAPIStatus(collectedData: any) {
   
   if (hasTechnical) {
     working.push('Technical');
+    console.log('✅ Technical: VALID (has indicators)');
   } else {
     failed.push('Technical');
+    console.log('❌ Technical: INVALID', {
+      success: collectedData.technical?.success,
+      hasIndicators: !!collectedData.technical?.indicators,
+      indicatorCount: collectedData.technical?.indicators ? Object.keys(collectedData.technical.indicators).length : 0
+    });
   }
 
   // 🔍 FORENSIC FIX: News structure is { success: true, symbol, articles, ... }
@@ -669,28 +708,55 @@ function calculateAPIStatus(collectedData: any) {
     collectedData.news?.articles?.length > 0
   ) {
     working.push('News');
+    console.log('✅ News: VALID (has articles)');
   } else {
     failed.push('News');
+    console.log('❌ News: INVALID', {
+      success: collectedData.news?.success,
+      articlesLength: collectedData.news?.articles?.length
+    });
   }
 
   // 🔍 FORENSIC FIX: On-Chain structure is { success: true, data: { dataQuality, ... } }
-  // This one DOES have .data nested - just check if data object exists and has content
+  // Check BOTH dataQuality field AND data content (handles fresh and cached data)
+  const onChainData = collectedData.onChain?.data;
+  const hasOnChainData = onChainData && (
+    onChainData.dataQuality > 0 || // Has dataQuality field (fresh data)
+    onChainData.networkStats || // Has networkStats (cached data)
+    Object.keys(onChainData).length > 2 // Has multiple fields
+  );
+  
   if (
     collectedData.onChain?.success === true &&
-    collectedData.onChain?.data &&
-    Object.keys(collectedData.onChain.data).length > 0
+    hasOnChainData
   ) {
     working.push('On-Chain');
+    console.log('✅ On-Chain: VALID', {
+      dataQuality: onChainData?.dataQuality,
+      hasNetworkStats: !!onChainData?.networkStats,
+      fieldCount: onChainData ? Object.keys(onChainData).length : 0
+    });
   } else {
     failed.push('On-Chain');
+    console.log('❌ On-Chain: INVALID', {
+      success: collectedData.onChain?.success,
+      hasData: !!onChainData,
+      dataQuality: onChainData?.dataQuality,
+      hasNetworkStats: !!onChainData?.networkStats,
+      fieldCount: onChainData ? Object.keys(onChainData).length : 0
+    });
   }
 
-  return {
+  const result = {
     working,
     failed,
     total: 5,
     successRate: Math.round((working.length / 5) * 100)
   };
+
+  console.log('📊 calculateAPIStatus result:', result);
+
+  return result;
 }
 
 /**
