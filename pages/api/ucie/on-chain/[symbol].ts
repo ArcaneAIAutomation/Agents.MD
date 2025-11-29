@@ -191,12 +191,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // 3. Cache the result (5 minutes = 300 seconds)
+    // 3. Cache the result (3 minutes = 180 seconds)
     await setCachedAnalysis(
       symbolUpper,
       'on-chain',
       onChainData,
-      300, // 5 minutes
+      180, // 3 minutes
       onChainData.dataQuality
     );
 

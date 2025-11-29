@@ -23,8 +23,8 @@ import { isVeritasEnabled } from '../../../../lib/ucie/veritas/utils/featureFlag
 import { validateMarketData, type VeritasValidationResult } from '../../../../lib/ucie/veritas/validators/marketDataValidator';
 import { validateBitcoinOnly } from '../../../../lib/ucie/btcOnlyValidator';
 
-// Cache TTL: 5 minutes (balances freshness with performance)
-const CACHE_TTL = 5 * 60; // 300 seconds
+// Cache TTL: 3 minutes (ensures fresh data for AI analysis)
+const CACHE_TTL = 3 * 60; // 180 seconds
 
 export interface MarketDataResponse {
   success: boolean;

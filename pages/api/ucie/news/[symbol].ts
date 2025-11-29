@@ -53,8 +53,8 @@ interface ErrorResponse {
   symbol?: string;
 }
 
-// Cache TTL: 10 minutes (news doesn't change that frequently)
-const CACHE_TTL = 10 * 60; // 600 seconds
+// Cache TTL: 3 minutes (ensures fresh data for AI analysis)
+const CACHE_TTL = 3 * 60; // 180 seconds
 
 async function handler(
   req: AuthenticatedRequest,

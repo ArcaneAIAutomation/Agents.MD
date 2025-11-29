@@ -275,12 +275,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       timestamp: new Date().toISOString()
     };
 
-    // 5. Cache the result (5 minutes = 300 seconds)
+    // 5. Cache the result (3 minutes = 180 seconds)
     await setCachedAnalysis(
       symbolUpper,
       'sentiment',
       response,
-      300, // 5 minutes
+      180, // 3 minutes
       response.dataQuality
     );
 
