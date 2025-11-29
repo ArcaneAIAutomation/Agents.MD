@@ -125,7 +125,7 @@
       "headers": {
         "Authorization": "Bearer axcnket7q4rppwklyrx8qo8pamhpj9uvjtbmx6sm"
       },
-      "disabled": false,
+      "disabled": true,
       "autoApprove": [
         "get_coin_data",
         "get_market_data",
