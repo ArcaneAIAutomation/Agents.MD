@@ -673,11 +673,15 @@ function calculateAPIStatus(collectedData: any) {
   }
 
   // 🔍 FORENSIC FIX: Sentiment structure is { success: true, data: { overallScore, dataQuality, ... } }
-  // Check BOTH dataQuality field AND data content (handles fresh and cached data)
+  // Check for ANY valid data indicators (handles fresh, cached, and 0% quality data)
   const sentimentData = collectedData.sentiment?.data;
   const hasSentimentData = sentimentData && (
-    sentimentData.dataQuality > 0 || // Has dataQuality field (fresh data)
-    sentimentData.overallScore !== undefined || // Has overallScore (cached data)
+    sentimentData.overallScore !== undefined || // Has overallScore (PRIMARY indicator)
+    sentimentData.sentiment !== undefined || // Has sentiment classification
+    sentimentData.fearGreedIndex !== undefined || // Has Fear & Greed data
+    sentimentData.lunarCrush !== undefined || // Has LunarCrush data
+    sentimentData.reddit !== undefined || // Has Reddit data
+    (sentimentData.dataQuality !== undefined && sentimentData.dataQuality >= 0) || // Has dataQuality field (even if 0)
     Object.keys(sentimentData).length > 2 // Has multiple fields
   );
   
@@ -689,6 +693,10 @@ function calculateAPIStatus(collectedData: any) {
     console.log('✅ Sentiment: VALID', {
       dataQuality: sentimentData?.dataQuality,
       overallScore: sentimentData?.overallScore,
+      sentiment: sentimentData?.sentiment,
+      hasFearGreed: !!sentimentData?.fearGreedIndex,
+      hasLunarCrush: !!sentimentData?.lunarCrush,
+      hasReddit: !!sentimentData?.reddit,
       fieldCount: sentimentData ? Object.keys(sentimentData).length : 0
     });
   } else {
@@ -738,11 +746,14 @@ function calculateAPIStatus(collectedData: any) {
   }
 
   // 🔍 FORENSIC FIX: On-Chain structure is { success: true, data: { dataQuality, ... } }
-  // Check BOTH dataQuality field AND data content (handles fresh and cached data)
+  // Check for ANY valid data indicators (handles fresh, cached, and 0% quality data)
   const onChainData = collectedData.onChain?.data;
   const hasOnChainData = onChainData && (
-    onChainData.dataQuality > 0 || // Has dataQuality field (fresh data)
-    onChainData.networkStats || // Has networkStats (cached data)
+    onChainData.networkMetrics !== undefined || // Has network metrics (PRIMARY indicator)
+    onChainData.whaleActivity !== undefined || // Has whale activity
+    onChainData.mempoolAnalysis !== undefined || // Has mempool data
+    onChainData.networkStats !== undefined || // Has network stats (legacy)
+    (onChainData.dataQuality !== undefined && onChainData.dataQuality >= 0) || // Has dataQuality field (even if 0)
     Object.keys(onChainData).length > 2 // Has multiple fields
   );
   
@@ -753,6 +764,9 @@ function calculateAPIStatus(collectedData: any) {
     working.push('On-Chain');
     console.log('✅ On-Chain: VALID', {
       dataQuality: onChainData?.dataQuality,
+      hasNetworkMetrics: !!onChainData?.networkMetrics,
+      hasWhaleActivity: !!onChainData?.whaleActivity,
+      hasMempool: !!onChainData?.mempoolAnalysis,
       hasNetworkStats: !!onChainData?.networkStats,
       fieldCount: onChainData ? Object.keys(onChainData).length : 0
     });
