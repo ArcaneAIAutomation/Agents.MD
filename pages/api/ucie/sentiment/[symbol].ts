@@ -24,7 +24,7 @@ import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cache
 async function fetchFearGreedIndex(): Promise<{ value: number; classification: string } | null> {
   try {
     const response = await fetch('https://api.alternative.me/fng/', {
-      signal: AbortSignal.timeout(5000)
+      signal: AbortSignal.timeout(10000) // ✅ Increased from 5s to 10s
     });
 
     if (!response.ok) return null;
@@ -59,7 +59,7 @@ async function fetchLunarCrushData(symbol: string): Promise<any | null> {
           'Accept': 'application/json',
           'Authorization': `Bearer ${apiKey}`,
         },
-        signal: AbortSignal.timeout(5000), // Reduced from 10s
+        signal: AbortSignal.timeout(10000), // ✅ Increased from 5s to 10s
       }
     );
 
@@ -69,7 +69,7 @@ async function fetchLunarCrushData(symbol: string): Promise<any | null> {
         `https://lunarcrush.com/api4/public/coins/${symbol}/v1`,
         {
           headers: { 'Accept': 'application/json' },
-          signal: AbortSignal.timeout(5000),
+          signal: AbortSignal.timeout(10000), // ✅ Increased from 5s to 10s
         }
       );
       
@@ -207,15 +207,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       totalWeight += 0.25;
     }
 
-    const overallScore = totalWeight > 0
-      ? Math.round(scores.reduce((sum, score) => sum + score, 0) / totalWeight)
-      : 50; // Neutral if no data
-
     // 4. Calculate data quality
     let dataQuality = 0;
     if (fearGreedData) dataQuality += 40; // Fear & Greed is most reliable
     if (lunarCrushData) dataQuality += 35; // LunarCrush is secondary
     if (redditData) dataQuality += 25; // Reddit is tertiary
+
+    // ✅ CRITICAL FIX: NO FALLBACK DATA - Fail if insufficient quality
+    // Require at least Fear & Greed Index (40% minimum) for reliable sentiment
+    if (dataQuality < 40) {
+      console.log(`❌ Insufficient data quality: ${dataQuality}% (minimum 40% required)`);
+      return res.status(503).json({
+        success: false,
+        error: 'Unable to fetch reliable sentiment data',
+        dataQuality: dataQuality,
+        availableSources: {
+          fearGreed: !!fearGreedData,
+          lunarCrush: !!lunarCrushData,
+          reddit: !!redditData
+        },
+        message: 'Sentiment analysis requires at least the Fear & Greed Index. Please try again later.'
+      });
+    }
+
+    // ✅ Calculate overall score (only if we have sufficient data)
+    const overallScore = Math.round(
+      scores.reduce((sum, score) => sum + score, 0) / totalWeight
+    );
 
     // 4. Format response
     const response = {
