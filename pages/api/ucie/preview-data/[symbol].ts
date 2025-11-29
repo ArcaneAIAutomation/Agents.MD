@@ -587,13 +587,33 @@ async function collectDataFromAPIs(symbol: string, req: NextApiRequest, refresh:
     }
   });
 
-  return {
+  const collectedData = {
     marketData: results[0].status === 'fulfilled' ? results[0].value : null,
     sentiment: results[1].status === 'fulfilled' ? results[1].value : null,
     technical: results[2].status === 'fulfilled' ? results[2].value : null,
     news: results[3].status === 'fulfilled' ? results[3].value : null,
     onChain: results[4].status === 'fulfilled' ? results[4].value : null
   };
+
+  // 🔍 DEBUG: Log the exact structure of collected data
+  console.log('🔍 DEBUG: Collected data structure:');
+  console.log('  Sentiment:', {
+    hasData: !!collectedData.sentiment,
+    success: collectedData.sentiment?.success,
+    hasDataField: !!collectedData.sentiment?.data,
+    dataKeys: collectedData.sentiment?.data ? Object.keys(collectedData.sentiment.data) : [],
+    dataQuality: collectedData.sentiment?.data?.dataQuality || collectedData.sentiment?.dataQuality,
+    overallScore: collectedData.sentiment?.data?.overallScore || collectedData.sentiment?.overallScore
+  });
+  console.log('  On-Chain:', {
+    hasData: !!collectedData.onChain,
+    success: collectedData.onChain?.success,
+    hasDataField: !!collectedData.onChain?.data,
+    dataKeys: collectedData.onChain?.data ? Object.keys(collectedData.onChain.data) : [],
+    dataQuality: collectedData.onChain?.data?.dataQuality || collectedData.onChain?.dataQuality
+  });
+
+  return collectedData;
 }
 
 /**
