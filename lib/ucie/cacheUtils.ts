@@ -31,7 +31,7 @@ export type AnalysisType =
  * @param analysisType - Type of analysis
  * @param userId - User ID (optional, for logging only)
  * @param userEmail - User email (optional, for logging only)
- * @param maxAgeSeconds - Maximum age in seconds (default: 900 = 15 minutes)
+ * @param maxAgeSeconds - Maximum age in seconds (default: 1020 = 17 minutes)
  * @returns Cached data or null if not found/expired/too old
  */
 export async function getCachedAnalysis(
@@ -39,7 +39,7 @@ export async function getCachedAnalysis(
   analysisType: AnalysisType,
   userId?: string,
   userEmail?: string,
-  maxAgeSeconds: number = 900 // 15 minutes default freshness (matches CACHE_TTL)
+  maxAgeSeconds: number = 1020 // 17 minutes default freshness (matches longest core data TTL)
 ): Promise<any | null> {
   try {
     // ✅ Query by symbol + analysis_type only (no user_id)

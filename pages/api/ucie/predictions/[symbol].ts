@@ -33,8 +33,8 @@ interface PredictionsResponse {
   cached?: boolean;
 }
 
-// Cache TTL: 15 minutes (predictions don't change rapidly)
-const CACHE_TTL = 15 * 60; // 900 seconds
+// Cache TTL: 17 minutes (predictions don't change rapidly + buffer)
+const CACHE_TTL = 1020; // 1020 seconds (17 minutes)
 
 /**
  * Get CoinGecko ID from symbol

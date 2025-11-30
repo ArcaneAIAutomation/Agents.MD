@@ -53,8 +53,8 @@ interface ErrorResponse {
   symbol?: string;
 }
 
-// Cache TTL: 4.5 minutes (ensures fresh data for AI analysis + buffer for preview viewing)
-const CACHE_TTL = 270; // 270 seconds (4.5 minutes)
+// Cache TTL: 6.5 minutes (ensures fresh data for AI analysis + buffer for preview viewing)
+const CACHE_TTL = 390; // 390 seconds (6.5 minutes)
 
 async function handler(
   req: AuthenticatedRequest,

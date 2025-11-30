@@ -48,8 +48,8 @@ export interface RiskAssessmentResponse {
   error?: string;
 }
 
-// Cache TTL: 10 minutes (risk scores are relatively stable)
-const CACHE_TTL = 10 * 60; // 600 seconds
+// Cache TTL: 12 minutes (risk scores are relatively stable + buffer)
+const CACHE_TTL = 720; // 720 seconds (12 minutes)
 
 /**
  * Calculate data quality score based on available metrics

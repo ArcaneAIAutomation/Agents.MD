@@ -25,8 +25,8 @@ import { calculateTechnicalIndicators } from '../../../../lib/ucie/technicalAnal
 import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
-// Cache TTL: 4.5 minutes (ensures fresh data for AI analysis + buffer for preview viewing)
-const CACHE_TTL = 270; // 270 seconds (4.5 minutes)
+// Cache TTL: 6.5 minutes (ensures fresh data for AI analysis + buffer for preview viewing)
+const CACHE_TTL = 390; // 390 seconds (6.5 minutes)
 
 async function handler(
   req: AuthenticatedRequest,
