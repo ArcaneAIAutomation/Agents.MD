@@ -21,7 +21,7 @@ interface DataPreview {
   timestamp: string;
   dataQuality: number;
   summary: string;
-  geminiAnalysis: string | null; // ✅ Full Gemini AI analysis
+  aiAnalysis: string | null; // ✅ Full AI analysis (GPT-5.1)
   caesarPromptPreview: string; // ✅ Caesar prompt preview
   collectedData: {
     marketData: any;
@@ -213,65 +213,90 @@ export default function DataPreviewModal({
                 <h3 className="text-lg font-bold text-bitcoin-white mb-3">
                   Data Sources
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-3">
                   {/* Market Data */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-bitcoin-orange hover:bg-opacity-5 transition-colors">
                     {preview.collectedData.marketData?.success ? (
-                      <CheckCircle className="text-bitcoin-orange flex-shrink-0" size={20} />
+                      <CheckCircle className="text-bitcoin-orange flex-shrink-0 mt-0.5" size={20} />
                     ) : (
-                      <XCircle className="text-bitcoin-white-60 flex-shrink-0" size={20} />
+                      <XCircle className="text-bitcoin-white-60 flex-shrink-0 mt-0.5" size={20} />
                     )}
-                    <span className={preview.collectedData.marketData?.success ? 'text-bitcoin-white-80' : 'text-bitcoin-white-60 line-through'}>
-                      Market Data
-                    </span>
+                    <div className="flex-1">
+                      <span className={`font-semibold ${preview.collectedData.marketData?.success ? 'text-bitcoin-white' : 'text-bitcoin-white-60 line-through'}`}>
+                        Market Data
+                      </span>
+                      <p className="text-xs text-bitcoin-white-60 mt-0.5">
+                        Real-time price, volume, market cap from CoinGecko, CoinMarketCap, Kraken
+                      </p>
+                    </div>
                   </div>
 
                   {/* Technical */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-bitcoin-orange hover:bg-opacity-5 transition-colors">
                     {preview.collectedData.technical?.success ? (
-                      <CheckCircle className="text-bitcoin-orange flex-shrink-0" size={20} />
+                      <CheckCircle className="text-bitcoin-orange flex-shrink-0 mt-0.5" size={20} />
                     ) : (
-                      <XCircle className="text-bitcoin-white-60 flex-shrink-0" size={20} />
+                      <XCircle className="text-bitcoin-white-60 flex-shrink-0 mt-0.5" size={20} />
                     )}
-                    <span className={preview.collectedData.technical?.success ? 'text-bitcoin-white-80' : 'text-bitcoin-white-60 line-through'}>
-                      Technical
-                    </span>
+                    <div className="flex-1">
+                      <span className={`font-semibold ${preview.collectedData.technical?.success ? 'text-bitcoin-white' : 'text-bitcoin-white-60 line-through'}`}>
+                        Technical Analysis
+                      </span>
+                      <p className="text-xs text-bitcoin-white-60 mt-0.5">
+                        RSI, MACD, EMA, Bollinger Bands, ATR, Stochastic indicators
+                      </p>
+                    </div>
                   </div>
 
                   {/* News */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-bitcoin-orange hover:bg-opacity-5 transition-colors">
                     {preview.collectedData.news?.success ? (
-                      <CheckCircle className="text-bitcoin-orange flex-shrink-0" size={20} />
+                      <CheckCircle className="text-bitcoin-orange flex-shrink-0 mt-0.5" size={20} />
                     ) : (
-                      <XCircle className="text-bitcoin-white-60 flex-shrink-0" size={20} />
+                      <XCircle className="text-bitcoin-white-60 flex-shrink-0 mt-0.5" size={20} />
                     )}
-                    <span className={preview.collectedData.news?.success ? 'text-bitcoin-white-80' : 'text-bitcoin-white-60 line-through'}>
-                      News
-                    </span>
+                    <div className="flex-1">
+                      <span className={`font-semibold ${preview.collectedData.news?.success ? 'text-bitcoin-white' : 'text-bitcoin-white-60 line-through'}`}>
+                        News & Events
+                      </span>
+                      <p className="text-xs text-bitcoin-white-60 mt-0.5">
+                        Latest cryptocurrency news from NewsAPI and CryptoCompare
+                      </p>
+                    </div>
                   </div>
 
                   {/* Sentiment */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-bitcoin-orange hover:bg-opacity-5 transition-colors">
                     {preview.collectedData.sentiment?.success ? (
-                      <CheckCircle className="text-bitcoin-orange flex-shrink-0" size={20} />
+                      <CheckCircle className="text-bitcoin-orange flex-shrink-0 mt-0.5" size={20} />
                     ) : (
-                      <XCircle className="text-bitcoin-white-60 flex-shrink-0" size={20} />
+                      <XCircle className="text-bitcoin-white-60 flex-shrink-0 mt-0.5" size={20} />
                     )}
-                    <span className={preview.collectedData.sentiment?.success ? 'text-bitcoin-white-80' : 'text-bitcoin-white-60 line-through'}>
-                      Sentiment
-                    </span>
+                    <div className="flex-1">
+                      <span className={`font-semibold ${preview.collectedData.sentiment?.success ? 'text-bitcoin-white' : 'text-bitcoin-white-60 line-through'}`}>
+                        Social Sentiment
+                      </span>
+                      <p className="text-xs text-bitcoin-white-60 mt-0.5">
+                        Community sentiment from Twitter, Reddit, LunarCrush social metrics
+                      </p>
+                    </div>
                   </div>
 
                   {/* On-Chain */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-bitcoin-orange hover:bg-opacity-5 transition-colors">
                     {preview.collectedData.onChain?.success ? (
-                      <CheckCircle className="text-bitcoin-orange flex-shrink-0" size={20} />
+                      <CheckCircle className="text-bitcoin-orange flex-shrink-0 mt-0.5" size={20} />
                     ) : (
-                      <XCircle className="text-bitcoin-white-60 flex-shrink-0" size={20} />
+                      <XCircle className="text-bitcoin-white-60 flex-shrink-0 mt-0.5" size={20} />
                     )}
-                    <span className={preview.collectedData.onChain?.success ? 'text-bitcoin-white-80' : 'text-bitcoin-white-60 line-through'}>
-                      On-Chain
-                    </span>
+                    <div className="flex-1">
+                      <span className={`font-semibold ${preview.collectedData.onChain?.success ? 'text-bitcoin-white' : 'text-bitcoin-white-60 line-through'}`}>
+                        On-Chain Analytics
+                      </span>
+                      <p className="text-xs text-bitcoin-white-60 mt-0.5">
+                        Blockchain data, whale movements, network activity from Etherscan/Blockchain.com
+                      </p>
+                    </div>
                   </div>
                 </div>
                 <p className="text-xs text-bitcoin-white-60 mt-3 pt-3 border-t border-bitcoin-orange-20">
@@ -337,15 +362,51 @@ export default function DataPreviewModal({
                 <h3 className="text-lg font-bold text-bitcoin-white mb-3 flex items-center gap-2">
                   <span className="text-bitcoin-orange">🤖</span>
                   ChatGPT 5.1 AI Analysis
-                  {preview.geminiAnalysis && (
+                  {(preview.aiAnalysis || preview.summary) && (
                     <span className="text-xs text-bitcoin-white-60 font-normal ml-2">
-                      ({preview.geminiAnalysis.split(' ').length.toLocaleString()} words)
+                      ({(preview.aiAnalysis || preview.summary).split(' ').length.toLocaleString()} words)
                     </span>
                   )}
                 </h3>
                 <div className="prose prose-invert max-w-none">
-                  <div className="text-bitcoin-white-80 whitespace-pre-wrap leading-relaxed max-h-96 overflow-y-auto">
-                    {preview.geminiAnalysis || preview.summary}
+                  <div className="text-bitcoin-white-80 leading-relaxed max-h-96 overflow-y-auto space-y-4">
+                    {/* Parse and format the AI analysis */}
+                    {(preview.aiAnalysis || preview.summary).split('\n\n').map((paragraph, index) => {
+                      // Check if it's a heading (starts with ##, ###, or **bold**)
+                      if (paragraph.trim().startsWith('##')) {
+                        const heading = paragraph.replace(/^#+\s*/, '').trim();
+                        return (
+                          <h4 key={index} className="text-lg font-bold text-bitcoin-orange mt-4 mb-2">
+                            {heading}
+                          </h4>
+                        );
+                      }
+                      
+                      // Check if it's a bullet list
+                      if (paragraph.includes('\n- ') || paragraph.includes('\n• ')) {
+                        const items = paragraph.split('\n').filter(line => line.trim().startsWith('-') || line.trim().startsWith('•'));
+                        return (
+                          <ul key={index} className="list-disc list-inside space-y-1 ml-4">
+                            {items.map((item, i) => (
+                              <li key={i} className="text-bitcoin-white-80">
+                                {item.replace(/^[-•]\s*/, '')}
+                              </li>
+                            ))}
+                          </ul>
+                        );
+                      }
+                      
+                      // Regular paragraph
+                      if (paragraph.trim()) {
+                        return (
+                          <p key={index} className="text-bitcoin-white-80">
+                            {paragraph.trim()}
+                          </p>
+                        );
+                      }
+                      
+                      return null;
+                    })}
                   </div>
                 </div>
                 <p className="text-xs text-bitcoin-white-60 mt-3 pt-3 border-t border-bitcoin-orange-20">
