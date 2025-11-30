@@ -1,0 +1,46 @@
+{
+  "timestamp": "2025-11-30T01:45:24.620Z",
+  "apiKey": "axcnket7q4...",
+  "tests": [
+    {
+      "test": "Coin Details",
+      "status": "success",
+      "endpoint": "/coins/btc/v1",
+      "dataPoints": 2,
+      "keyMetrics": {}
+    },
+    {
+      "test": "Time Series Data",
+      "status": "failed",
+      "error": "Invalid endpoint (2)",
+      "statusCode": 404
+    },
+    {
+      "test": "Social Metrics",
+      "status": "success",
+      "metrics": {}
+    },
+    {
+      "test": "Market Metrics",
+      "status": "success",
+      "metrics": {}
+    },
+    {
+      "test": "Galaxy Score & Alt Rank",
+      "status": "success",
+      "metrics": {}
+    },
+    {
+      "test": "Influencer Data",
+      "status": "failed",
+      "error": "Invalid endpoint (2)",
+      "statusCode": 404
+    },
+    {
+      "test": "News/Posts Data",
+      "status": "failed",
+      "error": "Invalid endpoint (2)",
+      "statusCode": 404
+    }
+  ]
+}

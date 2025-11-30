@@ -44,6 +44,177 @@ async function fetchFearGreedIndex(): Promise<{ value: number; classification: s
 }
 
 /**
+ * ✅ NEW: Fetch CoinMarketCap sentiment data
+ * Provides market cap dominance, volume trends, and price momentum
+ */
+async function fetchCoinMarketCapSentiment(symbol: string): Promise<any | null> {
+  const apiKey = process.env.COINMARKETCAP_API_KEY;
+  
+  if (!apiKey) {
+    console.warn('❌ CoinMarketCap API key not configured');
+    return null;
+  }
+
+  try {
+    console.log(`📊 Fetching CoinMarketCap sentiment for ${symbol}...`);
+    
+    const response = await fetch(
+      `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=${symbol}&convert=USD`,
+      {
+        headers: {
+          'X-CMC_PRO_API_KEY': apiKey,
+          'Accept': 'application/json'
+        },
+        signal: AbortSignal.timeout(10000)
+      }
+    );
+
+    if (!response.ok) {
+      console.warn(`❌ CoinMarketCap API returned ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json();
+    const coinData = data.data?.[symbol];
+    
+    if (!coinData) {
+      console.warn(`❌ No CoinMarketCap data for ${symbol}`);
+      return null;
+    }
+
+    const quote = coinData.quote?.USD;
+    
+    // Calculate sentiment from price momentum and volume
+    const priceChange24h = quote?.percent_change_24h || 0;
+    const priceChange7d = quote?.percent_change_7d || 0;
+    const volumeChange24h = quote?.volume_change_24h || 0;
+    const marketCapDominance = quote?.market_cap_dominance || 0;
+    
+    // Sentiment score based on price momentum (0-100 scale)
+    // Positive changes = bullish, negative = bearish
+    let sentimentScore = 50; // Neutral baseline
+    
+    // Price change impact (±30 points max)
+    sentimentScore += Math.min(Math.max(priceChange24h * 2, -30), 30);
+    
+    // Volume change impact (±10 points max)
+    sentimentScore += Math.min(Math.max(volumeChange24h / 10, -10), 10);
+    
+    // 7-day trend impact (±10 points max)
+    sentimentScore += Math.min(Math.max(priceChange7d, -10), 10);
+    
+    // Clamp to 0-100
+    sentimentScore = Math.max(0, Math.min(100, sentimentScore));
+    
+    console.log(`✅ CoinMarketCap sentiment: ${sentimentScore.toFixed(0)}/100`);
+    
+    return {
+      sentimentScore: Math.round(sentimentScore),
+      priceChange24h,
+      priceChange7d,
+      volumeChange24h,
+      marketCapDominance,
+      volume24h: quote?.volume_24h || 0,
+      marketCap: quote?.market_cap || 0,
+      circulatingSupply: coinData.circulating_supply || 0,
+      totalSupply: coinData.total_supply || 0,
+      rank: coinData.cmc_rank || 0
+    };
+  } catch (error) {
+    console.error('❌ CoinMarketCap sentiment fetch error:', error);
+    return null;
+  }
+}
+
+/**
+ * ✅ NEW: Fetch CoinGecko sentiment data
+ * Provides community scores, developer activity, and public interest
+ */
+async function fetchCoinGeckoSentiment(symbol: string): Promise<any | null> {
+  try {
+    console.log(`📊 Fetching CoinGecko sentiment for ${symbol}...`);
+    
+    // Map symbol to CoinGecko ID
+    const coinId = symbol.toLowerCase() === 'btc' ? 'bitcoin' : 
+                   symbol.toLowerCase() === 'eth' ? 'ethereum' : 
+                   symbol.toLowerCase();
+    
+    const response = await fetch(
+      `https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=true&developer_data=true&sparkline=false`,
+      {
+        headers: {
+          'Accept': 'application/json',
+          ...(process.env.COINGECKO_API_KEY && {
+            'x-cg-pro-api-key': process.env.COINGECKO_API_KEY
+          })
+        },
+        signal: AbortSignal.timeout(10000)
+      }
+    );
+
+    if (!response.ok) {
+      console.warn(`❌ CoinGecko API returned ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json();
+    
+    // Extract sentiment indicators
+    const communityScore = data.community_score || 0;
+    const developerScore = data.developer_score || 0;
+    const publicInterestScore = data.public_interest_score || 0;
+    const sentimentVotesUpPercentage = data.sentiment_votes_up_percentage || 50;
+    
+    // Community data
+    const twitterFollowers = data.community_data?.twitter_followers || 0;
+    const redditSubscribers = data.community_data?.reddit_subscribers || 0;
+    const redditActiveAccounts = data.community_data?.reddit_accounts_active_48h || 0;
+    
+    // Market data for sentiment
+    const priceChange24h = data.market_data?.price_change_percentage_24h || 0;
+    const priceChange7d = data.market_data?.price_change_percentage_7d || 0;
+    const priceChange30d = data.market_data?.price_change_percentage_30d || 0;
+    
+    // Calculate overall sentiment (0-100 scale)
+    let sentimentScore = 0;
+    
+    // Community score (0-100) - 30% weight
+    sentimentScore += communityScore * 0.3;
+    
+    // Developer score (0-100) - 20% weight
+    sentimentScore += developerScore * 0.2;
+    
+    // Public interest (0-100) - 20% weight
+    sentimentScore += publicInterestScore * 20 * 0.2; // Scale to 100
+    
+    // Sentiment votes - 30% weight
+    sentimentScore += sentimentVotesUpPercentage * 0.3;
+    
+    console.log(`✅ CoinGecko sentiment: ${sentimentScore.toFixed(0)}/100`);
+    
+    return {
+      sentimentScore: Math.round(sentimentScore),
+      communityScore,
+      developerScore,
+      publicInterestScore,
+      sentimentVotesUpPercentage,
+      sentimentVotesDownPercentage: 100 - sentimentVotesUpPercentage,
+      twitterFollowers,
+      redditSubscribers,
+      redditActiveAccounts,
+      priceChange24h,
+      priceChange7d,
+      priceChange30d,
+      marketCapRank: data.market_cap_rank || 0,
+      coingeckoRank: data.coingecko_rank || 0
+    };
+  } catch (error) {
+    console.error('❌ CoinGecko sentiment fetch error:', error);
+    return null;
+  }
+}
+
+/**
  * Fetch LunarCrush data (optional - may timeout)
  * 
  * ✅ FIXED: Uses correct v4 API endpoint and field mapping
@@ -230,49 +401,67 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log(`❌ Cache miss for ${symbolUpper}/sentiment - fetching fresh data`);
 
-    // 2. Fetch sentiment data from all sources IN PARALLEL (faster)
-    const [fearGreed, lunarCrush, reddit] = await Promise.allSettled([
+    // 2. Fetch sentiment data from ALL sources IN PARALLEL (faster)
+    const [fearGreed, coinMarketCap, coinGecko, lunarCrush, reddit] = await Promise.allSettled([
       fetchFearGreedIndex(),
+      fetchCoinMarketCapSentiment(symbolUpper),
+      fetchCoinGeckoSentiment(symbolUpper),
       fetchLunarCrushData(symbolUpper),
       fetchRedditSentiment(symbolUpper)
     ]);
 
     // Extract results
     const fearGreedData = fearGreed.status === 'fulfilled' ? fearGreed.value : null;
+    const coinMarketCapData = coinMarketCap.status === 'fulfilled' ? coinMarketCap.value : null;
+    const coinGeckoData = coinGecko.status === 'fulfilled' ? coinGecko.value : null;
     const lunarCrushData = lunarCrush.status === 'fulfilled' ? lunarCrush.value : null;
     const redditData = reddit.status === 'fulfilled' ? reddit.value : null;
 
-    // 3. Calculate aggregated sentiment score
+    // 3. Calculate aggregated sentiment score with NEW sources
     const scores: number[] = [];
     let totalWeight = 0;
 
-    // Fear & Greed Index (weight: 40%) - PRIMARY SOURCE
+    // Fear & Greed Index (weight: 25%) - Market-wide sentiment
     if (fearGreedData) {
-      scores.push(fearGreedData.value * 0.4);
-      totalWeight += 0.4;
-    }
-
-    // LunarCrush (weight: 35%)
-    if (lunarCrushData) {
-      const lcSentiment = calculateLunarCrushSentiment(lunarCrushData);
-      scores.push(lcSentiment * 0.35);
-      totalWeight += 0.35;
-    }
-
-    // Reddit (weight: 25%)
-    if (redditData) {
-      scores.push(redditData.sentiment * 0.25);
+      scores.push(fearGreedData.value * 0.25);
       totalWeight += 0.25;
     }
 
-    // 4. Calculate data quality
+    // ✅ NEW: CoinMarketCap (weight: 20%) - Price momentum & volume
+    if (coinMarketCapData) {
+      scores.push(coinMarketCapData.sentimentScore * 0.20);
+      totalWeight += 0.20;
+    }
+
+    // ✅ NEW: CoinGecko (weight: 20%) - Community & developer activity
+    if (coinGeckoData) {
+      scores.push(coinGeckoData.sentimentScore * 0.20);
+      totalWeight += 0.20;
+    }
+
+    // LunarCrush (weight: 20%) - Social media metrics
+    if (lunarCrushData) {
+      const lcSentiment = calculateLunarCrushSentiment(lunarCrushData);
+      scores.push(lcSentiment * 0.20);
+      totalWeight += 0.20;
+    }
+
+    // Reddit (weight: 15%) - Community discussions
+    if (redditData) {
+      scores.push(redditData.sentiment * 0.15);
+      totalWeight += 0.15;
+    }
+
+    // 4. Calculate data quality (now with 5 sources)
     let dataQuality = 0;
-    if (fearGreedData) dataQuality += 40; // Fear & Greed is most reliable
-    if (lunarCrushData) dataQuality += 35; // LunarCrush is secondary
-    if (redditData) dataQuality += 25; // Reddit is tertiary
+    if (fearGreedData) dataQuality += 25; // Fear & Greed
+    if (coinMarketCapData) dataQuality += 20; // CoinMarketCap
+    if (coinGeckoData) dataQuality += 20; // CoinGecko
+    if (lunarCrushData) dataQuality += 20; // LunarCrush
+    if (redditData) dataQuality += 15; // Reddit
 
     // ✅ CRITICAL FIX: NO FALLBACK DATA - Fail if insufficient quality
-    // Require at least Fear & Greed Index (40% minimum) for reliable sentiment
+    // Require at least 2 sources (40% minimum) for reliable sentiment
     if (dataQuality < 40) {
       console.log(`❌ Insufficient data quality: ${dataQuality}% (minimum 40% required)`);
       return res.status(503).json({
@@ -281,10 +470,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         dataQuality: dataQuality,
         availableSources: {
           fearGreed: !!fearGreedData,
+          coinMarketCap: !!coinMarketCapData,
+          coinGecko: !!coinGeckoData,
           lunarCrush: !!lunarCrushData,
           reddit: !!redditData
         },
-        message: 'Sentiment analysis requires at least the Fear & Greed Index. Please try again later.'
+        message: 'Sentiment analysis requires at least 2 data sources. Please try again later.'
       });
     }
 
@@ -298,36 +489,82 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       symbol: symbolUpper,
       overallScore,
       sentiment: overallScore > 60 ? 'bullish' : overallScore < 40 ? 'bearish' : 'neutral',
+      sentimentDescription: `Overall market sentiment is ${overallScore > 60 ? 'BULLISH' : overallScore < 40 ? 'BEARISH' : 'NEUTRAL'} based on ${Math.round(totalWeight * 100)}% of available data sources.`,
       
-      // Fear & Greed Index (PRIMARY)
+      // Fear & Greed Index
       fearGreedIndex: fearGreedData ? {
         value: fearGreedData.value,
         classification: fearGreedData.classification,
+        weight: '25%',
         description: 'Market-wide sentiment indicator. 0-25 = Extreme Fear (good buying opportunity), 25-45 = Fear, 45-55 = Neutral, 55-75 = Greed, 75-100 = Extreme Greed (caution advised)'
       } : null,
       
-      // LunarCrush data (galaxy_score and alt_rank only)
+      // ✅ NEW: CoinMarketCap sentiment
+      coinMarketCap: coinMarketCapData ? {
+        sentimentScore: coinMarketCapData.sentimentScore,
+        weight: '20%',
+        priceChange24h: coinMarketCapData.priceChange24h,
+        priceChange7d: coinMarketCapData.priceChange7d,
+        volumeChange24h: coinMarketCapData.volumeChange24h,
+        marketCapDominance: coinMarketCapData.marketCapDominance,
+        volume24h: coinMarketCapData.volume24h,
+        marketCap: coinMarketCapData.marketCap,
+        rank: coinMarketCapData.rank,
+        description: 'Price momentum and volume analysis. Sentiment derived from 24h/7d price changes, volume trends, and market dominance. Higher scores indicate bullish momentum.'
+      } : null,
+      
+      // ✅ NEW: CoinGecko sentiment
+      coinGecko: coinGeckoData ? {
+        sentimentScore: coinGeckoData.sentimentScore,
+        weight: '20%',
+        communityScore: coinGeckoData.communityScore,
+        developerScore: coinGeckoData.developerScore,
+        publicInterestScore: coinGeckoData.publicInterestScore,
+        sentimentVotesUpPercentage: coinGeckoData.sentimentVotesUpPercentage,
+        sentimentVotesDownPercentage: coinGeckoData.sentimentVotesDownPercentage,
+        twitterFollowers: coinGeckoData.twitterFollowers,
+        redditSubscribers: coinGeckoData.redditSubscribers,
+        redditActiveAccounts: coinGeckoData.redditActiveAccounts,
+        priceChange24h: coinGeckoData.priceChange24h,
+        priceChange7d: coinGeckoData.priceChange7d,
+        priceChange30d: coinGeckoData.priceChange30d,
+        marketCapRank: coinGeckoData.marketCapRank,
+        description: 'Community engagement and developer activity. Combines community score, developer activity, public interest, and user sentiment votes. Higher scores indicate strong community support.'
+      } : null,
+      
+      // LunarCrush social metrics
       lunarCrush: lunarCrushData ? {
         galaxyScore: lunarCrushData.galaxy_score || 0,
+        weight: '20%',
         galaxyScoreDescription: 'Social media popularity score (0-100). Higher scores mean more social buzz and community engagement.',
         altRank: lunarCrushData.alt_rank || 0,
         altRankDescription: 'Social ranking among all cryptocurrencies. Lower numbers = higher social activity (Rank 1 is most popular).',
         volatility: lunarCrushData.volatility || 0,
-        volatilityDescription: 'Price volatility indicator. Higher values mean bigger price swings.'
+        volatilityDescription: 'Price volatility indicator. Higher values mean bigger price swings.',
+        description: 'Social media metrics from Twitter, Reddit, and other platforms. Galaxy Score measures overall social engagement and influence.'
       } : null,
       
-      // Reddit data
+      // Reddit community data
       reddit: redditData ? {
         mentions24h: redditData.mentions24h,
+        weight: '15%',
         mentionsDescription: 'Number of Reddit posts mentioning Bitcoin in the last 24 hours across crypto subreddits.',
         sentiment: redditData.sentiment,
         sentimentDescription: 'Reddit community sentiment (0-100). Above 50 = positive, below 50 = negative.',
-        activeSubreddits: redditData.activeSubreddits
+        activeSubreddits: redditData.activeSubreddits,
+        description: 'Community discussions from r/cryptocurrency, r/CryptoMarkets, and r/Bitcoin. Sentiment based on post upvotes and engagement.'
       } : null,
       
-      // Data quality
+      // Data quality and sources
       dataQuality,
-      dataQualityDescription: 'Percentage of data sources successfully retrieved. 100% = all sources working.',
+      dataQualityDescription: `Successfully retrieved ${dataQuality}% of sentiment data from 5 sources (Fear & Greed, CoinMarketCap, CoinGecko, LunarCrush, Reddit).`,
+      sourcesUsed: [
+        fearGreedData && 'Fear & Greed Index (25%)',
+        coinMarketCapData && 'CoinMarketCap (20%)',
+        coinGeckoData && 'CoinGecko (20%)',
+        lunarCrushData && 'LunarCrush (20%)',
+        redditData && 'Reddit (15%)'
+      ].filter(Boolean),
       
       timestamp: new Date().toISOString()
     };
