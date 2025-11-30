@@ -25,16 +25,19 @@ import { getCachedAnalysis, setCachedAnalysis } from '../../../../lib/ucie/cache
 import { fetchEthereumOnChainData } from '../../../../lib/ucie/ethereumOnChain';
 
 /**
- * ✅ SIMPLIFIED Bitcoin On-Chain Data Fetcher
- * Mirrors the working BTC analysis pattern with direct API calls and proper timeouts
- * Focuses on essential metrics only to avoid timeout issues
+ * ✅ WORKING Bitcoin On-Chain Data Fetcher with REAL Whale Activity
+ * Uses the same blockchain client as the working Whale Watch feature
+ * Fetches actual whale transactions from the last 30 minutes
  */
 async function fetchBitcoinOnChainDataSimplified() {
   try {
-    console.log('📊 Fetching simplified Bitcoin on-chain data...');
+    console.log('📊 Fetching Bitcoin on-chain data with real whale activity...');
 
-    // Fetch basic stats and latest block in parallel (faster)
-    const [statsResponse, blockResponse] = await Promise.allSettled([
+    // Import blockchain client (same as Whale Watch)
+    const { blockchainClient } = await import('../../../../utils/blockchainClient');
+
+    // Fetch basic stats, latest block, and BTC price in parallel
+    const [statsResponse, blockResponse, priceResponse] = await Promise.allSettled([
       fetch('https://blockchain.info/stats?format=json', {
         signal: AbortSignal.timeout(5000),
         headers: { 'User-Agent': 'UCIE/1.0' }
@@ -42,6 +45,12 @@ async function fetchBitcoinOnChainDataSimplified() {
       fetch('https://blockchain.info/latestblock', {
         signal: AbortSignal.timeout(5000),
         headers: { 'User-Agent': 'UCIE/1.0' }
+      }),
+      fetch('https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=BTC', {
+        signal: AbortSignal.timeout(5000),
+        headers: {
+          'X-CMC_PRO_API_KEY': process.env.COINMARKETCAP_API_KEY || ''
+        }
       })
     ]);
 
@@ -54,12 +63,80 @@ async function fetchBitcoinOnChainDataSimplified() {
       ? await blockResponse.value.json()
       : null;
 
+    // Get BTC price for whale USD calculations
+    let btcPrice = 0;
+    if (priceResponse.status === 'fulfilled' && priceResponse.value.ok) {
+      const priceData = await priceResponse.value.json();
+      btcPrice = priceData.data?.BTC?.quote?.USD?.price || 0;
+    }
+
+    // ✅ FETCH REAL WHALE ACTIVITY (same as Whale Watch)
+    let whaleActivity = {
+      timeframe: '30 minutes',
+      minThreshold: '50 BTC',
+      summary: {
+        totalTransactions: 0,
+        totalValueUSD: 0,
+        totalValueBTC: 0,
+        largestTransaction: 0,
+        message: 'No whale activity detected'
+      }
+    };
+
+    if (btcPrice > 0) {
+      try {
+        console.log('🐋 Detecting whale transactions (>50 BTC) in last 30 minutes...');
+        
+        // Get unconfirmed and recent confirmed transactions (same as Whale Watch)
+        const [unconfirmedTxs, confirmedTxs] = await Promise.all([
+          blockchainClient.getUnconfirmedTransactions(),
+          blockchainClient.getRecentTransactions(30)
+        ]);
+
+        const allTransactions = [...unconfirmedTxs, ...confirmedTxs];
+        console.log(`📊 Scanning ${allTransactions.length} transactions for whales...`);
+
+        // Detect whale transactions (>50 BTC)
+        const whales = blockchainClient.detectWhaleTransactions(allTransactions, 50, btcPrice);
+        
+        if (whales.length > 0) {
+          const totalBTC = whales.reduce((sum, w) => sum + w.amount, 0);
+          const totalUSD = whales.reduce((sum, w) => sum + w.amountUSD, 0);
+          const largestWhale = Math.max(...whales.map(w => w.amount));
+
+          whaleActivity = {
+            timeframe: '30 minutes',
+            minThreshold: '50 BTC',
+            summary: {
+              totalTransactions: whales.length,
+              totalValueUSD: totalUSD,
+              totalValueBTC: totalBTC,
+              largestTransaction: largestWhale,
+              message: `${whales.length} whale transaction${whales.length > 1 ? 's' : ''} detected`
+            }
+          };
+
+          console.log(`🐋 Detected ${whales.length} whale transactions (${totalBTC.toFixed(2)} BTC / $${totalUSD.toLocaleString()})`);
+        } else {
+          console.log('🐋 No whale transactions detected in last 30 minutes');
+        }
+      } catch (whaleError) {
+        console.error('⚠️ Whale detection failed (continuing with other data):', whaleError);
+        whaleActivity.summary.message = 'Whale detection temporarily unavailable';
+      }
+    } else {
+      console.warn('⚠️ BTC price unavailable - skipping whale detection');
+      whaleActivity.summary.message = 'Whale detection requires BTC price data';
+    }
+
     // Calculate data quality
     let dataQuality = 0;
-    if (stats) dataQuality += 60;
-    if (latestBlock) dataQuality += 40;
+    if (stats) dataQuality += 40;
+    if (latestBlock) dataQuality += 30;
+    if (btcPrice > 0) dataQuality += 20;
+    if (whaleActivity.summary.totalTransactions >= 0) dataQuality += 10;
 
-    // Return simplified on-chain data
+    // Return complete on-chain data with REAL whale activity
     return {
       success: true,
       symbol: 'BTC',
@@ -83,18 +160,9 @@ async function fetchBitcoinOnChainDataSimplified() {
         maxSupply: 21000000,
         
         // Market Data
-        marketPriceUSD: stats?.market_price_usd || 0
+        marketPriceUSD: btcPrice || stats?.market_price_usd || 0
       },
-      whaleActivity: {
-        timeframe: '24 hours',
-        minThreshold: '50 BTC',
-        summary: {
-          totalTransactions: 0,
-          totalValueUSD: 0,
-          totalValueBTC: 0,
-          message: 'Whale tracking available in full analysis mode'
-        }
-      },
+      whaleActivity,
       mempoolAnalysis: {
         congestion: stats?.n_tx_mempool > 100000 ? 'high' : stats?.n_tx_mempool > 50000 ? 'medium' : 'low',
         averageFee: 0,
@@ -104,7 +172,7 @@ async function fetchBitcoinOnChainDataSimplified() {
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error('Bitcoin on-chain simplified fetch error:', error);
+    console.error('Bitcoin on-chain fetch error:', error);
     
     // Return minimal data on error
     return {
@@ -124,12 +192,13 @@ async function fetchBitcoinOnChainDataSimplified() {
         marketPriceUSD: 0
       },
       whaleActivity: {
-        timeframe: '24 hours',
+        timeframe: '30 minutes',
         minThreshold: '50 BTC',
         summary: {
           totalTransactions: 0,
           totalValueUSD: 0,
           totalValueBTC: 0,
+          largestTransaction: 0,
           message: 'Data temporarily unavailable'
         }
       },
