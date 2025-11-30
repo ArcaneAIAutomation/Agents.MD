@@ -18,7 +18,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { setCachedAnalysis, getCachedAnalysis } from '../../../../lib/ucie/cacheUtils';
 import { storeOpenAISummary } from '../../../../lib/ucie/openaiSummaryStorage';
-import { generateCryptoSummary } from '../../../../lib/ucie/geminiClient';
+import { generateOpenAIAnalysis } from '../../../../lib/ucie/openaiClient';
 import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
 
 interface DataPreview {
@@ -368,17 +368,17 @@ async function handler(
       console.warn(`   Technical Data: ${collectedData.technical?.success ? '✅' : '❌'}`);
     }
 
-    // ✅ ALWAYS attempt Gemini 2.0 Flash summary (latest experimental model)
+    // ✅ ALWAYS attempt GPT-5.1 summary (enhanced reasoning model)
     let summary = '';
-    console.log(`🤖 Generating Gemini 2.0 Flash summary for ${normalizedSymbol}...`);
+    console.log(`🤖 Generating GPT-5.1 summary for ${normalizedSymbol}...`);
     try {
       summary = await generateAISummary(normalizedSymbol, collectedData, apiStatus);
-      console.log(`✅ Gemini 2.0 Flash summary generated (${summary.length} chars, ~${Math.round(summary.split(' ').length)} words)`);
+      console.log(`✅ GPT-5.1 summary generated (${summary.length} chars, ~${Math.round(summary.split(' ').length)} words)`);
       
       // ✅ CRITICAL: Store ALL summaries (even short ones) so status endpoint knows analysis completed
       const analysisType = summary.length > 500 ? 'summary' : 'fallback';
       
-      // Store Gemini summary in database
+      // Store GPT-5.1 summary in database (using Gemini table for backward compatibility)
       const { storeGeminiAnalysis } = await import('../../../../lib/ucie/geminiAnalysisStorage');
       await storeGeminiAnalysis({
         symbol: normalizedSymbol,
@@ -387,12 +387,12 @@ async function handler(
         summaryText: summary,
         dataQualityScore: dataQuality,
         apiStatus: apiStatus,
-        modelUsed: 'gemini-2.0-flash-exp', // ✅ Latest Gemini experimental model
+        modelUsed: 'gpt-5.1', // ✅ Using GPT-5.1 instead of Gemini
         analysisType: analysisType, // Track if it's full summary or fallback
         dataSourcesUsed: apiStatus.working,
         availableDataCount: apiStatus.working.length
       });
-      console.log(`✅ Gemini ${analysisType} stored in ucie_gemini_analysis table (${summary.length} chars)`);
+      console.log(`✅ GPT-5.1 ${analysisType} stored in ucie_gemini_analysis table (${summary.length} chars)`);
       
       // Also store in OpenAI summary table for backward compatibility
       const { storeOpenAISummary } = await import('../../../../lib/ucie/openaiSummaryStorage');
@@ -434,7 +434,7 @@ async function handler(
           summaryText: `ERROR: ${error instanceof Error ? error.message : String(error)}\n\nFallback Summary:\n${summary}`,
           dataQualityScore: dataQuality,
           apiStatus: apiStatus,
-          modelUsed: 'gemini-2.5-pro',
+          modelUsed: 'gpt-5.1-error',
           analysisType: 'error', // Mark as error so status endpoint knows
           dataSourcesUsed: apiStatus.working,
           availableDataCount: apiStatus.working.length
@@ -797,7 +797,7 @@ function calculateAPIStatus(collectedData: any) {
  * Generate AI summary of collected data
  * ✅ CRITICAL: ONLY uses data from Supabase database (ucie_analysis_cache)
  * This ensures AI summary is based on the same data Caesar will use
- * Currently using: Gemini 2.0 Flash (latest experimental model)
+ * ✅ UPGRADED: Using GPT-5.1 with medium reasoning for enhanced analysis
  */
 async function generateAISummary(
   symbol: string,
@@ -1087,18 +1087,16 @@ function generateFallbackSummary(
 }
 
 /**
- * Generate Gemini AI summary from collected data (fallback when database is empty)
+ * Generate GPT-5.1 AI summary from collected data (fallback when database is empty)
  * Uses the collectedData parameter directly instead of reading from database
+ * ✅ UPGRADED: Using GPT-5.1 with medium reasoning for enhanced analysis
  */
-async function generateGeminiFromCollectedData(
+async function generateGPT51FromCollectedData(
   symbol: string,
   collectedData: any,
   apiStatus: any
 ): Promise<string> {
-  console.log(`📊 Gemini AI Summary: Using collectedData parameter (database fallback)`);
-  
-  // Import Gemini client
-  const { generateGeminiAnalysis } = await import('../../../../lib/ucie/geminiClient');
+  console.log(`📊 GPT-5.1 AI Summary: Using collectedData parameter (database fallback)`);
   
   // Build context from collectedData parameter
   let context = `Cryptocurrency: ${symbol}\n\n`;
@@ -1182,39 +1180,40 @@ Structure your analysis with these sections:
 
 Use ONLY the data provided. Be specific with numbers, percentages, and concrete data points.`;
 
-  // Call Gemini AI
+  // Call GPT-5.1 AI with medium reasoning
   try {
-    const geminiPromise = generateGeminiAnalysis(systemPrompt, context, 10000, 0.7);
+    const gpt51Promise = generateOpenAIAnalysis(systemPrompt, context, 8000, 0.7);
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Gemini timeout after 45 seconds')), 45000);
+      setTimeout(() => reject(new Error('GPT-5.1 timeout after 60 seconds')), 60000);
     });
     
-    const response = await Promise.race([geminiPromise, timeoutPromise]);
-    console.log(`✅ Gemini AI generated ${response.tokensUsed} tokens from collectedData`);
+    const response = await Promise.race([gpt51Promise, timeoutPromise]);
+    console.log(`✅ GPT-5.1 generated ${response.tokensUsed} tokens from collectedData (model: ${response.model})`);
     return response.content;
   } catch (error) {
-    console.error(`❌ Gemini AI failed:`, error);
+    console.error(`❌ GPT-5.1 failed:`, error);
     throw error; // Re-throw to trigger fallback in caller
   }
 }
 
 /**
- * Generate Gemini AI summary of collected data
+ * Generate GPT-5.1 AI summary of collected data
  * ✅ SIMPLIFIED: ALWAYS use collectedData parameter (already in memory)
+ * ✅ UPGRADED: Using GPT-5.1 with medium reasoning for enhanced analysis
  * This avoids database read issues and timeout problems
  */
-async function generateGeminiSummary(
+async function generateGPT51Summary(
   symbol: string,
   collectedData: any,
   apiStatus: any
 ): Promise<string> {
-  console.log(`📊 Gemini AI Summary: Using collectedData parameter (in-memory, fast)`);
+  console.log(`📊 GPT-5.1 AI Summary: Using collectedData parameter (in-memory, fast)`);
   console.log(`   This data was just collected in Phase 1 and is already available`);
   
   // ✅ SIMPLIFIED: Just use the collectedData that was passed in
   // This is the data that was just collected in Phase 1 and is already in memory
   // No need to read from database - it's the same data!
-  return generateGeminiFromCollectedData(symbol, collectedData, apiStatus);
+  return generateGPT51FromCollectedData(symbol, collectedData, apiStatus);
 }
 
 /**

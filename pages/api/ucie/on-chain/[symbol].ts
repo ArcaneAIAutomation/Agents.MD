@@ -255,20 +255,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (symbolUpper === 'BTC' || symbolUpper === 'BITCOIN') {
       // ✅ FIXED: Use simplified direct API calls (mirrors working BTC analysis pattern)
       onChainData = await fetchBitcoinOnChainDataSimplified();
-    } else if (symbolUpper === 'ETH' || symbolUpper === 'ETHEREUM') {
-      onChainData = await fetchEthereumOnChainData();
     } else {
-      // For other tokens, return minimal data
-      return res.status(200).json({
-        success: true,
-        data: {
-          symbol: symbolUpper,
-          chain: 'unknown',
-          message: 'On-chain analysis currently only available for BTC and ETH',
-          dataQuality: 0,
-          timestamp: new Date().toISOString()
-        },
-        cached: false,
+      // ❌ RESTRICTION: Only Bitcoin is supported for on-chain analysis
+      console.log(`❌ On-chain analysis not supported for ${symbolUpper} - Bitcoin only`);
+      return res.status(400).json({
+        success: false,
+        error: 'On-chain analysis is only available for Bitcoin (BTC)',
+        symbol: symbolUpper,
+        message: 'UCIE currently focuses on Bitcoin on-chain metrics only',
         timestamp: new Date().toISOString()
       });
     }
