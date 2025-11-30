@@ -273,7 +273,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // 3. Cache the result (3 minutes = 180 seconds)
+    // 3. Cache the result (4.5 minutes = 270 seconds)
     // ✅ FIX: Store unwrapped data (no API wrappers)
     const unwrappedData = {
       networkMetrics: onChainData.networkMetrics,
@@ -291,7 +291,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       symbolUpper,
       'on-chain',
       unwrappedData,
-      180, // 3 minutes
+      270, // 4.5 minutes
       onChainData.dataQuality
     );
 
