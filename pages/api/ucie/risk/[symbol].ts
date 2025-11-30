@@ -1,16 +1,24 @@
 /**
  * UCIE Risk Assessment API Endpoint
  * 
- * GET /api/ucie/risk/[symbol]
+ * GET /api/ucie/risk/BTC
  * 
- * Calculates comprehensive risk metrics including:
- * - Volatility metrics (30d, 90d, 1y)
- * - Correlation analysis (BTC, ETH, S&P 500, Gold)
- * - Maximum drawdown estimation (Monte Carlo)
- * - Risk scoring (0-100)
- * - Portfolio impact analysis
+ * Returns risk analysis to help you understand potential losses and volatility.
  * 
- * Caches results for 1 hour
+ * What you'll see:
+ * - Risk Score (0-100): Overall risk level (0=Very Low Risk, 100=Extreme Risk)
+ * - Volatility: How much Bitcoin's price swings daily (higher = more risky)
+ * - Maximum Drawdown: Worst potential loss from peak to bottom (e.g., -30% means you could lose 30%)
+ * - Sharpe Ratio: Risk-adjusted returns (higher = better returns for the risk taken)
+ * - Value at Risk (VaR): Maximum expected loss in a bad day (95% confidence)
+ * - Correlation: How Bitcoin moves with stocks, gold, and other assets
+ * 
+ * Why it matters: Risk assessment helps you decide how much to invest and whether you can
+ * handle the potential losses. Bitcoin is volatile - this shows you exactly how volatile.
+ * Use this to size your position appropriately for your risk tolerance.
+ * 
+ * Risk Levels: 0-20 (Low), 20-40 (Moderate), 40-60 (High), 60-80 (Very High), 80-100 (Extreme)
+ * Cache: 1 hour
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';

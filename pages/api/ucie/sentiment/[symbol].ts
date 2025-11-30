@@ -2,16 +2,19 @@
  * UCIE Sentiment Analysis API Endpoint
  * 
  * GET /api/ucie/sentiment/BTC
- * GET /api/ucie/sentiment/ETH
  * 
- * Returns comprehensive social sentiment analysis with:
- * - Fear & Greed Index (primary - always available)
- * - LunarCrush metrics (social score, galaxy score, social dominance)
- * - Reddit sentiment
- * - Aggregated sentiment score
+ * Returns social sentiment analysis to gauge market mood and community activity.
+ * 
+ * What you'll see:
+ * - Overall Sentiment Score (0-100): Combined sentiment from all sources
+ * - Fear & Greed Index: Market-wide fear/greed indicator (0=Extreme Fear, 100=Extreme Greed)
+ * - LunarCrush Galaxy Score: Social media popularity ranking (0-100, higher = more popular)
+ * - Reddit Activity: Community mentions and sentiment from crypto subreddits
+ * 
+ * Why it matters: Helps you understand if the market is optimistic (bullish) or pessimistic (bearish)
+ * about Bitcoin based on social media, news, and community discussions.
  * 
  * Uses database-backed caching (TTL: 5 minutes)
- * ✅ FIXED: Direct API calls with proper timeouts (mirrors working BTC analysis pattern)
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -42,6 +45,11 @@ async function fetchFearGreedIndex(): Promise<{ value: number; classification: s
 
 /**
  * Fetch LunarCrush data (optional - may timeout)
+ * 
+ * ✅ FIXED: Uses correct v4 API endpoint and field mapping
+ * - Endpoint: /coins/{symbol}/v1 (Details endpoint, not List endpoint)
+ * - Response structure: { data: { topic: {...} } } or { data: {...} }
+ * - Field names: v4 naming (interactions_24h, creators_active_24h, etc.)
  */
 async function fetchLunarCrushData(symbol: string): Promise<any | null> {
   const apiKey = process.env.LUNARCRUSH_API_KEY;
@@ -53,6 +61,7 @@ async function fetchLunarCrushData(symbol: string): Promise<any | null> {
 
   try {
     console.log(`📊 Fetching LunarCrush data for ${symbol}...`);
+    console.log(`   Using Details endpoint: /coins/${symbol}/v1`);
     
     const response = await fetch(
       `https://lunarcrush.com/api4/public/coins/${symbol}/v1`,
@@ -61,18 +70,20 @@ async function fetchLunarCrushData(symbol: string): Promise<any | null> {
           'Accept': 'application/json',
           'Authorization': `Bearer ${apiKey}`,
         },
-        signal: AbortSignal.timeout(10000), // ✅ Increased from 5s to 10s
+        signal: AbortSignal.timeout(10000),
       }
     );
 
     if (!response.ok) {
-      console.warn(`❌ LunarCrush API returned ${response.status}`);
+      console.warn(`❌ LunarCrush API returned ${response.status}: ${response.statusText}`);
+      
       // Try public endpoint as fallback
+      console.log(`   Trying public endpoint fallback...`);
       const publicResponse = await fetch(
         `https://lunarcrush.com/api4/public/coins/${symbol}/v1`,
         {
           headers: { 'Accept': 'application/json' },
-          signal: AbortSignal.timeout(10000), // ✅ Increased from 5s to 10s
+          signal: AbortSignal.timeout(10000),
         }
       );
       
@@ -82,61 +93,44 @@ async function fetchLunarCrushData(symbol: string): Promise<any | null> {
       }
       
       const publicData = await publicResponse.json();
-      const data = publicData.data;
       
-      // ✅ Log raw data for debugging
-      if (data) {
-        console.log(`✅ LunarCrush data (public):`, {
-          galaxy_score: data.galaxy_score,
-          social_volume: data.social_volume,
-          social_dominance: data.social_dominance,
-          social_contributors: data.social_contributors,
-          num_posts: data.num_posts,
-          interactions_24h: data.interactions_24h,
-          sentiment: data.sentiment
-        });
+      // ✅ CRITICAL FIX: Check for topic object first, then data
+      const data = publicData.data?.topic || publicData.data || publicData.topic;
+      
+      if (!data) {
+        console.warn('❌ LunarCrush response missing data/topic field');
+        console.warn('   Response structure:', JSON.stringify(publicData, null, 2));
+        return null;
       }
       
-      return data || null;
+      // ✅ Log available data
+      console.log(`✅ LunarCrush data (public):`, {
+        galaxy_score: data.galaxy_score,
+        alt_rank: data.alt_rank,
+        volatility: data.volatility
+      });
+      
+      return data;
     }
 
     const json = await response.json();
-    const data = json.data;
+    
+    // ✅ CRITICAL FIX: Check for topic object first, then data
+    // LunarCrush v4 API returns: { data: { topic: {...} } } or { data: {...} }
+    const data = json.data?.topic || json.data || json.topic;
     
     if (!data) {
-      console.warn('❌ LunarCrush response missing data field');
+      console.warn('❌ LunarCrush response missing data/topic field');
+      console.warn('   Response structure:', JSON.stringify(json, null, 2));
       return null;
     }
 
-    // ✅ Log raw data for debugging
-    console.log(`✅ LunarCrush data (authenticated):`, {
+    // ✅ Log available data
+    console.log(`✅ LunarCrush data:`, {
       galaxy_score: data.galaxy_score,
-      social_volume: data.social_volume,
-      social_dominance: data.social_dominance,
-      social_contributors: data.social_contributors,
-      num_posts: data.num_posts,
-      interactions_24h: data.interactions_24h,
-      sentiment: data.sentiment,
-      alt_rank: data.alt_rank
+      alt_rank: data.alt_rank,
+      volatility: data.volatility
     });
-    
-    // ✅ CRITICAL: Check if we're getting zeros and log warning
-    const hasZeros = 
-      data.social_volume === 0 &&
-      data.social_dominance === 0 &&
-      data.social_contributors === 0 &&
-      data.num_posts === 0 &&
-      data.interactions_24h === 0;
-    
-    if (hasZeros) {
-      console.warn(`⚠️ LunarCrush returned all zeros for ${symbol}!`);
-      console.warn(`   This might indicate:`);
-      console.warn(`   1. API rate limit reached`);
-      console.warn(`   2. Symbol not found in LunarCrush database`);
-      console.warn(`   3. API key has insufficient permissions`);
-      console.warn(`   4. API response structure changed`);
-      console.warn(`   Full response:`, JSON.stringify(data, null, 2));
-    }
 
     return data;
   } catch (error) {
@@ -299,7 +293,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       scores.reduce((sum, score) => sum + score, 0) / totalWeight
     );
 
-    // 4. Format response
+    // 4. Format response with user-friendly descriptions
     const response = {
       symbol: symbolUpper,
       overallScore,
@@ -308,61 +302,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Fear & Greed Index (PRIMARY)
       fearGreedIndex: fearGreedData ? {
         value: fearGreedData.value,
-        classification: fearGreedData.classification
+        classification: fearGreedData.classification,
+        description: 'Market-wide sentiment indicator. 0-25 = Extreme Fear (good buying opportunity), 25-45 = Fear, 45-55 = Neutral, 55-75 = Greed, 75-100 = Extreme Greed (caution advised)'
       } : null,
       
-      // LunarCrush data (✅ FIXED: Correct API v4 field names)
+      // LunarCrush data (galaxy_score and alt_rank only)
       lunarCrush: lunarCrushData ? {
-        // Core Scores
         galaxyScore: lunarCrushData.galaxy_score || 0,
+        galaxyScoreDescription: 'Social media popularity score (0-100). Higher scores mean more social buzz and community engagement.',
         altRank: lunarCrushData.alt_rank || 0,
-        altRank30d: lunarCrushData.alt_rank_30d || 0,
-        
-        // Social Volume & Dominance (✅ FIXED: Correct field names)
-        socialVolume: lunarCrushData.social_volume || 0,
-        socialVolume24hChange: lunarCrushData.social_volume_24h_change || 0,
-        socialDominance: lunarCrushData.social_dominance || 0,
-        socialDominance24hChange: lunarCrushData.social_dominance_24h_change || 0,
-        
-        // Engagement Metrics (✅ FIXED: Correct field names)
-        socialContributors: lunarCrushData.social_contributors || 0,
-        socialContributors24hChange: lunarCrushData.social_contributors_24h_change || 0,
-        numPosts: lunarCrushData.num_posts || 0, // ✅ FIXED: Was social_mentions
-        numPosts24hChange: lunarCrushData.num_posts_24h_change || 0,
-        interactions24h: lunarCrushData.interactions_24h || 0, // ✅ FIXED: Was social_interactions
-        interactions24hChange: lunarCrushData.interactions_24h_change || 0,
-        
-        // Sentiment Metrics
-        sentiment: lunarCrushData.sentiment || 3, // 0-5 scale, 3 is neutral
-        sentimentAbsolute: lunarCrushData.sentiment_absolute || 3,
-        sentimentRelative: lunarCrushData.sentiment_relative || 3,
-        sentimentScore: calculateLunarCrushSentiment(lunarCrushData), // Convert to 0-100
-        
-        // Market Metrics
-        marketDominance: lunarCrushData.market_dominance || 0,
-        marketDominance24hChange: lunarCrushData.market_dominance_24h_change || 0,
-        
-        // Additional Metrics
-        correlationRank: lunarCrushData.correlation_rank || 0,
+        altRankDescription: 'Social ranking among all cryptocurrencies. Lower numbers = higher social activity (Rank 1 is most popular).',
         volatility: lunarCrushData.volatility || 0,
-        
-        // Categories & Tags
-        categories: lunarCrushData.categories || [],
-        tags: lunarCrushData.tags || [],
-        
-        // Timestamps
-        updated: lunarCrushData.updated || Math.floor(Date.now() / 1000)
+        volatilityDescription: 'Price volatility indicator. Higher values mean bigger price swings.'
       } : null,
       
       // Reddit data
       reddit: redditData ? {
         mentions24h: redditData.mentions24h,
+        mentionsDescription: 'Number of Reddit posts mentioning Bitcoin in the last 24 hours across crypto subreddits.',
         sentiment: redditData.sentiment,
+        sentimentDescription: 'Reddit community sentiment (0-100). Above 50 = positive, below 50 = negative.',
         activeSubreddits: redditData.activeSubreddits
       } : null,
       
       // Data quality
       dataQuality,
+      dataQualityDescription: 'Percentage of data sources successfully retrieved. 100% = all sources working.',
       
       timestamp: new Date().toISOString()
     };

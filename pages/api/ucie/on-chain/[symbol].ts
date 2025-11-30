@@ -2,15 +2,22 @@
  * UCIE On-Chain Analysis API Endpoint
  * 
  * GET /api/ucie/on-chain/BTC
- * GET /api/ucie/on-chain/ETH
  * 
- * Returns comprehensive blockchain analysis with:
- * - Network metrics (hash rate, difficulty, mempool)
- * - Whale activity with exchange flow detection
- * - Holder distribution
- * - Exchange flows (deposits/withdrawals)
+ * Returns blockchain data showing what's happening on the Bitcoin network.
  * 
- * Uses database-backed caching (TTL: 5 minutes)
+ * What you'll see:
+ * - Network Hash Rate: Mining power securing the network (higher = more secure)
+ * - Difficulty: How hard it is to mine new blocks (adjusts every 2 weeks)
+ * - Mempool Size: Number of pending transactions waiting to be confirmed
+ * - Whale Activity: Large transactions (>50 BTC) that could impact price
+ * - Exchange Flows: Bitcoin moving to/from exchanges (deposits = potential selling, withdrawals = holding)
+ * - Active Addresses: Number of unique wallets transacting (shows network usage)
+ * 
+ * Why it matters: On-chain data reveals what Bitcoin holders are actually doing with their coins.
+ * Large movements to exchanges often precede selling, while withdrawals suggest long-term holding.
+ * Network metrics show the health and security of the blockchain.
+ * 
+ * Cache: 5 minutes
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';

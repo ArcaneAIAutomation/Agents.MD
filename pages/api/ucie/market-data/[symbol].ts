@@ -1,17 +1,23 @@
 /**
  * UCIE Market Data API Endpoint
  * 
- * Fetches and aggregates cryptocurrency market data from multiple sources
- * with caching, fallback mechanisms, and error handling.
+ * GET /api/ucie/market-data/BTC
  * 
- * Endpoint: GET /api/ucie/market-data/[symbol]
+ * Returns real-time Bitcoin price and market statistics from multiple exchanges.
  * 
- * Features:
- * - Multi-source data fetching with fallback
- * - 30-second cache TTL
- * - Data quality scoring
- * - Graceful error handling
- * - Comprehensive market metrics
+ * What you'll see:
+ * - Current Price: Live Bitcoin price in USD
+ * - 24h Change: Price movement in the last 24 hours (percentage and dollar amount)
+ * - Market Cap: Total value of all Bitcoin in circulation
+ * - Volume: Total trading volume across all exchanges in 24 hours
+ * - High/Low 24h: Highest and lowest prices in the last 24 hours
+ * - Supply: How many Bitcoin exist (circulating) vs maximum possible (21 million)
+ * 
+ * Why it matters: Shows you the current market value and trading activity. Use this to
+ * understand if Bitcoin is trending up or down, and how actively it's being traded.
+ * 
+ * Data sources: CoinGecko, CoinMarketCap, Kraken (aggregated for accuracy)
+ * Cache: 3 minutes (ensures fresh data)
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';

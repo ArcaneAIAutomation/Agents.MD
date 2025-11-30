@@ -2,9 +2,22 @@
  * UCIE Technical Analysis API Endpoint
  * 
  * GET /api/ucie/technical/BTC?timeframe=1h
- * GET /api/ucie/technical/ETH?timeframe=4h
  * 
- * Returns comprehensive technical analysis with real-time indicators
+ * Returns technical indicators that traders use to predict price movements.
+ * 
+ * What you'll see:
+ * - RSI (Relative Strength Index): Shows if Bitcoin is overbought (>70) or oversold (<30)
+ * - MACD: Momentum indicator showing trend strength and direction
+ * - Moving Averages (EMA): Average prices over time to identify trends
+ * - Bollinger Bands: Price volatility bands showing potential breakout zones
+ * - Support/Resistance: Key price levels where Bitcoin tends to bounce or break through
+ * - Trading Signals: Buy/Sell recommendations based on technical patterns
+ * 
+ * Why it matters: Technical analysis helps identify entry and exit points for trades.
+ * These indicators show momentum, trend direction, and potential reversal points.
+ * 
+ * Timeframes: 15m (short-term), 1h (intraday), 4h (swing), 1d (long-term)
+ * Cache: 3 minutes
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';
