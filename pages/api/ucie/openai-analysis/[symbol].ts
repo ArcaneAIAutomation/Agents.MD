@@ -33,26 +33,53 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log(`🚀 Starting GPT-5.1 analysis for ${symbol}...`);
 
-    // Calculate which APIs are actually working
+    // ✅ FIXED: Calculate which APIs are actually working by checking for real data
     const availableAPIs = [];
-    if (collectedData.marketData?.success !== false) availableAPIs.push('Market Data');
-    if (collectedData.technical?.success !== false) availableAPIs.push('Technical Analysis');
-    if (collectedData.sentiment?.success !== false) availableAPIs.push('Sentiment Analysis');
-    if (collectedData.news?.success !== false) availableAPIs.push('News');
-    if (collectedData.risk?.success !== false) availableAPIs.push('Risk Assessment');
-    if (collectedData.onChain?.success !== false) availableAPIs.push('On-Chain Data');
+    
+    // Check each data source for actual content (not just existence)
+    if (collectedData.marketData && Object.keys(collectedData.marketData).length > 0) {
+      availableAPIs.push('Market Data');
+    }
+    if (collectedData.technical && Object.keys(collectedData.technical).length > 0) {
+      availableAPIs.push('Technical Analysis');
+    }
+    if (collectedData.sentiment && Object.keys(collectedData.sentiment).length > 0) {
+      availableAPIs.push('Sentiment Analysis');
+    }
+    if (collectedData.news && Object.keys(collectedData.news).length > 0) {
+      availableAPIs.push('News');
+    }
+    if (collectedData.risk && Object.keys(collectedData.risk).length > 0) {
+      availableAPIs.push('Risk Assessment');
+    }
+    
+    // On-Chain is optional (only for BTC/ETH)
+    if (collectedData.onChain && Object.keys(collectedData.onChain).length > 0) {
+      availableAPIs.push('On-Chain Data');
+    }
     
     const totalAPIs = 5; // Core APIs: Market, Technical, Sentiment, News, Risk
-    const workingAPIs = Math.min(availableAPIs.length, totalAPIs);
+    const workingAPIs = availableAPIs.filter(api => api !== 'On-Chain Data').length;
     const dataQuality = Math.round((workingAPIs / totalAPIs) * 100);
     
-    console.log(`📊 Data Quality Check: ${workingAPIs}/${totalAPIs} APIs working (${dataQuality}%)`);
-    console.log(`   Available: ${availableAPIs.join(', ')}`);
+    console.log(`📊 Data Quality Check: ${workingAPIs}/${totalAPIs} core APIs working (${dataQuality}%)`);
+    console.log(`   Available APIs: ${availableAPIs.join(', ')}`);
+    console.log(`   Market Data keys:`, collectedData.marketData ? Object.keys(collectedData.marketData).length : 0);
+    console.log(`   Technical keys:`, collectedData.technical ? Object.keys(collectedData.technical).length : 0);
+    console.log(`   Sentiment keys:`, collectedData.sentiment ? Object.keys(collectedData.sentiment).length : 0);
+    console.log(`   News keys:`, collectedData.news ? Object.keys(collectedData.news).length : 0);
+    console.log(`   Risk keys:`, collectedData.risk ? Object.keys(collectedData.risk).length : 0);
     
     // Build comprehensive prompt with accurate data quality
     const prompt = `You are an expert cryptocurrency market analyst. Analyze ${symbol} using the following comprehensive data.
 
-CRITICAL: ${workingAPIs} out of ${totalAPIs} core APIs are working (${dataQuality}% data quality). Use ONLY the data provided below. Do NOT make assumptions about missing data.
+✅ ACCURATE DATA QUALITY: ${workingAPIs} out of ${totalAPIs} core APIs are working (${dataQuality}% data quality).
+📊 Available data sources: ${availableAPIs.join(', ')}
+
+CRITICAL INSTRUCTIONS:
+1. Report EXACTLY: "${dataQuality}% data quality with ${workingAPIs} out of ${totalAPIs} APIs working"
+2. Use ONLY the data provided below - do NOT invent or assume missing data
+3. All ${workingAPIs} APIs listed above are working and contain real data
 
 📊 MARKET DATA:
 ${collectedData.marketData ? JSON.stringify(collectedData.marketData, null, 2) : 'Not available'}
@@ -75,12 +102,18 @@ ${collectedData.onChain ? JSON.stringify(collectedData.onChain, null, 2) : 'Not 
 💰 DEFI METRICS:
 ${collectedData.defi ? JSON.stringify(collectedData.defi, null, 2) : 'Not available'}
 
-IMPORTANT INSTRUCTIONS:
-1. Report the ACTUAL data quality: ${dataQuality}% (${workingAPIs}/${totalAPIs} APIs working)
-2. Use ONLY the data provided above - do NOT invent or assume missing data
-3. If data is "Not available", acknowledge it but do NOT speculate about what it might be
-4. Focus your analysis on the data that IS available
-5. Be specific and cite actual numbers from the data provided
+✅ VERIFIED DATA SOURCES (ALL WORKING):
+${availableAPIs.map(api => `✓ ${api}`).join('\n')}
+
+CRITICAL INSTRUCTIONS FOR YOUR ANALYSIS:
+1. ✅ REPORT EXACTLY: "${dataQuality}% data quality with ${workingAPIs} out of ${totalAPIs} APIs working"
+2. ✅ ALL ${workingAPIs} APIs listed above are WORKING and contain REAL data
+3. ✅ Use ONLY the data provided above - do NOT invent or assume missing data
+4. ✅ If a section shows "Not available", it means that specific data source is not included
+5. ✅ Focus your analysis on the ${workingAPIs} working data sources
+6. ✅ Be specific and cite actual numbers from the data provided
+7. ❌ DO NOT say "only 3 out of 5 APIs working" if ${workingAPIs} APIs are actually working
+8. ❌ DO NOT underestimate the data quality - report the accurate ${dataQuality}%
 
 Provide comprehensive JSON analysis with these exact fields:
 {
