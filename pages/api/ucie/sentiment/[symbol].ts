@@ -217,10 +217,15 @@ async function fetchCoinGeckoSentiment(symbol: string): Promise<any | null> {
 /**
  * Fetch LunarCrush data (optional - may timeout)
  * 
- * ✅ FIXED: Uses correct v4 API endpoint and field mapping
- * - Endpoint: /coins/{symbol}/v1 (Details endpoint, not List endpoint)
+ * ✅ FIXED (January 27, 2025): Implements all 3 critical fixes from test analysis
+ * 
+ * FIX #1: Added ?data=all parameter to force inclusion of social metrics
+ * FIX #2: Corrected social feed endpoint path (global resource)
+ * FIX #3: Corrected influencer endpoint path (global resource)
+ * 
+ * - Endpoint: /coins/{symbol}/v1?data=all (Forces all social metrics)
  * - Response structure: { data: { topic: {...} } } or { data: {...} }
- * - Field names: v4 naming (interactions_24h, creators_active_24h, etc.)
+ * - Field names: v4 naming (interactions_24h, creators_active_24h, social_volume, etc.)
  */
 async function fetchLunarCrushData(symbol: string): Promise<any | null> {
   const apiKey = process.env.LUNARCRUSH_API_KEY;
@@ -232,10 +237,11 @@ async function fetchLunarCrushData(symbol: string): Promise<any | null> {
 
   try {
     console.log(`📊 Fetching LunarCrush data for ${symbol}...`);
-    console.log(`   Using Details endpoint: /coins/${symbol}/v1`);
+    console.log(`   ✅ FIX #1: Using ?data=all parameter to force social metrics`);
     
+    // ✅ FIX #1: Add ?data=all parameter to force inclusion of social metrics
     const response = await fetch(
-      `https://lunarcrush.com/api4/public/coins/${symbol}/v1`,
+      `https://lunarcrush.com/api4/public/coins/${symbol}/v1?data=all`,
       {
         headers: {
           'Accept': 'application/json',
@@ -248,10 +254,10 @@ async function fetchLunarCrushData(symbol: string): Promise<any | null> {
     if (!response.ok) {
       console.warn(`❌ LunarCrush API returned ${response.status}: ${response.statusText}`);
       
-      // Try public endpoint as fallback
-      console.log(`   Trying public endpoint fallback...`);
+      // Try public endpoint as fallback (also with ?data=all)
+      console.log(`   Trying public endpoint fallback with ?data=all...`);
       const publicResponse = await fetch(
-        `https://lunarcrush.com/api4/public/coins/${symbol}/v1`,
+        `https://lunarcrush.com/api4/public/coins/${symbol}/v1?data=all`,
         {
           headers: { 'Accept': 'application/json' },
           signal: AbortSignal.timeout(10000),
@@ -274,11 +280,14 @@ async function fetchLunarCrushData(symbol: string): Promise<any | null> {
         return null;
       }
       
-      // ✅ Log available data
+      // ✅ Log available data (including new social metrics)
       console.log(`✅ LunarCrush data (public):`, {
         galaxy_score: data.galaxy_score,
         alt_rank: data.alt_rank,
-        volatility: data.volatility
+        volatility: data.volatility,
+        social_volume: data.social_volume,
+        interactions_24h: data.interactions_24h,
+        social_contributors: data.social_contributors
       });
       
       return data;
@@ -296,16 +305,110 @@ async function fetchLunarCrushData(symbol: string): Promise<any | null> {
       return null;
     }
 
-    // ✅ Log available data
-    console.log(`✅ LunarCrush data:`, {
+    // ✅ Log available data (including new social metrics from ?data=all)
+    console.log(`✅ LunarCrush data with social metrics:`, {
       galaxy_score: data.galaxy_score,
       alt_rank: data.alt_rank,
-      volatility: data.volatility
+      volatility: data.volatility,
+      social_volume: data.social_volume,
+      interactions_24h: data.interactions_24h,
+      social_contributors: data.social_contributors,
+      creators_active_24h: data.creators_active_24h
     });
 
     return data;
   } catch (error) {
     console.error('❌ LunarCrush fetch error:', error);
+    return null;
+  }
+}
+
+/**
+ * ✅ NEW: Fetch LunarCrush social feed (FIX #2)
+ * Corrected endpoint: /feeds/v1 (global resource, not /coins/{symbol}/posts/v1)
+ */
+async function fetchLunarCrushSocialFeed(symbol: string, limit: number = 10): Promise<any | null> {
+  const apiKey = process.env.LUNARCRUSH_API_KEY;
+  
+  if (!apiKey) {
+    console.warn('❌ LunarCrush API key not configured');
+    return null;
+  }
+
+  try {
+    console.log(`📊 Fetching LunarCrush social feed for ${symbol}...`);
+    console.log(`   ✅ FIX #2: Using correct endpoint /feeds/v1?symbol=${symbol}`);
+    
+    // ✅ FIX #2: Correct endpoint path (global resource filtered by symbol)
+    const response = await fetch(
+      `https://lunarcrush.com/api4/public/feeds/v1?symbol=${symbol}&limit=${limit}`,
+      {
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        signal: AbortSignal.timeout(10000),
+      }
+    );
+
+    if (!response.ok) {
+      console.warn(`❌ LunarCrush social feed API returned ${response.status}: ${response.statusText}`);
+      return null;
+    }
+
+    const json = await response.json();
+    const feeds = json.data || [];
+    
+    console.log(`✅ LunarCrush social feed: ${feeds.length} posts retrieved`);
+    
+    return feeds;
+  } catch (error) {
+    console.error('❌ LunarCrush social feed fetch error:', error);
+    return null;
+  }
+}
+
+/**
+ * ✅ NEW: Fetch LunarCrush influencer metrics (FIX #3)
+ * Corrected endpoint: /influencers/v1 (global resource, not /coins/{symbol}/influencers/v1)
+ */
+async function fetchLunarCrushInfluencers(symbol: string, limit: number = 5): Promise<any | null> {
+  const apiKey = process.env.LUNARCRUSH_API_KEY;
+  
+  if (!apiKey) {
+    console.warn('❌ LunarCrush API key not configured');
+    return null;
+  }
+
+  try {
+    console.log(`📊 Fetching LunarCrush influencers for ${symbol}...`);
+    console.log(`   ✅ FIX #3: Using correct endpoint /influencers/v1?symbol=${symbol}`);
+    
+    // ✅ FIX #3: Correct endpoint path (global resource filtered by symbol)
+    const response = await fetch(
+      `https://lunarcrush.com/api4/public/influencers/v1?symbol=${symbol}&limit=${limit}`,
+      {
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        signal: AbortSignal.timeout(10000),
+      }
+    );
+
+    if (!response.ok) {
+      console.warn(`❌ LunarCrush influencers API returned ${response.status}: ${response.statusText}`);
+      return null;
+    }
+
+    const json = await response.json();
+    const influencers = json.data || [];
+    
+    console.log(`✅ LunarCrush influencers: ${influencers.length} influencers retrieved`);
+    
+    return influencers;
+  } catch (error) {
+    console.error('❌ LunarCrush influencers fetch error:', error);
     return null;
   }
 }
@@ -402,11 +505,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log(`❌ Cache miss for ${symbolUpper}/sentiment - fetching fresh data`);
 
     // 2. Fetch sentiment data from ALL sources IN PARALLEL (faster)
-    const [fearGreed, coinMarketCap, coinGecko, lunarCrush, reddit] = await Promise.allSettled([
+    // ✅ UPDATED: Now includes social feed and influencers (FIX #2 and #3)
+    const [fearGreed, coinMarketCap, coinGecko, lunarCrush, lunarCrushFeed, lunarCrushInfluencers, reddit] = await Promise.allSettled([
       fetchFearGreedIndex(),
       fetchCoinMarketCapSentiment(symbolUpper),
       fetchCoinGeckoSentiment(symbolUpper),
       fetchLunarCrushData(symbolUpper),
+      fetchLunarCrushSocialFeed(symbolUpper, 10), // ✅ FIX #2
+      fetchLunarCrushInfluencers(symbolUpper, 5), // ✅ FIX #3
       fetchRedditSentiment(symbolUpper)
     ]);
 
@@ -415,6 +521,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const coinMarketCapData = coinMarketCap.status === 'fulfilled' ? coinMarketCap.value : null;
     const coinGeckoData = coinGecko.status === 'fulfilled' ? coinGecko.value : null;
     const lunarCrushData = lunarCrush.status === 'fulfilled' ? lunarCrush.value : null;
+    const lunarCrushFeedData = lunarCrushFeed.status === 'fulfilled' ? lunarCrushFeed.value : null;
+    const lunarCrushInfluencersData = lunarCrushInfluencers.status === 'fulfilled' ? lunarCrushInfluencers.value : null;
     const redditData = reddit.status === 'fulfilled' ? reddit.value : null;
 
     // 3. Calculate aggregated sentiment score with NEW sources
@@ -532,7 +640,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         description: 'Community engagement and developer activity. Combines community score, developer activity, public interest, and user sentiment votes. Higher scores indicate strong community support.'
       } : null,
       
-      // LunarCrush social metrics
+      // LunarCrush social metrics (✅ ENHANCED with FIX #1 data)
       lunarCrush: lunarCrushData ? {
         galaxyScore: lunarCrushData.galaxy_score || 0,
         weight: '20%',
@@ -541,7 +649,44 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         altRankDescription: 'Social ranking among all cryptocurrencies. Lower numbers = higher social activity (Rank 1 is most popular).',
         volatility: lunarCrushData.volatility || 0,
         volatilityDescription: 'Price volatility indicator. Higher values mean bigger price swings.',
+        
+        // ✅ NEW: Social metrics from ?data=all parameter (FIX #1)
+        socialVolume: lunarCrushData.social_volume || 0,
+        socialVolumeDescription: 'Total social media mentions across all platforms in the last 24 hours.',
+        interactions24h: lunarCrushData.interactions_24h || 0,
+        interactions24hDescription: 'Total likes, shares, comments, and retweets in the last 24 hours.',
+        socialContributors: lunarCrushData.social_contributors || 0,
+        socialContributorsDescription: 'Number of unique users discussing this cryptocurrency.',
+        creatorsActive24h: lunarCrushData.creators_active_24h || 0,
+        creatorsActive24hDescription: 'Number of content creators posting about this cryptocurrency in the last 24 hours.',
+        
         description: 'Social media metrics from Twitter, Reddit, and other platforms. Galaxy Score measures overall social engagement and influence.'
+      } : null,
+      
+      // ✅ NEW: LunarCrush social feed (FIX #2)
+      lunarCrushFeed: lunarCrushFeedData && Array.isArray(lunarCrushFeedData) ? {
+        posts: lunarCrushFeedData.slice(0, 5).map((post: any) => ({
+          title: post.title || 'Untitled',
+          url: post.url || '',
+          source: post.source || 'Unknown',
+          sentiment: post.sentiment || 'neutral',
+          timestamp: post.created_at || post.time || ''
+        })),
+        totalPosts: lunarCrushFeedData.length,
+        description: 'Recent social media posts and news articles mentioning this cryptocurrency. Provides real-time community sentiment and trending topics.'
+      } : null,
+      
+      // ✅ NEW: LunarCrush influencers (FIX #3)
+      lunarCrushInfluencers: lunarCrushInfluencersData && Array.isArray(lunarCrushInfluencersData) ? {
+        influencers: lunarCrushInfluencersData.slice(0, 5).map((influencer: any) => ({
+          name: influencer.name || 'Unknown',
+          handle: influencer.handle || '',
+          followers: influencer.followers || 0,
+          influencerScore: influencer.influencer_score || 0,
+          platform: influencer.platform || 'twitter'
+        })),
+        totalInfluencers: lunarCrushInfluencersData.length,
+        description: 'Top crypto influencers discussing this cryptocurrency. Influencer score measures their impact and reach in the crypto community.'
       } : null,
       
       // Reddit community data
