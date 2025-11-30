@@ -22,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { symbol, collectedData } = req.body;
+    const { symbol, collectedData, forceRefresh } = req.body;
 
     if (!symbol || !collectedData) {
       return res.status(400).json({
@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    console.log(`🚀 Starting GPT-5.1 analysis for ${symbol}...`);
+    console.log(`🚀 Starting GPT-5.1 analysis for ${symbol}${forceRefresh ? ' (FORCE REFRESH)' : ''}...`);
 
     // ✅ FIXED: Calculate which APIs are actually working by checking for real data
     const availableAPIs = [];
@@ -200,7 +200,8 @@ Be specific, actionable, and data-driven. Return ONLY valid JSON.`;
         totalAPIs: totalAPIs,
         available: availableAPIs
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      version: '2.0-fixed' // ✅ Version marker to identify new analysis logic
     });
 
   } catch (error) {
