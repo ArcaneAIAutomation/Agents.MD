@@ -180,44 +180,29 @@ export default function EnhancedSocialSentimentPanel({
             </div>
           </div>
 
-          {/* Additional LunarCrush Metrics */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <MetricCard
-              label="Social Dominance"
-              value={`${(lunarCrush.socialDominance || 0).toFixed(2)}%`}
-              subtext="Market share"
-            />
+          {/* Additional LunarCrush Metrics - Only Available Data */}
+          <div className="grid grid-cols-2 gap-3">
             <MetricCard
               label="AltRank"
               value={`#${lunarCrush.altRank || 'N/A'}`}
-              subtext="Overall ranking"
+              subtext="Social ranking"
             />
-            <MetricCard
-              label="Mentions"
-              value={formatNumber(lunarCrush.mentions || 0)}
-              subtext="24h mentions"
-            />
-            <MetricCard
-              label="Interactions"
-              value={formatNumber(lunarCrush.interactions || 0)}
-              subtext="Total engagement"
-            />
+            {lunarCrush.volatility !== undefined && (
+              <MetricCard
+                label="Volatility"
+                value={`${(lunarCrush.volatility || 0).toFixed(2)}`}
+                subtext="Price volatility"
+              />
+            )}
           </div>
 
-          {/* Social Volume Change */}
-          {lunarCrush.socialVolumeChange24h !== undefined && (
-            <div className="mt-4 p-3 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded-lg">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-bitcoin-white-60">24h Social Volume Change</span>
-                <span className={`text-lg font-mono font-bold ${
-                  lunarCrush.socialVolumeChange24h > 0 ? 'text-bitcoin-orange' : 'text-bitcoin-white-60'
-                }`}>
-                  {lunarCrush.socialVolumeChange24h > 0 ? '+' : ''}
-                  {lunarCrush.socialVolumeChange24h.toFixed(2)}%
-                </span>
-              </div>
-            </div>
-          )}
+          {/* API Limitation Notice */}
+          <div className="mt-4 p-3 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded-lg">
+            <p className="text-xs text-bitcoin-white-60 italic">
+              ℹ️ LunarCrush v4 API provides Galaxy Score, AltRank, and Volatility. 
+              Additional social metrics require API tier upgrade.
+            </p>
+          </div>
         </div>
       )}
 

@@ -247,10 +247,6 @@ function renderSentimentData(data: any) {
         label="Overall Sentiment Score" 
         value={`${recentAvgScore}/100`} 
       />
-      <div className="flex justify-between items-center py-2 border-b border-bitcoin-orange-20">
-        <span className="text-sm text-bitcoin-white-60">Social Volume Change (24h)</span>
-        <span className={`text-sm font-mono font-semibold ${momentumColor}`}>{momentumText}</span>
-      </div>
       <DataRow label="Data Quality" value={`${actualData.dataQuality || 0}%`} />
       
       {lunarCrush && (
@@ -264,34 +260,19 @@ function renderSentimentData(data: any) {
               value={`${lunarCrush.galaxyScore || 0}/100`} 
             />
             <DataRow 
-              label="Social Score" 
-              value={`${lunarCrush.socialScore || 0}/100`} 
-            />
-            <DataRow 
               label="AltRank" 
               value={`#${lunarCrush.altRank || 'N/A'}`} 
             />
-            <DataRow 
-              label="Social Volume" 
-              value={`${(lunarCrush.socialVolume || 0).toLocaleString()}`} 
-            />
-            <DataRow 
-              label="Social Dominance" 
-              value={`${(lunarCrush.socialDominance || 0).toFixed(2)}%`} 
-            />
-            <DataRow 
-              label="Mentions" 
-              value={`${(lunarCrush.mentions || 0).toLocaleString()}`} 
-            />
-            <DataRow 
-              label="Interactions" 
-              value={`${(lunarCrush.interactions || 0).toLocaleString()}`} 
-            />
-            <DataRow 
-              label="Contributors" 
-              value={`${(lunarCrush.contributors || 0).toLocaleString()}`} 
-            />
+            {lunarCrush.volatility !== undefined && (
+              <DataRow 
+                label="Volatility" 
+                value={`${(lunarCrush.volatility || 0).toFixed(2)}`} 
+              />
+            )}
           </div>
+          <p className="text-xs text-bitcoin-white-60 mt-3 italic">
+            Note: Only Galaxy Score, AltRank, and Volatility are available from LunarCrush v4 API
+          </p>
         </div>
       )}
       
