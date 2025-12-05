@@ -648,13 +648,302 @@ export default function DataPreviewModal({
                     (What will be sent to Caesar)
                   </span>
                 </h3>
-                <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded p-3 max-h-96 overflow-y-auto">
-                  <pre className="text-xs text-bitcoin-white-80 whitespace-pre-wrap font-mono leading-relaxed">
-                    {preview.caesarPromptPreview}
-                  </pre>
+                
+                {/* ✅ ACTUAL CAESAR PROMPT TEXT - Display the real prompt that will be sent */}
+                {preview.caesarPromptPreview && (
+                  <div className="mb-6">
+                    <div className="bg-bitcoin-black border border-bitcoin-orange rounded-lg p-4 max-h-96 overflow-y-auto">
+                      <pre className="text-xs text-bitcoin-white-80 font-mono whitespace-pre-wrap leading-relaxed">
+                        {preview.caesarPromptPreview}
+                      </pre>
+                    </div>
+                    <p className="text-xs text-bitcoin-white-60 mt-2">
+                      ↑ This is the exact prompt that will be sent to Caesar AI for deep research
+                    </p>
+                  </div>
+                )}
+                
+                {/* Structured Data Display - Show as summary below the actual prompt */}
+                <div className="border-t border-bitcoin-orange-20 pt-4 mt-4">
+                  <h4 className="text-sm font-bold text-bitcoin-orange mb-3">
+                    📊 Data Summary (Visual Overview)
+                  </h4>
+                  <div className="space-y-4">
+                  {/* Market Data */}
+                  {preview.collectedData?.marketData?.success && (
+                    <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
+                      <h4 className="text-sm font-bold text-bitcoin-orange mb-2 flex items-center gap-2">
+                        📊 Market Data
+                      </h4>
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <span className="text-bitcoin-white-60">Price:</span>
+                          <span className="text-bitcoin-white font-mono ml-2">
+                            ${preview.collectedData.marketData.priceAggregation?.averagePrice?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-bitcoin-white-60">24h Change:</span>
+                          <span className={`font-mono ml-2 ${(preview.collectedData.marketData.priceAggregation?.averageChange24h || 0) >= 0 ? 'text-bitcoin-orange' : 'text-bitcoin-white'}`}>
+                            {(preview.collectedData.marketData.priceAggregation?.averageChange24h || 0) >= 0 ? '+' : ''}{preview.collectedData.marketData.priceAggregation?.averageChange24h?.toFixed(2)}%
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-bitcoin-white-60">Volume:</span>
+                          <span className="text-bitcoin-white font-mono ml-2">
+                            ${((preview.collectedData.marketData.priceAggregation?.totalVolume24h || 0) / 1e9).toFixed(2)}B
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-bitcoin-white-60">Market Cap:</span>
+                          <span className="text-bitcoin-white font-mono ml-2">
+                            ${((preview.collectedData.marketData.marketData?.marketCap || 0) / 1e9).toFixed(2)}B
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Sentiment Data - All 5 Sources */}
+                  {preview.collectedData?.sentiment?.success && (
+                    <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
+                      <h4 className="text-sm font-bold text-bitcoin-orange mb-3 flex items-center gap-2">
+                        💬 Social Sentiment (5/5 Sources)
+                      </h4>
+                      <div className="space-y-3">
+                        {/* Overall Score */}
+                        <div className="flex items-center justify-between">
+                          <span className="text-bitcoin-white-60 text-sm">Overall Score:</span>
+                          <span className="text-bitcoin-orange font-bold text-lg">
+                            {preview.collectedData.sentiment.sentiment?.overallScore || 0}/100
+                          </span>
+                        </div>
+                        
+                        {/* Distribution */}
+                        {preview.collectedData.sentiment.sentiment?.distribution && (
+                          <div className="grid grid-cols-3 gap-2 text-xs">
+                            <div className="text-center">
+                              <div className="text-bitcoin-white-60">Positive</div>
+                              <div className="text-bitcoin-orange font-bold">
+                                {preview.collectedData.sentiment.sentiment.distribution.positive || 0}%
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-bitcoin-white-60">Neutral</div>
+                              <div className="text-bitcoin-white font-bold">
+                                {preview.collectedData.sentiment.sentiment.distribution.neutral || 0}%
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-bitcoin-white-60">Negative</div>
+                              <div className="text-bitcoin-white font-bold">
+                                {preview.collectedData.sentiment.sentiment.distribution.negative || 0}%
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Data Sources */}
+                        <div className="pt-2 border-t border-bitcoin-orange-20">
+                          <div className="text-xs text-bitcoin-white-60 mb-1">Data Sources:</div>
+                          <div className="flex flex-wrap gap-2">
+                            {preview.collectedData.sentiment.sources?.fearGreed && (
+                              <span className="px-2 py-1 bg-bitcoin-orange-10 border border-bitcoin-orange-20 rounded text-xs text-bitcoin-white">
+                                Fear & Greed Index
+                              </span>
+                            )}
+                            {preview.collectedData.sentiment.sources?.lunarcrush && (
+                              <span className="px-2 py-1 bg-bitcoin-orange-10 border border-bitcoin-orange-20 rounded text-xs text-bitcoin-white">
+                                LunarCrush
+                              </span>
+                            )}
+                            {preview.collectedData.sentiment.sources?.coinmarketcap && (
+                              <span className="px-2 py-1 bg-bitcoin-orange-10 border border-bitcoin-orange-20 rounded text-xs text-bitcoin-white">
+                                CoinMarketCap
+                              </span>
+                            )}
+                            {preview.collectedData.sentiment.sources?.coingecko && (
+                              <span className="px-2 py-1 bg-bitcoin-orange-10 border border-bitcoin-orange-20 rounded text-xs text-bitcoin-white">
+                                CoinGecko
+                              </span>
+                            )}
+                            {preview.collectedData.sentiment.sources?.reddit && (
+                              <span className="px-2 py-1 bg-bitcoin-orange-10 border border-bitcoin-orange-20 rounded text-xs text-bitcoin-white">
+                                Reddit
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Technical Analysis */}
+                  {preview.collectedData?.technical?.success && (
+                    <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
+                      <h4 className="text-sm font-bold text-bitcoin-orange mb-2 flex items-center gap-2">
+                        📈 Technical Indicators
+                      </h4>
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        {preview.collectedData.technical.indicators?.rsi && (
+                          <div>
+                            <span className="text-bitcoin-white-60">RSI:</span>
+                            <span className="text-bitcoin-white font-mono ml-2">
+                              {typeof preview.collectedData.technical.indicators.rsi.value === 'number' 
+                                ? preview.collectedData.technical.indicators.rsi.value.toFixed(2)
+                                : preview.collectedData.technical.indicators.rsi}
+                            </span>
+                          </div>
+                        )}
+                        {preview.collectedData.technical.indicators?.macd && (
+                          <div>
+                            <span className="text-bitcoin-white-60">MACD:</span>
+                            <span className="text-bitcoin-white font-mono ml-2">
+                              {preview.collectedData.technical.indicators.macd.signal || 'neutral'}
+                            </span>
+                          </div>
+                        )}
+                        {preview.collectedData.technical.indicators?.trend && (
+                          <div>
+                            <span className="text-bitcoin-white-60">Trend:</span>
+                            <span className="text-bitcoin-white font-mono ml-2">
+                              {preview.collectedData.technical.indicators.trend.direction || 'neutral'}
+                            </span>
+                          </div>
+                        )}
+                        {preview.collectedData.technical.indicators?.volatility && (
+                          <div>
+                            <span className="text-bitcoin-white-60">Volatility:</span>
+                            <span className="text-bitcoin-white font-mono ml-2">
+                              {preview.collectedData.technical.indicators.volatility.current || 'N/A'}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* News Headlines */}
+                  {preview.collectedData?.news?.success && preview.collectedData.news.articles?.length > 0 && (
+                    <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
+                      <h4 className="text-sm font-bold text-bitcoin-orange mb-2 flex items-center gap-2">
+                        📰 Recent News ({preview.collectedData.news.articles.length} articles)
+                      </h4>
+                      <ul className="space-y-2 text-sm">
+                        {preview.collectedData.news.articles.slice(0, 3).map((article: any, i: number) => (
+                          <li key={i} className="text-bitcoin-white-80">
+                            <span className="text-bitcoin-orange mr-2">•</span>
+                            {article.title}
+                            {article.sentiment && (
+                              <span className="text-bitcoin-white-60 text-xs ml-2">
+                                ({article.sentiment})
+                              </span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* On-Chain Data */}
+                  {preview.collectedData?.onChain?.success && (
+                    <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
+                      <h4 className="text-sm font-bold text-bitcoin-orange mb-2 flex items-center gap-2">
+                        ⛓️ On-Chain Intelligence
+                      </h4>
+                      {preview.collectedData.onChain.whaleActivity && (
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-bitcoin-white-60">Whale Transactions:</span>
+                            <span className="text-bitcoin-white font-mono">
+                              {preview.collectedData.onChain.whaleActivity.summary?.totalTransactions || 
+                               preview.collectedData.onChain.whaleActivity.totalTransactions || 0}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-bitcoin-white-60">Total Value:</span>
+                            <span className="text-bitcoin-white font-mono">
+                              ${((preview.collectedData.onChain.whaleActivity.summary?.totalValueUSD || 
+                                  preview.collectedData.onChain.whaleActivity.totalValueUSD || 0) / 1e6).toFixed(2)}M
+                            </span>
+                          </div>
+                          {(preview.collectedData.onChain.whaleActivity.summary?.exchangeDeposits || 
+                            preview.collectedData.onChain.whaleActivity.exchangeDeposits) !== undefined && (
+                            <div className="flex justify-between">
+                              <span className="text-bitcoin-white-60">Exchange Flow:</span>
+                              <span className="text-bitcoin-white font-mono">
+                                {(() => {
+                                  const deposits = preview.collectedData.onChain.whaleActivity.summary?.exchangeDeposits || 
+                                                  preview.collectedData.onChain.whaleActivity.exchangeDeposits || 0;
+                                  const withdrawals = preview.collectedData.onChain.whaleActivity.summary?.exchangeWithdrawals || 
+                                                     preview.collectedData.onChain.whaleActivity.exchangeWithdrawals || 0;
+                                  const netFlow = withdrawals - deposits;
+                                  return `${netFlow > 0 ? '+' : ''}${netFlow} (${netFlow > 0 ? 'Bullish' : netFlow < 0 ? 'Bearish' : 'Neutral'})`;
+                                })()}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* GPT-5.1 Analysis Summary */}
+                  {preview.aiAnalysis && (
+                    <div className="bg-bitcoin-orange-10 border border-bitcoin-orange rounded-lg p-4">
+                      <h4 className="text-sm font-bold text-bitcoin-orange mb-2 flex items-center gap-2">
+                        🤖 GPT-5.1 AI Analysis
+                      </h4>
+                      <div className="text-sm text-bitcoin-white-80 max-h-48 overflow-y-auto">
+                        {(() => {
+                          try {
+                            const analysis = JSON.parse(preview.aiAnalysis);
+                            if (analysis.gptJobId) {
+                              return (
+                                <div className="space-y-2">
+                                  <p className="text-bitcoin-orange font-semibold">
+                                    ⏳ Analysis in progress...
+                                  </p>
+                                  <p className="text-xs text-bitcoin-white-60">
+                                    Job ID: {analysis.gptJobId}
+                                  </p>
+                                </div>
+                              );
+                            }
+                            return <p>{preview.aiAnalysis}</p>;
+                          } catch {
+                            return <p className="whitespace-pre-wrap">{preview.aiAnalysis}</p>;
+                          }
+                        })()}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Data Quality Summary */}
+                  <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
+                    <h4 className="text-sm font-bold text-bitcoin-orange mb-2">
+                      ✅ Data Quality Summary
+                    </h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-bitcoin-white-60">Overall Quality:</span>
+                        <span className="text-bitcoin-orange font-bold">{preview.dataQuality}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-bitcoin-white-60">Working APIs:</span>
+                        <span className="text-bitcoin-white">{preview.apiStatus?.working?.length || 0}/{preview.apiStatus?.total || 0}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-bitcoin-white-60">Success Rate:</span>
+                        <span className="text-bitcoin-white">{preview.apiStatus?.successRate || 0}%</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-xs text-bitcoin-white-60 mt-2">
-                  This comprehensive prompt includes all collected data, AI insights, and research instructions that will be sent to Caesar AI for deep analysis.
+                </div>
+
+                <p className="text-xs text-bitcoin-white-60 mt-4 pt-3 border-t border-bitcoin-orange-20">
+                  This comprehensive data will be sent to Caesar AI for deep institutional-grade research and analysis.
                 </p>
               </div>
 
