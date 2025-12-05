@@ -76,11 +76,23 @@ async function handler(
       ? `https://${process.env.VERCEL_URL}` 
       : 'http://localhost:3000';
     
+    console.log(`🔥 Triggering background process at: ${baseUrl}/api/ucie/openai-summary-process`);
+    
     fetch(`${baseUrl}/api/ucie/openai-summary-process`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ jobId, symbol: symbolUpper, collectedData, context })
-    }).catch(err => console.error('Background process trigger failed:', err));
+      body: JSON.stringify({ jobId: jobId.toString(), symbol: symbolUpper })
+    })
+      .then(response => {
+        console.log(`✅ Background process triggered: ${response.status}`);
+        return response.text();
+      })
+      .then(text => {
+        console.log(`📄 Background process response: ${text.substring(0, 200)}`);
+      })
+      .catch(err => {
+        console.error('❌ Background process trigger failed:', err);
+      });
 
     // Return immediately with jobId
     return res.status(200).json({

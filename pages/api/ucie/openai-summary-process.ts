@@ -45,18 +45,22 @@ export default async function handler(
     console.log(`🔄 ========================================`);
     console.log(`🔄 UCIE OpenAI Summary processor STARTED`);
     console.log(`🔄 Time: ${new Date().toISOString()}`);
+    console.log(`🔄 Request body:`, JSON.stringify(req.body).substring(0, 200));
     console.log(`🔄 ========================================`);
     
     const { jobId, symbol } = req.body as ProcessRequest;
     
     if (!jobId || !symbol) {
       console.error(`❌ Missing required fields: jobId=${jobId}, symbol=${symbol}`);
+      console.error(`❌ Full request body:`, req.body);
       return res.status(400).json({
         success: false,
         error: 'Missing required fields: jobId, symbol',
         timestamp: new Date().toISOString(),
       });
     }
+    
+    console.log(`✅ Job ${jobId}: Validated request for ${symbol}`);
     
     console.log(`📊 Job ${jobId}: Processing ${symbol} analysis...`);
     
@@ -165,28 +169,36 @@ Be specific, actionable, and data-driven.`;
     const reasoningEffort = 'low'; // Fast response (1-2 seconds)
     
     console.log(`📡 Calling OpenAI Responses API with ${model} (reasoning: ${reasoningEffort})...`);
+    console.log(`📡 API Key present: ${!!openaiApiKey}`);
+    console.log(`📡 Prompt length: ${prompt.length} chars`);
     const openaiStart = Date.now();
 
     // ✅ GPT-5.1 with Responses API (3-minute timeout)
-    const response = await fetch('https://api.openai.com/v1/responses', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openaiApiKey}`,
-      },
-      body: JSON.stringify({
-        model: model,
-        input: `You are an expert cryptocurrency analyst. Analyze this data and respond only with valid JSON.\n\n${prompt}`,
-        reasoning: {
-          effort: reasoningEffort // low = 1-2 seconds (fast)
+    let response;
+    try {
+      response = await fetch('https://api.openai.com/v1/responses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openaiApiKey}`,
         },
-        text: {
-          verbosity: 'medium'
-        },
-        max_output_tokens: 4000,
-      }),
-      signal: AbortSignal.timeout(180000), // ✅ 3 MINUTES (180 seconds)
-    });
+        body: JSON.stringify({
+          model: model,
+          input: `You are an expert cryptocurrency analyst. Analyze this data and respond only with valid JSON.\n\n${prompt}`,
+          reasoning: {
+            effort: reasoningEffort // low = 1-2 seconds (fast)
+          },
+          text: {
+            verbosity: 'medium'
+          },
+          max_output_tokens: 4000,
+        }),
+        signal: AbortSignal.timeout(180000), // ✅ 3 MINUTES (180 seconds)
+      });
+    } catch (fetchError) {
+      console.error(`❌ Fetch to OpenAI failed:`, fetchError);
+      throw fetchError;
+    }
 
     const openaiTime = Date.now() - openaiStart;
     console.log(`✅ ${model} Responses API responded in ${openaiTime}ms with status ${response.status}`);
