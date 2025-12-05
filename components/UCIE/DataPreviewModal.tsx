@@ -370,43 +370,163 @@ export default function DataPreviewModal({
                 </h3>
                 <div className="prose prose-invert max-w-none">
                   <div className="text-bitcoin-white-80 leading-relaxed max-h-96 overflow-y-auto space-y-4">
-                    {/* Parse and format the AI analysis */}
-                    {(preview.aiAnalysis || preview.summary).split('\n\n').map((paragraph, index) => {
-                      // Check if it's a heading (starts with ##, ###, or **bold**)
-                      if (paragraph.trim().startsWith('##')) {
-                        const heading = paragraph.replace(/^#+\s*/, '').trim();
+                    {/* ✅ HUMAN-READABLE FORMAT: Parse JSON and display in simple language */}
+                    {(() => {
+                      try {
+                        // Try to parse as JSON first
+                        const analysis = typeof (preview.aiAnalysis || preview.summary) === 'string' 
+                          ? JSON.parse(preview.aiAnalysis || preview.summary)
+                          : (preview.aiAnalysis || preview.summary);
+                        
                         return (
-                          <h4 key={index} className="text-lg font-bold text-bitcoin-orange mt-4 mb-2">
-                            {heading}
-                          </h4>
+                          <div className="space-y-6">
+                            {/* Executive Summary */}
+                            {analysis.summary && (
+                              <div>
+                                <h4 className="text-lg font-bold text-bitcoin-orange mb-2">
+                                  📊 What's Happening?
+                                </h4>
+                                <p className="text-bitcoin-white-80 leading-relaxed">
+                                  {analysis.summary}
+                                </p>
+                              </div>
+                            )}
+                            
+                            {/* Confidence Score */}
+                            {analysis.confidence && (
+                              <div>
+                                <h4 className="text-lg font-bold text-bitcoin-orange mb-2">
+                                  🎯 How Sure Are We?
+                                </h4>
+                                <div className="flex items-center gap-3">
+                                  <div className="flex-1 bg-bitcoin-black border border-bitcoin-orange-20 rounded-full h-3">
+                                    <div 
+                                      className="bg-bitcoin-orange h-full rounded-full transition-all"
+                                      style={{ width: `${analysis.confidence}%` }}
+                                    />
+                                  </div>
+                                  <span className="text-bitcoin-orange font-bold font-mono">
+                                    {analysis.confidence}%
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Key Insights */}
+                            {analysis.key_insights && analysis.key_insights.length > 0 && (
+                              <div>
+                                <h4 className="text-lg font-bold text-bitcoin-orange mb-2">
+                                  💡 Important Things to Know
+                                </h4>
+                                <ul className="space-y-2">
+                                  {analysis.key_insights.map((insight: string, i: number) => (
+                                    <li key={i} className="flex items-start gap-2">
+                                      <span className="text-bitcoin-orange mt-1">•</span>
+                                      <span className="text-bitcoin-white-80">{insight}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            
+                            {/* Market Outlook */}
+                            {analysis.market_outlook && (
+                              <div>
+                                <h4 className="text-lg font-bold text-bitcoin-orange mb-2">
+                                  🔮 What Might Happen Next?
+                                </h4>
+                                <p className="text-bitcoin-white-80 leading-relaxed">
+                                  {analysis.market_outlook}
+                                </p>
+                              </div>
+                            )}
+                            
+                            {/* Risk Factors */}
+                            {analysis.risk_factors && analysis.risk_factors.length > 0 && (
+                              <div>
+                                <h4 className="text-lg font-bold text-bitcoin-orange mb-2">
+                                  ⚠️ Things to Watch Out For
+                                </h4>
+                                <ul className="space-y-2">
+                                  {analysis.risk_factors.map((risk: string, i: number) => (
+                                    <li key={i} className="flex items-start gap-2">
+                                      <span className="text-bitcoin-orange mt-1">•</span>
+                                      <span className="text-bitcoin-white-80">{risk}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            
+                            {/* Opportunities */}
+                            {analysis.opportunities && analysis.opportunities.length > 0 && (
+                              <div>
+                                <h4 className="text-lg font-bold text-bitcoin-orange mb-2">
+                                  ✨ Good Things to Look For
+                                </h4>
+                                <ul className="space-y-2">
+                                  {analysis.opportunities.map((opp: string, i: number) => (
+                                    <li key={i} className="flex items-start gap-2">
+                                      <span className="text-bitcoin-orange mt-1">•</span>
+                                      <span className="text-bitcoin-white-80">{opp}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            
+                            {/* Technical Summary */}
+                            {analysis.technical_summary && (
+                              <div>
+                                <h4 className="text-lg font-bold text-bitcoin-orange mb-2">
+                                  📈 What the Charts Say
+                                </h4>
+                                <p className="text-bitcoin-white-80 leading-relaxed">
+                                  {analysis.technical_summary}
+                                </p>
+                              </div>
+                            )}
+                            
+                            {/* Sentiment Summary */}
+                            {analysis.sentiment_summary && (
+                              <div>
+                                <h4 className="text-lg font-bold text-bitcoin-orange mb-2">
+                                  💬 What People Are Saying
+                                </h4>
+                                <p className="text-bitcoin-white-80 leading-relaxed">
+                                  {analysis.sentiment_summary}
+                                </p>
+                              </div>
+                            )}
+                            
+                            {/* Recommendation */}
+                            {analysis.recommendation && (
+                              <div className="bg-bitcoin-orange-10 border border-bitcoin-orange rounded-lg p-4">
+                                <h4 className="text-lg font-bold text-bitcoin-orange mb-2">
+                                  🎯 Our Suggestion
+                                </h4>
+                                <p className="text-bitcoin-white font-semibold">
+                                  {analysis.recommendation}
+                                </p>
+                              </div>
+                            )}
+                          </div>
                         );
+                      } catch (error) {
+                        // Fallback to plain text if JSON parsing fails
+                        const text = (preview.aiAnalysis || preview.summary);
+                        return text.split('\n\n').map((paragraph, index) => {
+                          if (paragraph.trim()) {
+                            return (
+                              <p key={index} className="text-bitcoin-white-80">
+                                {paragraph.trim()}
+                              </p>
+                            );
+                          }
+                          return null;
+                        });
                       }
-                      
-                      // Check if it's a bullet list
-                      if (paragraph.includes('\n- ') || paragraph.includes('\n• ')) {
-                        const items = paragraph.split('\n').filter(line => line.trim().startsWith('-') || line.trim().startsWith('•'));
-                        return (
-                          <ul key={index} className="list-disc list-inside space-y-1 ml-4">
-                            {items.map((item, i) => (
-                              <li key={i} className="text-bitcoin-white-80">
-                                {item.replace(/^[-•]\s*/, '')}
-                              </li>
-                            ))}
-                          </ul>
-                        );
-                      }
-                      
-                      // Regular paragraph
-                      if (paragraph.trim()) {
-                        return (
-                          <p key={index} className="text-bitcoin-white-80">
-                            {paragraph.trim()}
-                          </p>
-                        );
-                      }
-                      
-                      return null;
-                    })}
+                    })()}
                   </div>
                 </div>
                 <p className="text-xs text-bitcoin-white-60 mt-3 pt-3 border-t border-bitcoin-orange-20">

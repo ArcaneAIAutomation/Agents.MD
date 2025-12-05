@@ -68,16 +68,44 @@ export default async function handler(
     
     console.log(`✅ Job ${jobId}: Status updated to 'processing'`);
 
-    // Fetch all UCIE data from database
-    console.log(`📡 Fetching UCIE data for ${symbol}...`);
+    // ✅ CRITICAL FIX: Use fresh collected data from preview modal, NOT stale database cache
+    console.log(`📡 Retrieving job context data for ${symbol}...`);
     
     const dataStart = Date.now();
-    const { getAllCachedDataForCaesar } = await import('../../../lib/ucie/openaiSummaryStorage');
-    const allData = await getAllCachedDataForCaesar(symbol);
+    
+    // Get the context data that was stored when job was created
+    const jobResult = await query(
+      'SELECT context_data FROM ucie_openai_jobs WHERE id = $1',
+      [parseInt(jobId)]
+    );
+    
+    if (!jobResult.rows[0]?.context_data) {
+      throw new Error('Job context data not found');
+    }
+    
+    const { collectedData, context } = jobResult.rows[0].context_data;
     const dataTime = Date.now() - dataStart;
     
-    console.log(`✅ UCIE data fetched in ${dataTime}ms`);
-    console.log(`📊 Data quality: ${allData.openaiSummary?.dataQuality || 0}%`);
+    console.log(`✅ Fresh collected data retrieved in ${dataTime}ms`);
+    console.log(`📊 Data quality: ${collectedData?.dataQuality || 0}%`);
+    console.log(`📊 Data timestamp: ${collectedData?.timestamp || 'unknown'}`);
+    
+    // Use the fresh collected data (not stale database cache)
+    const allData = {
+      marketData: collectedData?.marketData || null,
+      technical: collectedData?.technical || null,
+      sentiment: collectedData?.sentiment || null,
+      news: collectedData?.news || null,
+      onChain: collectedData?.onChain || null,
+      risk: collectedData?.risk || null,
+      predictions: collectedData?.predictions || null,
+      defi: collectedData?.defi || null,
+      openaiSummary: {
+        dataQuality: collectedData?.dataQuality || 0
+      }
+    };
+    
+    console.log(`✅ Using FRESH data from preview modal (NOT stale database cache)`);
 
     // Update progress
     await query(
