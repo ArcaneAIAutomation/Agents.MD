@@ -47,12 +47,71 @@ export default function DataPreviewModal({
   const [loading, setLoading] = useState(true);
   const [preview, setPreview] = useState<DataPreview | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  // GPT-5.1 polling state
+  const [gptJobId, setGptJobId] = useState<number | null>(null);
+  const [gptStatus, setGptStatus] = useState<'idle' | 'queued' | 'processing' | 'completed' | 'error'>('idle');
+  const [gptProgress, setGptProgress] = useState<string>('');
+  const [gptElapsedTime, setGptElapsedTime] = useState<number>(0);
 
   useEffect(() => {
     if (isOpen && symbol) {
       fetchDataPreview();
     }
   }, [isOpen, symbol]);
+  
+  // Poll for GPT-5.1 results
+  useEffect(() => {
+    if (!gptJobId || gptStatus === 'completed' || gptStatus === 'error') {
+      return;
+    }
+    
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/ucie/openai-summary-poll/${gptJobId}`);
+        if (!response.ok) {
+          throw new Error(`Poll failed: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setGptStatus(data.status);
+        
+        if (data.progress) {
+          setGptProgress(data.progress);
+        }
+        
+        if (data.status === 'completed' && data.result) {
+          // Parse and update preview with GPT-5.1 analysis
+          const analysis = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+          
+          setPreview(prev => prev ? {
+            ...prev,
+            aiAnalysis: JSON.stringify(analysis, null, 2)
+          } : null);
+          
+          console.log('✅ GPT-5.1 analysis completed:', analysis);
+        }
+        
+        if (data.status === 'error') {
+          console.error('❌ GPT-5.1 analysis failed:', data.error);
+          setGptProgress('Analysis failed');
+        }
+      } catch (err) {
+        console.error('❌ GPT-5.1 polling error:', err);
+      }
+    }, 3000); // Poll every 3 seconds
+    
+    // Track elapsed time
+    const startTime = Date.now();
+    const timeInterval = setInterval(() => {
+      setGptElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+    }, 1000);
+    
+    return () => {
+      clearInterval(pollInterval);
+      clearInterval(timeInterval);
+    };
+  }, [gptJobId, gptStatus]);
 
   const fetchDataPreview = async () => {
     setLoading(true);
@@ -94,8 +153,32 @@ export default function DataPreviewModal({
           dataQuality: data.data.dataQuality,
           sources: data.data.apiStatus.working.length,
           attempts: data.data.retryInfo?.attempts || 1,
-          timestamp: data.data.timestamp
+          timestamp: data.data.timestamp,
+          gptJobId: data.data.gptJobId
         });
+        
+        // ✅ CRITICAL: Check for GPT-5.1 jobId at top level (primary location)
+        if (data.data.gptJobId) {
+          console.log(`🚀 GPT-5.1 job ${data.data.gptJobId} detected, starting polling...`);
+          setGptJobId(parseInt(data.data.gptJobId));
+          setGptStatus('queued');
+          setGptProgress('GPT-5.1 analysis queued...');
+        } 
+        // Fallback: Check if GPT-5.1 analysis was started (legacy location)
+        else if (data.data.aiAnalysis) {
+          try {
+            const aiData = JSON.parse(data.data.aiAnalysis);
+            if (aiData.gptJobId) {
+              console.log(`🚀 GPT-5.1 job ${aiData.gptJobId} detected (legacy), starting polling...`);
+              setGptJobId(parseInt(aiData.gptJobId));
+              setGptStatus('queued');
+              setGptProgress('GPT-5.1 analysis queued...');
+            }
+          } catch (err) {
+            // aiAnalysis is not JSON, it's the actual analysis text
+            console.log('✅ GPT-5.1 analysis already complete in preview');
+          }
+        }
       } else {
         setError(data.error || 'Failed to load data preview');
       }
@@ -367,7 +450,29 @@ export default function DataPreviewModal({
                       ({(preview.aiAnalysis || preview.summary).split(' ').length.toLocaleString()} words)
                     </span>
                   )}
+                  {gptStatus === 'queued' || gptStatus === 'processing' ? (
+                    <span className="text-xs text-bitcoin-orange font-normal ml-2 animate-pulse">
+                      • Analyzing... ({gptElapsedTime}s)
+                    </span>
+                  ) : null}
                 </h3>
+                
+                {/* GPT-5.1 Progress Indicator */}
+                {(gptStatus === 'queued' || gptStatus === 'processing') && (
+                  <div className="mb-4 p-3 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded-lg">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-bitcoin-orange border-t-transparent"></div>
+                      <span className="text-sm text-bitcoin-white font-semibold">
+                        {gptProgress || 'GPT-5.1 analysis in progress...'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-bitcoin-white-60">
+                      <span>Elapsed: {gptElapsedTime}s</span>
+                      <span>Expected: 30-120s</span>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="prose prose-invert max-w-none">
                   <div className="text-bitcoin-white-80 leading-relaxed max-h-96 overflow-y-auto space-y-4">
                     {/* ✅ HUMAN-READABLE FORMAT: Parse JSON and display in simple language */}

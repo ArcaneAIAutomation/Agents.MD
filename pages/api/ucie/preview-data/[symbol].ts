@@ -445,7 +445,47 @@ async function handler(
       }
     }
 
-    // ✅ CRITICAL: Retrieve AI analysis from database
+    // ✅ CRITICAL: Start GPT-5.1 analysis job asynchronously
+    console.log(`🚀 Starting GPT-5.1 analysis job asynchronously...`);
+    let gptJobId: string | null = null;
+    try {
+      // Construct base URL from request headers
+      const protocol = req.headers['x-forwarded-proto'] || 'https';
+      const host = req.headers['host'];
+      const baseUrl = `${protocol}://${host}`;
+      
+      const startResponse = await fetch(`${baseUrl}/api/ucie/openai-summary-start/${normalizedSymbol}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          collectedData,
+          context: {
+            symbol: normalizedSymbol,
+            dataQuality,
+            apiStatus,
+            timestamp: new Date().toISOString()
+          }
+        })
+      });
+      
+      if (startResponse.ok) {
+        const startData = await startResponse.json();
+        if (startData.success && startData.jobId) {
+          gptJobId = startData.jobId;
+          console.log(`✅ GPT-5.1 analysis job ${gptJobId} started successfully`);
+        } else {
+          console.warn(`⚠️ GPT-5.1 job start returned success=false:`, startData);
+        }
+      } else {
+        console.warn(`⚠️ GPT-5.1 job start failed with status ${startResponse.status}`);
+      }
+    } catch (error) {
+      console.error(`❌ Failed to start GPT-5.1 analysis job:`, error);
+    }
+
+    // ✅ CRITICAL: Retrieve AI analysis from database (for immediate display)
     console.log(`📊 Retrieving AI analysis from database...`);
     let aiAnalysis: string | null = null;
     try {
@@ -479,7 +519,7 @@ async function handler(
       timestamp: new Date().toISOString(),
       dataQuality,
       summary: aiAnalysis || summary, // ✅ Use AI analysis if available, fallback to basic summary
-      aiAnalysis: aiAnalysis, // ✅ Include full AI analysis (OpenAI GPT-4o)
+      aiAnalysis: gptJobId ? JSON.stringify({ gptJobId, gptStatus: 'queued', message: 'GPT-5.1 analysis running...' }) : aiAnalysis, // ✅ Include jobId for polling
       caesarPromptPreview: caesarPromptPreview, // ✅ Include Caesar prompt preview
       collectedData,
       apiStatus,
@@ -498,7 +538,8 @@ async function handler(
         attempts: attempt,
         maxAttempts: maxAttempts,
         success: true
-      }
+      },
+      gptJobId: gptJobId // ✅ CRITICAL: Include jobId at top level for easy access
     };
 
     return res.status(200).json({
@@ -1039,12 +1080,40 @@ async function generateAISummary(
     context += `Note: The following data sources are unavailable: ${apiStatus.failed.join(', ')}\n`;
   }
 
-  // ✅ UCIE SYSTEM: Return instant fallback summary for preview
-  // GPT-5.1 analysis will run asynchronously after data collection
-  // User will see GPT-5.1 analysis before activating Caesar AI
-  console.log(`📊 Data collection complete. GPT-5.1 analysis will run asynchronously.`);
+  // ✅ UCIE SYSTEM: Trigger GPT-5.1 analysis asynchronously
+  // Start the analysis job and return jobId for polling
+  console.log(`📊 Data collection complete. Starting GPT-5.1 analysis asynchronously...`);
   
-  // Return instant fallback summary (GPT-5.1 runs separately)
+  try {
+    // Start GPT-5.1 analysis job
+    const startResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/ucie/openai-summary-start/${symbol}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (startResponse.ok) {
+      const startData = await startResponse.json();
+      if (startData.success && startData.jobId) {
+        console.log(`✅ GPT-5.1 analysis job ${startData.jobId} started`);
+        
+        // Return fallback summary with jobId for polling
+        return JSON.stringify({
+          summary: generateFallbackSummary(symbol, collectedData, apiStatus),
+          gptJobId: startData.jobId,
+          gptStatus: 'queued',
+          message: 'GPT-5.1 analysis is running in the background. Poll for results.'
+        });
+      }
+    }
+    
+    console.warn('⚠️ Failed to start GPT-5.1 analysis, returning fallback summary');
+  } catch (error) {
+    console.error('❌ Error starting GPT-5.1 analysis:', error);
+  }
+  
+  // Return fallback summary if GPT-5.1 start failed
   return generateFallbackSummary(symbol, collectedData, apiStatus);
 }
 
