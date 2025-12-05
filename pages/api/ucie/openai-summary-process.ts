@@ -251,9 +251,10 @@ Be specific, actionable, and data-driven.`;
     await query(
       `UPDATE ucie_openai_jobs 
        SET status = $1,
-           result_data = $2,
+           result = $2,
            progress = $3,
-           updated_at = NOW()
+           updated_at = NOW(),
+           completed_at = NOW()
        WHERE id = $4`,
       [
         'completed',
@@ -297,8 +298,9 @@ Be specific, actionable, and data-driven.`;
         await query(
           `UPDATE ucie_openai_jobs 
            SET status = $1, 
-               error_message = $2,
-               updated_at = NOW()
+               error = $2,
+               updated_at = NOW(),
+               completed_at = NOW()
            WHERE id = $3`,
           ['error', errorMessage, parseInt(jobId)]
         );

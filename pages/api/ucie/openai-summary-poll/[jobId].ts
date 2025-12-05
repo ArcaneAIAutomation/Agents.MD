@@ -55,7 +55,7 @@ async function handler(
   try {
     // Get job status from database
     const result = await query(
-      `SELECT id, symbol, status, result_data, error_message, progress, created_at, updated_at
+      `SELECT id, symbol, status, result, error, progress, created_at, updated_at
        FROM ucie_openai_jobs 
        WHERE id = $1 AND (user_id = $2 OR user_id IS NULL)`,
       [parseInt(jobId), userId]
@@ -82,12 +82,12 @@ async function handler(
       elapsedTime,
     };
 
-    if (job.status === 'completed' && job.result_data) {
-      response.result = job.result_data;
+    if (job.status === 'completed' && job.result) {
+      response.result = typeof job.result === 'string' ? job.result : JSON.stringify(job.result);
     }
 
-    if (job.status === 'error' && job.error_message) {
-      response.error = job.error_message;
+    if (job.status === 'error' && job.error) {
+      response.error = job.error;
     }
 
     if (job.progress) {
