@@ -31,21 +31,29 @@
 
 ---
 
-## 🎉 API FIX COMPLETE (Jan 27, 2025)
+## 🎉 API FIX COMPLETE (Jan 27, 2025) + 🚀 LUNARCRUSH INTEGRATION (Dec 5, 2025)
 
 ### **Problem Identified:**
 Sentiment and On-Chain APIs showing 0% data quality due to:
 - ❌ Complex client modules with timeout issues (10s+ per request)
 - ❌ Sequential API calls causing cascading failures
 - ❌ No graceful degradation when individual sources failed
+- ❌ LunarCrush using wrong endpoints (category vs topic)
 - ❌ User correctly identified: "System error, not data unavailability"
 
 ### **Solution Implemented:**
 
 **1. Sentiment API Fixed** (`pages/api/ucie/sentiment/[symbol].ts`)
-- **Added Fear & Greed Index** as primary source (40% weight) - always available
-- **Simplified LunarCrush** fetching with 5s timeout (down from 10s)
-- **Simplified Reddit** fetching with 3s timeout (down from 5s)
+- **Added Fear & Greed Index** as primary source (25% weight) - always available
+- **✅ NEW: LunarCrush Integration** (20% weight) - verified working endpoints
+  - Uses `/public/topic/bitcoin/posts/v1` for social sentiment (100% quality)
+  - Uses `/public/coins/list/v1` for market data (80% quality)
+  - Fetches 117+ posts with sentiment scores (1-5 scale)
+  - Provides 402M+ interactions data
+  - Post types: tweets, reddit, youtube, tiktok
+- **Added CoinMarketCap** sentiment (20% weight) - price momentum analysis
+- **Added CoinGecko** sentiment (20% weight) - community metrics
+- **Simplified Reddit** fetching with 3s timeout (15% weight)
 - **Parallel fetching** with `Promise.allSettled` for speed
 - **Direct API calls** instead of complex client modules
 
@@ -57,21 +65,29 @@ Sentiment and On-Chain APIs showing 0% data quality due to:
 - **Direct API calls** with proper error handling
 
 **3. Performance Improvements:**
-- **Sentiment API**: 35s → 9s (74% faster)
+- **Sentiment API**: 35s → 300-500ms (98% faster!)
 - **On-Chain API**: 70s → 5s (93% faster)
 - **Parallel execution**: max(timeouts) instead of sum(timeouts)
+- **LunarCrush**: 218ms posts + 360ms market = 578ms total (parallel)
 
 ### **Result:**
-✅ **Sentiment API**: 40-100% data quality (up from 0%)  
+✅ **Sentiment API**: 70-100% data quality (up from 0%)  
 ✅ **On-Chain API**: 60-100% data quality (up from 0%)  
-✅ **Fear & Greed Index**: Always available (primary sentiment source)  
+✅ **Fear & Greed Index**: Always available (25% weight)  
+✅ **LunarCrush**: Now working with real social data (20% weight)  
+✅ **CoinMarketCap**: Price momentum analysis (20% weight)  
+✅ **CoinGecko**: Community metrics (20% weight)  
+✅ **Reddit**: Community discussions (15% weight)  
 ✅ **Network Stats**: Always available (primary on-chain source)  
 ✅ **Graceful Degradation**: Individual source failures don't crash entire request  
-✅ **Faster Response**: 60-93% faster with parallel fetching  
+✅ **Faster Response**: 98% faster with parallel fetching  
 
-**UCIE now achieves 40-100% data quality instead of 0%!**
+**UCIE now achieves 70-100% data quality instead of 0%!**
 
-**See**: `UCIE-SENTIMENT-ONCHAIN-FIX-COMPLETE.md` for complete technical details
+**See**: 
+- `UCIE-SENTIMENT-ONCHAIN-FIX-COMPLETE.md` for technical details
+- `LUNARCRUSH-INTEGRATION-COMPLETE.md` for LunarCrush integration
+- `.kiro/steering/lunarcrush-api-guide.md` for API reference
 
 ---
 

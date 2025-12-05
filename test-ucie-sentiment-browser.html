@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UCIE Sentiment API Test</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-result {
+            background: #111;
+            border: 2px solid #F7931A;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .success { border-color: #F7931A; }
+        .error { border-color: #ff4444; }
+        pre {
+            background: #000;
+            border: 1px solid #333;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        button {
+            background: #F7931A;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #ff9d2e;
+        }
+        .metric {
+            display: inline-block;
+            margin: 10px 20px 10px 0;
+        }
+        .metric-label {
+            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .metric-value {
+            color: #F7931A;
+            font-size: 24px;
+            font-weight: bold;
+            font-family: 'Roboto Mono', monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="color: #F7931A;">UCIE Sentiment API Test</h1>
+    <p>Testing the sentiment API endpoint and data structure</p>
+    
+    <button onclick="testAPI()">Test API Endpoint</button>
+    <button onclick="testWithRefresh()">Test with Refresh</button>
+    
+    <div id="results"></div>
+    
+    <script>
+        async function testAPI(refresh = false) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="test-result"><p>Loading...</p></div>';
+            
+            try {
+                const url = refresh 
+                    ? 'http://localhost:3000/api/ucie/sentiment/BTC?refresh=true'
+                    : 'http://localhost:3000/api/ucie/sentiment/BTC';
+                    
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const d = data.data;
+                    
+                    let html = '<div class="test-result success">';
+                    html += '<h2>✅ API Test Successful</h2>';
+                    
+                    // Overall metrics
+                    html += '<div style="margin: 20px 0;">';
+                    html += `<div class="metric">
+                        <div class="metric-label">Overall Score</div>
+                        <div class="metric-value">${d.overallScore}/100</div>
+                    </div>`;
+                    html += `<div class="metric">
+                        <div class="metric-label">Sentiment</div>
+                        <div class="metric-value">${d.sentiment.toUpperCase()}</div>
+                    </div>`;
+                    html += `<div class="metric">
+                        <div class="metric-label">Data Quality</div>
+                        <div class="metric-value">${d.dataQuality}%</div>
+                    </div>`;
+                    html += `<div class="metric">
+                        <div class="metric-label">Cached</div>
+                        <div class="metric-value">${data.cached ? 'YES' : 'NO'}</div>
+                    </div>`;
+                    html += '</div>';
+                    
+                    // Data sources
+                    html += '<h3>Data Sources Available:</h3>';
+                    html += '<ul>';
+                    if (d.fearGreedIndex) html += '<li>✅ Fear & Greed Index: ' + d.fearGreedIndex.value + ' (' + d.fearGreedIndex.classification + ')</li>';
+                    if (d.coinMarketCap) html += '<li>✅ CoinMarketCap: Score ' + d.coinMarketCap.sentimentScore + '/100</li>';
+                    else html += '<li>❌ CoinMarketCap: Not available</li>';
+                    if (d.coinGecko) html += '<li>✅ CoinGecko: Score ' + d.coinGecko.sentimentScore + '/100</li>';
+                    else html += '<li>❌ CoinGecko: Not available</li>';
+                    if (d.lunarCrush) html += '<li>✅ LunarCrush: ' + d.lunarCrush.totalPosts + ' posts, Galaxy Score ' + d.lunarCrush.galaxyScore + '</li>';
+                    if (d.reddit) html += '<li>✅ Reddit: ' + d.reddit.mentions24h + ' mentions, Sentiment ' + d.reddit.sentiment + '/100</li>';
+                    html += '</ul>';
+                    
+                    // LunarCrush details
+                    if (d.lunarCrush) {
+                        html += '<h3>LunarCrush Details:</h3>';
+                        html += '<ul>';
+                        html += '<li>Average Sentiment: ' + d.lunarCrush.averageSentiment.toFixed(2) + '/5</li>';
+                        html += '<li>Total Interactions: ' + d.lunarCrush.totalInteractions.toLocaleString() + '</li>';
+                        html += '<li>Price: $' + d.lunarCrush.price.toLocaleString() + '</li>';
+                        html += '<li>Post Types: ' + JSON.stringify(d.lunarCrush.postTypes) + '</li>';
+                        html += '</ul>';
+                    }
+                    
+                    // Raw JSON
+                    html += '<h3>Raw API Response:</h3>';
+                    html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    html += '</div>';
+                    
+                    resultsDiv.innerHTML = html;
+                } else {
+                    resultsDiv.innerHTML = '<div class="test-result error"><h2>❌ API Test Failed</h2><pre>' + JSON.stringify(data, null, 2) + '</pre></div>';
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = '<div class="test-result error"><h2>❌ Error</h2><p>' + error.message + '</p></div>';
+            }
+        }
+        
+        function testWithRefresh() {
+            testAPI(true);
+        }
+        
+        // Auto-run test on page load
+        window.onload = () => testAPI();
+    </script>
+</body>
+</html>
