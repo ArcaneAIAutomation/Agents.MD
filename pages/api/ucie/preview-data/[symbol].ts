@@ -3,16 +3,18 @@
  * 
  * GET /api/ucie/preview-data/[symbol]
  * 
- * Collects data from all effective UCIE APIs and generates an OpenAI GPT-4o summary
+ * Collects data from all effective UCIE APIs and generates an OpenAI GPT-5.1 summary
  * for user review before proceeding with Caesar AI analysis.
  * 
  * Features:
  * - Parallel data collection from working APIs
- * - OpenAI GPT-4o summarization (latest model)
+ * - OpenAI GPT-5.1 summarization with reasoning (upgraded from GPT-4o)
  * - Data quality scoring
  * - User-friendly preview format
+ * - 20-MINUTE FRESHNESS RULE: NO data older than 20 minutes
  * 
  * Fixed: Parameter name mismatch (geminiSummary → aiAnalysis)
+ * Updated: December 5, 2025 - 20-minute freshness rule, GPT-5.1 async pattern
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -20,6 +22,30 @@ import { setCachedAnalysis, getCachedAnalysis } from '../../../../lib/ucie/cache
 import { storeOpenAISummary } from '../../../../lib/ucie/openaiSummaryStorage';
 import { generateOpenAIAnalysis } from '../../../../lib/ucie/openaiClient';
 import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
+
+// ✅ CRITICAL: 20-MINUTE FRESHNESS RULE
+// User requirement: NO data older than 20 minutes - EVER
+const MAX_DATA_AGE_MS = 20 * 60 * 1000; // 20 minutes in milliseconds
+
+/**
+ * Validate data freshness - reject data older than 20 minutes
+ */
+function isDataFresh(timestamp: string | number): boolean {
+  try {
+    const dataTime = typeof timestamp === 'string' ? new Date(timestamp).getTime() : timestamp;
+    const dataAge = Date.now() - dataTime;
+    const isFresh = dataAge < MAX_DATA_AGE_MS;
+    
+    if (!isFresh) {
+      console.warn(`⚠️ Data is ${Math.round(dataAge / 60000)} minutes old (max: 20 minutes)`);
+    }
+    
+    return isFresh;
+  } catch (error) {
+    console.error('Error validating data freshness:', error);
+    return false;
+  }
+}
 
 interface DataPreview {
   symbol: string;
@@ -232,7 +258,7 @@ async function handler(
           normalizedSymbol,
           'market-data',
           collectedData.marketData,
-          5 * 60, // ✅ 5 minutes - prices change frequently but not every second
+          10 * 60, // ✅ 10 minutes - prices change frequently (20-min max rule)
           collectedData.marketData.dataQuality || 0,
           userId,
           userEmail
@@ -249,7 +275,7 @@ async function handler(
           normalizedSymbol,
           'sentiment',
           collectedData.sentiment,
-          15 * 60, // ✅ 15 minutes - social sentiment changes slowly
+          20 * 60, // ✅ 20 minutes - MAXIMUM allowed (20-min max rule)
           collectedData.sentiment.dataQuality || 0,
           userId,
           userEmail
@@ -266,7 +292,7 @@ async function handler(
           normalizedSymbol,
           'technical',
           collectedData.technical,
-          5 * 60, // ✅ 5 minutes - technical indicators need fresh price data
+          10 * 60, // ✅ 10 minutes - needs fresh prices (20-min max rule)
           collectedData.technical.dataQuality || 0,
           userId,
           userEmail
@@ -283,7 +309,7 @@ async function handler(
           normalizedSymbol,
           'news',
           collectedData.news,
-          30 * 60, // ✅ 30 minutes - news doesn't change that frequently
+          20 * 60, // ✅ 20 minutes - MAXIMUM allowed (20-min max rule, reduced from 30)
           collectedData.news.dataQuality || 0,
           userId,
           userEmail
@@ -300,7 +326,7 @@ async function handler(
           normalizedSymbol,
           'on-chain',
           collectedData.onChain,
-          15 * 60, // ✅ 15 minutes - blockchain data is relatively stable
+          20 * 60, // ✅ 20 minutes - MAXIMUM allowed (20-min max rule)
           collectedData.onChain.dataQuality || 0,
           userId,
           userEmail
@@ -325,8 +351,9 @@ async function handler(
 
     // ✅ CRITICAL: Wait for database transactions to commit
     // PostgreSQL transactions need time to commit and become visible to other connections
-    console.log(`⏳ Waiting 2 seconds for database transactions to commit...`);
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // INCREASED from 2 to 5 seconds for better reliability
+    console.log(`⏳ Waiting 5 seconds for database transactions to commit...`);
+    await new Promise(resolve => setTimeout(resolve, 5000));
     
     // ✅ VERIFY database is populated
     console.log(`🔍 Verifying database population...`);
