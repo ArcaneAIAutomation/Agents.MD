@@ -72,19 +72,27 @@ async function handler(
     console.log(`✅ Job created: ${jobId}`);
 
     // Trigger background processing (fire and forget)
-    const baseUrl = process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
-      : 'http://localhost:3000';
+    // ✅ CRITICAL FIX: Use request host instead of VERCEL_URL (which points to preview deployments)
+    const protocol = req.headers['x-forwarded-proto'] || 'https';
+    const host = req.headers['host'] || 'news.arcane.group';
+    const baseUrl = `${protocol}://${host}`;
     
     console.log(`🔥 Triggering background process at: ${baseUrl}/api/ucie/openai-summary-process`);
+    console.log(`   Job ID: ${jobId}, Symbol: ${symbolUpper}`);
     
     fetch(`${baseUrl}/api/ucie/openai-summary-process`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'User-Agent': 'UCIE-Background-Processor/1.0'
+      },
       body: JSON.stringify({ jobId: jobId.toString(), symbol: symbolUpper })
     })
       .then(response => {
         console.log(`✅ Background process triggered: ${response.status}`);
+        if (!response.ok) {
+          console.error(`❌ Background process returned error: ${response.status} ${response.statusText}`);
+        }
         return response.text();
       })
       .then(text => {
@@ -92,6 +100,7 @@ async function handler(
       })
       .catch(err => {
         console.error('❌ Background process trigger failed:', err);
+        console.error('   Error details:', err.message);
       });
 
     // Return immediately with jobId
