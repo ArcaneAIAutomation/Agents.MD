@@ -874,8 +874,43 @@ async function generateAISummary(
 ): Promise<string> {
   console.log(`📊 OpenAI Summary: Reading ALL data from Supabase database...`);
   
+  // ✅ CRITICAL FIX: Start GPT-5.1 async job and return jobId for polling
+  // This allows frontend to poll for results instead of waiting synchronously
+  console.log(`🚀 Starting GPT-5.1 async analysis job for ${symbol}...`);
+  
+  try {
+    const startResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/ucie/openai-summary-start/${symbol}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    
+    if (startResponse.ok) {
+      const startData = await startResponse.json();
+      if (startData.success && startData.jobId) {
+        console.log(`✅ GPT-5.1 analysis job ${startData.jobId} started successfully`);
+        
+        // ✅ RETURN JOBID FOR POLLING (not fallback summary)
+        return JSON.stringify({
+          gptJobId: startData.jobId,
+          gptStatus: 'queued',
+          message: 'GPT-5.1 analysis started. Frontend will poll for results.',
+          timestamp: new Date().toISOString()
+        });
+      } else {
+        console.warn('⚠️ GPT-5.1 start response missing jobId:', startData);
+      }
+    } else {
+      console.warn(`⚠️ GPT-5.1 start failed with status ${startResponse.status}`);
+    }
+  } catch (error) {
+    console.error('❌ Error starting GPT-5.1 analysis:', error);
+  }
+  
+  // ❌ Only return fallback if start ACTUALLY failed
+  console.warn('⚠️ Failed to start GPT-5.1 analysis, returning fallback summary');
+  
   // ✅ ALWAYS read from database (ignore in-memory collectedData)
-  // This ensures OpenAI uses the same data source as Caesar
+  // This ensures fallback summary uses the same data source as Caesar
   const marketData = await getCachedAnalysis(symbol, 'market-data');
   const sentimentData = await getCachedAnalysis(symbol, 'sentiment');
   const technicalData = await getCachedAnalysis(symbol, 'technical');
@@ -883,7 +918,7 @@ async function generateAISummary(
   const onChainData = await getCachedAnalysis(symbol, 'on-chain');
 
   // Log what we retrieved with detailed info
-  console.log(`📦 Database retrieval results:`);
+  console.log(`📦 Database retrieval results (for fallback):`);
   console.log(`   Market Data: ${marketData ? '✅ Found' : '❌ Not found'}${marketData ? ` (${JSON.stringify(marketData).length} bytes)` : ''}`);
   console.log(`   Sentiment: ${sentimentData ? '✅ Found' : '❌ Not found'}${sentimentData ? ` (${JSON.stringify(sentimentData).length} bytes)` : ''}`);
   console.log(`   Technical: ${technicalData ? '✅ Found' : '❌ Not found'}${technicalData ? ` (${JSON.stringify(technicalData).length} bytes)` : ''}`);
@@ -899,8 +934,13 @@ async function generateAISummary(
     const errorMsg = `❌ CRITICAL: Missing required data from database: ${missingData.join(', ')}`;
     console.error(errorMsg);
     console.error(`   This means the database writes may have failed or data hasn't been committed yet`);
-    console.error(`   Throwing error to trigger fallback summary...`);
-    throw new Error(errorMsg);
+    
+    // Return error status instead of throwing
+    return JSON.stringify({
+      gptStatus: 'error',
+      error: errorMsg,
+      fallbackSummary: `Unable to generate analysis: ${errorMsg}`
+    });
   }
   
   // Build context from database data
