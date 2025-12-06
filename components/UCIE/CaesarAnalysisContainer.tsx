@@ -46,6 +46,7 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
   const startTimeRef = useRef<number>(Date.now());
   const [lastPollTime, setLastPollTime] = useState<Date>(new Date());
   const [elapsedTime, setElapsedTime] = useState<number>(0);
+  const [userWantsAnalysis, setUserWantsAnalysis] = useState(false); // ✅ NEW: Track user opt-in
 
   // Calculate fallback progress based on elapsed time
   // Uses a logarithmic curve to show faster progress at start, slower near end
@@ -61,11 +62,11 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
     return Math.min(95, Math.max(0, rawProgress));
   };
 
-  // Start Caesar analysis if no jobId provided
-  // Wait for progressive loading to complete + 3 second buffer for database writes
+  // ✅ MODIFIED: Only start analysis when user clicks button
+  // Wait for progressive loading to complete + user opt-in
   useEffect(() => {
-    if (!initialJobId && progressiveLoadingComplete) {
-      console.log('⏳ [Caesar] Progressive loading complete. Waiting 3 seconds for database writes to finalize...');
+    if (!initialJobId && progressiveLoadingComplete && userWantsAnalysis) {
+      console.log('⏳ [Caesar] User opted in. Waiting 3 seconds for database writes to finalize...');
       
       // Add 3-second delay to ensure database writes are complete
       const timer = setTimeout(() => {
@@ -77,8 +78,10 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
       return () => clearTimeout(timer);
     } else if (!progressiveLoadingComplete) {
       console.log('⏳ [Caesar] Waiting for progressive loading to complete...');
+    } else if (!userWantsAnalysis) {
+      console.log('⏳ [Caesar] Waiting for user to click "Start Caesar Deep Dive" button...');
     }
-  }, [initialJobId, progressiveLoadingComplete]);
+  }, [initialJobId, progressiveLoadingComplete, userWantsAnalysis]);
 
   // Update elapsed time every second for live display
   useEffect(() => {
@@ -268,7 +271,80 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
     startAnalysis();
   };
 
-  // Show preparing data state
+  // ✅ NEW: Show opt-in button when data is ready but user hasn't started analysis
+  if (!userWantsAnalysis && progressiveLoadingComplete) {
+    return (
+      <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-8">
+        <div className="text-center">
+          <Brain className="w-16 h-16 text-bitcoin-orange mx-auto mb-4" />
+          <h2 className="text-3xl font-bold text-bitcoin-white mb-2">
+            Caesar AI Deep Dive Research
+          </h2>
+          <p className="text-bitcoin-white-80 mb-6 max-w-2xl mx-auto">
+            All data has been collected and GPT-5.1 analysis is complete. 
+            You can now review all the information above, or proceed with Caesar AI's comprehensive deep dive research.
+          </p>
+          
+          {/* What Caesar Will Do */}
+          <div className="bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded-lg p-6 mb-6 text-left max-w-2xl mx-auto">
+            <h3 className="text-lg font-bold text-bitcoin-white mb-4">
+              What Caesar AI Will Analyze:
+            </h3>
+            <div className="space-y-3 text-sm text-bitcoin-white-80">
+              <div className="flex items-start gap-2">
+                <span className="text-bitcoin-orange mt-1">•</span>
+                <span>Search 15+ authoritative sources for latest information</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-bitcoin-orange mt-1">•</span>
+                <span>Analyze technology, team, partnerships, and market position</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-bitcoin-orange mt-1">•</span>
+                <span>Identify risks, opportunities, and recent developments</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-bitcoin-orange mt-1">•</span>
+                <span>Generate comprehensive research report with citations</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Time Warning */}
+          <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4 mb-6 max-w-2xl mx-auto">
+            <div className="flex items-center gap-2 justify-center text-bitcoin-orange">
+              <Clock className="w-5 h-5" />
+              <span className="font-semibold">Expected Duration: 15-20 minutes</span>
+            </div>
+            <p className="text-xs text-bitcoin-white-60 mt-2">
+              This is a comprehensive deep dive analysis. You can review other data while waiting.
+            </p>
+          </div>
+
+          {/* Start Button */}
+          <button
+            onClick={() => {
+              console.log('🚀 [Caesar] User clicked "Start Caesar Deep Dive" button');
+              setUserWantsAnalysis(true);
+            }}
+            className="bg-bitcoin-orange text-bitcoin-black border-2 border-bitcoin-orange font-bold uppercase px-8 py-4 rounded-lg transition-all hover:bg-bitcoin-black hover:text-bitcoin-orange hover:shadow-[0_0_30px_rgba(247,147,26,0.5)] hover:scale-105 active:scale-95 min-h-[56px] text-lg"
+          >
+            <Brain className="w-6 h-6 inline mr-2" />
+            Start Caesar Deep Dive (15-20 min)
+          </button>
+
+          {/* Optional: Skip Button */}
+          <div className="mt-4">
+            <p className="text-xs text-bitcoin-white-60">
+              You can review all the data above and come back to start Caesar analysis later.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show preparing data state (only after user clicks button)
   if (preparingData && !progressiveLoadingComplete) {
     return (
       <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-8">
@@ -281,14 +357,14 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
             Progressive loading is still in progress...
           </p>
           <div className="mt-4 text-sm text-bitcoin-white-60">
-            Caesar analysis will start automatically when data is ready
+            Caesar analysis will start when you click the button
           </div>
         </div>
       </div>
     );
   }
 
-  if (preparingData && progressiveLoadingComplete) {
+  if (preparingData && progressiveLoadingComplete && userWantsAnalysis) {
     return (
       <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-8">
         <div className="text-center">
