@@ -179,6 +179,12 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
   // Handle preview modal actions
   const handlePreviewContinue = (preview: any) => {
     console.log('📊 Preview data received:', preview);
+    console.log('📦 Preview data structure:', {
+      hasCollectedData: !!preview.collectedData,
+      hasGptAnalysis: !!preview.aiAnalysis,
+      hasCaesarPrompt: !!preview.caesarPromptPreview,
+      dataQuality: preview.dataQuality
+    });
     setPreviewData(preview); // ✅ Store preview data for Caesar
     setShowPreview(false);
     setProceedWithAnalysis(true);
@@ -193,11 +199,15 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
     
     // Merge analysis into preview data for Caesar
     if (previewData) {
-      setPreviewData({
+      const updatedPreviewData = {
         ...previewData,
-        gptAnalysis: analysis
-      });
+        gptAnalysis: analysis,
+        aiAnalysis: analysis // Also store as aiAnalysis for compatibility
+      };
+      console.log('📦 Updated preview data with GPT-5.1 analysis');
+      setPreviewData(updatedPreviewData);
     }
+  };
   };
 
   // Debug: Log analysis data changes
@@ -523,7 +533,7 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
       { id: 'defi' as TabId, title: 'DeFi Metrics', icon: <Coins className="w-5 h-5" />, content: <DeFiMetricsPanel symbol={symbol} data={analysisData.defi} /> },
       { id: 'derivatives' as TabId, title: 'Derivatives', icon: <AlertTriangle className="w-5 h-5" />, content: <DerivativesPanel symbol={symbol} data={analysisData.derivatives} /> },
       { id: 'predictions' as TabId, title: 'Predictions & AI', icon: <Target className="w-5 h-5" />, content: <PredictiveModelPanel symbol={symbol} data={analysisData.predictions} /> },
-      { id: 'research' as TabId, title: 'AI Research', icon: <Brain className="w-5 h-5" />, content: <CaesarAnalysisContainer symbol={symbol} jobId={analysisData.research?.jobId} progressiveLoadingComplete={!loading} /> },
+      { id: 'research' as TabId, title: 'AI Research', icon: <Brain className="w-5 h-5" />, content: <CaesarAnalysisContainer symbol={symbol} jobId={analysisData.research?.jobId} progressiveLoadingComplete={!loading} previewData={previewData} /> },
     ];
 
     return (
