@@ -88,19 +88,38 @@ async function handler(
       },
       body: JSON.stringify({ jobId: jobId.toString(), symbol: symbolUpper })
     })
-      .then(response => {
+      .then(async response => {
         console.log(`✅ Background process triggered: ${response.status}`);
         if (!response.ok) {
+          const errorText = await response.text();
           console.error(`❌ Background process returned error: ${response.status} ${response.statusText}`);
+          console.error(`❌ Error body:`, errorText.substring(0, 500));
+          
+          // Update job status to error
+          await query(
+            'UPDATE ucie_openai_jobs SET status = $1, error = $2, updated_at = NOW() WHERE id = $3',
+            ['error', `Background processor failed: ${response.status}`, jobId]
+          );
         }
         return response.text();
       })
       .then(text => {
         console.log(`📄 Background process response: ${text.substring(0, 200)}`);
       })
-      .catch(err => {
+      .catch(async err => {
         console.error('❌ Background process trigger failed:', err);
         console.error('   Error details:', err.message);
+        console.error('   Error stack:', err.stack);
+        
+        // Update job status to error
+        try {
+          await query(
+            'UPDATE ucie_openai_jobs SET status = $1, error = $2, updated_at = NOW() WHERE id = $3',
+            ['error', `Failed to trigger background processor: ${err.message}`, jobId]
+          );
+        } catch (dbError) {
+          console.error('❌ Failed to update job status:', dbError);
+        }
       });
 
     // Return immediately with jobId
