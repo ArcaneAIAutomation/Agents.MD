@@ -84,10 +84,48 @@ export default function DataPreviewModal({
           // Parse and update preview with GPT-5.1 analysis
           const analysis = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
           
-          setPreview(prev => prev ? {
-            ...prev,
-            aiAnalysis: JSON.stringify(analysis, null, 2)
-          } : null);
+          // ✅ CRITICAL: Regenerate Caesar prompt with GPT-5.1 analysis
+          console.log('🔄 Regenerating Caesar prompt with GPT-5.1 analysis...');
+          try {
+            const regenerateResponse = await fetch(`/api/ucie/regenerate-caesar-prompt/${symbol}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                gptAnalysis: JSON.stringify(analysis, null, 2)
+              })
+            });
+            
+            if (regenerateResponse.ok) {
+              const regenerateData = await regenerateResponse.json();
+              if (regenerateData.success && regenerateData.caesarPrompt) {
+                console.log('✅ Caesar prompt regenerated with GPT-5.1 analysis');
+                setPreview(prev => prev ? {
+                  ...prev,
+                  aiAnalysis: JSON.stringify(analysis, null, 2),
+                  caesarPromptPreview: regenerateData.caesarPrompt
+                } : null);
+              } else {
+                console.warn('⚠️ Caesar prompt regeneration returned success=false');
+                setPreview(prev => prev ? {
+                  ...prev,
+                  aiAnalysis: JSON.stringify(analysis, null, 2)
+                } : null);
+              }
+            } else {
+              console.warn('⚠️ Caesar prompt regeneration failed, using existing prompt');
+              setPreview(prev => prev ? {
+                ...prev,
+                aiAnalysis: JSON.stringify(analysis, null, 2)
+              } : null);
+            }
+          } catch (regenerateError) {
+            console.error('❌ Failed to regenerate Caesar prompt:', regenerateError);
+            // Still update with GPT-5.1 analysis even if regeneration fails
+            setPreview(prev => prev ? {
+              ...prev,
+              aiAnalysis: JSON.stringify(analysis, null, 2)
+            } : null);
+          }
           
           console.log('✅ GPT-5.1 analysis completed:', analysis);
         }
@@ -111,7 +149,7 @@ export default function DataPreviewModal({
       clearInterval(pollInterval);
       clearInterval(timeInterval);
     };
-  }, [gptJobId, gptStatus]);
+  }, [gptJobId, gptStatus, symbol]);
 
   const fetchDataPreview = async () => {
     setLoading(true);
@@ -649,8 +687,8 @@ export default function DataPreviewModal({
                   </span>
                 </h3>
                 
-                {/* ✅ ACTUAL CAESAR PROMPT TEXT - Display the real prompt that will be sent */}
-                {preview.caesarPromptPreview && (
+                {/* ✅ CONDITIONAL DISPLAY: Only show prompt when GPT-5.1 analysis is complete */}
+                {gptStatus === 'completed' && preview.caesarPromptPreview ? (
                   <div className="mb-6">
                     <div className="bg-bitcoin-black border border-bitcoin-orange rounded-lg p-4 max-h-96 overflow-y-auto">
                       <pre className="text-xs text-bitcoin-white-80 font-mono whitespace-pre-wrap leading-relaxed">
@@ -659,6 +697,43 @@ export default function DataPreviewModal({
                     </div>
                     <p className="text-xs text-bitcoin-white-60 mt-2">
                       ↑ This is the exact prompt that will be sent to Caesar AI for deep research
+                    </p>
+                  </div>
+                ) : gptStatus === 'queued' || gptStatus === 'processing' ? (
+                  <div className="mb-6 p-4 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded-lg">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-bitcoin-orange border-t-transparent"></div>
+                      <span className="text-sm text-bitcoin-white font-semibold">
+                        Preparing Caesar prompt with GPT-5.1 analysis...
+                      </span>
+                    </div>
+                    <p className="text-xs text-bitcoin-white-60 mb-2">
+                      {gptProgress || 'GPT-5.1 is analyzing all collected data to generate comprehensive context for Caesar AI'}
+                    </p>
+                    <div className="flex items-center justify-between text-xs text-bitcoin-white-60">
+                      <span>Elapsed: {gptElapsedTime}s</span>
+                      <span>Expected: 30-120s</span>
+                    </div>
+                    <p className="text-xs text-bitcoin-orange mt-3">
+                      ⏳ Caesar prompt will be displayed once GPT-5.1 analysis completes
+                    </p>
+                  </div>
+                ) : gptStatus === 'error' ? (
+                  <div className="mb-6 p-4 bg-bitcoin-black border border-bitcoin-orange rounded-lg">
+                    <p className="text-sm text-bitcoin-white-80 mb-2">
+                      ⚠️ GPT-5.1 analysis encountered an error. Caesar prompt will use collected data without AI enhancement.
+                    </p>
+                    <p className="text-xs text-bitcoin-white-60">
+                      You can still continue with Caesar AI research using the raw data collected from all sources.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mb-6 p-4 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded-lg">
+                    <p className="text-sm text-bitcoin-white-80 mb-2">
+                      📊 Collecting data from all sources...
+                    </p>
+                    <p className="text-xs text-bitcoin-white-60">
+                      Caesar prompt will be generated once all data is collected and GPT-5.1 analysis completes.
                     </p>
                   </div>
                 )}

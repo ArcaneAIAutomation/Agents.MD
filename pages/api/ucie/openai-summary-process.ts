@@ -110,6 +110,52 @@ export default async function handler(
     };
     
     console.log(`✅ Using FRESH data from preview modal (NOT stale database cache)`);
+    
+    // 🔍 DEBUG: Log sentiment data structure
+    console.log(`🔍 DEBUG: Sentiment data structure:`, {
+      hasSentiment: !!allData.sentiment,
+      sentimentKeys: allData.sentiment ? Object.keys(allData.sentiment) : [],
+      hasData: !!allData.sentiment?.data,
+      dataKeys: allData.sentiment?.data ? Object.keys(allData.sentiment.data) : [],
+      overallScore: allData.sentiment?.data?.overallScore,
+      dataQuality: allData.sentiment?.data?.dataQuality,
+      hasFearGreed: !!allData.sentiment?.data?.fearGreedIndex,
+      hasLunarCrush: !!allData.sentiment?.data?.lunarCrush,
+      hasCoinMarketCap: !!allData.sentiment?.data?.coinMarketCap,
+      hasCoinGecko: !!allData.sentiment?.data?.coinGecko,
+      hasReddit: !!allData.sentiment?.data?.reddit
+    });
+    
+    // 🔍 DEBUG: Verify all 5 sentiment sources
+    if (allData.sentiment?.data) {
+      console.log(`🔍 Sentiment sources verification:`, {
+        fearGreed: {
+          present: !!allData.sentiment.data.fearGreedIndex,
+          value: allData.sentiment.data.fearGreedIndex?.value,
+          classification: allData.sentiment.data.fearGreedIndex?.classification
+        },
+        lunarCrush: {
+          present: !!allData.sentiment.data.lunarCrush,
+          galaxyScore: allData.sentiment.data.lunarCrush?.galaxyScore,
+          altRank: allData.sentiment.data.lunarCrush?.altRank
+        },
+        coinMarketCap: {
+          present: !!allData.sentiment.data.coinMarketCap,
+          priceChange: allData.sentiment.data.coinMarketCap?.priceChange24h,
+          momentum: allData.sentiment.data.coinMarketCap?.momentum
+        },
+        coinGecko: {
+          present: !!allData.sentiment.data.coinGecko,
+          communityScore: allData.sentiment.data.coinGecko?.communityScore,
+          developerScore: allData.sentiment.data.coinGecko?.developerScore
+        },
+        reddit: {
+          present: !!allData.sentiment.data.reddit,
+          subscriberCount: allData.sentiment.data.reddit?.subscriberCount,
+          activeUsers: allData.sentiment.data.reddit?.activeUsers
+        }
+      });
+    }
 
     // Update progress
     await query(
@@ -168,9 +214,31 @@ Be specific, actionable, and data-driven.`;
     const model = 'gpt-5.1';
     const reasoningEffort = 'low'; // Fast response (1-2 seconds)
     
+    // 🔍 DEBUG: Log prompt statistics
+    console.log(`📏 Prompt statistics:`, {
+      totalLength: prompt.length,
+      estimatedTokens: Math.ceil(prompt.length / 4),
+      marketDataSize: allData.marketData ? JSON.stringify(allData.marketData).length : 0,
+      sentimentSize: allData.sentiment ? JSON.stringify(allData.sentiment).length : 0,
+      technicalSize: allData.technical ? JSON.stringify(allData.technical).length : 0,
+      newsSize: allData.news ? JSON.stringify(allData.news).length : 0,
+      onChainSize: allData.onChain ? JSON.stringify(allData.onChain).length : 0
+    });
+    
     console.log(`📡 Calling OpenAI Responses API with ${model} (reasoning: ${reasoningEffort})...`);
     console.log(`📡 API Key present: ${!!openaiApiKey}`);
     console.log(`📡 Prompt length: ${prompt.length} chars`);
+    
+    // 🔍 DEBUG: Log GPT-5.1 request details
+    console.log(`📡 GPT-5.1 request:`, {
+      model: model,
+      reasoningEffort: reasoningEffort,
+      promptLength: prompt.length,
+      estimatedTokens: Math.ceil(prompt.length / 4),
+      maxOutputTokens: 4000,
+      timeout: 180000
+    });
+    
     const openaiStart = Date.now();
 
     // ✅ GPT-5.1 with Responses API (3-minute timeout)
