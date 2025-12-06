@@ -208,7 +208,6 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
       setPreviewData(updatedPreviewData);
     }
   };
-  };
 
   // Debug: Log analysis data changes
   useEffect(() => {
