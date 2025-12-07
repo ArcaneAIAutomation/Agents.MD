@@ -265,10 +265,10 @@ export default function DataPreviewModal({
                 Collecting data from {symbol}...
               </p>
               <p className="text-bitcoin-white-60 text-sm mt-2">
-                This may take 20-60 seconds
+                This may take 30-60 seconds
               </p>
               <p className="text-bitcoin-white-60 text-xs mt-1">
-                Automatic retry system ensures 100% data collection
+                60-second API timeouts • 30-minute cache • Automatic retry system
               </p>
             </div>
           )}

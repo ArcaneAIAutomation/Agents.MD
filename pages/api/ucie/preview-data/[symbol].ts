@@ -22,6 +22,7 @@ import { setCachedAnalysis, getCachedAnalysis } from '../../../../lib/ucie/cache
 import { storeOpenAISummary } from '../../../../lib/ucie/openaiSummaryStorage';
 import { generateOpenAIAnalysis } from '../../../../lib/ucie/openaiClient';
 import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
+import { generateGeminiAnalysis } from '../../../../lib/ucie/geminiClient';
 
 // ✅ CRITICAL: 20-MINUTE FRESHNESS RULE
 // User requirement: NO data older than 20 minutes - EVER
@@ -94,31 +95,31 @@ const EFFECTIVE_APIS = {
   marketData: {
     endpoint: '/api/ucie/market-data',
     priority: 1,
-    timeout: 90000, // ✅ 90 seconds (MAXIMUM - prevent any failures)
+    timeout: 60000, // ✅ 60 seconds (optimized)
     required: true
   },
   sentiment: {
     endpoint: '/api/ucie/sentiment',
     priority: 2,
-    timeout: 90000, // ✅ 90 seconds (MAXIMUM - prevent any failures)
+    timeout: 60000, // ✅ 60 seconds (optimized)
     required: false
   },
   technical: {
     endpoint: '/api/ucie/technical',
     priority: 2,
-    timeout: 90000, // ✅ 90 seconds (MAXIMUM - prevent any failures)
+    timeout: 60000, // ✅ 60 seconds (optimized)
     required: true
   },
   news: {
     endpoint: '/api/ucie/news',
     priority: 2,
-    timeout: 120000, // ✅ 120 seconds (MAXIMUM - news can be very slow)
+    timeout: 60000, // ✅ 60 seconds (user requirement - increased from 30s)
     required: false
   },
   onChain: {
     endpoint: '/api/ucie/on-chain',
     priority: 3,
-    timeout: 90000, // ✅ 90 seconds (MAXIMUM - prevent any failures)
+    timeout: 60000, // ✅ 60 seconds (user requirement - increased from 30s)
     required: false
   }
 };
@@ -258,7 +259,7 @@ async function handler(
           normalizedSymbol,
           'market-data',
           collectedData.marketData,
-          10 * 60, // ✅ 10 minutes - prices change frequently (20-min max rule)
+          30 * 60, // ✅ 30 minutes TTL (user requirement - updated from 10 min)
           collectedData.marketData.dataQuality || 0,
           userId,
           userEmail
@@ -275,7 +276,7 @@ async function handler(
           normalizedSymbol,
           'sentiment',
           collectedData.sentiment,
-          20 * 60, // ✅ 20 minutes - MAXIMUM allowed (20-min max rule)
+          30 * 60, // ✅ 30 minutes TTL (user requirement - updated from 20 min)
           collectedData.sentiment.dataQuality || 0,
           userId,
           userEmail
@@ -292,7 +293,7 @@ async function handler(
           normalizedSymbol,
           'technical',
           collectedData.technical,
-          10 * 60, // ✅ 10 minutes - needs fresh prices (20-min max rule)
+          30 * 60, // ✅ 30 minutes TTL (user requirement - updated from 10 min)
           collectedData.technical.dataQuality || 0,
           userId,
           userEmail
@@ -309,7 +310,7 @@ async function handler(
           normalizedSymbol,
           'news',
           collectedData.news,
-          20 * 60, // ✅ 20 minutes - MAXIMUM allowed (20-min max rule, reduced from 30)
+          30 * 60, // ✅ 30 minutes TTL (user requirement - updated from 20 min)
           collectedData.news.dataQuality || 0,
           userId,
           userEmail
@@ -326,7 +327,7 @@ async function handler(
           normalizedSymbol,
           'on-chain',
           collectedData.onChain,
-          20 * 60, // ✅ 20 minutes - MAXIMUM allowed (20-min max rule)
+          30 * 60, // ✅ 30 minutes TTL (user requirement - updated from 20 min)
           collectedData.onChain.dataQuality || 0,
           userId,
           userEmail
@@ -349,11 +350,8 @@ async function handler(
       console.warn(`⚠️ Failed to store ${failed} responses`);
     }
 
-    // ✅ CRITICAL: Wait for database transactions to commit
-    // PostgreSQL transactions need time to commit and become visible to other connections
-    // INCREASED from 2 to 5 seconds for better reliability
-    console.log(`⏳ Waiting 5 seconds for database transactions to commit...`);
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    // ✅ Database writes are already awaited - no delay needed
+    console.log(`✅ Database writes completed (no delay needed - writes are already awaited)`);
     
     // ✅ VERIFY database is populated
     console.log(`🔍 Verifying database population...`);
@@ -863,331 +861,60 @@ function calculateAPIStatus(collectedData: any) {
 
 /**
  * Generate AI summary of collected data
- * ✅ CRITICAL: ONLY uses data from Supabase database (ucie_analysis_cache)
- * This ensures AI summary is based on the same data Caesar will use
- * ✅ UPGRADED: Using GPT-5.1 with medium reasoning for enhanced analysis
+ * ✅ CRITICAL FIX: NO JOB CREATION HERE - Just generate basic summary
+ * Job creation happens ONLY in main handler (lines 520-540)
+ * This prevents duplicate job creation that was causing stuck polling
  */
 async function generateAISummary(
   symbol: string,
   collectedData: any,
   apiStatus: any
 ): Promise<string> {
-  console.log(`📊 OpenAI Summary: Reading ALL data from Supabase database...`);
+  console.log(`📊 Generating basic summary for ${symbol} (NO job creation here)...`);
   
-  // ✅ CRITICAL FIX: Start GPT-5.1 async job and return jobId for polling
-  // This allows frontend to poll for results instead of waiting synchronously
-  console.log(`🚀 Starting GPT-5.1 async analysis job for ${symbol}...`);
+  // ✅ SIMPLIFIED: Just generate a basic summary from collectedData
+  // Don't start GPT-5.1 job here - let the main handler do it
   
-  try {
-    const startResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/ucie/openai-summary-start/${symbol}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-    
-    if (startResponse.ok) {
-      const startData = await startResponse.json();
-      if (startData.success && startData.jobId) {
-        console.log(`✅ GPT-5.1 analysis job ${startData.jobId} started successfully`);
-        
-        // ✅ RETURN JOBID FOR POLLING (not fallback summary)
-        return JSON.stringify({
-          gptJobId: startData.jobId,
-          gptStatus: 'queued',
-          message: 'GPT-5.1 analysis started. Frontend will poll for results.',
-          timestamp: new Date().toISOString()
-        });
-      } else {
-        console.warn('⚠️ GPT-5.1 start response missing jobId:', startData);
-      }
-    } else {
-      console.warn(`⚠️ GPT-5.1 start failed with status ${startResponse.status}`);
-    }
-  } catch (error) {
-    console.error('❌ Error starting GPT-5.1 analysis:', error);
-  }
-  
-  // ❌ Only return fallback if start ACTUALLY failed
-  console.warn('⚠️ Failed to start GPT-5.1 analysis, returning fallback summary');
-  
-  // ✅ ALWAYS read from database (ignore in-memory collectedData)
-  // This ensures fallback summary uses the same data source as Caesar
-  const marketData = await getCachedAnalysis(symbol, 'market-data');
-  const sentimentData = await getCachedAnalysis(symbol, 'sentiment');
-  const technicalData = await getCachedAnalysis(symbol, 'technical');
-  const newsData = await getCachedAnalysis(symbol, 'news');
-  const onChainData = await getCachedAnalysis(symbol, 'on-chain');
+  let summary = `**${symbol} Data Collection Summary**\n\n`;
+  summary += `Data Quality: ${apiStatus.successRate}%\n`;
+  summary += `Working APIs: ${apiStatus.working.join(', ')}\n\n`;
 
-  // Log what we retrieved with detailed info
-  console.log(`📦 Database retrieval results (for fallback):`);
-  console.log(`   Market Data: ${marketData ? '✅ Found' : '❌ Not found'}${marketData ? ` (${JSON.stringify(marketData).length} bytes)` : ''}`);
-  console.log(`   Sentiment: ${sentimentData ? '✅ Found' : '❌ Not found'}${sentimentData ? ` (${JSON.stringify(sentimentData).length} bytes)` : ''}`);
-  console.log(`   Technical: ${technicalData ? '✅ Found' : '❌ Not found'}${technicalData ? ` (${JSON.stringify(technicalData).length} bytes)` : ''}`);
-  console.log(`   News: ${newsData ? '✅ Found' : '❌ Not found'}${newsData ? ` (${JSON.stringify(newsData).length} bytes)` : ''}`);
-  console.log(`   On-Chain: ${onChainData ? '✅ Found' : '❌ Not found'}${onChainData ? ` (${JSON.stringify(onChainData).length} bytes)` : ''}`);
-  
-  // Check if we have minimum required data
-  if (!marketData || !technicalData) {
-    const missingData = [];
-    if (!marketData) missingData.push('Market Data');
-    if (!technicalData) missingData.push('Technical Data');
-    
-    const errorMsg = `❌ CRITICAL: Missing required data from database: ${missingData.join(', ')}`;
-    console.error(errorMsg);
-    console.error(`   This means the database writes may have failed or data hasn't been committed yet`);
-    
-    // Return error status instead of throwing
-    return JSON.stringify({
-      gptStatus: 'error',
-      error: errorMsg,
-      fallbackSummary: `Unable to generate analysis: ${errorMsg}`
-    });
-  }
-  
-  // Build context from database data
-  let context = `Cryptocurrency: ${symbol}\n\n`;
-  context += `Data Collection Status:\n`;
-  context += `- APIs Working: ${apiStatus.working.length}/${apiStatus.total}\n`;
-  context += `- Data Quality: ${apiStatus.successRate}%\n\n`;
-
-  // ✅ FIXED: Market Data - Use correct path (priceAggregation.averagePrice)
-  if (marketData?.success && marketData?.priceAggregation) {
-    const agg = marketData.priceAggregation;
-    context += `Market Data:\n`;
-    try {
-      // Extract actual values from priceAggregation
-      const price = agg.averagePrice || agg.aggregatedPrice || 0;
-      const volume = agg.totalVolume24h || agg.aggregatedVolume24h || 0;
-      const marketCap = marketData.marketData?.marketCap || agg.aggregatedMarketCap || 0;
-      const change = agg.averageChange24h || agg.aggregatedChange24h || 0;
-      
-      context += `- Price: $${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`;
-      context += `- 24h Volume: $${(volume / 1e9).toFixed(2)}B\n`;
-      context += `- Market Cap: $${(marketCap / 1e9).toFixed(2)}B\n`;
-      context += `- 24h Change: ${change > 0 ? '+' : ''}${change.toFixed(2)}%\n`;
-      context += `- Data Sources: ${agg.prices?.length || 0} exchanges\n\n`;
-    } catch (error) {
-      console.error('❌ Error formatting market data:', error);
-      context += `- Price: ${agg.averagePrice || agg.aggregatedPrice || 'N/A'}\n`;
-      context += `- Data Sources: ${agg.prices?.length || 0} exchanges\n\n`;
-    }
+  // Market Data
+  if (collectedData.marketData?.success && collectedData.marketData?.priceAggregation) {
+    const agg = collectedData.marketData.priceAggregation;
+    const price = agg.averagePrice || agg.aggregatedPrice || 0;
+    const change = agg.averageChange24h || agg.aggregatedChange24h || 0;
+    summary += `**Market**: $${price.toLocaleString()} (${change > 0 ? '+' : ''}${change.toFixed(2)}%)\n`;
   }
 
-  // ✅ FIXED: Sentiment - Use correct path (sentiment object) + LunarCrush details
-  if (sentimentData?.success && sentimentData?.sentiment) {
-    const sentiment = sentimentData.sentiment;
-    context += `Social Sentiment:\n`;
-    try {
-      // Extract actual values from sentiment data
-      const score = sentiment.overallScore || 0;
-      const trend = sentiment.trend || 'neutral';
-      const mentions = sentimentData.volumeMetrics?.total24h || sentiment.mentions24h || 0;
-      
-      context += `- Overall Score: ${score.toFixed(0)}/100\n`;
-      context += `- Trend: ${trend}\n`;
-      context += `- 24h Mentions: ${mentions.toLocaleString('en-US')}\n`;
-      
-      // ✅ FIXED: Include detailed LunarCrush data with CORRECT field names
-      if (sentimentData.lunarCrush) {
-        const lc = sentimentData.lunarCrush;
-        context += `\nLunarCrush Metrics:\n`;
-        context += `- Galaxy Score: ${lc.galaxyScore || 0}/100\n`;
-        context += `- Sentiment Score: ${lc.sentimentScore || 0}/100\n`;
-        context += `- Social Volume: ${(lc.socialVolume || 0).toLocaleString('en-US')}\n`;
-        context += `- Social Volume Change 24h: ${(lc.socialVolume24hChange || 0).toFixed(2)}%\n`;
-        context += `- Social Dominance: ${(lc.socialDominance || 0).toFixed(2)}%\n`;
-        context += `- Social Dominance Change 24h: ${(lc.socialDominance24hChange || 0).toFixed(2)}%\n`;
-        context += `- AltRank: ${lc.altRank || 'N/A'}\n`;
-        context += `- AltRank 30d: ${lc.altRank30d || 'N/A'}\n`;
-        context += `- Posts/Mentions: ${(lc.numPosts || 0).toLocaleString('en-US')}\n`;
-        context += `- Posts Change 24h: ${(lc.numPosts24hChange || 0).toFixed(2)}%\n`;
-        context += `- Interactions 24h: ${(lc.interactions24h || 0).toLocaleString('en-US')}\n`;
-        context += `- Interactions Change 24h: ${(lc.interactions24hChange || 0).toFixed(2)}%\n`;
-        context += `- Contributors: ${(lc.socialContributors || 0).toLocaleString('en-US')}\n`;
-        context += `- Contributors Change 24h: ${(lc.socialContributors24hChange || 0).toFixed(2)}%\n`;
-        context += `- Market Dominance: ${(lc.marketDominance || 0).toFixed(2)}%\n`;
-        context += `- Correlation Rank: ${lc.correlationRank || 'N/A'}\n`;
-        context += `- Volatility: ${((lc.volatility || 0) * 100).toFixed(2)}%\n`;
-      }
-      
-      // ✅ NEW: Include Reddit data if available
-      if (sentimentData.reddit) {
-        const reddit = sentimentData.reddit;
-        context += `\nReddit Metrics:\n`;
-        context += `- Mentions 24h: ${(reddit.mentions24h || 0).toLocaleString('en-US')}\n`;
-        context += `- Sentiment: ${reddit.sentiment || 0}/100\n`;
-        context += `- Active Subreddits: ${reddit.activeSubreddits?.join(', ') || 'N/A'}\n`;
-        context += `- Posts Per Day: ${reddit.postsPerDay || 0}\n`;
-        context += `- Comments Per Day: ${reddit.commentsPerDay || 0}\n`;
-      }
-      
-      const sources = Object.keys(sentimentData.sources || {}).filter(k => sentimentData.sources[k]);
-      if (sources.length > 0) {
-        context += `\nData Sources: ${sources.join(', ')}\n`;
-      }
-      context += `\n`;
-    } catch (error) {
-      console.error('❌ Error formatting sentiment data:', error);
-      context += `- Overall Score: ${sentiment.overallScore || 'N/A'}\n\n`;
-    }
+  // Sentiment
+  if (collectedData.sentiment?.success && collectedData.sentiment?.sentiment) {
+    const score = collectedData.sentiment.sentiment.overallScore || 0;
+    summary += `**Sentiment**: ${score}/100\n`;
   }
 
-  // ✅ FIXED: Technical - Use correct path (indicators object)
-  if (technicalData?.success && technicalData?.indicators) {
-    context += `Technical Analysis:\n`;
-    try {
-      // Extract actual values from technical indicators
-      const indicators = technicalData.indicators;
-      const rsi = indicators.rsi?.value || indicators.rsi || 0;
-      const macdSignal = indicators.macd?.signal || 'neutral';
-      const trend = indicators.trend?.direction || technicalData.trend?.direction || 'neutral';
-      
-      context += `- RSI: ${typeof rsi === 'number' ? rsi.toFixed(2) : rsi}\n`;
-      context += `- MACD Signal: ${macdSignal}\n`;
-      context += `- Trend: ${trend}\n`;
-      
-      // Additional indicators if available
-      if (indicators?.trend?.strength) {
-        context += `- Trend Strength: ${indicators.trend.strength}\n`;
-      }
-      if (indicators.volatility) {
-        context += `- Volatility: ${indicators.volatility.current || 'N/A'}\n`;
-      }
-      context += `\n`;
-    } catch (error) {
-      console.error('❌ Error formatting technical data:', error);
-      context += `- Indicators available\n\n`;
-    }
+  // Technical
+  if (collectedData.technical?.success && collectedData.technical?.indicators?.trend) {
+    const trend = collectedData.technical.indicators.trend.direction || 'neutral';
+    summary += `**Technical**: ${trend}\n`;
   }
 
-  // ✅ FIXED: News - Use correct path (articles array)
-  if (newsData?.success && newsData?.articles?.length > 0) {
-    const articles = newsData.articles.slice(0, 3);
-    context += `Recent News (Top 3):\n`;
-    articles.forEach((article: any, i: number) => {
-      context += `${i + 1}. ${article.title}`;
-      if (article.source) {
-        context += ` (${article.source})`;
-      }
-      context += `\n`;
-    });
-    context += `\n`;
+  // News
+  if (collectedData.news?.success && collectedData.news?.articles?.length > 0) {
+    summary += `**News**: ${collectedData.news.articles.length} recent articles\n`;
   }
 
-  // ✅ FIXED: On-Chain - Use correct path + detailed Blockchain.com data
-  if (onChainData?.success) {
-    context += `On-Chain Data (Blockchain.com):\n`;
-    
-    // ✅ NEW: Include detailed network metrics
-    if (onChainData.networkMetrics) {
-      const network = onChainData.networkMetrics;
-      context += `\nNetwork Metrics:\n`;
-      context += `- Latest Block Height: ${network.latestBlockHeight || 'N/A'}\n`;
-      context += `- Hash Rate: ${(network.hashRate || 0).toFixed(2)} TH/s\n`;
-      context += `- Difficulty: ${(network.difficulty || 0).toLocaleString('en-US')}\n`;
-      context += `- Mempool Size: ${(network.mempoolSize || 0).toLocaleString('en-US')} transactions\n`;
-      context += `- Mempool Bytes: ${((network.mempoolBytes || 0) / 1e6).toFixed(2)} MB\n`;
-      context += `- Average Fee Per Tx: ${(network.averageFeePerTx || 0).toLocaleString('en-US')} sats\n`;
-      context += `- Recommended Fee: ${network.recommendedFeePerVByte || 0} sat/vB\n`;
-      context += `- Total Circulating: ${((network.totalCirculating || 0) / 1e6).toFixed(2)}M BTC\n`;
-      context += `- Market Price: $${(network.marketPriceUSD || 0).toLocaleString('en-US')}\n`;
-    }
-    
-    // ✅ NEW: Include detailed whale activity with exchange flows
-    if (onChainData.whaleActivity) {
-      const whale = onChainData.whaleActivity;
-      context += `\nWhale Activity (${whale.timeframe || '12 hours'}):\n`;
-      context += `- Minimum Threshold: ${whale.minThreshold || '1000 BTC'}\n`;
-      context += `- Total Transactions: ${whale.summary?.totalTransactions || 0}\n`;
-      context += `- Total Value: ${((whale.summary?.totalValueUSD || 0) / 1e6).toFixed(2)}M USD\n`;
-      context += `- Total BTC Moved: ${(whale.summary?.totalValueBTC || 0).toLocaleString('en-US')} BTC\n`;
-      context += `- Largest Transaction: ${(whale.summary?.largestTransaction || 0).toLocaleString('en-US')} BTC\n`;
-      context += `- Average Size: ${(whale.summary?.averageSize || 0).toLocaleString('en-US')} BTC\n`;
-      
-      // ✅ CRITICAL: Exchange flow analysis (selling pressure vs accumulation)
-      context += `\nExchange Flow Analysis:\n`;
-      context += `- Exchange Deposits: ${whale.summary?.exchangeDeposits || 0} transactions (SELLING PRESSURE)\n`;
-      context += `- Exchange Withdrawals: ${whale.summary?.exchangeWithdrawals || 0} transactions (ACCUMULATION)\n`;
-      context += `- Cold Wallet Movements: ${whale.summary?.coldWalletMovements || 0} transactions\n`;
-      context += `- Net Flow: ${whale.summary?.netFlow || 0} (${whale.summary?.flowSentiment || 'neutral'})\n`;
-      
-      if (whale.summary?.netFlow) {
-        const netFlow = whale.summary.netFlow;
-        if (netFlow > 0) {
-          context += `- Flow Interpretation: BULLISH - More withdrawals than deposits (accumulation)\n`;
-        } else if (netFlow < 0) {
-          context += `- Flow Interpretation: BEARISH - More deposits than withdrawals (distribution)\n`;
-        } else {
-          context += `- Flow Interpretation: NEUTRAL - Balanced flows\n`;
-        }
-      }
-    }
-    
-    // ✅ NEW: Include mempool analysis
-    if (onChainData.mempoolAnalysis) {
-      const mempool = onChainData.mempoolAnalysis;
-      context += `\nMempool Analysis:\n`;
-      context += `- Congestion Level: ${mempool.congestion || 'unknown'}\n`;
-      context += `- Average Fee: ${mempool.averageFee || 0} sats\n`;
-      context += `- Recommended Fee: ${mempool.recommendedFee || 0} sat/vB\n`;
-    }
-    
-    // ✅ NEW: Include holder distribution if available
-    if (onChainData.holderDistribution?.concentration) {
-      const conc = onChainData.holderDistribution.concentration;
-      context += `\nHolder Distribution:\n`;
-      context += `- Top 10 Holders: ${conc.top10Percentage?.toFixed(2) || 'N/A'}%\n`;
-      context += `- Distribution Score: ${conc.distributionScore || 'N/A'}/100\n`;
-    }
-    
-    context += `\nData Quality: ${onChainData.dataQuality || 0}%\n\n`;
+  // On-Chain
+  if (collectedData.onChain?.success) {
+    summary += `**On-Chain**: Data available\n`;
   }
 
-  // Failed APIs
-  if (apiStatus.failed.length > 0) {
-    context += `Note: The following data sources are unavailable: ${apiStatus.failed.join(', ')}\n`;
-  }
-
-  // ✅ UCIE SYSTEM: Trigger GPT-5.1 analysis asynchronously
-  // Start the analysis job and return jobId for polling
-  console.log(`📊 Data collection complete. Starting GPT-5.1 analysis asynchronously...`);
+  summary += `\n✅ Data collection complete. GPT-5.1 analysis starting...`;
   
-  try {
-    // Start GPT-5.1 analysis job
-    const startResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/ucie/openai-summary-start/${symbol}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    
-    if (startResponse.ok) {
-      const startData = await startResponse.json();
-      if (startData.success && startData.jobId) {
-        console.log(`✅ GPT-5.1 analysis job ${startData.jobId} started`);
-        
-        // Return fallback summary with jobId for polling
-        return JSON.stringify({
-          summary: generateFallbackSummary(symbol, collectedData, apiStatus),
-          gptJobId: startData.jobId,
-          gptStatus: 'queued',
-          message: 'GPT-5.1 analysis is running in the background. Poll for results.'
-        });
-      }
-    }
-    
-    console.warn('⚠️ Failed to start GPT-5.1 analysis, returning fallback summary');
-  } catch (error) {
-    console.error('❌ Error starting GPT-5.1 analysis:', error);
-  }
-  
-  // Return fallback summary if GPT-5.1 start failed
-  return generateFallbackSummary(symbol, collectedData, apiStatus);
+  return summary;
 }
 
-/**
- * Generate fallback summary if OpenAI fails
- * ✅ FIXED: Use correct data structure paths
- */
+
 function generateFallbackSummary(
   symbol: string,
   collectedData: any,

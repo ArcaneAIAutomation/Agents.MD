@@ -30,12 +30,12 @@ export default async function handler(
   try {
     console.log(`🔄 Regenerating Caesar prompt for ${symbol} with GPT-5.1 analysis...`);
 
-    // ✅ Read ALL data from database (30 min freshness for Caesar)
-    const marketData = await getCachedAnalysis(symbol, 'market-data', undefined, undefined, 1800);
-    const sentimentData = await getCachedAnalysis(symbol, 'sentiment', undefined, undefined, 1800);
-    const technicalData = await getCachedAnalysis(symbol, 'technical', undefined, undefined, 1800);
-    const newsData = await getCachedAnalysis(symbol, 'news', undefined, undefined, 1800);
-    const onChainData = await getCachedAnalysis(symbol, 'on-chain', undefined, undefined, 1800);
+    // ✅ Read ALL data from database (40 min freshness for Caesar)
+    const marketData = await getCachedAnalysis(symbol, 'market-data', undefined, undefined, 2400);
+    const sentimentData = await getCachedAnalysis(symbol, 'sentiment', undefined, undefined, 2400);
+    const technicalData = await getCachedAnalysis(symbol, 'technical', undefined, undefined, 2400);
+    const newsData = await getCachedAnalysis(symbol, 'news', undefined, undefined, 2400);
+    const onChainData = await getCachedAnalysis(symbol, 'on-chain', undefined, undefined, 2400);
 
     // Build comprehensive Caesar prompt
     let prompt = `# Comprehensive ${symbol} Market Intelligence Report\n\n`;
