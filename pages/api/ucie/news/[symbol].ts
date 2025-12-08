@@ -262,23 +262,21 @@ async function handler(
       }
     }
 
-    // Cache the response in database (skip if refresh=true for live data)
-    if (!forceRefresh) {
-      // ✅ FIX: Store unwrapped data (no API wrappers)
-      const unwrappedData = {
-        articles: response.articles,
-        summary: response.summary,
-        sources: response.sources,
-        dataQuality: response.dataQuality,
-        timestamp: response.timestamp,
-        veritasValidation: response.veritasValidation
-      };
-      
-      await setCachedAnalysis(symbolUpper, 'news', unwrappedData, CACHE_TTL, dataQuality, userId, userEmail);
-      console.log(`💾 Cached ${symbolUpper} news for ${CACHE_TTL}s (unwrapped format)`);
-    } else {
-      console.log(`⚡ LIVE DATA: Not caching ${symbolUpper} news`);
-    }
+    // ✅ FIXED: Always cache the response in database (even when refresh=true)
+    // refresh=true means "skip cache READ", not "skip cache WRITE"
+    // Store unwrapped data (no API wrappers)
+    const unwrappedData = {
+      articles: response.articles,
+      summary: response.summary,
+      sources: response.sources,
+      dataQuality: response.dataQuality,
+      timestamp: response.timestamp,
+      veritasValidation: response.veritasValidation
+    };
+    
+    await setCachedAnalysis(symbolUpper, 'news', unwrappedData, CACHE_TTL, dataQuality, userId, userEmail);
+    console.log(`💾 Cached ${symbolUpper} news for ${CACHE_TTL}s (unwrapped format)${forceRefresh ? ' [FRESH DATA]' : ''}`);
+
 
     console.log(`[UCIE News] Successfully fetched and assessed ${assessedArticles.length} articles for ${symbolUpper}`);
 

@@ -105,35 +105,33 @@ async function handler(
       tf as '1h' | '4h' | '1d'
     );
 
-    // Cache the response in database (skip if refresh=true for live data)
-    if (!forceRefresh) {
-      // ✅ FIX: Store unwrapped data (no API wrappers)
-      const unwrappedData = {
-        rsi: technicalData.rsi,
-        macd: technicalData.macd,
-        ema: technicalData.ema,
-        bollingerBands: technicalData.bollingerBands,
-        atr: technicalData.atr,
-        stochastic: technicalData.stochastic,
-        signals: technicalData.signals,
-        multiTimeframeConsensus: technicalData.multiTimeframeConsensus,
-        dataQuality: technicalData.dataQuality,
-        timestamp: technicalData.timestamp
-      };
-      
-      await setCachedAnalysis(
-        cacheKey,
-        'technical',
-        unwrappedData,
-        CACHE_TTL,
-        technicalData.dataQuality,
-        userId,
-        userEmail
-      );
-      console.log(`💾 Cached ${cacheKey} technical for ${CACHE_TTL}s (unwrapped format)`);
-    } else {
-      console.log(`⚡ LIVE DATA: Not caching ${cacheKey} technical`);
-    }
+    // ✅ FIXED: Always cache the response in database (even when refresh=true)
+    // refresh=true means "skip cache READ", not "skip cache WRITE"
+    // Store unwrapped data (no API wrappers)
+    const unwrappedData = {
+      rsi: technicalData.rsi,
+      macd: technicalData.macd,
+      ema: technicalData.ema,
+      bollingerBands: technicalData.bollingerBands,
+      atr: technicalData.atr,
+      stochastic: technicalData.stochastic,
+      signals: technicalData.signals,
+      multiTimeframeConsensus: technicalData.multiTimeframeConsensus,
+      dataQuality: technicalData.dataQuality,
+      timestamp: technicalData.timestamp
+    };
+    
+    await setCachedAnalysis(
+      cacheKey,
+      'technical',
+      unwrappedData,
+      CACHE_TTL,
+      technicalData.dataQuality,
+      userId,
+      userEmail
+    );
+    console.log(`💾 Cached ${cacheKey} technical for ${CACHE_TTL}s (unwrapped format)${forceRefresh ? ' [FRESH DATA]' : ''}`);
+
 
     console.log(`[UCIE Technical] ${symbolUpper} signal: ${technicalData.signals.overall} (${technicalData.signals.confidence}% confidence)`);
 

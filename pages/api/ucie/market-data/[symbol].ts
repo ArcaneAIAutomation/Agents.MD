@@ -284,24 +284,22 @@ async function handler(
       }
     }
 
-    // Cache the response in database (skip if refresh=true for live data)
-    if (!forceRefresh) {
-      // ✅ FIX: Store unwrapped data (no API wrappers)
-      const unwrappedData = {
-        priceAggregation: response.priceAggregation,
-        marketData: response.marketData,
-        dataQuality: response.dataQuality,
-        timestamp: response.timestamp,
-        sources: response.sources,
-        attribution: response.attribution,
-        veritasValidation: response.veritasValidation
-      };
-      
-      await setCachedAnalysis(symbolUpper, 'market-data', unwrappedData, CACHE_TTL, overallQuality, userId, userEmail);
-      console.log(`💾 Cached ${symbolUpper} market-data for ${CACHE_TTL}s (unwrapped format)`);
-    } else {
-      console.log(`⚡ LIVE DATA: Not caching ${symbolUpper} market-data`);
-    }
+    // ✅ FIXED: Always cache the response in database (even when refresh=true)
+    // refresh=true means "skip cache READ", not "skip cache WRITE"
+    // Store unwrapped data (no API wrappers)
+    const unwrappedData = {
+      priceAggregation: response.priceAggregation,
+      marketData: response.marketData,
+      dataQuality: response.dataQuality,
+      timestamp: response.timestamp,
+      sources: response.sources,
+      attribution: response.attribution,
+      veritasValidation: response.veritasValidation
+    };
+    
+    await setCachedAnalysis(symbolUpper, 'market-data', unwrappedData, CACHE_TTL, overallQuality, userId, userEmail);
+    console.log(`💾 Cached ${symbolUpper} market-data for ${CACHE_TTL}s (unwrapped format)${forceRefresh ? ' [FRESH DATA]' : ''}`);
+
 
     return res.status(200).json(response);
 
