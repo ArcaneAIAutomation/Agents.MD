@@ -63,12 +63,23 @@ export default function DataPreviewModal({
   // Poll for GPT-5.1 results
   useEffect(() => {
     if (!gptJobId || gptStatus === 'completed' || gptStatus === 'error') {
+      console.log(`⏹️ Polling stopped: jobId=${gptJobId}, status=${gptStatus}`);
       return;
     }
     
-    console.log(`🔄 Starting GPT-5.1 polling for job ${gptJobId}...`);
+    console.log(`🔄 Starting GPT-5.1 polling for job ${gptJobId}, current status: ${gptStatus}`);
+    
+    // ✅ CRITICAL FIX: Use a ref to track if we should stop polling
+    let shouldStopPolling = false;
     
     const pollInterval = setInterval(async () => {
+      // ✅ CRITICAL: Check if we should stop polling BEFORE making the request
+      if (shouldStopPolling) {
+        console.log('🛑 Polling stopped by flag');
+        clearInterval(pollInterval);
+        return;
+      }
+      
       try {
         console.log(`📡 Polling job ${gptJobId}, current status: ${gptStatus}`);
         
@@ -81,19 +92,25 @@ export default function DataPreviewModal({
         console.log(`📊 Poll response:`, {
           status: data.status,
           hasResult: !!data.result,
+          resultLength: data.result ? (typeof data.result === 'string' ? data.result.length : JSON.stringify(data.result).length) : 0,
           hasError: !!data.error,
           progress: data.progress
         });
         
-        // ✅ CRITICAL FIX: Update status FIRST to trigger re-render
-        setGptStatus(data.status);
+        // ✅ CRITICAL FIX: Immediately stop polling if completed or error
+        if (data.status === 'completed' || data.status === 'error') {
+          console.log(`🛑 Analysis finished with status: ${data.status}, STOPPING POLLING NOW`);
+          shouldStopPolling = true;
+          clearInterval(pollInterval);
+        }
         
+        // Update progress first
         if (data.progress) {
           setGptProgress(data.progress);
         }
         
         if (data.status === 'completed' && data.result) {
-          console.log('🎉 GPT-5.1 analysis completed! Updating UI...');
+          console.log('🎉 GPT-5.1 analysis completed! Processing result...');
           
           // Parse and update preview with GPT-5.1 analysis
           const analysis = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
@@ -122,7 +139,7 @@ export default function DataPreviewModal({
                     aiAnalysis: JSON.stringify(analysis, null, 2),
                     caesarPromptPreview: regenerateData.caesarPrompt
                   };
-                  console.log('✅ Preview state updated!');
+                  console.log('✅ Preview state updated with analysis and prompt!');
                   return updated;
                 });
               } else {
@@ -148,15 +165,26 @@ export default function DataPreviewModal({
             } : null);
           }
           
-          console.log('✅ GPT-5.1 analysis UI update complete!');
+          // ✅ Update status and progress LAST to trigger UI update
+          setGptProgress('Analysis complete! ✅');
+          setGptStatus('completed');
+          console.log('✅ GPT-5.1 analysis UI update complete! Status set to completed.');
         }
         
         if (data.status === 'error') {
           console.error('❌ GPT-5.1 analysis failed:', data.error);
           setGptProgress(data.error || 'Analysis failed');
+          setGptStatus('error');
+        }
+        
+        // ✅ Update status for other states (queued, processing)
+        if (data.status !== 'completed' && data.status !== 'error') {
+          setGptStatus(data.status);
         }
       } catch (err) {
         console.error('❌ GPT-5.1 polling error:', err);
+        shouldStopPolling = true;
+        clearInterval(pollInterval);
       }
     }, 3000); // Poll every 3 seconds
     
@@ -167,7 +195,8 @@ export default function DataPreviewModal({
     }, 1000);
     
     return () => {
-      console.log(`🛑 Stopping polling for job ${gptJobId}`);
+      console.log(`🛑 Cleanup: Stopping polling for job ${gptJobId}`);
+      shouldStopPolling = true;
       clearInterval(pollInterval);
       clearInterval(timeInterval);
     };

@@ -83,7 +83,9 @@ async function handler(
     };
 
     if (job.status === 'completed' && job.result) {
+      // ✅ CRITICAL FIX: Handle JSONB column - PostgreSQL returns it as an object
       response.result = typeof job.result === 'string' ? job.result : JSON.stringify(job.result);
+      console.log(`✅ Job ${jobId} completed, returning result (${response.result.length} chars)`);
     }
 
     if (job.status === 'error' && job.error) {

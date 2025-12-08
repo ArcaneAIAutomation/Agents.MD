@@ -196,13 +196,13 @@ Provide comprehensive JSON analysis with these exact fields:
 
 Be specific, actionable, and data-driven.`;
 
-    // Call OpenAI API with GPT-4o (Chat Completions API)
+    // Call OpenAI API with GPT-5.1 (Chat Completions API)
     const openaiApiKey = process.env.OPENAI_API_KEY;
     if (!openaiApiKey) {
       throw new Error('OPENAI_API_KEY not configured');
     }
 
-    const model = 'gpt-4o'; // Use Chat Completions API
+    const model = 'gpt-5.1'; // Use Chat Completions API with GPT-5.1
     
     console.log(`📡 Calling OpenAI Chat Completions API with ${model}...`);
     console.log(`📡 Prompt length: ${prompt.length} chars`);

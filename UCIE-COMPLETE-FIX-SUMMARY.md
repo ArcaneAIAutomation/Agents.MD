@@ -35,7 +35,7 @@ This document summarizes all fixes applied to the UCIE (Universal Crypto Intelli
    ↓
 6. FRONTEND: Displays data in modal
    ↓
-7. USER: Clicks "Generate GPT-4o Summary" button
+7. USER: Clicks "Generate GPT-5.1 Summary" button
    ↓
 8. FRONTEND: Calls /api/ucie/openai-summary-start/BTC
    ↓
@@ -45,7 +45,7 @@ This document summarizes all fixes applied to the UCIE (Universal Crypto Intelli
     ├─ Updates job status to 'processing'
     ├─ Retrieves cached data from Supabase (40-minute limit)
     ├─ Builds comprehensive prompt
-    ├─ Calls OpenAI GPT-4o API (3-minute timeout, 3 retries)
+    ├─ Calls OpenAI GPT-5.1 API (3-minute timeout, 3 retries)
     ├─ Parses JSON response
     └─ Stores analysis in database (status: 'completed')
    ↓
@@ -53,7 +53,7 @@ This document summarizes all fixes applied to the UCIE (Universal Crypto Intelli
    ↓
 12. API: Returns job status and analysis when complete
    ↓
-13. FRONTEND: Displays GPT-4o analysis to user
+13. FRONTEND: Displays GPT-5.1 analysis to user
    ↓
 14. USER: Clicks "Analyze with Caesar AI" button
    ↓
