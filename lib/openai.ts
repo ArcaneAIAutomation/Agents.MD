@@ -1,38 +1,36 @@
 /**
- * Shared OpenAI Client for GPT-5.1 (Responses API)
+ * Shared OpenAI Client for Chat Completions API
  * 
  * This is the single source of truth for OpenAI API access across the entire application.
  * All other files must import and use this shared client instance.
  * 
- * Model: gpt-5.1 (default, configurable via OPENAI_MODEL env var)
- * API: Responses API with bulletproof parsing
+ * Model: gpt-4o (default, configurable via OPENAI_MODEL env var)
+ * API: Standard Chat Completions API with bulletproof parsing
  * 
- * GPT-5.1 Features:
- * - Enhanced reasoning with effort levels: low, medium, high
+ * Features:
  * - Bulletproof response parsing via utility functions
- * - Better analysis quality than GPT-4o
- * - Production-proven in Whale Watch
+ * - Automatic fallback to gpt-4o-mini on errors
+ * - JSON format support with proper message formatting
+ * - Production-proven across all UCIE features
  * 
- * MIGRATION NOTE (Jan 27, 2025):
- * - Upgraded from gpt-4o to gpt-5.1
- * - Added bulletproof response parsing
- * - See: GPT-5.1-MIGRATION-GUIDE.md
+ * MIGRATION NOTE (Dec 8, 2025):
+ * - Reverted from gpt-5.1 to gpt-4o (reasoning parameter not supported)
+ * - Removed unsupported 'reasoning' parameter
+ * - Fixed JSON format requirement (messages must contain "json")
+ * - See: UCIE-GPT51-API-400-FIX-COMPLETE.md
  */
 
 import OpenAI from 'openai';
 
-// Initialize OpenAI client with Responses API header
+// Initialize OpenAI client (standard Chat Completions API)
 export const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-  defaultHeaders: {
-    'OpenAI-Beta': 'responses=v1'
-  }
+  apiKey: process.env.OPENAI_API_KEY!
 });
 
 // Model configuration
-// ✅ UPGRADED: Using gpt-5.1 (enhanced reasoning, better analysis)
-export const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-5.1';
-export const OPENAI_FALLBACK_MODEL = process.env.OPENAI_FALLBACK_MODEL || 'gpt-5-mini';
+// ✅ FIXED: Using gpt-4o (gpt-5.1 reasoning parameter not yet supported)
+export const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o';
+export const OPENAI_FALLBACK_MODEL = process.env.OPENAI_FALLBACK_MODEL || 'gpt-4o-mini';
 
 // Reasoning effort configuration
 // Options: "low" (1-2s), "medium" (3-5s), "high" (5-10s)
@@ -57,7 +55,7 @@ import { extractResponseText, validateResponseText } from '../utils/openai';
  */
 export async function callOpenAI(
   input: string | Array<{ role: string; content: string }>,
-  maxOutputTokens: number = 8000, // GPT-5.1 supports larger outputs
+  maxOutputTokens: number = 8000,
   reasoningEffort?: 'low' | 'medium' | 'high',
   requestJsonFormat: boolean = true
 ) {
@@ -73,13 +71,19 @@ export async function callOpenAI(
       messages = input;
     }
     
-    // ✅ FIXED: Use standard Chat Completions API (not Responses API)
+    // ✅ FIXED: Ensure messages contain "json" when requesting JSON format
+    if (requestJsonFormat) {
+      const lastMessage = messages[messages.length - 1];
+      if (!lastMessage.content.toLowerCase().includes('json')) {
+        lastMessage.content += '\n\nPlease respond with valid JSON format.';
+      }
+    }
+    
+    // ✅ FIXED: Remove unsupported 'reasoning' parameter
+    // Standard Chat Completions API doesn't support reasoning parameter
     const completion = await openai.chat.completions.create({
       model: OPENAI_MODEL,
       messages: messages as any,
-      reasoning: {
-        effort: effort
-      },
       temperature: 0.7,
       max_tokens: maxOutputTokens,
       response_format: requestJsonFormat ? { type: 'json_object' } : undefined
@@ -89,7 +93,7 @@ export async function callOpenAI(
     const content = extractResponseText(completion, false);
     
     if (!content) {
-      throw new Error('No content in GPT-5.1 response');
+      throw new Error('No content in response');
     }
     
     console.log(`[OpenAI] Response received from ${completion.model} (${content.length} chars)`);
@@ -104,8 +108,8 @@ export async function callOpenAI(
   } catch (error: any) {
     console.error(`[OpenAI] Error calling ${OPENAI_MODEL}:`, error.message);
     
-    // Fallback to gpt-4o if GPT-5.1 fails
-    if (error.message?.includes('model') || error.message?.includes('quota') || error.status === 404 || error.status === 400) {
+    // Fallback to gpt-4o if primary model fails
+    if (error.message?.includes('model') || error.message?.includes('quota') || error.message?.includes('reasoning') || error.status === 404 || error.status === 400) {
       console.log(`[OpenAI] Trying fallback model: gpt-4o`);
       
       try {
@@ -117,7 +121,15 @@ export async function callOpenAI(
           messages = input;
         }
         
-        // Use standard Chat Completions API for gpt-4o
+        // ✅ FIXED: Ensure messages contain "json" when requesting JSON format
+        if (requestJsonFormat) {
+          const lastMessage = messages[messages.length - 1];
+          if (!lastMessage.content.toLowerCase().includes('json')) {
+            lastMessage.content += '\n\nPlease respond with valid JSON format.';
+          }
+        }
+        
+        // Use standard Chat Completions API for gpt-4o (no reasoning parameter)
         const fallbackCompletion = await openai.chat.completions.create({
           model: 'gpt-4o',
           messages: messages as any,
