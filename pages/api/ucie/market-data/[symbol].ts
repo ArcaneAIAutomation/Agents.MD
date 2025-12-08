@@ -60,39 +60,67 @@ export interface MarketDataResponse {
 // Cache functions removed - now using database cache via cacheUtils
 
 /**
- * Fetch comprehensive market data with improved fallback
- * ✅ IMPROVED: Better error handling and CoinMarketCap priority for reliability
+ * Fetch comprehensive market data with parallel racing
+ * ✅ FIXED: Parallel fetching with Promise.race() to avoid cumulative timeouts
+ * Returns the first successful response within 8 seconds
  */
 async function fetchMarketData(symbol: string): Promise<MarketData | null> {
-  const errors: string[] = [];
+  console.log(`📊 Racing CoinMarketCap and CoinGecko for ${symbol}...`);
   
-  // Try CoinMarketCap FIRST (more reliable, paid API)
+  // Fetch from both sources in parallel, return first success
+  const fetchPromises = [
+    coinMarketCapClient.getMarketData(symbol)
+      .then(data => ({ source: 'CoinMarketCap', data }))
+      .catch(error => ({ 
+        source: 'CoinMarketCap', 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      })),
+    coinGeckoClient.getMarketData(symbol)
+      .then(data => ({ source: 'CoinGecko', data }))
+      .catch(error => ({ 
+        source: 'CoinGecko', 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      }))
+  ];
+  
+  // Race with 8-second timeout
+  const timeoutPromise = new Promise<{ source: string; error: string }>((resolve) => {
+    setTimeout(() => resolve({ source: 'timeout', error: 'All sources timed out after 8s' }), 8000);
+  });
+  
   try {
-    console.log(`📊 Trying CoinMarketCap for ${symbol}...`);
-    const data = await coinMarketCapClient.getMarketData(symbol);
-    console.log(`✅ CoinMarketCap success for ${symbol}`);
-    return data;
+    // Wait for all promises to settle or timeout
+    const results = await Promise.race([
+      Promise.allSettled(fetchPromises),
+      timeoutPromise
+    ]);
+    
+    // If timeout occurred, return null
+    if (!Array.isArray(results)) {
+      console.warn(`⏱️ Market data fetch timed out for ${symbol}`);
+      return null;
+    }
+    
+    // Find first successful result
+    for (const result of results) {
+      if (result.status === 'fulfilled' && 'data' in result.value) {
+        console.log(`✅ ${result.value.source} success for ${symbol}`);
+        return result.value.data;
+      }
+    }
+    
+    // All failed, log errors
+    const errors = results
+      .filter(r => r.status === 'fulfilled' && 'error' in r.value)
+      .map(r => r.status === 'fulfilled' ? `${r.value.source}: ${r.value.error}` : 'Unknown');
+    
+    console.error(`❌ All market data sources failed for ${symbol}:`, errors.join(', '));
+    return null;
+    
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-    console.warn(`❌ CoinMarketCap failed for ${symbol}:`, errorMsg);
-    errors.push(`CoinMarketCap: ${errorMsg}`);
+    console.error(`❌ Unexpected error fetching market data for ${symbol}:`, error);
+    return null;
   }
-
-  // Fallback to CoinGecko (free API, may be rate-limited)
-  try {
-    console.log(`📊 Trying CoinGecko for ${symbol}...`);
-    const data = await coinGeckoClient.getMarketData(symbol);
-    console.log(`✅ CoinGecko success for ${symbol}`);
-    return data;
-  } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-    console.warn(`❌ CoinGecko failed for ${symbol}:`, errorMsg);
-    errors.push(`CoinGecko: ${errorMsg}`);
-  }
-
-  // Log all failures
-  console.error(`❌ All market data sources failed for ${symbol}:`, errors.join(', '));
-  return null;
 }
 
 /**
@@ -181,9 +209,9 @@ async function handler(
     // Fetch comprehensive market data (with fallback)
     const marketDataPromise = fetchMarketData(symbolUpper);
 
-    // Wait for both with increased timeout (30 seconds)
+    // Wait for both with 15-second timeout (parallel fetching is much faster)
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Request timeout after 30 seconds')), 30000);
+      setTimeout(() => reject(new Error('Request timeout after 15 seconds')), 15000);
     });
 
     const [priceAggregation, marketData] = await Promise.race([
