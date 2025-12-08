@@ -375,7 +375,7 @@ async function processJobAsync(
       await updateProgress(jobId, 'Generating executive summary...');
       
       // Build summary of all analyses
-      const analysisSum mary = {
+      const analysisSummary = {
         market: modularAnalysis.marketAnalysis || 'Not analyzed',
         technical: modularAnalysis.technicalAnalysis || 'Not analyzed',
         sentiment: modularAnalysis.sentimentAnalysis || 'Not analyzed',
