@@ -1,3 +1,10 @@
+/* ALL @import RULES MUST BE FIRST - Next.js 16 Turbopack Requirement */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600;700&display=swap');
+@import './data-formatting.css';
+@import url('./mobile-tablet-utility-classes.css');
+@import url('./container-containment.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,13 +13,6 @@
    BITCOIN SOVEREIGN TECHNOLOGY DESIGN SYSTEM
    CSS Variables & Base Styles
    ============================================ */
-
-/* Import Bitcoin Sovereign Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600;700&display=swap');
-
-/* Import Data Formatting Styles (Task 12.11) */
-@import './data-formatting.css';
 
 :root {
   /* ============================================
@@ -11000,12 +11000,10 @@ button,
 
 
 /* ============================================
-   IMPORT MOBILE/TABLET UTILITY CLASSES
+   MOBILE/TABLET UTILITY CLASSES
    Task 7: Foolproof Mobile/Tablet Styling System
+   Note: Imported at top of file
    ============================================ */
-
-@import url('./mobile-tablet-utility-classes.css');
-@import url('./container-containment.css');
 
 
 /* ============================================
@@ -15719,7 +15717,7 @@ ol[role="list"] {
   }
   
   /* Confidence Badge - Prevent Overflow */
-  .whale-watch-dashboard .px-3.py-1\\.5.rounded {
+  .whale-watch-dashboard .px-3.rounded {
     font-size: clamp(0.625rem, 2vw, 0.75rem);
     white-space: nowrap;
     overflow: hidden;
@@ -15868,7 +15866,7 @@ ol[role="list"] {
   }
   
   /* Analysis Metadata - Responsive */
-  .whale-watch-dashboard .flex.flex-col.md\\:flex-row {
+  .whale-watch-dashboard .flex.flex-col {
     gap: 1rem;
   }
   
@@ -16725,8 +16723,7 @@ ol[role="list"] {
   [class*="badge-"],
   [class*="tag-"],
   .px-2.py-1,
-  .px-3.py-1,
-  .px-3.py-1\\.5 {
+  .px-3.py-1 {
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
