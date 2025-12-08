@@ -739,16 +739,19 @@ function calculateAPIStatus(collectedData: any) {
   }
 
   // 🔍 FORENSIC FIX: Sentiment structure is { success: true, data: { overallScore, dataQuality, ... } }
-  // Check for ANY valid data indicators (handles fresh, cached, and 0% quality data)
+  // ✅ CRITICAL FIX: Check for data existence, not just quality score
+  // Data with 0% quality is still valid data (it means sources failed, but structure exists)
   const sentimentData = collectedData.sentiment?.data;
   const hasSentimentData = sentimentData && (
-    sentimentData.overallScore !== undefined || // Has overallScore (PRIMARY indicator)
+    typeof sentimentData.overallScore === 'number' || // Has overallScore (PRIMARY indicator)
     sentimentData.sentiment !== undefined || // Has sentiment classification
     sentimentData.fearGreedIndex !== undefined || // Has Fear & Greed data
     sentimentData.lunarCrush !== undefined || // Has LunarCrush data
     sentimentData.reddit !== undefined || // Has Reddit data
-    (sentimentData.dataQuality !== undefined && sentimentData.dataQuality >= 0) || // Has dataQuality field (even if 0)
-    Object.keys(sentimentData).length > 2 // Has multiple fields
+    sentimentData.coinMarketCap !== undefined || // Has CoinMarketCap data
+    sentimentData.coinGecko !== undefined || // Has CoinGecko data
+    typeof sentimentData.dataQuality === 'number' || // Has dataQuality field (even if 0)
+    Object.keys(sentimentData).length > 3 // Has multiple fields (more than just symbol, timestamp, dataQuality)
   );
   
   if (
@@ -763,6 +766,8 @@ function calculateAPIStatus(collectedData: any) {
       hasFearGreed: !!sentimentData?.fearGreedIndex,
       hasLunarCrush: !!sentimentData?.lunarCrush,
       hasReddit: !!sentimentData?.reddit,
+      hasCoinMarketCap: !!sentimentData?.coinMarketCap,
+      hasCoinGecko: !!sentimentData?.coinGecko,
       fieldCount: sentimentData ? Object.keys(sentimentData).length : 0
     });
   } else {
@@ -772,7 +777,8 @@ function calculateAPIStatus(collectedData: any) {
       hasData: !!sentimentData,
       dataQuality: sentimentData?.dataQuality,
       overallScore: sentimentData?.overallScore,
-      fieldCount: sentimentData ? Object.keys(sentimentData).length : 0
+      fieldCount: sentimentData ? Object.keys(sentimentData).length : 0,
+      dataKeys: sentimentData ? Object.keys(sentimentData) : []
     });
   }
 
@@ -812,15 +818,18 @@ function calculateAPIStatus(collectedData: any) {
   }
 
   // 🔍 FORENSIC FIX: On-Chain structure is { success: true, data: { dataQuality, ... } }
-  // Check for ANY valid data indicators (handles fresh, cached, and 0% quality data)
+  // ✅ CRITICAL FIX: Check for data existence, not just quality score
+  // Data with 0% quality is still valid data (it means sources failed, but structure exists)
   const onChainData = collectedData.onChain?.data;
   const hasOnChainData = onChainData && (
     onChainData.networkMetrics !== undefined || // Has network metrics (PRIMARY indicator)
     onChainData.whaleActivity !== undefined || // Has whale activity
     onChainData.mempoolAnalysis !== undefined || // Has mempool data
     onChainData.networkStats !== undefined || // Has network stats (legacy)
-    (onChainData.dataQuality !== undefined && onChainData.dataQuality >= 0) || // Has dataQuality field (even if 0)
-    Object.keys(onChainData).length > 2 // Has multiple fields
+    onChainData.blockchainInfo !== undefined || // Has blockchain info
+    onChainData.transactionStats !== undefined || // Has transaction stats
+    typeof onChainData.dataQuality === 'number' || // Has dataQuality field (even if 0)
+    Object.keys(onChainData).length > 3 // Has multiple fields (more than just symbol, timestamp, dataQuality)
   );
   
   if (
@@ -834,6 +843,8 @@ function calculateAPIStatus(collectedData: any) {
       hasWhaleActivity: !!onChainData?.whaleActivity,
       hasMempool: !!onChainData?.mempoolAnalysis,
       hasNetworkStats: !!onChainData?.networkStats,
+      hasBlockchainInfo: !!onChainData?.blockchainInfo,
+      hasTransactionStats: !!onChainData?.transactionStats,
       fieldCount: onChainData ? Object.keys(onChainData).length : 0
     });
   } else {
@@ -843,7 +854,8 @@ function calculateAPIStatus(collectedData: any) {
       hasData: !!onChainData,
       dataQuality: onChainData?.dataQuality,
       hasNetworkStats: !!onChainData?.networkStats,
-      fieldCount: onChainData ? Object.keys(onChainData).length : 0
+      fieldCount: onChainData ? Object.keys(onChainData).length : 0,
+      dataKeys: onChainData ? Object.keys(onChainData) : []
     });
   }
 
