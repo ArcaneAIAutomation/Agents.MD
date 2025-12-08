@@ -52,25 +52,48 @@ export async function assessNewsImpact(
         { role: 'system', content: systemPrompt },
         { role: 'user', content: prompt }
       ],
-      600, // max tokens
+      800, // ✅ INCREASED: More tokens for complete JSON (was 600)
       'low', // reasoning effort (fast news analysis)
       true // request JSON format
     );
     
-    const parsed = JSON.parse(result.content);
+    // ✅ FIX: Validate and clean JSON before parsing
+    let cleanedContent = result.content.trim();
     
+    // Remove any markdown code blocks if present
+    if (cleanedContent.startsWith('```json')) {
+      cleanedContent = cleanedContent.replace(/```json\n?/g, '').replace(/```\n?$/g, '');
+    } else if (cleanedContent.startsWith('```')) {
+      cleanedContent = cleanedContent.replace(/```\n?/g, '');
+    }
+    
+    // Try to parse JSON
+    let parsed;
+    try {
+      parsed = JSON.parse(cleanedContent);
+    } catch (parseError) {
+      console.error('JSON parse error for article:', article.title);
+      console.error('Raw content:', cleanedContent.substring(0, 200));
+      console.error('Parse error:', parseError);
+      
+      // ✅ FALLBACK: Try to extract partial data or use default
+      return getDefaultAssessment(article);
+    }
+    
+    // ✅ VALIDATE: Ensure all required fields exist and are correct type
     return {
       articleId: article.id,
-      impact: parsed.impact || 'neutral',
-      impactScore: parsed.impactScore || 50,
-      confidence: parsed.confidence || 50,
-      summary: parsed.summary || article.description,
-      keyPoints: parsed.keyPoints || [],
-      marketImplications: parsed.marketImplications || '',
-      timeframe: parsed.timeframe || 'short-term'
+      impact: ['bullish', 'bearish', 'neutral'].includes(parsed.impact) ? parsed.impact : 'neutral',
+      impactScore: typeof parsed.impactScore === 'number' ? Math.max(0, Math.min(100, parsed.impactScore)) : 50,
+      confidence: typeof parsed.confidence === 'number' ? Math.max(0, Math.min(100, parsed.confidence)) : 50,
+      summary: typeof parsed.summary === 'string' ? parsed.summary : article.description,
+      keyPoints: Array.isArray(parsed.keyPoints) ? parsed.keyPoints.slice(0, 3) : [],
+      marketImplications: typeof parsed.marketImplications === 'string' ? parsed.marketImplications : '',
+      timeframe: ['immediate', 'short-term', 'medium-term', 'long-term'].includes(parsed.timeframe) ? parsed.timeframe : 'short-term'
     };
   } catch (error) {
     console.error('News impact assessment error:', error);
+    console.error('Article:', article.title);
     return getDefaultAssessment(article);
   }
 }
@@ -124,7 +147,8 @@ export async function assessMultipleNews(
 }
 
 /**
- * Build assessment prompt for GPT-4o
+ * Build assessment prompt for GPT-5.1
+ * ✅ IMPROVED: More explicit JSON formatting instructions
  */
 function buildAssessmentPrompt(article: NewsArticle, symbol: string): string {
   return `Analyze this cryptocurrency news article for ${symbol} and provide a structured impact assessment.
@@ -135,27 +159,40 @@ Source: ${article.source}
 Published: ${article.publishedAt}
 Category: ${article.category}
 
-Provide your analysis in the following JSON format:
+CRITICAL: Respond with ONLY valid JSON. No markdown, no code blocks, no explanations.
+
+Required JSON format (all fields required):
 {
-  "impact": "bullish" | "bearish" | "neutral",
-  "impactScore": <number 0-100, where 0 is extremely bearish, 50 is neutral, 100 is extremely bullish>,
-  "confidence": <number 0-100, your confidence in this assessment>,
-  "summary": "<one sentence summary of the news>",
-  "keyPoints": ["<key point 1>", "<key point 2>", "<key point 3>"],
-  "marketImplications": "<2-3 sentences explaining potential market impact>",
-  "timeframe": "immediate" | "short-term" | "medium-term" | "long-term"
+  "impact": "bullish",
+  "impactScore": 65,
+  "confidence": 75,
+  "summary": "One sentence summary here",
+  "keyPoints": ["Point 1", "Point 2", "Point 3"],
+  "marketImplications": "2-3 sentences explaining market impact",
+  "timeframe": "short-term"
 }
 
-Consider:
-- Partnerships and integrations are typically bullish
-- Regulatory actions can be bearish or bullish depending on context
-- Technology upgrades are usually bullish
-- Security breaches or hacks are bearish
-- Adoption news is bullish
-- Exchange delistings are bearish
-- Major institutional involvement is bullish
+Field requirements:
+- impact: MUST be exactly "bullish", "bearish", or "neutral"
+- impactScore: MUST be number 0-100 (0=very bearish, 50=neutral, 100=very bullish)
+- confidence: MUST be number 0-100 (your confidence in assessment)
+- summary: MUST be string, one sentence
+- keyPoints: MUST be array with exactly 3 strings
+- marketImplications: MUST be string, 2-3 sentences
+- timeframe: MUST be exactly "immediate", "short-term", "medium-term", or "long-term"
 
-Be objective and base your assessment on the actual content, not speculation.`;
+Analysis guidelines:
+- Partnerships/integrations → bullish
+- Regulatory approval → bullish
+- Technology upgrades → bullish
+- Adoption news → bullish
+- Institutional investment → bullish
+- Security breaches/hacks → bearish
+- Regulatory bans → bearish
+- Exchange delistings → bearish
+- Lawsuits/fraud → bearish
+
+Be objective. Base assessment on actual content only.`;
 }
 
 /**
