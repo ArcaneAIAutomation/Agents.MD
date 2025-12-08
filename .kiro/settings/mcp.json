@@ -14,7 +14,24 @@
         "read_multiple_files",
         "list_directory",
         "search_files",
-        "get_file_info"
+        "get_file_info",
+        "edit_file"
+      ],
+      "disabledTools": [
+        "read_file",
+        "read_text_file",
+        "read_media_file",
+        "read_multiple_files",
+        "write_file",
+        "edit_file",
+        "create_directory",
+        "list_directory",
+        "list_directory_with_sizes",
+        "directory_tree",
+        "move_file",
+        "search_files",
+        "get_file_info",
+        "list_allowed_directories"
       ]
     },
     "postgres": {
@@ -30,6 +47,9 @@
         "query",
         "list_tables",
         "describe_table"
+      ],
+      "disabledTools": [
+        "query"
       ]
     },
     "fetch": {
@@ -40,6 +60,9 @@
       "env": {},
       "disabled": false,
       "autoApprove": [
+        "fetch"
+      ],
+      "disabledTools": [
         "fetch"
       ]
     },
@@ -58,6 +81,17 @@
         "search_nodes",
         "open_nodes",
         "read_graph"
+      ],
+      "disabledTools": [
+        "create_entities",
+        "create_relations",
+        "add_observations",
+        "delete_entities",
+        "delete_observations",
+        "delete_relations",
+        "read_graph",
+        "search_nodes",
+        "open_nodes"
       ]
     },
     "sequential-thinking": {
@@ -70,6 +104,9 @@
       "disabled": false,
       "autoApprove": [
         "sequentialthinking",
+        "sequentialthinking"
+      ],
+      "disabledTools": [
         "sequentialthinking"
       ]
     },
