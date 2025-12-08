@@ -8,7 +8,7 @@
         "C:\\OriK.Projects\\Agents.MD\\Agents.MD"
       ],
       "env": {},
-      "disabled": false,
+      "disabled": true,
       "autoApprove": [
         "read_file",
         "read_multiple_files",
@@ -42,7 +42,7 @@
         "postgres://postgres.nzcjkveexkhxsifllsox:QK9x178E4B7kzSvF@aws-1-eu-west-2.pooler.supabase.com:6543/postgres"
       ],
       "env": {},
-      "disabled": false,
+      "disabled": true,
       "autoApprove": [
         "query",
         "list_tables",
@@ -58,7 +58,7 @@
         "mcp-server-fetch"
       ],
       "env": {},
-      "disabled": false,
+      "disabled": true,
       "autoApprove": [
         "fetch"
       ],
@@ -73,7 +73,7 @@
         "@modelcontextprotocol/server-memory"
       ],
       "env": {},
-      "disabled": false,
+      "disabled": true,
       "autoApprove": [
         "create_entities",
         "create_relations",
@@ -101,7 +101,7 @@
         "@modelcontextprotocol/server-sequential-thinking"
       ],
       "env": {},
-      "disabled": false,
+      "disabled": true,
       "autoApprove": [
         "sequentialthinking",
         "sequentialthinking"

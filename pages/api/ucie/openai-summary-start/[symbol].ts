@@ -99,11 +99,45 @@ async function handler(
 }
 
 /**
- * Process GPT-5.1 job asynchronously
- * Extracted from openai-summary-process.ts to eliminate HTTP fetch dependency
+ * 🚀 MODULAR ANALYSIS APPROACH
  * 
- * ✅ CRITICAL FIX: Database connections are released immediately after each query
- * to prevent connection timeout during long OpenAI API calls (3 minutes)
+ * Instead of one giant prompt (15k+ chars causing socket timeouts),
+ * we analyze each data source separately:
+ * 
+ * 1. Market Data Analysis (small, fast)
+ * 2. Technical Analysis (small, fast)
+ * 3. Sentiment Analysis (small, fast)
+ * 4. News Analysis (small, fast)
+ * 5. On-Chain Analysis (small, fast)
+ * 6. Risk Analysis (small, fast)
+ * 7. Predictions Analysis (small, fast)
+ * 8. DeFi Analysis (small, fast)
+ * 9. Executive Summary (combines all insights)
+ * 
+ * Benefits:
+ * - No socket timeouts (each request <5s)
+ * - Granular insights (users see per-source analysis)
+ * - Caesar mega-prompt (combine all for deep dive)
+ * - Better error handling (one source fails, others succeed)
+ */
+
+interface ModularAnalysis {
+  marketAnalysis?: any;
+  technicalAnalysis?: any;
+  sentimentAnalysis?: any;
+  newsAnalysis?: any;
+  onChainAnalysis?: any;
+  riskAnalysis?: any;
+  predictionsAnalysis?: any;
+  defiAnalysis?: any;
+  executiveSummary?: any;
+  timestamp: string;
+  processingTime: number;
+}
+
+/**
+ * Process GPT-5.1 job asynchronously with MODULAR ANALYSIS
+ * Each data source analyzed separately for speed and reliability
  */
 async function processJobAsync(
   jobId: number,
@@ -140,7 +174,7 @@ async function processJobAsync(
       console.warn(`⚠️ Job ${jobId}: Failed to update status, continuing anyway...`);
     }
 
-    // Build comprehensive prompt
+    // 🚀 MODULAR ANALYSIS: Analyze each data source separately
     const allData = {
       marketData: collectedData?.marketData || null,
       technical: collectedData?.technical || null,
@@ -150,245 +184,224 @@ async function processJobAsync(
       risk: collectedData?.risk || null,
       predictions: collectedData?.predictions || null,
       defi: collectedData?.defi || null,
-      openaiSummary: {
-        dataQuality: collectedData?.dataQuality || 0
-      }
     };
 
-    const prompt = `You are an expert cryptocurrency market analyst. Analyze ${symbol} using the following comprehensive data:
-
-📊 MARKET DATA:
-${allData.marketData ? JSON.stringify(allData.marketData, null, 2) : 'Not available'}
-
-📈 TECHNICAL ANALYSIS:
-${allData.technical ? JSON.stringify(allData.technical, null, 2) : 'Not available'}
-
-💬 SENTIMENT ANALYSIS:
-${allData.sentiment ? JSON.stringify(allData.sentiment, null, 2) : 'Not available'}
-
-📰 NEWS:
-${allData.news ? JSON.stringify(allData.news, null, 2) : 'Not available'}
-
-⛓️ ON-CHAIN DATA:
-${allData.onChain ? JSON.stringify(allData.onChain, null, 2) : 'Not available'}
-
-🎯 RISK ASSESSMENT:
-${allData.risk ? JSON.stringify(allData.risk, null, 2) : 'Not available'}
-
-🔮 PREDICTIONS:
-${allData.predictions ? JSON.stringify(allData.predictions, null, 2) : 'Not available'}
-
-💰 DEFI METRICS:
-${allData.defi ? JSON.stringify(allData.defi, null, 2) : 'Not available'}
-
-Provide comprehensive JSON analysis with these exact fields:
-{
-  "summary": "Executive summary (2-3 paragraphs)",
-  "confidence": 85,
-  "key_insights": ["insight 1", "insight 2", "insight 3"],
-  "market_outlook": "24-48 hour outlook",
-  "risk_factors": ["risk 1", "risk 2", "risk 3"],
-  "opportunities": ["opportunity 1", "opportunity 2", "opportunity 3"],
-  "technical_summary": "Technical indicator summary",
-  "sentiment_summary": "Social sentiment summary",
-  "recommendation": "Buy|Hold|Sell with reasoning"
-}
-
-Be specific, actionable, and data-driven.`;
-
-    // Call OpenAI API with GPT-5.1 (Chat Completions API)
     const openaiApiKey = process.env.OPENAI_API_KEY;
     if (!openaiApiKey) {
       throw new Error('OPENAI_API_KEY not configured');
     }
 
-    const model = 'gpt-5.1'; // Use Chat Completions API with GPT-5.1
-    
-    console.log(`📡 Calling OpenAI Chat Completions API with ${model}...`);
-    console.log(`📡 Prompt length: ${prompt.length} chars`);
-    
-    const openaiStart = Date.now();
+    const model = 'gpt-5.1';
+    const modularAnalysis: ModularAnalysis = {
+      timestamp: new Date().toISOString(),
+      processingTime: 0
+    };
 
-    // ✅ ULTIMATE BULLETPROOF: Aggressive retry with connection management
-    let response: Response | null = null;
-    let lastError: Error | null = null;
-    const maxRetries = 5; // Increased from 3 to 5 for better reliability
+    console.log(`🔥 Starting MODULAR analysis for ${symbol}...`);
     
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    // ✅ STEP 1: Analyze Market Data (if available)
+    if (allData.marketData) {
       try {
-        console.log(`📡 Attempt ${attempt}/${maxRetries} calling OpenAI...`);
-        
-        // ✅ CRITICAL FIX: Aggressive timeout reduction to prevent socket issues
-        const controller = new AbortController();
-        const timeoutMs = 90000; // 90 seconds (well under Vercel's limit)
-        const timeoutId = setTimeout(() => {
-          console.warn(`⏰ Request timeout after ${timeoutMs}ms, aborting...`);
-          controller.abort();
-        }, timeoutMs);
-        
-        // ✅ CRITICAL FIX: Aggressive prompt truncation to reduce payload
-        const maxPromptLength = 12000; // Reduced from 15000
-        const truncatedPrompt = prompt.length > maxPromptLength 
-          ? prompt.substring(0, maxPromptLength) + '\n\n[Data truncated for performance - analysis based on available data]'
-          : prompt;
-        
-        console.log(`📡 Sending ${truncatedPrompt.length} chars to OpenAI (original: ${prompt.length})`);
-        
-        // ✅ CRITICAL: Use HTTP/1.1 with connection pooling
-        response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${openaiApiKey}`,
-            'Connection': 'keep-alive',
-            'Keep-Alive': 'timeout=90, max=100',
-            'Accept-Encoding': 'gzip, deflate', // Enable compression
-            'User-Agent': 'UCIE-Analysis/1.0',
-          },
-          body: JSON.stringify({
-            model: model,
-            messages: [
-              {
-                role: 'system',
-                content: 'You are an expert cryptocurrency market analyst. Provide concise, actionable analysis in valid JSON format only. Focus on key insights.'
-              },
-              {
-                role: 'user',
-                content: truncatedPrompt
-              }
-            ],
-            temperature: 0.7,
-            max_tokens: 2500, // Further reduced from 3000 for faster response
-            response_format: { type: 'json_object' }
-          }),
-          signal: controller.signal,
-          // @ts-ignore - keepalive is valid but not in types
-          keepalive: true,
-        });
-        
-        clearTimeout(timeoutId);
-        
-        const openaiTime = Date.now() - openaiStart;
-        console.log(`✅ ${model} responded in ${openaiTime}ms with status ${response.status}`);
-        
-        if (!response.ok) {
-          const errorText = await response.text().catch(() => 'Unable to read error');
-          console.error(`❌ ${model} error: ${response.status}`, errorText.substring(0, 200));
-          
-          // Retry on 5xx errors, rate limits, or timeouts
-          if (response.status >= 500 || response.status === 429 || response.status === 408) {
-            throw new Error(`${model} API error ${response.status}: ${errorText.substring(0, 100)}`);
-          }
-          
-          // Don't retry on 4xx errors (except 429 and 408)
-          throw new Error(`${model} API error ${response.status}: ${errorText.substring(0, 100)}`);
-        }
-        
-        // Success - break retry loop
-        console.log(`✅ Attempt ${attempt} succeeded!`);
-        break;
-        
+        await updateProgress(jobId, 'Analyzing market data...');
+        modularAnalysis.marketAnalysis = await analyzeDataSource(
+          openaiApiKey,
+          model,
+          symbol,
+          'Market Data',
+          allData.marketData,
+          'Analyze current price, volume, market cap, and price trends. Provide: current_price_analysis, volume_analysis, market_cap_insights, price_trend (bullish/bearish/neutral), key_metrics.'
+        );
+        console.log(`✅ Market analysis complete`);
       } catch (error) {
-        lastError = error as Error;
-        const errorMsg = error instanceof Error ? error.message : String(error);
-        console.error(`❌ Attempt ${attempt}/${maxRetries} failed:`, errorMsg);
-        
-        // Check if it's a network/socket error
-        if (error instanceof Error) {
-          const isNetworkError = 
-            error.message.includes('fetch failed') ||
-            error.message.includes('socket') ||
-            error.message.includes('ECONNRESET') ||
-            error.message.includes('ETIMEDOUT') ||
-            error.message.includes('other side closed') ||
-            error.message.includes('aborted') ||
-            error.message.includes('UND_ERR_SOCKET') ||
-            error.message.includes('ECONNREFUSED') ||
-            error.message.includes('network') ||
-            error.name === 'AbortError';
-          
-          if (isNetworkError && attempt < maxRetries) {
-            // Exponential backoff with jitter: 1s, 2s, 4s, 8s, 16s
-            const baseDelay = Math.pow(2, attempt - 1) * 1000;
-            const jitter = Math.random() * 1000; // Add randomness to prevent thundering herd
-            const delay = baseDelay + jitter;
-            console.log(`⏳ Network error detected, waiting ${Math.round(delay)}ms before retry...`);
-            await new Promise(resolve => setTimeout(resolve, delay));
-            continue;
-          }
-        }
-        
-        // If not retryable or last attempt, throw
-        if (attempt === maxRetries) {
-          console.error(`❌ All ${maxRetries} attempts failed, giving up`);
-          throw lastError;
-        }
-        
-        // For non-network errors, wait a bit before retry
-        if (attempt < maxRetries) {
-          const delay = 2000; // 2 seconds for non-network errors
-          console.log(`⏳ Waiting ${delay}ms before retry...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
-        }
+        console.error(`❌ Market analysis failed:`, error);
+        modularAnalysis.marketAnalysis = { error: 'Analysis failed' };
       }
     }
-    
-    if (!response) {
-      throw lastError || new Error('OpenAI API call failed after all retries');
-    }
 
-    const data = await response.json();
-    
-    // ✅ BULLETPROOF: Extract text using utility function
-    const { extractResponseText, validateResponseText } = await import('../../../../utils/openai');
-    const analysisText = extractResponseText(data, true);
-    validateResponseText(analysisText, model, data);
-    
-    console.log(`✅ Got ${model} response text (${analysisText.length} chars)`);
-
-    // ✅ ULTIMATE BULLETPROOF JSON PARSING
-    let analysis: any;
-    try {
-      analysis = JSON.parse(analysisText);
-      console.log(`✅ Direct JSON parse succeeded`);
-    } catch (parseError) {
-      console.warn(`⚠️ Initial JSON parse failed, engaging cleanup...`);
-      
+    // ✅ STEP 2: Analyze Technical Indicators (if available)
+    if (allData.technical) {
       try {
-        let cleanedText = analysisText.trim()
-          .replace(/^```json\s*/i, '')
-          .replace(/^```\s*/i, '')
-          .replace(/\s*```$/i, '')
-          .replace(/^[^{]*({)/s, '$1')
-          .replace(/(})[^}]*$/s, '$1');
-        
-        for (let i = 0; i < 5; i++) {
-          cleanedText = cleanedText
-            .replace(/,(\s*])/g, '$1')
-            .replace(/,(\s*})/g, '$1')
-            .replace(/(\d+)\.(\s*[,\]}])/g, '$1$2')
-            .replace(/,\s*,/g, ',');
-        }
-        
-        analysis = JSON.parse(cleanedText);
-        console.log(`✅ JSON parse succeeded after cleanup`);
-        
-      } catch (cleanupError) {
-        console.error(`❌ All parsing attempts failed`);
-        throw new Error(`Invalid JSON from ${model}: ${parseError instanceof Error ? parseError.message : 'Parse failed'}`);
+        await updateProgress(jobId, 'Analyzing technical indicators...');
+        modularAnalysis.technicalAnalysis = await analyzeDataSource(
+          openaiApiKey,
+          model,
+          symbol,
+          'Technical Indicators',
+          allData.technical,
+          'Analyze RSI, MACD, moving averages, and other indicators. Provide: rsi_signal, macd_signal, moving_average_trend, support_resistance_levels, technical_outlook (bullish/bearish/neutral).'
+        );
+        console.log(`✅ Technical analysis complete`);
+      } catch (error) {
+        console.error(`❌ Technical analysis failed:`, error);
+        modularAnalysis.technicalAnalysis = { error: 'Analysis failed' };
       }
     }
-    
-    if (!analysis || typeof analysis !== 'object') {
-      throw new Error('Parsed analysis is not a valid object');
+
+    // ✅ STEP 3: Analyze Sentiment (if available)
+    if (allData.sentiment) {
+      try {
+        await updateProgress(jobId, 'Analyzing social sentiment...');
+        modularAnalysis.sentimentAnalysis = await analyzeDataSource(
+          openaiApiKey,
+          model,
+          symbol,
+          'Social Sentiment',
+          allData.sentiment,
+          'Analyze social media sentiment, Fear & Greed Index, and community mood. Provide: overall_sentiment (bullish/bearish/neutral), fear_greed_interpretation, social_volume_trend, key_sentiment_drivers.'
+        );
+        console.log(`✅ Sentiment analysis complete`);
+      } catch (error) {
+        console.error(`❌ Sentiment analysis failed:`, error);
+        modularAnalysis.sentimentAnalysis = { error: 'Analysis failed' };
+      }
     }
-    
-    console.log(`✅ Analysis object validated, keys:`, Object.keys(analysis).join(', '));
 
-    const processingTime = Date.now() - startTime;
-    console.log(`✅ Job ${jobId} completed in ${processingTime}ms`);
+    // ✅ STEP 4: Analyze News with Market Context (if available)
+    if (allData.news) {
+      try {
+        await updateProgress(jobId, 'Analyzing news with market context...');
+        
+        // ✅ Build comprehensive context for news analysis
+        const newsContext = {
+          news: allData.news,
+          marketContext: {
+            currentPrice: allData.marketData?.price || 'N/A',
+            priceChange24h: allData.marketData?.change24h || 'N/A',
+            volume24h: allData.marketData?.volume24h || 'N/A',
+            marketCap: allData.marketData?.marketCap || 'N/A'
+          },
+          technicalContext: {
+            rsi: allData.technical?.rsi || 'N/A',
+            macd: allData.technical?.macd || 'N/A',
+            trend: allData.technical?.trend || 'N/A'
+          },
+          sentimentContext: {
+            fearGreedIndex: allData.sentiment?.fearGreedIndex || 'N/A',
+            socialSentiment: allData.sentiment?.socialSentiment || 'N/A'
+          }
+        };
+        
+        modularAnalysis.newsAnalysis = await analyzeNewsWithContext(
+          openaiApiKey,
+          model,
+          symbol,
+          newsContext
+        );
+        console.log(`✅ News analysis complete with market context`);
+      } catch (error) {
+        console.error(`❌ News analysis failed:`, error);
+        modularAnalysis.newsAnalysis = { error: 'Analysis failed' };
+      }
+    }
 
-    // ✅ UPDATE DATABASE: Store results with retry logic
+    // ✅ STEP 5: Analyze On-Chain Data (if available)
+    if (allData.onChain) {
+      try {
+        await updateProgress(jobId, 'Analyzing on-chain data...');
+        modularAnalysis.onChainAnalysis = await analyzeDataSource(
+          openaiApiKey,
+          model,
+          symbol,
+          'On-Chain Data',
+          allData.onChain,
+          'Analyze blockchain metrics, whale activity, and network health. Provide: whale_activity_summary, network_health, transaction_trends, on_chain_signals (bullish/bearish/neutral).'
+        );
+        console.log(`✅ On-chain analysis complete`);
+      } catch (error) {
+        console.error(`❌ On-chain analysis failed:`, error);
+        modularAnalysis.onChainAnalysis = { error: 'Analysis failed' };
+      }
+    }
+
+    // ✅ STEP 6: Analyze Risk (if available)
+    if (allData.risk) {
+      try {
+        await updateProgress(jobId, 'Analyzing risk factors...');
+        modularAnalysis.riskAnalysis = await analyzeDataSource(
+          openaiApiKey,
+          model,
+          symbol,
+          'Risk Assessment',
+          allData.risk,
+          'Analyze risk factors and volatility. Provide: risk_level (low/medium/high), volatility_assessment, key_risks, risk_mitigation_strategies.'
+        );
+        console.log(`✅ Risk analysis complete`);
+      } catch (error) {
+        console.error(`❌ Risk analysis failed:`, error);
+        modularAnalysis.riskAnalysis = { error: 'Analysis failed' };
+      }
+    }
+
+    // ✅ STEP 7: Analyze Predictions (if available)
+    if (allData.predictions) {
+      try {
+        await updateProgress(jobId, 'Analyzing predictions...');
+        modularAnalysis.predictionsAnalysis = await analyzeDataSource(
+          openaiApiKey,
+          model,
+          symbol,
+          'Price Predictions',
+          allData.predictions,
+          'Analyze price predictions and forecasts. Provide: short_term_outlook, medium_term_outlook, prediction_confidence, key_price_levels.'
+        );
+        console.log(`✅ Predictions analysis complete`);
+      } catch (error) {
+        console.error(`❌ Predictions analysis failed:`, error);
+        modularAnalysis.predictionsAnalysis = { error: 'Analysis failed' };
+      }
+    }
+
+    // ✅ STEP 8: Analyze DeFi (if available)
+    if (allData.defi) {
+      try {
+        await updateProgress(jobId, 'Analyzing DeFi metrics...');
+        modularAnalysis.defiAnalysis = await analyzeDataSource(
+          openaiApiKey,
+          model,
+          symbol,
+          'DeFi Metrics',
+          allData.defi,
+          'Analyze DeFi protocol metrics and TVL. Provide: tvl_analysis, defi_adoption_trend, protocol_health, defi_opportunities.'
+        );
+        console.log(`✅ DeFi analysis complete`);
+      } catch (error) {
+        console.error(`❌ DeFi analysis failed:`, error);
+        modularAnalysis.defiAnalysis = { error: 'Analysis failed' };
+      }
+    }
+
+    // ✅ STEP 9: Generate Executive Summary (combines all insights)
+    try {
+      await updateProgress(jobId, 'Generating executive summary...');
+      
+      // Build summary of all analyses
+      const analysisSum mary = {
+        market: modularAnalysis.marketAnalysis || 'Not analyzed',
+        technical: modularAnalysis.technicalAnalysis || 'Not analyzed',
+        sentiment: modularAnalysis.sentimentAnalysis || 'Not analyzed',
+        news: modularAnalysis.newsAnalysis || 'Not analyzed',
+        onChain: modularAnalysis.onChainAnalysis || 'Not analyzed',
+        risk: modularAnalysis.riskAnalysis || 'Not analyzed',
+        predictions: modularAnalysis.predictionsAnalysis || 'Not analyzed',
+        defi: modularAnalysis.defiAnalysis || 'Not analyzed'
+      };
+      
+      modularAnalysis.executiveSummary = await generateExecutiveSummary(
+        openaiApiKey,
+        model,
+        symbol,
+        analysisSummary
+      );
+      console.log(`✅ Executive summary complete`);
+    } catch (error) {
+      console.error(`❌ Executive summary failed:`, error);
+      modularAnalysis.executiveSummary = { error: 'Summary generation failed' };
+    }
+
+    modularAnalysis.processingTime = Date.now() - startTime;
+    console.log(`✅ MODULAR analysis completed in ${modularAnalysis.processingTime}ms`);
+
+    // ✅ STORE MODULAR ANALYSIS: Store results with retry logic
     let resultsStored = false;
     for (let dbAttempt = 1; dbAttempt <= 3; dbAttempt++) {
       try {
@@ -402,19 +415,19 @@ Be specific, actionable, and data-driven.`;
            WHERE id = $4`,
           [
             'completed',
-            JSON.stringify(analysis),
+            JSON.stringify(modularAnalysis),
             'Analysis complete!',
             jobId
           ],
-          { timeout: 20000, retries: 1 } // 20 second timeout for large JSON, 1 retry
+          { timeout: 20000, retries: 1 }
         );
-        console.log(`✅ Job ${jobId}: Analysis completed and stored, DB connection released`);
+        console.log(`✅ Job ${jobId}: Modular analysis stored, DB connection released`);
         resultsStored = true;
         break;
       } catch (dbError) {
         console.error(`❌ DB store attempt ${dbAttempt}/3 failed:`, dbError);
         if (dbAttempt < 3) {
-          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s before retry
+          await new Promise(resolve => setTimeout(resolve, 2000));
         }
       }
     }
@@ -431,7 +444,7 @@ Be specific, actionable, and data-driven.`;
     
     if (error instanceof Error) {
       if (error.message.includes('timeout') || error.message.includes('abort')) {
-        errorMessage = 'Analysis timed out after 3 minutes';
+        errorMessage = 'Analysis timed out';
       } else if (error.message.includes('API key')) {
         errorMessage = 'OpenAI API key issue';
       } else {
@@ -450,20 +463,333 @@ Be specific, actionable, and data-driven.`;
                completed_at = NOW()
            WHERE id = $3`,
           ['error', errorMessage, jobId],
-          { timeout: 5000, retries: 1 } // 5 second timeout, 1 retry
+          { timeout: 5000, retries: 1 }
         );
         console.log(`❌ Job ${jobId}: Marked as error, DB connection released`);
         break;
       } catch (dbError) {
         console.error(`❌ DB error update attempt ${dbAttempt}/3 failed:`, dbError);
         if (dbAttempt < 3) {
-          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s before retry
-        } else {
-          console.error(`❌ Failed to update error status after 3 attempts`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
     }
   }
+}
+
+/**
+ * Update job progress in database
+ */
+async function updateProgress(jobId: number, progress: string): Promise<void> {
+  try {
+    await query(
+      'UPDATE ucie_openai_jobs SET progress = $1, updated_at = NOW() WHERE id = $2',
+      [progress, jobId],
+      { timeout: 3000, retries: 1 }
+    );
+  } catch (error) {
+    console.warn(`⚠️ Failed to update progress:`, error);
+  }
+}
+
+/**
+ * Analyze a single data source with GPT-5.1
+ * Small, fast, focused analysis
+ */
+async function analyzeDataSource(
+  apiKey: string,
+  model: string,
+  symbol: string,
+  dataType: string,
+  data: any,
+  instructions: string
+): Promise<any> {
+  const maxRetries = 3;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutMs = 30000; // 30 seconds per data source (fast!)
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      
+      // ✅ FIX: Extract articles array for news analysis
+      let dataToAnalyze = data;
+      if (dataType === 'News' && data?.articles && Array.isArray(data.articles)) {
+        // Pass only the articles array (5-10 articles)
+        dataToAnalyze = {
+          articles: data.articles,
+          totalArticles: data.articles.length,
+          sources: data.sources,
+          dataQuality: data.dataQuality
+        };
+        console.log(`📰 Analyzing ${data.articles.length} news articles for ${symbol}`);
+      }
+      
+      // Build focused prompt for this data source only
+      const prompt = `Analyze ${symbol} ${dataType}:
+
+${JSON.stringify(dataToAnalyze, null, 2)}
+
+${instructions}
+
+Respond with valid JSON only.`;
+      
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+          'Connection': 'keep-alive',
+          'Accept-Encoding': 'gzip, deflate',
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            {
+              role: 'system',
+              content: `You are a cryptocurrency analyst. Analyze ${dataType} and respond with concise JSON.`
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 800, // Small response for focused analysis
+          response_format: { type: 'json_object' }
+        }),
+        signal: controller.signal,
+        // @ts-ignore
+        keepalive: true,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`API error ${response.status}`);
+      }
+      
+      const responseData = await response.json();
+      const { extractResponseText } = await import('../../../../utils/openai');
+      const analysisText = extractResponseText(responseData, false);
+      
+      return JSON.parse(analysisText);
+      
+    } catch (error) {
+      if (attempt === maxRetries) {
+        throw error;
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+    }
+  }
+  
+  throw new Error(`Failed to analyze ${dataType} after ${maxRetries} attempts`);
+}
+
+/**
+ * Analyze news with comprehensive market context
+ * Provides GPT-5.1 with full picture for accurate impact assessment
+ */
+async function analyzeNewsWithContext(
+  apiKey: string,
+  model: string,
+  symbol: string,
+  context: any
+): Promise<any> {
+  const maxRetries = 3;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutMs = 45000; // 45 seconds for news analysis
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      
+      // Extract articles array
+      const articles = context.news?.articles || [];
+      const articleCount = articles.length;
+      
+      console.log(`📰 Analyzing ${articleCount} news articles with market context...`);
+      
+      // Build comprehensive prompt with market context
+      const prompt = `Analyze ${symbol} news articles in the context of current market conditions:
+
+**MARKET CONTEXT:**
+- Current Price: ${context.marketContext.currentPrice}
+- 24h Change: ${context.marketContext.priceChange24h}
+- 24h Volume: ${context.marketContext.volume24h}
+- Market Cap: ${context.marketContext.marketCap}
+
+**TECHNICAL CONTEXT:**
+- RSI: ${context.technicalContext.rsi}
+- MACD: ${context.technicalContext.macd}
+- Trend: ${context.technicalContext.trend}
+
+**SENTIMENT CONTEXT:**
+- Fear & Greed Index: ${context.sentimentContext.fearGreedIndex}
+- Social Sentiment: ${context.sentimentContext.socialSentiment}
+
+**NEWS ARTICLES (${articleCount} total):**
+${JSON.stringify(articles, null, 2)}
+
+**INSTRUCTIONS:**
+Analyze ALL ${articleCount} news articles and assess their collective market impact.
+
+Provide JSON with:
+{
+  "articlesAnalyzed": ${articleCount},
+  "keyHeadlines": ["headline 1", "headline 2", "headline 3"],
+  "overallSentiment": "bullish" | "bearish" | "neutral",
+  "sentimentScore": <0-100>,
+  "marketImpact": "high" | "medium" | "low",
+  "impactReasoning": "Why these articles matter given current market conditions",
+  "priceImplications": "How news may affect price given technical and sentiment context",
+  "keyDevelopments": ["development 1", "development 2"],
+  "correlationWithMarket": "How news aligns or conflicts with current market state",
+  "tradingImplications": "What traders should watch for"
+}
+
+Consider:
+- How news aligns with current price action
+- Whether news confirms or contradicts technical signals
+- If sentiment matches or diverges from social metrics
+- Potential catalysts or risks identified in articles
+
+Respond with valid JSON only.`;
+      
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+          'Connection': 'keep-alive',
+          'Accept-Encoding': 'gzip, deflate',
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a cryptocurrency news analyst. Analyze news articles in the context of current market conditions and provide comprehensive impact assessment. Respond with JSON only.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 1200, // Larger response for comprehensive news analysis
+          response_format: { type: 'json_object' }
+        }),
+        signal: controller.signal,
+        // @ts-ignore
+        keepalive: true,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`API error ${response.status}`);
+      }
+      
+      const responseData = await response.json();
+      const { extractResponseText } = await import('../../../../utils/openai');
+      const analysisText = extractResponseText(responseData, false);
+      
+      return JSON.parse(analysisText);
+      
+    } catch (error) {
+      if (attempt === maxRetries) {
+        throw error;
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+    }
+  }
+  
+  throw new Error(`Failed to analyze news after ${maxRetries} attempts`);
+}
+
+/**
+ * Generate executive summary combining all analyses
+ */
+async function generateExecutiveSummary(
+  apiKey: string,
+  model: string,
+  symbol: string,
+  analysisSummary: any
+): Promise<any> {
+  const maxRetries = 3;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutMs = 45000; // 45 seconds for summary
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      
+      const prompt = `Generate executive summary for ${symbol} based on these analyses:
+
+${JSON.stringify(analysisSummary, null, 2)}
+
+Provide JSON with:
+{
+  "summary": "2-3 paragraph executive summary",
+  "confidence": 85,
+  "recommendation": "Buy|Hold|Sell with reasoning",
+  "key_insights": ["insight 1", "insight 2", "insight 3"],
+  "market_outlook": "24-48 hour outlook",
+  "risk_factors": ["risk 1", "risk 2"],
+  "opportunities": ["opportunity 1", "opportunity 2"]
+}`;
+      
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+          'Connection': 'keep-alive',
+          'Accept-Encoding': 'gzip, deflate',
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a cryptocurrency analyst. Synthesize analyses into executive summary. Respond with JSON only.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 1500,
+          response_format: { type: 'json_object' }
+        }),
+        signal: controller.signal,
+        // @ts-ignore
+        keepalive: true,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`API error ${response.status}`);
+      }
+      
+      const responseData = await response.json();
+      const { extractResponseText } = await import('../../../../utils/openai');
+      const summaryText = extractResponseText(responseData, false);
+      
+      return JSON.parse(summaryText);
+      
+    } catch (error) {
+      if (attempt === maxRetries) {
+        throw error;
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+    }
+  }
+  
+  throw new Error(`Failed to generate executive summary after ${maxRetries} attempts`);
 }
 
 export default withOptionalAuth(handler);

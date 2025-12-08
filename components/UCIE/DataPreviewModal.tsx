@@ -38,6 +38,329 @@ interface DataPreview {
   };
 }
 
+/**
+ * AnalysisCard Component
+ * Reusable card for displaying individual analysis results
+ */
+interface AnalysisCardProps {
+  title: string;
+  icon: string;
+  data: any;
+  fields: Array<{ label: string; key: string }>;
+  listFields?: Array<{ label: string; key: string }>;
+}
+
+function AnalysisCard({ title, icon, data, fields, listFields }: AnalysisCardProps) {
+  return (
+    <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4 hover:border-bitcoin-orange transition-colors">
+      <h4 className="text-lg font-bold text-bitcoin-orange mb-3 flex items-center gap-2">
+        <span>{icon}</span>
+        {title}
+      </h4>
+      
+      <div className="space-y-3">
+        {/* Regular fields */}
+        {fields.map(field => (
+          data[field.key] && (
+            <div key={field.key}>
+              <span className="text-bitcoin-white-60 text-sm font-semibold">{field.label}:</span>
+              <p className="text-bitcoin-white-80 mt-1">{data[field.key]}</p>
+            </div>
+          )
+        ))}
+        
+        {/* List fields */}
+        {listFields?.map(field => (
+          data[field.key] && Array.isArray(data[field.key]) && (
+            <div key={field.key}>
+              <span className="text-bitcoin-white-60 text-sm font-semibold">{field.label}:</span>
+              <ul className="mt-1 space-y-1">
+                {data[field.key].map((item: string, i: number) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-1">•</span>
+                    <span className="text-bitcoin-white-80">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * ModularAnalysisDisplay Component
+ * Displays modular analysis with granular insights per data source
+ */
+interface ModularAnalysis {
+  marketAnalysis?: any;
+  technicalAnalysis?: any;
+  sentimentAnalysis?: any;
+  newsAnalysis?: any;
+  onChainAnalysis?: any;
+  riskAnalysis?: any;
+  predictionsAnalysis?: any;
+  defiAnalysis?: any;
+  executiveSummary?: any;
+  timestamp?: string;
+  processingTime?: number;
+}
+
+function ModularAnalysisDisplay({ analysis }: { analysis: ModularAnalysis }) {
+  return (
+    <div className="space-y-6">
+      {/* Executive Summary (Prominent) */}
+      {analysis.executiveSummary && !analysis.executiveSummary.error && (
+        <div className="bg-bitcoin-orange-10 border-2 border-bitcoin-orange rounded-lg p-6">
+          <h3 className="text-2xl font-bold text-bitcoin-orange mb-4 flex items-center gap-2">
+            <span>📋</span>
+            Executive Summary
+          </h3>
+          <p className="text-bitcoin-white-80 text-lg leading-relaxed mb-4">
+            {analysis.executiveSummary.summary}
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            {analysis.executiveSummary.confidence !== undefined && (
+              <div>
+                <span className="text-bitcoin-white-60 text-sm">Confidence:</span>
+                <span className="text-bitcoin-orange font-bold text-2xl ml-2">
+                  {analysis.executiveSummary.confidence}%
+                </span>
+              </div>
+            )}
+            {analysis.executiveSummary.recommendation && (
+              <div>
+                <span className="text-bitcoin-white-60 text-sm">Recommendation:</span>
+                <span className="text-bitcoin-white font-bold text-2xl ml-2">
+                  {analysis.executiveSummary.recommendation}
+                </span>
+              </div>
+            )}
+          </div>
+          {analysis.executiveSummary.key_insights && Array.isArray(analysis.executiveSummary.key_insights) && (
+            <div className="mt-4 pt-4 border-t border-bitcoin-orange-20">
+              <span className="text-bitcoin-white-60 text-sm font-semibold">Key Insights:</span>
+              <ul className="mt-2 space-y-2">
+                {analysis.executiveSummary.key_insights.map((insight: string, i: number) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-1">•</span>
+                    <span className="text-bitcoin-white-80">{insight}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* Market Analysis Card */}
+      {analysis.marketAnalysis && !analysis.marketAnalysis.error && (
+        <AnalysisCard
+          title="Market Analysis"
+          icon="📊"
+          data={analysis.marketAnalysis}
+          fields={[
+            { label: 'Price Trend', key: 'price_trend' },
+            { label: 'Current Price Analysis', key: 'current_price_analysis' },
+            { label: 'Volume Analysis', key: 'volume_analysis' },
+            { label: 'Market Cap Insights', key: 'market_cap_insights' }
+          ]}
+          listFields={[
+            { label: 'Key Metrics', key: 'key_metrics' }
+          ]}
+        />
+      )}
+      
+      {/* Technical Analysis Card */}
+      {analysis.technicalAnalysis && !analysis.technicalAnalysis.error && (
+        <AnalysisCard
+          title="Technical Analysis"
+          icon="📈"
+          data={analysis.technicalAnalysis}
+          fields={[
+            { label: 'Technical Outlook', key: 'technical_outlook' },
+            { label: 'RSI Signal', key: 'rsi_signal' },
+            { label: 'MACD Signal', key: 'macd_signal' },
+            { label: 'Moving Average Trend', key: 'moving_average_trend' }
+          ]}
+          listFields={[
+            { label: 'Support/Resistance Levels', key: 'support_resistance_levels' }
+          ]}
+        />
+      )}
+      
+      {/* Sentiment Analysis Card */}
+      {analysis.sentimentAnalysis && !analysis.sentimentAnalysis.error && (
+        <AnalysisCard
+          title="Sentiment Analysis"
+          icon="💬"
+          data={analysis.sentimentAnalysis}
+          fields={[
+            { label: 'Overall Sentiment', key: 'overall_sentiment' },
+            { label: 'Fear & Greed Interpretation', key: 'fear_greed_interpretation' },
+            { label: 'Social Volume Trend', key: 'social_volume_trend' }
+          ]}
+          listFields={[
+            { label: 'Key Sentiment Drivers', key: 'key_sentiment_drivers' }
+          ]}
+        />
+      )}
+      
+      {/* News Analysis Card */}
+      {analysis.newsAnalysis && !analysis.newsAnalysis.error && (
+        <AnalysisCard
+          title="News Analysis"
+          icon="📰"
+          data={analysis.newsAnalysis}
+          fields={[
+            { label: 'News Sentiment', key: 'news_sentiment' },
+            { label: 'Potential Market Impact', key: 'potential_market_impact' }
+          ]}
+          listFields={[
+            { label: 'Key Headlines', key: 'key_headlines' },
+            { label: 'Important Developments', key: 'important_developments' }
+          ]}
+        />
+      )}
+      
+      {/* On-Chain Analysis Card */}
+      {analysis.onChainAnalysis && !analysis.onChainAnalysis.error && (
+        <AnalysisCard
+          title="On-Chain Analysis"
+          icon="⛓️"
+          data={analysis.onChainAnalysis}
+          fields={[
+            { label: 'On-Chain Signals', key: 'on_chain_signals' },
+            { label: 'Whale Activity Summary', key: 'whale_activity_summary' },
+            { label: 'Network Health', key: 'network_health' },
+            { label: 'Transaction Trends', key: 'transaction_trends' }
+          ]}
+        />
+      )}
+      
+      {/* Risk Analysis Card */}
+      {analysis.riskAnalysis && !analysis.riskAnalysis.error && (
+        <AnalysisCard
+          title="Risk Analysis"
+          icon="⚠️"
+          data={analysis.riskAnalysis}
+          fields={[
+            { label: 'Risk Level', key: 'risk_level' },
+            { label: 'Volatility Assessment', key: 'volatility_assessment' }
+          ]}
+          listFields={[
+            { label: 'Key Risks', key: 'key_risks' },
+            { label: 'Risk Mitigation Strategies', key: 'risk_mitigation_strategies' }
+          ]}
+        />
+      )}
+      
+      {/* Predictions Analysis Card */}
+      {analysis.predictionsAnalysis && !analysis.predictionsAnalysis.error && (
+        <AnalysisCard
+          title="Predictions Analysis"
+          icon="🔮"
+          data={analysis.predictionsAnalysis}
+          fields={[
+            { label: 'Short Term Outlook', key: 'short_term_outlook' },
+            { label: 'Medium Term Outlook', key: 'medium_term_outlook' },
+            { label: 'Prediction Confidence', key: 'prediction_confidence' }
+          ]}
+          listFields={[
+            { label: 'Key Price Levels', key: 'key_price_levels' }
+          ]}
+        />
+      )}
+      
+      {/* DeFi Analysis Card */}
+      {analysis.defiAnalysis && !analysis.defiAnalysis.error && (
+        <AnalysisCard
+          title="DeFi Analysis"
+          icon="🏦"
+          data={analysis.defiAnalysis}
+          fields={[
+            { label: 'TVL Analysis', key: 'tvl_analysis' },
+            { label: 'DeFi Adoption Trend', key: 'defi_adoption_trend' },
+            { label: 'Protocol Health', key: 'protocol_health' }
+          ]}
+          listFields={[
+            { label: 'DeFi Opportunities', key: 'defi_opportunities' }
+          ]}
+        />
+      )}
+      
+      {/* Processing Info */}
+      {analysis.processingTime && (
+        <div className="text-xs text-bitcoin-white-60 text-center pt-4 border-t border-bitcoin-orange-20">
+          Analysis completed in {(analysis.processingTime / 1000).toFixed(1)}s • 
+          Generated at {analysis.timestamp ? new Date(analysis.timestamp).toLocaleString() : 'N/A'}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * LegacyAnalysisDisplay Component
+ * Displays old monolithic analysis format (fallback)
+ */
+function LegacyAnalysisDisplay({ analysis }: { analysis: any }) {
+  // If analysis is a string, split into paragraphs
+  if (typeof analysis === 'string') {
+    return (
+      <>
+        {analysis.split('\n\n').map((paragraph, index) => {
+          if (paragraph.trim()) {
+            return (
+              <p key={index} className="text-bitcoin-white-80 mb-4">
+                {paragraph.trim()}
+              </p>
+            );
+          }
+          return null;
+        })}
+      </>
+    );
+  }
+  
+  // If analysis is an object, display key-value pairs
+  return (
+    <div className="space-y-4">
+      {Object.entries(analysis).map(([key, value]) => {
+        if (typeof value === 'string' || typeof value === 'number') {
+          return (
+            <div key={key}>
+              <span className="text-bitcoin-white-60 text-sm font-semibold capitalize">
+                {key.replace(/_/g, ' ')}:
+              </span>
+              <p className="text-bitcoin-white-80 mt-1">{value}</p>
+            </div>
+          );
+        } else if (Array.isArray(value)) {
+          return (
+            <div key={key}>
+              <span className="text-bitcoin-white-60 text-sm font-semibold capitalize">
+                {key.replace(/_/g, ' ')}:
+              </span>
+              <ul className="mt-1 space-y-1">
+                {value.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="text-bitcoin-orange mt-1">•</span>
+                    <span className="text-bitcoin-white-80">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        }
+        return null;
+      })}
+    </div>
+  );
+}
+
 export default function DataPreviewModal({
   symbol,
   isOpen,
@@ -557,14 +880,14 @@ export default function DataPreviewModal({
                     </div>
                     <div className="flex items-center justify-between text-xs text-bitcoin-white-60">
                       <span>Elapsed: {gptElapsedTime}s</span>
-                      <span>Expected: 30-120s</span>
+                      <span>Expected: 60-100s</span>
                     </div>
                   </div>
                 )}
                 
                 <div className="prose prose-invert max-w-none">
                   <div className="text-bitcoin-white-80 leading-relaxed max-h-96 overflow-y-auto space-y-4">
-                    {/* ✅ HUMAN-READABLE FORMAT: Parse JSON and display in simple language */}
+                    {/* ✅ MODULAR ANALYSIS DISPLAY */}
                     {(() => {
                       try {
                         // Try to parse as JSON first
@@ -572,140 +895,17 @@ export default function DataPreviewModal({
                           ? JSON.parse(preview.aiAnalysis || preview.summary)
                           : (preview.aiAnalysis || preview.summary);
                         
-                        return (
-                          <div className="space-y-6">
-                            {/* Executive Summary */}
-                            {analysis.summary && (
-                              <div>
-                                <h4 className="text-lg font-bold text-bitcoin-orange mb-2">
-                                  📊 What's Happening?
-                                </h4>
-                                <p className="text-bitcoin-white-80 leading-relaxed">
-                                  {analysis.summary}
-                                </p>
-                              </div>
-                            )}
-                            
-                            {/* Confidence Score */}
-                            {analysis.confidence && (
-                              <div>
-                                <h4 className="text-lg font-bold text-bitcoin-orange mb-2">
-                                  🎯 How Sure Are We?
-                                </h4>
-                                <div className="flex items-center gap-3">
-                                  <div className="flex-1 bg-bitcoin-black border border-bitcoin-orange-20 rounded-full h-3">
-                                    <div 
-                                      className="bg-bitcoin-orange h-full rounded-full transition-all"
-                                      style={{ width: `${analysis.confidence}%` }}
-                                    />
-                                  </div>
-                                  <span className="text-bitcoin-orange font-bold font-mono">
-                                    {analysis.confidence}%
-                                  </span>
-                                </div>
-                              </div>
-                            )}
-                            
-                            {/* Key Insights */}
-                            {analysis.key_insights && analysis.key_insights.length > 0 && (
-                              <div>
-                                <h4 className="text-lg font-bold text-bitcoin-orange mb-2">
-                                  💡 Important Things to Know
-                                </h4>
-                                <ul className="space-y-2">
-                                  {analysis.key_insights.map((insight: string, i: number) => (
-                                    <li key={i} className="flex items-start gap-2">
-                                      <span className="text-bitcoin-orange mt-1">•</span>
-                                      <span className="text-bitcoin-white-80">{insight}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                            
-                            {/* Market Outlook */}
-                            {analysis.market_outlook && (
-                              <div>
-                                <h4 className="text-lg font-bold text-bitcoin-orange mb-2">
-                                  🔮 What Might Happen Next?
-                                </h4>
-                                <p className="text-bitcoin-white-80 leading-relaxed">
-                                  {analysis.market_outlook}
-                                </p>
-                              </div>
-                            )}
-                            
-                            {/* Risk Factors */}
-                            {analysis.risk_factors && analysis.risk_factors.length > 0 && (
-                              <div>
-                                <h4 className="text-lg font-bold text-bitcoin-orange mb-2">
-                                  ⚠️ Things to Watch Out For
-                                </h4>
-                                <ul className="space-y-2">
-                                  {analysis.risk_factors.map((risk: string, i: number) => (
-                                    <li key={i} className="flex items-start gap-2">
-                                      <span className="text-bitcoin-orange mt-1">•</span>
-                                      <span className="text-bitcoin-white-80">{risk}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                            
-                            {/* Opportunities */}
-                            {analysis.opportunities && analysis.opportunities.length > 0 && (
-                              <div>
-                                <h4 className="text-lg font-bold text-bitcoin-orange mb-2">
-                                  ✨ Good Things to Look For
-                                </h4>
-                                <ul className="space-y-2">
-                                  {analysis.opportunities.map((opp: string, i: number) => (
-                                    <li key={i} className="flex items-start gap-2">
-                                      <span className="text-bitcoin-orange mt-1">•</span>
-                                      <span className="text-bitcoin-white-80">{opp}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                            
-                            {/* Technical Summary */}
-                            {analysis.technical_summary && (
-                              <div>
-                                <h4 className="text-lg font-bold text-bitcoin-orange mb-2">
-                                  📈 What the Charts Say
-                                </h4>
-                                <p className="text-bitcoin-white-80 leading-relaxed">
-                                  {analysis.technical_summary}
-                                </p>
-                              </div>
-                            )}
-                            
-                            {/* Sentiment Summary */}
-                            {analysis.sentiment_summary && (
-                              <div>
-                                <h4 className="text-lg font-bold text-bitcoin-orange mb-2">
-                                  💬 What People Are Saying
-                                </h4>
-                                <p className="text-bitcoin-white-80 leading-relaxed">
-                                  {analysis.sentiment_summary}
-                                </p>
-                              </div>
-                            )}
-                            
-                            {/* Recommendation */}
-                            {analysis.recommendation && (
-                              <div className="bg-bitcoin-orange-10 border border-bitcoin-orange rounded-lg p-4">
-                                <h4 className="text-lg font-bold text-bitcoin-orange mb-2">
-                                  🎯 Our Suggestion
-                                </h4>
-                                <p className="text-bitcoin-white font-semibold">
-                                  {analysis.recommendation}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        );
+                        // Check if it's modular analysis
+                        const isModular = analysis.marketAnalysis || analysis.technicalAnalysis || 
+                                        analysis.sentimentAnalysis || analysis.executiveSummary;
+                        
+                        if (isModular) {
+                          // Display modular analysis
+                          return <ModularAnalysisDisplay analysis={analysis} />;
+                        } else {
+                          // Display legacy format
+                          return <LegacyAnalysisDisplay analysis={analysis} />;
+                        }
                       } catch (error) {
                         // Fallback to plain text if JSON parsing fails
                         const text = (preview.aiAnalysis || preview.summary);
