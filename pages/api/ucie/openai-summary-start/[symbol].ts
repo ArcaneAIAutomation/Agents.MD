@@ -224,7 +224,7 @@ Be specific, actionable, and data-driven.`;
     const data = await response.json();
     
     // ✅ BULLETPROOF: Extract text using utility function
-    const { extractResponseText, validateResponseText } = await import('../../../utils/openai');
+    const { extractResponseText, validateResponseText } = await import('../../../../utils/openai');
     const analysisText = extractResponseText(data, true);
     validateResponseText(analysisText, model, data);
     

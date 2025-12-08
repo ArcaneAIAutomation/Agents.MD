@@ -66,14 +66,26 @@ export default function DataPreviewModal({
       return;
     }
     
+    console.log(`🔄 Starting GPT-5.1 polling for job ${gptJobId}...`);
+    
     const pollInterval = setInterval(async () => {
       try {
+        console.log(`📡 Polling job ${gptJobId}, current status: ${gptStatus}`);
+        
         const response = await fetch(`/api/ucie/openai-summary-poll/${gptJobId}`);
         if (!response.ok) {
           throw new Error(`Poll failed: ${response.status}`);
         }
         
         const data = await response.json();
+        console.log(`📊 Poll response:`, {
+          status: data.status,
+          hasResult: !!data.result,
+          hasError: !!data.error,
+          progress: data.progress
+        });
+        
+        // ✅ CRITICAL FIX: Update status FIRST to trigger re-render
         setGptStatus(data.status);
         
         if (data.progress) {
@@ -81,8 +93,11 @@ export default function DataPreviewModal({
         }
         
         if (data.status === 'completed' && data.result) {
+          console.log('🎉 GPT-5.1 analysis completed! Updating UI...');
+          
           // Parse and update preview with GPT-5.1 analysis
           const analysis = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+          console.log('✅ Parsed analysis:', Object.keys(analysis).join(', '));
           
           // ✅ CRITICAL: Regenerate Caesar prompt with GPT-5.1 analysis
           console.log('🔄 Regenerating Caesar prompt with GPT-5.1 analysis...');
@@ -99,11 +114,17 @@ export default function DataPreviewModal({
               const regenerateData = await regenerateResponse.json();
               if (regenerateData.success && regenerateData.caesarPrompt) {
                 console.log('✅ Caesar prompt regenerated with GPT-5.1 analysis');
-                setPreview(prev => prev ? {
-                  ...prev,
-                  aiAnalysis: JSON.stringify(analysis, null, 2),
-                  caesarPromptPreview: regenerateData.caesarPrompt
-                } : null);
+                console.log('🔄 Updating preview state with analysis and prompt...');
+                setPreview(prev => {
+                  if (!prev) return null;
+                  const updated = {
+                    ...prev,
+                    aiAnalysis: JSON.stringify(analysis, null, 2),
+                    caesarPromptPreview: regenerateData.caesarPrompt
+                  };
+                  console.log('✅ Preview state updated!');
+                  return updated;
+                });
               } else {
                 console.warn('⚠️ Caesar prompt regeneration returned success=false');
                 setPreview(prev => prev ? {
@@ -127,12 +148,12 @@ export default function DataPreviewModal({
             } : null);
           }
           
-          console.log('✅ GPT-5.1 analysis completed:', analysis);
+          console.log('✅ GPT-5.1 analysis UI update complete!');
         }
         
         if (data.status === 'error') {
           console.error('❌ GPT-5.1 analysis failed:', data.error);
-          setGptProgress('Analysis failed');
+          setGptProgress(data.error || 'Analysis failed');
         }
       } catch (err) {
         console.error('❌ GPT-5.1 polling error:', err);
@@ -146,6 +167,7 @@ export default function DataPreviewModal({
     }, 1000);
     
     return () => {
+      console.log(`🛑 Stopping polling for job ${gptJobId}`);
       clearInterval(pollInterval);
       clearInterval(timeInterval);
     };
