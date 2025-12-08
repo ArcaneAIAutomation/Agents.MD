@@ -41,29 +41,26 @@ const response = await openai.responses.create({
 
 **BEFORE (Broken)**:
 ```typescript
-// Using non-existent Responses API
+// Using non-existent Responses API with unsupported parameters
 const response = await openai.responses.create({
-  model: OPENAI_MODEL,
+  model: 'gpt-5.1',
   input: messages,
-  reasoning: { effort: effort },
+  reasoning: { effort: effort }, // ❌ Not supported
   max_output_tokens: maxOutputTokens,
   response_format: requestJsonFormat ? { type: 'json_object' } : undefined
 });
-
-// Trying to extract from non-standard format
-const content = extractResponseText(response, false);
 ```
 
 **AFTER (Fixed)**:
 ```typescript
-// Using standard Chat Completions API
+// Using standard Chat Completions API with proper JSON formatting
 const completion = await openai.chat.completions.create({
-  model: OPENAI_MODEL,
-  messages: messages as any,
-  reasoning: { effort: effort },
+  model: 'gpt-4o', // ✅ Changed from gpt-5.1
+  messages: messages as any, // ✅ Includes "json" keyword when needed
   temperature: 0.7,
   max_tokens: maxOutputTokens,
   response_format: requestJsonFormat ? { type: 'json_object' } : undefined
+  // ✅ Removed unsupported 'reasoning' parameter
 });
 
 // Extract from standard Chat Completions format
