@@ -177,22 +177,21 @@ Provide comprehensive JSON analysis with these exact fields:
 
 Be specific, actionable, and data-driven.`;
 
-    // Call OpenAI API with GPT-5.1
+    // Call OpenAI API with GPT-4o (Chat Completions API)
     const openaiApiKey = process.env.OPENAI_API_KEY;
     if (!openaiApiKey) {
       throw new Error('OPENAI_API_KEY not configured');
     }
 
-    const model = 'gpt-5.1';
-    const reasoningEffort = 'low'; // Fast response (1-2 seconds)
+    const model = 'gpt-4o'; // Use Chat Completions API
     
-    console.log(`📡 Calling OpenAI Responses API with ${model} (reasoning: ${reasoningEffort})...`);
+    console.log(`📡 Calling OpenAI Chat Completions API with ${model}...`);
     console.log(`📡 Prompt length: ${prompt.length} chars`);
     
     const openaiStart = Date.now();
 
-    // ✅ GPT-5.1 with Responses API (3-minute timeout)
-    const response = await fetch('https://api.openai.com/v1/responses', {
+    // ✅ GPT-4o with Chat Completions API (3-minute timeout)
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -200,25 +199,30 @@ Be specific, actionable, and data-driven.`;
       },
       body: JSON.stringify({
         model: model,
-        input: `You are an expert cryptocurrency analyst. Analyze this data and respond only with valid JSON.\n\n${prompt}`,
-        reasoning: {
-          effort: reasoningEffort // low = 1-2 seconds (fast)
-        },
-        text: {
-          verbosity: 'medium'
-        },
-        max_output_tokens: 4000,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert cryptocurrency market analyst. Analyze data and respond only with valid JSON.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 4000,
+        response_format: { type: 'json_object' } // Force JSON response
       }),
       signal: AbortSignal.timeout(180000), // ✅ 3 MINUTES (180 seconds)
     });
 
     const openaiTime = Date.now() - openaiStart;
-    console.log(`✅ ${model} Responses API responded in ${openaiTime}ms with status ${response.status}`);
+    console.log(`✅ ${model} Chat Completions API responded in ${openaiTime}ms with status ${response.status}`);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`❌ ${model} Responses API error: ${response.status}`, errorText);
-      throw new Error(`${model} Responses API error: ${response.status}`);
+      console.error(`❌ ${model} Chat Completions API error: ${response.status}`, errorText);
+      throw new Error(`${model} Chat Completions API error: ${response.status}`);
     }
 
     const data = await response.json();
