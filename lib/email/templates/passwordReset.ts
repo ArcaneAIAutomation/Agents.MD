@@ -1,106 +1,81 @@
 /**
  * Password Reset Email Template
  * 
- * Professional password reset email with Bitcoin Sovereign Technology branding
- * Sent to users when they request a password reset
- * 
- * Design:
- * - Black background (#000000)
- * - Bitcoin orange accents (#F7931A)
- * - Clean, minimalist layout
- * - Mobile-responsive HTML
- * - Security-focused messaging
+ * Generates HTML email for password reset requests.
  */
 
-interface PasswordResetEmailData {
+interface PasswordResetEmailParams {
   email: string;
-  resetToken: string;
-  resetUrl?: string;
-  expirationMinutes?: number;
+  resetUrl: string;
+  expiresInHours: number;
+  platformUrl: string;
 }
 
 /**
- * Generate password reset email HTML with Bitcoin Sovereign branding
+ * Generate password reset email HTML
  * 
- * @param data Reset data including token and expiration
+ * @param params - Email parameters
  * @returns HTML email content
  */
-export function generatePasswordResetEmail(data: PasswordResetEmailData): string {
-  const baseUrl = data.resetUrl || process.env.NEXT_PUBLIC_APP_URL || 'https://news.arcane.group';
-  const resetLink = `${baseUrl}/reset-password?token=${data.resetToken}`;
-  const expirationMinutes = data.expirationMinutes || 60;
-  const expirationTime = new Date(Date.now() + expirationMinutes * 60 * 1000).toLocaleString();
-  
+export function generatePasswordResetEmail(params: PasswordResetEmailParams): string {
+  const { email, resetUrl, expiresInHours, platformUrl } = params;
+
   return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Password Reset - Bitcoin Sovereign Technology</title>
+  <title>Reset Your Password - Bitcoin Sovereign Technology</title>
   <style>
     body {
-      margin: 0;
-      padding: 0;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background-color: #000000;
       color: #FFFFFF;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
     }
-    .email-container {
+    .container {
       max-width: 600px;
       margin: 0 auto;
-      background-color: #000000;
+      padding: 40px 20px;
     }
     .header {
-      padding: 40px 20px;
       text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
       border-bottom: 2px solid #F7931A;
     }
     .logo {
       font-size: 28px;
       font-weight: 800;
       color: #F7931A;
-      text-shadow: 0 0 20px rgba(247, 147, 26, 0.5);
-      margin: 0;
+      text-decoration: none;
       letter-spacing: -0.02em;
     }
     .content {
-      padding: 40px 20px;
-    }
-    .alert-box {
-      background-color: rgba(247, 147, 26, 0.1);
+      background: #000000;
       border: 2px solid #F7931A;
       border-radius: 12px;
-      padding: 24px;
-      margin: 30px 0;
-      text-align: center;
+      padding: 30px;
+      margin-bottom: 30px;
     }
-    .alert-icon {
-      font-size: 48px;
+    h1 {
       color: #F7931A;
-      margin-bottom: 16px;
-    }
-    .alert-title {
       font-size: 24px;
-      font-weight: 700;
-      color: #FFFFFF;
-      margin: 0 0 12px 0;
+      font-weight: 800;
+      margin-top: 0;
+      margin-bottom: 20px;
     }
-    .alert-message {
-      font-size: 16px;
+    p {
       color: rgba(255, 255, 255, 0.8);
-      margin: 0;
-      line-height: 1.6;
-    }
-    .message {
+      margin-bottom: 20px;
       font-size: 16px;
-      line-height: 1.6;
-      color: rgba(255, 255, 255, 0.8);
-      margin: 0 0 20px 0;
     }
     .button {
       display: inline-block;
-      background-color: #F7931A;
+      background: #F7931A;
       color: #000000;
       text-decoration: none;
       padding: 16px 32px;
@@ -113,206 +88,95 @@ export function generatePasswordResetEmail(data: PasswordResetEmailData): string
       transition: all 0.3s ease;
     }
     .button:hover {
-      box-shadow: 0 0 30px rgba(247, 147, 26, 0.5);
+      background: #FFFFFF;
+      color: #000000;
     }
-    .info-box {
-      background-color: #000000;
-      border: 1px solid rgba(247, 147, 26, 0.2);
-      border-radius: 12px;
-      padding: 24px;
-      margin: 30px 0;
-    }
-    .info-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #F7931A;
-      margin: 0 0 16px 0;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .info-item {
-      margin: 12px 0;
-      padding-left: 20px;
-      position: relative;
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.8);
-    }
-    .info-item:before {
-      content: "₿";
-      position: absolute;
-      left: 0;
-      color: #F7931A;
-      font-weight: 700;
-    }
-    .warning-box {
-      background-color: rgba(247, 147, 26, 0.05);
-      border-left: 4px solid #F7931A;
-      padding: 16px 20px;
-      margin: 30px 0;
+    .warning {
+      background: rgba(247, 147, 26, 0.1);
+      border: 1px solid rgba(247, 147, 26, 0.3);
+      border-radius: 8px;
+      padding: 15px;
+      margin: 20px 0;
     }
     .warning-title {
-      font-size: 16px;
-      font-weight: 700;
       color: #F7931A;
-      margin: 0 0 8px 0;
+      font-weight: 700;
+      margin-bottom: 10px;
     }
-    .warning-text {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.8);
-      margin: 0;
-      line-height: 1.6;
-    }
-    .code-box {
-      background-color: rgba(247, 147, 26, 0.05);
+    .code-block {
+      background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(247, 147, 26, 0.2);
-      border-radius: 8px;
-      padding: 16px;
-      margin: 20px 0;
+      border-radius: 6px;
+      padding: 15px;
       font-family: 'Roboto Mono', monospace;
       font-size: 14px;
       color: #F7931A;
       word-break: break-all;
-      text-align: center;
+      margin: 15px 0;
     }
     .footer {
-      padding: 30px 20px;
       text-align: center;
-      border-top: 1px solid rgba(247, 147, 26, 0.2);
-      margin-top: 40px;
-    }
-    .footer-text {
-      font-size: 12px;
       color: rgba(255, 255, 255, 0.6);
-      margin: 8px 0;
+      font-size: 14px;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(247, 147, 26, 0.2);
     }
-    .divider {
-      height: 1px;
-      background-color: rgba(247, 147, 26, 0.2);
-      margin: 30px 0;
+    .footer a {
+      color: #F7931A;
+      text-decoration: none;
     }
-    @media only screen and (max-width: 600px) {
-      .content {
-        padding: 30px 16px;
-      }
-      .alert-title {
-        font-size: 20px;
-      }
-      .message {
-        font-size: 14px;
-      }
-      .button {
-        display: block;
-        text-align: center;
-      }
+    .expiry {
+      color: #F7931A;
+      font-weight: 600;
     }
   </style>
 </head>
 <body>
-  <div class="email-container">
-    <!-- Header -->
+  <div class="container">
     <div class="header">
-      <h1 class="logo">BITCOIN SOVEREIGN TECHNOLOGY</h1>
+      <a href="${platformUrl}" class="logo">₿ Bitcoin Sovereign Technology</a>
     </div>
 
-    <!-- Content -->
     <div class="content">
-      <!-- Alert Box -->
-      <div class="alert-box">
-        <div class="alert-icon">🔐</div>
-        <h2 class="alert-title">Password Reset Request</h2>
-        <p class="alert-message">
-          We received a request to reset your password. Click the button below to create a new password.
-        </p>
-      </div>
-
-      <p class="message">
-        A password reset was requested for the account associated with <strong>${data.email}</strong>.
-      </p>
-
-      <!-- CTA Button -->
+      <h1>🔐 Reset Your Password</h1>
+      
+      <p>Hello,</p>
+      
+      <p>We received a request to reset the password for your account (<strong>${email}</strong>).</p>
+      
+      <p>Click the button below to reset your password:</p>
+      
       <div style="text-align: center;">
-        <a href="${resetLink}" class="button">Reset Password</a>
+        <a href="${resetUrl}" class="button">Reset Password</a>
       </div>
-
-      <p class="message" style="text-align: center; margin-top: 20px;">
-        Or copy and paste this link into your browser:
-      </p>
-
-      <div class="code-box">
-        ${resetLink}
+      
+      <p>Or copy and paste this link into your browser:</p>
+      
+      <div class="code-block">${resetUrl}</div>
+      
+      <div class="warning">
+        <div class="warning-title">⏰ Important:</div>
+        <p style="margin: 0;">This password reset link will expire in <span class="expiry">${expiresInHours} hour${expiresInHours > 1 ? 's' : ''}</span>. After that, you'll need to request a new one.</p>
       </div>
-
-      <div class="divider"></div>
-
-      <!-- Security Information -->
-      <div class="info-box">
-        <h3 class="info-title">Security Information</h3>
-        <div class="info-item">
-          <strong>Requested for:</strong> ${data.email}
-        </div>
-        <div class="info-item">
-          <strong>Expires:</strong> ${expirationTime}
-        </div>
-        <div class="info-item">
-          <strong>Valid for:</strong> ${expirationMinutes} minutes
-        </div>
-        <div class="info-item">
-          <strong>One-time use:</strong> Link becomes invalid after use
-        </div>
+      
+      <div class="warning">
+        <div class="warning-title">🛡️ Security Notice:</div>
+        <p style="margin: 0;">If you didn't request this password reset, please ignore this email. Your password will remain unchanged. Someone may have entered your email address by mistake.</p>
       </div>
-
-      <!-- Warning Box -->
-      <div class="warning-box">
-        <div class="warning-title">⚠️ Important Security Notice</div>
-        <p class="warning-text">
-          If you did not request a password reset, please ignore this email and your password will remain unchanged. 
-          Your account security has not been compromised.
-        </p>
-      </div>
-
-      <div class="divider"></div>
-
-      <!-- Best Practices -->
-      <div class="info-box">
-        <h3 class="info-title">Password Best Practices</h3>
-        <div class="info-item">
-          Use at least 8 characters
-        </div>
-        <div class="info-item">
-          Include uppercase and lowercase letters
-        </div>
-        <div class="info-item">
-          Include at least one number
-        </div>
-        <div class="info-item">
-          Avoid common words or patterns
-        </div>
-        <div class="info-item">
-          Don't reuse passwords from other accounts
-        </div>
-      </div>
-
-      <p class="message" style="margin-top: 30px;">
-        If you have any questions or concerns about your account security, please contact our support team immediately.
-      </p>
     </div>
 
-    <!-- Footer -->
     <div class="footer">
-      <p class="footer-text">
-        <strong>Bitcoin Sovereign Technology</strong>
+      <p>
+        <strong>Bitcoin Sovereign Technology</strong><br>
+        Real-time cryptocurrency intelligence and analysis
       </p>
-      <p class="footer-text">
-        Advanced Cryptocurrency Trading Intelligence
+      <p>
+        <a href="${platformUrl}">Visit Platform</a> | 
+        <a href="${platformUrl}/support">Support</a>
       </p>
-      <p class="footer-text">
-        ${baseUrl}
-      </p>
-      <p class="footer-text" style="margin-top: 20px;">
-        This is an automated security message. Please do not reply to this email.
-      </p>
-      <p class="footer-text">
-        © ${new Date().getFullYear()} Bitcoin Sovereign Technology. All rights reserved.
+      <p style="font-size: 12px; color: rgba(255, 255, 255, 0.4);">
+        This is an automated email. Please do not reply to this message.
       </p>
     </div>
   </div>
@@ -323,68 +187,38 @@ export function generatePasswordResetEmail(data: PasswordResetEmailData): string
 
 /**
  * Generate plain text version of password reset email
- * Fallback for email clients that don't support HTML
  * 
- * @param data Reset data including token and expiration
+ * @param params - Email parameters
  * @returns Plain text email content
  */
-export function generatePasswordResetEmailText(data: PasswordResetEmailData): string {
-  const baseUrl = data.resetUrl || process.env.NEXT_PUBLIC_APP_URL || 'https://news.arcane.group';
-  const resetLink = `${baseUrl}/reset-password?token=${data.resetToken}`;
-  const expirationMinutes = data.expirationMinutes || 60;
-  const expirationTime = new Date(Date.now() + expirationMinutes * 60 * 1000).toLocaleString();
-  
+export function generatePasswordResetEmailText(params: PasswordResetEmailParams): string {
+  const { email, resetUrl, expiresInHours, platformUrl } = params;
+
   return `
-BITCOIN SOVEREIGN TECHNOLOGY
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Bitcoin Sovereign Technology - Reset Your Password
 
-🔐 PASSWORD RESET REQUEST
+Hello,
 
-We received a request to reset your password. Use the link below to create a new password.
+We received a request to reset the password for your account (${email}).
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+To reset your password, visit this link:
+${resetUrl}
 
-A password reset was requested for the account associated with ${data.email}.
+IMPORTANT:
+- This link will expire in ${expiresInHours} hour${expiresInHours > 1 ? 's' : ''}
+- If you didn't request this reset, please ignore this email
+- Your password will remain unchanged if you don't use this link
 
-RESET YOUR PASSWORD:
-${resetLink}
+SECURITY NOTICE:
+If you didn't request this password reset, someone may have entered your email address by mistake. Your account is still secure.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SECURITY INFORMATION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-₿ Requested for: ${data.email}
-₿ Expires: ${expirationTime}
-₿ Valid for: ${expirationMinutes} minutes
-₿ One-time use: Link becomes invalid after use
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ IMPORTANT SECURITY NOTICE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-If you did not request a password reset, please ignore this email and your password will remain unchanged. Your account security has not been compromised.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-PASSWORD BEST PRACTICES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-₿ Use at least 8 characters
-₿ Include uppercase and lowercase letters
-₿ Include at least one number
-₿ Avoid common words or patterns
-₿ Don't reuse passwords from other accounts
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-If you have any questions or concerns about your account security, please contact our support team immediately.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
+---
 Bitcoin Sovereign Technology
-Advanced Cryptocurrency Trading Intelligence
-${baseUrl}
+Real-time cryptocurrency intelligence and analysis
 
-This is an automated security message. Please do not reply to this email.
-© ${new Date().getFullYear()} Bitcoin Sovereign Technology. All rights reserved.
+Visit: ${platformUrl}
+Support: ${platformUrl}/support
+
+This is an automated email. Please do not reply to this message.
   `.trim();
 }

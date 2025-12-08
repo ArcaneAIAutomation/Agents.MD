@@ -292,7 +292,7 @@ export default function LoginForm({ onSuccess, onError, onSwitchToRegister }: Lo
           )}
         </div>
 
-        {/* Remember Me Checkbox */}
+        {/* Remember Me Checkbox & Forgot Password */}
         <div className="flex items-center justify-between">
           <label htmlFor="rememberMe" className="flex items-center gap-2 cursor-pointer">
             <input
@@ -308,6 +308,14 @@ export default function LoginForm({ onSuccess, onError, onSwitchToRegister }: Lo
               Remember me for 30 days
             </span>
           </label>
+          
+          <a
+            href="/auth/forgot-password"
+            className="text-sm text-bitcoin-orange hover:text-bitcoin-white transition-colors duration-200"
+            tabIndex={isLoading || countdown > 0 ? -1 : 0}
+          >
+            Forgot Password?
+          </a>
         </div>
 
         {/* Submit Button */}
