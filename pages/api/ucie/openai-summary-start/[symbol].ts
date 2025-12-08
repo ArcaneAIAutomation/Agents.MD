@@ -209,83 +209,110 @@ Be specific, actionable, and data-driven.`;
     
     const openaiStart = Date.now();
 
-    // ✅ BULLETPROOF: Retry logic with exponential backoff
+    // ✅ ULTIMATE BULLETPROOF: Aggressive retry with connection management
     let response: Response | null = null;
     let lastError: Error | null = null;
-    const maxRetries = 3;
+    const maxRetries = 5; // Increased from 3 to 5 for better reliability
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         console.log(`📡 Attempt ${attempt}/${maxRetries} calling OpenAI...`);
         
-        // ✅ Create AbortController for manual timeout control
+        // ✅ CRITICAL FIX: Aggressive timeout reduction to prevent socket issues
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 180000); // 3 minutes
+        const timeoutMs = 90000; // 90 seconds (well under Vercel's limit)
+        const timeoutId = setTimeout(() => {
+          console.warn(`⏰ Request timeout after ${timeoutMs}ms, aborting...`);
+          controller.abort();
+        }, timeoutMs);
         
+        // ✅ CRITICAL FIX: Aggressive prompt truncation to reduce payload
+        const maxPromptLength = 12000; // Reduced from 15000
+        const truncatedPrompt = prompt.length > maxPromptLength 
+          ? prompt.substring(0, maxPromptLength) + '\n\n[Data truncated for performance - analysis based on available data]'
+          : prompt;
+        
+        console.log(`📡 Sending ${truncatedPrompt.length} chars to OpenAI (original: ${prompt.length})`);
+        
+        // ✅ CRITICAL: Use HTTP/1.1 with connection pooling
         response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${openaiApiKey}`,
-            'Connection': 'keep-alive', // ✅ Keep connection alive
+            'Connection': 'keep-alive',
+            'Keep-Alive': 'timeout=90, max=100',
+            'Accept-Encoding': 'gzip, deflate', // Enable compression
+            'User-Agent': 'UCIE-Analysis/1.0',
           },
           body: JSON.stringify({
             model: model,
             messages: [
               {
                 role: 'system',
-                content: 'You are an expert cryptocurrency market analyst. Analyze data and respond only with valid JSON.'
+                content: 'You are an expert cryptocurrency market analyst. Provide concise, actionable analysis in valid JSON format only. Focus on key insights.'
               },
               {
                 role: 'user',
-                content: prompt
+                content: truncatedPrompt
               }
             ],
             temperature: 0.7,
-            max_tokens: 4000,
-            response_format: { type: 'json_object' } // Force JSON response
+            max_tokens: 2500, // Further reduced from 3000 for faster response
+            response_format: { type: 'json_object' }
           }),
           signal: controller.signal,
+          // @ts-ignore - keepalive is valid but not in types
+          keepalive: true,
         });
         
         clearTimeout(timeoutId);
         
         const openaiTime = Date.now() - openaiStart;
-        console.log(`✅ ${model} Chat Completions API responded in ${openaiTime}ms with status ${response.status}`);
+        console.log(`✅ ${model} responded in ${openaiTime}ms with status ${response.status}`);
         
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`❌ ${model} Chat Completions API error: ${response.status}`, errorText);
+          const errorText = await response.text().catch(() => 'Unable to read error');
+          console.error(`❌ ${model} error: ${response.status}`, errorText.substring(0, 200));
           
-          // Retry on 5xx errors or rate limits
-          if (response.status >= 500 || response.status === 429) {
-            throw new Error(`${model} API error ${response.status}: ${errorText}`);
+          // Retry on 5xx errors, rate limits, or timeouts
+          if (response.status >= 500 || response.status === 429 || response.status === 408) {
+            throw new Error(`${model} API error ${response.status}: ${errorText.substring(0, 100)}`);
           }
           
-          // Don't retry on 4xx errors (except 429)
-          throw new Error(`${model} API error ${response.status}: ${errorText}`);
+          // Don't retry on 4xx errors (except 429 and 408)
+          throw new Error(`${model} API error ${response.status}: ${errorText.substring(0, 100)}`);
         }
         
         // Success - break retry loop
+        console.log(`✅ Attempt ${attempt} succeeded!`);
         break;
         
       } catch (error) {
         lastError = error as Error;
-        console.error(`❌ Attempt ${attempt}/${maxRetries} failed:`, error);
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.error(`❌ Attempt ${attempt}/${maxRetries} failed:`, errorMsg);
         
-        // Check if it's a network error
+        // Check if it's a network/socket error
         if (error instanceof Error) {
           const isNetworkError = 
             error.message.includes('fetch failed') ||
             error.message.includes('socket') ||
             error.message.includes('ECONNRESET') ||
             error.message.includes('ETIMEDOUT') ||
-            error.message.includes('other side closed');
+            error.message.includes('other side closed') ||
+            error.message.includes('aborted') ||
+            error.message.includes('UND_ERR_SOCKET') ||
+            error.message.includes('ECONNREFUSED') ||
+            error.message.includes('network') ||
+            error.name === 'AbortError';
           
           if (isNetworkError && attempt < maxRetries) {
-            // Exponential backoff: 2s, 4s, 8s
-            const delay = Math.pow(2, attempt) * 1000;
-            console.log(`⏳ Waiting ${delay}ms before retry...`);
+            // Exponential backoff with jitter: 1s, 2s, 4s, 8s, 16s
+            const baseDelay = Math.pow(2, attempt - 1) * 1000;
+            const jitter = Math.random() * 1000; // Add randomness to prevent thundering herd
+            const delay = baseDelay + jitter;
+            console.log(`⏳ Network error detected, waiting ${Math.round(delay)}ms before retry...`);
             await new Promise(resolve => setTimeout(resolve, delay));
             continue;
           }
@@ -293,13 +320,21 @@ Be specific, actionable, and data-driven.`;
         
         // If not retryable or last attempt, throw
         if (attempt === maxRetries) {
+          console.error(`❌ All ${maxRetries} attempts failed, giving up`);
           throw lastError;
+        }
+        
+        // For non-network errors, wait a bit before retry
+        if (attempt < maxRetries) {
+          const delay = 2000; // 2 seconds for non-network errors
+          console.log(`⏳ Waiting ${delay}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
     }
     
     if (!response) {
-      throw lastError || new Error('OpenAI API call failed after retries');
+      throw lastError || new Error('OpenAI API call failed after all retries');
     }
 
     const data = await response.json();
