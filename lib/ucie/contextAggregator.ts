@@ -40,11 +40,13 @@ export interface ComprehensiveContext {
  * 
  * @param symbol - Token symbol (e.g., 'BTC', 'ETH')
  * @param userId - User ID for data isolation (REQUIRED for security)
+ * @param maxAgeSeconds - Maximum age of cached data in seconds (default: 1020 = 17 minutes)
  * @returns Comprehensive context with all available data
  */
 export async function getComprehensiveContext(
   symbol: string,
-  userId?: string
+  userId?: string,
+  maxAgeSeconds?: number
 ): Promise<ComprehensiveContext> {
   console.log(`📊 Aggregating context for ${symbol} (user: ${userId || 'anonymous'})...`);
   
@@ -62,17 +64,17 @@ export async function getComprehensiveContext(
     research,
     gptAnalysis
   ] = await Promise.all([
-    getCachedAnalysis(symbol, 'market-data', userId),
-    getCachedAnalysis(symbol, 'technical', userId),
-    getCachedAnalysis(symbol, 'sentiment', userId),
-    getCachedAnalysis(symbol, 'news', userId),
-    getCachedAnalysis(symbol, 'on-chain', userId),
-    getCachedAnalysis(symbol, 'risk', userId),
-    getCachedAnalysis(symbol, 'predictions', userId),
-    getCachedAnalysis(symbol, 'defi', userId),
-    getCachedAnalysis(symbol, 'derivatives', userId),
-    getCachedAnalysis(symbol, 'research', userId),
-    getCachedAnalysis(symbol, 'gpt-analysis', userId)
+    getCachedAnalysis(symbol, 'market-data', userId, undefined, maxAgeSeconds),
+    getCachedAnalysis(symbol, 'technical', userId, undefined, maxAgeSeconds),
+    getCachedAnalysis(symbol, 'sentiment', userId, undefined, maxAgeSeconds),
+    getCachedAnalysis(symbol, 'news', userId, undefined, maxAgeSeconds),
+    getCachedAnalysis(symbol, 'on-chain', userId, undefined, maxAgeSeconds),
+    getCachedAnalysis(symbol, 'risk', userId, undefined, maxAgeSeconds),
+    getCachedAnalysis(symbol, 'predictions', userId, undefined, maxAgeSeconds),
+    getCachedAnalysis(symbol, 'defi', userId, undefined, maxAgeSeconds),
+    getCachedAnalysis(symbol, 'derivatives', userId, undefined, maxAgeSeconds),
+    getCachedAnalysis(symbol, 'research', userId, undefined, maxAgeSeconds),
+    getCachedAnalysis(symbol, 'gpt-analysis', userId, undefined, maxAgeSeconds)
   ]);
 
   // Determine which data is available
