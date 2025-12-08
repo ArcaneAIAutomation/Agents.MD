@@ -97,7 +97,8 @@ export function getPool(): Pool {
       },
       max: 20, // Maximum number of clients in the pool
       idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-      connectionTimeoutMillis: 10000, // Timeout after 10 seconds
+      connectionTimeoutMillis: 20000, // ✅ Increased to 20 seconds for async operations
+      statement_timeout: 30000, // ✅ 30 second statement timeout
     });
 
     // Handle pool errors

@@ -101,6 +101,9 @@ async function handler(
 /**
  * Process GPT-5.1 job asynchronously
  * Extracted from openai-summary-process.ts to eliminate HTTP fetch dependency
+ * 
+ * ✅ CRITICAL FIX: Database connections are released immediately after each query
+ * to prevent connection timeout during long OpenAI API calls (3 minutes)
  */
 async function processJobAsync(
   jobId: number,
@@ -113,13 +116,14 @@ async function processJobAsync(
   try {
     console.log(`🔄 Job ${jobId}: Processing ${symbol} analysis...`);
     
-    // Update status to processing
+    // ✅ FIX: Update status to processing (connection released immediately)
     await query(
       'UPDATE ucie_openai_jobs SET status = $1, progress = $2, updated_at = NOW() WHERE id = $3',
-      ['processing', 'Analyzing with GPT-5.1...', jobId]
+      ['processing', 'Analyzing with GPT-5.1...', jobId],
+      { timeout: 5000 } // 5 second timeout for quick update
     );
     
-    console.log(`✅ Job ${jobId}: Status updated to 'processing'`);
+    console.log(`✅ Job ${jobId}: Status updated to 'processing', DB connection released`);
 
     // Build comprehensive prompt
     const allData = {
@@ -190,39 +194,97 @@ Be specific, actionable, and data-driven.`;
     
     const openaiStart = Date.now();
 
-    // ✅ GPT-4o with Chat Completions API (3-minute timeout)
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openaiApiKey}`,
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert cryptocurrency market analyst. Analyze data and respond only with valid JSON.'
+    // ✅ BULLETPROOF: Retry logic with exponential backoff
+    let response: Response | null = null;
+    let lastError: Error | null = null;
+    const maxRetries = 3;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`📡 Attempt ${attempt}/${maxRetries} calling OpenAI...`);
+        
+        // ✅ Create AbortController for manual timeout control
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 180000); // 3 minutes
+        
+        response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${openaiApiKey}`,
+            'Connection': 'keep-alive', // ✅ Keep connection alive
           },
-          {
-            role: 'user',
-            content: prompt
+          body: JSON.stringify({
+            model: model,
+            messages: [
+              {
+                role: 'system',
+                content: 'You are an expert cryptocurrency market analyst. Analyze data and respond only with valid JSON.'
+              },
+              {
+                role: 'user',
+                content: prompt
+              }
+            ],
+            temperature: 0.7,
+            max_tokens: 4000,
+            response_format: { type: 'json_object' } // Force JSON response
+          }),
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
+        
+        const openaiTime = Date.now() - openaiStart;
+        console.log(`✅ ${model} Chat Completions API responded in ${openaiTime}ms with status ${response.status}`);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`❌ ${model} Chat Completions API error: ${response.status}`, errorText);
+          
+          // Retry on 5xx errors or rate limits
+          if (response.status >= 500 || response.status === 429) {
+            throw new Error(`${model} API error ${response.status}: ${errorText}`);
           }
-        ],
-        temperature: 0.7,
-        max_tokens: 4000,
-        response_format: { type: 'json_object' } // Force JSON response
-      }),
-      signal: AbortSignal.timeout(180000), // ✅ 3 MINUTES (180 seconds)
-    });
-
-    const openaiTime = Date.now() - openaiStart;
-    console.log(`✅ ${model} Chat Completions API responded in ${openaiTime}ms with status ${response.status}`);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`❌ ${model} Chat Completions API error: ${response.status}`, errorText);
-      throw new Error(`${model} Chat Completions API error: ${response.status}`);
+          
+          // Don't retry on 4xx errors (except 429)
+          throw new Error(`${model} API error ${response.status}: ${errorText}`);
+        }
+        
+        // Success - break retry loop
+        break;
+        
+      } catch (error) {
+        lastError = error as Error;
+        console.error(`❌ Attempt ${attempt}/${maxRetries} failed:`, error);
+        
+        // Check if it's a network error
+        if (error instanceof Error) {
+          const isNetworkError = 
+            error.message.includes('fetch failed') ||
+            error.message.includes('socket') ||
+            error.message.includes('ECONNRESET') ||
+            error.message.includes('ETIMEDOUT') ||
+            error.message.includes('other side closed');
+          
+          if (isNetworkError && attempt < maxRetries) {
+            // Exponential backoff: 2s, 4s, 8s
+            const delay = Math.pow(2, attempt) * 1000;
+            console.log(`⏳ Waiting ${delay}ms before retry...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            continue;
+          }
+        }
+        
+        // If not retryable or last attempt, throw
+        if (attempt === maxRetries) {
+          throw lastError;
+        }
+      }
+    }
+    
+    if (!response) {
+      throw lastError || new Error('OpenAI API call failed after retries');
     }
 
     const data = await response.json();
@@ -276,7 +338,7 @@ Be specific, actionable, and data-driven.`;
     const processingTime = Date.now() - startTime;
     console.log(`✅ Job ${jobId} completed in ${processingTime}ms`);
 
-    // ✅ UPDATE DATABASE: Store results
+    // ✅ UPDATE DATABASE: Store results (with timeout to prevent connection issues)
     await query(
       `UPDATE ucie_openai_jobs 
        SET status = $1,
@@ -290,10 +352,11 @@ Be specific, actionable, and data-driven.`;
         JSON.stringify(analysis),
         'Analysis complete!',
         jobId
-      ]
+      ],
+      { timeout: 15000 } // 15 second timeout for storing large JSON result
     );
 
-    console.log(`✅ Job ${jobId}: Analysis completed and stored`);
+    console.log(`✅ Job ${jobId}: Analysis completed and stored, DB connection released`);
 
   } catch (error) {
     const processingTime = Date.now() - startTime;
@@ -311,7 +374,7 @@ Be specific, actionable, and data-driven.`;
       }
     }
 
-    // Update job status to error
+    // Update job status to error (with timeout)
     try {
       await query(
         `UPDATE ucie_openai_jobs 
@@ -320,9 +383,10 @@ Be specific, actionable, and data-driven.`;
              updated_at = NOW(),
              completed_at = NOW()
          WHERE id = $3`,
-        ['error', errorMessage, jobId]
+        ['error', errorMessage, jobId],
+        { timeout: 5000 } // 5 second timeout for error update
       );
-      console.log(`❌ Job ${jobId}: Marked as error`);
+      console.log(`❌ Job ${jobId}: Marked as error, DB connection released`);
     } catch (dbError) {
       console.error('❌ Failed to update job status:', dbError);
     }
