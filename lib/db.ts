@@ -95,10 +95,12 @@ export function getPool(): Pool {
       ssl: {
         rejectUnauthorized: false
       },
-      max: 20, // Maximum number of clients in the pool
-      idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-      connectionTimeoutMillis: 20000, // ✅ Increased to 20 seconds for async operations
-      statement_timeout: 30000, // ✅ 30 second statement timeout
+      max: 30, // ✅ Increased to 30 connections for better concurrency
+      min: 5, // ✅ Keep 5 connections always ready
+      idleTimeoutMillis: 60000, // ✅ Increased to 60 seconds
+      connectionTimeoutMillis: 30000, // ✅ Increased to 30 seconds
+      statement_timeout: 45000, // ✅ Increased to 45 seconds
+      query_timeout: 45000, // ✅ Added query timeout
     });
 
     // Handle pool errors

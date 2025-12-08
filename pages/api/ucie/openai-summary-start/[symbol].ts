@@ -116,14 +116,29 @@ async function processJobAsync(
   try {
     console.log(`🔄 Job ${jobId}: Processing ${symbol} analysis...`);
     
-    // ✅ FIX: Update status to processing (connection released immediately)
-    await query(
-      'UPDATE ucie_openai_jobs SET status = $1, progress = $2, updated_at = NOW() WHERE id = $3',
-      ['processing', 'Analyzing with GPT-5.1...', jobId],
-      { timeout: 5000 } // 5 second timeout for quick update
-    );
+    // ✅ FIX: Update status to processing with retry logic
+    let statusUpdated = false;
+    for (let dbAttempt = 1; dbAttempt <= 3; dbAttempt++) {
+      try {
+        await query(
+          'UPDATE ucie_openai_jobs SET status = $1, progress = $2, updated_at = NOW() WHERE id = $3',
+          ['processing', 'Analyzing with GPT-5.1...', jobId],
+          { timeout: 5000, retries: 1 } // 5 second timeout, 1 retry
+        );
+        console.log(`✅ Job ${jobId}: Status updated to 'processing', DB connection released`);
+        statusUpdated = true;
+        break;
+      } catch (dbError) {
+        console.error(`❌ DB update attempt ${dbAttempt}/3 failed:`, dbError);
+        if (dbAttempt < 3) {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s before retry
+        }
+      }
+    }
     
-    console.log(`✅ Job ${jobId}: Status updated to 'processing', DB connection released`);
+    if (!statusUpdated) {
+      console.warn(`⚠️ Job ${jobId}: Failed to update status, continuing anyway...`);
+    }
 
     // Build comprehensive prompt
     const allData = {
@@ -338,25 +353,40 @@ Be specific, actionable, and data-driven.`;
     const processingTime = Date.now() - startTime;
     console.log(`✅ Job ${jobId} completed in ${processingTime}ms`);
 
-    // ✅ UPDATE DATABASE: Store results (with timeout to prevent connection issues)
-    await query(
-      `UPDATE ucie_openai_jobs 
-       SET status = $1,
-           result = $2,
-           progress = $3,
-           updated_at = NOW(),
-           completed_at = NOW()
-       WHERE id = $4`,
-      [
-        'completed',
-        JSON.stringify(analysis),
-        'Analysis complete!',
-        jobId
-      ],
-      { timeout: 15000 } // 15 second timeout for storing large JSON result
-    );
-
-    console.log(`✅ Job ${jobId}: Analysis completed and stored, DB connection released`);
+    // ✅ UPDATE DATABASE: Store results with retry logic
+    let resultsStored = false;
+    for (let dbAttempt = 1; dbAttempt <= 3; dbAttempt++) {
+      try {
+        await query(
+          `UPDATE ucie_openai_jobs 
+           SET status = $1,
+               result = $2,
+               progress = $3,
+               updated_at = NOW(),
+               completed_at = NOW()
+           WHERE id = $4`,
+          [
+            'completed',
+            JSON.stringify(analysis),
+            'Analysis complete!',
+            jobId
+          ],
+          { timeout: 20000, retries: 1 } // 20 second timeout for large JSON, 1 retry
+        );
+        console.log(`✅ Job ${jobId}: Analysis completed and stored, DB connection released`);
+        resultsStored = true;
+        break;
+      } catch (dbError) {
+        console.error(`❌ DB store attempt ${dbAttempt}/3 failed:`, dbError);
+        if (dbAttempt < 3) {
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s before retry
+        }
+      }
+    }
+    
+    if (!resultsStored) {
+      throw new Error('Failed to store analysis results in database after 3 attempts');
+    }
 
   } catch (error) {
     const processingTime = Date.now() - startTime;
@@ -374,21 +404,29 @@ Be specific, actionable, and data-driven.`;
       }
     }
 
-    // Update job status to error (with timeout)
-    try {
-      await query(
-        `UPDATE ucie_openai_jobs 
-         SET status = $1, 
-             error = $2,
-             updated_at = NOW(),
-             completed_at = NOW()
-         WHERE id = $3`,
-        ['error', errorMessage, jobId],
-        { timeout: 5000 } // 5 second timeout for error update
-      );
-      console.log(`❌ Job ${jobId}: Marked as error, DB connection released`);
-    } catch (dbError) {
-      console.error('❌ Failed to update job status:', dbError);
+    // Update job status to error with retry logic
+    for (let dbAttempt = 1; dbAttempt <= 3; dbAttempt++) {
+      try {
+        await query(
+          `UPDATE ucie_openai_jobs 
+           SET status = $1, 
+               error = $2,
+               updated_at = NOW(),
+               completed_at = NOW()
+           WHERE id = $3`,
+          ['error', errorMessage, jobId],
+          { timeout: 5000, retries: 1 } // 5 second timeout, 1 retry
+        );
+        console.log(`❌ Job ${jobId}: Marked as error, DB connection released`);
+        break;
+      } catch (dbError) {
+        console.error(`❌ DB error update attempt ${dbAttempt}/3 failed:`, dbError);
+        if (dbAttempt < 3) {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s before retry
+        } else {
+          console.error(`❌ Failed to update error status after 3 attempts`);
+        }
+      }
     }
   }
 }
