@@ -111,7 +111,7 @@ export default function LunarCrushDashboard() {
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-bitcoin-orange">•</span>
-                    <span><strong className="text-bitcoin-white">Viral Content Tracking:</strong> Automatic detection of posts with >10M interactions</span>
+                    <span><strong className="text-bitcoin-white">Viral Content Tracking:</strong> Automatic detection of posts with &gt;10M interactions</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-bitcoin-orange">•</span>
