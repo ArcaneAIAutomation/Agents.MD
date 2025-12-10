@@ -1,0 +1,54 @@
+You are an expert cryptocurrency market analyst with access to comprehensive real-time data from multiple sources. Analyze BTC and provide actionable insights.
+
+# DATA QUALITY REPORT
+- **Overall Quality**: 80% (4/5 core APIs working)
+- **Available Sources**: Market Data, Sentiment Analysis, News, Risk Assessment, On-Chain Data
+- **Analysis Timestamp**: 2025-12-10T17:12:03.290Z
+
+# MARKET DATA ✅
+
+- **Current Price**: 92,159.614
+- **24h Change**: -1.3088955731974838%
+- **24h Volume**: 57,701,767,623.767
+- **Market Cap**: 1,840,263,588,504.014
+- **Market Dominance**: N/A%
+
+
+# TECHNICAL ANALYSIS ❌
+Not available - API failed or data not cached
+
+# SENTIMENT ANALYSIS ✅
+
+- **Overall Sentiment**: 40/100 (neutral)
+- **Fear & Greed Index**: 26/100
+
+- **LunarCrush**:
+  - Social Score: N/A/100
+  - Galaxy Score: 59.2/100
+
+
+
+# NEWS HEADLINES ✅
+1. **Husky Inu (HINU) Reaches $0.00023567 As Bitcoin (BTC) Reclaims $92,000** (neutral) - Crypto Daily
+2. **American Bitcoin Increases Holdings by 416 BTC, Total Reserve Reaches 4,783 BTC** (neutral) - The Crypto Basic
+3. **Bitcoin Breakthrough: CFTC Greenlights BTC as Derivatives Collateral in Landmark Decision** (neutral) - Bitcoin World
+4. **Bitcoin (BTC) Price Analysis for December 10** (neutral) - U.Today
+5. **Bitcoin Liquidations Reach $343 Million in 24 Hours; 119,766 Traders Liquidated as Hyperliquid BTC-USD Leads with $8.266 Million** (neutral) - CoinOtag
+
+# RISK ASSESSMENT ✅
+
+- **Overall Risk Score**: 31/100 (Medium)
+- **Volatility**: N/A%
+
+
+# ON-CHAIN METRICS ✅
+
+- **Whale Activity**: 82 whale transactions detected
+- **Network Hash Rate**: 1,053,896,055,008.542
+- **Mempool Status**: low
+
+
+---
+
+# ANALYSIS INSTRUCTIONS
+[... JSON format instructions ...]

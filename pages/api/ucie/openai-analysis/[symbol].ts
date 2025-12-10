@@ -129,13 +129,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       } : null
     });
     
-    // ✅ FIXED: Calculate which APIs are actually working by checking for real data
+    // ✅ FIXED: Calculate which APIs are actually working by checking for real data with CORRECT field paths
     const availableAPIs = [];
     
     // Check each data source for actual content (not just existence)
-    if (marketDataRaw && typeof marketDataRaw === 'object' && Object.keys(marketDataRaw).length > 0 && marketDataRaw.price) {
+    if (marketDataRaw && typeof marketDataRaw === 'object' && Object.keys(marketDataRaw).length > 0 && marketDataRaw.priceAggregation?.averagePrice) {
       availableAPIs.push('Market Data');
-      console.log(`   ✅ Market Data available: price=${marketDataRaw.price}`);
+      console.log(`   ✅ Market Data available: price=${marketDataRaw.priceAggregation.averagePrice}`);
     }
     if (technicalRaw && typeof technicalRaw === 'object' && Object.keys(technicalRaw).length > 0 && technicalRaw.rsi) {
       availableAPIs.push('Technical Analysis');
@@ -149,9 +149,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       availableAPIs.push('News');
       console.log(`   ✅ News available: ${newsRaw.articles.length} articles`);
     }
-    if (riskRaw && typeof riskRaw === 'object' && Object.keys(riskRaw).length > 0 && riskRaw.overallScore !== undefined) {
+    if (riskRaw && typeof riskRaw === 'object' && Object.keys(riskRaw).length > 0 && riskRaw.riskScore?.overall !== undefined) {
       availableAPIs.push('Risk Assessment');
-      console.log(`   ✅ Risk available: score=${riskRaw.overallScore}`);
+      console.log(`   ✅ Risk available: score=${riskRaw.riskScore.overall}`);
     }
     
     // On-Chain is optional (only for BTC/ETH)
@@ -183,13 +183,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return String(value);
     };
     
+    // ✅ CRITICAL FIX: Extract from ACTUAL stored structure
     const marketSummary = marketDataRaw ? {
-      price: marketDataRaw.price,
-      change24h: marketDataRaw.change24h,
-      volume24h: marketDataRaw.volume24h,
-      marketCap: marketDataRaw.marketCap,
-      dominance: marketDataRaw.dominance,
-      source: marketDataRaw.source
+      price: marketDataRaw.priceAggregation?.averagePrice, // ✅ FIXED: Use priceAggregation.averagePrice
+      change24h: marketDataRaw.priceAggregation?.averageChange24h, // ✅ FIXED: Use priceAggregation.averageChange24h
+      volume24h: marketDataRaw.priceAggregation?.totalVolume24h, // ✅ FIXED: Use priceAggregation.totalVolume24h
+      marketCap: marketDataRaw.marketData?.marketCap, // ✅ FIXED: Use marketData.marketCap (nested)
+      dominance: marketDataRaw.marketData?.dominance, // ✅ FIXED: Use marketData.dominance (nested)
+      source: marketDataRaw.sources?.join(', ') || 'Multiple' // ✅ FIXED: sources is an array
     } : null;
     
     // ✅ LOG MARKET SUMMARY to verify no [Object object]
@@ -227,12 +228,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         publishedAt: article.publishedAt
       })) : null;
     
+    // ✅ CRITICAL FIX: Extract from ACTUAL stored structure
     const riskSummary = riskRaw ? {
-      overallScore: riskRaw.overallScore,
-      riskLevel: riskRaw.riskLevel,
-      volatility: riskRaw.volatility,
-      maxDrawdown: riskRaw.maxDrawdown,
-      correlations: riskRaw.correlations
+      overallScore: riskRaw.riskScore?.overall, // ✅ FIXED: Use riskScore.overall (not overallScore)
+      riskLevel: riskRaw.riskScore?.category, // ✅ FIXED: Use riskScore.category (not riskLevel)
+      volatility: riskRaw.volatilityMetrics, // ✅ FIXED: Use volatilityMetrics object
+      maxDrawdown: riskRaw.maxDrawdownMetrics, // ✅ FIXED: Use maxDrawdownMetrics object
+      correlations: riskRaw.correlationMetrics // ✅ FIXED: Use correlationMetrics object
     } : null;
     
     const onChainSummary = onChainRaw ? {
@@ -294,8 +296,8 @@ ${newsSummary ? newsSummary.map((article: any, i: number) =>
 # RISK ASSESSMENT ${riskSummary ? '✅' : '❌'}
 ${riskSummary ? `
 - **Overall Risk Score**: ${riskSummary.overallScore || 'N/A'}/100 (${riskSummary.riskLevel || 'N/A'})
-- **30-Day Volatility**: ${riskSummary.volatility?.std30d || 'N/A'}%
-- **Max Drawdown**: ${riskSummary.maxDrawdown?.historical || 'N/A'}%
+- **30-Day Volatility**: ${riskSummary.volatility?.annualized30d || 'N/A'}%
+- **Max Drawdown**: ${riskSummary.maxDrawdown?.maxDrawdown || 'N/A'}%
 - **BTC Correlation**: ${riskSummary.correlations?.btc || 'N/A'}
 - **ETH Correlation**: ${riskSummary.correlations?.eth || 'N/A'}
 ` : 'Not available - API failed or data not cached'}

@@ -32,6 +32,10 @@
     "pages/api/ucie/openai-summary-poll/**/*.ts": {
       "maxDuration": 10
     },
+    "pages/api/lunarcrush/**/*.ts": {
+      "maxDuration": 30,
+      "memory": 1024
+    },
     "pages/api/**/*.ts": {
       "maxDuration": 60
     }
