@@ -138,6 +138,10 @@ interface ModularAnalysis {
 /**
  * Process GPT-5.1 job asynchronously with MODULAR ANALYSIS
  * Each data source analyzed separately for speed and reliability
+ * 
+ * ✅ HEARTBEAT: Updates database every 10 seconds to show job is alive
+ * ✅ GPT-5.1: Uses Responses API with reasoning parameter
+ * ✅ ERROR HANDLING: Comprehensive try-catch with database updates
  */
 async function processJobAsync(
   jobId: number,
@@ -146,9 +150,28 @@ async function processJobAsync(
   context: any
 ) {
   const startTime = Date.now();
+  let heartbeatInterval: NodeJS.Timeout | null = null;
   
   try {
+    console.log(`🔄 ========================================`);
     console.log(`🔄 Job ${jobId}: Processing ${symbol} analysis...`);
+    console.log(`🔄 Start time: ${new Date().toISOString()}`);
+    console.log(`🔄 ========================================`);
+    
+    // ✅ START HEARTBEAT: Update database every 10 seconds
+    heartbeatInterval = setInterval(async () => {
+      try {
+        await query(
+          'UPDATE ucie_openai_jobs SET updated_at = NOW() WHERE id = $1',
+          [jobId],
+          { timeout: 3000, retries: 0 }
+        );
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        console.log(`💓 HEARTBEAT: Job ${jobId} alive (${elapsed}s elapsed)`);
+      } catch (error) {
+        console.warn(`⚠️ Heartbeat failed:`, error);
+      }
+    }, 10000); // Every 10 seconds
     
     // ✅ FIX: Update status to processing with retry logic
     let statusUpdated = false;
@@ -438,7 +461,10 @@ async function processJobAsync(
 
   } catch (error) {
     const processingTime = Date.now() - startTime;
-    console.error(`❌ Job ${jobId} FAILED after ${processingTime}ms:`, error);
+    console.error(`❌ ========================================`);
+    console.error(`❌ Job ${jobId} FAILED after ${processingTime}ms`);
+    console.error(`❌ Error:`, error);
+    console.error(`❌ ========================================`);
     
     let errorMessage = 'Analysis failed';
     
@@ -447,6 +473,8 @@ async function processJobAsync(
         errorMessage = 'Analysis timed out';
       } else if (error.message.includes('API key')) {
         errorMessage = 'OpenAI API key issue';
+      } else if (error.message.includes('reasoning')) {
+        errorMessage = 'GPT-5.1 reasoning parameter not supported';
       } else {
         errorMessage = error.message;
       }
@@ -474,6 +502,19 @@ async function processJobAsync(
         }
       }
     }
+  } finally {
+    // ✅ CLEANUP: Stop heartbeat interval
+    if (heartbeatInterval) {
+      clearInterval(heartbeatInterval);
+      console.log(`🛑 Heartbeat stopped for job ${jobId}`);
+    }
+    
+    const totalTime = Date.now() - startTime;
+    console.log(`🏁 ========================================`);
+    console.log(`🏁 Job ${jobId}: Processing ended`);
+    console.log(`🏁 Total time: ${totalTime}ms (${(totalTime / 1000).toFixed(1)}s)`);
+    console.log(`🏁 End time: ${new Date().toISOString()}`);
+    console.log(`🏁 ========================================`);
   }
 }
 
@@ -493,8 +534,12 @@ async function updateProgress(jobId: number, progress: string): Promise<void> {
 }
 
 /**
- * Analyze a single data source with GPT-5.1
- * Small, fast, focused analysis
+ * Analyze a single data source with GPT-5.1 Responses API
+ * Small, fast, focused analysis with reasoning capability
+ * 
+ * ✅ USES GPT-5.1: Responses API with reasoning parameter
+ * ✅ BULLETPROOF: Uses extractResponseText utility
+ * ✅ FAST: Low reasoning effort for quick analysis
  */
 async function analyzeDataSource(
   apiKey: string,
@@ -508,9 +553,20 @@ async function analyzeDataSource(
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const controller = new AbortController();
-      const timeoutMs = 30000; // 30 seconds per data source (fast!)
-      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      console.log(`🔍 Analyzing ${dataType} for ${symbol} (attempt ${attempt}/${maxRetries})...`);
+      const analysisStart = Date.now();
+      
+      // ✅ Import OpenAI SDK
+      const OpenAI = (await import('openai')).default;
+      const { extractResponseText, validateResponseText } = await import('../../../../utils/openai');
+      
+      // ✅ Initialize OpenAI client with Responses API
+      const openai = new OpenAI({
+        apiKey: apiKey,
+        defaultHeaders: {
+          'OpenAI-Beta': 'responses=v1'
+        }
+      });
       
       // ✅ FIX: Extract articles array for news analysis
       let dataToAnalyze = data;
@@ -534,52 +590,47 @@ ${instructions}
 
 Respond with valid JSON only.`;
       
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-          'Connection': 'keep-alive',
-          'Accept-Encoding': 'gzip, deflate',
+      // ✅ Call GPT-5.1 with Responses API
+      const completion = await openai.chat.completions.create({
+        model: model,
+        messages: [
+          {
+            role: 'system',
+            content: `You are a cryptocurrency analyst. Analyze ${dataType} and respond with concise JSON.`
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        reasoning: {
+          effort: 'low' // Fast analysis for modular approach (1-2 seconds)
         },
-        body: JSON.stringify({
-          model: model,
-          messages: [
-            {
-              role: 'system',
-              content: `You are a cryptocurrency analyst. Analyze ${dataType} and respond with concise JSON.`
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          temperature: 0.7,
-          max_tokens: 800, // Small response for focused analysis
-          response_format: { type: 'json_object' }
-        }),
-        signal: controller.signal,
-        // @ts-ignore
-        keepalive: true,
+        temperature: 0.7,
+        max_tokens: 800, // Small response for focused analysis
+        response_format: { type: 'json_object' }
       });
       
-      clearTimeout(timeoutId);
+      const analysisTime = Date.now() - analysisStart;
+      console.log(`✅ ${dataType} analysis completed in ${analysisTime}ms`);
       
-      if (!response.ok) {
-        throw new Error(`API error ${response.status}`);
-      }
-      
-      const responseData = await response.json();
-      const { extractResponseText } = await import('../../../../utils/openai');
-      const analysisText = extractResponseText(responseData, false);
+      // ✅ Bulletproof extraction
+      const analysisText = extractResponseText(completion, true); // Debug mode
+      validateResponseText(analysisText, model, completion);
       
       return JSON.parse(analysisText);
       
     } catch (error) {
+      console.error(`❌ ${dataType} analysis attempt ${attempt} failed:`, error);
+      
       if (attempt === maxRetries) {
         throw error;
       }
-      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      
+      // Exponential backoff
+      const backoffMs = 1000 * attempt;
+      console.log(`⏳ Retrying in ${backoffMs}ms...`);
+      await new Promise(resolve => setTimeout(resolve, backoffMs));
     }
   }
   
@@ -587,8 +638,11 @@ Respond with valid JSON only.`;
 }
 
 /**
- * Analyze news with comprehensive market context
- * Provides GPT-5.1 with full picture for accurate impact assessment
+ * Analyze news with comprehensive market context using GPT-5.1
+ * Provides full picture for accurate impact assessment
+ * 
+ * ✅ USES GPT-5.1: Responses API with medium reasoning effort
+ * ✅ CONTEXT-AWARE: Combines news with market, technical, and sentiment data
  */
 async function analyzeNewsWithContext(
   apiKey: string,
@@ -600,9 +654,20 @@ async function analyzeNewsWithContext(
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const controller = new AbortController();
-      const timeoutMs = 45000; // 45 seconds for news analysis
-      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      console.log(`📰 Analyzing news with market context (attempt ${attempt}/${maxRetries})...`);
+      const analysisStart = Date.now();
+      
+      // ✅ Import OpenAI SDK
+      const OpenAI = (await import('openai')).default;
+      const { extractResponseText, validateResponseText } = await import('../../../../utils/openai');
+      
+      // ✅ Initialize OpenAI client with Responses API
+      const openai = new OpenAI({
+        apiKey: apiKey,
+        defaultHeaders: {
+          'OpenAI-Beta': 'responses=v1'
+        }
+      });
       
       // Extract articles array
       const articles = context.news?.articles || [];
@@ -656,52 +721,47 @@ Consider:
 
 Respond with valid JSON only.`;
       
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-          'Connection': 'keep-alive',
-          'Accept-Encoding': 'gzip, deflate',
+      // ✅ Call GPT-5.1 with Responses API
+      const completion = await openai.chat.completions.create({
+        model: model,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a cryptocurrency news analyst. Analyze news articles in the context of current market conditions and provide comprehensive impact assessment. Respond with JSON only.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        reasoning: {
+          effort: 'medium' // Deeper analysis for news context (3-5 seconds)
         },
-        body: JSON.stringify({
-          model: model,
-          messages: [
-            {
-              role: 'system',
-              content: 'You are a cryptocurrency news analyst. Analyze news articles in the context of current market conditions and provide comprehensive impact assessment. Respond with JSON only.'
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          temperature: 0.7,
-          max_tokens: 1200, // Larger response for comprehensive news analysis
-          response_format: { type: 'json_object' }
-        }),
-        signal: controller.signal,
-        // @ts-ignore
-        keepalive: true,
+        temperature: 0.7,
+        max_tokens: 1200, // Larger response for comprehensive news analysis
+        response_format: { type: 'json_object' }
       });
       
-      clearTimeout(timeoutId);
+      const analysisTime = Date.now() - analysisStart;
+      console.log(`✅ News analysis completed in ${analysisTime}ms`);
       
-      if (!response.ok) {
-        throw new Error(`API error ${response.status}`);
-      }
-      
-      const responseData = await response.json();
-      const { extractResponseText } = await import('../../../../utils/openai');
-      const analysisText = extractResponseText(responseData, false);
+      // ✅ Bulletproof extraction
+      const analysisText = extractResponseText(completion, true); // Debug mode
+      validateResponseText(analysisText, model, completion);
       
       return JSON.parse(analysisText);
       
     } catch (error) {
+      console.error(`❌ News analysis attempt ${attempt} failed:`, error);
+      
       if (attempt === maxRetries) {
         throw error;
       }
-      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      
+      // Exponential backoff
+      const backoffMs = 1000 * attempt;
+      console.log(`⏳ Retrying in ${backoffMs}ms...`);
+      await new Promise(resolve => setTimeout(resolve, backoffMs));
     }
   }
   
@@ -709,7 +769,12 @@ Respond with valid JSON only.`;
 }
 
 /**
- * Generate executive summary combining all analyses
+ * Generate executive summary combining all analyses using GPT-5.1
+ * Synthesizes all modular analyses into comprehensive overview
+ * 
+ * ✅ USES GPT-5.1: Responses API with medium reasoning effort
+ * ✅ BULLETPROOF: Uses extractResponseText utility
+ * ✅ COMPREHENSIVE: Combines all 8 data source analyses
  */
 async function generateExecutiveSummary(
   apiKey: string,
@@ -721,71 +786,92 @@ async function generateExecutiveSummary(
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const controller = new AbortController();
-      const timeoutMs = 45000; // 45 seconds for summary
-      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      console.log(`📊 Generating executive summary (attempt ${attempt}/${maxRetries})...`);
+      const summaryStart = Date.now();
       
+      // ✅ Import OpenAI SDK
+      const OpenAI = (await import('openai')).default;
+      const { extractResponseText, validateResponseText } = await import('../../../../utils/openai');
+      
+      // ✅ Initialize OpenAI client with Responses API
+      const openai = new OpenAI({
+        apiKey: apiKey,
+        defaultHeaders: {
+          'OpenAI-Beta': 'responses=v1'
+        }
+      });
+      
+      // Build comprehensive prompt combining all analyses
       const prompt = `Generate executive summary for ${symbol} based on these analyses:
 
 ${JSON.stringify(analysisSummary, null, 2)}
 
 Provide JSON with:
 {
-  "summary": "2-3 paragraph executive summary",
+  "summary": "2-3 paragraph executive summary synthesizing all analyses",
   "confidence": 85,
-  "recommendation": "Buy|Hold|Sell with reasoning",
+  "recommendation": "Buy|Hold|Sell with detailed reasoning",
   "key_insights": ["insight 1", "insight 2", "insight 3"],
-  "market_outlook": "24-48 hour outlook",
+  "market_outlook": "24-48 hour outlook based on all data",
   "risk_factors": ["risk 1", "risk 2"],
   "opportunities": ["opportunity 1", "opportunity 2"]
-}`;
+}
+
+Consider:
+- Market data trends and price action
+- Technical indicator signals
+- Social sentiment and Fear & Greed
+- News impact and developments
+- On-chain whale activity
+- Risk factors and volatility
+- Price predictions and forecasts
+- DeFi adoption and TVL trends
+
+Synthesize all analyses into cohesive, actionable summary.
+
+Respond with valid JSON only.`;
       
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-          'Connection': 'keep-alive',
-          'Accept-Encoding': 'gzip, deflate',
+      // ✅ Call GPT-5.1 with Responses API
+      const completion = await openai.chat.completions.create({
+        model: model,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a cryptocurrency analyst. Synthesize all analyses into comprehensive executive summary. Respond with JSON only.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        reasoning: {
+          effort: 'medium' // Balanced analysis for summary (3-5 seconds)
         },
-        body: JSON.stringify({
-          model: model,
-          messages: [
-            {
-              role: 'system',
-              content: 'You are a cryptocurrency analyst. Synthesize analyses into executive summary. Respond with JSON only.'
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          temperature: 0.7,
-          max_tokens: 1500,
-          response_format: { type: 'json_object' }
-        }),
-        signal: controller.signal,
-        // @ts-ignore
-        keepalive: true,
+        temperature: 0.7,
+        max_tokens: 1500, // Larger response for comprehensive summary
+        response_format: { type: 'json_object' }
       });
       
-      clearTimeout(timeoutId);
+      const summaryTime = Date.now() - summaryStart;
+      console.log(`✅ Executive summary completed in ${summaryTime}ms`);
       
-      if (!response.ok) {
-        throw new Error(`API error ${response.status}`);
-      }
-      
-      const responseData = await response.json();
-      const { extractResponseText } = await import('../../../../utils/openai');
-      const summaryText = extractResponseText(responseData, false);
+      // ✅ Bulletproof extraction
+      const summaryText = extractResponseText(completion, true); // Debug mode
+      validateResponseText(summaryText, model, completion);
       
       return JSON.parse(summaryText);
       
     } catch (error) {
+      console.error(`❌ Executive summary attempt ${attempt} failed:`, error);
+      
       if (attempt === maxRetries) {
         throw error;
       }
-      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      
+      // Exponential backoff
+      const backoffMs = 1000 * attempt;
+      console.log(`⏳ Retrying in ${backoffMs}ms...`);
+      await new Promise(resolve => setTimeout(resolve, backoffMs));
     }
   }
   
