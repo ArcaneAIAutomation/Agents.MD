@@ -26,7 +26,6 @@ export interface ComprehensiveContext {
   onChain: any | null;
   risk: any | null;
   predictions: any | null;
-  defi: any | null;
   derivatives: any | null;
   research: any | null;
   gptAnalysis: any | null; // ✅ NEW: GPT-5.1 analysis
@@ -59,7 +58,6 @@ export async function getComprehensiveContext(
     onChain,
     risk,
     predictions,
-    defi,
     derivatives,
     research,
     gptAnalysis
@@ -71,7 +69,6 @@ export async function getComprehensiveContext(
     getCachedAnalysis(symbol, 'on-chain', userId, undefined, maxAgeSeconds),
     getCachedAnalysis(symbol, 'risk', userId, undefined, maxAgeSeconds),
     getCachedAnalysis(symbol, 'predictions', userId, undefined, maxAgeSeconds),
-    getCachedAnalysis(symbol, 'defi', userId, undefined, maxAgeSeconds),
     getCachedAnalysis(symbol, 'derivatives', userId, undefined, maxAgeSeconds),
     getCachedAnalysis(symbol, 'research', userId, undefined, maxAgeSeconds),
     getCachedAnalysis(symbol, 'gpt-analysis', userId, undefined, maxAgeSeconds)
@@ -86,15 +83,14 @@ export async function getComprehensiveContext(
   if (onChain) availableData.push('on-chain');
   if (risk) availableData.push('risk');
   if (predictions) availableData.push('predictions');
-  if (defi) availableData.push('defi');
   if (gptAnalysis) availableData.push('gpt-analysis');
   if (derivatives) availableData.push('derivatives');
   if (research) availableData.push('research');
 
   // Calculate overall data quality (percentage of available data)
-  const dataQuality = (availableData.length / 10) * 100;
+  const dataQuality = (availableData.length / 9) * 100;
 
-  console.log(`✅ Context aggregated: ${dataQuality.toFixed(0)}% complete (${availableData.length}/10 sources)`);
+  console.log(`✅ Context aggregated: ${dataQuality.toFixed(0)}% complete (${availableData.length}/9 sources)`);
   console.log(`📊 Available: ${availableData.join(', ')}`);
 
   return {
@@ -105,7 +101,6 @@ export async function getComprehensiveContext(
     onChain,
     risk,
     predictions,
-    defi,
     derivatives,
     research,
     gptAnalysis,
@@ -256,21 +251,6 @@ export function formatContextForAI(context: ComprehensiveContext): string {
     if (context.predictions.scenarios) {
       prompt += `- **Bull Case**: $${context.predictions.scenarios.bullCase?.target || 'N/A'}\n`;
       prompt += `- **Bear Case**: $${context.predictions.scenarios.bearCase?.target || 'N/A'}\n`;
-    }
-    prompt += `\n`;
-  }
-
-  // DeFi Metrics Section
-  if (context.defi) {
-    prompt += `## 🏦 DeFi Metrics\n`;
-    if (context.defi.tvl !== undefined) {
-      prompt += `- **Total Value Locked**: $${context.defi.tvl?.toLocaleString() || 'N/A'}\n`;
-    }
-    if (context.defi.protocolRevenue !== undefined) {
-      prompt += `- **Protocol Revenue**: $${context.defi.protocolRevenue?.toLocaleString() || 'N/A'}\n`;
-    }
-    if (context.defi.utilityScore !== undefined) {
-      prompt += `- **Token Utility Score**: ${context.defi.utilityScore}/100\n`;
     }
     prompt += `\n`;
   }
