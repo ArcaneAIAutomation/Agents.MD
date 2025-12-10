@@ -394,7 +394,7 @@ Now analyze ${symbol} and return ONLY the JSON response.`;
     const startTime = Date.now();
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-5.1',
+      model: 'gpt-4o', // ✅ FIXED: Using gpt-4o instead of gpt-5.1 (gpt-5.1 not available yet)
       messages: [
         { 
           role: 'system', 
@@ -420,9 +420,6 @@ Quality standards:
         },
         { role: 'user', content: prompt }
       ],
-      reasoning: {
-        effort: 'medium' // Medium reasoning for balanced speed and quality
-      },
       temperature: 0.7, // Balanced creativity and consistency
       max_tokens: 4000, // Sufficient for comprehensive analysis
     });

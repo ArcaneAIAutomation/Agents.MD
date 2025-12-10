@@ -1,0 +1,1057 @@
+{
+  "timestamp": "2025-12-10T18:20:22.959Z",
+  "symbol": "BTC",
+  "summary": {
+    "totalEndpoints": 8,
+    "successful": 7,
+    "failed": 1,
+    "avgQuality": 87,
+    "avgResponseTime": 3698.625,
+    "meetsThreshold": true
+  },
+  "results": [
+    {
+      "endpoint": "/api/ucie/market-data/BTC",
+      "success": true,
+      "dataQuality": 100,
+      "data": {
+        "success": true,
+        "symbol": "BTC",
+        "priceAggregation": {
+          "symbol": "BTC",
+          "prices": [
+            {
+              "exchange": "CoinMarketCap",
+              "price": 92399.57423887633,
+              "volume24h": 55753790433.77686,
+              "change24h": -1.67655276,
+              "timestamp": "2025-12-10T18:19:46.389Z",
+              "success": true
+            },
+            {
+              "exchange": "CoinGecko",
+              "price": 92380,
+              "volume24h": 42643753453.71904,
+              "change24h": -1.764828984673263,
+              "timestamp": "2025-12-10T18:19:46.328Z",
+              "success": true
+            },
+            {
+              "exchange": "Kraken",
+              "price": 92268.1,
+              "volume24h": 137787911.38561332,
+              "change24h": -0.46827367635287115,
+              "timestamp": "2025-12-10T18:19:46.399Z",
+              "success": true
+            },
+            {
+              "exchange": "Coinbase",
+              "price": 92278.985,
+              "volume24h": 0,
+              "change24h": 0,
+              "timestamp": "2025-12-10T18:19:46.328Z",
+              "success": true
+            }
+          ],
+          "vwap": 92390.91912439208,
+          "averagePrice": 92331.66480971908,
+          "highestPrice": 92399.57423887633,
+          "lowestPrice": 92268.1,
+          "priceVariance": 131.47423887632613,
+          "priceVariancePercentage": 0.14249154244676776,
+          "totalVolume24h": 55753790433.77686,
+          "averageChange24h": -0.9774138552565336,
+          "arbitrageOpportunities": [],
+          "dataQuality": 100,
+          "timestamp": "2025-12-10T18:19:46.400Z",
+          "fetchDuration": 215
+        },
+        "marketData": {
+          "marketCap": 1844321188889.61,
+          "circulatingSupply": 19960278,
+          "totalSupply": 19960278,
+          "high24h": 0,
+          "low24h": 0,
+          "change7d": -0.74825956
+        },
+        "dataQuality": 100,
+        "sources": [
+          "CoinMarketCap",
+          "CoinGecko",
+          "Kraken",
+          "Coinbase",
+          "coinmarketcap"
+        ],
+        "cached": false,
+        "timestamp": "2025-12-10T18:19:46.430Z",
+        "attribution": {
+          "provider": "CoinGecko",
+          "url": "https://www.coingecko.com?utm_source=bitcoin-sovereign-tech&utm_medium=referral",
+          "message": "Market data powered by CoinGecko"
+        }
+      },
+      "responseTime": 1396
+    },
+    {
+      "endpoint": "/api/ucie/technical/BTC",
+      "success": true,
+      "dataQuality": 100,
+      "data": {
+        "success": true,
+        "symbol": "BTC",
+        "timeframe": "1h",
+        "currentPrice": 92239.5,
+        "indicators": {
+          "rsi": {
+            "value": 50.86573501180084,
+            "signal": "neutral",
+            "strength": "weak"
+          },
+          "macd": {
+            "value": 63.31021075534227,
+            "signal": 151.19321209356525,
+            "histogram": -87.88300133822298,
+            "trend": "bearish",
+            "crossover": "none"
+          },
+          "ema": {
+            "ema9": 92235.16356829132,
+            "ema21": 92250.62400927061,
+            "ema50": 91855.82406652062,
+            "ema200": 91259.60249999998,
+            "trend": "neutral",
+            "alignment": "mixed"
+          },
+          "bollingerBands": {
+            "upper": 92951.04897934881,
+            "middle": 92376.845,
+            "lower": 91802.6410206512,
+            "width": 1.2431772904753513,
+            "position": "upper_band",
+            "squeeze": true
+          },
+          "atr": {
+            "value": 435.5500000000008,
+            "volatility": "low",
+            "percentOfPrice": 0.47219466714368663
+          },
+          "stochastic": {
+            "k": 39.19109098696683,
+            "d": 40.24352933977855,
+            "signal": "neutral",
+            "crossover": "bearish_crossover"
+          }
+        },
+        "tradingZones": {
+          "support": [
+            89700.09000000001
+          ],
+          "resistance": [
+            92207.63076923076
+          ],
+          "currentZone": "neutral",
+          "nearestSupport": 89700.09000000001,
+          "nearestResistance": 96851.475
+        },
+        "signals": {
+          "overall": "neutral",
+          "confidence": 83,
+          "buySignals": 0,
+          "sellSignals": 1,
+          "neutralSignals": 5,
+          "reasons": [
+            "MACD bearish trend"
+          ]
+        },
+        "dataQuality": 95,
+        "timestamp": "2025-12-10T18:19:47.738Z",
+        "cached": false
+      },
+      "responseTime": 237
+    },
+    {
+      "endpoint": "/api/ucie/sentiment/BTC",
+      "success": true,
+      "dataQuality": 98,
+      "data": {
+        "success": true,
+        "data": {
+          "symbol": "BTC",
+          "overallScore": 51,
+          "sentiment": "neutral",
+          "sentimentDescription": "Overall market sentiment is NEUTRAL based on 80% of available data sources.",
+          "fearGreedIndex": {
+            "value": 26,
+            "classification": "Fear",
+            "weight": "25%",
+            "description": "Market-wide sentiment indicator. 0-25 = Extreme Fear (good buying opportunity), 25-45 = Fear, 45-55 = Neutral, 55-75 = Greed, 75-100 = Extreme Greed (caution advised)"
+          },
+          "coinMarketCap": {
+            "sentimentScore": 44,
+            "weight": "20%",
+            "priceChange24h": -1.67655276,
+            "priceChange7d": -0.74825956,
+            "volumeChange24h": -13.9985,
+            "marketCapDominance": 58.4171,
+            "volume24h": 55753790433.77686,
+            "marketCap": 1844321188889.61,
+            "rank": 1,
+            "description": "Price momentum and volume analysis. Sentiment derived from 24h/7d price changes, volume trends, and market dominance. Higher scores indicate bullish momentum."
+          },
+          "coinGecko": null,
+          "lunarCrush": {
+            "price": 92281.4548130613,
+            "priceDescription": "Current Bitcoin price from LunarCrush market data.",
+            "volume24h": 55679216113.81,
+            "volume24hDescription": "24-hour trading volume across all exchanges.",
+            "marketCap": 1841963492313.14,
+            "marketCapDescription": "Total market capitalization.",
+            "galaxyScore": 54.8,
+            "weight": "20%",
+            "galaxyScoreDescription": "Social media popularity score (0-100). Higher scores mean more social buzz and community engagement.",
+            "averageSentiment": 3.0927192982456133,
+            "averageSentimentDescription": "Average sentiment from social posts (1-5 scale). 1=Very Negative, 3=Neutral, 5=Very Positive.",
+            "totalPosts": 114,
+            "totalPostsDescription": "Number of social media posts analyzed in the last 24 hours.",
+            "totalInteractions": 373988743,
+            "totalInteractionsDescription": "Total likes, shares, comments, and retweets across all posts.",
+            "postTypes": {
+              "tweet": 81,
+              "youtube-video": 13,
+              "tiktok-video": 10,
+              "reddit-post": 10
+            },
+            "postTypesDescription": "Breakdown of posts by platform (tweets, reddit posts, youtube videos, tiktok videos).",
+            "dataSources": {
+              "posts": true,
+              "coins": true
+            },
+            "dataSourcesDescription": "Which LunarCrush endpoints provided data (posts=social sentiment, coins=market data).",
+            "description": "Social media metrics from Twitter, Reddit, YouTube, and TikTok. Combines market data with real-time social sentiment analysis."
+          },
+          "reddit": {
+            "mentions24h": 14,
+            "weight": "15%",
+            "mentionsDescription": "Number of Reddit posts mentioning Bitcoin in the last 24 hours across crypto subreddits.",
+            "sentiment": 100,
+            "sentimentDescription": "Reddit community sentiment (0-100). Above 50 = positive, below 50 = negative.",
+            "activeSubreddits": [
+              "cryptocurrency",
+              "CryptoMarkets",
+              "Bitcoin"
+            ],
+            "description": "Community discussions from r/cryptocurrency, r/CryptoMarkets, and r/Bitcoin. Sentiment based on post upvotes and engagement."
+          },
+          "dataQuality": 80,
+          "dataQualityDescription": "Successfully retrieved 80% of sentiment data from 5 sources (Fear & Greed, CoinMarketCap, CoinGecko, LunarCrush, Reddit).",
+          "sourcesUsed": [
+            "Fear & Greed Index (25%)",
+            "CoinMarketCap (20%)",
+            "LunarCrush (20%)",
+            "Reddit (15%)"
+          ],
+          "timestamp": "2025-12-10T18:19:50.603Z"
+        },
+        "cached": false,
+        "timestamp": "2025-12-10T18:19:50.648Z"
+      },
+      "responseTime": 1838
+    },
+    {
+      "endpoint": "/api/ucie/news/BTC",
+      "success": true,
+      "dataQuality": 100,
+      "data": {
+        "success": true,
+        "symbol": "BTC",
+        "articles": [
+          {
+            "id": "cryptocompare-55609392",
+            "title": "Bitcoin Price Prediction: US Bank Now Lets Clients Buy BTC Directly – Could This Be the Start of a Banking Domino Effect?",
+            "description": "PNC Bank, the sixth-largest commercial bank in the United States, has launched direct spot Bitcoin trading for eligible private bank clients, becoming the first major U.S. bank to offer native Bitcoin...",
+            "url": "https://cryptonews.com/news/bitcoin-price-prediction-us-bank-now-lets-clients-buy-btc-directly-could-this-be-the-start-of-a-banking-domino-effect/",
+            "source": "cryptonews",
+            "publishedAt": "2025-12-10T17:54:00.000Z",
+            "imageUrl": "https://resources.cryptocompare.com/news/52/55609392.jpeg",
+            "category": "technology",
+            "isBreaking": true,
+            "relevanceScore": 0.9999999999999999,
+            "assessment": {
+              "articleId": "cryptocompare-55609392",
+              "impact": "bullish",
+              "impactScore": 78,
+              "confidence": 80,
+              "summary": "PNC Bank, the sixth-largest U.S. commercial bank, is launching direct spot Bitcoin trading for eligible private bank clients, marking a significant step in mainstream banking adoption of BTC.",
+              "keyPoints": [
+                "PNC Bank becomes the first major U.S. bank to offer native spot Bitcoin trading to its eligible private banking clients.",
+                "This move signals growing institutional and traditional banking sector acceptance of Bitcoin as an investable asset.",
+                "The development could encourage a competitive response from other large banks, potentially creating a broader banking domino effect in BTC offerings."
+              ],
+              "marketImplications": "Expanded access to Bitcoin through a major U.S. bank is likely to improve BTC’s legitimacy and attract new high-net-worth and institutional capital, supporting positive price sentiment. If rival banks follow, this could deepen liquidity and reduce perceived career and operational risk for traditional finance players entering BTC. In the near term, it may act as a narrative catalyst and bolster bullish expectations around continued mainstream adoption.",
+              "timeframe": "short-term"
+            }
+          },
+          {
+            "id": "cryptocompare-55607988",
+            "title": "American Bitcoin Corp. now holds 4,783 BTC",
+            "description": "American Bitcoin Corp., Eric Trump’s digital asset mining firm, has purchased an additional 416 Bitcoin for $38 million at an average price of $91,346 per BTC. The corporation now holds 4,783 BTC in i...",
+            "url": "https://www.cryptopolitan.com/eric-trumps-american-bitcoin-corp/",
+            "source": "Cryptopolitan",
+            "publishedAt": "2025-12-10T17:06:53.000Z",
+            "imageUrl": "https://resources.cryptocompare.com/news/43/55607988.jpeg",
+            "category": "technology",
+            "isBreaking": true,
+            "relevanceScore": 0.9999999999999999,
+            "assessment": {
+              "articleId": "cryptocompare-55607988",
+              "impact": "bullish",
+              "impactScore": 68,
+              "confidence": 78,
+              "summary": "American Bitcoin Corp., linked to Eric Trump, has expanded its holdings to 4,783 BTC after purchasing 416 BTC for $38 million.",
+              "keyPoints": [
+                "American Bitcoin Corp. acquired an additional 416 BTC at an average price of $91,346 per BTC.",
+                "The company now holds a total of 4,783 BTC, signaling continued institutional-scale accumulation.",
+                "Association with a high-profile political family may increase mainstream visibility and perceived legitimacy of Bitcoin as an asset."
+              ],
+              "marketImplications": "This purchase reinforces the narrative of ongoing institutional and corporate accumulation of Bitcoin, which is generally supportive of long-term price and adoption. The high average purchase price also signals strong conviction at elevated levels, potentially bolstering investor sentiment. However, the direct short-term price impact is likely limited given Bitcoin’s large market capitalization.",
+              "timeframe": "short-term"
+            }
+          },
+          {
+            "id": "cryptocompare-55606257",
+            "title": "Husky Inu (HINU) Reaches $0.00023567 As Bitcoin (BTC) Reclaims $92,000",
+            "description": "Husky Inu (HINU) completed the latest price increase of its pre-launch phase, rising from $0.00023477 to $0.00023567. The project’s pre-launch phase began on April 1, 2025. Meanwhile, the cryptocurren...",
+            "url": "https://cryptodaily.co.uk/2025/12/husky-inu-hinu-reaches-000023567-as-bitcoin-btc-reclaims-92000",
+            "source": "Crypto Daily",
+            "publishedAt": "2025-12-10T16:20:16.000Z",
+            "imageUrl": "https://resources.cryptocompare.com/news/75/55606257.jpeg",
+            "category": "technology",
+            "isBreaking": true,
+            "relevanceScore": 0.9999999999999999,
+            "assessment": {
+              "articleId": "cryptocompare-55606257",
+              "impact": "bullish",
+              "impactScore": 62,
+              "confidence": 58,
+              "summary": "Bitcoin’s reclaiming of the $92,000 level alongside speculative interest in tokens like Husky Inu reflects broadly positive market sentiment toward BTC.",
+              "keyPoints": [
+                "The article notes Bitcoin has reclaimed the $92,000 price level, signaling a strong ongoing uptrend.",
+                "Speculative activity around Husky Inu’s pre-launch suggests heightened risk-on appetite in the crypto market, which typically correlates with bullish phases for BTC.",
+                "No negative regulatory, security, or macroeconomic developments are mentioned that would directly pressure Bitcoin’s price."
+              ],
+              "marketImplications": "BTC trading back above $92,000 reinforces the current bullish narrative and may attract additional momentum and retail inflows in the near term. The presence of active speculative memecoin participation implies a risk-on environment that historically aligns with continued strength or at least sustained elevated levels for BTC. However, such conditions can also increase the likelihood of sharp, sentiment-driven volatility.",
+              "timeframe": "short-term"
+            }
+          },
+          {
+            "id": "cryptocompare-55609103",
+            "title": "Stunning Bitcoin Price Prediction: Ric Edelman Forecasts $180K by 2026",
+            "description": "BitcoinWorld Stunning Bitcoin Price Prediction: Ric Edelman Forecasts $180K by 2026 Could Bitcoin truly be headed for a staggering $180,000 within the next few years? Esteemed investor and founder of ...",
+            "url": "https://bitcoinworld.co.in/bitcoin-price-prediction-180k-2026/",
+            "source": "Bitcoin World",
+            "publishedAt": "2025-12-10T17:45:12.000Z",
+            "imageUrl": "https://resources.cryptocompare.com/news/82/default.png",
+            "category": "technology",
+            "isBreaking": true,
+            "relevanceScore": 0.6,
+            "assessment": {
+              "articleId": "cryptocompare-55609103",
+              "impact": "bullish",
+              "impactScore": 62,
+              "confidence": 72,
+              "summary": "A prominent investor, Ric Edelman, has publicly forecast that Bitcoin could reach $180,000 by 2026.",
+              "keyPoints": [
+                "Ric Edelman, a well-known investor and financial author, projects Bitcoin could climb to $180,000 within a few years.",
+                "The prediction is framed as a substantial upside potential relative to current price levels, reinforcing a long-term bullish narrative.",
+                "Coverage by a crypto-focused outlet amplifies optimistic sentiment but does not introduce new fundamental developments or regulatory changes."
+              ],
+              "marketImplications": "The article is likely to have a mildly positive impact on market sentiment, particularly among retail investors who follow high-profile forecasts. It may contribute to short-term speculative buying and narrative-driven price support. However, without accompanying fundamental news such as adoption or regulatory shifts, the effect is likely to be limited and potentially short-lived.",
+              "timeframe": "short-term"
+            }
+          },
+          {
+            "id": "cryptocompare-55607408",
+            "title": "GameStop’s Stunning $9.4 Million Bitcoin Loss: What It Reveals About Corporate Crypto Risk",
+            "description": "BitcoinWorld GameStop’s Stunning $9.4 Million Bitcoin Loss: What It Reveals About Corporate Crypto Risk In a move that caught the attention of both Wall Street and Crypto Twitter, GameStop recently di...",
+            "url": "https://bitcoinworld.co.in/gamestop-bitcoin-loss-report/",
+            "source": "Bitcoin World",
+            "publishedAt": "2025-12-10T16:55:11.000Z",
+            "imageUrl": "https://resources.cryptocompare.com/news/82/default.png",
+            "category": "technology",
+            "isBreaking": true,
+            "relevanceScore": 0.6,
+            "assessment": {
+              "articleId": "cryptocompare-55607408",
+              "impact": "bearish",
+              "impactScore": 35,
+              "confidence": 72,
+              "summary": "GameStop’s reported $9.4 million loss on its Bitcoin holdings highlights the financial and reputational risks corporations face when holding BTC on their balance sheets.",
+              "keyPoints": [
+                "GameStop realized a sizable loss on its Bitcoin position, signaling potential volatility and downside risk for corporate treasuries holding BTC.",
+                "The article frames the event in terms of broader corporate crypto risk, which may reinforce cautious or negative sentiment among traditional firms and regulators.",
+                "Such high-profile losses can be used as case studies against Bitcoin adoption in boardrooms, potentially slowing institutional uptake in the near term."
+              ],
+              "marketImplications": "In the short term, this kind of headline can contribute to negative sentiment around Bitcoin as a treasury asset, especially among risk-averse corporate decision makers. While it is unlikely to meaningfully impact Bitcoin’s core user base or long-term thesis, it may dampen incremental institutional adoption and provide fuel for critics during periods of price weakness. Overall, it tilts narrative risk slightly against BTC without materially changing fundamentals.",
+              "timeframe": "short-term"
+            }
+          },
+          {
+            "id": "cryptocompare-55606338",
+            "title": "GameStop Posted $9.4M Loss on Bitcoin Holdings in Q3",
+            "description": "The firm has not announced any new bitcoin purchases since May, when it bought 4,710 BTC....",
+            "url": "https://www.coindesk.com/markets/2025/12/10/gamestop-keeps-usd519m-in-bitcoin-as-shares-fall-and-sales-disappoint",
+            "source": "CoinDesk",
+            "publishedAt": "2025-12-10T16:25:53.000Z",
+            "imageUrl": "https://resources.cryptocompare.com/news/5/55606338.jpeg",
+            "category": "market",
+            "isBreaking": true,
+            "relevanceScore": 0.6,
+            "assessment": {
+              "articleId": "cryptocompare-55606338",
+              "impact": "neutral",
+              "impactScore": 45,
+              "confidence": 72,
+              "summary": "GameStop reported a $9.4 million unrealized loss on its existing bitcoin holdings in Q3 and has not added to its position since May.",
+              "keyPoints": [
+                "GameStop disclosed a $9.4 million loss on its bitcoin holdings for the third quarter, likely reflecting mark-to-market accounting amid BTC price volatility.",
+                "The company has not announced any new bitcoin purchases since May, when it accumulated 4,710 BTC, suggesting a pause in additional corporate accumulation.",
+                "The loss is specific to one corporate holder and does not indicate broader structural issues with bitcoin’s market or infrastructure."
+              ],
+              "marketImplications": "This news may have a mildly negative sentiment effect as it highlights short-term losses for a recognizable corporate holder, reinforcing bitcoin’s volatility narrative. However, the impact on BTC’s overall market is limited because there is no indication of forced selling or a strategic exit from bitcoin by GameStop. Broader market pricing is more likely to be driven by macro and sector-wide flows than by this single disclosure.",
+              "timeframe": "short-term"
+            }
+          },
+          {
+            "id": "cryptocompare-55610049",
+            "title": "Silk Road Wallets Allegedly Connected to Ross Ulbricht Move Millions in Bitcoin",
+            "description": "Wallets labeled with connections to defunct dark web marketplace Silk Road moved millions in Bitcoin for the first time in years....",
+            "url": "https://decrypt.co/351839/silk-road-wallets-connected-ross-ulbricht-move-millions-bitcoin",
+            "source": "Decrypt",
+            "publishedAt": "2025-12-10T18:15:27.000Z",
+            "imageUrl": "https://resources.cryptocompare.com/news/44/55610049.jpeg",
+            "category": "market",
+            "isBreaking": true,
+            "relevanceScore": 0.4,
+            "assessment": {
+              "articleId": "cryptocompare-55610049",
+              "impact": "bearish",
+              "impactScore": 35,
+              "confidence": 78,
+              "summary": "Previously dormant Silk Road-linked wallets have moved millions of dollars in Bitcoin for the first time in years, raising concerns about potential large-scale selling or enforcement actions.",
+              "keyPoints": [
+                "Wallets associated with the defunct Silk Road marketplace and allegedly linked to Ross Ulbricht have shown significant on-chain activity after a long period of dormancy.",
+                "Large movements from historically tainted coins often trigger fears of imminent liquidation, law-enforcement seizures, or auctions that could add sell-side pressure to the market.",
+                "The news may revive narratives around Bitcoin’s association with dark web activity and regulatory scrutiny, affecting market sentiment despite no immediate evidence of actual selling yet."
+              ],
+              "marketImplications": "In the short term, traders may interpret the movement of these coins as a signal of possible future selling or government action, leading to increased volatility and cautious positioning. Even without confirmed liquidation, the overhang of potentially market-bound supply can weigh on sentiment and cap upside momentum. If no follow-on selling or enforcement news emerges, the impact is likely to fade as the market absorbs the information.",
+              "timeframe": "short-term"
+            }
+          },
+          {
+            "id": "cryptocompare-55609970",
+            "title": "XRP and Bitcoin Get NYSE Listing, Shiba Inu (SHIB) Whale Activity Highest in Months, Ripple CTO Stunned by Solana — Crypto News Digest",
+            "description": "Crypto market today: Bitcoin and XRP expanded their Wall Street footprint, Solana doubled down on its XRP provocation; SHIB whales awaken....",
+            "url": "https://u.today/xrp-and-bitcoin-get-nyse-listing-shiba-inu-shib-whale-activity-highest-in-months-ripple-cto-stunned",
+            "source": "U.Today",
+            "publishedAt": "2025-12-10T18:12:43.000Z",
+            "imageUrl": "https://resources.cryptocompare.com/news/64/55609970.jpeg",
+            "category": "market",
+            "isBreaking": true,
+            "relevanceScore": 0.4,
+            "assessment": {
+              "articleId": "cryptocompare-55609970",
+              "impact": "bullish",
+              "impactScore": 80,
+              "confidence": 78,
+              "summary": "Bitcoin’s expanded footprint via an NYSE-related listing signals growing mainstream and institutional acceptance, which is positive for BTC’s market perception and demand.",
+              "keyPoints": [
+                "Bitcoin has gained a new Wall Street presence through an NYSE-linked listing alongside XRP, highlighting rising traditional finance integration.",
+                "Mainstream visibility from a major U.S. exchange can attract additional institutional and retail interest to BTC.",
+                "The article context is broadly positive for crypto market sentiment, indirectly supporting Bitcoin as the flagship asset."
+              ],
+              "marketImplications": "An NYSE-linked listing for BTC increases its legitimacy and accessibility for traditional investors, likely boosting near-term demand and improving sentiment. This may support higher trading volumes and a more favorable risk perception among institutions. While direct price impact is uncertain, the news skews risk-reward to the upside in the short run.",
+              "timeframe": "short-term"
+            }
+          },
+          {
+            "id": "cryptocompare-55609936",
+            "title": "Bitcoin miners face deep losses as hash price hits record low",
+            "description": "The Bitcoin mining industry is getting squeezed hard as the crypto downturn drags miners into unprofitability, based on information gathered from Bloomberg. Companies across the sector are cutting bac...",
+            "url": "https://www.cryptopolitan.com/bitcoin-mining-margins-collapse/",
+            "source": "Cryptopolitan",
+            "publishedAt": "2025-12-10T18:05:33.000Z",
+            "imageUrl": "https://resources.cryptocompare.com/news/43/55609936.jpeg",
+            "category": "technology",
+            "isBreaking": true,
+            "relevanceScore": 0.4,
+            "assessment": {
+              "articleId": "cryptocompare-55609936",
+              "impact": "bearish",
+              "impactScore": 35,
+              "confidence": 72,
+              "summary": "Bitcoin miners are experiencing deep losses as hash price hits a record low, forcing widespread cutbacks across the industry.",
+              "keyPoints": [
+                "Hash price for Bitcoin mining has fallen to a record low, significantly compressing miner profitability.",
+                "Many mining companies are being dragged into unprofitability and are cutting back operations to survive.",
+                "The industry-wide squeeze reflects the broader crypto market downturn impacting Bitcoin-related infrastructure."
+              ],
+              "marketImplications": "Sustained miner stress and unprofitability can lead to forced selling of BTC reserves and reduced network investment, putting near-term downward pressure on price and sentiment. If conditions persist, some miners may shut down or consolidate, which could ultimately stabilize network difficulty but only after a period of heightened volatility and negative headlines. Overall, this environment is likely to weigh on BTC in the short term.",
+              "timeframe": "short-term"
+            }
+          },
+          {
+            "id": "cryptocompare-55609776",
+            "title": "Michael Saylor Says Bitcoin Will Power Digital Credit Revolution in the Middle East",
+            "description": "Strategy founder Michael Saylor used his Bitcoin MENA 2025 keynote in Abu Dhabi to lay out a sweeping vision for digital capital, digital credit, and digital money — and he did it in his trademark sty...",
+            "url": "https://news.bitcoin.com/michael-saylor-says-bitcoin-will-power-digital-credit-revolution-in-the-middle-east/",
+            "source": "Bitcoin.com",
+            "publishedAt": "2025-12-10T18:05:02.000Z",
+            "imageUrl": "https://resources.cryptocompare.com/news/14/55609776.jpeg",
+            "category": "regulatory",
+            "isBreaking": true,
+            "relevanceScore": 0.4,
+            "assessment": {
+              "articleId": "cryptocompare-55609776",
+              "impact": "bullish",
+              "impactScore": 63,
+              "confidence": 72,
+              "summary": "Michael Saylor’s keynote in Abu Dhabi promotes Bitcoin as the backbone of a future digital credit and capital system in the Middle East, signaling growing regional interest and adoption narratives.",
+              "keyPoints": [
+                "Michael Saylor presented a vision of Bitcoin underpinning digital capital, digital credit, and digital money at Bitcoin MENA 2025 in Abu Dhabi.",
+                "The speech targets the Middle East, a region with significant capital reserves and growing interest in digital assets and financial innovation.",
+                "The narrative positions Bitcoin as core financial infrastructure rather than just a speculative asset, potentially influencing institutional and regulatory attitudes."
+              ],
+              "marketImplications": "This narrative-driven, high-profile endorsement in a capital-rich region is modestly bullish for BTC by reinforcing its positioning as strategic financial infrastructure, especially among institutional and sovereign stakeholders in the Middle East. While it does not constitute direct regulatory approval or specific investment commitments, it can support positive sentiment and longer-run adoption discussions. Any concrete policy moves or institutional initiatives that follow from this vision would further amplify the bullish impact.",
+              "timeframe": "medium-term"
+            }
+          },
+          {
+            "id": "cryptocompare-55609961",
+            "title": "Bitwise Uplists BITW Crypto Index Fund to NYSE Arca with Bitcoin-Dominant Holdings",
+            "description": "Bitwise Asset Management has uplisted its Bitwise 10 Crypto Index ETF (BITW) to NYSE Arca, providing investors with regulated access to a diversified portfolio of top cryptocurrencies including Bitcoi...",
+            "url": "https://en.coinotag.com/bitwise-uplists-bitw-crypto-index-fund-to-nyse-arca-with-bitcoin-dominant-holdings",
+            "source": "CoinOtag",
+            "publishedAt": "2025-12-10T18:04:14.000Z",
+            "imageUrl": "https://resources.cryptocompare.com/news/77/55609961.jpeg",
+            "category": "market",
+            "isBreaking": true,
+            "relevanceScore": 0.4,
+            "assessment": {
+              "articleId": "cryptocompare-55609961",
+              "impact": "neutral",
+              "impactScore": 50,
+              "confidence": 50,
+              "summary": "Bitwise Asset Management has uplisted its Bitwise 10 Crypto Index ETF (BITW) to NYSE Arca, providing investors with regulated access to a diversified portfolio of top cryptocurrencies including Bitcoi...",
+              "keyPoints": [],
+              "marketImplications": "Quick assessment - full analysis available on demand",
+              "timeframe": "short-term"
+            }
+          },
+          {
+            "id": "cryptocompare-55609610",
+            "title": "Bitwise’s fund joins NYSE Arca – Why 90% of index rests on BTC and ETH",
+            "description": "A 10-asset index sounds balanced, yet nine of those assets barely register - What's happening?...",
+            "url": "https://ambcrypto.com/bitwises-fund-joins-nyse-arca-why-90-of-index-rests-on-btc-and-eth/",
+            "source": "AMB Crypto",
+            "publishedAt": "2025-12-10T18:00:22.000Z",
+            "imageUrl": "https://images.cryptocompare.com/news/default/ambcrypto.png",
+            "category": "market",
+            "isBreaking": true,
+            "relevanceScore": 0.4,
+            "assessment": {
+              "articleId": "cryptocompare-55609610",
+              "impact": "neutral",
+              "impactScore": 50,
+              "confidence": 50,
+              "summary": "A 10-asset index sounds balanced, yet nine of those assets barely register - What's happening?...",
+              "keyPoints": [],
+              "marketImplications": "Quick assessment - full analysis available on demand",
+              "timeframe": "short-term"
+            }
+          },
+          {
+            "id": "cryptocompare-55608736",
+            "title": "Price predictions 12/10: BTC, ETH, XRP, BNB, SOL, DOGE, ADA, BCH, LINK, HYPE",
+            "description": "Bitcoin is attempting a recovery, but the short-term trend depends on the Federal Reserve’s upcoming interest rate decision. Meanwhile, ETH leads the altcoin recovery....",
+            "url": "https://cointelegraph.com/news/price-predictions-12-10-btc-eth-xrp-bnb-sol-doge-ada-bch-link-hype?utm_source=rss_feed&utm_medium=rss&utm_campaign=rss_partner_inbound",
+            "source": "Cointelegraph",
+            "publishedAt": "2025-12-10T17:30:00.000Z",
+            "imageUrl": "https://images.cryptocompare.com/news/default/cointelegraph.png",
+            "category": "market",
+            "isBreaking": true,
+            "relevanceScore": 0.5,
+            "assessment": {
+              "articleId": "cryptocompare-55608736",
+              "impact": "neutral",
+              "impactScore": 50,
+              "confidence": 50,
+              "summary": "Bitcoin is attempting a recovery, but the short-term trend depends on the Federal Reserve’s upcoming interest rate decision. Meanwhile, ETH leads the altcoin recovery....",
+              "keyPoints": [],
+              "marketImplications": "Quick assessment - full analysis available on demand",
+              "timeframe": "short-term"
+            }
+          },
+          {
+            "id": "cryptocompare-55608436",
+            "title": "Stunning Prediction: More Eurozone Nations Will Buy Bitcoin Following Czech Republic’s Lead",
+            "description": "BitcoinWorld Stunning Prediction: More Eurozone Nations Will Buy Bitcoin Following Czech Republic’s Lead Could a single, modest $1 million investment by a European central bank trigger a continent-wid...",
+            "url": "https://bitcoinworld.co.in/eurozone-nations-buy-bitcoin-prediction/",
+            "source": "Bitcoin World",
+            "publishedAt": "2025-12-10T17:25:11.000Z",
+            "imageUrl": "https://resources.cryptocompare.com/news/82/default.png",
+            "category": "technology",
+            "isBreaking": true,
+            "relevanceScore": 0.6,
+            "assessment": {
+              "articleId": "cryptocompare-55608436",
+              "impact": "neutral",
+              "impactScore": 50,
+              "confidence": 50,
+              "summary": "BitcoinWorld Stunning Prediction: More Eurozone Nations Will Buy Bitcoin Following Czech Republic’s Lead Could a single, modest $1 million investment by a European central bank trigger a continent-wid...",
+              "keyPoints": [],
+              "marketImplications": "Quick assessment - full analysis available on demand",
+              "timeframe": "short-term"
+            }
+          },
+          {
+            "id": "cryptocompare-55608365",
+            "title": "Bitcoin Selling Pressure Eases as Exchange Inflows Drop: CryptoQuant",
+            "description": "Bitcoin’s market dynamics have shifted sharply in recent weeks, offering signs of short-term resilience as selling pressure eases and investors reduce deposits to exchanges ahead of a highly anticipat...",
+            "url": "https://cryptonews.com/news/bitcoin-selling-pressure-eases-as-exchange-inflows-drop-cryptoquant/",
+            "source": "cryptonews",
+            "publishedAt": "2025-12-10T17:23:12.000Z",
+            "imageUrl": "https://resources.cryptocompare.com/news/52/55608365.jpeg",
+            "category": "regulatory",
+            "isBreaking": true,
+            "relevanceScore": 0.6,
+            "assessment": {
+              "articleId": "cryptocompare-55608365",
+              "impact": "neutral",
+              "impactScore": 50,
+              "confidence": 50,
+              "summary": "Bitcoin’s market dynamics have shifted sharply in recent weeks, offering signs of short-term resilience as selling pressure eases and investors reduce deposits to exchanges ahead of a highly anticipat...",
+              "keyPoints": [],
+              "marketImplications": "Quick assessment - full analysis available on demand",
+              "timeframe": "short-term"
+            }
+          },
+          {
+            "id": "cryptocompare-55609367",
+            "title": "Strategy blasts MSCI plan to drop crypto treasuries from indexes",
+            "description": "Strategy has planted a flag against MSCI’s proposal to remove digital asset treasury companies (DATs) from its Global Investable Market Indexes. According to the company, the wiser course for MSCI, fo...",
+            "url": "https://www.cryptopolitan.com/strategy-responds-to-msci-proposal/",
+            "source": "Cryptopolitan",
+            "publishedAt": "2025-12-10T17:48:58.000Z",
+            "imageUrl": "https://resources.cryptocompare.com/news/43/55609367.jpeg",
+            "category": "community",
+            "isBreaking": true,
+            "relevanceScore": 0.30000000000000004,
+            "assessment": {
+              "articleId": "cryptocompare-55609367",
+              "impact": "neutral",
+              "impactScore": 50,
+              "confidence": 50,
+              "summary": "Strategy has planted a flag against MSCI’s proposal to remove digital asset treasury companies (DATs) from its Global Investable Market Indexes. According to the company, the wiser course for MSCI, fo...",
+              "keyPoints": [],
+              "marketImplications": "Quick assessment - full analysis available on demand",
+              "timeframe": "short-term"
+            }
+          },
+          {
+            "id": "cryptocompare-55608783",
+            "title": "XRP Price Prediction: $100M Whale Dump Hits Just Before Breakout – Can Retail Buying Stop the Bleed?",
+            "description": "XRP whales have dumped a significant volume of tokens ahead of today’s FOMC meeting and may have delayed the token’s recovery. However, long-term holders are still not selling and continue to show the...",
+            "url": "https://cryptonews.com/news/xrp-price-prediction-100m-whale-dump-hits-just-before-breakout-can-retail-buying-stop-the-bleed/",
+            "source": "cryptonews",
+            "publishedAt": "2025-12-10T17:35:40.000Z",
+            "imageUrl": "https://resources.cryptocompare.com/news/52/55608783.jpeg",
+            "category": "partnerships",
+            "isBreaking": true,
+            "relevanceScore": 0.30000000000000004,
+            "assessment": {
+              "articleId": "cryptocompare-55608783",
+              "impact": "neutral",
+              "impactScore": 50,
+              "confidence": 50,
+              "summary": "XRP whales have dumped a significant volume of tokens ahead of today’s FOMC meeting and may have delayed the token’s recovery. However, long-term holders are still not selling and continue to show the...",
+              "keyPoints": [],
+              "marketImplications": "Quick assessment - full analysis available on demand",
+              "timeframe": "short-term"
+            }
+          },
+          {
+            "id": "cryptocompare-55608810",
+            "title": "SHIB Is Dead Unless It Reclaims Key Support Zone, Warns Bitcoin Advisor",
+            "description": "Shiba Inu’s future appears precarious unless the token regains a crucial support area, according to Bitcoin advisor Nebraskan Gooner. The warning comes as the broader crypto market eyes a potential re...",
+            "url": "https://coinpaper.com/13022/shib-is-dead-unless-it-reclaims-key-support-zone-warns-bitcoin-advisor",
+            "source": "Coinpaper",
+            "publishedAt": "2025-12-10T17:34:47.000Z",
+            "imageUrl": "https://resources.cryptocompare.com/news/93/default.png",
+            "category": "regulatory",
+            "isBreaking": true,
+            "relevanceScore": 0.4,
+            "assessment": {
+              "articleId": "cryptocompare-55608810",
+              "impact": "neutral",
+              "impactScore": 50,
+              "confidence": 50,
+              "summary": "Shiba Inu’s future appears precarious unless the token regains a crucial support area, according to Bitcoin advisor Nebraskan Gooner. The warning comes as the broader crypto market eyes a potential re...",
+              "keyPoints": [],
+              "marketImplications": "Quick assessment - full analysis available on demand",
+              "timeframe": "short-term"
+            }
+          },
+          {
+            "id": "cryptocompare-55607778",
+            "title": "Strategy Challenges MSCI Digital Asset Exclusion Threatening Bitcoin Treasury Firms",
+            "description": "Strategy Inc warns that MSCI’s plan to drop digital-asset-focused companies from major indexes could distort global markets, curb bitcoin-driven innovation, and trigger significant investment fallout....",
+            "url": "https://news.bitcoin.com/strategy-challenges-msci-digital-asset-exclusion-threatening-bitcoin-treasury-firms/",
+            "source": "Bitcoin.com",
+            "publishedAt": "2025-12-10T17:05:29.000Z",
+            "imageUrl": "https://resources.cryptocompare.com/news/14/55607778.jpeg",
+            "category": "market",
+            "isBreaking": true,
+            "relevanceScore": 0.4,
+            "assessment": {
+              "articleId": "cryptocompare-55607778",
+              "impact": "neutral",
+              "impactScore": 50,
+              "confidence": 50,
+              "summary": "Strategy Inc warns that MSCI’s plan to drop digital-asset-focused companies from major indexes could distort global markets, curb bitcoin-driven innovation, and trigger significant investment fallout....",
+              "keyPoints": [],
+              "marketImplications": "Quick assessment - full analysis available on demand",
+              "timeframe": "short-term"
+            }
+          },
+          {
+            "id": "cryptocompare-55606988",
+            "title": "Vivek Ramaswamy’s Strive launches preferred-stock sale for crypto purchases",
+            "description": "Asset manager Strive, Inc., co-founded by entrepreneur and former presidential candidate Vivek Ramaswamy, has moved to raise up to $500 million via a new at-the-market offering of its perpetual prefer...",
+            "url": "https://www.cryptopolitan.com/vivek-ramaswamy-strive-btc-reserve/",
+            "source": "Cryptopolitan",
+            "publishedAt": "2025-12-10T16:31:29.000Z",
+            "imageUrl": "https://resources.cryptocompare.com/news/43/55606988.jpeg",
+            "category": "technology",
+            "isBreaking": true,
+            "relevanceScore": 0.30000000000000004,
+            "assessment": {
+              "articleId": "cryptocompare-55606988",
+              "impact": "neutral",
+              "impactScore": 50,
+              "confidence": 50,
+              "summary": "Asset manager Strive, Inc., co-founded by entrepreneur and former presidential candidate Vivek Ramaswamy, has moved to raise up to $500 million via a new at-the-market offering of its perpetual prefer...",
+              "keyPoints": [],
+              "marketImplications": "Quick assessment - full analysis available on demand",
+              "timeframe": "short-term"
+            }
+          }
+        ],
+        "summary": {
+          "overallSentiment": "neutral",
+          "bullishCount": 6,
+          "bearishCount": 3,
+          "neutralCount": 11,
+          "averageImpact": 53.15,
+          "majorNews": []
+        },
+        "sources": {
+          "LunarCrush": {
+            "success": true,
+            "articles": 15
+          },
+          "NewsAPI": {
+            "success": true,
+            "articles": 20
+          },
+          "CryptoCompare": {
+            "success": true,
+            "articles": 50
+          }
+        },
+        "dataQuality": 88,
+        "timestamp": "2025-12-10T18:20:08.500Z",
+        "cached": false
+      },
+      "responseTime": 16907
+    },
+    {
+      "endpoint": "/api/ucie/on-chain/BTC",
+      "success": true,
+      "dataQuality": 100,
+      "data": {
+        "success": true,
+        "data": {
+          "success": true,
+          "symbol": "BTC",
+          "chain": "bitcoin",
+          "networkMetrics": {
+            "latestBlockHeight": 927299,
+            "latestBlockTime": 1765390449,
+            "blockTime": 9.6214,
+            "hashRate": 1046474251804.256,
+            "difficulty": 149301205959699,
+            "mempoolSize": 0,
+            "mempoolBytes": 0,
+            "totalCirculating": 19960306.25,
+            "maxSupply": 21000000,
+            "marketPriceUSD": 92432.89512131573
+          },
+          "whaleActivity": {
+            "timeframe": "30 minutes",
+            "minThreshold": "50 BTC",
+            "summary": {
+              "totalTransactions": 46,
+              "totalValueUSD": 667552356.215389,
+              "totalValueBTC": 7222.021503700001,
+              "largestTransaction": 853.53039449,
+              "message": "46 whale transactions detected"
+            }
+          },
+          "mempoolAnalysis": {
+            "congestion": "low",
+            "averageFee": 0,
+            "recommendedFee": 5
+          },
+          "dataQuality": 100,
+          "timestamp": "2025-12-10T18:20:16.395Z"
+        },
+        "cached": false,
+        "timestamp": "2025-12-10T18:20:16.453Z"
+      },
+      "responseTime": 6828
+    },
+    {
+      "endpoint": "/api/ucie/risk/BTC",
+      "success": true,
+      "dataQuality": 100,
+      "data": {
+        "success": true,
+        "symbol": "BTC",
+        "timestamp": "2025-12-10T18:20:18.174Z",
+        "dataQualityScore": 30,
+        "riskScore": {
+          "overall": 31,
+          "category": "Medium",
+          "components": {
+            "volatility": 32.5,
+            "liquidity": 21.15,
+            "concentration": 0,
+            "regulatory": 40,
+            "marketCap": 95
+          },
+          "weights": {
+            "volatility": 0.3,
+            "liquidity": 0.25,
+            "concentration": 0.2,
+            "regulatory": 0.15,
+            "marketCap": 0.1
+          },
+          "explanation": "Primary risk factors: small market cap."
+        },
+        "volatilityMetrics": {},
+        "correlationMetrics": {
+          "btc": 1,
+          "eth": 0.7569248903449545,
+          "sp500": 0,
+          "gold": 0,
+          "rolling30d": {
+            "btc": 1.0000000000000002,
+            "eth": 0.9673948716297707
+          },
+          "rolling90d": {
+            "btc": 1,
+            "eth": 0.9681007009360609
+          },
+          "regimeChanges": [
+            {
+              "asset": "ETH",
+              "date": "2025-08-14T18:20:17.988Z",
+              "previousCorrelation": 0.24224868057638338,
+              "newCorrelation": 0.5476256645143435,
+              "significance": "Low"
+            }
+          ],
+          "diversificationScore": 56
+        },
+        "maxDrawdownMetrics": {},
+        "portfolioImpact": {
+          "allocations": [
+            {
+              "percentage": 1,
+              "expectedReturn": 0.25,
+              "volatility": 0.5985177136388359,
+              "sharpeRatio": 0.35086680847464524,
+              "maxDrawdown": 0.99,
+              "diversificationScore": 21.806103070341273
+            },
+            {
+              "percentage": 5,
+              "expectedReturn": 0.25,
+              "volatility": 0.592666806688153,
+              "sharpeRatio": 0.35433062494842393,
+              "maxDrawdown": 0.99,
+              "diversificationScore": 30.806103070341273
+            },
+            {
+              "percentage": 10,
+              "expectedReturn": 0.25,
+              "volatility": 0.5855335836922175,
+              "sharpeRatio": 0.3586472336493432,
+              "maxDrawdown": 0.99,
+              "diversificationScore": 36.80610307034127
+            },
+            {
+              "percentage": 20,
+              "expectedReturn": 0.25,
+              "volatility": 0.5718967702210307,
+              "sharpeRatio": 0.36719913616374805,
+              "maxDrawdown": 0.99,
+              "diversificationScore": 30.806103070341273
+            }
+          ],
+          "optimalAllocation": 20,
+          "diversificationBenefit": 4.683871629828214,
+          "recommendations": [
+            "Adding 20% allocation could improve portfolio Sharpe ratio from 0.35 to 0.37"
+          ]
+        },
+        "cacheStatus": "miss"
+      },
+      "responseTime": 714
+    },
+    {
+      "endpoint": "/api/ucie/predictions/BTC",
+      "success": false,
+      "dataQuality": 0,
+      "data": null,
+      "error": "HTTP 500: Internal Server Error",
+      "responseTime": 386
+    },
+    {
+      "endpoint": "/api/ucie/derivatives/BTC",
+      "success": true,
+      "dataQuality": 98,
+      "data": {
+        "success": true,
+        "symbol": "BTC",
+        "fundingAnalysis": {
+          "symbol": "BTC",
+          "timestamp": "2025-12-10T18:20:21.889Z",
+          "currentRates": [
+            {
+              "exchange": "Binance",
+              "symbol": "BTC",
+              "fundingRate": 0.00002122,
+              "fundingTime": "2025-12-10T18:20:21.001Z",
+              "nextFundingTime": "2025-12-11T00:00:00.000Z",
+              "markPrice": 92141.23778986,
+              "indexPrice": 92205.18717391
+            },
+            {
+              "exchange": "Bybit",
+              "symbol": "BTC",
+              "fundingRate": 0.00002308,
+              "fundingTime": "2025-12-10T18:20:21.097Z",
+              "nextFundingTime": "2025-12-11T00:00:00.000Z",
+              "markPrice": 92137.6,
+              "indexPrice": 92180.87
+            }
+          ],
+          "trends": [],
+          "extremeRates": [],
+          "meanReversionOpportunities": [],
+          "aggregatedRate": 0.00002215,
+          "marketSentiment": "neutral",
+          "riskLevel": "low"
+        },
+        "openInterestAnalysis": {
+          "symbol": "BTC",
+          "timestamp": "2025-12-10T18:20:21.889Z",
+          "totalOpenInterest": 134266.423,
+          "totalOpenInterestValue": 0,
+          "changes": [],
+          "byExchange": [
+            {
+              "exchange": "Binance",
+              "openInterest": 87112.609,
+              "openInterestValue": 0,
+              "percentageOfTotal": 64.8804124319302,
+              "change24h": 0,
+              "change24hPercent": 0
+            },
+            {
+              "exchange": "Bybit",
+              "openInterest": 47153.814,
+              "openInterestValue": 0,
+              "percentageOfTotal": 35.11958756806979,
+              "change24h": 0,
+              "change24hPercent": 0
+            }
+          ],
+          "spikes": [],
+          "dominantExchange": "Binance",
+          "marketSignal": "neutral",
+          "confidence": 0
+        },
+        "liquidationAnalysis": null,
+        "longShortAnalysis": {
+          "symbol": "BTC",
+          "timestamp": "2025-12-10T18:20:21.890Z",
+          "byExchange": [
+            {
+              "exchange": "Binance",
+              "symbol": "BTC",
+              "longRatio": 1.9377,
+              "shortRatio": -0.9377,
+              "longAccount": 0.6596,
+              "shortAccount": 0.3404,
+              "timestamp": "2025-12-10T18:15:00.000Z"
+            }
+          ],
+          "aggregated": {
+            "longRatio": 1.9377,
+            "shortRatio": -0.9377,
+            "longAccount": 0.6596,
+            "shortAccount": 0.3404,
+            "exchanges": 1,
+            "timestamp": "2025-12-10T18:15:00.000Z"
+          },
+          "extremePositioning": [
+            {
+              "exchange": "Binance",
+              "longRatio": 1.9377,
+              "shortRatio": -0.9377,
+              "severity": "extreme_long",
+              "description": "Extreme long bias on Binance with 193.8% longs. Market is heavily one-sided, increasing risk of long squeeze.",
+              "timestamp": "2025-12-10T18:15:00.000Z"
+            }
+          ],
+          "marketSentiment": "extremely_bullish",
+          "crowdedness": "extremely_crowded",
+          "contrarianSignal": {
+            "signal": "contrarian_short",
+            "confidence": 95,
+            "reasoning": "193.8% of traders are long, indicating overcrowded positioning. When the majority is on one side, the market often moves against them. Consider shorting or waiting for better long entry after a pullback.",
+            "targetEntry": 90298.41303406279,
+            "stopLoss": 94905.4749235558,
+            "takeProfit": 84769.9387666712,
+            "riskReward": 2.666666666666663
+          },
+          "recommendation": "⚠️ Extremely bullish sentiment detected. Market may be overextended. 🚨 EXTREMELY crowded positioning. High risk of sudden reversal. 📉 CONTRARIAN SHORT signal (95% confidence). 193.8% of traders are long, indicating overcrowded positioning. When the majority is on one side, the market often moves against them. Consider shorting or waiting for better long entry after a pullback. Entry: $90298.41, Stop: $94905.47, Target: $84769.94 (R:R 2.67)"
+        },
+        "overallRisk": "high",
+        "dataQuality": 80,
+        "sources": [
+          "Funding Rates",
+          "Binance",
+          "Bybit",
+          "Open Interest",
+          "Long/Short Ratios"
+        ],
+        "cached": false,
+        "timestamp": "2025-12-10T18:20:21.890Z"
+      },
+      "responseTime": 1283
+    }
+  ]
+}
