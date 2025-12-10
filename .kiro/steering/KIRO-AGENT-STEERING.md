@@ -125,11 +125,13 @@ const apiKey = process.env.COINGECKO_API_KEY;
 const apiKey = 'hardcoded-key';
 ```
 
-### Rule #5: GPT-5.1 Integration (NEW - January 2025)
+### Rule #5: GPT-5.1 Integration (MANDATORY - January 2025)
 
 **When working with OpenAI APIs, ALWAYS use GPT-5.1 with bulletproof response parsing.**
 
 **Why**: GPT-5.1 provides enhanced reasoning and better analysis quality than GPT-4o.
+
+**Status**: ✅ Fully deployed in UCIE and Whale Watch
 
 #### Required Imports
 ```typescript

@@ -394,7 +394,7 @@ Now analyze ${symbol} and return ONLY the JSON response.`;
     const startTime = Date.now();
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o', // ✅ FIXED: Using gpt-4o instead of gpt-5.1 (gpt-5.1 not available yet)
+      model: 'gpt-5.1', // ✅ Using GPT-5.1 for enhanced reasoning
       messages: [
         { 
           role: 'system', 
@@ -420,8 +420,11 @@ Quality standards:
         },
         { role: 'user', content: prompt }
       ],
+      reasoning: {
+        effort: 'medium' // Balanced speed and quality for UCIE analysis
+      },
       temperature: 0.7, // Balanced creativity and consistency
-      max_tokens: 4000, // Sufficient for comprehensive analysis
+      max_tokens: 8000, // Increased for comprehensive analysis with reasoning
     });
 
     const duration = Date.now() - startTime;
@@ -431,6 +434,7 @@ Quality standards:
     validateResponseText(responseText, 'gpt-5.1', completion);
 
     console.log(`✅ Got GPT-5.1 response text (${responseText.length} chars)`);
+    console.log(`🧠 Reasoning tokens used: ${completion.usage?.reasoning_tokens || 0}`);
 
     let analysis: any;
     try {

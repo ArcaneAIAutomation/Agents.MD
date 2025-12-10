@@ -156,16 +156,38 @@ async function handler(
   console.log(`📊 Collecting ${forceRefresh ? 'FRESH' : 'CACHED'} data for ${normalizedSymbol}...`);
 
   try {
-    // ✅ INVALIDATE CACHE if refresh=true
+    // ✅ CRITICAL FIX: INVALIDATE ALL CACHE ENTRIES if refresh=true
     if (forceRefresh) {
-      console.log(`🗑️ Invalidating cache for ${normalizedSymbol}...`);
+      console.log(`🗑️ FORCE REFRESH: Invalidating ALL cache for ${normalizedSymbol}...`);
       try {
         // Import invalidateCache function from correct path
         const { invalidateCache } = await import('../../../../lib/ucie/cacheUtils');
-        await invalidateCache(normalizedSymbol);
-        console.log(`✅ Invalidated cache for ${normalizedSymbol}`);
+        
+        // ✅ CRITICAL: Delete ALL analysis types for this symbol
+        const analysisTypes = ['market-data', 'sentiment', 'technical', 'news', 'on-chain', 'predictions', 'risk', 'derivatives', 'defi'];
+        
+        for (const type of analysisTypes) {
+          await invalidateCache(normalizedSymbol, type as any);
+          console.log(`   ✅ Invalidated ${type}`);
+        }
+        
+        console.log(`✅ Invalidated ALL cache entries for ${normalizedSymbol}`);
+        
+        // ✅ VERIFICATION: Check if cache is actually empty
+        const { getCachedAnalysis } = await import('../../../../lib/ucie/cacheUtils');
+        const verifyMarket = await getCachedAnalysis(normalizedSymbol, 'market-data', userId, userEmail, 0); // 0 = no age limit
+        const verifySentiment = await getCachedAnalysis(normalizedSymbol, 'sentiment', userId, userEmail, 0);
+        
+        if (verifyMarket || verifySentiment) {
+          console.error(`❌ CACHE INVALIDATION FAILED: Data still exists after deletion!`);
+          console.error(`   Market Data: ${verifyMarket ? 'STILL EXISTS' : 'deleted'}`);
+          console.error(`   Sentiment: ${verifySentiment ? 'STILL EXISTS' : 'deleted'}`);
+        } else {
+          console.log(`✅ VERIFIED: Cache is empty after invalidation`);
+        }
+        
       } catch (err) {
-        console.error(`Cache invalidation error:`, err);
+        console.error(`❌ Cache invalidation error:`, err);
         // Continue anyway - we'll fetch fresh data
       }
     }

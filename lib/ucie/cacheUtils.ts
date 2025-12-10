@@ -191,11 +191,13 @@ export async function setCachedAnalysis(
 }
 
 /**
- * Invalidate cache for a symbol (USER-SPECIFIC)
+ * Invalidate cache for a symbol (GLOBAL - affects all users)
+ * ✅ CRITICAL FIX: Remove user_id filter to delete cache for ALL users
+ * This ensures refresh=true works for everyone, not just the requesting user
  * 
  * @param symbol - Token symbol
  * @param analysisType - Optional specific analysis type to invalidate
- * @param userId - User ID for data isolation (REQUIRED for security)
+ * @param userId - User ID (IGNORED - kept for backward compatibility)
  */
 export async function invalidateCache(
   symbol: string,
@@ -203,23 +205,27 @@ export async function invalidateCache(
   userId?: string
 ): Promise<void> {
   try {
-    const effectiveUserId = userId || 'anonymous';
+    // ✅ CRITICAL FIX: Delete for ALL users (no user_id filter)
+    // This ensures fresh data is fetched for everyone when refresh=true
     
     if (analysisType) {
-      await query(
-        `DELETE FROM ucie_analysis_cache WHERE symbol = $1 AND analysis_type = $2 AND user_id = $3`,
-        [symbol.toUpperCase(), analysisType, effectiveUserId]
+      const result = await query(
+        `DELETE FROM ucie_analysis_cache WHERE symbol = $1 AND analysis_type = $2`,
+        [symbol.toUpperCase(), analysisType]
       );
-      console.log(`🗑️ Invalidated cache for ${symbol}/${analysisType} (user: ${effectiveUserId})`);
+      const deletedCount = result.rowCount || 0;
+      console.log(`🗑️ Invalidated cache for ${symbol}/${analysisType} (deleted ${deletedCount} entries for ALL users)`);
     } else {
-      await query(
-        `DELETE FROM ucie_analysis_cache WHERE symbol = $1 AND user_id = $2`,
-        [symbol.toUpperCase(), effectiveUserId]
+      const result = await query(
+        `DELETE FROM ucie_analysis_cache WHERE symbol = $1`,
+        [symbol.toUpperCase()]
       );
-      console.log(`🗑️ Invalidated all cache for ${symbol} (user: ${effectiveUserId})`);
+      const deletedCount = result.rowCount || 0;
+      console.log(`🗑️ Invalidated all cache for ${symbol} (deleted ${deletedCount} entries for ALL users)`);
     }
   } catch (error) {
     console.error(`❌ Failed to invalidate cache:`, error);
+    throw error; // Re-throw to let caller know invalidation failed
   }
 }
 

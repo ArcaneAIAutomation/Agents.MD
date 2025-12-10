@@ -1,0 +1,866 @@
+﻿{
+    "success":  true,
+    "data":  {
+                 "symbol":  "BTC",
+                 "timestamp":  "2025-12-10T19:51:12.274Z",
+                 "dataQuality":  100,
+                 "summary":  "**BTC Data Collection Summary**\n\nData Quality: 100%\nWorking APIs: Market Data, Sentiment, Technical, News, On-Chain\n\n**Market**: $92,686.163 (-0.60%)\n**News**: 20 recent articles\n**On-Chain**: Data available\n\n✅ Data collection complete. GPT-5.1 analysis starting...",
+                 "aiAnalysis":  "{\"gptJobId\":\"69\",\"gptStatus\":\"queued\",\"message\":\"GPT-5.1 analysis running...\"}",
+                 "caesarPromptPreview":  "# Caesar AI Research Request for BTC\n\n## Research Objective\nConduct comprehensive institutional-grade research on BTC cryptocurrency, including:\n- Technology architecture and innovation\n- Team credentials and track record\n- Strategic partnerships and ecosystem\n- Competitive positioning and market dynamics\n- Risk assessment and regulatory considerations\n- Investment thesis and valuation analysis\n\n## Available Data Context\nData Quality: 100% (5/5 sources)\nWorking APIs: Market Data, Sentiment, Technical, News, On-Chain\n\n### Market Data\n- Current Price: $92,686.16\n- 24h Change: -0.60%\n- 24h Volume: $60.27B\n- Market Cap: $1850.25B\n- Data Sources: 4 exchanges\n\n### Technical Analysis\n- RSI: 57.40\n- MACD Signal: 146.78100538519135\n- Trend Direction: neutral\n\n### Recent News (20 articles)\n1. Conflicted Fed cuts rates but Bitcoin’s ‘fragile range’ pins BTC under $100K\n2. Bitcoin Price Plummets: Key Insights as BTC Drops Below $92,000\n3. American Bitcoin Adds to BTC Treasury While Shares Face Prolonged Pressure\n4. Bitcoin Price Prediction: US Bank Now Lets Clients Buy BTC Directly – Could This Be the Start of a Banking Domino Effect?\n5. Bitcoin’s Market Structure Strengthens Despite Slower Trading Activity — Here’s Why\n\n**News Summary:**\n- Overall Sentiment: neutral\n- Bullish: 6, Bearish: 3, Neutral: 11\n- Average Impact: 53.0/10\n\n### On-Chain Intelligence\n\n## AI-Generated Market Summary\n**BTC Data Collection Summary**\n\nData Quality: 100%\nWorking APIs: Market Data, Sentiment, Technical, News, On-Chain\n\n**Market**: $92,686.163 (-0.60%)\n**News**: 20 recent articles\n**On-Chain**: Data available\n\n✅ Data collection complete. GPT-5.1 analysis starting...\n\n## Research Instructions\nUsing the above data as context, conduct deep research on BTC covering:\n\n1. **Technology \u0026 Innovation** (25%)\n   - Core technology architecture and consensus mechanism\n   - Unique innovations and competitive advantages\n   - Scalability, security, and decentralization trade-offs\n   - Development activity and GitHub metrics\n   - Roadmap and upcoming technical milestones\n\n2. **Team \u0026 Leadership** (15%)\n   - Founder backgrounds and track records\n   - Core team credentials and expertise\n   - Advisory board and strategic advisors\n   - Team transparency and communication\n   - Previous successes and failures\n\n3. **Partnerships \u0026 Ecosystem** (20%)\n   - Strategic partnerships and integrations\n   - Institutional adoption and enterprise clients\n   - Developer ecosystem and dApp activity\n   - Community size and engagement\n   - Network effects and ecosystem growth\n\n4. **Competitive Analysis** (15%)\n   - Direct competitors and market positioning\n   - Competitive advantages and moats\n   - Market share and growth trajectory\n   - Differentiation factors\n   - Threats from emerging competitors\n\n5. **Risk Assessment** (15%)\n   - Technical risks (bugs, exploits, centralization)\n   - Regulatory risks and compliance status\n   - Market risks (liquidity, volatility, correlation)\n   - Operational risks (team, funding, governance)\n   - Black swan scenarios and tail risks\n\n6. **Investment Thesis** (10%)\n   - Bull case: Key catalysts and growth drivers\n   - Bear case: Major concerns and red flags\n   - Valuation analysis and price targets\n   - Risk-reward assessment\n   - Recommended position sizing and time horizon\n\n## Output Requirements\n- Provide comprehensive, institutional-grade research (3000-5000 words)\n- Include specific data points, metrics, and evidence\n- Cite all sources with URLs for verification\n- Use professional, objective tone\n- Highlight both opportunities and risks\n- Provide actionable insights for investors\n",
+                 "collectedData":  {
+                                       "marketData":  {
+                                                          "success":  true,
+                                                          "symbol":  "BTC",
+                                                          "priceAggregation":  {
+                                                                                   "symbol":  "BTC",
+                                                                                   "prices":  [
+                                                                                                  {
+                                                                                                      "exchange":  "CoinMarketCap",
+                                                                                                      "price":  92696.69856388829,
+                                                                                                      "volume24h":  60272513341.21754,
+                                                                                                      "change24h":  -1.17535782,
+                                                                                                      "timestamp":  "2025-12-10T19:51:00.146Z",
+                                                                                                      "success":  true
+                                                                                                  },
+                                                                                                  {
+                                                                                                      "exchange":  "CoinGecko",
+                                                                                                      "price":  92704,
+                                                                                                      "volume24h":  47684890473.64359,
+                                                                                                      "change24h":  -1.1723235777452992,
+                                                                                                      "timestamp":  "2025-12-10T19:51:00.074Z",
+                                                                                                      "success":  true
+                                                                                                  },
+                                                                                                  {
+                                                                                                      "exchange":  "Kraken",
+                                                                                                      "price":  92643.4,
+                                                                                                      "volume24h":  160897538.0126607,
+                                                                                                      "change24h":  -0.06342891538712449,
+                                                                                                      "timestamp":  "2025-12-10T19:51:00.181Z",
+                                                                                                      "success":  true
+                                                                                                  },
+                                                                                                  {
+                                                                                                      "exchange":  "Coinbase",
+                                                                                                      "price":  92700.555,
+                                                                                                      "volume24h":  0,
+                                                                                                      "change24h":  0,
+                                                                                                      "timestamp":  "2025-12-10T19:51:00.112Z",
+                                                                                                      "success":  true
+                                                                                                  }
+                                                                                              ],
+                                                                                   "vwap":  92699.83949904291,
+                                                                                   "averagePrice":  92686.16339097207,
+                                                                                   "highestPrice":  92704,
+                                                                                   "lowestPrice":  92643.4,
+                                                                                   "priceVariance":  60.60000000000582,
+                                                                                   "priceVariancePercentage":  0.0654121070686156,
+                                                                                   "totalVolume24h":  60272513341.21754,
+                                                                                   "averageChange24h":  -0.602777578283106,
+                                                                                   "arbitrageOpportunities":  [
+
+                                                                                                              ],
+                                                                                   "dataQuality":  100,
+                                                                                   "timestamp":  "2025-12-10T19:51:00.181Z",
+                                                                                   "fetchDuration":  237
+                                                                               },
+                                                          "marketData":  {
+                                                                             "marketCap":  1850254190434.8752,
+                                                                             "circulatingSupply":  19960303,
+                                                                             "totalSupply":  19960303,
+                                                                             "high24h":  0,
+                                                                             "low24h":  0,
+                                                                             "change7d":  -0.26788782
+                                                                         },
+                                                          "dataQuality":  100,
+                                                          "sources":  [
+                                                                          "CoinMarketCap",
+                                                                          "CoinGecko",
+                                                                          "Kraken",
+                                                                          "Coinbase",
+                                                                          "coinmarketcap"
+                                                                      ],
+                                                          "cached":  false,
+                                                          "timestamp":  "2025-12-10T19:51:00.200Z",
+                                                          "attribution":  {
+                                                                              "provider":  "CoinGecko",
+                                                                              "url":  "https://www.coingecko.com?utm_source=bitcoin-sovereign-tech\u0026utm_medium=referral",
+                                                                              "message":  "Market data powered by CoinGecko"
+                                                                          }
+                                                      },
+                                       "sentiment":  {
+                                                         "success":  true,
+                                                         "data":  {
+                                                                      "symbol":  "BTC",
+                                                                      "overallScore":  46,
+                                                                      "sentiment":  "neutral",
+                                                                      "sentimentDescription":  "Overall market sentiment is NEUTRAL based on 100% of available data sources.",
+                                                                      "fearGreedIndex":  {
+                                                                                             "value":  26,
+                                                                                             "classification":  "Fear",
+                                                                                             "weight":  "25%",
+                                                                                             "description":  "Market-wide sentiment indicator. 0-25 = Extreme Fear (good buying opportunity), 25-45 = Fear, 45-55 = Neutral, 55-75 = Greed, 75-100 = Extreme Greed (caution advised)"
+                                                                                         },
+                                                                      "coinMarketCap":  {
+                                                                                            "sentimentScore":  47,
+                                                                                            "weight":  "20%",
+                                                                                            "priceChange24h":  -1.17535782,
+                                                                                            "priceChange7d":  -0.26788782,
+                                                                                            "volumeChange24h":  -7.9244,
+                                                                                            "marketCapDominance":  58.4107,
+                                                                                            "volume24h":  60272513341.21754,
+                                                                                            "marketCap":  1850254190434.8752,
+                                                                                            "rank":  1,
+                                                                                            "description":  "Price momentum and volume analysis. Sentiment derived from 24h/7d price changes, volume trends, and market dominance. Higher scores indicate bullish momentum."
+                                                                                        },
+                                                                      "coinGecko":  {
+                                                                                        "sentimentScore":  24,
+                                                                                        "weight":  "20%",
+                                                                                        "communityScore":  0,
+                                                                                        "developerScore":  0,
+                                                                                        "publicInterestScore":  0,
+                                                                                        "sentimentVotesUpPercentage":  80.93,
+                                                                                        "sentimentVotesDownPercentage":  19.069999999999993,
+                                                                                        "twitterFollowers":  0,
+                                                                                        "redditSubscribers":  0,
+                                                                                        "redditActiveAccounts":  0,
+                                                                                        "priceChange24h":  -1.16966,
+                                                                                        "priceChange7d":  -0.30672,
+                                                                                        "priceChange30d":  -12.34442,
+                                                                                        "marketCapRank":  1,
+                                                                                        "description":  "Community engagement and developer activity. Combines community score, developer activity, public interest, and user sentiment votes. Higher scores indicate strong community support."
+                                                                                    },
+                                                                      "lunarCrush":  {
+                                                                                         "price":  92742.10569368645,
+                                                                                         "priceDescription":  "Current Bitcoin price from LunarCrush market data.",
+                                                                                         "volume24h":  60509515501.77,
+                                                                                         "volume24hDescription":  "24-hour trading volume across all exchanges.",
+                                                                                         "marketCap":  1851160530504.01,
+                                                                                         "marketCapDescription":  "Total market capitalization.",
+                                                                                         "galaxyScore":  57.4,
+                                                                                         "weight":  "20%",
+                                                                                         "galaxyScoreDescription":  "Social media popularity score (0-100). Higher scores mean more social buzz and community engagement.",
+                                                                                         "averageSentiment":  3.0943859649122807,
+                                                                                         "averageSentimentDescription":  "Average sentiment from social posts (1-5 scale). 1=Very Negative, 3=Neutral, 5=Very Positive.",
+                                                                                         "totalPosts":  114,
+                                                                                         "totalPostsDescription":  "Number of social media posts analyzed in the last 24 hours.",
+                                                                                         "totalInteractions":  381964351,
+                                                                                         "totalInteractionsDescription":  "Total likes, shares, comments, and retweets across all posts.",
+                                                                                         "postTypes":  {
+                                                                                                           "tweet":  81,
+                                                                                                           "reddit-post":  10,
+                                                                                                           "tiktok-video":  10,
+                                                                                                           "youtube-video":  13
+                                                                                                       },
+                                                                                         "postTypesDescription":  "Breakdown of posts by platform (tweets, reddit posts, youtube videos, tiktok videos).",
+                                                                                         "dataSources":  {
+                                                                                                             "posts":  true,
+                                                                                                             "coins":  true
+                                                                                                         },
+                                                                                         "dataSourcesDescription":  "Which LunarCrush endpoints provided data (posts=social sentiment, coins=market data).",
+                                                                                         "description":  "Social media metrics from Twitter, Reddit, YouTube, and TikTok. Combines market data with real-time social sentiment analysis."
+                                                                                     },
+                                                                      "reddit":  {
+                                                                                     "mentions24h":  14,
+                                                                                     "weight":  "15%",
+                                                                                     "mentionsDescription":  "Number of Reddit posts mentioning Bitcoin in the last 24 hours across crypto subreddits.",
+                                                                                     "sentiment":  100,
+                                                                                     "sentimentDescription":  "Reddit community sentiment (0-100). Above 50 = positive, below 50 = negative.",
+                                                                                     "activeSubreddits":  [
+                                                                                                              "cryptocurrency",
+                                                                                                              "CryptoMarkets",
+                                                                                                              "Bitcoin"
+                                                                                                          ],
+                                                                                     "description":  "Community discussions from r/cryptocurrency, r/CryptoMarkets, and r/Bitcoin. Sentiment based on post upvotes and engagement."
+                                                                                 },
+                                                                      "dataQuality":  100,
+                                                                      "dataQualityDescription":  "Successfully retrieved 100% of sentiment data from 5 sources (Fear \u0026 Greed, CoinMarketCap, CoinGecko, LunarCrush, Reddit).",
+                                                                      "sourcesUsed":  [
+                                                                                          "Fear \u0026 Greed Index (25%)",
+                                                                                          "CoinMarketCap (20%)",
+                                                                                          "CoinGecko (20%)",
+                                                                                          "LunarCrush (20%)",
+                                                                                          "Reddit (15%)"
+                                                                                      ],
+                                                                      "timestamp":  "2025-12-10T19:51:01.051Z"
+                                                                  },
+                                                         "cached":  false,
+                                                         "timestamp":  "2025-12-10T19:51:01.114Z"
+                                                     },
+                                       "technical":  {
+                                                         "success":  true,
+                                                         "symbol":  "BTC",
+                                                         "timeframe":  "1h",
+                                                         "currentPrice":  92694.2,
+                                                         "indicators":  {
+                                                                            "rsi":  {
+                                                                                        "value":  57.40132900474834,
+                                                                                        "signal":  "neutral",
+                                                                                        "strength":  "weak"
+                                                                                    },
+                                                                            "macd":  {
+                                                                                         "value":  110.81119011506962,
+                                                                                         "signal":  146.78100538519135,
+                                                                                         "histogram":  -35.96981527012173,
+                                                                                         "trend":  "bearish",
+                                                                                         "crossover":  "none"
+                                                                                     },
+                                                                            "ema":  {
+                                                                                        "ema9":  92372.90685463305,
+                                                                                        "ema21":  92314.67637691848,
+                                                                                        "ema50":  91899.75459241516,
+                                                                                        "ema200":  91287.6085,
+                                                                                        "trend":  "bullish",
+                                                                                        "alignment":  "aligned"
+                                                                                    },
+                                                                            "bollingerBands":  {
+                                                                                                   "upper":  92964.04993501962,
+                                                                                                   "middle":  92390.8,
+                                                                                                   "lower":  91817.55006498039,
+                                                                                                   "width":  1.2409242803820635,
+                                                                                                   "position":  "upper_band",
+                                                                                                   "squeeze":  true
+                                                                                               },
+                                                                            "atr":  {
+                                                                                        "value":  589.7785714285731,
+                                                                                        "volatility":  "low",
+                                                                                        "percentOfPrice":  0.6362626479634897
+                                                                                    },
+                                                                            "stochastic":  {
+                                                                                               "k":  67.01340023251515,
+                                                                                               "d":  57.00911705317262,
+                                                                                               "signal":  "neutral",
+                                                                                               "crossover":  "none"
+                                                                                           }
+                                                                        },
+                                                         "tradingZones":  {
+                                                                              "support":  [
+                                                                                              89700.09000000001
+                                                                                          ],
+                                                                              "resistance":  [
+                                                                                                 92207.63076923076
+                                                                                             ],
+                                                                              "currentZone":  "neutral",
+                                                                              "nearestSupport":  89700.09000000001,
+                                                                              "nearestResistance":  97328.91
+                                                                          },
+                                                         "signals":  {
+                                                                         "overall":  "neutral",
+                                                                         "confidence":  83,
+                                                                         "buySignals":  1,
+                                                                         "sellSignals":  1,
+                                                                         "neutralSignals":  4,
+                                                                         "reasons":  [
+                                                                                         "MACD bearish trend",
+                                                                                         "EMAs bullish and aligned"
+                                                                                     ]
+                                                                     },
+                                                         "dataQuality":  95,
+                                                         "timestamp":  "2025-12-10T19:51:00.116Z",
+                                                         "cached":  false
+                                                     },
+                                       "news":  {
+                                                    "success":  true,
+                                                    "symbol":  "BTC",
+                                                    "articles":  [
+                                                                     {
+                                                                         "id":  "cryptocompare-55612657",
+                                                                         "title":  "Conflicted Fed cuts rates but Bitcoin’s ‘fragile range’ pins BTC under $100K",
+                                                                         "description":  "A divided Federal Reserve approved a 0.25% rate cut, but concerns over inflation and growth, as well as Glassnode data highlighting BTC’s “fragile range,” may keep it under $100,000....",
+                                                                         "url":  "https://cointelegraph.com/news/conflicted-fed-cuts-rates-but-bitcoin-s-fragile-range-pins-btc-under-100k?utm_source=rss_feed\u0026utm_medium=rss\u0026utm_campaign=rss_partner_inbound",
+                                                                         "source":  "Cointelegraph",
+                                                                         "publishedAt":  "2025-12-10T19:36:41.000Z",
+                                                                         "imageUrl":  "https://images.cryptocompare.com/news/default/cointelegraph.png",
+                                                                         "category":  "regulatory",
+                                                                         "isBreaking":  true,
+                                                                         "relevanceScore":  0.8999999999999999,
+                                                                         "assessment":  {
+                                                                                            "articleId":  "cryptocompare-55612657",
+                                                                                            "impact":  "neutral",
+                                                                                            "impactScore":  52,
+                                                                                            "confidence":  72,
+                                                                                            "summary":  "A divided Federal Reserve’s 0.25% rate cut offers modest support to Bitcoin, but concerns over inflation, growth, and on-chain data suggesting a \u0027fragile range\u0027 are likely to cap BTC below $100,000.",
+                                                                                            "keyPoints":  [
+                                                                                                              "The Federal Reserve implemented a 0.25% interest rate cut, signaling some easing of monetary policy but with internal divisions and lingering concerns over inflation and growth.",
+                                                                                                              "On-chain analytics from Glassnode characterize Bitcoin’s current trading zone as a \u0027fragile range,\u0027 implying limited conviction among market participants.",
+                                                                                                              "The combination of cautious macro outlook and weak on-chain support suggests Bitcoin may struggle to break and sustain prices above the $100,000 level in the near term."
+                                                                                                          ],
+                                                                                            "marketImplications":  "The rate cut is modestly supportive for risk assets like BTC, but the Fed’s conflicted stance and persistent macroeconomic concerns may dampen strong upside momentum. Glassnode’s indication of a fragile range implies susceptibility to volatility and potential failed breakouts near psychological resistance levels. Traders may remain cautious, with BTC likely to oscillate below $100,000 until clearer macro or on-chain strength emerges.",
+                                                                                            "timeframe":  "short-term"
+                                                                                        }
+                                                                     },
+                                                                     {
+                                                                         "id":  "cryptocompare-55612487",
+                                                                         "title":  "Bitcoin Price Plummets: Key Insights as BTC Drops Below $92,000",
+                                                                         "description":  "BitcoinWorld Bitcoin Price Plummets: Key Insights as BTC Drops Below $92,000 The cryptocurrency market experienced a significant jolt today as the Bitcoin price fell sharply, breaking below the crucia...",
+                                                                         "url":  "https://bitcoinworld.co.in/bitcoin-price-drops-below-92000-7/",
+                                                                         "source":  "Bitcoin World",
+                                                                         "publishedAt":  "2025-12-10T19:35:12.000Z",
+                                                                         "imageUrl":  "https://resources.cryptocompare.com/news/82/default.png",
+                                                                         "category":  "technology",
+                                                                         "isBreaking":  true,
+                                                                         "relevanceScore":  0.9999999999999999,
+                                                                         "assessment":  {
+                                                                                            "articleId":  "cryptocompare-55612487",
+                                                                                            "impact":  "bearish",
+                                                                                            "impactScore":  30,
+                                                                                            "confidence":  72,
+                                                                                            "summary":  "Bitcoin has sharply dropped below the key $92,000 level, signaling a significant downside move in the market.",
+                                                                                            "keyPoints":  [
+                                                                                                              "BTC price has fallen sharply and broken below a critical psychological and technical level of $92,000.",
+                                                                                                              "The move suggests heightened selling pressure and likely liquidation of leveraged long positions.",
+                                                                                                              "Market sentiment is likely to turn more risk-off as traders reassess short-term upside expectations for Bitcoin."
+                                                                                                          ],
+                                                                                            "marketImplications":  "This drop below $92,000 is likely to trigger further short-term volatility, forced liquidations, and increased fear among leveraged traders. Spot demand may temporarily weaken as market participants wait for signs of stabilization or a clear support level. However, longer-term holders may view deeper pullbacks as potential accumulation opportunities once selling pressure exhausts.",
+                                                                                            "timeframe":  "short-term"
+                                                                                        }
+                                                                     },
+                                                                     {
+                                                                         "id":  "cryptocompare-55612047",
+                                                                         "title":  "American Bitcoin Adds to BTC Treasury While Shares Face Prolonged Pressure",
+                                                                         "description":  "American Bitcoin Corp. has expanded its bitcoin reserve to 4,783 BTC, even as its stock continues to slide across several timeframes. ABTC Lifts Holdings to 4,783 BTC American Bitcoin Corp. has expand...",
+                                                                         "url":  "https://news.bitcoin.com/american-bitcoin-adds-to-btc-treasury-while-shares-face-prolonged-pressure/",
+                                                                         "source":  "Bitcoin.com",
+                                                                         "publishedAt":  "2025-12-10T19:20:16.000Z",
+                                                                         "imageUrl":  "https://resources.cryptocompare.com/news/14/55612047.jpeg",
+                                                                         "category":  "market",
+                                                                         "isBreaking":  true,
+                                                                         "relevanceScore":  0.9999999999999999,
+                                                                         "assessment":  {
+                                                                                            "articleId":  "cryptocompare-55612047",
+                                                                                            "impact":  "bullish",
+                                                                                            "impactScore":  60,
+                                                                                            "confidence":  72,
+                                                                                            "summary":  "American Bitcoin Corp has increased its bitcoin treasury to 4,783 BTC despite ongoing weakness in its share price.",
+                                                                                            "keyPoints":  [
+                                                                                                              "American Bitcoin Corp expanded its BTC holdings to a sizeable 4,783 BTC, signaling continued corporate accumulation.",
+                                                                                                              "The company’s stock price is under pressure across multiple timeframes, indicating equity-market skepticism toward the firm or mining sector.",
+                                                                                                              "The divergence between growing on-balance-sheet BTC and falling equity value highlights miners’ strategy of accumulating bitcoin as a long-term reserve asset."
+                                                                                                          ],
+                                                                                            "marketImplications":  "Additional BTC accumulation by a public company is incrementally supportive for long-term bitcoin demand and reinforces its role as a treasury asset. However, the concurrent weakness in the miner’s share price suggests investors may be cautious about mining sector profitability, limiting the immediate positive impact on BTC price. Overall, this leans modestly bullish for bitcoin sentiment rather than being a strong direct price catalyst.",
+                                                                                            "timeframe":  "short-term"
+                                                                                        }
+                                                                     },
+                                                                     {
+                                                                         "id":  "cryptocompare-55609392",
+                                                                         "title":  "Bitcoin Price Prediction: US Bank Now Lets Clients Buy BTC Directly – Could This Be the Start of a Banking Domino Effect?",
+                                                                         "description":  "PNC Bank, the sixth-largest commercial bank in the United States, has launched direct spot Bitcoin trading for eligible private bank clients, becoming the first major U.S. bank to offer native Bitcoin...",
+                                                                         "url":  "https://cryptonews.com/news/bitcoin-price-prediction-us-bank-now-lets-clients-buy-btc-directly-could-this-be-the-start-of-a-banking-domino-effect/",
+                                                                         "source":  "cryptonews",
+                                                                         "publishedAt":  "2025-12-10T17:54:00.000Z",
+                                                                         "imageUrl":  "https://resources.cryptocompare.com/news/52/55609392.jpeg",
+                                                                         "category":  "technology",
+                                                                         "isBreaking":  true,
+                                                                         "relevanceScore":  0.9999999999999999,
+                                                                         "assessment":  {
+                                                                                            "articleId":  "cryptocompare-55609392",
+                                                                                            "impact":  "bullish",
+                                                                                            "impactScore":  78,
+                                                                                            "confidence":  80,
+                                                                                            "summary":  "PNC Bank’s launch of direct spot Bitcoin trading for eligible private banking clients signals a significant step in mainstream institutional adoption of BTC within the U.S. banking sector.",
+                                                                                            "keyPoints":  [
+                                                                                                              "PNC Bank, the sixth-largest U.S. commercial bank, is offering native spot Bitcoin trading to select private bank clients.",
+                                                                                                              "This marks the first major U.S. bank to provide direct Bitcoin access rather than relying solely on ETFs or third-party platforms.",
+                                                                                                              "The move raises expectations of a competitive response from other banks, potentially triggering a broader institutional adoption wave."
+                                                                                                          ],
+                                                                                            "marketImplications":  "Direct Bitcoin access through a top-tier U.S. bank lowers friction for high-net-worth and institutional capital to flow into BTC, supporting underlying demand and improving market depth. If competitors follow PNC’s lead, a banking domino effect could materially increase the investor base and reinforce Bitcoin’s status as a mainstream asset. In the short term, this headline is likely to be interpreted as positive sentiment fuel, even if actual inflows scale more gradually over time.",
+                                                                                            "timeframe":  "short-term"
+                                                                                        }
+                                                                     },
+                                                                     {
+                                                                         "id":  "cryptocompare-55611407",
+                                                                         "title":  "Bitcoin’s Market Structure Strengthens Despite Slower Trading Activity — Here’s Why",
+                                                                         "description":  "Despite a noticeable cooldown in trading volumes, Bitcoin’s underlying market structure has continued to strengthen. The price action has stabilized within a narrow range as long-term holders maintain...",
+                                                                         "url":  "https://www.newsbtc.com/news/bitcoin/bitcoins-market-structure-strengthens/",
+                                                                         "source":  "NewsBTC",
+                                                                         "publishedAt":  "2025-12-10T19:00:17.000Z",
+                                                                         "imageUrl":  "https://resources.cryptocompare.com/news/21/55611407.jpeg",
+                                                                         "category":  "technology",
+                                                                         "isBreaking":  true,
+                                                                         "relevanceScore":  0.6,
+                                                                         "assessment":  {
+                                                                                            "articleId":  "cryptocompare-55611407",
+                                                                                            "impact":  "bullish",
+                                                                                            "impactScore":  64,
+                                                                                            "confidence":  72,
+                                                                                            "summary":  "Despite declining trading volumes, Bitcoin’s underlying market structure and price stability are strengthening as long-term holders maintain their positions.",
+                                                                                            "keyPoints":  [
+                                                                                                              "Trading activity and volumes in Bitcoin have cooled, indicating reduced speculative participation.",
+                                                                                                              "Bitcoin’s market structure is described as strengthening, with price action stabilizing within a narrow range.",
+                                                                                                              "Long-term holders are maintaining or potentially accumulating positions, supporting structural resilience."
+                                                                                                          ],
+                                                                                            "marketImplications":  "The strengthening of Bitcoin’s market structure and continued conviction from long-term holders are mildly bullish signals, suggesting a solid underlying base despite weaker short-term trading interest. Price may remain range-bound in the near term, but this consolidation can set the stage for a more sustainable move higher if demand returns. Short-term volatility might be muted, yet downside risk appears somewhat cushioned by holder behavior.",
+                                                                                            "timeframe":  "short-term"
+                                                                                        }
+                                                                     },
+                                                                     {
+                                                                         "id":  "cryptocompare-55611472",
+                                                                         "title":  "BREAKING: Bitcoin (BTC) Price Reacts to Fed\u0027s Latest Rate Cut",
+                                                                         "description":  "The Federal Reserve has lowered its benchmark interest rate by a quarter-point ....",
+                                                                         "url":  "https://u.today/breaking-bitcoin-btc-price-reacts-to-feds-latest-rate-cut",
+                                                                         "source":  "U.Today",
+                                                                         "publishedAt":  "2025-12-10T18:56:20.000Z",
+                                                                         "imageUrl":  "https://resources.cryptocompare.com/news/64/55611472.jpeg",
+                                                                         "category":  "market",
+                                                                         "isBreaking":  true,
+                                                                         "relevanceScore":  0.7,
+                                                                         "assessment":  {
+                                                                                            "articleId":  "cryptocompare-55611472",
+                                                                                            "impact":  "bullish",
+                                                                                            "impactScore":  68,
+                                                                                            "confidence":  72,
+                                                                                            "summary":  "Bitcoin is reacting positively to the Federal Reserve’s quarter-point interest rate cut, which generally supports risk assets like BTC.",
+                                                                                            "keyPoints":  [
+                                                                                                              "The Federal Reserve has lowered its benchmark interest rate by 0.25 percentage points.",
+                                                                                                              "Lower interest rates typically weaken the dollar and make yield-bearing traditional assets less attractive relative to risk assets such as Bitcoin.",
+                                                                                                              "Bitcoin’s immediate price reaction suggests traders are positioning for a more accommodative monetary environment."
+                                                                                                          ],
+                                                                                            "marketImplications":  "The rate cut signals a more supportive liquidity backdrop, which can attract additional speculative and institutional capital into Bitcoin. Traders may anticipate easier financial conditions and position for potential upside, increasing volatility and trading volumes. However, the sustainability of the move will depend on subsequent Fed communications and macro data confirming a looser policy path.",
+                                                                                            "timeframe":  "short-term"
+                                                                                        }
+                                                                     },
+                                                                     {
+                                                                         "id":  "cryptocompare-55611202",
+                                                                         "title":  "Silk Road-Linked Bitcoin Wallets Transfer Millions After Years of Inactivity",
+                                                                         "description":  "Silk Road Bitcoin wallets, dormant for years and linked to the defunct dark web marketplace, recently transferred millions in BTC to a new address, marking their first activity in at least five years ...",
+                                                                         "url":  "https://en.coinotag.com/silk-road-linked-bitcoin-wallets-transfer-millions-after-years-of-inactivity",
+                                                                         "source":  "CoinOtag",
+                                                                         "publishedAt":  "2025-12-10T18:30:59.000Z",
+                                                                         "imageUrl":  "https://resources.cryptocompare.com/news/77/55611202.jpeg",
+                                                                         "category":  "market",
+                                                                         "isBreaking":  true,
+                                                                         "relevanceScore":  0.6,
+                                                                         "assessment":  {
+                                                                                            "articleId":  "cryptocompare-55611202",
+                                                                                            "impact":  "bearish",
+                                                                                            "impactScore":  35,
+                                                                                            "confidence":  78,
+                                                                                            "summary":  "Previously dormant Silk Road-linked Bitcoin wallets have moved millions in BTC for the first time in years, raising concerns about potential selling pressure.",
+                                                                                            "keyPoints":  [
+                                                                                                              "Silk Road-associated Bitcoin wallets that had been inactive for at least five years have suddenly transferred millions in BTC to a new address.",
+                                                                                                              "Movement of long-dormant, high-profile coins often triggers market concern about imminent liquidation or law-enforcement-related sales.",
+                                                                                                              "The event can increase short-term volatility and negatively impact market sentiment despite not changing Bitcoin’s fundamentals."
+                                                                                                          ],
+                                                                                            "marketImplications":  "The transfer of large, historically tainted BTC holdings can spark fears of upcoming sell orders, creating short-term downward pressure on price and heightened volatility. Traders may become more cautious, potentially leading to risk-off behavior and a softer spot and derivatives market in the immediate aftermath. Over time, the impact is likely to fade as the market absorbs any actual sales and refocuses on broader macro and adoption trends.",
+                                                                                            "timeframe":  "short-term"
+                                                                                        }
+                                                                     },
+                                                                     {
+                                                                         "id":  "cryptocompare-55610570",
+                                                                         "title":  "KindlyMD borrows $210 million from Kraken in new Bitcoin-backed credit deal",
+                                                                         "description":  "A Securities Exchange Commission filing on Tuesday revealed that KindlyMD (NAKA) agreed to borrow $210 million from Kraken. The initiative makes the crypto exchange NAKA’s fourth provider to help serv...",
+                                                                         "url":  "https://www.cryptopolitan.com/kindlymd-taps-kraken-for-new-210-m/",
+                                                                         "source":  "Cryptopolitan",
+                                                                         "publishedAt":  "2025-12-10T18:20:37.000Z",
+                                                                         "imageUrl":  "https://resources.cryptocompare.com/news/43/55610570.jpeg",
+                                                                         "category":  "partnerships",
+                                                                         "isBreaking":  true,
+                                                                         "relevanceScore":  0.6,
+                                                                         "assessment":  {
+                                                                                            "articleId":  "cryptocompare-55610570",
+                                                                                            "impact":  "bullish",
+                                                                                            "impactScore":  64,
+                                                                                            "confidence":  72,
+                                                                                            "summary":  "KindlyMD securing a $210 million Bitcoin-backed credit line from Kraken highlights growing institutional use of BTC as collateral and reinforces its role in crypto credit markets.",
+                                                                                            "keyPoints":  [
+                                                                                                              "The deal involves a sizable $210 million Bitcoin-backed credit facility, underscoring BTC’s growing use as high-quality collateral.",
+                                                                                                              "Kraken serving as one of multiple credit providers to KindlyMD suggests increasing institutional comfort with BTC-based lending structures.",
+                                                                                                              "The arrangement indirectly supports BTC demand and liquidity, as more corporate and financial actors leverage Bitcoin for large financing deals."
+                                                                                                          ],
+                                                                                            "marketImplications":  "This news supports the narrative of Bitcoin as a mature financial asset suitable for large credit arrangements, which can bolster investor confidence. While it may not trigger immediate price action alone, it contributes positively to the structural demand and utility of BTC in institutional finance. Over time, repeated deals of this type can strengthen Bitcoin’s perceived safety and reliability as collateral, aiding broader market adoption.",
+                                                                                            "timeframe":  "short-term"
+                                                                                        }
+                                                                     },
+                                                                     {
+                                                                         "id":  "cryptocompare-55612554",
+                                                                         "title":  "Bitcoin Prices Dip After Fed’s Third 2025 Rate Cut Amid Chair Succession Talk",
+                                                                         "description":  "The Federal Reserve\u0027s 0.25% rate cut in 2025 has led to mixed reactions in cryptocurrency markets, with Bitcoin dipping to around $92,000 and Ethereum holding steady above $3,300. This third cut aims ...",
+                                                                         "url":  "https://en.coinotag.com/bitcoin-prices-dip-after-feds-third-2025-rate-cut-amid-chair-succession-talk",
+                                                                         "source":  "CoinOtag",
+                                                                         "publishedAt":  "2025-12-10T19:31:00.000Z",
+                                                                         "imageUrl":  "https://resources.cryptocompare.com/news/77/55612554.jpeg",
+                                                                         "category":  "regulatory",
+                                                                         "isBreaking":  true,
+                                                                         "relevanceScore":  0.4,
+                                                                         "assessment":  {
+                                                                                            "articleId":  "cryptocompare-55612554",
+                                                                                            "impact":  "bearish",
+                                                                                            "impactScore":  40,
+                                                                                            "confidence":  70,
+                                                                                            "summary":  "Bitcoin prices dipped to around $92,000 following the Federal Reserve’s third 0.25% rate cut of 2025, reflecting mixed reactions in crypto markets.",
+                                                                                            "keyPoints":  [
+                                                                                                              "The Federal Reserve implemented a third 0.25% interest rate cut in 2025, signaling continued monetary easing.",
+                                                                                                              "Bitcoin reacted negatively in the immediate aftermath, falling to around $92,000.",
+                                                                                                              "Ethereum showed relative resilience by holding above $3,300, highlighting a divergence in major crypto price action."
+                                                                                                          ],
+                                                                                            "marketImplications":  "Despite rate cuts typically being supportive for risk assets like Bitcoin, the immediate market reaction was negative, suggesting that the move may have been fully priced in or interpreted as signaling economic concerns. Short-term sentiment for BTC appears cautious to mildly risk-off, with traders reassessing macro implications. However, the broader easing cycle could still underpin risk appetite once markets digest the news.",
+                                                                                            "timeframe":  "short-term"
+                                                                                        }
+                                                                     },
+                                                                     {
+                                                                         "id":  "cryptocompare-55612553",
+                                                                         "title":  "Fed Rate Cut May Provide Liquidity Tailwind for Bitcoin Amid Job Market Risks",
+                                                                         "description":  "The Federal Reserve\u0027s 25 basis point interest rate cut on December 10 sets the federal funds rate at 3.50–3.75%, signaling a shift toward easing amid rising employment risks and moderating inflation. ...",
+                                                                         "url":  "https://en.coinotag.com/fed-rate-cut-may-provide-liquidity-tailwind-for-bitcoin-amid-job-market-risks",
+                                                                         "source":  "CoinOtag",
+                                                                         "publishedAt":  "2025-12-10T19:30:05.000Z",
+                                                                         "imageUrl":  "https://resources.cryptocompare.com/news/77/55612553.jpeg",
+                                                                         "category":  "market",
+                                                                         "isBreaking":  true,
+                                                                         "relevanceScore":  0.4,
+                                                                         "assessment":  {
+                                                                                            "articleId":  "cryptocompare-55612553",
+                                                                                            "impact":  "bullish",
+                                                                                            "impactScore":  68,
+                                                                                            "confidence":  78,
+                                                                                            "summary":  "The Fed’s 25 bps rate cut and pivot toward easing is broadly supportive for Bitcoin by improving liquidity conditions despite emerging job market risks.",
+                                                                                            "keyPoints":  [
+                                                                                                              "The Federal Reserve cut rates by 25 basis points to 3.50–3.75%, marking a shift from tight to more accommodative policy.",
+                                                                                                              "Easier monetary conditions typically increase market liquidity and risk appetite, historically benefiting assets like Bitcoin.",
+                                                                                                              "Rising employment risks introduce macroeconomic uncertainty that could dampen risk sentiment and add volatility despite the supportive rate backdrop."
+                                                                                                          ],
+                                                                                            "marketImplications":  "Lower policy rates generally support higher liquidity and risk-on behavior, which tends to be positive for Bitcoin pricing and capital flows into crypto. However, job market deterioration could periodically trigger risk-off episodes, creating short-term volatility and corrective phases. Overall, BTC is likely to see a net positive tailwind as markets adjust to the new easing cycle, with sensitivity to incoming labor and inflation data.",
+                                                                                            "timeframe":  "short-term"
+                                                                                        }
+                                                                     },
+                                                                     {
+                                                                         "id":  "cryptocompare-55612216",
+                                                                         "title":  "Solana Price Prediction: Institutional Flows Into Spot ETFs Dry Up – Here’s the Catalyst They Might Be Waiting For",
+                                                                         "description":  "Spot SOL ETFs have seen a clear unwind of accumulation over the past two trading weeks, with bullish Solana price predictions awaiting a U.S. interest rate cut decision as confirmation. The altcoin is...",
+                                                                         "url":  "https://cryptonews.com/news/solana-price-prediction-institutional-flows-into-spot-etfs-dry-up-heres-the-catalyst-they-might-be-waiting-for/",
+                                                                         "source":  "cryptonews",
+                                                                         "publishedAt":  "2025-12-10T19:26:00.000Z",
+                                                                         "imageUrl":  "https://resources.cryptocompare.com/news/52/55612216.jpeg",
+                                                                         "category":  "technology",
+                                                                         "isBreaking":  true,
+                                                                         "relevanceScore":  0.30000000000000004,
+                                                                         "assessment":  {
+                                                                                            "articleId":  "cryptocompare-55612216",
+                                                                                            "impact":  "neutral",
+                                                                                            "impactScore":  50,
+                                                                                            "confidence":  50,
+                                                                                            "summary":  "Spot SOL ETFs have seen a clear unwind of accumulation over the past two trading weeks, with bullish Solana price predictions awaiting a U.S. interest rate cut decision as confirmation. The altcoin is...",
+                                                                                            "keyPoints":  [
+
+                                                                                                          ],
+                                                                                            "marketImplications":  "Quick assessment - full analysis available on demand",
+                                                                                            "timeframe":  "short-term"
+                                                                                        }
+                                                                     },
+                                                                     {
+                                                                         "id":  "cryptocompare-55611819",
+                                                                         "title":  "Bitcoin Price Reacts as US Federal Reserve Cuts Rates by 25 BPS",
+                                                                         "description":  "Bitcoin’s price has declined by more than $2,000 in the last 24 hours. It dropped by some $500 in the past few minutes, and then recovered, right as the US Federal Reserve announced another rate cut –...",
+                                                                         "url":  "https://cryptopotato.com/bitcoin-price-reacts-as-us-federal-reserve-cuts-rates-by-25-bps/",
+                                                                         "source":  "Crypto Potato",
+                                                                         "publishedAt":  "2025-12-10T19:11:44.000Z",
+                                                                         "imageUrl":  "https://resources.cryptocompare.com/news/27/55611819.jpeg",
+                                                                         "category":  "market",
+                                                                         "isBreaking":  true,
+                                                                         "relevanceScore":  0.4,
+                                                                         "assessment":  {
+                                                                                            "articleId":  "cryptocompare-55611819",
+                                                                                            "impact":  "neutral",
+                                                                                            "impactScore":  50,
+                                                                                            "confidence":  50,
+                                                                                            "summary":  "Bitcoin’s price has declined by more than $2,000 in the last 24 hours. It dropped by some $500 in the past few minutes, and then recovered, right as the US Federal Reserve announced another rate cut –...",
+                                                                                            "keyPoints":  [
+
+                                                                                                          ],
+                                                                                            "marketImplications":  "Quick assessment - full analysis available on demand",
+                                                                                            "timeframe":  "short-term"
+                                                                                        }
+                                                                     },
+                                                                     {
+                                                                         "id":  "cryptocompare-55611732",
+                                                                         "title":  "Stunning Bitcoin Price Prediction: $112K Target if Fed Shifts Policy",
+                                                                         "description":  "BitcoinWorld Stunning Bitcoin Price Prediction: $112K Target if Fed Shifts Policy Could Bitcoin be on the cusp of a historic surge? A new analysis from on-chain data firm CryptoQuant has sent ripples ...",
+                                                                         "url":  "https://bitcoinworld.co.in/bitcoin-price-prediction-fed-dovish/",
+                                                                         "source":  "Bitcoin World",
+                                                                         "publishedAt":  "2025-12-10T19:10:13.000Z",
+                                                                         "imageUrl":  "https://resources.cryptocompare.com/news/82/default.png",
+                                                                         "category":  "technology",
+                                                                         "isBreaking":  true,
+                                                                         "relevanceScore":  0.4,
+                                                                         "assessment":  {
+                                                                                            "articleId":  "cryptocompare-55611732",
+                                                                                            "impact":  "neutral",
+                                                                                            "impactScore":  50,
+                                                                                            "confidence":  50,
+                                                                                            "summary":  "BitcoinWorld Stunning Bitcoin Price Prediction: $112K Target if Fed Shifts Policy Could Bitcoin be on the cusp of a historic surge? A new analysis from on-chain data firm CryptoQuant has sent ripples ...",
+                                                                                            "keyPoints":  [
+
+                                                                                                          ],
+                                                                                            "marketImplications":  "Quick assessment - full analysis available on demand",
+                                                                                            "timeframe":  "short-term"
+                                                                                        }
+                                                                     },
+                                                                     {
+                                                                         "id":  "cryptocompare-55611453",
+                                                                         "title":  "Bitcoin Soars: A Stunning Surge Past $93,000 Signals Bullish Momentum",
+                                                                         "description":  "BitcoinWorld Bitcoin Soars: A Stunning Surge Past $93,000 Signals Bullish Momentum The cryptocurrency market is buzzing with excitement as Bitcoin, the flagship digital asset, has achieved a remarkabl...",
+                                                                         "url":  "https://bitcoinworld.co.in/bitcoin-price-surge-93000-4/",
+                                                                         "source":  "Bitcoin World",
+                                                                         "publishedAt":  "2025-12-10T19:00:12.000Z",
+                                                                         "imageUrl":  "https://resources.cryptocompare.com/news/82/default.png",
+                                                                         "category":  "technology",
+                                                                         "isBreaking":  true,
+                                                                         "relevanceScore":  0.4,
+                                                                         "assessment":  {
+                                                                                            "articleId":  "cryptocompare-55611453",
+                                                                                            "impact":  "neutral",
+                                                                                            "impactScore":  50,
+                                                                                            "confidence":  50,
+                                                                                            "summary":  "BitcoinWorld Bitcoin Soars: A Stunning Surge Past $93,000 Signals Bullish Momentum The cryptocurrency market is buzzing with excitement as Bitcoin, the flagship digital asset, has achieved a remarkabl...",
+                                                                                            "keyPoints":  [
+
+                                                                                                          ],
+                                                                                            "marketImplications":  "Quick assessment - full analysis available on demand",
+                                                                                            "timeframe":  "short-term"
+                                                                                        }
+                                                                     },
+                                                                     {
+                                                                         "id":  "cryptocompare-55610510",
+                                                                         "title":  "MicroStrategy Opposes MSCI Proposal to Exclude Bitcoin Treasury Companies from Indexes",
+                                                                         "description":  "MicroStrategy has urged MSCI to reconsider its proposed policy change that would exclude digital asset treasury companies holding over 50% in crypto from stock indexes, arguing these firms are active ...",
+                                                                         "url":  "https://en.coinotag.com/microstrategy-opposes-msci-proposal-to-exclude-bitcoin-treasury-companies-from-indexes",
+                                                                         "source":  "CoinOtag",
+                                                                         "publishedAt":  "2025-12-10T18:17:13.000Z",
+                                                                         "imageUrl":  "https://resources.cryptocompare.com/news/77/55610510.jpeg",
+                                                                         "category":  "community",
+                                                                         "isBreaking":  true,
+                                                                         "relevanceScore":  0.4,
+                                                                         "assessment":  {
+                                                                                            "articleId":  "cryptocompare-55610510",
+                                                                                            "impact":  "neutral",
+                                                                                            "impactScore":  50,
+                                                                                            "confidence":  50,
+                                                                                            "summary":  "MicroStrategy has urged MSCI to reconsider its proposed policy change that would exclude digital asset treasury companies holding over 50% in crypto from stock indexes, arguing these firms are active ...",
+                                                                                            "keyPoints":  [
+
+                                                                                                          ],
+                                                                                            "marketImplications":  "Quick assessment - full analysis available on demand",
+                                                                                            "timeframe":  "short-term"
+                                                                                        }
+                                                                     },
+                                                                     {
+                                                                         "id":  "cryptocompare-55610049",
+                                                                         "title":  "Silk Road Wallets Allegedly Connected to Ross Ulbricht Move Millions in Bitcoin",
+                                                                         "description":  "Wallets labeled with connections to defunct dark web marketplace Silk Road moved millions in Bitcoin for the first time in years....",
+                                                                         "url":  "https://decrypt.co/351839/silk-road-wallets-connected-ross-ulbricht-move-millions-bitcoin",
+                                                                         "source":  "Decrypt",
+                                                                         "publishedAt":  "2025-12-10T18:15:27.000Z",
+                                                                         "imageUrl":  "https://resources.cryptocompare.com/news/44/55610049.jpeg",
+                                                                         "category":  "market",
+                                                                         "isBreaking":  true,
+                                                                         "relevanceScore":  0.4,
+                                                                         "assessment":  {
+                                                                                            "articleId":  "cryptocompare-55610049",
+                                                                                            "impact":  "neutral",
+                                                                                            "impactScore":  50,
+                                                                                            "confidence":  50,
+                                                                                            "summary":  "Wallets labeled with connections to defunct dark web marketplace Silk Road moved millions in Bitcoin for the first time in years....",
+                                                                                            "keyPoints":  [
+
+                                                                                                          ],
+                                                                                            "marketImplications":  "Quick assessment - full analysis available on demand",
+                                                                                            "timeframe":  "short-term"
+                                                                                        }
+                                                                     },
+                                                                     {
+                                                                         "id":  "cryptocompare-55609970",
+                                                                         "title":  "XRP and Bitcoin Get NYSE Listing, Shiba Inu (SHIB) Whale Activity Highest in Months, Ripple CTO Stunned by Solana — Crypto News Digest",
+                                                                         "description":  "Crypto market today: Bitcoin and XRP expanded their Wall Street footprint, Solana doubled down on its XRP provocation; SHIB whales awaken....",
+                                                                         "url":  "https://u.today/xrp-and-bitcoin-get-nyse-listing-shiba-inu-shib-whale-activity-highest-in-months-ripple-cto-stunned",
+                                                                         "source":  "U.Today",
+                                                                         "publishedAt":  "2025-12-10T18:12:43.000Z",
+                                                                         "imageUrl":  "https://resources.cryptocompare.com/news/64/55609970.jpeg",
+                                                                         "category":  "market",
+                                                                         "isBreaking":  true,
+                                                                         "relevanceScore":  0.4,
+                                                                         "assessment":  {
+                                                                                            "articleId":  "cryptocompare-55609970",
+                                                                                            "impact":  "neutral",
+                                                                                            "impactScore":  50,
+                                                                                            "confidence":  50,
+                                                                                            "summary":  "Crypto market today: Bitcoin and XRP expanded their Wall Street footprint, Solana doubled down on its XRP provocation; SHIB whales awaken....",
+                                                                                            "keyPoints":  [
+
+                                                                                                          ],
+                                                                                            "marketImplications":  "Quick assessment - full analysis available on demand",
+                                                                                            "timeframe":  "short-term"
+                                                                                        }
+                                                                     },
+                                                                     {
+                                                                         "id":  "cryptocompare-55609936",
+                                                                         "title":  "Bitcoin miners face deep losses as hash price hits record low",
+                                                                         "description":  "The Bitcoin mining industry is getting squeezed hard as the crypto downturn drags miners into unprofitability, based on information gathered from Bloomberg. Companies across the sector are cutting bac...",
+                                                                         "url":  "https://www.cryptopolitan.com/bitcoin-mining-margins-collapse/",
+                                                                         "source":  "Cryptopolitan",
+                                                                         "publishedAt":  "2025-12-10T18:05:33.000Z",
+                                                                         "imageUrl":  "https://resources.cryptocompare.com/news/43/55609936.jpeg",
+                                                                         "category":  "technology",
+                                                                         "isBreaking":  true,
+                                                                         "relevanceScore":  0.4,
+                                                                         "assessment":  {
+                                                                                            "articleId":  "cryptocompare-55609936",
+                                                                                            "impact":  "neutral",
+                                                                                            "impactScore":  50,
+                                                                                            "confidence":  50,
+                                                                                            "summary":  "The Bitcoin mining industry is getting squeezed hard as the crypto downturn drags miners into unprofitability, based on information gathered from Bloomberg. Companies across the sector are cutting bac...",
+                                                                                            "keyPoints":  [
+
+                                                                                                          ],
+                                                                                            "marketImplications":  "Quick assessment - full analysis available on demand",
+                                                                                            "timeframe":  "short-term"
+                                                                                        }
+                                                                     },
+                                                                     {
+                                                                         "id":  "cryptocompare-55609776",
+                                                                         "title":  "Michael Saylor Says Bitcoin Will Power Digital Credit Revolution in the Middle East",
+                                                                         "description":  "Strategy founder Michael Saylor used his Bitcoin MENA 2025 keynote in Abu Dhabi to lay out a sweeping vision for digital capital, digital credit, and digital money — and he did it in his trademark sty...",
+                                                                         "url":  "https://news.bitcoin.com/michael-saylor-says-bitcoin-will-power-digital-credit-revolution-in-the-middle-east/",
+                                                                         "source":  "Bitcoin.com",
+                                                                         "publishedAt":  "2025-12-10T18:05:02.000Z",
+                                                                         "imageUrl":  "https://resources.cryptocompare.com/news/14/55609776.jpeg",
+                                                                         "category":  "regulatory",
+                                                                         "isBreaking":  true,
+                                                                         "relevanceScore":  0.4,
+                                                                         "assessment":  {
+                                                                                            "articleId":  "cryptocompare-55609776",
+                                                                                            "impact":  "neutral",
+                                                                                            "impactScore":  50,
+                                                                                            "confidence":  50,
+                                                                                            "summary":  "Strategy founder Michael Saylor used his Bitcoin MENA 2025 keynote in Abu Dhabi to lay out a sweeping vision for digital capital, digital credit, and digital money — and he did it in his trademark sty...",
+                                                                                            "keyPoints":  [
+
+                                                                                                          ],
+                                                                                            "marketImplications":  "Quick assessment - full analysis available on demand",
+                                                                                            "timeframe":  "short-term"
+                                                                                        }
+                                                                     },
+                                                                     {
+                                                                         "id":  "cryptocompare-55609961",
+                                                                         "title":  "Bitwise Uplists BITW Crypto Index Fund to NYSE Arca with Bitcoin-Dominant Holdings",
+                                                                         "description":  "Bitwise Asset Management has uplisted its Bitwise 10 Crypto Index ETF (BITW) to NYSE Arca, providing investors with regulated access to a diversified portfolio of top cryptocurrencies including Bitcoi...",
+                                                                         "url":  "https://en.coinotag.com/bitwise-uplists-bitw-crypto-index-fund-to-nyse-arca-with-bitcoin-dominant-holdings",
+                                                                         "source":  "CoinOtag",
+                                                                         "publishedAt":  "2025-12-10T18:04:14.000Z",
+                                                                         "imageUrl":  "https://resources.cryptocompare.com/news/77/55609961.jpeg",
+                                                                         "category":  "market",
+                                                                         "isBreaking":  true,
+                                                                         "relevanceScore":  0.4,
+                                                                         "assessment":  {
+                                                                                            "articleId":  "cryptocompare-55609961",
+                                                                                            "impact":  "neutral",
+                                                                                            "impactScore":  50,
+                                                                                            "confidence":  50,
+                                                                                            "summary":  "Bitwise Asset Management has uplisted its Bitwise 10 Crypto Index ETF (BITW) to NYSE Arca, providing investors with regulated access to a diversified portfolio of top cryptocurrencies including Bitcoi...",
+                                                                                            "keyPoints":  [
+
+                                                                                                          ],
+                                                                                            "marketImplications":  "Quick assessment - full analysis available on demand",
+                                                                                            "timeframe":  "short-term"
+                                                                                        }
+                                                                     }
+                                                                 ],
+                                                    "summary":  {
+                                                                    "overallSentiment":  "neutral",
+                                                                    "bullishCount":  6,
+                                                                    "bearishCount":  3,
+                                                                    "neutralCount":  11,
+                                                                    "averageImpact":  52.95,
+                                                                    "majorNews":  [
+
+                                                                                  ]
+                                                                },
+                                                    "sources":  {
+                                                                    "LunarCrush":  {
+                                                                                       "success":  true,
+                                                                                       "articles":  15
+                                                                                   },
+                                                                    "NewsAPI":  {
+                                                                                    "success":  true,
+                                                                                    "articles":  20
+                                                                                },
+                                                                    "CryptoCompare":  {
+                                                                                          "success":  true,
+                                                                                          "articles":  50
+                                                                                      }
+                                                                },
+                                                    "dataQuality":  89,
+                                                    "timestamp":  "2025-12-10T19:51:11.644Z",
+                                                    "cached":  false
+                                                },
+                                       "onChain":  {
+                                                       "success":  true,
+                                                       "data":  {
+                                                                    "success":  true,
+                                                                    "symbol":  "BTC",
+                                                                    "chain":  "bitcoin",
+                                                                    "networkMetrics":  {
+                                                                                           "latestBlockHeight":  927309,
+                                                                                           "latestBlockTime":  1765394529,
+                                                                                           "blockTime":  9.1301,
+                                                                                           "hashRate":  1091005071029.969,
+                                                                                           "difficulty":  149301205959699,
+                                                                                           "mempoolSize":  0,
+                                                                                           "mempoolBytes":  0,
+                                                                                           "totalCirculating":  19960343.75,
+                                                                                           "maxSupply":  21000000,
+                                                                                           "marketPriceUSD":  92696.69856388829
+                                                                                       },
+                                                                    "whaleActivity":  {
+                                                                                          "timeframe":  "30 minutes",
+                                                                                          "minThreshold":  "50 BTC",
+                                                                                          "summary":  {
+                                                                                                          "totalTransactions":  41,
+                                                                                                          "totalValueUSD":  625780191.2226641,
+                                                                                                          "totalValueBTC":  6750.835800170002,
+                                                                                                          "largestTransaction":  1406.85503679,
+                                                                                                          "message":  "41 whale transactions detected"
+                                                                                                      }
+                                                                                      },
+                                                                    "mempoolAnalysis":  {
+                                                                                            "congestion":  "low",
+                                                                                            "averageFee":  0,
+                                                                                            "recommendedFee":  5
+                                                                                        },
+                                                                    "dataQuality":  100,
+                                                                    "timestamp":  "2025-12-10T19:51:06.080Z"
+                                                                },
+                                                       "cached":  false,
+                                                       "timestamp":  "2025-12-10T19:51:06.116Z"
+                                                   }
+                                   },
+                 "apiStatus":  {
+                                   "working":  [
+                                                   "Market Data",
+                                                   "Sentiment",
+                                                   "Technical",
+                                                   "News",
+                                                   "On-Chain"
+                                               ],
+                                   "failed":  [
+
+                                              ],
+                                   "total":  5,
+                                   "successRate":  100
+                               },
+                 "timing":  {
+                                "total":  12368,
+                                "collection":  11807,
+                                "storage":  226,
+                                "attempts":  1
+                            },
+                 "databaseStatus":  {
+                                        "stored":  5,
+                                        "failed":  0,
+                                        "total":  5
+                                    },
+                 "retryInfo":  {
+                                   "attempts":  1,
+                                   "maxAttempts":  2,
+                                   "success":  true
+                               },
+                 "gptJobId":  "69"
+             }
+}

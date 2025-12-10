@@ -584,18 +584,18 @@ Before considering work complete:
 ## 🆕 GPT-5.1 Integration for UCIE (January 2025)
 
 ### Overview
-UCIE has been upgraded to GPT-5.1 for enhanced AI analysis quality (migrated from GPT-4o).
+UCIE uses GPT-5.1 for enhanced AI analysis quality with reasoning capabilities.
 
-### Why Upgrade?
+### Why GPT-5.1?
 - ✅ **Better reasoning**: Enhanced analysis with thinking mode
 - ✅ **Higher accuracy**: Improved market predictions and insights
 - ✅ **Bulletproof parsing**: Utility functions handle all response formats
-- ✅ **Production proven**: Successfully deployed in Whale Watch
+- ✅ **Production proven**: Successfully deployed in Whale Watch and UCIE
 
-### Migration Priority
-1. **High Priority**: UCIE Research Analysis (`/api/ucie/research/[symbol]`)
-2. **Medium Priority**: Technical Analysis, Risk Assessment
-3. **Low Priority**: Simple categorization tasks
+### Current Status
+- ✅ **UCIE Analysis**: Fully migrated to GPT-5.1 (`/api/ucie/openai-analysis/[symbol]`)
+- ✅ **Whale Watch**: Fully migrated to GPT-5.1
+- 🔄 **Other Features**: Ready for migration as needed
 
 ### Implementation Pattern for UCIE
 
@@ -663,17 +663,17 @@ export default async function handler(req, res) {
 - **`high`**: For complex multi-factor analysis (use sparingly due to cost)
 - **`low`**: Not recommended for UCIE (insufficient depth)
 
-### Migration Checklist
-- [ ] Import utility functions from `utils/openai.ts`
-- [ ] Update OpenAI client with Responses API header
-- [ ] Change model from `gpt-4o` to `gpt-5.1`
-- [ ] Add reasoning effort level
-- [ ] Use `extractResponseText()` for parsing
-- [ ] Use `validateResponseText()` for validation
-- [ ] Enable debug mode during testing
-- [ ] Test with real data
-- [ ] Monitor Vercel logs
-- [ ] Update cache TTL if needed
+### Implementation Checklist (For New Features)
+- [x] Import utility functions from `utils/openai.ts`
+- [x] Update OpenAI client with Responses API header
+- [x] Use model `gpt-5.1` (not `gpt-4o`)
+- [x] Add reasoning effort level (`medium` recommended for UCIE)
+- [x] Use `extractResponseText()` for parsing
+- [x] Use `validateResponseText()` for validation
+- [x] Enable debug mode during testing
+- [x] Test with real data
+- [x] Monitor Vercel logs
+- [x] Update cache TTL if needed
 
 **See**: `GPT-5.1-MIGRATION-GUIDE.md` for complete migration instructions.
 

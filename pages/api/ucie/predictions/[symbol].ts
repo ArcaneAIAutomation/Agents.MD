@@ -75,19 +75,33 @@ async function fetchHistoricalPrices(symbol: string): Promise<HistoricalPrice[]>
     const days = 365;
     
     const apiKey = process.env.COINGECKO_API_KEY;
+    
+    // ✅ FIX: Use correct API endpoint based on key availability
+    // Pro API requires different URL structure
     const baseUrl = apiKey 
       ? 'https://pro-api.coingecko.com/api/v3'
       : 'https://api.coingecko.com/api/v3';
     
-    const headers = apiKey ? { 'x-cg-pro-api-key': apiKey } : {};
+    // ✅ FIX: Use correct header name for pro API
+    const headers: Record<string, string> = {};
+    if (apiKey) {
+      headers['x-cg-pro-api-key'] = apiKey;
+    }
     
-    const response = await fetch(
-      `${baseUrl}/coins/${coinGeckoId}/market_chart?vs_currency=usd&days=${days}&interval=daily`,
-      { headers, signal: AbortSignal.timeout(10000) }
-    );
+    // ✅ FIX: Add precision parameter for better data quality
+    const url = `${baseUrl}/coins/${coinGeckoId}/market_chart?vs_currency=usd&days=${days}&interval=daily&precision=2`;
+    
+    console.log(`📊 Fetching historical data from CoinGecko: ${url.replace(apiKey || '', 'API_KEY')}`);
+    
+    const response = await fetch(url, { 
+      headers, 
+      signal: AbortSignal.timeout(15000) // Increased timeout to 15s
+    });
     
     if (!response.ok) {
-      throw new Error(`CoinGecko API error: ${response.statusText}`);
+      const errorText = await response.text().catch(() => 'Unknown error');
+      console.error(`❌ CoinGecko API error (${response.status}): ${errorText}`);
+      throw new Error(`CoinGecko API error: ${response.status} ${response.statusText}`);
     }
     
     const data = await response.json();
