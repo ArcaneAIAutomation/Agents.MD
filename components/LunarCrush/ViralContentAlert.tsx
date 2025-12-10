@@ -31,7 +31,7 @@ export default function ViralContentAlert({
             Viral Bitcoin Content Detected
           </h3>
           <p className="text-bitcoin-white-60 text-sm">
-            {data.totalViral} post{data.totalViral !== 1 ? 's' : ''} with >{formatInteractions(threshold)} interactions
+            {data.totalViral} post{data.totalViral !== 1 ? 's' : ''} with &gt;{formatInteractions(threshold)} interactions
           </p>
         </div>
       </div>
