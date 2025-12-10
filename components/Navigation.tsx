@@ -1,7 +1,7 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { Menu, X, Home, Newspaper, Bot, Bitcoin, Coins, Fish, Scale, LogOut, Brain, Zap } from 'lucide-react';
+import { Menu, X, Home, Newspaper, Bot, Bitcoin, Coins, Fish, Scale, LogOut, Brain, Zap, Users } from 'lucide-react';
 import { useAuth } from './auth/AuthProvider';
 
 export interface NavigationRef {
@@ -83,6 +83,7 @@ const Navigation = forwardRef<NavigationRef>((props, ref) => {
     { name: 'Home', path: '/', icon: Home, emoji: '🏠', description: 'Dashboard Overview' },
     { name: 'Universal Intelligence', path: '/ucie', icon: Brain, emoji: '🧠', description: 'Multi-Asset Crypto Analysis' },
     { name: 'Quantum BTC', path: '/quantum-btc', icon: Zap, emoji: '⚡', description: 'Quantum Bitcoin Intelligence Engine' },
+    { name: 'Social Sentiment', path: '/lunarcrush-dashboard', icon: Users, emoji: '👥', description: 'Bitcoin Social Intelligence' },
     { name: 'Crypto News Wire', path: '/crypto-news', icon: Newspaper, emoji: '📰', description: 'Real-Time News & Sentiment' },
     { name: 'AI Trade Engine', path: '/atge', icon: Zap, emoji: '⚡', description: 'AI-Powered Trade Signals' },
     // COMMENTED OUT - Keep for future reference
