@@ -32,7 +32,8 @@
       "memory": 1024
     },
     "pages/api/ucie/openai-summary-start/**/*.ts": {
-      "maxDuration": 60
+      "maxDuration": 300,
+      "memory": 1024
     },
     "pages/api/ucie/openai-summary-poll/**/*.ts": {
       "maxDuration": 10
