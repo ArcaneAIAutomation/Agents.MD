@@ -33,7 +33,9 @@ export function OpenAIAnalysis({ symbol, collectedData, onAnalysisComplete }: Op
       setError(null);
       setProgress(10);
 
-      const response = await fetch(`/api/ucie/openai-analysis/${encodeURIComponent(symbol)}`, {
+      // Step 1: Start the analysis job
+      console.log(`📤 Starting GPT-5.1 analysis job...`);
+      const startResponse = await fetch(`/api/ucie/openai-summary-start/${encodeURIComponent(symbol)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -43,27 +45,71 @@ export function OpenAIAnalysis({ symbol, collectedData, onAnalysisComplete }: Op
         }),
       });
 
-      setProgress(50);
+      setProgress(20);
 
-      if (!response.ok) {
-        throw new Error(`Analysis failed: ${response.statusText}`);
+      if (!startResponse.ok) {
+        throw new Error(`Failed to start analysis: ${startResponse.statusText}`);
       }
 
-      const data = await response.json();
-      setProgress(90);
-
-      if (!data.success) {
-        throw new Error(data.error || 'Analysis failed');
+      const startData = await startResponse.json();
+      
+      if (!startData.success || !startData.jobId) {
+        throw new Error(startData.error || 'Failed to start analysis job');
       }
 
-      console.log(`✅ GPT-5.1 analysis complete:`, data.analysis);
-      setAnalysis(data.analysis);
-      setProgress(100);
-      setLoading(false);
+      const jobId = startData.jobId;
+      console.log(`✅ Analysis job started: ${jobId}`);
+      setProgress(30);
 
-      if (onAnalysisComplete) {
-        onAnalysisComplete(data.analysis);
+      // Step 2: Poll for completion
+      console.log(`🔄 Polling for analysis completion...`);
+      let attempts = 0;
+      const maxAttempts = 60; // 60 attempts × 5 seconds = 5 minutes max
+      
+      while (attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+        attempts++;
+        
+        const pollProgress = 30 + (attempts / maxAttempts) * 60; // Progress from 30% to 90%
+        setProgress(Math.round(pollProgress));
+        
+        console.log(`🔄 Polling attempt ${attempts}/${maxAttempts}...`);
+        
+        const pollResponse = await fetch(`/api/ucie/openai-summary-poll/${jobId}`, {
+          credentials: 'include',
+        });
+        
+        if (!pollResponse.ok) {
+          console.warn(`⚠️ Poll request failed: ${pollResponse.statusText}`);
+          continue;
+        }
+        
+        const pollData = await pollResponse.json();
+        console.log(`📊 Poll response:`, pollData);
+        
+        if (pollData.status === 'completed' && pollData.result) {
+          console.log(`✅ GPT-5.1 analysis complete!`);
+          setAnalysis(pollData.result);
+          setProgress(100);
+          setLoading(false);
+          
+          if (onAnalysisComplete) {
+            onAnalysisComplete(pollData.result);
+          }
+          
+          return;
+        }
+        
+        if (pollData.status === 'failed') {
+          throw new Error(pollData.error || 'Analysis failed');
+        }
+        
+        // Status is still 'processing', continue polling
+        console.log(`⏳ Status: ${pollData.status}, continuing to poll...`);
       }
+      
+      // If we get here, we timed out
+      throw new Error('Analysis timed out after 5 minutes');
 
     } catch (err) {
       console.error(`❌ GPT-5.1 analysis failed:`, err);

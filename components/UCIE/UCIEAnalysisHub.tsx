@@ -899,40 +899,29 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
             </div>
           ) : null}
 
-          {/* GPT-5.1 Analysis Section */}
-          <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6">
+          {/* GPT-5.1 Analysis Section - Always show after data collection */}
+          <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6 mb-6">
             <h2 className="text-2xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
               <Brain className="w-6 h-6 text-bitcoin-orange" />
               GPT-5.1 AI Analysis
             </h2>
-            <OpenAIAnalysis symbol={symbol} />
+            <p className="text-bitcoin-white-80 mb-4">
+              Comprehensive AI analysis of all collected data using GPT-5.1 with enhanced reasoning.
+            </p>
+            <OpenAIAnalysis 
+              symbol={symbol}
+              collectedData={{
+                marketData: analysisData?.['market-data'] || analysisData?.marketData,
+                technical: analysisData?.technical,
+                sentiment: analysisData?.sentiment,
+                news: analysisData?.news,
+                onChain: analysisData?.['on-chain'] || analysisData?.onChain,
+                risk: analysisData?.risk,
+                defi: analysisData?.defi
+              }}
+              onAnalysisComplete={handleGPTAnalysisComplete}
+            />
           </div>
-
-          {/* GPT-5.1 Analysis Section */}
-          {showGptAnalysis && (
-            <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6 mb-6">
-              <h2 className="text-2xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
-                <Brain className="w-6 h-6 text-bitcoin-orange" />
-                GPT-5.1 AI Analysis
-              </h2>
-              <p className="text-bitcoin-white-80 mb-4">
-                Comprehensive AI analysis of all collected data using GPT-5.1 with enhanced reasoning.
-              </p>
-              <OpenAIAnalysis 
-                symbol={symbol}
-                collectedData={{
-                  marketData: analysisData?.['market-data'] || analysisData?.marketData,
-                  technical: analysisData?.technical,
-                  sentiment: analysisData?.sentiment,
-                  news: analysisData?.news,
-                  onChain: analysisData?.['on-chain'] || analysisData?.onChain,
-                  risk: analysisData?.risk,
-                  defi: analysisData?.defi
-                }}
-                onAnalysisComplete={handleGPTAnalysisComplete}
-              />
-            </div>
-          )}
 
           {/* Caesar AI Deep Dive Section */}
           {gptAnalysis && (
