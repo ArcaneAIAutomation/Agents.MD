@@ -181,7 +181,7 @@ export function OpenAIAnalysis({ symbol, collectedData, onAnalysisComplete }: Op
   if (!analysis) return null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-gpt-results>
       {/* Consensus Recommendation */}
       {analysis.consensus && (
         <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6">

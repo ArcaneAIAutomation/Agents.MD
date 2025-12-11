@@ -207,6 +207,29 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
       console.log('📦 Updated preview data with GPT-5.1 analysis');
       setPreviewData(updatedPreviewData);
     }
+
+    // 🎯 CRITICAL FIX: Automatically scroll to results after 500ms delay
+    setTimeout(() => {
+      // Find the GPT-5.1 results section (it's the OpenAIAnalysis component)
+      const resultsSection = document.querySelector('[data-gpt-results]');
+      if (resultsSection) {
+        console.log('📜 Auto-scrolling to GPT-5.1 results...');
+        resultsSection.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      } else {
+        // Fallback: scroll to the GPT-5.1 section
+        const gptSection = document.querySelector('[data-gpt-section]');
+        if (gptSection) {
+          console.log('📜 Auto-scrolling to GPT-5.1 section...');
+          gptSection.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+          });
+        }
+      }
+    }, 500);
   };
 
   // Debug: Log analysis data changes
@@ -900,7 +923,7 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
           ) : null}
 
           {/* GPT-5.1 Analysis Section - Always show after data collection */}
-          <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6 mb-6">
+          <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-xl p-6 mb-6" data-gpt-section>
             <h2 className="text-2xl font-bold text-bitcoin-white mb-4 flex items-center gap-2">
               <Brain className="w-6 h-6 text-bitcoin-orange" />
               GPT-5.1 AI Analysis
