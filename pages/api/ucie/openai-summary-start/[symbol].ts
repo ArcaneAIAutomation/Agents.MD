@@ -553,20 +553,32 @@ async function analyzeDataSource(
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`🔍 Analyzing ${dataType} for ${symbol} (attempt ${attempt}/${maxRetries})...`);
+      console.log(`🔄 [analyzeDataSource] ========================================`);
+      console.log(`🔄 [analyzeDataSource] Starting analysis for: ${dataType}`);
+      console.log(`🔄 [analyzeDataSource] Symbol: ${symbol}`);
+      console.log(`🔄 [analyzeDataSource] Attempt: ${attempt}/${maxRetries}`);
+      console.log(`🔄 [analyzeDataSource] Model: ${model}`);
+      console.log(`🔄 [analyzeDataSource] API Key present: ${!!apiKey}`);
+      console.log(`🔄 [analyzeDataSource] API Key length: ${apiKey?.length || 0}`);
+      console.log(`🔄 [analyzeDataSource] ========================================`);
+      
       const analysisStart = Date.now();
       
       // ✅ Import OpenAI SDK
+      console.log(`🔧 [analyzeDataSource] Importing OpenAI SDK...`);
       const OpenAI = (await import('openai')).default;
       const { extractResponseText, validateResponseText } = await import('../../../../utils/openai');
+      console.log(`✅ [analyzeDataSource] OpenAI SDK imported successfully`);
       
       // ✅ Initialize OpenAI client with Responses API
+      console.log(`🔧 [analyzeDataSource] Initializing OpenAI client...`);
       const openai = new OpenAI({
         apiKey: apiKey,
         defaultHeaders: {
           'OpenAI-Beta': 'responses=v1'
         }
       });
+      console.log(`✅ [analyzeDataSource] OpenAI client initialized`);
       
       // ✅ FIX: Extract articles array for news analysis
       let dataToAnalyze = data;
@@ -591,6 +603,9 @@ ${instructions}
 Respond with valid JSON only.`;
       
       // ✅ Call GPT-5.1 with Responses API
+      console.log(`🚀 [analyzeDataSource] Calling OpenAI API...`);
+      console.log(`🚀 [analyzeDataSource] Prompt length: ${prompt.length} characters`);
+      
       const completion = await openai.chat.completions.create({
         model: model,
         messages: [
@@ -612,24 +627,51 @@ Respond with valid JSON only.`;
       });
       
       const analysisTime = Date.now() - analysisStart;
-      console.log(`✅ ${dataType} analysis completed in ${analysisTime}ms`);
+      console.log(`✅ [analyzeDataSource] OpenAI API call completed in ${analysisTime}ms`);
+      console.log(`📊 [analyzeDataSource] Response received:`, JSON.stringify(completion, null, 2).substring(0, 500) + '...');
       
       // ✅ Bulletproof extraction
+      console.log(`🔧 [analyzeDataSource] Extracting response text...`);
       const analysisText = extractResponseText(completion, true); // Debug mode
-      validateResponseText(analysisText, model, completion);
+      console.log(`✅ [analyzeDataSource] Response text extracted: ${analysisText.length} characters`);
       
-      return JSON.parse(analysisText);
+      console.log(`🔧 [analyzeDataSource] Validating response text...`);
+      validateResponseText(analysisText, model, completion);
+      console.log(`✅ [analyzeDataSource] Response text validated`);
+      
+      console.log(`🔧 [analyzeDataSource] Parsing JSON...`);
+      const parsed = JSON.parse(analysisText);
+      console.log(`✅ [analyzeDataSource] JSON parsed successfully`);
+      console.log(`✅ [analyzeDataSource] Completed analysis for: ${dataType}`);
+      console.log(`✅ [analyzeDataSource] ========================================`);
+      
+      return parsed;
       
     } catch (error) {
-      console.error(`❌ ${dataType} analysis attempt ${attempt} failed:`, error);
+      console.error(`❌ [analyzeDataSource] ========================================`);
+      console.error(`❌ [analyzeDataSource] FAILED for ${dataType}`);
+      console.error(`❌ [analyzeDataSource] Attempt: ${attempt}/${maxRetries}`);
+      console.error(`❌ [analyzeDataSource] Error:`, error);
+      console.error(`❌ [analyzeDataSource] Error message:`, error instanceof Error ? error.message : 'Unknown error');
+      console.error(`❌ [analyzeDataSource] Error stack:`, error instanceof Error ? error.stack : 'No stack trace');
+      
+      if (error instanceof Error && error.message) {
+        console.error(`❌ [analyzeDataSource] Error details:`, JSON.stringify({
+          name: error.name,
+          message: error.message,
+          cause: (error as any).cause
+        }, null, 2));
+      }
+      console.error(`❌ [analyzeDataSource] ========================================`);
       
       if (attempt === maxRetries) {
+        console.error(`❌ [analyzeDataSource] MAX RETRIES REACHED - GIVING UP`);
         throw error;
       }
       
       // Exponential backoff
       const backoffMs = 1000 * attempt;
-      console.log(`⏳ Retrying in ${backoffMs}ms...`);
+      console.log(`⏳ [analyzeDataSource] Retrying in ${backoffMs}ms...`);
       await new Promise(resolve => setTimeout(resolve, backoffMs));
     }
   }
