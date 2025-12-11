@@ -540,6 +540,7 @@ async function updateProgress(jobId: number, progress: string): Promise<void> {
  * ✅ USES GPT-5.1: Responses API with reasoning parameter
  * ✅ BULLETPROOF: Uses extractResponseText utility
  * ✅ FAST: Low reasoning effort for quick analysis
+ * ✅ FALLBACK: Returns error object instead of throwing on failure
  */
 async function analyzeDataSource(
   apiKey: string,
@@ -576,7 +577,9 @@ async function analyzeDataSource(
         apiKey: apiKey,
         defaultHeaders: {
           'OpenAI-Beta': 'responses=v1'
-        }
+        },
+        timeout: 30000, // 30 second timeout per request
+        maxRetries: 0 // We handle retries ourselves
       });
       console.log(`✅ [analyzeDataSource] OpenAI client initialized`);
       
@@ -665,8 +668,15 @@ Respond with valid JSON only.`;
       console.error(`❌ [analyzeDataSource] ========================================`);
       
       if (attempt === maxRetries) {
-        console.error(`❌ [analyzeDataSource] MAX RETRIES REACHED - GIVING UP`);
-        throw error;
+        console.error(`❌ [analyzeDataSource] MAX RETRIES REACHED - RETURNING ERROR OBJECT`);
+        // ✅ FIX: Return error object instead of throwing
+        // This allows other analyses to continue even if one fails
+        return {
+          error: 'Analysis failed',
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+          dataType: dataType,
+          timestamp: new Date().toISOString()
+        };
       }
       
       // Exponential backoff
@@ -676,7 +686,12 @@ Respond with valid JSON only.`;
     }
   }
   
-  throw new Error(`Failed to analyze ${dataType} after ${maxRetries} attempts`);
+  // This should never be reached, but just in case
+  return {
+    error: 'Analysis failed after all retries',
+    dataType: dataType,
+    timestamp: new Date().toISOString()
+  };
 }
 
 /**
@@ -685,6 +700,7 @@ Respond with valid JSON only.`;
  * 
  * ✅ USES GPT-5.1: Responses API with medium reasoning effort
  * ✅ CONTEXT-AWARE: Combines news with market, technical, and sentiment data
+ * ✅ FALLBACK: Returns error object instead of throwing on failure
  */
 async function analyzeNewsWithContext(
   apiKey: string,
@@ -708,7 +724,9 @@ async function analyzeNewsWithContext(
         apiKey: apiKey,
         defaultHeaders: {
           'OpenAI-Beta': 'responses=v1'
-        }
+        },
+        timeout: 30000, // 30 second timeout
+        maxRetries: 0 // We handle retries ourselves
       });
       
       // Extract articles array
@@ -797,7 +815,13 @@ Respond with valid JSON only.`;
       console.error(`❌ News analysis attempt ${attempt} failed:`, error);
       
       if (attempt === maxRetries) {
-        throw error;
+        console.error(`❌ News analysis MAX RETRIES REACHED - RETURNING ERROR OBJECT`);
+        // ✅ FIX: Return error object instead of throwing
+        return {
+          error: 'News analysis failed',
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+          timestamp: new Date().toISOString()
+        };
       }
       
       // Exponential backoff
@@ -807,7 +831,11 @@ Respond with valid JSON only.`;
     }
   }
   
-  throw new Error(`Failed to analyze news after ${maxRetries} attempts`);
+  // This should never be reached, but just in case
+  return {
+    error: 'News analysis failed after all retries',
+    timestamp: new Date().toISOString()
+  };
 }
 
 /**
@@ -817,6 +845,7 @@ Respond with valid JSON only.`;
  * ✅ USES GPT-5.1: Responses API with medium reasoning effort
  * ✅ BULLETPROOF: Uses extractResponseText utility
  * ✅ COMPREHENSIVE: Combines all 8 data source analyses
+ * ✅ FALLBACK: Returns error object instead of throwing on failure
  */
 async function generateExecutiveSummary(
   apiKey: string,
@@ -840,7 +869,9 @@ async function generateExecutiveSummary(
         apiKey: apiKey,
         defaultHeaders: {
           'OpenAI-Beta': 'responses=v1'
-        }
+        },
+        timeout: 30000, // 30 second timeout
+        maxRetries: 0 // We handle retries ourselves
       });
       
       // Build comprehensive prompt combining all analyses
@@ -907,7 +938,14 @@ Respond with valid JSON only.`;
       console.error(`❌ Executive summary attempt ${attempt} failed:`, error);
       
       if (attempt === maxRetries) {
-        throw error;
+        console.error(`❌ Executive summary MAX RETRIES REACHED - RETURNING ERROR OBJECT`);
+        // ✅ FIX: Return error object instead of throwing
+        return {
+          error: 'Executive summary generation failed',
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+          summary: 'Unable to generate executive summary due to API error',
+          timestamp: new Date().toISOString()
+        };
       }
       
       // Exponential backoff
@@ -917,7 +955,12 @@ Respond with valid JSON only.`;
     }
   }
   
-  throw new Error(`Failed to generate executive summary after ${maxRetries} attempts`);
+  // This should never be reached, but just in case
+  return {
+    error: 'Executive summary failed after all retries',
+    summary: 'Unable to generate executive summary',
+    timestamp: new Date().toISOString()
+  };
 }
 
 export default withOptionalAuth(handler);
