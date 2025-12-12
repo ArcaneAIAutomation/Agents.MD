@@ -99,37 +99,55 @@ Sentiment and On-Chain APIs showing 0% data quality due to:
 
 **Why**: AI needs complete context (all 10 data sources) for maximum analysis quality.
 
-**Execution Order**:
+**🆕 VERIFIED USER FLOW (December 12, 2025)**:
 ```
-Phase 1: Market Data → Cache in DB → ✅ (2-3 minutes)
-Phase 2: Sentiment & News → Cache in DB → ✅ (3-4 minutes)
-Phase 3: Technical, On-Chain, Risk, Predictions, Derivatives, DeFi → Cache in DB → ✅ (3-4 minutes)
-⏸️ CHECKPOINT: Verify data quality ≥ 70% (30 seconds)
-Phase 4: Retrieve ALL data → Aggregate context → Call AI → ✅ (3-5 minutes)
+Phase 1: Data Collection (60-120s)
+  ├─ Market Data → Cache in DB → ✅
+  ├─ Sentiment → Cache in DB → ✅
+  ├─ Technical → Cache in DB → ✅
+  ├─ News → Cache in DB → ✅
+  └─ On-Chain → Cache in DB → ✅
+  
+Phase 2: GPT-5.1 Analysis (60-100s) - **AUTO-STARTS**
+  ├─ Automatically starts after Phase 1
+  ├─ No user input required
+  ├─ Polls every 3 seconds
+  └─ Displays modular analysis when complete
+  
+Phase 3: Caesar Research (15-20 min) - **MANUAL START ONLY**
+  ├─ Shows "Start Caesar Deep Dive" button
+  ├─ User must explicitly click to proceed
+  ├─ Polls every 60 seconds
+  └─ Displays comprehensive report when complete
 
-Total: 11-16 minutes (within Vercel Pro 900s limit)
+Total: 17-22 minutes (with user opt-in for Caesar)
 ```
 
 **NEVER**:
 - ❌ Call AI before data is cached
 - ❌ Call AI in parallel with data fetching
 - ❌ Call AI with partial context
+- ❌ Auto-start Caesar without user consent
 
 **ALWAYS**:
 - ✅ Fetch and cache ALL data first
 - ✅ Verify data quality (minimum 70%)
 - ✅ Aggregate complete context
-- ✅ THEN call AI with full context
+- ✅ GPT-5.1 auto-starts after data collection
+- ✅ Caesar requires explicit user opt-in
 
-### 🆕 Vercel Pro Timeout Configuration (November 27, 2025)
+### 🆕 Vercel Pro Timeout Configuration (December 12, 2025)
 
 **CRITICAL**: With Vercel Pro, we have increased timeouts to prevent failures:
+
+- **Caesar Research Endpoints**: 1500 seconds (25 minutes)
+  - `/api/ucie/research/**`
+  - `/api/ucie/caesar-research/**`
+  - **Why**: Caesar takes 15-20 minutes, needs buffer
 
 - **Critical UCIE Endpoints**: 900 seconds (15 minutes)
   - `/api/ucie/comprehensive/**`
   - `/api/ucie/preview-data/**`
-  - `/api/ucie/research/**`
-  - `/api/ucie/caesar-research/**`
 
 - **Standard UCIE Endpoints**: 600 seconds (10 minutes)
   - All individual data source endpoints
@@ -137,8 +155,9 @@ Total: 11-16 minutes (within Vercel Pro 900s limit)
   - Whale Watch endpoints
 
 **Why This Matters**:
-- Complete data collection from 13+ APIs (8-10 minutes)
-- AI analysis with full context (3-5 minutes)
+- Complete data collection from 13+ APIs (60-120 seconds)
+- GPT-5.1 analysis with full context (60-100 seconds)
+- Caesar research with full context (15-20 minutes)
 - Buffer for retries and network latency (1-2 minutes)
 
 **See**: `VERCEL-PRO-TIMEOUT-FIX-CRITICAL.md` for complete details
@@ -214,32 +233,41 @@ Store in Database (setCachedAnalysis)
 Return fresh data
 ```
 
-### AI Analysis Flow
+### AI Analysis Flow (VERIFIED December 12, 2025)
 
 ```
 User triggers analysis for BTC
     ↓
-Phase 1-3: Fetch and cache ALL data sources (8-10 seconds)
-    ├─ Market data → DB
-    ├─ Sentiment → DB
-    ├─ News → DB
-    ├─ Technical → DB
-    ├─ On-chain → DB
-    ├─ Risk → DB
-    ├─ Predictions → DB
-    ├─ Derivatives → DB
-    └─ DeFi → DB
+Phase 1: Data Collection (60-120s)
+    ├─ Market data → DB (parallel)
+    ├─ Sentiment → DB (parallel)
+    ├─ News → DB (parallel)
+    ├─ Technical → DB (parallel)
+    └─ On-chain → DB (parallel)
     ↓
 Checkpoint: Verify data quality ≥ 70%
     ↓
-Phase 4: AI Analysis (5-10 minutes)
+Phase 2: GPT-5.1 Analysis (60-100s) - AUTO-STARTS
     ├─ Retrieve ALL data from database
     ├─ Aggregate context (getComprehensiveContext)
     ├─ Format for AI (formatContextForAI)
-    ├─ Call Caesar/OpenAI with COMPLETE context
-    └─ Store AI analysis → DB
+    ├─ Call GPT-5.1 with COMPLETE context
+    ├─ Modular analysis (market, technical, sentiment, news, summary)
+    └─ Store GPT-5.1 analysis → DB
     ↓
-Return complete analysis to user
+Display GPT-5.1 results to user
+    ↓
+Phase 3: Caesar Research (15-20 min) - MANUAL START
+    ├─ Show "Start Caesar Deep Dive" button
+    ├─ User clicks button (explicit opt-in)
+    ├─ 3-second delay for database writes
+    ├─ Retrieve ALL data + GPT-5.1 analysis from DB
+    ├─ Format comprehensive context for Caesar
+    ├─ Call Caesar API with COMPLETE context
+    ├─ Poll every 60 seconds for status
+    └─ Store Caesar research → DB
+    ↓
+Display complete analysis to user
 ```
 
 ---
@@ -503,12 +531,13 @@ await callAI(context); // ✅ Quality verified
 - **Cache Hit Rate Target**: > 80%
 - **TTL Accuracy**: 100%
 
-### API Performance
+### API Performance (VERIFIED December 12, 2025)
 
-- **Phase 1-3 Complete**: < 10 seconds
-- **Phase 4 Complete**: < 10 minutes
+- **Phase 1 (Data Collection)**: 60-120 seconds (parallel processing)
+- **Phase 2 (GPT-5.1 Analysis)**: 60-100 seconds (auto-starts)
+- **Phase 3 (Caesar Research)**: 15-20 minutes (manual start)
 - **Cached Analysis**: < 1 second
-- **Data Quality**: 90-100% typical
+- **Data Quality**: 70-100% typical
 
 ### Cost Efficiency
 
@@ -552,6 +581,100 @@ Before considering work complete:
 **Testing**:
 1. `scripts/test-database-access.ts` - Database tests
 2. `scripts/verify-database-storage.ts` - Verification
+
+---
+
+## 🎯 VERIFIED USER FLOW (December 12, 2025)
+
+### Complete 3-Phase Flow
+
+**Status**: ✅ **VERIFIED CORRECT** - All phases working as designed
+
+#### Phase 1: Data Collection (60-120 seconds)
+**What Happens**:
+1. User enters symbol (e.g., BTC) and clicks "Get Preview"
+2. Preview modal opens with progress bar
+3. Data collected in parallel from 5 sources:
+   - ✅ Market Data (CoinGecko, CoinMarketCap, Kraken)
+   - ✅ Sentiment (Fear & Greed, LunarCrush, CMC, CoinGecko, Reddit)
+   - ✅ Technical Indicators (RSI, MACD, EMA, Bollinger Bands)
+   - ✅ News (NewsAPI, CryptoCompare)
+   - ✅ On-Chain (Etherscan/Blockchain.com whale tracking)
+4. All data cached in Supabase database with 30-minute TTL
+5. Preview displayed with data quality score
+
+**Timeline**: 60-120 seconds (parallel processing)
+
+#### Phase 2: GPT-5.1 Analysis (60-100 seconds) - **AUTO-STARTS**
+**What Happens**:
+1. **AUTOMATICALLY STARTS** after Phase 1 completes
+2. Creates GPT-5.1 job via `/api/ucie/openai-summary-start/[symbol]`
+3. Job processes in background with modular analysis:
+   - Market Analysis (price trends, volume, market cap)
+   - Technical Analysis (RSI, MACD, trend signals)
+   - Sentiment Analysis (Fear & Greed, social metrics)
+   - News Analysis (recent headlines, sentiment)
+   - Executive Summary (comprehensive synthesis)
+4. Frontend polls every 3 seconds via `/api/ucie/openai-summary-poll/[jobId]`
+5. Shows progress: "AI Analysis in Progress... (45s)"
+6. Displays modular analysis when complete
+
+**Timeline**: 60-100 seconds (medium reasoning effort)
+
+**User Experience**:
+- ✅ Progress indicator with elapsed time
+- ✅ "Analyzing..." status with countdown
+- ✅ Modular results displayed as they complete
+- ✅ NO user input required - fully automatic
+
+#### Phase 3: Caesar AI Research (15-20 minutes) - **MANUAL START ONLY**
+**What Happens**:
+1. **WAITS FOR USER INPUT** - Does NOT auto-start
+2. Shows "Start Caesar Deep Dive (15-20 min)" button
+3. Displays what Caesar will analyze:
+   - Search 15+ authoritative sources
+   - Analyze technology, team, partnerships
+   - Identify risks and opportunities
+   - Generate comprehensive report with citations
+4. User must explicitly click button to start
+5. 3-second delay to ensure database writes complete
+6. Caesar job created via `/api/ucie/research/[symbol]`
+7. Polls every 60 seconds for status updates
+8. Shows progress bar with elapsed time
+9. Displays comprehensive research report when complete
+
+**Timeline**: 15-20 minutes (NOT 5-7 minutes as previously documented)
+
+**User Experience**:
+- ✅ Clear opt-in button with time warning
+- ✅ "Expected Duration: 15-20 minutes" displayed
+- ✅ Progress bar with percentage (0-95%)
+- ✅ Live elapsed time counter
+- ✅ Poll updates every 60 seconds
+- ✅ Comprehensive report with sources when complete
+
+### Key Implementation Details
+
+**GPT-5.1 Auto-Start**:
+- File: `components/UCIE/DataPreviewModal.tsx`
+- Triggers automatically after preview completes
+- No user input required
+- Polls every 3 seconds for status
+
+**Caesar Manual Start**:
+- File: `components/UCIE/CaesarAnalysisContainer.tsx`
+- Requires explicit user click
+- Shows opt-in button with clear messaging
+- Timeout: 25 minutes (1500000ms)
+- Polls every 60 seconds for status
+
+**Database Caching**:
+- All data stored in Supabase
+- 30-minute TTL for all sources
+- Uses `getCachedAnalysis()` and `setCachedAnalysis()`
+- No in-memory cache
+
+**See**: `UCIE-USER-FLOW-VERIFIED.md` for complete 500+ line verification document
 
 ---
 
