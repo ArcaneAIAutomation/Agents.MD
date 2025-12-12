@@ -19,7 +19,7 @@
 ### Whale Watch Intelligence
 - **Bitcoin Whale Tracking**: Real-time detection of large BTC transactions (>50 BTC)
 - **🆕 GPT-5.1 Deep Dive**: Enhanced whale transaction analysis with high reasoning mode
-- **Caesar AI Analysis**: Deep research and analysis of whale transactions with 5-7 minute processing
+- **Caesar AI Analysis**: Deep research and analysis of whale transactions with 15-20 minute processing
 - **Transaction Classification**: Automatic identification of exchange deposits, withdrawals, and whale-to-whale transfers
 - **Market Impact Assessment**: AI-powered analysis of potential market effects (Bearish/Bullish/Neutral)
 - **Analysis Lock System**: Prevents API spam by allowing only one analysis at a time

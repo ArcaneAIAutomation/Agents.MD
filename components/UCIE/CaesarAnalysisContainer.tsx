@@ -28,8 +28,8 @@ interface AnalysisStatus {
   estimatedTimeRemaining?: number;
 }
 
-// Maximum wait time: 15 minutes (900 seconds)
-const MAX_WAIT_TIME = 900000; // 15 minutes in milliseconds
+// Maximum wait time: 25 minutes (1500 seconds) - Caesar takes 15-20 minutes
+const MAX_WAIT_TIME = 1500000; // 25 minutes in milliseconds (with 5-min buffer)
 const POLL_INTERVAL = 60000; // 60 seconds in milliseconds
 
 export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, progressiveLoadingComplete = true, previewData }: CaesarAnalysisContainerProps) {
@@ -191,10 +191,10 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
       
       console.log(`🔄 [Caesar] Poll #${currentPollCount} - Checking status for job ${jobId} (${elapsedMinutes}m ${elapsedSeconds % 60}s elapsed)...`);
 
-      // Check for timeout (15 minutes)
+      // Check for timeout (25 minutes)
       if (elapsedMs > MAX_WAIT_TIME) {
-        console.error(`❌ [Caesar] Analysis timed out after 15 minutes`);
-        setError('Analysis timed out after 15 minutes. Please try again.');
+        console.error(`❌ [Caesar] Analysis timed out after 25 minutes`);
+        setError('Analysis timed out after 25 minutes. Please try again.');
         setLoading(false);
         if (pollingIntervalRef.current) {
           clearInterval(pollingIntervalRef.current);
@@ -481,9 +481,9 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
           </div>
 
           {/* Timeout Warning */}
-          {(Date.now() - startTimeRef.current) > 600000 && (
+          {(Date.now() - startTimeRef.current) > 1200000 && (
             <div className="text-xs text-bitcoin-orange">
-              ⚠️ Analysis taking longer than expected (15 min timeout)
+              ⚠️ Analysis taking longer than expected (25 min timeout)
             </div>
           )}
         </div>
@@ -534,7 +534,7 @@ export default function CaesarAnalysisContainer({ symbol, jobId: initialJobId, p
 
         {/* Disclaimer */}
         <div className="mt-6 text-xs text-bitcoin-white-60">
-          This process typically takes 5-10 minutes for comprehensive analysis.
+          This process typically takes 15-20 minutes for comprehensive analysis.
           <br />
           Progress updates every 60 seconds.
         </div>
