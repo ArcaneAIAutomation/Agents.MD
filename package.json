@@ -50,7 +50,8 @@
     "sync-end": "pwsh -File sync-end.ps1",
     "sync-status": "pwsh -File sync-status.ps1",
     "sync-quick": "pwsh -File sync-quick.ps1",
-    "sync": "pwsh -File sync-quick.ps1"
+    "sync": "pwsh -File sync-quick.ps1",
+    "verify:ucie-production": "npx tsx scripts/verify-ucie-production-ready.ts"
   },
   "dependencies": {
     "@vercel/kv": "^3.0.0",
