@@ -1,12 +1,12 @@
 /**
  * UCIE OpenAI Summary - Background Processor
  * 
- * Processes GPT-4o analysis in the background (up to 180 seconds / 3 minutes)
+ * Processes chatgpt-4o-latest analysis in the background (up to 180 seconds / 3 minutes)
  * Updates database with results
  * Frontend polls /openai-summary-poll/[jobId] every 5 seconds for status
  * 
  * ✅ ASYNC: Avoids Vercel 60-second timeout
- * ✅ USES GPT-4o: Standard OpenAI Chat Completions API
+ * ✅ USES chatgpt-4o-latest: OpenAI's latest GPT-4o with automatic updates
  * ✅ STORES DATA: Updates database with results
  * ✅ PATTERN: Whale Watch Deep Dive (proven in production)
  */
@@ -160,7 +160,7 @@ export default async function handler(
     // Update progress
     await query(
       'UPDATE ucie_openai_jobs SET progress = $1, updated_at = NOW() WHERE id = $2',
-      ['Analyzing with GPT-4o...', parseInt(jobId)]
+      ['Analyzing with chatgpt-4o-latest...', parseInt(jobId)]
     );
 
     // Build comprehensive prompt
@@ -205,13 +205,14 @@ Provide comprehensive JSON analysis with these exact fields:
 
 Be specific, actionable, and data-driven.`;
 
-    // Call OpenAI API with GPT-4o
+    // Call OpenAI API with chatgpt-4o-latest
     const openaiApiKey = process.env.OPENAI_API_KEY;
     if (!openaiApiKey) {
       throw new Error('OPENAI_API_KEY not configured');
     }
 
-    const model = 'gpt-4o';
+    // ✅ Use chatgpt-4o-latest: OpenAI's latest GPT-4o with automatic updates
+    const model = process.env.OPENAI_MODEL || 'chatgpt-4o-latest';
     
     // 🔍 DEBUG: Log prompt statistics
     console.log(`📏 Prompt statistics:`, {
@@ -228,8 +229,8 @@ Be specific, actionable, and data-driven.`;
     console.log(`📡 API Key present: ${!!openaiApiKey}`);
     console.log(`📡 Prompt length: ${prompt.length} chars`);
     
-    // 🔍 DEBUG: Log GPT-4o request details
-    console.log(`📡 GPT-4o request:`, {
+    // 🔍 DEBUG: Log chatgpt-4o-latest request details
+    console.log(`📡 chatgpt-4o-latest request:`, {
       model: model,
       promptLength: prompt.length,
       estimatedTokens: Math.ceil(prompt.length / 4),
@@ -239,7 +240,7 @@ Be specific, actionable, and data-driven.`;
     
     const openaiStart = Date.now();
 
-    // ✅ GPT-4o with Chat Completions API (3-minute timeout)
+    // ✅ chatgpt-4o-latest with Chat Completions API (3-minute timeout)
     let response;
     try {
       response = await fetch('https://api.openai.com/v1/chat/completions', {

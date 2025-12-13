@@ -1,14 +1,14 @@
 /**
- * UCIE GPT-5.1 Analysis Endpoint
+ * UCIE chatgpt-4o-latest Analysis Endpoint
  * 
- * Analyzes collected UCIE data using GPT-5.1 with medium reasoning effort
+ * Analyzes collected UCIE data using chatgpt-4o-latest (OpenAI's latest GPT-4o)
  * Similar to Whale Watch deep dive analysis
  * 
  * GET /api/ucie/gpt-analysis/BTC
  * 
  * Features:
- * - GPT-5.1 with Responses API
- * - Medium reasoning effort (3-5 seconds)
+ * - chatgpt-4o-latest with Chat Completions API
+ * - Fast analysis (3-5 seconds)
  * - Analyzes market data, sentiment, technical, on-chain
  * - Stores analysis in database
  * - Adds to Caesar prompt context
@@ -79,7 +79,7 @@ async function handler(
   }
 
   try {
-    console.log(`🤖 Starting GPT-5.1 analysis for ${symbolUpper}...`);
+    console.log(`🤖 Starting chatgpt-4o-latest analysis for ${symbolUpper}...`);
 
     // Fetch all available data
     const [marketData, sentiment, technical, onChain, news] = await Promise.all([
@@ -192,13 +192,14 @@ async function handler(
     prompt += `}\n\n`;
     prompt += `Be specific, data-driven, and actionable. Focus on what the data tells us about potential price movements.`;
 
-    // Call GPT-4o with Chat Completions API
+    // Call chatgpt-4o-latest with Chat Completions API
     const openaiApiKey = process.env.OPENAI_API_KEY;
     if (!openaiApiKey) {
       throw new Error('OPENAI_API_KEY not configured');
     }
 
-    const model = 'gpt-4o';
+    // ✅ Use chatgpt-4o-latest: OpenAI's latest GPT-4o with automatic updates
+    const model = process.env.OPENAI_MODEL || 'chatgpt-4o-latest';
 
     console.log(`📡 Calling OpenAI Chat Completions API with ${model}...`);
     const openaiStart = Date.now();
@@ -266,7 +267,7 @@ async function handler(
       console.log(`💾 Cached ${symbolUpper} GPT analysis for ${CACHE_TTL}s`);
     }
 
-    console.log(`✅ GPT-4o analysis complete for ${symbolUpper}`);
+    console.log(`✅ chatgpt-4o-latest analysis complete for ${symbolUpper}`);
 
     return res.status(200).json(responseData);
 

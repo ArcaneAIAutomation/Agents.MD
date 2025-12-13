@@ -3,13 +3,13 @@
  * 
  * POST /api/ucie/openai-summary-start/[symbol]
  * 
- * Starts GPT-4o analysis in background, returns jobId immediately
+ * Starts chatgpt-4o-latest analysis in background, returns jobId immediately
  * Frontend polls /api/ucie/openai-summary-poll/[jobId] every 10 seconds
  * 
  * ✅ ASYNC: Avoids Vercel 60-second timeout
  * ✅ POLLING: Frontend checks status every 10 seconds
  * ✅ BULLETPROOF: Can run for up to 3 minutes
- * ✅ MODEL: Uses gpt-4o (standard OpenAI API)
+ * ✅ MODEL: Uses chatgpt-4o-latest (OpenAI's latest GPT-4o with automatic updates)
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -59,7 +59,7 @@ async function handler(
       });
     }
 
-    console.log(`🚀 Starting GPT-4o analysis for ${symbolUpper}...`);
+    console.log(`🚀 Starting chatgpt-4o-latest analysis for ${symbolUpper}...`);
 
     // Create job in database
     const result = await query(
@@ -90,7 +90,7 @@ async function handler(
     });
 
   } catch (error) {
-    console.error('Failed to start GPT-5.1 analysis:', error);
+    console.error('Failed to start chatgpt-4o-latest analysis:', error);
     return res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to start analysis',
@@ -137,11 +137,11 @@ interface ModularAnalysis {
 }
 
 /**
- * Process GPT-4o job asynchronously with MODULAR ANALYSIS
+ * Process chatgpt-4o-latest job asynchronously with MODULAR ANALYSIS
  * Each data source analyzed separately for speed and reliability
  * 
  * ✅ HEARTBEAT: Updates database every 10 seconds to show job is alive
- * ✅ GPT-4o: Uses standard OpenAI Chat Completions API
+ * ✅ chatgpt-4o-latest: Uses OpenAI's latest GPT-4o with automatic updates
  * ✅ ERROR HANDLING: Comprehensive try-catch with database updates
  */
 async function processJobAsync(
@@ -180,7 +180,7 @@ async function processJobAsync(
       try {
         await query(
           'UPDATE ucie_openai_jobs SET status = $1, progress = $2, updated_at = NOW() WHERE id = $3',
-          ['processing', 'Analyzing with GPT-4o...', jobId],
+          ['processing', 'Analyzing with chatgpt-4o-latest...', jobId],
           { timeout: 5000, retries: 1 } // 5 second timeout, 1 retry
         );
         console.log(`✅ Job ${jobId}: Status updated to 'processing', DB connection released`);
@@ -215,7 +215,8 @@ async function processJobAsync(
       throw new Error('OPENAI_API_KEY not configured');
     }
 
-    const model = 'gpt-4o';
+    // ✅ Use chatgpt-4o-latest: OpenAI's latest GPT-4o with automatic updates
+    const model = process.env.OPENAI_MODEL || 'chatgpt-4o-latest';
     const modularAnalysis: ModularAnalysis = {
       timestamp: new Date().toISOString(),
       processingTime: 0
@@ -535,10 +536,10 @@ async function updateProgress(jobId: number, progress: string): Promise<void> {
 }
 
 /**
- * Analyze a single data source with GPT-4o
+ * Analyze a single data source with chatgpt-4o-latest
  * Small, fast, focused analysis
  * 
- * ✅ USES GPT-4o: Standard OpenAI Chat Completions API
+ * ✅ USES chatgpt-4o-latest: OpenAI's latest GPT-4o with automatic updates
  * ✅ BULLETPROOF: Uses extractResponseText utility
  * ✅ FAST: Quick analysis for modular approach
  * ✅ FALLBACK: Returns error object instead of throwing on failure
@@ -603,7 +604,7 @@ ${instructions}
 
 Respond with valid JSON only.`;
       
-      // ✅ Call GPT-5.1 with Responses API
+      // ✅ Call chatgpt-4o-latest with Chat Completions API
       console.log(`🚀 [analyzeDataSource] Calling OpenAI API...`);
       console.log(`🚀 [analyzeDataSource] Prompt length: ${prompt.length} characters`);
       
@@ -690,10 +691,10 @@ Respond with valid JSON only.`;
 }
 
 /**
- * Analyze news with comprehensive market context using GPT-4o
+ * Analyze news with comprehensive market context using chatgpt-4o-latest
  * Provides full picture for accurate impact assessment
  * 
- * ✅ USES GPT-4o: Standard OpenAI Chat Completions API
+ * ✅ USES chatgpt-4o-latest: OpenAI's latest GPT-4o with automatic updates
  * ✅ CONTEXT-AWARE: Combines news with market, technical, and sentiment data
  * ✅ FALLBACK: Returns error object instead of throwing on failure
  */
@@ -773,7 +774,7 @@ Consider:
 
 Respond with valid JSON only.`;
       
-      // ✅ Call GPT-4o API
+      // ✅ Call chatgpt-4o-latest API
       const completion = await openai.chat.completions.create({
         model: model,
         messages: [
