@@ -82,8 +82,31 @@ async function handler(
       const cached = await getCachedAnalysis(symbolUpper, source.type as any);
       
       const isAvailable = !!cached;
-      const quality = cached?.dataQuality || cached?.data?.dataQuality || null;
-      const timestamp = cached?.timestamp || cached?.data?.timestamp || null;
+      
+      // ✅ ROBUST QUALITY EXTRACTION: Check multiple possible locations
+      // Data can be stored in different formats depending on the API
+      let quality: number | null = null;
+      if (cached) {
+        quality = cached.dataQuality 
+          ?? cached.data?.dataQuality 
+          ?? cached.quality 
+          ?? cached.data?.quality
+          ?? (cached.success === true ? 100 : null) // If success flag exists, assume 100%
+          ?? null;
+      }
+      
+      // ✅ ROBUST TIMESTAMP EXTRACTION
+      let timestamp: string | null = null;
+      if (cached) {
+        timestamp = cached.timestamp 
+          ?? cached.data?.timestamp 
+          ?? cached.fetchedAt 
+          ?? cached.data?.fetchedAt
+          ?? null;
+      }
+      
+      // Log for debugging
+      console.log(`   ${source.name}: ${isAvailable ? '✅' : '❌'} (quality: ${quality ?? 'N/A'})`);
 
       dataSources.push({
         name: source.name,
@@ -101,11 +124,45 @@ async function handler(
     const collectionPercentage = Math.round((completedCount / totalSources) * 100);
 
     // ✅ Check for Gemini analysis in database
-    const geminiAnalysis = await getGeminiAnalysis(symbolUpper, userId);
+    // CRITICAL FIX: Check for ALL analysis types (summary, fallback, error)
+    // The preview-data endpoint stores with different analysisTypes based on success/failure
+    let geminiAnalysis = await getGeminiAnalysis(symbolUpper, userId, 'summary');
+    
+    // If no 'summary' found, check for 'fallback' type
+    if (!geminiAnalysis) {
+      geminiAnalysis = await getGeminiAnalysis(symbolUpper, userId, 'fallback');
+    }
+    
+    // If still not found, check for 'error' type (at least we know it was attempted)
+    if (!geminiAnalysis) {
+      geminiAnalysis = await getGeminiAnalysis(symbolUpper, userId, 'error');
+    }
+    
+    // Also check for 'anonymous' user if current user has no analysis
+    if (!geminiAnalysis && userId !== 'anonymous') {
+      geminiAnalysis = await getGeminiAnalysis(symbolUpper, 'anonymous', 'summary');
+      if (!geminiAnalysis) {
+        geminiAnalysis = await getGeminiAnalysis(symbolUpper, 'anonymous', 'fallback');
+      }
+      if (!geminiAnalysis) {
+        geminiAnalysis = await getGeminiAnalysis(symbolUpper, 'anonymous', 'error');
+      }
+    }
+    
     const geminiAvailable = !!geminiAnalysis;
     const geminiWordCount = geminiAnalysis?.summary_text 
       ? geminiAnalysis.summary_text.split(' ').length 
       : null;
+    
+    // Log for debugging
+    console.log(`📊 Status check for ${symbolUpper}:`);
+    console.log(`   User ID: ${userId}`);
+    console.log(`   Data sources found: ${completedCount}/${totalSources}`);
+    console.log(`   Gemini analysis found: ${geminiAvailable}`);
+    if (geminiAnalysis) {
+      console.log(`   Analysis type: ${geminiAnalysis.analysis_type}`);
+      console.log(`   Word count: ${geminiWordCount}`);
+    }
 
     // ✅ Determine overall status
     let status: AnalysisStatus['status'] = 'initializing';

@@ -18,7 +18,49 @@ export default function AnalyzePage() {
 
   const handleAnalysisComplete = (data: any) => {
     console.log('✅ Analysis complete:', data);
-    setAnalysisData(data);
+    
+    // ✅ CRITICAL FIX: Transform data structure for UCIEAnalysisHub
+    // The preview-data API returns: { success: true, data: { collectedData: {...}, summary, dataQuality, ... } }
+    // UCIEAnalysisHub expects: { marketData, sentiment, technical, news, onChain, summary, dataQuality, ... }
+    let transformedData = data;
+    
+    if (data?.success && data?.data) {
+      // Extract from nested structure
+      const apiData = data.data;
+      transformedData = {
+        // Flatten collectedData to top level
+        marketData: apiData.collectedData?.marketData,
+        sentiment: apiData.collectedData?.sentiment,
+        technical: apiData.collectedData?.technical,
+        news: apiData.collectedData?.news,
+        onChain: apiData.collectedData?.onChain,
+        // Also support hyphenated keys for compatibility
+        'market-data': apiData.collectedData?.marketData,
+        'on-chain': apiData.collectedData?.onChain,
+        // Include other important fields
+        summary: apiData.summary,
+        aiAnalysis: apiData.aiAnalysis,
+        dataQuality: apiData.dataQuality,
+        apiStatus: apiData.apiStatus,
+        caesarPromptPreview: apiData.caesarPromptPreview,
+        gptJobId: apiData.gptJobId,
+        timing: apiData.timing,
+        databaseStatus: apiData.databaseStatus,
+        // Keep original data for reference
+        _originalData: apiData
+      };
+      console.log('📦 Transformed data structure:', {
+        hasMarketData: !!transformedData.marketData,
+        hasSentiment: !!transformedData.sentiment,
+        hasTechnical: !!transformedData.technical,
+        hasNews: !!transformedData.news,
+        hasOnChain: !!transformedData.onChain,
+        hasSummary: !!transformedData.summary,
+        dataQuality: transformedData.dataQuality
+      });
+    }
+    
+    setAnalysisData(transformedData);
     setIsLoading(false);
   };
 

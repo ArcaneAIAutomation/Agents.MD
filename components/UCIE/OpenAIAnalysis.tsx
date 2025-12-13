@@ -3,9 +3,14 @@
  * 
  * Generates comprehensive analysis using GPT-5.1 after data collection
  * Displays results and prepares Caesar prompt
+ * 
+ * ✅ FIX (Dec 13, 2025): Added hasStartedRef to prevent infinite re-renders
+ * The parent component passes collectedData as an inline object, which creates
+ * a new reference on every render. This was causing startAnalysis() to be called
+ * repeatedly, creating an infinite loop. The ref ensures we only start once.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Brain, RefreshCw, AlertTriangle } from 'lucide-react';
 
 interface OpenAIAnalysisProps {
@@ -19,10 +24,34 @@ export function OpenAIAnalysis({ symbol, collectedData, onAnalysisComplete }: Op
   const [analysis, setAnalysis] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+  
+  // ✅ CRITICAL FIX: Track if analysis has already started to prevent infinite loops
+  // The parent passes collectedData as an inline object, creating new references on each render
+  // Without this ref, the useEffect would trigger startAnalysis() on every parent re-render
+  const hasStartedRef = useRef(false);
+  const currentSymbolRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (collectedData) {
+    // ✅ Only start analysis if:
+    // 1. We have collected data
+    // 2. We haven't already started for this symbol
+    // 3. The symbol hasn't changed (or it's a new symbol)
+    if (collectedData && !hasStartedRef.current) {
+      console.log(`🔒 OpenAIAnalysis: Starting analysis for ${symbol} (first time)`);
+      hasStartedRef.current = true;
+      currentSymbolRef.current = symbol;
       startAnalysis();
+    } else if (collectedData && symbol !== currentSymbolRef.current) {
+      // Symbol changed - reset and start new analysis
+      console.log(`🔄 OpenAIAnalysis: Symbol changed from ${currentSymbolRef.current} to ${symbol}, restarting`);
+      hasStartedRef.current = true;
+      currentSymbolRef.current = symbol;
+      setAnalysis(null);
+      setError(null);
+      setProgress(0);
+      startAnalysis();
+    } else if (collectedData && hasStartedRef.current) {
+      console.log(`⏭️ OpenAIAnalysis: Skipping - analysis already started for ${symbol}`);
     }
   }, [collectedData, symbol]);
 
@@ -155,6 +184,16 @@ export function OpenAIAnalysis({ symbol, collectedData, onAnalysisComplete }: Op
     );
   }
 
+  // ✅ Retry handler that resets the hasStartedRef to allow a fresh start
+  const handleRetry = () => {
+    console.log(`🔄 OpenAIAnalysis: Manual retry requested for ${symbol}`);
+    hasStartedRef.current = false; // Reset so startAnalysis can run again
+    setError(null);
+    setProgress(0);
+    setLoading(true);
+    startAnalysis();
+  };
+
   if (error) {
     return (
       <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-xl p-8">
@@ -167,7 +206,7 @@ export function OpenAIAnalysis({ symbol, collectedData, onAnalysisComplete }: Op
             {error}
           </p>
           <button
-            onClick={startAnalysis}
+            onClick={handleRetry}
             className="bg-bitcoin-orange text-bitcoin-black border-2 border-bitcoin-orange font-bold uppercase px-6 py-3 rounded-lg transition-all hover:bg-bitcoin-black hover:text-bitcoin-orange min-h-[48px]"
           >
             <RefreshCw className="w-5 h-5 inline mr-2" />

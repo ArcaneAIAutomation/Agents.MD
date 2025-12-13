@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   TrendingUp, 
   Brain, 
@@ -183,9 +183,126 @@ export default function UCIEAnalysisHub({ symbol, onBack, initialData }: UCIEAna
     },
   });
   
-  // ✅ CRITICAL: Use initialData if provided, otherwise use progressive loading data
-  const analysisData = initialData || progressiveData;
-  const loading = initialData ? false : progressiveLoading; // Not loading if we have initialData
+  // ✅ CRITICAL FIX: Use data from multiple sources in priority order:
+  // 1. initialData (passed from external source like ProgressiveLoadingScreen)
+  // 2. previewData.collectedData (from DataPreviewModal after user clicks "Continue")
+  // 3. progressiveData (from useProgressiveLoading hook)
+  const getAnalysisData = () => {
+    if (initialData) {
+      console.log('📊 Using initialData for analysis');
+      return initialData;
+    }
+    if (previewData?.collectedData) {
+      console.log('📊 Using previewData.collectedData for analysis');
+      console.log('📦 Raw previewData structure:', {
+        hasCollectedData: !!previewData.collectedData,
+        collectedDataKeys: Object.keys(previewData.collectedData || {}),
+        dataQuality: previewData.dataQuality,
+        hasAiAnalysis: !!previewData.aiAnalysis
+      });
+      
+      // ✅ CRITICAL FIX: The collectedData structure from API is:
+      // { marketData: { success: true, priceAggregation: {...} }, ... }
+      // Panels expect the FULL object (they check for data.priceAggregation, data.indicators, etc.)
+      const collected = previewData.collectedData;
+      
+      // Log each data source for debugging
+      console.log('📦 Market Data:', {
+        exists: !!collected.marketData,
+        success: collected.marketData?.success,
+        hasPriceAggregation: !!collected.marketData?.priceAggregation
+      });
+      console.log('📦 Sentiment:', {
+        exists: !!collected.sentiment,
+        success: collected.sentiment?.success,
+        hasOverallScore: collected.sentiment?.overallScore !== undefined
+      });
+      console.log('📦 Technical:', {
+        exists: !!collected.technical,
+        success: collected.technical?.success,
+        hasIndicators: !!collected.technical?.indicators
+      });
+      console.log('📦 News:', {
+        exists: !!collected.news,
+        success: collected.news?.success,
+        hasArticles: !!collected.news?.articles
+      });
+      console.log('📦 On-Chain:', {
+        exists: !!collected.onChain,
+        success: collected.onChain?.success,
+        hasNetworkMetrics: !!collected.onChain?.networkMetrics
+      });
+      
+      // ✅ Pass the full objects - panels will extract what they need
+      // MarketDataPanel expects data.priceAggregation
+      // TechnicalAnalysisPanel expects data.indicators
+      // SocialSentimentPanel expects data with overallScore, fearGreedIndex, etc.
+      // NewsPanel expects articles array
+      // OnChainAnalyticsPanel expects individual props (handled separately)
+      const transformedData = {
+        'market-data': collected.marketData || null,
+        marketData: collected.marketData || null,
+        sentiment: collected.sentiment || null,
+        technical: collected.technical || null,
+        news: collected.news || null,
+        'on-chain': collected.onChain || null,
+        onChain: collected.onChain || null,
+        // Include any additional data from preview
+        summary: previewData.aiAnalysis,
+        aiAnalysis: previewData.aiAnalysis,
+        dataQuality: previewData.dataQuality,
+        apiStatus: previewData.apiStatus,
+      };
+      
+      console.log('✅ Transformed preview data for panels:', {
+        hasMarketData: !!transformedData.marketData,
+        hasSentiment: !!transformedData.sentiment,
+        hasTechnical: !!transformedData.technical,
+        hasNews: !!transformedData.news,
+        hasOnChain: !!transformedData.onChain,
+        dataQuality: transformedData.dataQuality
+      });
+      
+      return transformedData;
+    }
+    if (progressiveData && Object.keys(progressiveData).length > 0) {
+      console.log('📊 Using progressiveData for analysis');
+      return progressiveData;
+    }
+    console.log('⚠️ No analysis data available from any source');
+    return null;
+  };
+  
+  const analysisData = getAnalysisData();
+  
+  // ✅ CRITICAL FIX (Dec 13, 2025): Memoize collectedData for OpenAIAnalysis
+  // This prevents creating a new object reference on every render, which was
+  // causing the OpenAIAnalysis useEffect to trigger startAnalysis() repeatedly
+  const openAICollectedData = useMemo(() => {
+    if (!analysisData) return null;
+    return {
+      marketData: analysisData?.['market-data'] || analysisData?.marketData,
+      technical: analysisData?.technical,
+      sentiment: analysisData?.sentiment,
+      news: analysisData?.news,
+      onChain: analysisData?.['on-chain'] || analysisData?.onChain,
+      risk: analysisData?.risk,
+      defi: analysisData?.defi
+    };
+  }, [
+    analysisData?.['market-data'],
+    analysisData?.marketData,
+    analysisData?.technical,
+    analysisData?.sentiment,
+    analysisData?.news,
+    analysisData?.['on-chain'],
+    analysisData?.onChain,
+    analysisData?.risk,
+    analysisData?.defi
+  ]);
+  
+  // Not loading if we have any data source available
+  const loading = !analysisData && progressiveLoading;
 
   // Handle preview modal actions
   const handlePreviewContinue = (preview: any) => {
@@ -196,10 +313,39 @@ export default function UCIEAnalysisHub({ symbol, onBack, initialData }: UCIEAna
       hasCaesarPrompt: !!preview.caesarPromptPreview,
       dataQuality: preview.dataQuality
     });
-    setPreviewData(preview); // ✅ Store preview data for Caesar
+    
+    // ✅ CRITICAL FIX: Transform preview data to match analysisData format
+    // This prevents useProgressiveLoading from starting again!
+    const transformedData = {
+      'market-data': preview.collectedData?.marketData,
+      marketData: preview.collectedData?.marketData,
+      sentiment: preview.collectedData?.sentiment,
+      technical: preview.collectedData?.technical,
+      news: preview.collectedData?.news,
+      'on-chain': preview.collectedData?.onChain,
+      onChain: preview.collectedData?.onChain,
+      // Include GPT-5.1 analysis if available
+      summary: preview.aiAnalysis,
+      aiAnalysis: preview.aiAnalysis,
+      // Include data quality
+      dataQuality: preview.dataQuality,
+      apiStatus: preview.apiStatus,
+    };
+    
+    console.log('🔄 Transformed preview data for analysis hub:', Object.keys(transformedData));
+    
+    setPreviewData(preview); // ✅ Store original preview data for Caesar
     setShowPreview(false);
-    setProceedWithAnalysis(true);
-    setShowGptAnalysis(true); // ✅ Trigger GPT-5.1 analysis
+    
+    // ✅ CRITICAL: Set data quality from preview
+    setDataQuality(preview.dataQuality || 0);
+    
+    // ✅ CRITICAL FIX: Do NOT set proceedWithAnalysis to true!
+    // The preview modal already collected all data, we don't need progressive loading
+    // Instead, we'll use the previewData directly
+    // setProceedWithAnalysis(true); // ❌ REMOVED - This was causing the loop!
+    
+    setShowGptAnalysis(true); // ✅ Trigger GPT-5.1 analysis display
     haptic.buttonPress();
   };
 
@@ -1008,17 +1154,10 @@ export default function UCIEAnalysisHub({ symbol, onBack, initialData }: UCIEAna
             <p className="text-bitcoin-white-80 mb-4">
               Comprehensive AI analysis of all collected data using GPT-5.1 with enhanced reasoning.
             </p>
+            {/* ✅ CRITICAL FIX: Use memoized openAICollectedData to prevent infinite re-renders */}
             <OpenAIAnalysis 
               symbol={symbol}
-              collectedData={{
-                marketData: analysisData?.['market-data'] || analysisData?.marketData,
-                technical: analysisData?.technical,
-                sentiment: analysisData?.sentiment,
-                news: analysisData?.news,
-                onChain: analysisData?.['on-chain'] || analysisData?.onChain,
-                risk: analysisData?.risk,
-                defi: analysisData?.defi
-              }}
+              collectedData={openAICollectedData}
               onAnalysisComplete={handleGPTAnalysisComplete}
             />
           </div>

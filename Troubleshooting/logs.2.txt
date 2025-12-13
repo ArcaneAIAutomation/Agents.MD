@@ -1,0 +1,210 @@
+2025-12-13 18:33:40.715 [info] 📊 Collecting FRESH data for BTC...
+2025-12-13 18:33:40.715 [info] 🗑️ FORCE REFRESH: Invalidating ALL cache for BTC...
+2025-12-13 18:33:40.723 [info] 🗑️ Invalidated cache for BTC/market-data (deleted 1 entries for ALL users)
+2025-12-13 18:33:40.723 [info] ✅ Invalidated market-data
+2025-12-13 18:33:40.726 [info] 🗑️ Invalidated cache for BTC/sentiment (deleted 1 entries for ALL users)
+2025-12-13 18:33:40.726 [info] ✅ Invalidated sentiment
+2025-12-13 18:33:40.731 [info] 🗑️ Invalidated cache for BTC/technical (deleted 1 entries for ALL users)
+2025-12-13 18:33:40.731 [info] ✅ Invalidated technical
+2025-12-13 18:33:40.736 [info] 🗑️ Invalidated cache for BTC/news (deleted 1 entries for ALL users)
+2025-12-13 18:33:40.736 [info] ✅ Invalidated news
+2025-12-13 18:33:40.740 [info] 🗑️ Invalidated cache for BTC/on-chain (deleted 1 entries for ALL users)
+2025-12-13 18:33:40.740 [info] ✅ Invalidated on-chain
+2025-12-13 18:33:40.741 [info] 🗑️ Invalidated cache for BTC/predictions (deleted 0 entries for ALL users)
+2025-12-13 18:33:40.741 [info] ✅ Invalidated predictions
+2025-12-13 18:33:40.743 [info] 🗑️ Invalidated cache for BTC/risk (deleted 0 entries for ALL users)
+2025-12-13 18:33:40.743 [info] ✅ Invalidated risk
+2025-12-13 18:33:40.745 [info] 🗑️ Invalidated cache for BTC/derivatives (deleted 0 entries for ALL users)
+2025-12-13 18:33:40.745 [info] ✅ Invalidated derivatives
+2025-12-13 18:33:40.746 [info] 🗑️ Invalidated cache for BTC/defi (deleted 0 entries for ALL users)
+2025-12-13 18:33:40.746 [info] ✅ Invalidated defi
+2025-12-13 18:33:40.746 [info] ✅ Invalidated ALL cache entries for BTC
+2025-12-13 18:33:40.749 [info] ❌ Cache miss for BTC/market-data
+2025-12-13 18:33:40.750 [info] ℹ️ No data found in database at all (not even expired)
+2025-12-13 18:33:40.752 [info] ❌ Cache miss for BTC/sentiment
+2025-12-13 18:33:40.754 [info] ℹ️ No data found in database at all (not even expired)
+2025-12-13 18:33:40.754 [info] ✅ VERIFIED: Cache is empty after invalidation
+2025-12-13 18:33:40.754 [info] 🔄 Starting data collection with automatic retry (2 attempts, 30s timeout each)...
+2025-12-13 18:33:40.754 [info] 📡 Attempt 1/2 - Collecting data...
+2025-12-13 18:33:40.754 [info] 🔍 Collecting data for BTC (FORCING FRESH DATA)...
+2025-12-13 18:33:40.754 [info] 🌐 Using base URL: https://agents-md-git-main-arcane-ai-automations-projects.vercel.app
+2025-12-13 18:34:20.569 [info] ✅ Market Data (4 APIs): Success
+2025-12-13 18:34:20.569 [info] ✅ Sentiment (3 APIs): Success
+2025-12-13 18:34:20.569 [info] ✅ Technical: Success
+2025-12-13 18:34:20.569 [info] ✅ News: Success
+2025-12-13 18:34:20.569 [info] ✅ On-Chain (1 API - BTC only): Success
+2025-12-13 18:34:20.569 [info] 🔍 DEBUG: Collected data structure:
+2025-12-13 18:34:20.569 [info] Sentiment: {
+  hasData: true,
+  success: true,
+  hasDataField: true,
+  dataKeys: [
+    'symbol',
+    'overallScore',
+    'sentiment',
+    'sentimentDescription',
+    'fearGreedIndex',
+    'coinMarketCap',
+    'coinGecko',
+    'lunarCrush',
+    'reddit',
+    'dataQuality',
+    'dataQualityDescription',
+    'sourcesUsed',
+    'timestamp'
+  ],
+  dataQuality: 65,
+  overallScore: 40
+}
+2025-12-13 18:34:20.569 [info] On-Chain: {
+  hasData: true,
+  success: true,
+  hasDataField: true,
+  dataKeys: [
+    'success',
+    'symbol',
+    'chain',
+    'networkMetrics',
+    'whaleActivity',
+    'mempoolAnalysis',
+    'dataQuality',
+    'timestamp'
+  ],
+  dataQuality: 100
+}
+2025-12-13 18:34:20.569 [info] ✅ Attempt 1 completed in 39808ms
+2025-12-13 18:34:20.569 [info] 🔍 DEBUG: calculateAPIStatus called with: {
+  marketData: 'present',
+  sentiment: 'present',
+  technical: 'present',
+  news: 'present',
+  onChain: 'present'
+}
+2025-12-13 18:34:20.570 [info] ✅ Market Data: VALID (has priceAggregation.prices)
+2025-12-13 18:34:20.570 [info] ✅ Sentiment: VALID {
+  dataQuality: 65,
+  overallScore: 40,
+  sentiment: 'neutral',
+  hasFearGreed: true,
+  hasLunarCrush: true,
+  hasReddit: false,
+  hasCoinMarketCap: true,
+  hasCoinGecko: false,
+  fieldCount: 13
+}
+2025-12-13 18:34:20.570 [info] ✅ Technical: VALID (has indicators)
+2025-12-13 18:34:20.570 [info] ✅ News: VALID (has articles)
+2025-12-13 18:34:20.570 [info] ✅ On-Chain: VALID {
+  dataQuality: 100,
+  hasNetworkMetrics: true,
+  hasWhaleActivity: true,
+  hasMempool: true,
+  hasNetworkStats: false,
+  hasBlockchainInfo: false,
+  hasTransactionStats: false,
+  fieldCount: 8
+}
+2025-12-13 18:34:20.570 [info] 📊 calculateAPIStatus result: {
+  working: [ 'Market Data', 'Sentiment', 'Technical', 'News', 'On-Chain' ],
+  failed: [],
+  total: 5,
+  successRate: 100
+}
+2025-12-13 18:34:20.570 [info] 📊 Attempt 1 data quality: 100%
+2025-12-13 18:34:20.570 [info] 🎉 Perfect data quality achieved on attempt 1!
+2025-12-13 18:34:20.570 [info] ✅ Data collection completed after 1 attempt(s) in 39810ms
+2025-12-13 18:34:20.570 [info] 🔍 DEBUG: calculateAPIStatus called with: {
+  marketData: 'present',
+  sentiment: 'present',
+  technical: 'present',
+  news: 'present',
+  onChain: 'present'
+}
+2025-12-13 18:34:20.570 [info] ✅ Market Data: VALID (has priceAggregation.prices)
+2025-12-13 18:34:20.570 [info] ✅ Sentiment: VALID {
+  dataQuality: 65,
+  overallScore: 40,
+  sentiment: 'neutral',
+  hasFearGreed: true,
+  hasLunarCrush: true,
+  hasReddit: false,
+  hasCoinMarketCap: true,
+  hasCoinGecko: false,
+  fieldCount: 13
+}
+2025-12-13 18:34:20.570 [info] ✅ Technical: VALID (has indicators)
+2025-12-13 18:34:20.570 [info] ✅ News: VALID (has articles)
+2025-12-13 18:34:20.570 [info] ✅ On-Chain: VALID {
+  dataQuality: 100,
+  hasNetworkMetrics: true,
+  hasWhaleActivity: true,
+  hasMempool: true,
+  hasNetworkStats: false,
+  hasBlockchainInfo: false,
+  hasTransactionStats: false,
+  fieldCount: 8
+}
+2025-12-13 18:34:20.570 [info] 📊 calculateAPIStatus result: {
+  working: [ 'Market Data', 'Sentiment', 'Technical', 'News', 'On-Chain' ],
+  failed: [],
+  total: 5,
+  successRate: 100
+}
+2025-12-13 18:34:20.570 [info] 📈 Data quality: 100%
+2025-12-13 18:34:20.570 [info] ✅ Working APIs: Market Data, Sentiment, Technical, News, On-Chain
+2025-12-13 18:34:20.570 [info] 💾 Storing API responses in Supabase database (BLOCKING)...
+2025-12-13 18:34:20.570 [info] 🔐 Caching for authenticated user: c0ab7e31-9063-42c4-9052-3a5288dccafa <morgan@arcane.group>
+2025-12-13 18:34:20.570 [info] 🔐 Caching for authenticated user: c0ab7e31-9063-42c4-9052-3a5288dccafa <morgan@arcane.group>
+2025-12-13 18:34:20.570 [info] 🔐 Caching for authenticated user: c0ab7e31-9063-42c4-9052-3a5288dccafa <morgan@arcane.group>
+2025-12-13 18:34:20.570 [info] 🔐 Caching for authenticated user: c0ab7e31-9063-42c4-9052-3a5288dccafa <morgan@arcane.group>
+2025-12-13 18:34:20.570 [info] 🔐 Caching for authenticated user: c0ab7e31-9063-42c4-9052-3a5288dccafa <morgan@arcane.group>
+2025-12-13 18:34:20.570 [info] ⏳ Waiting for 5 database writes...
+2025-12-13 18:34:20.575 [info] ✅ Analysis cached for BTC/market-data (user: morgan@arcane.group, TTL: 1800s, quality: 100)
+2025-12-13 18:34:20.581 [info] ✅ Verified: Data exists in database (created: Sat Dec 13 2025 18:34:20 GMT+0000 (Coordinated Universal Time))
+2025-12-13 18:34:20.603 [info] ✅ Analysis cached for BTC/technical (user: morgan@arcane.group, TTL: 1800s, quality: 95)
+2025-12-13 18:34:20.613 [info] ✅ Analysis cached for BTC/news (user: morgan@arcane.group, TTL: 1800s, quality: 87)
+2025-12-13 18:34:20.615 [info] ✅ Verified: Data exists in database (created: Sat Dec 13 2025 18:34:20 GMT+0000 (Coordinated Universal Time))
+2025-12-13 18:34:20.615 [info] ✅ Verified: Data exists in database (created: Sat Dec 13 2025 18:34:20 GMT+0000 (Coordinated Universal Time))
+2025-12-13 18:34:20.617 [info] ✅ Analysis cached for BTC/on-chain (user: morgan@arcane.group, TTL: 1800s, quality: N/A)
+2025-12-13 18:34:20.618 [info] ✅ Analysis cached for BTC/sentiment (user: morgan@arcane.group, TTL: 1800s, quality: N/A)
+2025-12-13 18:34:20.620 [info] ✅ Verified: Data exists in database (created: Sat Dec 13 2025 18:34:20 GMT+0000 (Coordinated Universal Time))
+2025-12-13 18:34:20.620 [info] ✅ Verified: Data exists in database (created: Sat Dec 13 2025 18:34:20 GMT+0000 (Coordinated Universal Time))
+2025-12-13 18:34:20.620 [info] ✅ Stored 5/5 API responses in 52ms
+2025-12-13 18:34:20.620 [info] ✅ Database writes completed (no delay needed - writes are already awaited)
+2025-12-13 18:34:20.620 [info] 🔍 Verifying database population...
+2025-12-13 18:34:20.623 [info] ✅ Cache hit for BTC/market-data (stored by: morgan@arcane.group, age: 0s, ttl: 1799s, quality: 100)
+2025-12-13 18:34:20.623 [info] 🔓 Auto-unwrapping old format data for BTC/market-data
+2025-12-13 18:34:20.623 [info] 🔓 Unwrapping market-data data (old format detected)
+2025-12-13 18:34:20.625 [info] ✅ Cache hit for BTC/sentiment (stored by: morgan@arcane.group, age: 0s, ttl: 1799s, quality: N/A)
+2025-12-13 18:34:20.625 [info] 🔓 Auto-unwrapping old format data for BTC/sentiment
+2025-12-13 18:34:20.625 [info] 🔓 Unwrapping sentiment data (old format detected)
+2025-12-13 18:34:20.627 [info] ✅ Cache hit for BTC/technical (stored by: morgan@arcane.group, age: 0s, ttl: 1799s, quality: 95)
+2025-12-13 18:34:20.627 [info] 🔓 Auto-unwrapping old format data for BTC/technical
+2025-12-13 18:34:20.627 [info] 🔓 Unwrapping technical data (old format detected)
+2025-12-13 18:34:20.631 [info] ✅ Cache hit for BTC/news (stored by: morgan@arcane.group, age: 0s, ttl: 1799s, quality: 87)
+2025-12-13 18:34:20.631 [info] 🔓 Auto-unwrapping old format data for BTC/news
+2025-12-13 18:34:20.631 [info] 🔓 Unwrapping news data (old format detected)
+2025-12-13 18:34:20.634 [info] ✅ Cache hit for BTC/on-chain (stored by: morgan@arcane.group, age: 0s, ttl: 1799s, quality: N/A)
+2025-12-13 18:34:20.634 [info] 🔓 Auto-unwrapping old format data for BTC/on-chain
+2025-12-13 18:34:20.634 [info] 🔓 Unwrapping on-chain data (old format detected)
+2025-12-13 18:34:20.634 [info] ✅ Database verification: Found 5/5 data types
+2025-12-13 18:34:20.634 [info] Market Data: ✅
+2025-12-13 18:34:20.634 [info] Sentiment: ✅
+2025-12-13 18:34:20.634 [info] Technical: ✅
+2025-12-13 18:34:20.634 [info] News: ✅
+2025-12-13 18:34:20.634 [info] On-Chain: ✅
+2025-12-13 18:34:20.634 [info] 🔍 Verifying data quality before AI summary...
+2025-12-13 18:34:20.634 [info] Data Quality: 100%
+2025-12-13 18:34:20.634 [info] Required Data: Market (true), Technical (true)
+2025-12-13 18:34:20.634 [info] 🤖 Generating GPT-5.1 summary for BTC...
+2025-12-13 18:34:20.634 [info] 📊 Generating basic summary for BTC (NO job creation here)...
+2025-12-13 18:34:20.634 [info] ✅ GPT-5.1 summary generated (265 chars, ~26 words)
+2025-12-13 18:34:20.643 [info] ✅ GPT-5.1 fallback stored in ucie_gemini_analysis table (265 chars)
+2025-12-13 18:34:20.650 [info] ✅ Stored OpenAI summary for BTC in ucie_openai_analysis table
+2025-12-13 18:34:20.650 [info] ✅ Summary also stored in ucie_openai_analysis table
+2025-12-13 18:34:20.651 [info] 🚀 Starting GPT-5.1 analysis job asynchronously...
+2025-12-13 18:34:21.076 [info] ✅ GPT-5.1 analysis job 85 started successfully
+2025-12-13 18:34:21.076 [info] 📊 Retrieving AI analysis from database...
+2025-12-13 18:34:21.082 [warning] ⚠️ No AI analysis found in database
+2025-12-13 18:34:21.082 [info] 📝 Generating Caesar prompt preview...
+2025-12-13 18:34:21.083 [info] ⚡ Total processing time: 40330ms (1 attempts, 5/5 stored)
