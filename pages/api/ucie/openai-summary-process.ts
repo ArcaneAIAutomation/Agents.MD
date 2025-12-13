@@ -1,12 +1,12 @@
 /**
  * UCIE OpenAI Summary - Background Processor
  * 
- * Processes GPT-5.1 analysis in the background (up to 180 seconds / 3 minutes)
+ * Processes GPT-4o analysis in the background (up to 180 seconds / 3 minutes)
  * Updates database with results
  * Frontend polls /openai-summary-poll/[jobId] every 5 seconds for status
  * 
  * ✅ ASYNC: Avoids Vercel 60-second timeout
- * ✅ USES GPT-5.1: Enhanced reasoning with low effort (fast)
+ * ✅ USES GPT-4o: Standard OpenAI Chat Completions API
  * ✅ STORES DATA: Updates database with results
  * ✅ PATTERN: Whale Watch Deep Dive (proven in production)
  */
@@ -160,7 +160,7 @@ export default async function handler(
     // Update progress
     await query(
       'UPDATE ucie_openai_jobs SET progress = $1, updated_at = NOW() WHERE id = $2',
-      ['Analyzing with GPT-5.1...', parseInt(jobId)]
+      ['Analyzing with GPT-4o...', parseInt(jobId)]
     );
 
     // Build comprehensive prompt
@@ -205,14 +205,13 @@ Provide comprehensive JSON analysis with these exact fields:
 
 Be specific, actionable, and data-driven.`;
 
-    // Call OpenAI API with GPT-5.1
+    // Call OpenAI API with GPT-4o
     const openaiApiKey = process.env.OPENAI_API_KEY;
     if (!openaiApiKey) {
       throw new Error('OPENAI_API_KEY not configured');
     }
 
-    const model = 'gpt-5.1';
-    const reasoningEffort = 'low'; // Fast response (1-2 seconds)
+    const model = 'gpt-4o';
     
     // 🔍 DEBUG: Log prompt statistics
     console.log(`📏 Prompt statistics:`, {
@@ -225,26 +224,25 @@ Be specific, actionable, and data-driven.`;
       onChainSize: allData.onChain ? JSON.stringify(allData.onChain).length : 0
     });
     
-    console.log(`📡 Calling OpenAI Responses API with ${model} (reasoning: ${reasoningEffort})...`);
+    console.log(`📡 Calling OpenAI Chat Completions API with ${model}...`);
     console.log(`📡 API Key present: ${!!openaiApiKey}`);
     console.log(`📡 Prompt length: ${prompt.length} chars`);
     
-    // 🔍 DEBUG: Log GPT-5.1 request details
-    console.log(`📡 GPT-5.1 request:`, {
+    // 🔍 DEBUG: Log GPT-4o request details
+    console.log(`📡 GPT-4o request:`, {
       model: model,
-      reasoningEffort: reasoningEffort,
       promptLength: prompt.length,
       estimatedTokens: Math.ceil(prompt.length / 4),
-      maxOutputTokens: 4000,
+      maxTokens: 4000,
       timeout: 180000
     });
     
     const openaiStart = Date.now();
 
-    // ✅ GPT-5.1 with Responses API (3-minute timeout)
+    // ✅ GPT-4o with Chat Completions API (3-minute timeout)
     let response;
     try {
-      response = await fetch('https://api.openai.com/v1/responses', {
+      response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -252,14 +250,19 @@ Be specific, actionable, and data-driven.`;
         },
         body: JSON.stringify({
           model: model,
-          input: `You are an expert cryptocurrency analyst. Analyze this data and respond only with valid JSON.\n\n${prompt}`,
-          reasoning: {
-            effort: reasoningEffort // low = 1-2 seconds (fast)
-          },
-          text: {
-            verbosity: 'medium'
-          },
-          max_output_tokens: 4000,
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert cryptocurrency analyst. Analyze this data and respond only with valid JSON.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 4000,
+          response_format: { type: 'json_object' }
         }),
         signal: AbortSignal.timeout(180000), // ✅ 3 MINUTES (180 seconds)
       });
@@ -269,19 +272,21 @@ Be specific, actionable, and data-driven.`;
     }
 
     const openaiTime = Date.now() - openaiStart;
-    console.log(`✅ ${model} Responses API responded in ${openaiTime}ms with status ${response.status}`);
+    console.log(`✅ ${model} Chat Completions API responded in ${openaiTime}ms with status ${response.status}`);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`❌ ${model} Responses API error: ${response.status}`, errorText);
-      throw new Error(`${model} Responses API error: ${response.status}`);
+      console.error(`❌ ${model} Chat Completions API error: ${response.status}`, errorText);
+      throw new Error(`${model} Chat Completions API error: ${response.status}`);
     }
 
     const data = await response.json();
     
-    // ✅ BULLETPROOF: Extract text using utility function
-    const analysisText = extractResponseText(data, true);
-    validateResponseText(analysisText, model, data);
+    // ✅ Extract text from Chat Completions response
+    const analysisText = data.choices?.[0]?.message?.content || '';
+    if (!analysisText) {
+      throw new Error('No content in OpenAI response');
+    }
     
     console.log(`✅ Got ${model} response text (${analysisText.length} chars)`);
 

@@ -192,19 +192,18 @@ async function handler(
     prompt += `}\n\n`;
     prompt += `Be specific, data-driven, and actionable. Focus on what the data tells us about potential price movements.`;
 
-    // Call GPT-5.1 with Responses API
+    // Call GPT-4o with Chat Completions API
     const openaiApiKey = process.env.OPENAI_API_KEY;
     if (!openaiApiKey) {
       throw new Error('OPENAI_API_KEY not configured');
     }
 
-    const model = 'gpt-5.1';
-    const reasoningEffort = 'medium'; // 3-5 seconds
+    const model = 'gpt-4o';
 
-    console.log(`📡 Calling OpenAI Responses API with ${model} (reasoning: ${reasoningEffort})...`);
+    console.log(`📡 Calling OpenAI Chat Completions API with ${model}...`);
     const openaiStart = Date.now();
 
-    const response = await fetch('https://api.openai.com/v1/responses', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -212,32 +211,39 @@ async function handler(
       },
       body: JSON.stringify({
         model: model,
-        input: `You are an expert cryptocurrency analyst. Analyze this data and respond only with valid JSON.\n\n${prompt}`,
-        reasoning: {
-          effort: reasoningEffort
-        },
-        text: {
-          verbosity: 'medium'
-        },
-        max_output_tokens: 4000,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert cryptocurrency analyst. Analyze this data and respond only with valid JSON.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 4000,
+        response_format: { type: 'json_object' }
       }),
       signal: AbortSignal.timeout(60000), // 60 seconds
     });
 
     const openaiTime = Date.now() - openaiStart;
-    console.log(`✅ ${model} Responses API responded in ${openaiTime}ms with status ${response.status}`);
+    console.log(`✅ ${model} Chat Completions API responded in ${openaiTime}ms with status ${response.status}`);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`❌ ${model} Responses API error: ${response.status}`, errorText);
-      throw new Error(`${model} Responses API error: ${response.status}`);
+      console.error(`❌ ${model} Chat Completions API error: ${response.status}`, errorText);
+      throw new Error(`${model} Chat Completions API error: ${response.status}`);
     }
 
     const data = await response.json();
 
-    // Extract text using bulletproof utility
-    const analysisText = extractResponseText(data, true);
-    validateResponseText(analysisText, model, data);
+    // Extract text from Chat Completions response
+    const analysisText = data.choices?.[0]?.message?.content || '';
+    if (!analysisText) {
+      throw new Error('No content in OpenAI response');
+    }
 
     console.log(`✅ Got ${model} response text (${analysisText.length} chars)`);
 
@@ -260,7 +266,7 @@ async function handler(
       console.log(`💾 Cached ${symbolUpper} GPT analysis for ${CACHE_TTL}s`);
     }
 
-    console.log(`✅ GPT-5.1 analysis complete for ${symbolUpper}`);
+    console.log(`✅ GPT-4o analysis complete for ${symbolUpper}`);
 
     return res.status(200).json(responseData);
 

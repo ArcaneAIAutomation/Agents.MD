@@ -3,12 +3,13 @@
  * 
  * POST /api/ucie/openai-summary-start/[symbol]
  * 
- * Starts GPT-5.1 analysis in background, returns jobId immediately
+ * Starts GPT-4o analysis in background, returns jobId immediately
  * Frontend polls /api/ucie/openai-summary-poll/[jobId] every 10 seconds
  * 
  * ✅ ASYNC: Avoids Vercel 60-second timeout
  * ✅ POLLING: Frontend checks status every 10 seconds
  * ✅ BULLETPROOF: Can run for up to 3 minutes
+ * ✅ MODEL: Uses gpt-4o (standard OpenAI API)
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -58,7 +59,7 @@ async function handler(
       });
     }
 
-    console.log(`🚀 Starting GPT-5.1 analysis for ${symbolUpper}...`);
+    console.log(`🚀 Starting GPT-4o analysis for ${symbolUpper}...`);
 
     // Create job in database
     const result = await query(
@@ -136,11 +137,11 @@ interface ModularAnalysis {
 }
 
 /**
- * Process GPT-5.1 job asynchronously with MODULAR ANALYSIS
+ * Process GPT-4o job asynchronously with MODULAR ANALYSIS
  * Each data source analyzed separately for speed and reliability
  * 
  * ✅ HEARTBEAT: Updates database every 10 seconds to show job is alive
- * ✅ GPT-5.1: Uses Responses API with reasoning parameter
+ * ✅ GPT-4o: Uses standard OpenAI Chat Completions API
  * ✅ ERROR HANDLING: Comprehensive try-catch with database updates
  */
 async function processJobAsync(
@@ -179,7 +180,7 @@ async function processJobAsync(
       try {
         await query(
           'UPDATE ucie_openai_jobs SET status = $1, progress = $2, updated_at = NOW() WHERE id = $3',
-          ['processing', 'Analyzing with GPT-5.1...', jobId],
+          ['processing', 'Analyzing with GPT-4o...', jobId],
           { timeout: 5000, retries: 1 } // 5 second timeout, 1 retry
         );
         console.log(`✅ Job ${jobId}: Status updated to 'processing', DB connection released`);
@@ -214,7 +215,7 @@ async function processJobAsync(
       throw new Error('OPENAI_API_KEY not configured');
     }
 
-    const model = 'gpt-5.1';
+    const model = 'gpt-4o';
     const modularAnalysis: ModularAnalysis = {
       timestamp: new Date().toISOString(),
       processingTime: 0
@@ -474,7 +475,7 @@ async function processJobAsync(
       } else if (error.message.includes('API key')) {
         errorMessage = 'OpenAI API key issue';
       } else if (error.message.includes('reasoning')) {
-        errorMessage = 'GPT-5.1 reasoning parameter not supported';
+        errorMessage = 'OpenAI API parameter error';
       } else {
         errorMessage = error.message;
       }
@@ -534,12 +535,12 @@ async function updateProgress(jobId: number, progress: string): Promise<void> {
 }
 
 /**
- * Analyze a single data source with GPT-5.1 Responses API
- * Small, fast, focused analysis with reasoning capability
+ * Analyze a single data source with GPT-4o
+ * Small, fast, focused analysis
  * 
- * ✅ USES GPT-5.1: Responses API with reasoning parameter
+ * ✅ USES GPT-4o: Standard OpenAI Chat Completions API
  * ✅ BULLETPROOF: Uses extractResponseText utility
- * ✅ FAST: Low reasoning effort for quick analysis
+ * ✅ FAST: Quick analysis for modular approach
  * ✅ FALLBACK: Returns error object instead of throwing on failure
  */
 async function analyzeDataSource(
@@ -571,13 +572,10 @@ async function analyzeDataSource(
       const { extractResponseText, validateResponseText } = await import('../../../../utils/openai');
       console.log(`✅ [analyzeDataSource] OpenAI SDK imported successfully`);
       
-      // ✅ Initialize OpenAI client with Responses API
+      // ✅ Initialize OpenAI client
       console.log(`🔧 [analyzeDataSource] Initializing OpenAI client...`);
       const openai = new OpenAI({
         apiKey: apiKey,
-        defaultHeaders: {
-          'OpenAI-Beta': 'responses=v1'
-        },
         timeout: 30000, // 30 second timeout per request
         maxRetries: 0 // We handle retries ourselves
       });
@@ -621,9 +619,6 @@ Respond with valid JSON only.`;
             content: prompt
           }
         ],
-        reasoning: {
-          effort: 'low' // Fast analysis for modular approach (1-2 seconds)
-        },
         temperature: 0.7,
         max_tokens: 800, // Small response for focused analysis
         response_format: { type: 'json_object' }
@@ -695,10 +690,10 @@ Respond with valid JSON only.`;
 }
 
 /**
- * Analyze news with comprehensive market context using GPT-5.1
+ * Analyze news with comprehensive market context using GPT-4o
  * Provides full picture for accurate impact assessment
  * 
- * ✅ USES GPT-5.1: Responses API with medium reasoning effort
+ * ✅ USES GPT-4o: Standard OpenAI Chat Completions API
  * ✅ CONTEXT-AWARE: Combines news with market, technical, and sentiment data
  * ✅ FALLBACK: Returns error object instead of throwing on failure
  */
@@ -719,12 +714,9 @@ async function analyzeNewsWithContext(
       const OpenAI = (await import('openai')).default;
       const { extractResponseText, validateResponseText } = await import('../../../../utils/openai');
       
-      // ✅ Initialize OpenAI client with Responses API
+      // ✅ Initialize OpenAI client
       const openai = new OpenAI({
         apiKey: apiKey,
-        defaultHeaders: {
-          'OpenAI-Beta': 'responses=v1'
-        },
         timeout: 30000, // 30 second timeout
         maxRetries: 0 // We handle retries ourselves
       });
@@ -781,7 +773,7 @@ Consider:
 
 Respond with valid JSON only.`;
       
-      // ✅ Call GPT-5.1 with Responses API
+      // ✅ Call GPT-4o API
       const completion = await openai.chat.completions.create({
         model: model,
         messages: [
@@ -794,9 +786,6 @@ Respond with valid JSON only.`;
             content: prompt
           }
         ],
-        reasoning: {
-          effort: 'medium' // Deeper analysis for news context (3-5 seconds)
-        },
         temperature: 0.7,
         max_tokens: 1200, // Larger response for comprehensive news analysis
         response_format: { type: 'json_object' }
@@ -839,10 +828,10 @@ Respond with valid JSON only.`;
 }
 
 /**
- * Generate executive summary combining all analyses using GPT-5.1
+ * Generate executive summary combining all analyses using GPT-4o
  * Synthesizes all modular analyses into comprehensive overview
  * 
- * ✅ USES GPT-5.1: Responses API with medium reasoning effort
+ * ✅ USES GPT-4o: Standard OpenAI Chat Completions API
  * ✅ BULLETPROOF: Uses extractResponseText utility
  * ✅ COMPREHENSIVE: Combines all 8 data source analyses
  * ✅ FALLBACK: Returns error object instead of throwing on failure
@@ -864,12 +853,9 @@ async function generateExecutiveSummary(
       const OpenAI = (await import('openai')).default;
       const { extractResponseText, validateResponseText } = await import('../../../../utils/openai');
       
-      // ✅ Initialize OpenAI client with Responses API
+      // ✅ Initialize OpenAI client
       const openai = new OpenAI({
         apiKey: apiKey,
-        defaultHeaders: {
-          'OpenAI-Beta': 'responses=v1'
-        },
         timeout: 30000, // 30 second timeout
         maxRetries: 0 // We handle retries ourselves
       });
@@ -904,7 +890,7 @@ Synthesize all analyses into cohesive, actionable summary.
 
 Respond with valid JSON only.`;
       
-      // ✅ Call GPT-5.1 with Responses API
+      // ✅ Call GPT-4o API
       const completion = await openai.chat.completions.create({
         model: model,
         messages: [
@@ -917,9 +903,6 @@ Respond with valid JSON only.`;
             content: prompt
           }
         ],
-        reasoning: {
-          effort: 'medium' // Balanced analysis for summary (3-5 seconds)
-        },
         temperature: 0.7,
         max_tokens: 1500, // Larger response for comprehensive summary
         response_format: { type: 'json_object' }
