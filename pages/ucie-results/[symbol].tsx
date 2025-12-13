@@ -1,7 +1,6 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { getCachedAnalysis } from '../../lib/ucie/cacheUtils';
-import { TrendingUp, TrendingDown, Activity, DollarSign, Users, Newspaper, Link as LinkIcon } from 'lucide-react';
+import { Activity, DollarSign, Users, Newspaper, Link as LinkIcon } from 'lucide-react';
 
 interface UCIEResultsData {
   symbol: string;
@@ -28,13 +27,13 @@ export default function UCIEResultsPage() {
       try {
         setLoading(true);
         
-        // Fetch all cached data from database
+        // Fetch all cached data via API routes
         const [marketData, sentiment, technical, news, onChain] = await Promise.all([
-          getCachedAnalysis(symbol, 'market-data'),
-          getCachedAnalysis(symbol, 'sentiment'),
-          getCachedAnalysis(symbol, 'technical'),
-          getCachedAnalysis(symbol, 'news'),
-          getCachedAnalysis(symbol, 'on-chain')
+          fetch(`/api/ucie/market-data/${symbol}`).then(r => r.ok ? r.json() : null),
+          fetch(`/api/ucie/sentiment/${symbol}`).then(r => r.ok ? r.json() : null),
+          fetch(`/api/ucie/technical/${symbol}`).then(r => r.ok ? r.json() : null),
+          fetch(`/api/ucie/news/${symbol}`).then(r => r.ok ? r.json() : null),
+          fetch(`/api/ucie/on-chain/${symbol}`).then(r => r.ok ? r.json() : null)
         ]);
 
         // Calculate data quality
