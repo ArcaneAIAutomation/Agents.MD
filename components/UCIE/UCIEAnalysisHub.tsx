@@ -45,6 +45,7 @@ import PullToRefresh from './PullToRefresh';
 interface UCIEAnalysisHubProps {
   symbol: string;
   onBack?: () => void;
+  initialData?: any; // ✅ Data from ProgressiveLoadingScreen
 }
 
 type TabId = 
@@ -74,10 +75,10 @@ interface LoadingPhase {
   complete: boolean;
 }
 
-export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps) {
+export default function UCIEAnalysisHub({ symbol, onBack, initialData }: UCIEAnalysisHubProps) {
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [error, setError] = useState<string | null>(null);
-  const [dataQuality, setDataQuality] = useState<number>(0);
+  const [dataQuality, setDataQuality] = useState<number>(initialData?.dataQuality || 0);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
@@ -87,13 +88,14 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
   const [showValidationDetails, setShowValidationDetails] = useState(false);
   
   // Data Preview Modal State
-  const [showPreview, setShowPreview] = useState(true); // Show preview on mount
-  const [proceedWithAnalysis, setProceedWithAnalysis] = useState(false);
-  const [previewData, setPreviewData] = useState<any>(null); // ✅ Store preview data for Caesar
+  // ✅ CRITICAL FIX: If initialData is provided, skip the preview modal
+  const [showPreview, setShowPreview] = useState(!initialData); // Don't show preview if we have initial data
+  const [proceedWithAnalysis, setProceedWithAnalysis] = useState(!!initialData); // Auto-proceed if we have data
+  const [previewData, setPreviewData] = useState<any>(initialData || null); // ✅ Use initialData if provided
   
   // GPT-5.1 Analysis State
-  const [gptAnalysis, setGptAnalysis] = useState<any>(null);
-  const [showGptAnalysis, setShowGptAnalysis] = useState(false);
+  const [gptAnalysis, setGptAnalysis] = useState<any>(initialData?.summary ? { summary: initialData.summary } : null);
+  const [showGptAnalysis, setShowGptAnalysis] = useState(!!initialData?.summary);
 
   // Mobile capabilities
   const mobileCapabilities = useUCIEMobile();
@@ -133,17 +135,22 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
     },
   });
 
-  // Progressive loading - only start if user proceeded with analysis
+  // ✅ CRITICAL FIX: Only use progressive loading if NO initialData provided
+  // If initialData exists, we already have all the data from ProgressiveLoadingScreen
+  // Starting useProgressiveLoading again would cause the loop issue!
+  const shouldUseProgressiveLoading = !initialData && proceedWithAnalysis;
+  
+  // Progressive loading - only start if user proceeded with analysis AND no initialData
   const {
     phases: loadingPhases,
-    loading,
+    loading: progressiveLoading,
     currentPhase,
     overallProgress,
-    data: analysisData,
+    data: progressiveData,
     refresh: refreshAnalysis,
   } = useProgressiveLoading({
     symbol,
-    enabled: proceedWithAnalysis, // Only load if user clicked Continue
+    enabled: shouldUseProgressiveLoading, // ✅ FIXED: Don't load if we have initialData
     onPhaseComplete: (phase, data) => {
       console.log(`✅ Phase ${phase} completed with data:`, data);
       setLastUpdate(new Date());
@@ -175,6 +182,10 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
       setError(`Phase ${phase} failed: ${errorMsg}`);
     },
   });
+  
+  // ✅ CRITICAL: Use initialData if provided, otherwise use progressive loading data
+  const analysisData = initialData || progressiveData;
+  const loading = initialData ? false : progressiveLoading; // Not loading if we have initialData
 
   // Handle preview modal actions
   const handlePreviewContinue = (preview: any) => {
@@ -519,12 +530,27 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
           jobId={analysisData.research?.jobId}
           progressiveLoadingComplete={!loading}
         />;
-      case 'onchain':
-        return <OnChainAnalyticsPanel symbol={symbol} data={analysisData['on-chain'] || analysisData.onChain} />;
+      case 'onchain': {
+        // ✅ FIXED: Extract individual props for OnChainAnalyticsPanel
+        const onChainData = analysisData['on-chain'] || analysisData.onChain || {};
+        return (
+          <OnChainAnalyticsPanel 
+            symbol={symbol} 
+            holderData={onChainData.holderData || onChainData.holders || []}
+            whaleTransactions={onChainData.whaleTransactions || onChainData.whales || []}
+            exchangeFlows={onChainData.exchangeFlows || { inflow24h: 0, outflow24h: 0, netFlow: 0, trend: 'neutral' }}
+            smartContractAnalysis={onChainData.smartContractAnalysis || onChainData.contractSecurity || { score: 0, isVerified: false, vulnerabilities: [], redFlags: [], warnings: [], strengths: [] }}
+          />
+        );
+      }
       case 'social':
         return <SocialSentimentPanel symbol={symbol} data={analysisData.sentiment} />;
-      case 'news':
-        return <NewsPanel symbol={symbol} data={analysisData.news} />;
+      case 'news': {
+        // ✅ FIXED: NewsPanel expects 'articles' prop, not 'data'
+        const newsData = analysisData.news || {};
+        const articles = newsData.articles || newsData.assessedArticles || (Array.isArray(newsData) ? newsData : []);
+        return <NewsPanel articles={articles} />;
+      }
       case 'technical':
         return <TechnicalAnalysisPanel symbol={symbol} data={analysisData.technical} />;
       case 'predictions':
@@ -544,14 +570,28 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
   const renderMobileView = () => {
     if (!analysisData) return null;
 
+    // ✅ FIXED: Extract data for NewsPanel and OnChainAnalyticsPanel with proper props
+    const newsData = analysisData.news || {};
+    const newsArticles = newsData.articles || newsData.assessedArticles || (Array.isArray(newsData) ? newsData : []);
+    
+    const onChainData = analysisData['on-chain'] || analysisData.onChain || {};
+
     const sections = [
       { id: 'overview' as TabId, title: 'Overview', icon: <TrendingUp className="w-5 h-5" />, content: renderOverview() },
       { id: 'market' as TabId, title: 'Market Data', icon: <DollarSign className="w-5 h-5" />, content: <MarketDataPanel symbol={symbol} data={analysisData['market-data'] || analysisData.marketData} /> },
       { id: 'risk' as TabId, title: 'Risk Assessment', icon: <Shield className="w-5 h-5" />, content: <RiskAssessmentPanel symbol={symbol} data={analysisData.risk} /> },
-      { id: 'news' as TabId, title: 'News & Intelligence', icon: <Newspaper className="w-5 h-5" />, content: <NewsPanel symbol={symbol} data={analysisData.news} /> },
+      { id: 'news' as TabId, title: 'News & Intelligence', icon: <Newspaper className="w-5 h-5" />, content: <NewsPanel articles={newsArticles} /> },
       { id: 'social' as TabId, title: 'Social Sentiment', icon: <Share2 className="w-5 h-5" />, content: <SocialSentimentPanel symbol={symbol} data={analysisData.sentiment} /> },
       { id: 'technical' as TabId, title: 'Technical Analysis', icon: <BarChart3 className="w-5 h-5" />, content: <TechnicalAnalysisPanel symbol={symbol} data={analysisData.technical} /> },
-      { id: 'onchain' as TabId, title: 'On-Chain Analytics', icon: <Activity className="w-5 h-5" />, content: <OnChainAnalyticsPanel symbol={symbol} data={analysisData['on-chain'] || analysisData.onChain} /> },
+      { id: 'onchain' as TabId, title: 'On-Chain Analytics', icon: <Activity className="w-5 h-5" />, content: (
+        <OnChainAnalyticsPanel 
+          symbol={symbol} 
+          holderData={onChainData.holderData || onChainData.holders || []}
+          whaleTransactions={onChainData.whaleTransactions || onChainData.whales || []}
+          exchangeFlows={onChainData.exchangeFlows || { inflow24h: 0, outflow24h: 0, netFlow: 0, trend: 'neutral' }}
+          smartContractAnalysis={onChainData.smartContractAnalysis || onChainData.contractSecurity || { score: 0, isVerified: false, vulnerabilities: [], redFlags: [], warnings: [], strengths: [] }}
+        />
+      ) },
       { id: 'defi' as TabId, title: 'DeFi Metrics', icon: <Coins className="w-5 h-5" />, content: <DeFiMetricsPanel symbol={symbol} data={analysisData.defi} /> },
       { id: 'derivatives' as TabId, title: 'Derivatives', icon: <AlertTriangle className="w-5 h-5" />, content: <DerivativesPanel symbol={symbol} data={analysisData.derivatives} /> },
       { id: 'predictions' as TabId, title: 'Predictions & AI', icon: <Target className="w-5 h-5" />, content: <PredictiveModelPanel symbol={symbol} data={analysisData.predictions} /> },
@@ -863,7 +903,17 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
                 <Newspaper className="w-6 h-6 text-bitcoin-orange" />
                 News & Intelligence
               </h2>
-              <NewsPanel symbol={symbol} data={analysisData.news} />
+              {/* ✅ FIX: NewsPanel expects 'articles' prop, not 'data' */}
+              <NewsPanel 
+                articles={
+                  // Handle multiple data structures from API
+                  analysisData.news?.articles || // Direct articles array
+                  analysisData.news?.data?.articles || // Nested in data.articles
+                  (Array.isArray(analysisData.news) ? analysisData.news : []) // Direct array
+                }
+                loading={false}
+                error={analysisData.news?.error || null}
+              />
             </div>
           ) : null}
 
@@ -874,7 +924,34 @@ export default function UCIEAnalysisHub({ symbol, onBack }: UCIEAnalysisHubProps
                 <Activity className="w-6 h-6 text-bitcoin-orange" />
                 On-Chain Analytics
               </h2>
-              <OnChainAnalyticsPanel symbol={symbol} data={analysisData['on-chain'] || analysisData.onChain} />
+              {/* ✅ FIX: OnChainAnalyticsPanel expects individual props, not single 'data' prop */}
+              {(() => {
+                const onChainData = analysisData['on-chain'] || analysisData.onChain || {};
+                // Handle nested data structure: { success: true, data: {...} }
+                const data = onChainData?.data || onChainData;
+                return (
+                  <OnChainAnalyticsPanel 
+                    symbol={symbol}
+                    holderData={data?.holderData || data?.holders || []}
+                    whaleTransactions={data?.whaleTransactions || data?.whales || []}
+                    exchangeFlows={data?.exchangeFlows || data?.flows || {
+                      inflow24h: 0,
+                      outflow24h: 0,
+                      netFlow: 0,
+                      trend: 'neutral' as const
+                    }}
+                    smartContractAnalysis={data?.smartContractAnalysis || data?.security || {
+                      score: 0,
+                      isVerified: false,
+                      vulnerabilities: [],
+                      redFlags: [],
+                      warnings: [],
+                      strengths: []
+                    }}
+                    loading={false}
+                  />
+                );
+              })()}
             </div>
           ) : null}
 
