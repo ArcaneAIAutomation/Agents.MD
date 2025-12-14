@@ -1,26 +1,26 @@
 /**
- * Shared OpenAI Client for GPT-5.1 Responses API
+ * Shared OpenAI Client for GPT-5-mini Responses API
  * 
  * This is the single source of truth for OpenAI API access across the entire application.
  * All other files must import and use this shared client instance.
  * 
- * Model: gpt-5.1 (default, configurable via OPENAI_MODEL env var)
+ * Model: gpt-5-mini (default, configurable via OPENAI_MODEL env var)
  * API: OpenAI Responses API with reasoning support
  * 
  * Features:
- * - GPT-5.1 with enhanced reasoning capabilities
+ * - GPT-5-mini with enhanced reasoning capabilities
  * - Bulletproof response parsing via utility functions
  * - Automatic fallback to gpt-4o on errors
  * - JSON format support with proper message formatting
- * - Production-proven in Whale Watch Deep Dive
+ * - Production-proven in UCIE Analysis
  * 
- * MIGRATION COMPLETE (Dec 8, 2025):
- * - ✅ Upgraded from gpt-4o to gpt-5.1
+ * UPDATED (Dec 14, 2025):
+ * - ✅ Using gpt-5-mini (lightweight GPT-5 model)
  * - ✅ Using Responses API (not Chat Completions)
- * - ✅ Proper max_completion_tokens parameter
- * - ✅ Reasoning effort support (low/medium/high)
- * - ✅ Bulletproof response parsing
- * - See: GPT-5.1-MIGRATION-GUIDE.md
+ * - ✅ Proper max_output_tokens parameter
+ * - ✅ Reasoning effort: 'minimal', 'low', 'medium', 'high' (NOT 'none')
+ * - ✅ gpt-5-mini does NOT support custom temperature (only default 1)
+ * - ✅ Fallback to gpt-4o (hardcoded, not env var)
  */
 
 import OpenAI from 'openai';
@@ -29,18 +29,20 @@ import OpenAI from 'openai';
 export const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
   defaultHeaders: {
-    'OpenAI-Beta': 'responses=v1' // Required for GPT-5.1 Responses API
+    'OpenAI-Beta': 'responses=v1' // Required for GPT-5 Responses API
   }
 });
 
 // Model configuration
-// ✅ UPGRADED: Using gpt-5.1 with Responses API
-export const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-5.1';
-export const OPENAI_FALLBACK_MODEL = process.env.OPENAI_FALLBACK_MODEL || 'gpt-4o';
+// ✅ UPDATED: Using gpt-5-mini with Responses API
+export const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-5-mini';
+// ✅ HARDCODED: Fallback MUST be gpt-4o (not gpt-5-mini which has different constraints)
+export const OPENAI_FALLBACK_MODEL = 'gpt-4o';
 
-// Reasoning effort configuration
-// Options: "low" (1-2s), "medium" (3-5s), "high" (5-10s)
-export const REASONING_EFFORT = (process.env.REASONING_EFFORT || 'medium') as 'low' | 'medium' | 'high';
+// Reasoning effort configuration for gpt-5-mini
+// Options: "minimal" (fastest), "low" (1-2s), "medium" (3-5s), "high" (5-10s)
+// ⚠️ IMPORTANT: 'none' is NOT supported by gpt-5-mini
+export const REASONING_EFFORT = (process.env.REASONING_EFFORT || 'minimal') as 'minimal' | 'low' | 'medium' | 'high';
 
 // Timeout configuration
 // ✅ EXTENDED: 30 minutes for deep analysis
@@ -62,9 +64,10 @@ import { extractResponseText, validateResponseText } from '../utils/openai';
 export async function callOpenAI(
   input: string | Array<{ role: string; content: string }>,
   maxOutputTokens: number = 8000,
-  reasoningEffort?: 'low' | 'medium' | 'high',
+  reasoningEffort?: 'minimal' | 'low' | 'medium' | 'high',
   requestJsonFormat: boolean = true
 ) {
+  // ✅ IMPORTANT: gpt-5-mini requires 'minimal', 'low', 'medium', or 'high' (NOT 'none')
   const effort = reasoningEffort || REASONING_EFFORT;
   const model = OPENAI_MODEL;
   
@@ -93,9 +96,9 @@ export async function callOpenAI(
       promptText += '\n\nPlease respond with valid JSON format.';
     }
     
-    // ✅ GPT-5.1: Use Responses API with proper parameters
-    if (model === 'gpt-5.1' || model.includes('gpt-5')) {
-      console.log(`🚀 Using Responses API for ${model}`);
+    // ✅ GPT-5-mini: Use Responses API with proper parameters
+    if (model === 'gpt-5-mini' || model.includes('gpt-5')) {
+      console.log(`🚀 Using Responses API for ${model} with reasoning effort: ${effort}`);
       
       const response = await fetch('https://api.openai.com/v1/responses', {
         method: 'POST',
@@ -107,12 +110,10 @@ export async function callOpenAI(
           model: model,
           input: promptText,
           reasoning: {
-            effort: effort // low, medium, high
+            effort: effort // ✅ MUST be: 'minimal', 'low', 'medium', or 'high' (NOT 'none')
           },
-          text: {
-            verbosity: 'medium'
-          },
-          max_output_tokens: maxOutputTokens, // ✅ CORRECT parameter for GPT-5.1
+          max_output_tokens: maxOutputTokens, // ✅ CORRECT parameter for GPT-5-mini
+          // ⚠️ NOTE: temperature is NOT supported by gpt-5-mini (only default 1)
         }),
         signal: AbortSignal.timeout(OPENAI_TIMEOUT),
       });
@@ -131,18 +132,18 @@ export async function callOpenAI(
       // Validate extraction succeeded
       validateResponseText(content, model, data);
       
-      console.log(`✅ ${model} response received (${content.length} chars)`);
+      console.log(`✅ ${model} response received (${content.length} chars) with reasoning: ${effort}`);
       
       return {
         content,
         tokensUsed: data.usage?.total_tokens || 0,
         model: model,
-        reasoning: effort,
+        reasoning: effort, // Returns actual effort used: 'minimal', 'low', 'medium', or 'high'
         responseId: data.id || 'unknown',
       };
       
     } else {
-      // ✅ GPT-4o: Use standard Chat Completions API
+      // ✅ GPT-4o or other models: Use standard Chat Completions API
       console.log(`📡 Using Chat Completions API for ${model}`);
       
       // Convert back to messages format for Chat Completions
@@ -164,8 +165,8 @@ export async function callOpenAI(
       const completion = await openai.chat.completions.create({
         model: model,
         messages: messages as any,
-        temperature: 0.7,
-        max_completion_tokens: maxOutputTokens, // ✅ UPDATED: Use max_completion_tokens (OpenAI API update)
+        temperature: 0.7, // ✅ OK for gpt-4o (this path is only for non-gpt-5 models)
+        max_completion_tokens: maxOutputTokens,
         response_format: requestJsonFormat ? { type: 'json_object' } : undefined
       });
       
@@ -181,7 +182,7 @@ export async function callOpenAI(
         content,
         tokensUsed: completion.usage?.total_tokens || 0,
         model: completion.model,
-        reasoning: 'none',
+        reasoning: 'n/a', // Chat Completions doesn't have reasoning
         responseId: completion.id,
       };
     }
@@ -189,9 +190,12 @@ export async function callOpenAI(
   } catch (error: any) {
     console.error(`[OpenAI] Error calling ${model}:`, error.message);
     
-    // Fallback to gpt-4o if GPT-5.1 fails
-    if (model === 'gpt-5.1' || model.includes('gpt-5')) {
-      console.log(`[OpenAI] Trying fallback model: ${OPENAI_FALLBACK_MODEL}`);
+    // Fallback to gpt-4o if GPT-5-mini fails
+    // ✅ HARDCODED: Always use gpt-4o for fallback (NOT gpt-5-mini which has different constraints)
+    const fallbackModel = 'gpt-4o';
+    
+    if (model === 'gpt-5-mini' || model.includes('gpt-5')) {
+      console.log(`[OpenAI] Trying fallback model: ${fallbackModel}`);
       
       try {
         // Convert input to messages format for fallback
@@ -210,12 +214,13 @@ export async function callOpenAI(
           }
         }
         
-        // Use standard Chat Completions API for fallback
+        // ✅ Use standard Chat Completions API for gpt-4o fallback
+        // gpt-4o supports temperature: 0.7 (unlike gpt-5-mini)
         const fallbackCompletion = await openai.chat.completions.create({
-          model: OPENAI_FALLBACK_MODEL,
+          model: fallbackModel,
           messages: messages as any,
-          temperature: 0.7,
-          max_completion_tokens: maxOutputTokens, // ✅ UPDATED: Use max_completion_tokens (OpenAI API update)
+          temperature: 0.7, // ✅ OK for gpt-4o
+          max_completion_tokens: maxOutputTokens,
           response_format: requestJsonFormat ? { type: 'json_object' } : undefined
         });
         
@@ -225,18 +230,18 @@ export async function callOpenAI(
           throw new Error('No content in fallback response');
         }
         
-        console.log(`✅ Fallback ${OPENAI_FALLBACK_MODEL} response received`);
+        console.log(`✅ Fallback ${fallbackModel} response received`);
         
         return {
           content,
           tokensUsed: fallbackCompletion.usage?.total_tokens || 0,
           model: `${fallbackCompletion.model} (fallback)`,
-          reasoning: 'none',
+          reasoning: 'n/a', // gpt-4o doesn't have reasoning
           responseId: fallbackCompletion.id,
         };
       } catch (fallbackError: any) {
         console.error(`[OpenAI] Fallback also failed:`, fallbackError.message);
-        throw new Error(`Both ${model} and ${OPENAI_FALLBACK_MODEL} failed: ${error.message}`);
+        throw new Error(`Both ${model} and ${fallbackModel} failed: ${error.message}`);
       }
     }
     
@@ -246,7 +251,7 @@ export async function callOpenAI(
 
 /**
  * Legacy compatibility function for chat completions
- * Wraps GPT-5.1 to maintain backward compatibility
+ * Wraps GPT-5-mini to maintain backward compatibility
  * 
  * @deprecated Use callOpenAI() instead for new code
  */
@@ -256,8 +261,8 @@ export async function createChatCompletion(
   temperature?: number
 ) {
   console.warn('[OpenAI] Using legacy createChatCompletion wrapper - consider migrating to callOpenAI()');
-  // Note: temperature parameter is used, reasoning effort defaults to 'medium'
-  return callOpenAI(messages, maxTokens, 'medium', true);
+  // Note: temperature parameter is ignored for gpt-5-mini, reasoning effort defaults to 'minimal'
+  return callOpenAI(messages, maxTokens, 'minimal', true);
 }
 
 /**
