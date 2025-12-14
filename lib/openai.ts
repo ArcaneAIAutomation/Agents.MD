@@ -165,7 +165,7 @@ export async function callOpenAI(
         model: model,
         messages: messages as any,
         temperature: 0.7,
-        max_tokens: maxOutputTokens, // ✅ CORRECT parameter for GPT-4o
+        max_completion_tokens: maxOutputTokens, // ✅ UPDATED: Use max_completion_tokens (OpenAI API update)
         response_format: requestJsonFormat ? { type: 'json_object' } : undefined
       });
       
@@ -215,7 +215,7 @@ export async function callOpenAI(
           model: OPENAI_FALLBACK_MODEL,
           messages: messages as any,
           temperature: 0.7,
-          max_tokens: maxOutputTokens,
+          max_completion_tokens: maxOutputTokens, // ✅ UPDATED: Use max_completion_tokens (OpenAI API update)
           response_format: requestJsonFormat ? { type: 'json_object' } : undefined
         });
         
