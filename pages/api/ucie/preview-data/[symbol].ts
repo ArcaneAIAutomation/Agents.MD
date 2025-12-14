@@ -423,7 +423,8 @@ async function handler(
       console.log(`✅ GPT-5.1 summary generated (${summary.length} chars, ~${Math.round(summary.split(' ').length)} words)`);
       
       // ✅ CRITICAL: Store ALL summaries (even short ones) so status endpoint knows analysis completed
-      const analysisType = summary.length > 500 ? 'summary' : 'fallback';
+      // Note: analysisType must be 'summary' | 'deep-dive' | 'quick' - using 'summary' for all cases
+      const analysisType: 'summary' | 'deep-dive' | 'quick' = 'summary';
       
       // Store GPT-5.1 summary in database (using Gemini table for backward compatibility)
       const { storeGeminiAnalysis } = await import('../../../../lib/ucie/geminiAnalysisStorage');
@@ -472,6 +473,7 @@ async function handler(
       console.log(`📝 Using basic fallback summary (${summary.length} chars)`);
       
       // ✅ CRITICAL: Store error state in database so status endpoint knows it failed
+      // Note: analysisType must be 'summary' | 'deep-dive' | 'quick' - using 'summary' for error cases too
       try {
         const { storeGeminiAnalysis } = await import('../../../../lib/ucie/geminiAnalysisStorage');
         await storeGeminiAnalysis({
@@ -482,7 +484,7 @@ async function handler(
           dataQualityScore: dataQuality,
           apiStatus: apiStatus,
           modelUsed: 'gpt-5.1-error',
-          analysisType: 'error', // Mark as error so status endpoint knows
+          analysisType: 'summary', // Using 'summary' type (valid value) - error is indicated by modelUsed
           dataSourcesUsed: apiStatus.working,
           availableDataCount: apiStatus.working.length
         });
@@ -587,7 +589,7 @@ async function handler(
       const aiData = await getGeminiAnalysis(normalizedSymbol, userId);
       if (aiData?.summary_text) {
         aiAnalysis = aiData.summary_text;
-        console.log(`✅ Retrieved AI analysis (${aiAnalysis.length} chars, model: ${aiData.model_used || 'unknown'})`);
+        console.log(`✅ Retrieved AI analysis (${aiAnalysis?.length || 0} chars, model: ${aiData.model_used || 'unknown'})`);
       } else {
         console.warn(`⚠️ No AI analysis found in database`);
       }
@@ -787,6 +789,8 @@ async function fetchWithTimeout(url: string, timeout: number) {
  * Calculate API status with proper data validation
  * ✅ FIX #1: Validate actual data existence, not just success flags
  * ✅ FIX #6: Check dataQuality field AND data content (handles both fresh and cached data)
+ * ✅ FIX #7: Don't require success === true - check for actual data presence
+ *           This fixes the 0% data quality issue when APIs return data without success flag
  */
 function calculateAPIStatus(collectedData: any) {
   const working: string[] = [];
@@ -800,27 +804,43 @@ function calculateAPIStatus(collectedData: any) {
     onChain: collectedData.onChain ? 'present' : 'missing'
   });
 
-  // 🔍 FORENSIC FIX: Market Data structure is { success: true, symbol, priceAggregation, ... }
-  // NOT { success: true, data: { priceAggregation, ... } }
-  if (
-    collectedData.marketData?.success === true &&
-    collectedData.marketData?.priceAggregation?.prices?.length > 0
-  ) {
+  // ✅ FIX #7: Market Data - Check for actual data, not just success flag
+  // Structure can be: { success: true, priceAggregation, ... } OR { priceAggregation, ... }
+  const marketData = collectedData.marketData;
+  const hasMarketData = marketData && (
+    // Check for priceAggregation with prices array
+    (marketData.priceAggregation?.prices?.length > 0) ||
+    // Check for direct price data
+    (typeof marketData.price === 'number' && marketData.price > 0) ||
+    // Check for marketData nested object with price
+    (marketData.marketData?.price > 0) ||
+    // Check for aggregatedPrice
+    (typeof marketData.aggregatedPrice === 'number' && marketData.aggregatedPrice > 0)
+  );
+  
+  // Accept if success !== false AND has actual data
+  if (marketData?.success !== false && hasMarketData) {
     working.push('Market Data');
-    console.log('✅ Market Data: VALID (has priceAggregation.prices)');
+    console.log('✅ Market Data: VALID', {
+      success: marketData?.success,
+      hasPriceAggregation: !!marketData?.priceAggregation,
+      pricesLength: marketData?.priceAggregation?.prices?.length,
+      hasDirectPrice: typeof marketData?.price === 'number'
+    });
   } else {
     failed.push('Market Data');
     console.log('❌ Market Data: INVALID', {
-      success: collectedData.marketData?.success,
-      hasPriceAggregation: !!collectedData.marketData?.priceAggregation,
-      pricesLength: collectedData.marketData?.priceAggregation?.prices?.length
+      success: marketData?.success,
+      hasPriceAggregation: !!marketData?.priceAggregation,
+      pricesLength: marketData?.priceAggregation?.prices?.length,
+      hasDirectPrice: typeof marketData?.price === 'number'
     });
   }
 
-  // 🔍 FORENSIC FIX: Sentiment structure is { success: true, data: { overallScore, dataQuality, ... } }
-  // ✅ CRITICAL FIX: Check for data existence, not just quality score
-  // Data with 0% quality is still valid data (it means sources failed, but structure exists)
-  const sentimentData = collectedData.sentiment?.data;
+  // ✅ FIX #7: Sentiment - Check for actual data, not just success flag
+  // Structure can be: { success: true, data: {...} } OR { success: true, overallScore, ... }
+  const sentiment = collectedData.sentiment;
+  const sentimentData = sentiment?.data || sentiment; // Handle both nested and flat structures
   const hasSentimentData = sentimentData && (
     typeof sentimentData.overallScore === 'number' || // Has overallScore (PRIMARY indicator)
     sentimentData.sentiment !== undefined || // Has sentiment classification
@@ -830,15 +850,14 @@ function calculateAPIStatus(collectedData: any) {
     sentimentData.coinMarketCap !== undefined || // Has CoinMarketCap data
     sentimentData.coinGecko !== undefined || // Has CoinGecko data
     typeof sentimentData.dataQuality === 'number' || // Has dataQuality field (even if 0)
-    Object.keys(sentimentData).length > 3 // Has multiple fields (more than just symbol, timestamp, dataQuality)
+    (sentimentData && Object.keys(sentimentData).length > 3) // Has multiple fields
   );
   
-  if (
-    collectedData.sentiment?.success === true &&
-    hasSentimentData
-  ) {
+  // Accept if success !== false AND has actual data
+  if (sentiment?.success !== false && hasSentimentData) {
     working.push('Sentiment');
     console.log('✅ Sentiment: VALID', {
+      success: sentiment?.success,
       dataQuality: sentimentData?.dataQuality,
       overallScore: sentimentData?.overallScore,
       sentiment: sentimentData?.sentiment,
@@ -852,54 +871,75 @@ function calculateAPIStatus(collectedData: any) {
   } else {
     failed.push('Sentiment');
     console.log('❌ Sentiment: INVALID', {
-      success: collectedData.sentiment?.success,
+      success: sentiment?.success,
       hasData: !!sentimentData,
       dataQuality: sentimentData?.dataQuality,
       overallScore: sentimentData?.overallScore,
       fieldCount: sentimentData ? Object.keys(sentimentData).length : 0,
-      dataKeys: sentimentData ? Object.keys(sentimentData) : []
+      dataKeys: sentimentData ? Object.keys(sentimentData).slice(0, 10) : []
     });
   }
 
-  // 🔍 FORENSIC FIX: Technical structure is { success: true, symbol, indicators, ... }
-  // NOT { success: true, data: { indicators, ... } }
-  const hasTechnical = collectedData.technical?.success === true &&
-                       collectedData.technical?.indicators &&
-                       typeof collectedData.technical.indicators === 'object' &&
-                       Object.keys(collectedData.technical.indicators).length >= 6;
+  // ✅ FIX #7: Technical - Check for actual data, not just success flag
+  // Structure can be: { success: true, indicators, ... } OR { indicators, ... }
+  const technical = collectedData.technical;
+  const hasTechnical = technical && (
+    // Check for indicators object with multiple entries
+    (technical.indicators && typeof technical.indicators === 'object' && Object.keys(technical.indicators).length >= 3) ||
+    // Check for direct indicator fields
+    (technical.rsi !== undefined || technical.macd !== undefined || technical.ema !== undefined) ||
+    // Check for signals
+    (technical.signals && typeof technical.signals === 'object')
+  );
   
-  if (hasTechnical) {
+  // Accept if success !== false AND has actual data
+  if (technical?.success !== false && hasTechnical) {
     working.push('Technical');
-    console.log('✅ Technical: VALID (has indicators)');
+    console.log('✅ Technical: VALID', {
+      success: technical?.success,
+      hasIndicators: !!technical?.indicators,
+      indicatorCount: technical?.indicators ? Object.keys(technical.indicators).length : 0,
+      hasSignals: !!technical?.signals
+    });
   } else {
     failed.push('Technical');
     console.log('❌ Technical: INVALID', {
-      success: collectedData.technical?.success,
-      hasIndicators: !!collectedData.technical?.indicators,
-      indicatorCount: collectedData.technical?.indicators ? Object.keys(collectedData.technical.indicators).length : 0
+      success: technical?.success,
+      hasIndicators: !!technical?.indicators,
+      indicatorCount: technical?.indicators ? Object.keys(technical.indicators).length : 0,
+      hasSignals: !!technical?.signals
     });
   }
 
-  // 🔍 FORENSIC FIX: News structure is { success: true, symbol, articles, ... }
-  // NOT { success: true, data: { articles, ... } }
-  if (
-    collectedData.news?.success === true &&
-    collectedData.news?.articles?.length > 0
-  ) {
+  // ✅ FIX #7: News - Check for actual data, not just success flag
+  // Structure can be: { success: true, articles, ... } OR { articles, ... }
+  const news = collectedData.news;
+  const hasNews = news && (
+    // Check for articles array with content
+    (Array.isArray(news.articles) && news.articles.length > 0) ||
+    // Check for nested data.articles
+    (Array.isArray(news.data?.articles) && news.data.articles.length > 0)
+  );
+  
+  // Accept if success !== false AND has actual data
+  if (news?.success !== false && hasNews) {
     working.push('News');
-    console.log('✅ News: VALID (has articles)');
+    console.log('✅ News: VALID', {
+      success: news?.success,
+      articlesLength: news?.articles?.length || news?.data?.articles?.length
+    });
   } else {
     failed.push('News');
     console.log('❌ News: INVALID', {
-      success: collectedData.news?.success,
-      articlesLength: collectedData.news?.articles?.length
+      success: news?.success,
+      articlesLength: news?.articles?.length || news?.data?.articles?.length
     });
   }
 
-  // 🔍 FORENSIC FIX: On-Chain structure is { success: true, data: { dataQuality, ... } }
-  // ✅ CRITICAL FIX: Check for data existence, not just quality score
-  // Data with 0% quality is still valid data (it means sources failed, but structure exists)
-  const onChainData = collectedData.onChain?.data;
+  // ✅ FIX #7: On-Chain - Check for actual data, not just success flag
+  // Structure can be: { success: true, data: {...} } OR { success: true, networkMetrics, ... }
+  const onChain = collectedData.onChain;
+  const onChainData = onChain?.data || onChain; // Handle both nested and flat structures
   const hasOnChainData = onChainData && (
     onChainData.networkMetrics !== undefined || // Has network metrics (PRIMARY indicator)
     onChainData.whaleActivity !== undefined || // Has whale activity
@@ -908,15 +948,14 @@ function calculateAPIStatus(collectedData: any) {
     onChainData.blockchainInfo !== undefined || // Has blockchain info
     onChainData.transactionStats !== undefined || // Has transaction stats
     typeof onChainData.dataQuality === 'number' || // Has dataQuality field (even if 0)
-    Object.keys(onChainData).length > 3 // Has multiple fields (more than just symbol, timestamp, dataQuality)
+    (onChainData && Object.keys(onChainData).length > 3) // Has multiple fields
   );
   
-  if (
-    collectedData.onChain?.success === true &&
-    hasOnChainData
-  ) {
+  // Accept if success !== false AND has actual data
+  if (onChain?.success !== false && hasOnChainData) {
     working.push('On-Chain');
     console.log('✅ On-Chain: VALID', {
+      success: onChain?.success,
       dataQuality: onChainData?.dataQuality,
       hasNetworkMetrics: !!onChainData?.networkMetrics,
       hasWhaleActivity: !!onChainData?.whaleActivity,
@@ -929,12 +968,12 @@ function calculateAPIStatus(collectedData: any) {
   } else {
     failed.push('On-Chain');
     console.log('❌ On-Chain: INVALID', {
-      success: collectedData.onChain?.success,
+      success: onChain?.success,
       hasData: !!onChainData,
       dataQuality: onChainData?.dataQuality,
       hasNetworkStats: !!onChainData?.networkStats,
       fieldCount: onChainData ? Object.keys(onChainData).length : 0,
-      dataKeys: onChainData ? Object.keys(onChainData) : []
+      dataKeys: onChainData ? Object.keys(onChainData).slice(0, 10) : []
     });
   }
 
@@ -1190,7 +1229,7 @@ async function generateOpenAISummaryFromCollectedData(
     context += `Market Data:\n`;
     const price = agg.averagePrice || agg.aggregatedPrice || 0;
     const volume = agg.totalVolume24h || agg.aggregatedVolume24h || 0;
-    const marketCap = marketData.marketData?.marketCap || agg.aggregatedMarketCap || 0;
+    const marketCap = collectedData.marketData?.marketData?.marketCap || agg.aggregatedMarketCap || 0;
     const change = agg.averageChange24h || agg.aggregatedChange24h || 0;
     
     context += `- Price: $${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`;
@@ -1200,6 +1239,7 @@ async function generateOpenAISummaryFromCollectedData(
   }
 
   // Sentiment with AI Insights
+  const sentimentData = collectedData.sentiment;
   if (sentimentData?.success && sentimentData?.sentiment) {
     const sentiment = sentimentData.sentiment;
     context += `Social Sentiment:\n`;
@@ -1238,6 +1278,7 @@ async function generateOpenAISummaryFromCollectedData(
   }
 
   // Technical
+  const technicalData = collectedData.technical;
   if (technicalData?.success && technicalData?.indicators) {
     context += `Technical Analysis:\n`;
     const indicators = technicalData.indicators;
@@ -1251,6 +1292,7 @@ async function generateOpenAISummaryFromCollectedData(
   }
 
   // News with Enhanced Details
+  const newsData = collectedData.news;
   if (newsData?.success && newsData?.articles?.length > 0) {
     context += `Recent News (${newsData.articles.length} articles):\n`;
     
@@ -1279,6 +1321,7 @@ async function generateOpenAISummaryFromCollectedData(
   }
 
   // On-Chain with AI Insights
+  const onChainData = collectedData.onChain;
   if (onChainData?.success) {
     context += `On-Chain Data:\n`;
     if (onChainData.whaleActivity) {
