@@ -3,13 +3,13 @@
  * 
  * POST /api/ucie/openai-summary-start/[symbol]
  * 
- * Starts chatgpt-4o-latest analysis in background, returns jobId immediately
+ * Starts GPT-5 analysis in background, returns jobId immediately
  * Frontend polls /api/ucie/openai-summary-poll/[jobId] every 10 seconds
  * 
  * ✅ ASYNC: Avoids Vercel 60-second timeout
  * ✅ POLLING: Frontend checks status every 10 seconds
  * ✅ BULLETPROOF: Can run for up to 3 minutes
- * ✅ MODEL: Uses chatgpt-4o-latest (OpenAI's latest GPT-4o with automatic updates)
+ * ✅ MODEL: Uses gpt-5-turbo (OpenAI's latest GPT-5 model - December 2024)
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -59,7 +59,7 @@ async function handler(
       });
     }
 
-    console.log(`🚀 Starting chatgpt-4o-latest analysis for ${symbolUpper}...`);
+    console.log(`🚀 Starting gpt-5-turbo analysis for ${symbolUpper}...`);
 
     // Create job in database
     const result = await query(
@@ -137,11 +137,11 @@ interface ModularAnalysis {
 }
 
 /**
- * Process chatgpt-4o-latest job asynchronously with MODULAR ANALYSIS
+ * Process GPT-5 job asynchronously with MODULAR ANALYSIS
  * Each data source analyzed separately for speed and reliability
  * 
  * ✅ HEARTBEAT: Updates database every 10 seconds to show job is alive
- * ✅ chatgpt-4o-latest: Uses OpenAI's latest GPT-4o with automatic updates
+ * ✅ gpt-5-turbo: Uses OpenAI's latest GPT-5 model (December 2024)
  * ✅ ERROR HANDLING: Comprehensive try-catch with database updates
  */
 async function processJobAsync(
@@ -180,7 +180,7 @@ async function processJobAsync(
       try {
         await query(
           'UPDATE ucie_openai_jobs SET status = $1, progress = $2, updated_at = NOW() WHERE id = $3',
-          ['processing', 'Analyzing with chatgpt-4o-latest...', jobId],
+          ['processing', 'Analyzing with gpt-5-turbo...', jobId],
           { timeout: 5000, retries: 1 } // 5 second timeout, 1 retry
         );
         console.log(`✅ Job ${jobId}: Status updated to 'processing', DB connection released`);
@@ -215,8 +215,8 @@ async function processJobAsync(
       throw new Error('OPENAI_API_KEY not configured');
     }
 
-    // ✅ Use chatgpt-4o-latest: OpenAI's latest GPT-4o with automatic updates
-    const model = process.env.OPENAI_MODEL || 'chatgpt-4o-latest';
+    // ✅ Use gpt-5-turbo: OpenAI's latest GPT-5 model (December 2024)
+    const model = process.env.OPENAI_MODEL || 'gpt-5-turbo';
     const modularAnalysis: ModularAnalysis = {
       timestamp: new Date().toISOString(),
       processingTime: 0
@@ -536,10 +536,10 @@ async function updateProgress(jobId: number, progress: string): Promise<void> {
 }
 
 /**
- * Analyze a single data source with chatgpt-4o-latest
+ * Analyze a single data source with gpt-5-turbo
  * Small, fast, focused analysis
  * 
- * ✅ USES chatgpt-4o-latest: OpenAI's latest GPT-4o with automatic updates
+ * ✅ USES gpt-5-turbo: OpenAI's latest GPT-5 model (December 2024)
  * ✅ BULLETPROOF: Uses extractResponseText utility
  * ✅ FAST: Quick analysis for modular approach
  * ✅ FALLBACK: Returns error object instead of throwing on failure
@@ -604,7 +604,7 @@ ${instructions}
 
 Respond with valid JSON only.`;
       
-      // ✅ Call chatgpt-4o-latest with Chat Completions API
+      // ✅ Call gpt-5-turbo with Chat Completions API
       console.log(`🚀 [analyzeDataSource] Calling OpenAI API...`);
       console.log(`🚀 [analyzeDataSource] Prompt length: ${prompt.length} characters`);
       
@@ -691,10 +691,10 @@ Respond with valid JSON only.`;
 }
 
 /**
- * Analyze news with comprehensive market context using chatgpt-4o-latest
+ * Analyze news with comprehensive market context using gpt-5-turbo
  * Provides full picture for accurate impact assessment
  * 
- * ✅ USES chatgpt-4o-latest: OpenAI's latest GPT-4o with automatic updates
+ * ✅ USES gpt-5-turbo: OpenAI's latest GPT-5 model (December 2024)
  * ✅ CONTEXT-AWARE: Combines news with market, technical, and sentiment data
  * ✅ FALLBACK: Returns error object instead of throwing on failure
  */
@@ -774,7 +774,7 @@ Consider:
 
 Respond with valid JSON only.`;
       
-      // ✅ Call chatgpt-4o-latest API
+      // ✅ Call gpt-5-turbo API
       const completion = await openai.chat.completions.create({
         model: model,
         messages: [
@@ -829,10 +829,10 @@ Respond with valid JSON only.`;
 }
 
 /**
- * Generate executive summary combining all analyses using GPT-4o
+ * Generate executive summary combining all analyses using gpt-5-turbo
  * Synthesizes all modular analyses into comprehensive overview
  * 
- * ✅ USES GPT-4o: Standard OpenAI Chat Completions API
+ * ✅ USES gpt-5-turbo: OpenAI's latest GPT-5 model (December 2024)
  * ✅ BULLETPROOF: Uses extractResponseText utility
  * ✅ COMPREHENSIVE: Combines all 8 data source analyses
  * ✅ FALLBACK: Returns error object instead of throwing on failure
@@ -891,7 +891,7 @@ Synthesize all analyses into cohesive, actionable summary.
 
 Respond with valid JSON only.`;
       
-      // ✅ Call GPT-4o API
+      // ✅ Call gpt-5-turbo API
       const completion = await openai.chat.completions.create({
         model: model,
         messages: [
