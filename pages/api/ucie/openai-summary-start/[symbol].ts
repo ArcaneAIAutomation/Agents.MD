@@ -159,20 +159,21 @@ async function processJobAsync(
     console.log(`🔄 Start time: ${new Date().toISOString()}`);
     console.log(`🔄 ========================================`);
     
-    // ✅ START HEARTBEAT: Update database every 10 seconds
+    // ✅ START HEARTBEAT: Update database every 15 seconds (increased from 10s)
     heartbeatInterval = setInterval(async () => {
       try {
         await query(
           'UPDATE ucie_openai_jobs SET updated_at = NOW() WHERE id = $1',
           [jobId],
-          { timeout: 3000, retries: 0 }
+          { timeout: 10000, retries: 1 } // ✅ FIXED: Increased timeout to 10s, added 1 retry
         );
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
         console.log(`💓 HEARTBEAT: Job ${jobId} alive (${elapsed}s elapsed)`);
       } catch (error) {
-        console.warn(`⚠️ Heartbeat failed:`, error);
+        console.warn(`⚠️ Heartbeat failed (non-critical):`, error);
+        // Heartbeat failures are non-critical - job continues processing
       }
-    }, 10000); // Every 10 seconds
+    }, 15000); // Every 15 seconds (increased from 10s to reduce DB load)
     
     // ✅ FIX: Update status to processing with retry logic
     let statusUpdated = false;
@@ -181,7 +182,7 @@ async function processJobAsync(
         await query(
           'UPDATE ucie_openai_jobs SET status = $1, progress = $2, updated_at = NOW() WHERE id = $3',
           ['processing', 'Analyzing with gpt-5-mini...', jobId],
-          { timeout: 5000, retries: 1 } // 5 second timeout, 1 retry
+          { timeout: 10000, retries: 2 } // ✅ FIXED: 10 second timeout, 2 retries
         );
         console.log(`✅ Job ${jobId}: Status updated to 'processing', DB connection released`);
         statusUpdated = true;
@@ -493,7 +494,7 @@ async function processJobAsync(
                completed_at = NOW()
            WHERE id = $3`,
           ['error', errorMessage, jobId],
-          { timeout: 5000, retries: 1 }
+          { timeout: 10000, retries: 2 } // ✅ FIXED: 10 second timeout, 2 retries
         );
         console.log(`❌ Job ${jobId}: Marked as error, DB connection released`);
         break;
@@ -528,10 +529,11 @@ async function updateProgress(jobId: number, progress: string): Promise<void> {
     await query(
       'UPDATE ucie_openai_jobs SET progress = $1, updated_at = NOW() WHERE id = $2',
       [progress, jobId],
-      { timeout: 3000, retries: 1 }
+      { timeout: 10000, retries: 2 } // ✅ FIXED: Increased timeout to 10s, 2 retries
     );
   } catch (error) {
-    console.warn(`⚠️ Failed to update progress:`, error);
+    console.warn(`⚠️ Failed to update progress (non-critical):`, error);
+    // Progress update failures are non-critical - job continues processing
   }
 }
 
