@@ -492,44 +492,91 @@ async function handler(
       }
     }
 
-    // ✅ CRITICAL: Start GPT-5.1 analysis job asynchronously
-    console.log(`🚀 Starting GPT-5.1 analysis job asynchronously...`);
+    // ✅ CRITICAL: GATE CHECK - Only start GPT-5.1 if data is CONFIRMED in database
+    // Per UCIE steering rules: AI analysis happens LAST, only after ALL data is cached
+    // Minimum requirements:
+    // 1. Storage must be successful (at least 2 data types stored)
+    // 2. Data quality must be >= 70%
+    // 3. Database verification must find at least 3 data types
+    
+    const MIN_STORAGE_SUCCESS = 2; // At least 2 data types must be stored
+    const MIN_DATA_QUALITY = 70;   // Minimum 70% data quality per UCIE steering
+    const MIN_DB_VERIFICATION = 3; // At least 3 data types must be verified in DB
+    
+    const canStartGPT = 
+      successful >= MIN_STORAGE_SUCCESS &&
+      dataQuality >= MIN_DATA_QUALITY &&
+      foundCount >= MIN_DB_VERIFICATION;
+    
+    console.log(`🔒 GPT-5.1 Gate Check:`);
+    console.log(`   Storage Success: ${successful}/${storagePromises.length} (min: ${MIN_STORAGE_SUCCESS}) ${successful >= MIN_STORAGE_SUCCESS ? '✅' : '❌'}`);
+    console.log(`   Data Quality: ${dataQuality}% (min: ${MIN_DATA_QUALITY}%) ${dataQuality >= MIN_DATA_QUALITY ? '✅' : '❌'}`);
+    console.log(`   DB Verification: ${foundCount}/5 (min: ${MIN_DB_VERIFICATION}) ${foundCount >= MIN_DB_VERIFICATION ? '✅' : '❌'}`);
+    console.log(`   Gate Result: ${canStartGPT ? '✅ PASSED - Starting GPT-5.1' : '❌ FAILED - Skipping GPT-5.1'}`);
+    
+    // ✅ CRITICAL: Start GPT-5.1 analysis job ONLY if gate check passes
     let gptJobId: string | null = null;
-    try {
-      // Construct base URL from request headers
-      const protocol = req.headers['x-forwarded-proto'] || 'https';
-      const host = req.headers['host'];
-      const baseUrl = `${protocol}://${host}`;
-      
-      const startResponse = await fetch(`${baseUrl}/api/ucie/openai-summary-start/${normalizedSymbol}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          collectedData,
-          context: {
-            symbol: normalizedSymbol,
-            dataQuality,
-            apiStatus,
-            timestamp: new Date().toISOString()
+    let gptSkipReason: string | null = null;
+    
+    if (canStartGPT) {
+      console.log(`🚀 Starting GPT-5.1 analysis job (data confirmed in database)...`);
+      try {
+        // Construct base URL from request headers
+        const protocol = req.headers['x-forwarded-proto'] || 'https';
+        const host = req.headers['host'];
+        const baseUrl = `${protocol}://${host}`;
+        
+        const startResponse = await fetch(`${baseUrl}/api/ucie/openai-summary-start/${normalizedSymbol}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            collectedData,
+            context: {
+              symbol: normalizedSymbol,
+              dataQuality,
+              apiStatus,
+              timestamp: new Date().toISOString(),
+              gateCheck: {
+                storageSuccess: successful,
+                dataQuality: dataQuality,
+                dbVerification: foundCount,
+                passed: true
+              }
+            }
+          })
+        });
+        
+        if (startResponse.ok) {
+          const startData = await startResponse.json();
+          if (startData.success && startData.jobId) {
+            gptJobId = startData.jobId;
+            console.log(`✅ GPT-5.1 analysis job ${gptJobId} started successfully (data confirmed in DB)`);
+          } else {
+            console.warn(`⚠️ GPT-5.1 job start returned success=false:`, startData);
           }
-        })
-      });
-      
-      if (startResponse.ok) {
-        const startData = await startResponse.json();
-        if (startData.success && startData.jobId) {
-          gptJobId = startData.jobId;
-          console.log(`✅ GPT-5.1 analysis job ${gptJobId} started successfully`);
         } else {
-          console.warn(`⚠️ GPT-5.1 job start returned success=false:`, startData);
+          console.warn(`⚠️ GPT-5.1 job start failed with status ${startResponse.status}`);
         }
-      } else {
-        console.warn(`⚠️ GPT-5.1 job start failed with status ${startResponse.status}`);
+      } catch (error) {
+        console.error(`❌ Failed to start GPT-5.1 analysis job:`, error);
       }
-    } catch (error) {
-      console.error(`❌ Failed to start GPT-5.1 analysis job:`, error);
+    } else {
+      // Build skip reason for user feedback
+      const reasons: string[] = [];
+      if (successful < MIN_STORAGE_SUCCESS) {
+        reasons.push(`storage failed (${successful}/${MIN_STORAGE_SUCCESS} required)`);
+      }
+      if (dataQuality < MIN_DATA_QUALITY) {
+        reasons.push(`data quality too low (${dataQuality}%/${MIN_DATA_QUALITY}% required)`);
+      }
+      if (foundCount < MIN_DB_VERIFICATION) {
+        reasons.push(`database verification failed (${foundCount}/${MIN_DB_VERIFICATION} required)`);
+      }
+      gptSkipReason = reasons.join(', ');
+      console.warn(`⚠️ GPT-5.1 analysis SKIPPED: ${gptSkipReason}`);
+      console.warn(`   Per UCIE steering rules: AI analysis only starts after data is confirmed in database`);
     }
 
     // ✅ CRITICAL: Retrieve AI analysis from database (for immediate display)
@@ -586,7 +633,17 @@ async function handler(
         maxAttempts: maxAttempts,
         success: true
       },
-      gptJobId: gptJobId // ✅ CRITICAL: Include jobId at top level for easy access
+      gptJobId: gptJobId, // ✅ CRITICAL: Include jobId at top level for easy access
+      gptSkipReason: gptSkipReason, // ✅ CRITICAL: Include skip reason so frontend knows why GPT was skipped
+      gptGateCheck: { // ✅ CRITICAL: Include gate check details for debugging
+        storageSuccess: successful,
+        storageRequired: MIN_STORAGE_SUCCESS,
+        dataQuality: dataQuality,
+        dataQualityRequired: MIN_DATA_QUALITY,
+        dbVerification: foundCount,
+        dbVerificationRequired: MIN_DB_VERIFICATION,
+        passed: canStartGPT
+      }
     };
 
     return res.status(200).json({
