@@ -604,25 +604,14 @@ ${instructions}
 
 Respond with valid JSON only.`;
       
-      // ✅ Call gpt-5-mini with Chat Completions API
-      console.log(`🚀 [analyzeDataSource] Calling OpenAI API...`);
+      // ✅ Call gpt-5-mini with Responses API + minimal reasoning
+      console.log(`🚀 [analyzeDataSource] Calling OpenAI Responses API...`);
       console.log(`🚀 [analyzeDataSource] Prompt length: ${prompt.length} characters`);
       
-      const completion = await openai.chat.completions.create({
+      const completion = await (openai as any).responses.create({
         model: model,
-        messages: [
-          {
-            role: 'system',
-            content: `You are a cryptocurrency analyst. Analyze ${dataType} and respond with concise JSON.`
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 800, // Small response for focused analysis
-        response_format: { type: 'json_object' }
+        reasoning: { effort: "minimal" },
+        input: `You are a cryptocurrency analyst. Analyze ${dataType} and respond with concise JSON.\n\n${prompt}`
       });
       
       const analysisTime = Date.now() - analysisStart;
@@ -774,22 +763,11 @@ Consider:
 
 Respond with valid JSON only.`;
       
-      // ✅ Call gpt-5-mini API
-      const completion = await openai.chat.completions.create({
+      // ✅ Call gpt-5-mini with Responses API + minimal reasoning
+      const completion = await (openai as any).responses.create({
         model: model,
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a cryptocurrency news analyst. Analyze news articles in the context of current market conditions and provide comprehensive impact assessment. Respond with JSON only.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1200, // Larger response for comprehensive news analysis
-        response_format: { type: 'json_object' }
+        reasoning: { effort: "minimal" },
+        input: `You are a cryptocurrency news analyst. Analyze news articles in the context of current market conditions and provide comprehensive impact assessment. Respond with JSON only.\n\n${prompt}`
       });
       
       const analysisTime = Date.now() - analysisStart;
@@ -891,22 +869,11 @@ Synthesize all analyses into cohesive, actionable summary.
 
 Respond with valid JSON only.`;
       
-      // ✅ Call gpt-5-mini API
-      const completion = await openai.chat.completions.create({
+      // ✅ Call gpt-5-mini with Responses API + minimal reasoning
+      const completion = await (openai as any).responses.create({
         model: model,
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a cryptocurrency analyst. Synthesize all analyses into comprehensive executive summary. Respond with JSON only.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1500, // Larger response for comprehensive summary
-        response_format: { type: 'json_object' }
+        reasoning: { effort: "minimal" },
+        input: `You are a cryptocurrency analyst. Synthesize all analyses into comprehensive executive summary. Respond with JSON only.\n\n${prompt}`
       });
       
       const summaryTime = Date.now() - summaryStart;

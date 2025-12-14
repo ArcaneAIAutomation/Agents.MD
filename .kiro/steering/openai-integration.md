@@ -1,16 +1,16 @@
 # OpenAI Integration Guide - Bitcoin Sovereign Technology
 
-**Last Updated**: January 27, 2025  
+**Last Updated**: December 14, 2025  
 **Status**: ✅ Active - Production Ready  
 **Scope**: Cryptocurrency analysis, trade signals, market intelligence  
-**Primary API**: Chat Completions API  
-**Models**: `chatgpt-4o-latest`, `gpt-5.1`
+**Primary API**: Responses API  
+**Primary Model**: `gpt-5-mini`
 
 ---
 
 ## 🎯 Overview
 
-This guide documents OpenAI integration patterns for the Bitcoin Sovereign Technology platform. We use OpenAI's Chat Completions API for cryptocurrency market analysis, trade signal generation, and intelligent data processing.
+This guide documents OpenAI integration patterns for the Bitcoin Sovereign Technology platform. We use OpenAI's **Responses API** with the `gpt-5-mini` model for cryptocurrency market analysis, trade signal generation, and intelligent data processing.
 
 **Key Principle**: OpenAI is used for **analysis and insights**, not data fetching. Always fetch data first, then analyze with AI.
 
@@ -22,32 +22,27 @@ This guide documents OpenAI integration patterns for the Bitcoin Sovereign Techn
 
 | Model | Use Cases | Status | Performance |
 |-------|-----------|--------|-------------|
-| `chatgpt-4o-latest` | UCIE modular analysis, news sentiment | ✅ Primary | 800-1200ms |
-| `gpt-5.1` | Quantum BTC, ATGE, deep analysis | ✅ Production | 1500-3000ms |
+| `gpt-5-mini` | UCIE modular analysis, news sentiment, trade signals | ✅ Primary | Fast, cost-effective |
 | `gpt-4o` | Fallback, legacy endpoints | ✅ Backup | 600-900ms |
 
 ### API Pattern
 
-**We use Chat Completions API exclusively** (not Responses API):
+**We use the Responses API with reasoning:**
 
 ```typescript
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-  timeout: 120000, // 120 seconds
-  maxRetries: 0    // We handle retries ourselves
+  timeout: 30000, // 30 seconds
+  maxRetries: 0   // We handle retries ourselves
 });
 
-const completion = await openai.chat.completions.create({
-  model: 'chatgpt-4o-latest',
-  messages: [
-    { role: 'system', content: systemPrompt },
-    { role: 'user', content: userPrompt }
-  ],
-  temperature: 0.7,
-  max_tokens: 800,
-  response_format: { type: 'json_object' } // For structured output
+// ✅ CORRECT: Use Responses API with reasoning
+const completion = await (openai as any).responses.create({
+  model: 'gpt-5-mini',
+  reasoning: { effort: 'minimal' },
+  input: 'Your prompt here'
 });
 ```
 
@@ -61,7 +56,7 @@ const completion = await openai.chat.completions.create({
 
 ```typescript
 // ❌ WRONG - AI called before data
-const analysis = await openai.chat.completions.create({...});
+const analysis = await openai.responses.create({...});
 const marketData = await fetchMarketData(); // Too late!
 
 // ✅ CORRECT - Data first, then AI
@@ -70,12 +65,10 @@ const sentiment = await fetchSentiment();
 const technical = await fetchTechnical();
 
 // Now call AI with complete context
-const analysis = await openai.chat.completions.create({
-  model: 'chatgpt-4o-latest',
-  messages: [
-    { role: 'system', content: 'You are a crypto analyst...' },
-    { role: 'user', content: `Analyze: ${JSON.stringify({marketData, sentiment, technical})}` }
-  ]
+const analysis = await (openai as any).responses.create({
+  model: 'gpt-5-mini',
+  reasoning: { effort: 'minimal' },
+  input: `Analyze: ${JSON.stringify({marketData, sentiment, technical})}`
 });
 ```
 
@@ -86,19 +79,23 @@ const analysis = await openai.chat.completions.create({
 ```typescript
 import { extractResponseText, validateResponseText } from '../utils/openai';
 
-const completion = await openai.chat.completions.create({...});
+const completion = await (openai as any).responses.create({
+  model: 'gpt-5-mini',
+  reasoning: { effort: 'minimal' },
+  input: prompt
+});
 
 // ✅ Bulletproof extraction (handles all edge cases)
 const responseText = extractResponseText(completion, true); // true = debug mode
-validateResponseText(responseText, 'chatgpt-4o-latest', completion);
+validateResponseText(responseText, 'gpt-5-mini', completion);
 
 // Now parse
 const analysis = JSON.parse(responseText);
 ```
 
 **Why?** These utilities handle:
-- Missing `choices` array
-- Null `message.content`
+- Different response formats
+- Null content
 - Malformed JSON
 - Empty responses
 - API errors
@@ -118,74 +115,54 @@ const analysis = JSON.parse(responseText);
 
 ## 🎨 Model Selection Guide
 
-### When to Use `chatgpt-4o-latest`
+### When to Use `gpt-5-mini`
 
 **Best for:**
-- ✅ Fast analysis (800-1200ms)
+- ✅ Fast analysis
 - ✅ Modular analysis (market, technical, sentiment)
 - ✅ News sentiment classification
-- ✅ JSON output with `response_format`
 - ✅ Cost-effective at scale
-
-**Use cases:**
-- UCIE modular analysis (9 separate analyses)
-- Bitcoin News Wire sentiment
-- Quick trade signal validation
+- ✅ UCIE modular analysis (9 separate analyses)
 
 **Configuration:**
 ```typescript
-const completion = await openai.chat.completions.create({
-  model: 'chatgpt-4o-latest', // Auto-updates to latest GPT-4o
-  messages: [...],
-  temperature: 0.7,
-  max_tokens: 800,
-  response_format: { type: 'json_object' }
+const completion = await (openai as any).responses.create({
+  model: 'gpt-5-mini',
+  reasoning: { effort: 'minimal' },
+  input: prompt
 });
 ```
 
-### When to Use `gpt-5.1`
+### Reasoning Effort Levels
 
-**Best for:**
-- ✅ Deep reasoning (1500-3000ms)
-- ✅ Complex trade analysis
-- ✅ Multi-factor decision making
-- ✅ Strategic recommendations
-- ✅ High-stakes analysis
+| Effort | Use Cases |
+|--------|-----------|
+| `minimal` | Quick analysis, sentiment classification, simple summaries |
+| `low` | Standard analysis, moderate complexity |
+| `medium` | Complex analysis, multi-factor decisions |
+| `high` | Deep analysis, strategic recommendations |
 
-**Use cases:**
-- Quantum BTC trade generation
-- ATGE comprehensive analysis
-- Deep dive whale analysis
-- Risk assessment
-
-**Configuration:**
-```typescript
-const completion = await openai.chat.completions.create({
-  model: 'gpt-5.1',
-  messages: [...],
-  temperature: 0.7,
-  max_tokens: 2000,
-  // Note: gpt-5.1 doesn't support response_format yet
-});
-```
+**For UCIE modular analysis, use `minimal` for speed.**
 
 ### Fallback Strategy
 
 ```typescript
-const OPENAI_MODEL = process.env.OPENAI_MODEL || 'chatgpt-4o-latest';
+const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-5-mini';
 const OPENAI_FALLBACK_MODEL = process.env.OPENAI_FALLBACK_MODEL || 'gpt-4o';
 
 try {
-  const completion = await openai.chat.completions.create({
+  const completion = await (openai as any).responses.create({
     model: OPENAI_MODEL,
-    messages: [...]
+    reasoning: { effort: 'minimal' },
+    input: prompt
   });
 } catch (error) {
   console.error('Primary model failed, trying fallback...');
   
+  // Fallback to Chat Completions API with gpt-4o
   const completion = await openai.chat.completions.create({
     model: OPENAI_FALLBACK_MODEL,
-    messages: [...]
+    messages: [{ role: 'user', content: prompt }]
   });
 }
 ```
@@ -202,35 +179,35 @@ try {
 // pages/api/ucie/openai-summary-start/[symbol].ts
 
 async function analyzeDataSource(
+  apiKey: string,
+  model: string,
+  symbol: string,
   dataType: string,
-  dataToAnalyze: any,
+  data: any,
   instructions: string
 ): Promise<any> {
-  const model = process.env.OPENAI_MODEL || 'chatgpt-4o-latest';
+  const OpenAI = (await import('openai')).default;
+  const { extractResponseText, validateResponseText } = await import('../../../../utils/openai');
   
-  const prompt = `Analyze this ${dataType} data:
+  const openai = new OpenAI({
+    apiKey: apiKey,
+    timeout: 30000,
+    maxRetries: 0
+  });
+  
+  const prompt = `Analyze ${symbol} ${dataType}:
 
-${JSON.stringify(dataToAnalyze, null, 2)}
+${JSON.stringify(data, null, 2)}
 
 ${instructions}
 
 Respond with valid JSON only.`;
   
-  const completion = await openai.chat.completions.create({
+  // ✅ Use Responses API with minimal reasoning
+  const completion = await (openai as any).responses.create({
     model: model,
-    messages: [
-      {
-        role: 'system',
-        content: `You are a cryptocurrency analyst. Analyze ${dataType} and respond with concise JSON.`
-      },
-      {
-        role: 'user',
-        content: prompt
-      }
-    ],
-    temperature: 0.7,
-    max_tokens: 800,
-    response_format: { type: 'json_object' }
+    reasoning: { effort: 'minimal' },
+    input: `You are a cryptocurrency analyst. Analyze ${dataType} and respond with concise JSON.\n\n${prompt}`
   });
   
   // ✅ Bulletproof extraction
@@ -241,165 +218,95 @@ Respond with valid JSON only.`;
 }
 ```
 
-### Pattern 2: Trade Signal Generation
+### Pattern 2: News Analysis with Context
 
-**Use case**: Generate actionable trade signals with confidence scores
+**Use case**: Analyze news with market, technical, and sentiment context
 
 ```typescript
-// pages/api/quantum/generate-btc-trade.ts
-
-async function generateTradeSignal(
-  marketData: any,
-  technicalData: any,
-  sentimentData: any
-): Promise<TradeSignal> {
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-5.1',
-    messages: [
-      {
-        role: 'system',
-        content: 'You are an expert cryptocurrency trader. Generate precise trade signals with risk management.'
-      },
-      {
-        role: 'user',
-        content: `Analyze this data and generate a trade signal:
-
-Market: ${JSON.stringify(marketData)}
-Technical: ${JSON.stringify(technicalData)}
-Sentiment: ${JSON.stringify(sentimentData)}
-
-Provide: signal (BUY/SELL/HOLD), confidence (0-100), entry price, stop loss, take profit levels, reasoning.`
-      }
-    ],
-    temperature: 0.7,
-    max_tokens: 2000
+async function analyzeNewsWithContext(
+  apiKey: string,
+  model: string,
+  symbol: string,
+  context: any
+): Promise<any> {
+  const OpenAI = (await import('openai')).default;
+  const { extractResponseText, validateResponseText } = await import('../../../../utils/openai');
+  
+  const openai = new OpenAI({
+    apiKey: apiKey,
+    timeout: 30000,
+    maxRetries: 0
   });
   
-  const responseText = extractResponseText(completion, true);
-  validateResponseText(responseText, 'gpt-5.1', completion);
+  const prompt = `Analyze ${symbol} news articles in the context of current market conditions:
+
+**MARKET CONTEXT:**
+- Current Price: ${context.marketContext.currentPrice}
+- 24h Change: ${context.marketContext.priceChange24h}
+
+**NEWS ARTICLES:**
+${JSON.stringify(context.news?.articles || [], null, 2)}
+
+Provide JSON with sentiment analysis and market impact assessment.`;
   
-  // Parse and validate trade signal
-  const signal = parseTradeSignal(responseText);
-  return signal;
+  // ✅ Use Responses API with minimal reasoning
+  const completion = await (openai as any).responses.create({
+    model: model,
+    reasoning: { effort: 'minimal' },
+    input: `You are a cryptocurrency news analyst. Respond with JSON only.\n\n${prompt}`
+  });
+  
+  const analysisText = extractResponseText(completion, true);
+  validateResponseText(analysisText, model, completion);
+  
+  return JSON.parse(analysisText);
 }
 ```
 
-### Pattern 3: News Sentiment Analysis
+### Pattern 3: Executive Summary
 
-**Use case**: Batch analyze news articles for sentiment
-
-```typescript
-// pages/api/bitcoin-news-wire.ts
-
-async function analyzeNewsSentiment(articles: NewsArticle[]): Promise<SentimentResult[]> {
-  const batchSize = 10;
-  const results: SentimentResult[] = [];
-  
-  for (let i = 0; i < articles.length; i += batchSize) {
-    const batch = articles.slice(i, i + batchSize);
-    
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-5.1',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a cryptocurrency news analyst. Classify sentiment as BULLISH, BEARISH, or NEUTRAL.'
-        },
-        {
-          role: 'user',
-          content: `Analyze sentiment for these articles:
-
-${batch.map((a, idx) => `${idx + 1}. ${a.title}: ${a.description}`).join('\n\n')}
-
-Respond with JSON array: [{"index": 1, "sentiment": "BULLISH", "confidence": 85, "reasoning": "..."}]`
-        }
-      ],
-      temperature: 0.3, // Lower for consistent classification
-      max_tokens: 1500,
-      response_format: { type: 'json_object' }
-    });
-    
-    const responseText = extractResponseText(completion, true);
-    const batchResults = JSON.parse(responseText);
-    results.push(...batchResults);
-  }
-  
-  return results;
-}
-```
-
-### Pattern 4: UCIE Complete Flow
-
-**Use case**: Full UCIE analysis with data collection → AI analysis
+**Use case**: Synthesize all modular analyses into comprehensive overview
 
 ```typescript
-// pages/api/ucie/openai-summary-start/[symbol].ts
+async function generateExecutiveSummary(
+  apiKey: string,
+  model: string,
+  symbol: string,
+  analysisSummary: any
+): Promise<any> {
+  const OpenAI = (await import('openai')).default;
+  const { extractResponseText, validateResponseText } = await import('../../../../utils/openai');
+  
+  const openai = new OpenAI({
+    apiKey: apiKey,
+    timeout: 30000,
+    maxRetries: 0
+  });
+  
+  const prompt = `Generate executive summary for ${symbol} based on these analyses:
 
-export default async function handler(req, res) {
-  const { symbol } = req.query;
-  
-  // ✅ STEP 1: Fetch and cache ALL data first
-  const [marketData, sentiment, technical, news, onChain] = await Promise.all([
-    getCachedAnalysis(symbol, 'market-data'),
-    getCachedAnalysis(symbol, 'sentiment'),
-    getCachedAnalysis(symbol, 'technical'),
-    getCachedAnalysis(symbol, 'news'),
-    getCachedAnalysis(symbol, 'on-chain')
-  ]);
-  
-  // ✅ STEP 2: Verify data quality
-  const dataQuality = calculateDataQuality({
-    marketData, sentiment, technical, news, onChain
-  });
-  
-  if (dataQuality < 70) {
-    return res.status(400).json({
-      error: 'Insufficient data quality for analysis',
-      dataQuality
-    });
-  }
-  
-  // ✅ STEP 3: Create analysis job
-  const jobId = uuidv4();
-  
-  // Start background analysis
-  analyzeInBackground(jobId, symbol, {
-    marketData, sentiment, technical, news, onChain
-  });
-  
-  return res.status(200).json({
-    success: true,
-    jobId,
-    message: 'Analysis started'
-  });
-}
+${JSON.stringify(analysisSummary, null, 2)}
 
-async function analyzeInBackground(jobId, symbol, data) {
-  try {
-    // Analyze each data source separately (modular approach)
-    const analyses = await Promise.all([
-      analyzeDataSource('market', data.marketData, 'Focus on price trends and volume'),
-      analyzeDataSource('technical', data.technical, 'Focus on indicators and signals'),
-      analyzeDataSource('sentiment', data.sentiment, 'Focus on market mood and social metrics'),
-      analyzeDataSource('news', data.news, 'Focus on recent events and impact'),
-      analyzeDataSource('on-chain', data.onChain, 'Focus on blockchain activity')
-    ]);
-    
-    // Generate executive summary
-    const summary = await generateExecutiveSummary(analyses);
-    
-    // Store complete analysis
-    await setCachedAnalysis(symbol, 'openai-analysis', {
-      jobId,
-      analyses,
-      summary,
-      timestamp: new Date().toISOString()
-    }, 3600, 100);
-    
-  } catch (error) {
-    console.error('Analysis failed:', error);
-    // Store error state
-  }
+Provide JSON with:
+{
+  "summary": "2-3 paragraph executive summary",
+  "confidence": 85,
+  "recommendation": "Buy|Hold|Sell with reasoning",
+  "key_insights": ["insight 1", "insight 2"],
+  "risk_factors": ["risk 1", "risk 2"]
+}`;
+  
+  // ✅ Use Responses API with minimal reasoning
+  const completion = await (openai as any).responses.create({
+    model: model,
+    reasoning: { effort: 'minimal' },
+    input: `You are a cryptocurrency analyst. Synthesize all analyses into comprehensive executive summary. Respond with JSON only.\n\n${prompt}`
+  });
+  
+  const summaryText = extractResponseText(completion, true);
+  validateResponseText(summaryText, model, completion);
+  
+  return JSON.parse(summaryText);
 }
 ```
 
@@ -407,27 +314,24 @@ async function analyzeInBackground(jobId, symbol, data) {
 
 ## 🎯 Prompt Engineering Best Practices
 
-### System Prompts
+### System Instructions in Input
 
-**Be specific about role and output format:**
+**Include role and format instructions in the input:**
 
 ```typescript
-// ✅ GOOD - Clear role and expectations
-{
-  role: 'system',
-  content: 'You are a cryptocurrency analyst specializing in Bitcoin. Analyze market data and provide actionable insights. Always respond with valid JSON containing: analysis, confidence, recommendation, risks.'
-}
+// ✅ GOOD - Clear role and expectations in input
+const completion = await (openai as any).responses.create({
+  model: 'gpt-5-mini',
+  reasoning: { effort: 'minimal' },
+  input: `You are a cryptocurrency analyst specializing in Bitcoin. Analyze market data and provide actionable insights. Always respond with valid JSON containing: analysis, confidence, recommendation, risks.
 
-// ❌ BAD - Vague and generic
-{
-  role: 'system',
-  content: 'You are a helpful assistant.'
-}
+${prompt}`
+});
 ```
 
-### User Prompts
+### Structured Data
 
-**Structure data clearly:**
+**Structure data clearly in prompts:**
 
 ```typescript
 // ✅ GOOD - Structured and clear
@@ -443,31 +347,9 @@ TECHNICAL INDICATORS:
 - MACD: ${macd}
 - Trend: ${trend}
 
-TASK: Provide trade recommendation with confidence score and reasoning.`;
+TASK: Provide trade recommendation with confidence score and reasoning.
 
-// ❌ BAD - Unstructured dump
-const prompt = `Here's some data: ${JSON.stringify(allData)}. What should I do?`;
-```
-
-### JSON Output
-
-**Use `response_format` for structured output:**
-
-```typescript
-const completion = await openai.chat.completions.create({
-  model: 'chatgpt-4o-latest',
-  messages: [...],
-  response_format: { type: 'json_object' } // ✅ Forces JSON output
-});
-
-// Prompt should still request JSON
-const prompt = `Analyze and respond with JSON:
-{
-  "signal": "BUY" | "SELL" | "HOLD",
-  "confidence": 0-100,
-  "reasoning": "...",
-  "risks": ["..."]
-}`;
+Respond with valid JSON only.`;
 ```
 
 ---
@@ -478,26 +360,15 @@ const prompt = `Analyze and respond with JSON:
 
 ```typescript
 // Environment variables
-OPENAI_TIMEOUT=120000        // 120 seconds (default)
-FALLBACK_TIMEOUT=30000       // 30 seconds
+OPENAI_TIMEOUT=30000        // 30 seconds (default)
+OPENAI_MODEL=gpt-5-mini     // Primary model
 
 // Implementation
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-  timeout: parseInt(process.env.OPENAI_TIMEOUT || '120000'),
+  timeout: parseInt(process.env.OPENAI_TIMEOUT || '30000'),
   maxRetries: 0 // We handle retries ourselves
 });
-```
-
-### Token Optimization
-
-```typescript
-// ✅ GOOD - Concise prompts, focused output
-max_tokens: 800  // For modular analysis
-max_tokens: 2000 // For comprehensive analysis
-
-// ❌ BAD - Excessive tokens
-max_tokens: 8000 // Wastes tokens and money
 ```
 
 ### Parallel Processing
@@ -505,15 +376,10 @@ max_tokens: 8000 // Wastes tokens and money
 ```typescript
 // ✅ GOOD - Analyze multiple sources in parallel
 const analyses = await Promise.all([
-  analyzeMarket(marketData),
-  analyzeTechnical(technicalData),
-  analyzeSentiment(sentimentData)
+  analyzeDataSource(apiKey, model, symbol, 'Market', marketData, instructions),
+  analyzeDataSource(apiKey, model, symbol, 'Technical', technicalData, instructions),
+  analyzeDataSource(apiKey, model, symbol, 'Sentiment', sentimentData, instructions)
 ]);
-
-// ❌ BAD - Sequential (slow)
-const marketAnalysis = await analyzeMarket(marketData);
-const technicalAnalysis = await analyzeTechnical(technicalData);
-const sentimentAnalysis = await analyzeSentiment(sentimentData);
 ```
 
 ### Caching Strategy
@@ -535,27 +401,25 @@ if (cached) {
 
 ## 🛡️ Error Handling
 
-### Comprehensive Error Handling
+### Comprehensive Error Handling with Retries
 
 ```typescript
 async function callOpenAIWithRetry(
-  messages: any[],
+  prompt: string,
   maxRetries: number = 3
 ): Promise<any> {
   let lastError: Error;
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const completion = await openai.chat.completions.create({
-        model: process.env.OPENAI_MODEL || 'chatgpt-4o-latest',
-        messages,
-        temperature: 0.7,
-        max_tokens: 800,
-        timeout: 120000
+      const completion = await (openai as any).responses.create({
+        model: process.env.OPENAI_MODEL || 'gpt-5-mini',
+        reasoning: { effort: 'minimal' },
+        input: prompt
       });
       
       const responseText = extractResponseText(completion, true);
-      validateResponseText(responseText, 'chatgpt-4o-latest', completion);
+      validateResponseText(responseText, 'gpt-5-mini', completion);
       
       return JSON.parse(responseText);
       
@@ -589,10 +453,11 @@ try {
 } catch (error) {
   console.error('OpenAI analysis failed:', error);
   
-  // Return data without AI analysis
+  // Return error object instead of throwing
   return {
-    success: true,
-    analysis: null,
+    success: false,
+    error: 'Analysis failed',
+    errorMessage: error instanceof Error ? error.message : 'Unknown error',
     data: data,
     message: 'Data available, AI analysis unavailable'
   };
@@ -611,112 +476,10 @@ console.log(`📊 [OpenAI] Model: ${model}`);
 console.log(`📏 [OpenAI] Prompt length: ${prompt.length} characters`);
 
 const startTime = Date.now();
-const completion = await openai.chat.completions.create({...});
+const completion = await (openai as any).responses.create({...});
 const duration = Date.now() - startTime;
 
 console.log(`✅ [OpenAI] Completed in ${duration}ms`);
-console.log(`📊 [OpenAI] Tokens used: ${completion.usage?.total_tokens}`);
-```
-
-### Cost Tracking
-
-```typescript
-interface OpenAIUsage {
-  model: string;
-  promptTokens: number;
-  completionTokens: number;
-  totalTokens: number;
-  estimatedCost: number;
-  timestamp: string;
-}
-
-function trackUsage(completion: any, model: string): OpenAIUsage {
-  const usage = completion.usage;
-  
-  // Approximate costs (update based on current pricing)
-  const costs = {
-    'chatgpt-4o-latest': { input: 0.0025, output: 0.01 }, // per 1K tokens
-    'gpt-5.1': { input: 0.005, output: 0.015 },
-    'gpt-4o': { input: 0.0025, output: 0.01 }
-  };
-  
-  const modelCost = costs[model] || costs['gpt-4o'];
-  const estimatedCost = 
-    (usage.prompt_tokens / 1000) * modelCost.input +
-    (usage.completion_tokens / 1000) * modelCost.output;
-  
-  return {
-    model,
-    promptTokens: usage.prompt_tokens,
-    completionTokens: usage.completion_tokens,
-    totalTokens: usage.total_tokens,
-    estimatedCost,
-    timestamp: new Date().toISOString()
-  };
-}
-```
-
----
-
-## 🧪 Testing
-
-### Unit Tests
-
-```typescript
-// __tests__/api/openai-analysis.test.ts
-
-describe('OpenAI Analysis', () => {
-  it('should analyze market data successfully', async () => {
-    const mockData = {
-      price: 95000,
-      change24h: 2.5,
-      volume: 25000000000
-    };
-    
-    const analysis = await analyzeMarket(mockData);
-    
-    expect(analysis).toHaveProperty('signal');
-    expect(analysis).toHaveProperty('confidence');
-    expect(analysis.confidence).toBeGreaterThanOrEqual(0);
-    expect(analysis.confidence).toBeLessThanOrEqual(100);
-  });
-  
-  it('should handle API errors gracefully', async () => {
-    // Mock OpenAI error
-    jest.spyOn(openai.chat.completions, 'create')
-      .mockRejectedValue(new Error('API Error'));
-    
-    const result = await analyzeMarket({});
-    
-    expect(result.success).toBe(false);
-    expect(result.error).toBeDefined();
-  });
-});
-```
-
-### Integration Tests
-
-```typescript
-// __tests__/integration/ucie-openai-flow.test.ts
-
-describe('UCIE OpenAI Integration', () => {
-  it('should complete full analysis flow', async () => {
-    const symbol = 'BTC';
-    
-    // Step 1: Fetch data
-    const data = await fetchAllData(symbol);
-    expect(data.dataQuality).toBeGreaterThan(70);
-    
-    // Step 2: Start analysis
-    const job = await startAnalysis(symbol, data);
-    expect(job.jobId).toBeDefined();
-    
-    // Step 3: Poll for results
-    const result = await pollForResults(job.jobId, 60);
-    expect(result.status).toBe('completed');
-    expect(result.analyses).toHaveLength(5);
-  });
-});
 ```
 
 ---
@@ -732,12 +495,11 @@ describe('UCIE OpenAI Integration', () => {
 OPENAI_API_KEY=sk-proj-...
 
 # Model Configuration
-OPENAI_MODEL=chatgpt-4o-latest
+OPENAI_MODEL=gpt-5-mini
 OPENAI_FALLBACK_MODEL=gpt-4o
 
 # Timeout Configuration
-OPENAI_TIMEOUT=120000
-FALLBACK_TIMEOUT=30000
+OPENAI_TIMEOUT=30000
 
 # Feature Flags
 USE_REAL_AI_ANALYSIS=true
@@ -753,10 +515,6 @@ ENABLE_AI_NEWS_ANALYSIS=true
     "pages/api/ucie/openai-summary-start/[symbol].ts": {
       "maxDuration": 300,
       "memory": 1024
-    },
-    "pages/api/quantum/generate-btc-trade.ts": {
-      "maxDuration": 300,
-      "memory": 1024
     }
   }
 }
@@ -769,13 +527,11 @@ ENABLE_AI_NEWS_ANALYSIS=true
 Before deploying OpenAI features:
 
 - [ ] `OPENAI_API_KEY` set in Vercel environment variables
-- [ ] Model configuration verified (`OPENAI_MODEL`, `OPENAI_FALLBACK_MODEL`)
+- [ ] `OPENAI_MODEL=gpt-5-mini` set in Vercel environment variables
 - [ ] Timeout values appropriate for Vercel plan (30s free, 300s Pro)
 - [ ] Error handling implemented with graceful degradation
 - [ ] Caching strategy in place to reduce API calls
 - [ ] Logging and monitoring configured
-- [ ] Cost tracking implemented
-- [ ] Tests passing (unit + integration)
 - [ ] UCIE system rules followed (if applicable)
 
 ---
@@ -787,21 +543,14 @@ Before deploying OpenAI features:
 - **API Integration**: `.kiro/steering/api-integration.md`
 - **Utility Functions**: `utils/openai.ts`
 
-### OpenAI Documentation
-- **Chat Completions API**: https://platform.openai.com/docs/api-reference/chat
-- **Models**: https://platform.openai.com/docs/models
-- **Best Practices**: https://platform.openai.com/docs/guides/prompt-engineering
-
 ### Project Examples
 - **UCIE Modular Analysis**: `pages/api/ucie/openai-summary-start/[symbol].ts`
-- **Trade Generation**: `pages/api/quantum/generate-btc-trade.ts`
-- **News Sentiment**: `pages/api/bitcoin-news-wire.ts`
 
 ---
 
 **Status**: ✅ Production Ready  
-**Last Updated**: January 27, 2025  
-**Models**: `chatgpt-4o-latest` (primary), `gpt-5.1` (deep analysis)  
-**API**: Chat Completions API
+**Last Updated**: December 14, 2025  
+**Primary Model**: `gpt-5-mini`  
+**API**: Responses API with `reasoning: { effort: 'minimal' }`
 
 **Remember**: Data first, AI second. Always fetch and cache data before calling OpenAI!
