@@ -39,10 +39,37 @@ export const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-5-mini';
 // ✅ HARDCODED: Fallback MUST be gpt-4o (not gpt-5-mini which has different constraints)
 export const OPENAI_FALLBACK_MODEL = 'gpt-4o';
 
+// Models that support 'none' reasoning effort
+const MODELS_SUPPORTING_NONE = new Set(['gpt-5.2', 'gpt-5.1', 'gpt-5.1-codex-max']);
+
 // Reasoning effort configuration for gpt-5-mini
 // Options: "minimal" (fastest), "low" (1-2s), "medium" (3-5s), "high" (5-10s)
-// ⚠️ IMPORTANT: 'none' is NOT supported by gpt-5-mini
-export const REASONING_EFFORT = (process.env.REASONING_EFFORT || 'minimal') as 'minimal' | 'low' | 'medium' | 'high';
+// ⚠️ IMPORTANT: 'none' is NOT supported by gpt-5-mini - auto-converted to 'minimal'
+const rawReasoningEffort = process.env.REASONING_EFFORT || 'minimal';
+// ✅ AUTO-NORMALIZE: Convert 'none' to 'minimal' for gpt-5-mini at startup
+export const REASONING_EFFORT = (
+  rawReasoningEffort === 'none' && !MODELS_SUPPORTING_NONE.has(OPENAI_MODEL)
+    ? 'minimal'
+    : rawReasoningEffort
+) as 'minimal' | 'low' | 'medium' | 'high';
+
+/**
+ * Normalize reasoning effort for the given model
+ * gpt-5-mini does NOT support 'none', so we convert it to 'minimal'
+ * 
+ * @param model - The OpenAI model name
+ * @param effort - The requested reasoning effort
+ * @returns The normalized effort that's valid for the model
+ */
+export type ReasoningEffort = 'none' | 'minimal' | 'low' | 'medium' | 'high';
+
+export function normalizeReasoningEffort(model: string, effort: ReasoningEffort): ReasoningEffort {
+  if (effort === 'none' && !MODELS_SUPPORTING_NONE.has(model)) {
+    console.log(`[OpenAI] Converting 'none' to 'minimal' for ${model} (doesn't support 'none')`);
+    return 'minimal'; // Safe fallback for gpt-5-mini
+  }
+  return effort;
+}
 
 // Timeout configuration
 // ✅ EXTENDED: 30 minutes for deep analysis

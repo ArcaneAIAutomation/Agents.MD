@@ -356,9 +356,17 @@ CRITICAL INSTRUCTIONS:
       throw new Error('OPENAI_API_KEY not configured');
     }
 
-    // ✅ MIGRATED TO RESPONSES API: Proper GPT-5.1 implementation
-    const model = process.env.OPENAI_MODEL || 'gpt-5.1';
-    const reasoningEffort = process.env.OPENAI_REASONING_EFFORT || 'medium'; // none, low, medium, high
+    // ✅ UPDATED: Using gpt-5-mini with Responses API
+    const model = process.env.OPENAI_MODEL || 'gpt-5-mini';
+    const requestedEffort = process.env.OPENAI_REASONING_EFFORT || 'medium';
+    
+    // ✅ NORMALIZE: gpt-5-mini does NOT support 'none', convert to 'minimal'
+    // Models that support 'none': gpt-5.2, gpt-5.1, gpt-5.1-codex-max
+    // Models that DON'T support 'none': gpt-5-mini (use 'minimal' instead)
+    const MODELS_SUPPORTING_NONE = ['gpt-5.2', 'gpt-5.1', 'gpt-5.1-codex-max'];
+    const reasoningEffort = (requestedEffort === 'none' && !MODELS_SUPPORTING_NONE.includes(model))
+      ? 'minimal'  // Safe fallback for gpt-5-mini
+      : requestedEffort;
     
     console.log(`📡 Calling OpenAI Responses API with ${model} (reasoning: ${reasoningEffort})...`);
     const openaiStart = Date.now();
@@ -366,9 +374,9 @@ CRITICAL INSTRUCTIONS:
     let response: Response;
     let analysisText: string;
 
-    // ✅ GPT-5.1 with Responses API (PROPER IMPLEMENTATION)
-    if (model === 'gpt-5.1' || model.includes('gpt-5')) {
-      console.log(`🚀 Using Responses API for ${model}`);
+    // ✅ GPT-5-mini with Responses API (PROPER IMPLEMENTATION)
+    if (model === 'gpt-5-mini' || model.includes('gpt-5')) {
+      console.log(`🚀 Using Responses API for ${model} with effort: ${reasoningEffort}`);
       
       response = await fetch('https://api.openai.com/v1/responses', {
         method: 'POST',
@@ -380,12 +388,10 @@ CRITICAL INSTRUCTIONS:
           model: model,
           input: `You are an expert cryptocurrency analyst. Analyze this whale transaction and respond only with valid JSON.\n\n${prompt}`,
           reasoning: {
-            effort: reasoningEffort // none, low, medium, high
-          },
-          text: {
-            verbosity: 'medium' // low, medium, high
+            effort: reasoningEffort // ✅ MUST be: 'minimal', 'low', 'medium', or 'high' for gpt-5-mini
           },
           max_output_tokens: 6000,
+          // ⚠️ NOTE: 'text.verbosity' and 'temperature' are NOT supported by gpt-5-mini
         }),
         signal: AbortSignal.timeout(270000), // 270 seconds (4.5 minutes) - Vercel Pro allows 300s
       });
