@@ -1,0 +1,235 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-19T00:00:00Z",
+  "platform": "Bitcoin Sovereign Technology",
+  "features": {
+    "whale-watch": {
+      "name": "Whale Watch",
+      "status": "production",
+      "health": "healthy",
+      "priority": "high",
+      "description": "Real-time Bitcoin whale transaction tracking with Gemini AI analysis",
+      "documentation": "docs/production-features/whale-watch.md",
+      "endpoints": [
+        "/api/whale-watch/detect",
+        "/api/whale-watch/analyze",
+        "/api/whale-watch/analysis/[jobId]",
+        "/api/whale-watch/deep-dive-process"
+      ],
+      "dependencies": {
+        "external": ["blockchain.com", "gemini-ai", "openai-gpt-5.1"],
+        "internal": ["authentication"]
+      },
+      "aiModel": "gpt-5.1",
+      "lastVerified": "2025-12-19",
+      "notes": "GPT-5.1 migration complete for deep dive analysis"
+    },
+    "news-wire": {
+      "name": "Bitcoin News Wire",
+      "status": "production",
+      "health": "healthy",
+      "priority": "high",
+      "description": "Aggregated cryptocurrency news from multiple sources with sentiment analysis",
+      "documentation": "docs/production-features/news-wire.md",
+      "endpoints": [
+        "/api/bitcoin-news-wire",
+        "/api/crypto-herald",
+        "/api/crypto-herald-15-stories"
+      ],
+      "dependencies": {
+        "external": ["newsapi", "cryptocompare"],
+        "internal": []
+      },
+      "lastVerified": "2025-12-19",
+      "notes": "15-story optimized endpoint for mobile performance"
+    },
+    "btc-eth-analysis": {
+      "name": "BTC/ETH Market Analysis",
+      "status": "production",
+      "health": "healthy",
+      "priority": "high",
+      "description": "Technical and market analysis for Bitcoin and Ethereum",
+      "documentation": "docs/production-features/btc-eth-analysis.md",
+      "endpoints": [
+        "/api/btc-analysis",
+        "/api/eth-analysis"
+      ],
+      "dependencies": {
+        "external": ["coingecko", "coinmarketcap", "kraken"],
+        "internal": []
+      },
+      "lastVerified": "2025-12-19",
+      "notes": "Multi-source data with intelligent fallback"
+    },
+    "authentication": {
+      "name": "Authentication System",
+      "status": "production",
+      "health": "healthy",
+      "priority": "critical",
+      "description": "Session-only JWT authentication with access codes",
+      "documentation": "docs/production-features/authentication.md",
+      "endpoints": [
+        "/api/auth/register",
+        "/api/auth/login",
+        "/api/auth/logout",
+        "/api/auth/me",
+        "/api/auth/csrf-token"
+      ],
+      "dependencies": {
+        "external": ["supabase"],
+        "internal": []
+      },
+      "configuration": {
+        "tokenExpiration": "1 hour",
+        "sessionPersistence": "none",
+        "passwordHashing": "bcrypt-12-rounds"
+      },
+      "lastVerified": "2025-12-19",
+      "notes": "Session-only mode - users must login every browser session"
+    },
+    "lunarcrush-dashboard": {
+      "name": "LunarCrush Dashboard",
+      "status": "production",
+      "health": "healthy",
+      "priority": "medium",
+      "description": "Social sentiment analysis and Galaxy Score tracking",
+      "documentation": "docs/production-features/lunarcrush-dashboard.md",
+      "endpoints": [
+        "/api/lunarcrush/sentiment/[symbol]",
+        "/api/lunarcrush/posts/[symbol]",
+        "/api/lunarcrush/viral/[symbol]",
+        "/api/lunarcrush/signals/[symbol]"
+      ],
+      "dependencies": {
+        "external": ["lunarcrush"],
+        "internal": []
+      },
+      "lastVerified": "2025-12-19",
+      "notes": "Full-stack integration with 6 React components"
+    },
+    "quantum-btc": {
+      "name": "Quantum BTC",
+      "status": "production",
+      "health": "healthy",
+      "priority": "high",
+      "description": "Advanced Bitcoin trading intelligence with quantum-inspired algorithms",
+      "documentation": "docs/production-features/quantum-btc.md",
+      "endpoints": [
+        "/api/quantum/btc/analysis",
+        "/api/quantum/btc/signals",
+        "/api/quantum/btc/trade-details"
+      ],
+      "dependencies": {
+        "external": ["coingecko", "coinmarketcap"],
+        "internal": ["authentication"]
+      },
+      "lastVerified": "2025-12-19",
+      "notes": "Quantum-inspired price prediction and trade generation"
+    },
+    "ucie": {
+      "name": "Universal Crypto Intelligence Engine",
+      "status": "partial",
+      "health": "degraded",
+      "priority": "critical",
+      "description": "Comprehensive multi-source cryptocurrency analysis with AI insights",
+      "documentation": "docs/production-features/ucie.md",
+      "endpoints": [
+        "/api/ucie/preview-data/[symbol]",
+        "/api/ucie/market-data/[symbol]",
+        "/api/ucie/sentiment/[symbol]",
+        "/api/ucie/technical/[symbol]",
+        "/api/ucie/news/[symbol]",
+        "/api/ucie/on-chain/[symbol]",
+        "/api/ucie/openai-summary-start/[symbol]",
+        "/api/ucie/openai-summary-poll/[jobId]",
+        "/api/ucie/research/[symbol]"
+      ],
+      "dependencies": {
+        "external": [
+          "coingecko",
+          "coinmarketcap",
+          "lunarcrush",
+          "newsapi",
+          "openai-gpt-5-mini",
+          "caesar-api"
+        ],
+        "internal": ["authentication"]
+      },
+      "aiModel": "gpt-5-mini",
+      "issues": [
+        {
+          "id": "UCIE-001",
+          "description": "GPT-5.1 analysis pipeline needs investigation",
+          "severity": "high",
+          "status": "investigating"
+        }
+      ],
+      "lastVerified": "2025-12-19",
+      "notes": "Data collection working, AI analysis needs investigation"
+    },
+    "atge": {
+      "name": "AI Trade Generation Engine",
+      "status": "blocked",
+      "health": "unknown",
+      "priority": "high",
+      "description": "AI-powered trade signal generation",
+      "documentation": null,
+      "endpoints": [
+        "/api/live-trade-generation",
+        "/api/reliable-trade-generation"
+      ],
+      "dependencies": {
+        "external": ["openai"],
+        "internal": ["ucie"]
+      },
+      "blockedBy": ["ucie"],
+      "lastVerified": "2025-12-19",
+      "notes": "Blocked by UCIE GPT analysis issues"
+    },
+    "einstein": {
+      "name": "Einstein Trade Engine",
+      "status": "blocked",
+      "health": "unknown",
+      "priority": "high",
+      "description": "Advanced trade execution and management system",
+      "documentation": null,
+      "endpoints": [],
+      "dependencies": {
+        "external": [],
+        "internal": ["atge", "ucie"]
+      },
+      "blockedBy": ["atge"],
+      "lastVerified": "2025-12-19",
+      "notes": "Blocked by ATGE dependency chain"
+    }
+  },
+  "statusDefinitions": {
+    "production": "Feature is fully operational in production",
+    "partial": "Feature is partially working with known issues",
+    "blocked": "Feature is blocked by dependencies",
+    "development": "Feature is under active development",
+    "deprecated": "Feature is scheduled for removal"
+  },
+  "healthDefinitions": {
+    "healthy": "All endpoints responding, no errors",
+    "degraded": "Some functionality impaired",
+    "unhealthy": "Major functionality broken",
+    "unknown": "Status cannot be determined"
+  },
+  "priorityDefinitions": {
+    "critical": "Core platform functionality",
+    "high": "Important user-facing feature",
+    "medium": "Enhancement or secondary feature",
+    "low": "Nice-to-have functionality"
+  },
+  "summary": {
+    "total": 9,
+    "production": 6,
+    "partial": 1,
+    "blocked": 2,
+    "healthyCount": 6,
+    "degradedCount": 1,
+    "unknownCount": 2
+  }
+}

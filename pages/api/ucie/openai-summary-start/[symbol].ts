@@ -10,11 +10,13 @@
  * ✅ POLLING: Frontend checks status every 10 seconds
  * ✅ BULLETPROOF: Can run for up to 3 minutes
  * ✅ MODEL: Uses gpt-5-mini (OpenAI's lightweight GPT-5 model - December 2024)
+ * ✅ CONTEXT AGGREGATION: Uses formatContextForAI() for comprehensive prompts (December 2025 fix)
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { query } from '../../../../lib/db';
 import { withOptionalAuth, AuthenticatedRequest } from '../../../../middleware/auth';
+import { getComprehensiveContext, formatContextForAI, ComprehensiveContext } from '../../../../lib/ucie/contextAggregator';
 
 interface StartResponse {
   success: boolean;
@@ -225,6 +227,29 @@ async function processJobAsync(
 
     console.log(`🔥 Starting MODULAR analysis for ${symbol}...`);
     
+    // ✅ CONTEXT AGGREGATION FIX (December 2025)
+    // Build comprehensive context using formatContextForAI() for better AI prompts
+    const comprehensiveContext: ComprehensiveContext = {
+      marketData: allData.marketData,
+      technical: allData.technical,
+      sentiment: allData.sentiment,
+      news: allData.news,
+      onChain: allData.onChain,
+      risk: allData.risk,
+      predictions: allData.predictions,
+      derivatives: null, // Not collected in preview
+      research: null, // Will be generated
+      gptAnalysis: null, // Will be generated
+      dataQuality: calculateDataQuality(allData),
+      availableData: Object.entries(allData).filter(([_, v]) => v !== null).map(([k]) => k),
+      timestamp: new Date().toISOString()
+    };
+    
+    // Generate formatted context for AI consumption
+    const formattedContext = formatContextForAI(comprehensiveContext);
+    console.log(`📊 Context aggregated: ${comprehensiveContext.dataQuality.toFixed(0)}% complete`);
+    console.log(`📊 Available data sources: ${comprehensiveContext.availableData.join(', ')}`);
+    
     // ✅ STEP 1: Analyze Market Data (if available)
     if (allData.marketData) {
       try {
@@ -235,7 +260,8 @@ async function processJobAsync(
           symbol,
           'Market Data',
           allData.marketData,
-          'Analyze current price, volume, market cap, and price trends. Provide: current_price_analysis, volume_analysis, market_cap_insights, price_trend (bullish/bearish/neutral), key_metrics.'
+          'Analyze current price, volume, market cap, and price trends. Provide: current_price_analysis, volume_analysis, market_cap_insights, price_trend (bullish/bearish/neutral), key_metrics.',
+          formattedContext // ✅ Pass formatted context for enhanced analysis
         );
         console.log(`✅ Market analysis complete`);
       } catch (error) {
@@ -254,7 +280,8 @@ async function processJobAsync(
           symbol,
           'Technical Indicators',
           allData.technical,
-          'Analyze RSI, MACD, moving averages, and other indicators. Provide: rsi_signal, macd_signal, moving_average_trend, support_resistance_levels, technical_outlook (bullish/bearish/neutral).'
+          'Analyze RSI, MACD, moving averages, and other indicators. Provide: rsi_signal, macd_signal, moving_average_trend, support_resistance_levels, technical_outlook (bullish/bearish/neutral).',
+          formattedContext // ✅ Pass formatted context for enhanced analysis
         );
         console.log(`✅ Technical analysis complete`);
       } catch (error) {
@@ -273,7 +300,8 @@ async function processJobAsync(
           symbol,
           'Social Sentiment',
           allData.sentiment,
-          'Analyze social media sentiment, Fear & Greed Index, and community mood. Provide: overall_sentiment (bullish/bearish/neutral), fear_greed_interpretation, social_volume_trend, key_sentiment_drivers.'
+          'Analyze social media sentiment, Fear & Greed Index, and community mood. Provide: overall_sentiment (bullish/bearish/neutral), fear_greed_interpretation, social_volume_trend, key_sentiment_drivers.',
+          formattedContext // ✅ Pass formatted context for enhanced analysis
         );
         console.log(`✅ Sentiment analysis complete`);
       } catch (error) {
@@ -311,7 +339,8 @@ async function processJobAsync(
           openaiApiKey,
           model,
           symbol,
-          newsContext
+          newsContext,
+          formattedContext // ✅ Pass formatted context for enhanced analysis
         );
         console.log(`✅ News analysis complete with market context`);
       } catch (error) {
@@ -330,7 +359,8 @@ async function processJobAsync(
           symbol,
           'On-Chain Data',
           allData.onChain,
-          'Analyze blockchain metrics, whale activity, and network health. Provide: whale_activity_summary, network_health, transaction_trends, on_chain_signals (bullish/bearish/neutral).'
+          'Analyze blockchain metrics, whale activity, and network health. Provide: whale_activity_summary, network_health, transaction_trends, on_chain_signals (bullish/bearish/neutral).',
+          formattedContext // ✅ Pass formatted context for enhanced analysis
         );
         console.log(`✅ On-chain analysis complete`);
       } catch (error) {
@@ -349,7 +379,8 @@ async function processJobAsync(
           symbol,
           'Risk Assessment',
           allData.risk,
-          'Analyze risk factors and volatility. Provide: risk_level (low/medium/high), volatility_assessment, key_risks, risk_mitigation_strategies.'
+          'Analyze risk factors and volatility. Provide: risk_level (low/medium/high), volatility_assessment, key_risks, risk_mitigation_strategies.',
+          formattedContext // ✅ Pass formatted context for enhanced analysis
         );
         console.log(`✅ Risk analysis complete`);
       } catch (error) {
@@ -368,7 +399,8 @@ async function processJobAsync(
           symbol,
           'Price Predictions',
           allData.predictions,
-          'Analyze price predictions and forecasts. Provide: short_term_outlook, medium_term_outlook, prediction_confidence, key_price_levels.'
+          'Analyze price predictions and forecasts. Provide: short_term_outlook, medium_term_outlook, prediction_confidence, key_price_levels.',
+          formattedContext // ✅ Pass formatted context for enhanced analysis
         );
         console.log(`✅ Predictions analysis complete`);
       } catch (error) {
@@ -387,7 +419,8 @@ async function processJobAsync(
           symbol,
           'DeFi Metrics',
           allData.defi,
-          'Analyze DeFi protocol metrics and TVL. Provide: tvl_analysis, defi_adoption_trend, protocol_health, defi_opportunities.'
+          'Analyze DeFi protocol metrics and TVL. Provide: tvl_analysis, defi_adoption_trend, protocol_health, defi_opportunities.',
+          formattedContext // ✅ Pass formatted context for enhanced analysis
         );
         console.log(`✅ DeFi analysis complete`);
       } catch (error) {
@@ -416,7 +449,8 @@ async function processJobAsync(
         openaiApiKey,
         model,
         symbol,
-        analysisSummary
+        analysisSummary,
+        formattedContext // ✅ Pass formatted context for enhanced executive summary
       );
       console.log(`✅ Executive summary complete`);
     } catch (error) {
@@ -522,6 +556,17 @@ async function processJobAsync(
 }
 
 /**
+ * Calculate data quality percentage based on available data sources
+ * @param allData - Object containing all data sources
+ * @returns Percentage of available data (0-100)
+ */
+function calculateDataQuality(allData: Record<string, any>): number {
+  const totalSources = 8; // marketData, technical, sentiment, news, onChain, risk, predictions, defi
+  const availableSources = Object.values(allData).filter(v => v !== null && v !== undefined).length;
+  return (availableSources / totalSources) * 100;
+}
+
+/**
  * Update job progress in database
  */
 async function updateProgress(jobId: number, progress: string): Promise<void> {
@@ -545,6 +590,7 @@ async function updateProgress(jobId: number, progress: string): Promise<void> {
  * ✅ BULLETPROOF: Uses extractResponseText utility
  * ✅ FAST: Quick analysis for modular approach
  * ✅ FALLBACK: Returns error object instead of throwing on failure
+ * ✅ CONTEXT-AWARE: Uses formatted context for comprehensive analysis (December 2025 fix)
  */
 async function analyzeDataSource(
   apiKey: string,
@@ -552,7 +598,8 @@ async function analyzeDataSource(
   symbol: string,
   dataType: string,
   data: any,
-  instructions: string
+  instructions: string,
+  formattedContext?: string // ✅ NEW: Optional formatted context for enhanced analysis
 ): Promise<any> {
   const maxRetries = 3;
   
@@ -597,14 +644,35 @@ async function analyzeDataSource(
         console.log(`📰 Analyzing ${data.articles.length} news articles for ${symbol}`);
       }
       
-      // Build focused prompt for this data source only
-      const prompt = `Analyze ${symbol} ${dataType}:
+      // ✅ Build enhanced prompt with formatted context (December 2025 fix)
+      // When formatted context is available, include it for comprehensive analysis
+      let prompt: string;
+      
+      if (formattedContext) {
+        // Enhanced prompt with full market context
+        prompt = `Analyze ${symbol} ${dataType} in the context of current market conditions:
+
+**COMPREHENSIVE MARKET CONTEXT:**
+${formattedContext}
+
+**SPECIFIC ${dataType.toUpperCase()} DATA TO ANALYZE:**
+${JSON.stringify(dataToAnalyze, null, 2)}
+
+**ANALYSIS INSTRUCTIONS:**
+${instructions}
+
+Consider the full market context when analyzing this specific data source.
+Respond with valid JSON only.`;
+      } else {
+        // Fallback to simple prompt (backward compatibility)
+        prompt = `Analyze ${symbol} ${dataType}:
 
 ${JSON.stringify(dataToAnalyze, null, 2)}
 
 ${instructions}
 
 Respond with valid JSON only.`;
+      }
       
       // ✅ Call gpt-5-mini with Responses API + minimal reasoning
       console.log(`🚀 [analyzeDataSource] Calling OpenAI Responses API...`);
@@ -688,12 +756,14 @@ Respond with valid JSON only.`;
  * ✅ USES gpt-5-mini: OpenAI's lightweight GPT-5 model (December 2024)
  * ✅ CONTEXT-AWARE: Combines news with market, technical, and sentiment data
  * ✅ FALLBACK: Returns error object instead of throwing on failure
+ * ✅ ENHANCED: Uses formatContextForAI() for comprehensive prompts (December 2025 fix)
  */
 async function analyzeNewsWithContext(
   apiKey: string,
   model: string,
   symbol: string,
-  context: any
+  context: any,
+  formattedContext?: string // ✅ NEW: Optional formatted context for enhanced analysis
 ): Promise<any> {
   const maxRetries = 3;
   
@@ -719,8 +789,62 @@ async function analyzeNewsWithContext(
       
       console.log(`📰 Analyzing ${articleCount} news articles with market context...`);
       
-      // Build comprehensive prompt with market context
-      const prompt = `Analyze ${symbol} news articles in the context of current market conditions:
+      // ✅ Build comprehensive prompt with market context AND formatted context (December 2025 fix)
+      let prompt: string;
+      
+      if (formattedContext) {
+        // Enhanced prompt with full comprehensive context from formatContextForAI()
+        prompt = `Analyze ${symbol} news articles in the context of current market conditions:
+
+**COMPREHENSIVE MARKET CONTEXT:**
+${formattedContext}
+
+**SPECIFIC NEWS CONTEXT:**
+- Current Price: ${context.marketContext.currentPrice}
+- 24h Change: ${context.marketContext.priceChange24h}
+- 24h Volume: ${context.marketContext.volume24h}
+- Market Cap: ${context.marketContext.marketCap}
+
+**TECHNICAL CONTEXT:**
+- RSI: ${context.technicalContext.rsi}
+- MACD: ${context.technicalContext.macd}
+- Trend: ${context.technicalContext.trend}
+
+**SENTIMENT CONTEXT:**
+- Fear & Greed Index: ${context.sentimentContext.fearGreedIndex}
+- Social Sentiment: ${context.sentimentContext.socialSentiment}
+
+**NEWS ARTICLES (${articleCount} total):**
+${JSON.stringify(articles, null, 2)}
+
+**INSTRUCTIONS:**
+Analyze ALL ${articleCount} news articles and assess their collective market impact.
+Use the comprehensive market context to provide deeper insights.
+
+Provide JSON with:
+{
+  "articlesAnalyzed": ${articleCount},
+  "keyHeadlines": ["headline 1", "headline 2", "headline 3"],
+  "overallSentiment": "bullish" | "bearish" | "neutral",
+  "sentimentScore": <0-100>,
+  "marketImpact": "high" | "medium" | "low",
+  "impactReasoning": "Why these articles matter given current market conditions",
+  "priceImplications": "How news may affect price given technical and sentiment context",
+  "keyDevelopments": ["development 1", "development 2"],
+  "correlationWithMarket": "How news aligns or conflicts with current market state",
+  "tradingImplications": "What traders should watch for"
+}
+
+Consider:
+- How news aligns with current price action
+- Whether news confirms or contradicts technical signals
+- If sentiment matches or diverges from social metrics
+- Potential catalysts or risks identified in articles
+
+Respond with valid JSON only.`;
+      } else {
+        // Fallback to original prompt (backward compatibility)
+        prompt = `Analyze ${symbol} news articles in the context of current market conditions:
 
 **MARKET CONTEXT:**
 - Current Price: ${context.marketContext.currentPrice}
@@ -764,6 +888,7 @@ Consider:
 - Potential catalysts or risks identified in articles
 
 Respond with valid JSON only.`;
+      }
       
       // ✅ Call gpt-5-mini with Responses API + minimal reasoning
       const completion = await (openai as any).responses.create({
@@ -816,12 +941,14 @@ Respond with valid JSON only.`;
  * ✅ BULLETPROOF: Uses extractResponseText utility
  * ✅ COMPREHENSIVE: Combines all 8 data source analyses
  * ✅ FALLBACK: Returns error object instead of throwing on failure
+ * ✅ CONTEXT-AWARE: Uses formatContextForAI() for comprehensive prompts (December 2025 fix)
  */
 async function generateExecutiveSummary(
   apiKey: string,
   model: string,
   symbol: string,
-  analysisSummary: any
+  analysisSummary: any,
+  formattedContext?: string // ✅ NEW: Optional formatted context for enhanced analysis
 ): Promise<any> {
   const maxRetries = 3;
   
@@ -841,8 +968,48 @@ async function generateExecutiveSummary(
         maxRetries: 0 // We handle retries ourselves
       });
       
-      // Build comprehensive prompt combining all analyses
-      const prompt = `Generate executive summary for ${symbol} based on these analyses:
+      // ✅ Build comprehensive prompt combining all analyses AND formatted context (December 2025 fix)
+      let prompt: string;
+      
+      if (formattedContext) {
+        // Enhanced prompt with full comprehensive context from formatContextForAI()
+        prompt = `Generate executive summary for ${symbol} based on comprehensive market context and modular analyses:
+
+**COMPREHENSIVE MARKET CONTEXT:**
+${formattedContext}
+
+**MODULAR ANALYSES RESULTS:**
+${JSON.stringify(analysisSummary, null, 2)}
+
+Provide JSON with:
+{
+  "summary": "2-3 paragraph executive summary synthesizing all analyses with comprehensive market context",
+  "confidence": 85,
+  "recommendation": "Buy|Hold|Sell with detailed reasoning based on all available data",
+  "key_insights": ["insight 1", "insight 2", "insight 3"],
+  "market_outlook": "24-48 hour outlook based on all data sources",
+  "risk_factors": ["risk 1", "risk 2"],
+  "opportunities": ["opportunity 1", "opportunity 2"],
+  "data_quality_assessment": "Assessment of data completeness and reliability"
+}
+
+Consider:
+- Market data trends and price action
+- Technical indicator signals
+- Social sentiment and Fear & Greed
+- News impact and developments
+- On-chain whale activity
+- Risk factors and volatility
+- Price predictions and forecasts
+- DeFi adoption and TVL trends
+- Overall data quality and confidence level
+
+Synthesize all analyses into cohesive, actionable summary.
+
+Respond with valid JSON only.`;
+      } else {
+        // Fallback to original prompt (backward compatibility)
+        prompt = `Generate executive summary for ${symbol} based on these analyses:
 
 ${JSON.stringify(analysisSummary, null, 2)}
 
@@ -870,6 +1037,7 @@ Consider:
 Synthesize all analyses into cohesive, actionable summary.
 
 Respond with valid JSON only.`;
+      }
       
       // ✅ Call gpt-5-mini with Responses API + minimal reasoning
       const completion = await (openai as any).responses.create({

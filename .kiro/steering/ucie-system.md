@@ -1,9 +1,10 @@
 # UCIE System - Complete Steering Guide
 
-**Last Updated**: December 13, 2025  
+**Last Updated**: December 19, 2025  
 **Status**: ✅ **SIMPLIFIED DATA-FIRST APPROACH**  
 **Priority**: CRITICAL - Read this before working on UCIE  
 **Latest**: 🎉 New Flow: Collect Data → Display Results (No AI Analysis Yet)
+**Model**: `gpt-5-mini` with Responses API + `reasoning: { effort: "minimal" }`
 
 ---
 
@@ -22,7 +23,7 @@
 - ✅ **On-Chain API Fixed**: Simplified Bitcoin fetching (60-100% quality)
 - ✅ **Performance**: 60-93% faster response times with parallel fetching
 - ✅ **Reliability**: Graceful degradation if individual sources fail
-- ✅ **GPT Model**: Uses `chatgpt-4o-latest` (OpenAI's latest GPT-4o with automatic updates)
+- ✅ **GPT Model**: Uses `gpt-5-mini` (OpenAI's lightweight GPT-5 model with Responses API)
 - ✅ Sentiment trend calculated from distribution data
 - ✅ Exchange deposit/withdrawal detection (15+ major exchanges)
 - ✅ Cold wallet movement tracking
@@ -706,11 +707,12 @@ Before considering work complete:
 ## 🆕 OpenAI Integration for UCIE (December 2025)
 
 ### Overview
-UCIE uses `chatgpt-4o-latest` (OpenAI's latest GPT-4o with automatic updates) for AI analysis via the **Chat Completions API**.
+UCIE uses `gpt-5-mini` (OpenAI's lightweight GPT-5 model) for AI analysis via the **Responses API** with minimal reasoning effort.
 
-### Why `chatgpt-4o-latest` (NOT `gpt-5.1-codex-max`)?
-- ✅ **Optimized for analysis**: Chat Completions API is best for text/data analysis
-- ✅ **JSON output**: Native `response_format: { type: 'json_object' }` support
+### Why `gpt-5-mini` with Responses API?
+- ✅ **Lightweight GPT-5**: Fast, efficient model optimized for analysis tasks
+- ✅ **Responses API**: Modern API with reasoning capabilities
+- ✅ **Minimal reasoning**: `{ effort: "minimal" }` for quick responses
 - ✅ **Fast responses**: 30-second timeout per analysis module
 - ✅ **Bulletproof parsing**: Utility functions handle all response formats
 - ✅ **Production proven**: Successfully deployed in UCIE modular analysis
@@ -719,16 +721,17 @@ UCIE uses `chatgpt-4o-latest` (OpenAI's latest GPT-4o with automatic updates) fo
 
 | Task Type | Model | API | Use Case |
 |-----------|-------|-----|----------|
-| **UCIE Analysis** | `chatgpt-4o-latest` | Chat Completions | Data analysis, JSON output |
-| **Whale Watch** | `chatgpt-4o-latest` | Chat Completions | Transaction analysis |
+| **UCIE Analysis** | `gpt-5-mini` | Responses API | Data analysis, modular insights |
+| **Whale Watch** | `gpt-5-mini` | Responses API | Transaction analysis |
 | **Code Editing** | `gpt-5.1-codex-max` | Responses API | IDE tasks, apply_patch |
 
-**Note**: The `GPT-5.1-API-Steering.md` file is for **IDE/code editing tasks**, NOT for UCIE data analysis.
+**Note**: All UCIE features use the Responses API with `reasoning: { effort: "minimal" }`.
 
 ### Current Status
-- ✅ **UCIE Analysis**: Uses `chatgpt-4o-latest` with Chat Completions API
+- ✅ **UCIE Analysis**: Uses `gpt-5-mini` with Responses API
 - ✅ **Modular Analysis**: 9 separate analyses (market, technical, sentiment, news, on-chain, risk, predictions, defi, executive summary)
 - ✅ **Bulletproof Extraction**: Uses `extractResponseText()` and `validateResponseText()` utilities
+- ✅ **Context Aggregation**: Uses `formatContextForAI()` for comprehensive prompts
 
 ### Implementation Pattern for UCIE
 
@@ -737,26 +740,21 @@ UCIE uses `chatgpt-4o-latest` (OpenAI's latest GPT-4o with automatic updates) fo
 import { extractResponseText, validateResponseText } from '../../../../utils/openai';
 import OpenAI from 'openai';
 
-// ✅ UCIE uses Chat Completions API (NOT Responses API)
+// ✅ UCIE uses Responses API with gpt-5-mini
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
   timeout: 30000, // 30 second timeout per request
   maxRetries: 0   // We handle retries ourselves
 });
 
-// ✅ Model: chatgpt-4o-latest (OpenAI's latest GPT-4o)
-const model = process.env.OPENAI_MODEL || 'chatgpt-4o-latest';
+// ✅ Model: gpt-5-mini (OpenAI's lightweight GPT-5 model - December 2024)
+const model = process.env.OPENAI_MODEL || 'gpt-5-mini';
 
-// ✅ Call Chat Completions API with JSON output
-const completion = await openai.chat.completions.create({
+// ✅ Call Responses API with minimal reasoning
+const completion = await (openai as any).responses.create({
   model: model,
-  messages: [
-    { role: 'system', content: 'You are a cryptocurrency analyst...' },
-    { role: 'user', content: prompt }
-  ],
-  temperature: 0.7,
-  max_tokens: 800,
-  response_format: { type: 'json_object' } // ✅ Native JSON output
+  reasoning: { effort: "minimal" }, // ✅ Minimal reasoning for fast responses
+  input: `You are a cryptocurrency analyst. Analyze data and respond with concise JSON.\n\n${prompt}`
 });
 
 // ✅ Bulletproof extraction (same utilities work for both APIs)
@@ -790,9 +788,9 @@ UCIE uses a **modular analysis approach** instead of one giant prompt:
 
 ### Implementation Checklist (For UCIE Features)
 - [x] Import utility functions from `utils/openai.ts`
-- [x] Use Chat Completions API (NOT Responses API)
-- [x] Use model `chatgpt-4o-latest` (configurable via `OPENAI_MODEL` env var)
-- [x] Use `response_format: { type: 'json_object' }` for JSON output
+- [x] Use Responses API with `reasoning: { effort: "minimal" }`
+- [x] Use model `gpt-5-mini` (configurable via `OPENAI_MODEL` env var)
+- [x] Use `formatContextForAI()` for comprehensive context aggregation
 - [x] Use `extractResponseText()` for parsing
 - [x] Use `validateResponseText()` for validation
 - [x] Enable debug mode during testing
@@ -800,7 +798,7 @@ UCIE uses a **modular analysis approach** instead of one giant prompt:
 - [x] Implement retry logic with exponential backoff
 - [x] Return error objects instead of throwing (graceful degradation)
 
-**See**: `.kiro/steering/GPT-5.1-API-Steering.md` for IDE/code editing tasks (different approach).
+**See**: `.kiro/steering/openai-integration.md` for complete OpenAI integration patterns.
 
 ---
 
