@@ -378,6 +378,99 @@ function LegacyAnalysisDisplay({ analysis }: { analysis: any }) {
   );
 }
 
+/**
+ * ✅ CRITICAL FIX: Helper function to validate data presence
+ * Matches backend calculateAPIStatus logic to ensure checkmarks display correctly
+ * Backend validates ACTUAL DATA PRESENCE, not just success flags
+ */
+function hasValidData(dataType: 'marketData' | 'sentiment' | 'technical' | 'news' | 'onChain', data: any): boolean {
+  if (!data) return false;
+  
+  switch (dataType) {
+    case 'marketData': {
+      // Check for priceAggregation with prices array
+      if (data.priceAggregation?.prices?.length > 0) return true;
+      // Check for direct price data
+      if (typeof data.price === 'number' && data.price > 0) return true;
+      // Check for marketData nested object with price
+      if (data.marketData?.price > 0) return true;
+      // Check for aggregatedPrice
+      if (typeof data.aggregatedPrice === 'number' && data.aggregatedPrice > 0) return true;
+      // Fallback to success flag
+      return data.success === true;
+    }
+    
+    case 'sentiment': {
+      const sentimentData = data.data || data; // Handle both nested and flat structures
+      // Check for overallScore (PRIMARY indicator)
+      if (typeof sentimentData?.overallScore === 'number') return true;
+      // Check for sentiment classification
+      if (sentimentData?.sentiment !== undefined) return true;
+      // Check for Fear & Greed data
+      if (sentimentData?.fearGreedIndex !== undefined) return true;
+      // Check for LunarCrush data
+      if (sentimentData?.lunarCrush !== undefined) return true;
+      // Check for Reddit data
+      if (sentimentData?.reddit !== undefined) return true;
+      // Check for CoinMarketCap data
+      if (sentimentData?.coinMarketCap !== undefined) return true;
+      // Check for CoinGecko data
+      if (sentimentData?.coinGecko !== undefined) return true;
+      // Check for dataQuality field
+      if (typeof sentimentData?.dataQuality === 'number') return true;
+      // Check for multiple fields (indicates data presence)
+      if (sentimentData && Object.keys(sentimentData).length > 3) return true;
+      // Fallback to success flag
+      return data.success === true;
+    }
+    
+    case 'technical': {
+      // Check for indicators object with multiple entries
+      if (data.indicators && typeof data.indicators === 'object' && Object.keys(data.indicators).length >= 3) return true;
+      // Check for direct indicator fields
+      if (data.rsi !== undefined || data.macd !== undefined || data.ema !== undefined) return true;
+      // Check for signals
+      if (data.signals && typeof data.signals === 'object') return true;
+      // Fallback to success flag
+      return data.success === true;
+    }
+    
+    case 'news': {
+      // Check for articles array with content
+      if (Array.isArray(data.articles) && data.articles.length > 0) return true;
+      // Check for nested data.articles
+      if (Array.isArray(data.data?.articles) && data.data.articles.length > 0) return true;
+      // Fallback to success flag
+      return data.success === true;
+    }
+    
+    case 'onChain': {
+      const onChainData = data.data || data; // Handle both nested and flat structures
+      // Check for network metrics (PRIMARY indicator)
+      if (onChainData?.networkMetrics !== undefined) return true;
+      // Check for whale activity
+      if (onChainData?.whaleActivity !== undefined) return true;
+      // Check for mempool data
+      if (onChainData?.mempoolAnalysis !== undefined) return true;
+      // Check for network stats (legacy)
+      if (onChainData?.networkStats !== undefined) return true;
+      // Check for blockchain info
+      if (onChainData?.blockchainInfo !== undefined) return true;
+      // Check for transaction stats
+      if (onChainData?.transactionStats !== undefined) return true;
+      // Check for dataQuality field
+      if (typeof onChainData?.dataQuality === 'number') return true;
+      // Check for multiple fields (indicates data presence)
+      if (onChainData && Object.keys(onChainData).length > 3) return true;
+      // Fallback to success flag
+      return data.success === true;
+    }
+    
+    default:
+      return data.success === true;
+  }
+}
+
 export default function DataPreviewModal({
   symbol,
   isOpen,
@@ -728,13 +821,13 @@ export default function DataPreviewModal({
                 <div className="space-y-3">
                   {/* Market Data */}
                   <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-bitcoin-orange hover:bg-opacity-5 transition-colors">
-                    {preview.collectedData.marketData?.success ? (
+                    {hasValidData('marketData', preview.collectedData.marketData) ? (
                       <CheckCircle className="text-bitcoin-orange flex-shrink-0 mt-0.5" size={20} />
                     ) : (
                       <XCircle className="text-bitcoin-white-60 flex-shrink-0 mt-0.5" size={20} />
                     )}
                     <div className="flex-1">
-                      <span className={`font-semibold ${preview.collectedData.marketData?.success ? 'text-bitcoin-white' : 'text-bitcoin-white-60 line-through'}`}>
+                      <span className={`font-semibold ${hasValidData('marketData', preview.collectedData.marketData) ? 'text-bitcoin-white' : 'text-bitcoin-white-60 line-through'}`}>
                         Market Data
                       </span>
                       <p className="text-xs text-bitcoin-white-60 mt-0.5">
@@ -745,13 +838,13 @@ export default function DataPreviewModal({
 
                   {/* Technical */}
                   <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-bitcoin-orange hover:bg-opacity-5 transition-colors">
-                    {preview.collectedData.technical?.success ? (
+                    {hasValidData('technical', preview.collectedData.technical) ? (
                       <CheckCircle className="text-bitcoin-orange flex-shrink-0 mt-0.5" size={20} />
                     ) : (
                       <XCircle className="text-bitcoin-white-60 flex-shrink-0 mt-0.5" size={20} />
                     )}
                     <div className="flex-1">
-                      <span className={`font-semibold ${preview.collectedData.technical?.success ? 'text-bitcoin-white' : 'text-bitcoin-white-60 line-through'}`}>
+                      <span className={`font-semibold ${hasValidData('technical', preview.collectedData.technical) ? 'text-bitcoin-white' : 'text-bitcoin-white-60 line-through'}`}>
                         Technical Analysis
                       </span>
                       <p className="text-xs text-bitcoin-white-60 mt-0.5">
@@ -762,13 +855,13 @@ export default function DataPreviewModal({
 
                   {/* News */}
                   <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-bitcoin-orange hover:bg-opacity-5 transition-colors">
-                    {preview.collectedData.news?.success ? (
+                    {hasValidData('news', preview.collectedData.news) ? (
                       <CheckCircle className="text-bitcoin-orange flex-shrink-0 mt-0.5" size={20} />
                     ) : (
                       <XCircle className="text-bitcoin-white-60 flex-shrink-0 mt-0.5" size={20} />
                     )}
                     <div className="flex-1">
-                      <span className={`font-semibold ${preview.collectedData.news?.success ? 'text-bitcoin-white' : 'text-bitcoin-white-60 line-through'}`}>
+                      <span className={`font-semibold ${hasValidData('news', preview.collectedData.news) ? 'text-bitcoin-white' : 'text-bitcoin-white-60 line-through'}`}>
                         News & Events
                       </span>
                       <p className="text-xs text-bitcoin-white-60 mt-0.5">
@@ -779,13 +872,13 @@ export default function DataPreviewModal({
 
                   {/* Sentiment */}
                   <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-bitcoin-orange hover:bg-opacity-5 transition-colors">
-                    {preview.collectedData.sentiment?.success ? (
+                    {hasValidData('sentiment', preview.collectedData.sentiment) ? (
                       <CheckCircle className="text-bitcoin-orange flex-shrink-0 mt-0.5" size={20} />
                     ) : (
                       <XCircle className="text-bitcoin-white-60 flex-shrink-0 mt-0.5" size={20} />
                     )}
                     <div className="flex-1">
-                      <span className={`font-semibold ${preview.collectedData.sentiment?.success ? 'text-bitcoin-white' : 'text-bitcoin-white-60 line-through'}`}>
+                      <span className={`font-semibold ${hasValidData('sentiment', preview.collectedData.sentiment) ? 'text-bitcoin-white' : 'text-bitcoin-white-60 line-through'}`}>
                         Social Sentiment
                       </span>
                       <p className="text-xs text-bitcoin-white-60 mt-0.5">
@@ -796,13 +889,13 @@ export default function DataPreviewModal({
 
                   {/* On-Chain */}
                   <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-bitcoin-orange hover:bg-opacity-5 transition-colors">
-                    {preview.collectedData.onChain?.success ? (
+                    {hasValidData('onChain', preview.collectedData.onChain) ? (
                       <CheckCircle className="text-bitcoin-orange flex-shrink-0 mt-0.5" size={20} />
                     ) : (
                       <XCircle className="text-bitcoin-white-60 flex-shrink-0 mt-0.5" size={20} />
                     )}
                     <div className="flex-1">
-                      <span className={`font-semibold ${preview.collectedData.onChain?.success ? 'text-bitcoin-white' : 'text-bitcoin-white-60 line-through'}`}>
+                      <span className={`font-semibold ${hasValidData('onChain', preview.collectedData.onChain) ? 'text-bitcoin-white' : 'text-bitcoin-white-60 line-through'}`}>
                         On-Chain Analytics
                       </span>
                       <p className="text-xs text-bitcoin-white-60 mt-0.5">
@@ -818,7 +911,7 @@ export default function DataPreviewModal({
               </div>
 
               {/* Market Overview */}
-              {preview.collectedData.marketData?.success && preview.collectedData.marketData?.priceAggregation && (
+              {hasValidData('marketData', preview.collectedData.marketData) && preview.collectedData.marketData?.priceAggregation && (
                 <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
                   <h3 className="text-lg font-bold text-bitcoin-white mb-3">
                     Market Overview
@@ -1013,7 +1106,7 @@ export default function DataPreviewModal({
                   </h4>
                   <div className="space-y-4">
                   {/* Market Data */}
-                  {preview.collectedData?.marketData?.success && (
+                  {hasValidData('marketData', preview.collectedData?.marketData) && (
                     <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
                       <h4 className="text-sm font-bold text-bitcoin-orange mb-2 flex items-center gap-2">
                         📊 Market Data
@@ -1048,7 +1141,7 @@ export default function DataPreviewModal({
                   )}
 
                   {/* Sentiment Data - All 5 Sources */}
-                  {preview.collectedData?.sentiment?.success && (
+                  {hasValidData('sentiment', preview.collectedData?.sentiment) && (
                     <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
                       <h4 className="text-sm font-bold text-bitcoin-orange mb-3 flex items-center gap-2">
                         💬 Social Sentiment (5/5 Sources)
@@ -1122,7 +1215,7 @@ export default function DataPreviewModal({
                   )}
 
                   {/* Technical Analysis */}
-                  {preview.collectedData?.technical?.success && (
+                  {hasValidData('technical', preview.collectedData?.technical) && (
                     <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
                       <h4 className="text-sm font-bold text-bitcoin-orange mb-2 flex items-center gap-2">
                         📈 Technical Indicators
@@ -1167,7 +1260,7 @@ export default function DataPreviewModal({
                   )}
 
                   {/* News Headlines */}
-                  {preview.collectedData?.news?.success && preview.collectedData.news.articles?.length > 0 && (
+                  {hasValidData('news', preview.collectedData?.news) && preview.collectedData.news?.articles?.length > 0 && (
                     <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
                       <h4 className="text-sm font-bold text-bitcoin-orange mb-2 flex items-center gap-2">
                         📰 Recent News ({preview.collectedData.news.articles.length} articles)
@@ -1189,7 +1282,7 @@ export default function DataPreviewModal({
                   )}
 
                   {/* On-Chain Data */}
-                  {preview.collectedData?.onChain?.success && (
+                  {hasValidData('onChain', preview.collectedData?.onChain) && (
                     <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
                       <h4 className="text-sm font-bold text-bitcoin-orange mb-2 flex items-center gap-2">
                         ⛓️ On-Chain Intelligence
