@@ -230,7 +230,7 @@ export function OpenAIAnalysis({ symbol, collectedData, onAnalysisComplete }: Op
           <div className="flex items-center gap-4 p-4 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded-lg">
             <div className="text-center">
               <div className="text-3xl font-bold text-bitcoin-orange font-mono">
-                {analysis.consensus.overallScore}
+                {analysis.consensus?.overallScore ?? 'N/A'}
               </div>
               <div className="text-xs text-bitcoin-white-60 uppercase">
                 Score
@@ -238,10 +238,10 @@ export function OpenAIAnalysis({ symbol, collectedData, onAnalysisComplete }: Op
             </div>
             <div className="flex-1">
               <div className="text-xl font-bold text-bitcoin-white uppercase">
-                {analysis.consensus.recommendation}
+                {analysis.consensus?.recommendation ?? 'N/A'}
               </div>
               <div className="text-sm text-bitcoin-white-80">
-                Confidence: {analysis.consensus.confidence}%
+                Confidence: {analysis.consensus?.confidence !== undefined ? `${analysis.consensus.confidence}%` : 'N/A'}
               </div>
             </div>
           </div>

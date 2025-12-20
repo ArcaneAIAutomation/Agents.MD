@@ -560,7 +560,7 @@ export default function UCIEAnalysisHub({ symbol, onBack, initialData }: UCIEAna
               <div className="flex items-center gap-4 p-4 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded-lg">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-bitcoin-orange font-mono">
-                    {consensus.overallScore}
+                    {consensus?.overallScore ?? 'N/A'}
                   </div>
                   <div className="text-xs text-bitcoin-white-60 uppercase">
                     Score
@@ -568,10 +568,10 @@ export default function UCIEAnalysisHub({ symbol, onBack, initialData }: UCIEAna
                 </div>
                 <div className="flex-1">
                   <div className="text-xl font-bold text-bitcoin-white uppercase">
-                    {consensus.recommendation}
+                    {consensus?.recommendation ?? 'N/A'}
                   </div>
                   <div className="text-sm text-bitcoin-white-80">
-                    Confidence: {consensus.confidence}%
+                    Confidence: {consensus?.confidence !== undefined ? `${consensus.confidence}%` : 'N/A'}
                   </div>
                 </div>
               </div>
