@@ -109,41 +109,58 @@ interface ModularAnalysis {
 }
 
 function ModularAnalysisDisplay({ analysis }: { analysis: ModularAnalysis }) {
+  // ✅ CRITICAL FIX: Add null safety checks for all analysis properties
+  if (!analysis || typeof analysis !== 'object') {
+    return (
+      <div className="text-bitcoin-white-60 text-center py-4">
+        Analysis data is loading...
+      </div>
+    );
+  }
+
+  // Safe access helper
+  const executiveSummary = analysis.executiveSummary;
+  const hasValidExecutiveSummary = executiveSummary && 
+    typeof executiveSummary === 'object' && 
+    !executiveSummary.error;
+
   return (
     <div className="space-y-6">
       {/* Executive Summary (Prominent) */}
-      {analysis.executiveSummary && !analysis.executiveSummary.error && (
+      {hasValidExecutiveSummary && (
         <div className="bg-bitcoin-orange-10 border-2 border-bitcoin-orange rounded-lg p-6">
           <h3 className="text-2xl font-bold text-bitcoin-orange mb-4 flex items-center gap-2">
             <span>📋</span>
             Executive Summary
           </h3>
-          <p className="text-bitcoin-white-80 text-lg leading-relaxed mb-4">
-            {analysis.executiveSummary.summary}
-          </p>
+          {executiveSummary.summary && (
+            <p className="text-bitcoin-white-80 text-lg leading-relaxed mb-4">
+              {executiveSummary.summary}
+            </p>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            {analysis.executiveSummary.confidence !== undefined && (
+            {executiveSummary.confidence !== undefined && executiveSummary.confidence !== null && (
               <div>
                 <span className="text-bitcoin-white-60 text-sm">Confidence:</span>
                 <span className="text-bitcoin-orange font-bold text-2xl ml-2">
-                  {analysis.executiveSummary.confidence}%
+                  {executiveSummary.confidence}%
                 </span>
               </div>
             )}
-            {analysis.executiveSummary.recommendation && (
+            {executiveSummary.recommendation && (
               <div>
                 <span className="text-bitcoin-white-60 text-sm">Recommendation:</span>
                 <span className="text-bitcoin-white font-bold text-2xl ml-2">
-                  {analysis.executiveSummary.recommendation}
+                  {executiveSummary.recommendation}
                 </span>
               </div>
             )}
           </div>
-          {analysis.executiveSummary.key_insights && Array.isArray(analysis.executiveSummary.key_insights) && (
+          {executiveSummary.key_insights && Array.isArray(executiveSummary.key_insights) && executiveSummary.key_insights.length > 0 && (
             <div className="mt-4 pt-4 border-t border-bitcoin-orange-20">
               <span className="text-bitcoin-white-60 text-sm font-semibold">Key Insights:</span>
               <ul className="mt-2 space-y-2">
-                {analysis.executiveSummary.key_insights.map((insight: string, i: number) => (
+                {executiveSummary.key_insights.map((insight: string, i: number) => (
                   <li key={i} className="flex items-start gap-2">
                     <span className="text-bitcoin-orange mt-1">•</span>
                     <span className="text-bitcoin-white-80">{insight}</span>
