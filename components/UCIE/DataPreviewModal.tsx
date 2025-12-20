@@ -109,68 +109,123 @@ interface ModularAnalysis {
 }
 
 function ModularAnalysisDisplay({ analysis }: { analysis: ModularAnalysis }) {
-  // ✅ CRITICAL FIX: Add null safety checks for all analysis properties
-  if (!analysis || typeof analysis !== 'object') {
-    return (
-      <div className="text-bitcoin-white-60 text-center py-4">
-        Analysis data is loading...
-      </div>
+  // ✅ CRITICAL FIX: Wrap entire component in try-catch for bulletproof error handling
+  try {
+    // ✅ CRITICAL FIX: Add null safety checks for all analysis properties
+    if (!analysis || typeof analysis !== 'object') {
+      return (
+        <div className="text-bitcoin-white-60 text-center py-4">
+          Analysis data is loading...
+        </div>
+      );
+    }
+
+    // ✅ Safe access helper with extra defensive checks
+    const executiveSummary = analysis?.executiveSummary;
+    const hasValidExecutiveSummary = Boolean(
+      executiveSummary && 
+      typeof executiveSummary === 'object' && 
+      executiveSummary !== null &&
+      !executiveSummary.error
     );
-  }
+    
+    // ✅ Safe getters for executive summary properties
+    const getConfidence = () => {
+      try {
+        if (hasValidExecutiveSummary && executiveSummary?.confidence !== undefined && executiveSummary?.confidence !== null) {
+          return executiveSummary.confidence;
+        }
+        return null;
+      } catch {
+        return null;
+      }
+    };
+    
+    const getRecommendation = () => {
+      try {
+        if (hasValidExecutiveSummary && executiveSummary?.recommendation) {
+          return executiveSummary.recommendation;
+        }
+        return null;
+      } catch {
+        return null;
+      }
+    };
+    
+    const getSummary = () => {
+      try {
+        if (hasValidExecutiveSummary && executiveSummary?.summary) {
+          return executiveSummary.summary;
+        }
+        return null;
+      } catch {
+        return null;
+      }
+    };
+    
+    const getKeyInsights = () => {
+      try {
+        if (hasValidExecutiveSummary && executiveSummary?.key_insights && Array.isArray(executiveSummary.key_insights)) {
+          return executiveSummary.key_insights;
+        }
+        return [];
+      } catch {
+        return [];
+      }
+    };
 
-  // Safe access helper
-  const executiveSummary = analysis.executiveSummary;
-  const hasValidExecutiveSummary = executiveSummary && 
-    typeof executiveSummary === 'object' && 
-    !executiveSummary.error;
+    const confidence = getConfidence();
+    const recommendation = getRecommendation();
+    const summary = getSummary();
+    const keyInsights = getKeyInsights();
 
-  return (
-    <div className="space-y-6">
-      {/* Executive Summary (Prominent) */}
-      {hasValidExecutiveSummary && (
-        <div className="bg-bitcoin-orange-10 border-2 border-bitcoin-orange rounded-lg p-6">
-          <h3 className="text-2xl font-bold text-bitcoin-orange mb-4 flex items-center gap-2">
-            <span>📋</span>
-            Executive Summary
-          </h3>
-          {executiveSummary.summary && (
-            <p className="text-bitcoin-white-80 text-lg leading-relaxed mb-4">
-              {executiveSummary.summary}
-            </p>
-          )}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            {executiveSummary.confidence !== undefined && executiveSummary.confidence !== null && (
-              <div>
-                <span className="text-bitcoin-white-60 text-sm">Confidence:</span>
-                <span className="text-bitcoin-orange font-bold text-2xl ml-2">
-                  {executiveSummary.confidence}%
-                </span>
-              </div>
+    return (
+      <div className="space-y-6">
+        {/* Executive Summary (Prominent) */}
+        {hasValidExecutiveSummary && (
+          <div className="bg-bitcoin-orange-10 border-2 border-bitcoin-orange rounded-lg p-6">
+            <h3 className="text-2xl font-bold text-bitcoin-orange mb-4 flex items-center gap-2">
+              <span>📋</span>
+              Executive Summary
+            </h3>
+            {summary && (
+              <p className="text-bitcoin-white-80 text-lg leading-relaxed mb-4">
+                {summary}
+              </p>
             )}
-            {executiveSummary.recommendation && (
-              <div>
-                <span className="text-bitcoin-white-60 text-sm">Recommendation:</span>
-                <span className="text-bitcoin-white font-bold text-2xl ml-2">
-                  {executiveSummary.recommendation}
-                </span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              {confidence !== null && (
+                <div>
+                  <span className="text-bitcoin-white-60 text-sm">Confidence:</span>
+                  <span className="text-bitcoin-orange font-bold text-2xl ml-2">
+                    {confidence}%
+                  </span>
+                </div>
+              )}
+              {recommendation && (
+                <div>
+                  <span className="text-bitcoin-white-60 text-sm">Recommendation:</span>
+                  <span className="text-bitcoin-white font-bold text-2xl ml-2">
+                    {recommendation}
+                  </span>
+                </div>
+              )}
+            </div>
+            {keyInsights.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-bitcoin-orange-20">
+                <span className="text-bitcoin-white-60 text-sm font-semibold">Key Insights:</span>
+                <ul className="mt-2 space-y-2">
+                  {keyInsights.map((insight: string, i: number) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-bitcoin-orange mt-1">•</span>
+                      <span className="text-bitcoin-white-80">{insight}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
           </div>
-          {executiveSummary.key_insights && Array.isArray(executiveSummary.key_insights) && executiveSummary.key_insights.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-bitcoin-orange-20">
-              <span className="text-bitcoin-white-60 text-sm font-semibold">Key Insights:</span>
-              <ul className="mt-2 space-y-2">
-                {executiveSummary.key_insights.map((insight: string, i: number) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <span className="text-bitcoin-orange mt-1">•</span>
-                    <span className="text-bitcoin-white-80">{insight}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
+        )}
       
       {/* Market Analysis Card */}
       {analysis.marketAnalysis && !analysis.marketAnalysis.error && (
@@ -317,6 +372,16 @@ function ModularAnalysisDisplay({ analysis }: { analysis: ModularAnalysis }) {
       )}
     </div>
   );
+  } catch (error) {
+    // ✅ CRITICAL: Catch any rendering errors and show fallback UI
+    console.error('[ModularAnalysisDisplay] Render error:', error);
+    return (
+      <div className="text-bitcoin-white-60 text-center py-4">
+        <p className="mb-2">Unable to display analysis results.</p>
+        <p className="text-xs">Please try refreshing the page.</p>
+      </div>
+    );
+  }
 }
 
 /**
