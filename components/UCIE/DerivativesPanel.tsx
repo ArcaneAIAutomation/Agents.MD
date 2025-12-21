@@ -93,10 +93,10 @@ export default function DerivativesPanel({
       </div>
 
       {/* Overall Risk Alert */}
-      {(fundingAnalysis.riskLevel === 'extreme' || 
-        openInterestAnalysis.confidence > 80 ||
-        liquidationAnalysis.riskLevel === 'extreme' ||
-        longShortAnalysis.contrarianSignal.confidence > 80) && (
+      {(fundingAnalysis?.riskLevel === 'extreme' || 
+        (openInterestAnalysis?.confidence ?? 0) > 80 ||
+        liquidationAnalysis?.riskLevel === 'extreme' ||
+        (longShortAnalysis?.contrarianSignal?.confidence ?? 0) > 80) && (
         <div className="bg-bitcoin-orange bg-opacity-10 border border-bitcoin-orange rounded-lg p-4 flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-bitcoin-orange flex-shrink-0 mt-0.5" />
           <div>
@@ -216,7 +216,7 @@ export default function DerivativesPanel({
                 <div key={index} className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-semibold text-bitcoin-white">{opp.exchange}</span>
-                    <span className="text-sm text-bitcoin-orange">{opp.confidence}% Confidence</span>
+                    <span className="text-sm text-bitcoin-orange">{opp?.confidence ?? 0}% Confidence</span>
                   </div>
                   <p className="text-sm text-bitcoin-white-80 mb-2">{opp.reasoning}</p>
                   <div className="flex items-center gap-2">
@@ -456,14 +456,14 @@ export default function DerivativesPanel({
           </div>
 
           {/* Contrarian Signal */}
-          {longShortAnalysis.contrarianSignal.signal !== 'neutral' && (
+          {longShortAnalysis?.contrarianSignal?.signal !== 'neutral' && (
             <div className="bg-bitcoin-orange bg-opacity-10 border border-bitcoin-orange rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-semibold text-bitcoin-orange">
-                  {longShortAnalysis.contrarianSignal.signal.replace('_', ' ').toUpperCase()}
+                  {longShortAnalysis?.contrarianSignal?.signal?.replace('_', ' ').toUpperCase()}
                 </span>
                 <span className="text-sm text-bitcoin-orange">
-                  {longShortAnalysis.contrarianSignal.confidence}% Confidence
+                  {longShortAnalysis?.contrarianSignal?.confidence ?? 0}% Confidence
                 </span>
               </div>
               <p className="text-sm text-bitcoin-white-80 mb-3">{longShortAnalysis.contrarianSignal.reasoning}</p>

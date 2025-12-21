@@ -129,26 +129,26 @@ function NewsArticleCard({ article }: { article: AssessedNewsArticle }) {
       <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-3 mb-3">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            {getImpactIcon(assessment.impact)}
-            <span className={`font-bold ${getImpactColor(assessment.impact)}`}>
-              {assessment.impact.charAt(0).toUpperCase() + assessment.impact.slice(1)}
+            {getImpactIcon(assessment?.impact ?? 'neutral')}
+            <span className={`font-bold ${getImpactColor(assessment?.impact ?? 'neutral')}`}>
+              {(assessment?.impact ?? 'neutral').charAt(0).toUpperCase() + (assessment?.impact ?? 'neutral').slice(1)}
             </span>
             <span className="text-bitcoin-white-60 text-sm">
-              Impact: {assessment.impactScore}/100
+              Impact: {assessment?.impactScore ?? 0}/100
             </span>
           </div>
           <div className="text-bitcoin-white-60 text-sm">
-            Confidence: {assessment.confidence}%
+            Confidence: {assessment?.confidence ?? 0}%
           </div>
         </div>
         
         {/* AI Summary */}
         <p className="text-bitcoin-white-80 text-sm mb-2">
-          {assessment.summary}
+          {assessment?.summary ?? 'Analysis pending...'}
         </p>
         
         {/* Market Implications */}
-        {assessment.marketImplications && (
+        {assessment?.marketImplications && (
           <div className="text-bitcoin-white-60 text-xs italic border-l-2 border-bitcoin-orange-20 pl-2">
             {assessment.marketImplications}
           </div>
@@ -156,7 +156,7 @@ function NewsArticleCard({ article }: { article: AssessedNewsArticle }) {
       </div>
 
       {/* Key Points */}
-      {assessment.keyPoints && assessment.keyPoints.length > 0 && (
+      {assessment?.keyPoints && assessment.keyPoints.length > 0 && (
         <div className="mb-3">
           <p className="text-xs font-semibold text-bitcoin-white-60 uppercase mb-1">Key Points:</p>
           <ul className="space-y-1">

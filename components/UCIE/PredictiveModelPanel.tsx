@@ -101,10 +101,10 @@ export default function PredictiveModelPanel({
               Low Estimate
             </p>
             <p className="font-mono text-2xl font-bold text-bitcoin-white">
-              ${selectedPrediction.low.toLocaleString()}
+              ${(selectedPrediction?.low ?? 0).toLocaleString()}
             </p>
             <p className="text-sm text-bitcoin-white-60 mt-1">
-              {((selectedPrediction.low / currentPrice - 1) * 100).toFixed(2)}% from current
+              {(((selectedPrediction?.low ?? currentPrice) / currentPrice - 1) * 100).toFixed(2)}% from current
             </p>
           </div>
 
@@ -114,10 +114,10 @@ export default function PredictiveModelPanel({
               Expected Price
             </p>
             <p className="font-mono text-3xl font-bold text-bitcoin-orange [text-shadow:0_0_20px_rgba(247,147,26,0.3)]">
-              ${selectedPrediction.mid.toLocaleString()}
+              ${(selectedPrediction?.mid ?? 0).toLocaleString()}
             </p>
             <p className="text-sm text-bitcoin-white-80 mt-1">
-              {((selectedPrediction.mid / currentPrice - 1) * 100).toFixed(2)}% from current
+              {(((selectedPrediction?.mid ?? currentPrice) / currentPrice - 1) * 100).toFixed(2)}% from current
             </p>
           </div>
 
@@ -127,10 +127,10 @@ export default function PredictiveModelPanel({
               High Estimate
             </p>
             <p className="font-mono text-2xl font-bold text-bitcoin-white">
-              ${selectedPrediction.high.toLocaleString()}
+              ${(selectedPrediction?.high ?? 0).toLocaleString()}
             </p>
             <p className="text-sm text-bitcoin-white-60 mt-1">
-              {((selectedPrediction.high / currentPrice - 1) * 100).toFixed(2)}% from current
+              {(((selectedPrediction?.high ?? currentPrice) / currentPrice - 1) * 100).toFixed(2)}% from current
             </p>
           </div>
         </div>
@@ -138,17 +138,17 @@ export default function PredictiveModelPanel({
         <div className="flex items-center gap-4 text-sm">
           <div className="flex items-center gap-2">
             <span className="text-bitcoin-white-60">Confidence:</span>
-            <span className="font-bold text-bitcoin-orange">{selectedPrediction.confidence}%</span>
+            <span className="font-bold text-bitcoin-orange">{selectedPrediction?.confidence ?? 0}%</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-bitcoin-white-60">Methodology:</span>
-            <span className="text-bitcoin-white-80">{selectedPrediction.methodology}</span>
+            <span className="text-bitcoin-white-80">{selectedPrediction?.methodology ?? 'N/A'}</span>
           </div>
         </div>
       </div>
 
       {/* Pattern Matching */}
-      {patternMatching.currentPattern && (
+      {patternMatching?.currentPattern && (
         <div className="space-y-4">
           <h3 className="text-xl font-bold text-bitcoin-white">Identified Chart Pattern</h3>
           
@@ -156,28 +156,28 @@ export default function PredictiveModelPanel({
             <div className="flex items-start justify-between mb-3">
               <div>
                 <h4 className="text-lg font-bold text-bitcoin-orange capitalize">
-                  {patternMatching.currentPattern.type.replace(/_/g, ' ')}
+                  {(patternMatching.currentPattern?.type ?? 'unknown').replace(/_/g, ' ')}
                 </h4>
                 <p className="text-sm text-bitcoin-white-80 mt-1">
-                  {patternMatching.currentPattern.description}
+                  {patternMatching.currentPattern?.description ?? 'No description available'}
                 </p>
               </div>
               <div className="text-right">
                 <p className="text-xs text-bitcoin-white-60">Confidence</p>
                 <p className="text-2xl font-bold text-bitcoin-orange">
-                  {patternMatching.currentPattern.confidence}%
+                  {patternMatching.currentPattern?.confidence ?? 0}%
                 </p>
               </div>
             </div>
             
             <div className="flex items-center gap-2">
-              {patternMatching.currentPattern.bullish ? (
+              {patternMatching.currentPattern?.bullish ? (
                 <TrendingUp className="text-bitcoin-orange" size={20} />
               ) : (
                 <TrendingDown className="text-bitcoin-orange" size={20} />
               )}
               <span className="text-sm font-semibold text-bitcoin-white">
-                {patternMatching.currentPattern.bullish ? 'Bullish' : 'Bearish'} Pattern
+                {patternMatching.currentPattern?.bullish ? 'Bullish' : 'Bearish'} Pattern
               </span>
             </div>
           </div>

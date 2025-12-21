@@ -327,11 +327,11 @@ function renderTechnicalData(data: any) {
           </p>
           <div className="p-3 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded">
             <div className="flex justify-between items-center mb-2">
-              <span className={`text-xl font-bold uppercase ${getSignalColor(signals.overall)}`}>
-                {signals.overall}
+              <span className={`text-xl font-bold uppercase ${getSignalColor(signals?.overall)}`}>
+                {signals?.overall ?? 'N/A'}
               </span>
               <span className="text-sm text-bitcoin-white-60">
-                {signals.confidence}% confidence
+                {signals?.confidence ?? 0}% confidence
               </span>
             </div>
             <div className="flex gap-4 text-sm">

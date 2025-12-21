@@ -123,7 +123,7 @@ export default function TechnicalAnalysisPanel({ symbol, data, loading }: Techni
           )}
         </button>
 
-        {expandedSections.aiInterpretation && (
+        {expandedSections.aiInterpretation && data?.aiInterpretation && (
           <div className="space-y-4">
             <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
@@ -131,20 +131,20 @@ export default function TechnicalAnalysisPanel({ symbol, data, loading }: Techni
                   Summary
                 </span>
                 <span className="text-sm text-bitcoin-orange">
-                  {data.aiInterpretation.confidence}% Confidence
+                  {data.aiInterpretation?.confidence ?? 0}% Confidence
                 </span>
               </div>
-              <p className="text-bitcoin-white-80 mb-3">{data.aiInterpretation.summary}</p>
+              <p className="text-bitcoin-white-80 mb-3">{data.aiInterpretation?.summary ?? 'Analysis pending...'}</p>
               
               <div className="border-t border-bitcoin-orange-20 pt-3 mt-3">
                 <p className="text-sm text-bitcoin-white-60 mb-2">Detailed Analysis:</p>
-                <p className="text-bitcoin-white-80 text-sm">{data.aiInterpretation.explanation}</p>
+                <p className="text-bitcoin-white-80 text-sm">{data.aiInterpretation?.explanation ?? 'Loading...'}</p>
               </div>
 
               <div className="border-t border-bitcoin-orange-20 pt-3 mt-3">
                 <p className="text-sm text-bitcoin-white-60 mb-2">Trading Implication:</p>
                 <p className="text-bitcoin-orange text-sm font-semibold">
-                  {data.aiInterpretation.tradingImplication}
+                  {data.aiInterpretation?.tradingImplication ?? 'Pending analysis...'}
                 </p>
               </div>
             </div>
@@ -214,34 +214,34 @@ export default function TechnicalAnalysisPanel({ symbol, data, loading }: Techni
                   Overall Signal
                 </span>
                 <span className="text-sm font-semibold">
-                  {data.multiTimeframe.overall.agreement}% Agreement
+                  {data?.multiTimeframe?.overall?.agreement ?? 0}% Agreement
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold uppercase">
-                  {data.multiTimeframe.overall.signal.replace('_', ' ')}
+                  {(data?.multiTimeframe?.overall?.signal ?? 'neutral').replace('_', ' ')}
                 </span>
                 <span className="text-sm">
-                  ({data.multiTimeframe.overall.confidence}% confidence)
+                  ({data?.multiTimeframe?.overall?.confidence ?? 0}% confidence)
                 </span>
               </div>
             </div>
 
             {/* Timeframe Breakdown */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-              {data.multiTimeframe.timeframes.map((tf, index) => (
+              {(data?.multiTimeframe?.timeframes ?? []).map((tf, index) => (
                 <div
                   key={index}
                   className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-3 text-center"
                 >
                   <div className="text-xs font-semibold text-bitcoin-white-60 uppercase mb-1">
-                    {tf.timeframe}
+                    {tf?.timeframe ?? 'N/A'}
                   </div>
-                  <div className={`text-sm font-bold ${getSignalColor(tf.signal)} mb-1`}>
-                    {tf.signal.replace('_', ' ').toUpperCase()}
+                  <div className={`text-sm font-bold ${getSignalColor(tf?.signal ?? 'neutral')} mb-1`}>
+                    {(tf?.signal ?? 'neutral').replace('_', ' ').toUpperCase()}
                   </div>
                   <div className="text-xs text-bitcoin-white-60">
-                    {tf.confidence}%
+                    {tf?.confidence ?? 0}%
                   </div>
                 </div>
               ))}
@@ -268,39 +268,39 @@ export default function TechnicalAnalysisPanel({ symbol, data, loading }: Techni
           <div className="space-y-4">
             {/* Nearest Levels */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {data.supportResistance.nearestSupport && (
+              {data?.supportResistance?.nearestSupport && (
                 <div className="bg-bitcoin-black border-2 border-bitcoin-orange rounded-lg p-4">
                   <div className="text-sm font-semibold text-bitcoin-white-60 uppercase mb-2">
                     Nearest Support
                   </div>
                   <div className="font-mono text-2xl font-bold text-bitcoin-orange mb-1">
-                    ${data.supportResistance.nearestSupport.price.toFixed(2)}
+                    ${(data.supportResistance.nearestSupport?.price ?? 0).toFixed(2)}
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <span className="text-bitcoin-white-60">
-                      {data.supportResistance.nearestSupport.strength} strength
+                      {data.supportResistance.nearestSupport?.strength ?? 'N/A'} strength
                     </span>
                     <span className="text-bitcoin-orange">
-                      {data.supportResistance.nearestSupport.confidence}%
+                      {data.supportResistance.nearestSupport?.confidence ?? 0}%
                     </span>
                   </div>
                 </div>
               )}
 
-              {data.supportResistance.nearestResistance && (
+              {data?.supportResistance?.nearestResistance && (
                 <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-lg p-4">
                   <div className="text-sm font-semibold text-bitcoin-white-60 uppercase mb-2">
                     Nearest Resistance
                   </div>
                   <div className="font-mono text-2xl font-bold text-bitcoin-white mb-1">
-                    ${data.supportResistance.nearestResistance.price.toFixed(2)}
+                    ${(data.supportResistance.nearestResistance?.price ?? 0).toFixed(2)}
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <span className="text-bitcoin-white-60">
-                      {data.supportResistance.nearestResistance.strength} strength
+                      {data.supportResistance.nearestResistance?.strength ?? 'N/A'} strength
                     </span>
                     <span className="text-bitcoin-orange">
-                      {data.supportResistance.nearestResistance.confidence}%
+                      {data.supportResistance.nearestResistance?.confidence ?? 0}%
                     </span>
                   </div>
                 </div>
@@ -311,24 +311,24 @@ export default function TechnicalAnalysisPanel({ symbol, data, loading }: Techni
             <div className="space-y-2">
               <h4 className="text-sm font-semibold text-bitcoin-white-60 uppercase">All Levels</h4>
               <div className="max-h-64 overflow-y-auto space-y-2">
-                {data.supportResistance.levels.slice(0, 10).map((level, index) => (
+                {(data?.supportResistance?.levels ?? []).slice(0, 10).map((level, index) => (
                   <div
                     key={index}
                     className="bg-bitcoin-black border border-bitcoin-orange-20 rounded p-2 flex items-center justify-between"
                   >
                     <div className="flex items-center gap-3">
                       <span className={`text-xs font-semibold uppercase ${
-                        level.type === 'support' ? 'text-bitcoin-orange' : 'text-bitcoin-white-60'
+                        level?.type === 'support' ? 'text-bitcoin-orange' : 'text-bitcoin-white-60'
                       }`}>
-                        {level.type}
+                        {level?.type ?? 'N/A'}
                       </span>
                       <span className="font-mono text-sm font-bold text-bitcoin-white">
-                        ${level.price.toFixed(2)}
+                        ${(level?.price ?? 0).toFixed(2)}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-bitcoin-white-60">{level.strength}</span>
-                      <span className="text-xs text-bitcoin-orange">{level.confidence}%</span>
+                      <span className="text-xs text-bitcoin-white-60">{level?.strength ?? 'N/A'}</span>
+                      <span className="text-xs text-bitcoin-orange">{level?.confidence ?? 0}%</span>
                     </div>
                   </div>
                 ))}
@@ -354,7 +354,7 @@ export default function TechnicalAnalysisPanel({ symbol, data, loading }: Techni
 
         {expandedSections.patterns && (
           <div className="space-y-3">
-            {data.patterns.length === 0 ? (
+            {(!data?.patterns || data.patterns.length === 0) ? (
               <p className="text-bitcoin-white-60 text-center py-4">
                 No chart patterns detected in current price action.
               </p>
@@ -363,7 +363,7 @@ export default function TechnicalAnalysisPanel({ symbol, data, loading }: Techni
                 <div
                   key={index}
                   className={`bg-bitcoin-black border-2 rounded-lg p-4 ${
-                    pattern.confidence >= 70
+                    (pattern?.confidence ?? 0) >= 70
                       ? 'border-bitcoin-orange'
                       : 'border-bitcoin-orange-20'
                   }`}
@@ -371,20 +371,20 @@ export default function TechnicalAnalysisPanel({ symbol, data, loading }: Techni
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <span className="text-lg font-bold text-bitcoin-white">
-                        {pattern.name}
+                        {pattern?.name ?? 'Unknown Pattern'}
                       </span>
-                      <span className={`flex items-center gap-1 ${getSignalColor(pattern.signal)}`}>
-                        {getSignalIcon(pattern.signal)}
+                      <span className={`flex items-center gap-1 ${getSignalColor(pattern?.signal ?? 'neutral')}`}>
+                        {getSignalIcon(pattern?.signal ?? 'neutral')}
                       </span>
                     </div>
                     <span className="text-sm text-bitcoin-orange font-semibold">
-                      {pattern.confidence}% confidence
+                      {pattern?.confidence ?? 0}% confidence
                     </span>
                   </div>
 
-                  <p className="text-sm text-bitcoin-white-80 mb-3">{pattern.description}</p>
+                  <p className="text-sm text-bitcoin-white-80 mb-3">{pattern?.description ?? 'No description available'}</p>
 
-                  {pattern.targetPrice && (
+                  {pattern?.targetPrice && (
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div>
                         <span className="text-bitcoin-white-60">Target: </span>

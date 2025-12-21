@@ -40,6 +40,9 @@ export const OpenAIAnalysisResults: React.FC<OpenAIAnalysisResultsProps> = ({
     }
   };
 
+  // ✅ FIX: Apply null safety to confidence
+  const confidenceValue = result?.confidence ?? 0;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -51,8 +54,8 @@ export const OpenAIAnalysisResults: React.FC<OpenAIAnalysisResultsProps> = ({
           </h3>
         </div>
         <div className="flex items-center gap-3">
-          <span className={`px-4 py-2 rounded-lg font-bold text-sm uppercase font-mono ${getConfidenceStyle(result.confidence)}`}>
-            {result.confidence}% Confidence
+          <span className={`px-4 py-2 rounded-lg font-bold text-sm uppercase font-mono ${getConfidenceStyle(confidenceValue)}`}>
+            {confidenceValue}% Confidence
           </span>
           <button
             onClick={onReset}
