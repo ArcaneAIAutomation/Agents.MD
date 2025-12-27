@@ -51,10 +51,112 @@ interface AnalysisCardProps {
   listFields?: Array<{ label: string; key: string }>;
 }
 
+/**
+ * Flexible field value getter - handles snake_case, camelCase, and variations
+ * This is CRITICAL for GPT response compatibility
+ */
+function getFieldValue(data: any, key: string): any {
+  if (!data || typeof data !== 'object') return null;
+  
+  // Direct match
+  if (data[key] !== undefined && data[key] !== null) return data[key];
+  
+  // Try camelCase version (price_trend -> priceTrend)
+  const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+  if (data[camelKey] !== undefined && data[camelKey] !== null) return data[camelKey];
+  
+  // Try snake_case version (priceTrend -> price_trend)
+  const snakeKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+  if (data[snakeKey] !== undefined && data[snakeKey] !== null) return data[snakeKey];
+  
+  // Try lowercase version
+  const lowerKey = key.toLowerCase();
+  if (data[lowerKey] !== undefined && data[lowerKey] !== null) return data[lowerKey];
+  
+  // Try uppercase version
+  const upperKey = key.toUpperCase();
+  if (data[upperKey] !== undefined && data[upperKey] !== null) return data[upperKey];
+  
+  // Try with spaces replaced by underscores
+  const spaceKey = key.replace(/ /g, '_');
+  if (data[spaceKey] !== undefined && data[spaceKey] !== null) return data[spaceKey];
+  
+  return null;
+}
+
 function AnalysisCard({ title, icon, data, fields, listFields }: AnalysisCardProps) {
   // ✅ CRITICAL FIX: Add null safety check for data
   if (!data || typeof data !== 'object') {
+    console.log(`[AnalysisCard] ${title}: No data provided`);
     return null;
+  }
+  
+  // ✅ DEBUG: Log what data we received
+  console.log(`[AnalysisCard] ${title} received data:`, JSON.stringify(data, null, 2).substring(0, 500));
+  
+  // Check if we have ANY displayable content
+  const hasAnyField = (fields || []).some(field => getFieldValue(data, field.key) !== null);
+  const hasAnyListField = (listFields || []).some(field => {
+    const val = getFieldValue(data, field.key);
+    return val !== null && Array.isArray(val) && val.length > 0;
+  });
+  
+  // If no structured fields match, show raw data as fallback
+  if (!hasAnyField && !hasAnyListField) {
+    console.log(`[AnalysisCard] ${title}: No matching fields, showing raw data`);
+    const dataKeys = Object.keys(data);
+    if (dataKeys.length === 0) return null;
+    
+    return (
+      <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4 hover:border-bitcoin-orange transition-colors">
+        <h4 className="text-lg font-bold text-bitcoin-orange mb-3 flex items-center gap-2">
+          <span>{icon}</span>
+          {title}
+        </h4>
+        <div className="space-y-3">
+          {dataKeys.map(key => {
+            const value = data[key];
+            if (value === null || value === undefined) return null;
+            
+            // Format the key for display
+            const label = key.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim();
+            const displayLabel = label.charAt(0).toUpperCase() + label.slice(1);
+            
+            if (Array.isArray(value)) {
+              return (
+                <div key={key}>
+                  <span className="text-bitcoin-white-60 text-sm font-semibold">{displayLabel}:</span>
+                  <ul className="mt-1 space-y-1">
+                    {value.slice(0, 5).map((item: any, i: number) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="text-bitcoin-orange mt-1">•</span>
+                        <span className="text-bitcoin-white-80">{typeof item === 'string' ? item : JSON.stringify(item)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            }
+            
+            if (typeof value === 'object') {
+              return (
+                <div key={key}>
+                  <span className="text-bitcoin-white-60 text-sm font-semibold">{displayLabel}:</span>
+                  <p className="text-bitcoin-white-80 mt-1 text-sm">{JSON.stringify(value)}</p>
+                </div>
+              );
+            }
+            
+            return (
+              <div key={key}>
+                <span className="text-bitcoin-white-60 text-sm font-semibold">{displayLabel}:</span>
+                <p className="text-bitcoin-white-80 mt-1">{String(value)}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
   }
   
   return (
@@ -65,32 +167,38 @@ function AnalysisCard({ title, icon, data, fields, listFields }: AnalysisCardPro
       </h4>
       
       <div className="space-y-3">
-        {/* Regular fields - ✅ CRITICAL FIX: Add null safety for fields array */}
-        {(fields || []).map(field => (
-          data?.[field.key] && (
+        {/* Regular fields - ✅ CRITICAL FIX: Use flexible field matching */}
+        {(fields || []).map(field => {
+          const value = getFieldValue(data, field.key);
+          if (value === null) return null;
+          
+          return (
             <div key={field.key}>
               <span className="text-bitcoin-white-60 text-sm font-semibold">{field.label}:</span>
-              <p className="text-bitcoin-white-80 mt-1">{data[field.key]}</p>
+              <p className="text-bitcoin-white-80 mt-1">{typeof value === 'object' ? JSON.stringify(value) : String(value)}</p>
             </div>
-          )
-        ))}
+          );
+        })}
         
-        {/* List fields - ✅ CRITICAL FIX: Add null safety for listFields and nested arrays */}
-        {(listFields || []).map(field => (
-          data?.[field.key] && Array.isArray(data[field.key]) && (
+        {/* List fields - ✅ CRITICAL FIX: Use flexible field matching */}
+        {(listFields || []).map(field => {
+          const value = getFieldValue(data, field.key);
+          if (value === null || !Array.isArray(value) || value.length === 0) return null;
+          
+          return (
             <div key={field.key}>
               <span className="text-bitcoin-white-60 text-sm font-semibold">{field.label}:</span>
               <ul className="mt-1 space-y-1">
-                {(data[field.key] || []).map((item: string, i: number) => (
+                {value.map((item: any, i: number) => (
                   <li key={i} className="flex items-start gap-2">
                     <span className="text-bitcoin-orange mt-1">•</span>
-                    <span className="text-bitcoin-white-80">{item}</span>
+                    <span className="text-bitcoin-white-80">{typeof item === 'string' ? item : JSON.stringify(item)}</span>
                   </li>
                 ))}
               </ul>
             </div>
-          )
-        ))}
+          );
+        })}
       </div>
     </div>
   );
