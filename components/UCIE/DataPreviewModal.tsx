@@ -22,6 +22,7 @@ interface DataPreview {
   dataQuality: number;
   summary: string;
   aiAnalysis: string | null; // ✅ Full AI analysis (GPT-5.1)
+  parsedAnalysis?: any; // ✅ CRITICAL FIX: Parsed analysis object for direct access (avoids re-parsing)
   caesarPromptPreview: string; // ✅ Caesar prompt preview
   collectedData: {
     marketData: any;
@@ -615,12 +616,33 @@ export default function DataPreviewModal({
         if (data.status === 'completed' && data.result) {
           console.log('🎉 GPT-5.1 analysis completed! Processing result...');
           
-          // Parse and update preview with GPT-5.1 analysis
-          const analysis = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
-          console.log('✅ Parsed analysis:', Object.keys(analysis).join(', '));
+          // ✅ CRITICAL FIX: Parse result safely with error handling
+          let analysis: any;
+          try {
+            analysis = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+            console.log('✅ Parsed analysis keys:', Object.keys(analysis || {}).join(', '));
+            console.log('✅ Has executiveSummary:', !!analysis?.executiveSummary);
+            console.log('✅ Has marketAnalysis:', !!analysis?.marketAnalysis);
+          } catch (parseError) {
+            console.error('❌ Failed to parse analysis result:', parseError);
+            console.log('📄 Raw result:', data.result?.substring?.(0, 500) || data.result);
+            // Set error state and return early
+            setGptProgress('Analysis parsing failed');
+            setGptStatus('error');
+            return;
+          }
+          
+          // ✅ CRITICAL: Validate analysis has expected structure
+          if (!analysis || typeof analysis !== 'object') {
+            console.error('❌ Analysis is not a valid object:', typeof analysis);
+            setGptProgress('Invalid analysis format');
+            setGptStatus('error');
+            return;
+          }
           
           // ✅ CRITICAL: Regenerate Caesar prompt with GPT-5.1 analysis
           console.log('🔄 Regenerating Caesar prompt with GPT-5.1 analysis...');
+          let caesarPrompt = '';
           try {
             const regenerateResponse = await fetch(`/api/ucie/regenerate-caesar-prompt/${symbol}`, {
               method: 'POST',
@@ -634,44 +656,41 @@ export default function DataPreviewModal({
               const regenerateData = await regenerateResponse.json();
               if (regenerateData.success && regenerateData.caesarPrompt) {
                 console.log('✅ Caesar prompt regenerated with GPT-5.1 analysis');
-                console.log('🔄 Updating preview state with analysis and prompt...');
-                setPreview(prev => {
-                  if (!prev) return null;
-                  const updated = {
-                    ...prev,
-                    aiAnalysis: JSON.stringify(analysis, null, 2),
-                    caesarPromptPreview: regenerateData.caesarPrompt
-                  };
-                  console.log('✅ Preview state updated with analysis and prompt!');
-                  return updated;
-                });
-              } else {
-                console.warn('⚠️ Caesar prompt regeneration returned success=false');
-                setPreview(prev => prev ? {
-                  ...prev,
-                  aiAnalysis: JSON.stringify(analysis, null, 2)
-                } : null);
+                caesarPrompt = regenerateData.caesarPrompt;
               }
-            } else {
-              console.warn('⚠️ Caesar prompt regeneration failed, using existing prompt');
-              setPreview(prev => prev ? {
-                ...prev,
-                aiAnalysis: JSON.stringify(analysis, null, 2)
-              } : null);
             }
           } catch (regenerateError) {
             console.error('❌ Failed to regenerate Caesar prompt:', regenerateError);
-            // Still update with GPT-5.1 analysis even if regeneration fails
-            setPreview(prev => prev ? {
-              ...prev,
-              aiAnalysis: JSON.stringify(analysis, null, 2)
-            } : null);
+            // Continue without Caesar prompt - not critical
           }
           
-          // ✅ Update status and progress LAST to trigger UI update
-          setGptProgress('Analysis complete! ✅');
-          setGptStatus('completed');
-          console.log('✅ GPT-5.1 analysis UI update complete! Status set to completed.');
+          // ✅ CRITICAL FIX: Update preview state with analysis FIRST
+          // Store the analysis object directly (not stringified) for easier rendering
+          console.log('🔄 Updating preview state with analysis...');
+          setPreview(prev => {
+            if (!prev) {
+              console.warn('⚠️ Preview is null, cannot update');
+              return null;
+            }
+            const updated = {
+              ...prev,
+              // ✅ Store as stringified JSON for consistent handling
+              aiAnalysis: JSON.stringify(analysis, null, 2),
+              // ✅ Also store parsed version for direct access
+              parsedAnalysis: analysis,
+              caesarPromptPreview: caesarPrompt || prev.caesarPromptPreview
+            };
+            console.log('✅ Preview state updated! aiAnalysis length:', updated.aiAnalysis?.length);
+            return updated;
+          });
+          
+          // ✅ CRITICAL FIX: Update status AFTER preview update with slight delay
+          // This ensures React has time to process the preview update
+          setTimeout(() => {
+            setGptProgress('Analysis complete! ✅');
+            setGptStatus('completed');
+            console.log('✅ GPT-5.1 analysis UI update complete! Status set to completed.');
+          }, 100);
         }
         
         if (data.status === 'error') {
@@ -1067,13 +1086,49 @@ export default function DataPreviewModal({
                 
                 <div className="prose prose-invert max-w-none">
                   <div className="text-bitcoin-white-80 leading-relaxed max-h-96 overflow-y-auto space-y-4">
-                    {/* ✅ MODULAR ANALYSIS DISPLAY */}
+                    {/* ✅ MODULAR ANALYSIS DISPLAY - CRITICAL FIX: Use parsedAnalysis directly when available */}
                     {(() => {
                       try {
-                        // Try to parse as JSON first
-                        const analysis = typeof (preview.aiAnalysis || preview.summary) === 'string' 
-                          ? JSON.parse(preview.aiAnalysis || preview.summary)
-                          : (preview.aiAnalysis || preview.summary);
+                        // ✅ CRITICAL FIX: Use parsedAnalysis directly if available (avoids re-parsing)
+                        let analysis = preview.parsedAnalysis;
+                        
+                        // Fallback: Try to parse aiAnalysis or summary if parsedAnalysis not available
+                        if (!analysis) {
+                          const rawAnalysis = preview.aiAnalysis || preview.summary;
+                          if (typeof rawAnalysis === 'string' && rawAnalysis.trim()) {
+                            try {
+                              analysis = JSON.parse(rawAnalysis);
+                            } catch (parseErr) {
+                              console.log('[ModularAnalysisDisplay] JSON parse failed, using raw text');
+                              // Not JSON, will fall through to text display
+                            }
+                          } else if (typeof rawAnalysis === 'object' && rawAnalysis !== null) {
+                            analysis = rawAnalysis;
+                          }
+                        }
+                        
+                        // ✅ Validate analysis is a valid object
+                        if (!analysis || typeof analysis !== 'object') {
+                          // No valid analysis object, show raw text if available
+                          const text = preview.aiAnalysis || preview.summary || '';
+                          if (typeof text === 'string' && text.trim()) {
+                            return text.split('\n\n').map((paragraph, index) => {
+                              if (paragraph.trim()) {
+                                return (
+                                  <p key={index} className="text-bitcoin-white-80">
+                                    {paragraph.trim()}
+                                  </p>
+                                );
+                              }
+                              return null;
+                            });
+                          }
+                          return (
+                            <p className="text-bitcoin-white-60 text-center py-4">
+                              Analysis data is loading...
+                            </p>
+                          );
+                        }
                         
                         // Check if it's modular analysis
                         const isModular = analysis.marketAnalysis || analysis.technicalAnalysis || 
@@ -1087,18 +1142,26 @@ export default function DataPreviewModal({
                           return <LegacyAnalysisDisplay analysis={analysis} />;
                         }
                       } catch (error) {
-                        // Fallback to plain text if JSON parsing fails
-                        const text = (preview.aiAnalysis || preview.summary);
-                        return text.split('\n\n').map((paragraph, index) => {
-                          if (paragraph.trim()) {
-                            return (
-                              <p key={index} className="text-bitcoin-white-80">
-                                {paragraph.trim()}
-                              </p>
-                            );
-                          }
-                          return null;
-                        });
+                        console.error('[ModularAnalysisDisplay] Render error:', error);
+                        // Fallback to plain text if anything fails
+                        const text = preview.aiAnalysis || preview.summary || '';
+                        if (typeof text === 'string' && text.trim()) {
+                          return text.split('\n\n').map((paragraph, index) => {
+                            if (paragraph.trim()) {
+                              return (
+                                <p key={index} className="text-bitcoin-white-80">
+                                  {paragraph.trim()}
+                                </p>
+                              );
+                            }
+                            return null;
+                          });
+                        }
+                        return (
+                          <p className="text-bitcoin-white-60 text-center py-4">
+                            Unable to display analysis. Please try refreshing.
+                          </p>
+                        );
                       }
                     })()}
                   </div>
