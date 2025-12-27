@@ -193,7 +193,7 @@ export const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
         
         {/* Risk Components */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-8">
-          {Object.entries(riskScore.components).map(([key, value]) => (
+          {Object.entries(riskScore?.components || {}).map(([key, value]) => (
             <div key={key} className="bitcoin-block-subtle p-3 text-center">
               <div className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-1">
                 {key}
@@ -286,13 +286,13 @@ export const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
         </div>
         
         {/* Regime Changes */}
-        {correlationMetrics.regimeChanges.length > 0 && (
+        {(correlationMetrics?.regimeChanges || []).length > 0 && (
           <div className="mt-4">
             <h4 className="text-sm font-semibold text-bitcoin-white mb-2">
               Recent Correlation Regime Changes
             </h4>
             <div className="space-y-2">
-              {correlationMetrics.regimeChanges.slice(0, 3).map((change, idx) => (
+              {(correlationMetrics?.regimeChanges || []).slice(0, 3).map((change, idx) => (
                 <div key={idx} className="text-xs text-bitcoin-white-60 p-2 bg-bitcoin-black border border-bitcoin-orange-20 rounded">
                   <span className="text-bitcoin-orange">{change.asset}</span>: {change.previousCorrelation.toFixed(2)} → {change.newCorrelation.toFixed(2)} ({change.significance} significance)
                 </div>
@@ -368,7 +368,7 @@ export const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
               </tr>
             </thead>
             <tbody>
-              {portfolioImpact.allocations.map((scenario, idx) => (
+              {(portfolioImpact?.allocations || []).map((scenario, idx) => (
                 <tr 
                   key={idx}
                   className={`border-b border-bitcoin-orange-20 ${
@@ -406,7 +406,7 @@ export const RiskAssessmentPanel: React.FC<RiskAssessmentPanelProps> = ({
           <h4 className="text-sm font-semibold text-bitcoin-white mb-2">
             Recommendations
           </h4>
-          {portfolioImpact.recommendations.map((rec, idx) => (
+          {(portfolioImpact?.recommendations || []).map((rec, idx) => (
             <div key={idx} className="text-sm text-bitcoin-white-80 p-3 bg-bitcoin-black border border-bitcoin-orange-20 rounded">
               • {rec}
             </div>

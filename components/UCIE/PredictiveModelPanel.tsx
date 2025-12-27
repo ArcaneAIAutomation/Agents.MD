@@ -190,7 +190,7 @@ export default function PredictiveModelPanel({
               </h4>
               
               <div className="space-y-2">
-                {patternMatching.historicalMatches.slice(0, 3).map((match, index) => (
+                {(patternMatching?.historicalMatches || []).slice(0, 3).map((match, index) => (
                   <div
                     key={index}
                     className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-3"
@@ -262,7 +262,7 @@ export default function PredictiveModelPanel({
             </p>
             
             <div className="space-y-1">
-              {selectedScenario.bullCase.keyFactors.map((factor, index) => (
+              {(selectedScenario?.bullCase?.keyFactors || []).map((factor, index) => (
                 <div key={index} className="flex items-start gap-2">
                   <CheckCircle className="text-bitcoin-orange flex-shrink-0 mt-0.5" size={14} />
                   <span className="text-xs text-bitcoin-white-60">{factor}</span>
@@ -291,7 +291,7 @@ export default function PredictiveModelPanel({
             </p>
             
             <div className="space-y-1">
-              {selectedScenario.baseCase.keyFactors.map((factor, index) => (
+              {(selectedScenario?.baseCase?.keyFactors || []).map((factor, index) => (
                 <div key={index} className="flex items-start gap-2">
                   <CheckCircle className="text-bitcoin-orange flex-shrink-0 mt-0.5" size={14} />
                   <span className="text-xs text-bitcoin-white-80">{factor}</span>
@@ -320,7 +320,7 @@ export default function PredictiveModelPanel({
             </p>
             
             <div className="space-y-1">
-              {selectedScenario.bearCase.keyFactors.map((factor, index) => (
+              {(selectedScenario?.bearCase?.keyFactors || []).map((factor, index) => (
                 <div key={index} className="flex items-start gap-2">
                   <AlertCircle className="text-bitcoin-white-60 flex-shrink-0 mt-0.5" size={14} />
                   <span className="text-xs text-bitcoin-white-60">{factor}</span>

@@ -216,13 +216,13 @@ export default function SocialSentimentPanel({
           </div>
 
           {/* Post Type Breakdown */}
-          {lunarCrush.postTypes && Object.keys(lunarCrush.postTypes).length > 0 && (
+          {lunarCrush?.postTypes && Object.keys(lunarCrush.postTypes).length > 0 && (
             <div>
               <h4 className="text-sm font-bold text-bitcoin-white mb-3">
                 Post Type Breakdown
               </h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {Object.entries(lunarCrush.postTypes).map(([type, count]: [string, any]) => (
+                {Object.entries(lunarCrush?.postTypes || {}).map(([type, count]: [string, any]) => (
                   <div key={type} className="bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded-lg p-3">
                     <div className="text-xs text-bitcoin-white-60 mb-1 capitalize">
                       {type.replace('-', ' ')}
@@ -400,7 +400,7 @@ export default function SocialSentimentPanel({
           Data Sources Used
         </h4>
         <div className="flex flex-wrap gap-2">
-          {data.sourcesUsed && data.sourcesUsed.map((source: string, index: number) => (
+          {(data?.sourcesUsed || []).map((source: string, index: number) => (
             <span
               key={index}
               className="px-3 py-1 bg-bitcoin-black border border-bitcoin-orange-20 rounded-full text-xs text-bitcoin-white-80"

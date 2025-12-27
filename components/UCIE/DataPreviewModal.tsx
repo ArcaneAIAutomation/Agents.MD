@@ -51,6 +51,11 @@ interface AnalysisCardProps {
 }
 
 function AnalysisCard({ title, icon, data, fields, listFields }: AnalysisCardProps) {
+  // ✅ CRITICAL FIX: Add null safety check for data
+  if (!data || typeof data !== 'object') {
+    return null;
+  }
+  
   return (
     <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4 hover:border-bitcoin-orange transition-colors">
       <h4 className="text-lg font-bold text-bitcoin-orange mb-3 flex items-center gap-2">
@@ -59,9 +64,9 @@ function AnalysisCard({ title, icon, data, fields, listFields }: AnalysisCardPro
       </h4>
       
       <div className="space-y-3">
-        {/* Regular fields */}
-        {fields.map(field => (
-          data[field.key] && (
+        {/* Regular fields - ✅ CRITICAL FIX: Add null safety for fields array */}
+        {(fields || []).map(field => (
+          data?.[field.key] && (
             <div key={field.key}>
               <span className="text-bitcoin-white-60 text-sm font-semibold">{field.label}:</span>
               <p className="text-bitcoin-white-80 mt-1">{data[field.key]}</p>
@@ -69,13 +74,13 @@ function AnalysisCard({ title, icon, data, fields, listFields }: AnalysisCardPro
           )
         ))}
         
-        {/* List fields */}
-        {listFields?.map(field => (
-          data[field.key] && Array.isArray(data[field.key]) && (
+        {/* List fields - ✅ CRITICAL FIX: Add null safety for listFields and nested arrays */}
+        {(listFields || []).map(field => (
+          data?.[field.key] && Array.isArray(data[field.key]) && (
             <div key={field.key}>
               <span className="text-bitcoin-white-60 text-sm font-semibold">{field.label}:</span>
               <ul className="mt-1 space-y-1">
-                {data[field.key].map((item: string, i: number) => (
+                {(data[field.key] || []).map((item: string, i: number) => (
                   <li key={i} className="flex items-start gap-2">
                     <span className="text-bitcoin-orange mt-1">•</span>
                     <span className="text-bitcoin-white-80">{item}</span>
