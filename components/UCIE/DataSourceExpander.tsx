@@ -589,13 +589,13 @@ function renderNewsData(data: any) {
       <DataRow label="Articles Found" value={articles.length.toString()} />
       <DataRow label="Data Quality" value={`${actualData.dataQuality || 0}%`} />
       
-      {articles.length > 0 && (
+      {(articles || []).length > 0 && (
         <div className="mt-3 pt-3 border-t border-bitcoin-orange-20">
           <p className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-2">
             Recent Articles (Top 5)
           </p>
           <div className="space-y-2">
-            {articles.slice(0, 5).map((article: any, index: number) => (
+            {(articles || []).slice(0, 5).map((article: any, index: number) => (
               <div key={index} className="p-2 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded">
                 <p className="text-sm font-semibold text-bitcoin-white mb-1">
                   {article.title}
@@ -706,13 +706,13 @@ function renderOnChainData(data: any) {
             />
           </div>
           
-          {whaleActivity.transactions && whaleActivity.transactions.length > 0 && (
+          {whaleActivity?.transactions && whaleActivity.transactions.length > 0 && (
             <div className="mt-3">
               <p className="text-xs text-bitcoin-white-60 uppercase tracking-wider mb-2">
                 Recent Whale Transactions
               </p>
               <div className="space-y-2">
-                {whaleActivity.transactions.slice(0, 3).map((tx: any, index: number) => (
+                {(whaleActivity?.transactions || []).slice(0, 3).map((tx: any, index: number) => (
                   <div key={index} className="p-2 bg-bitcoin-orange-5 border border-bitcoin-orange-20 rounded">
                     <div className="flex justify-between items-start mb-1">
                       <span className="text-xs text-bitcoin-white-60">

@@ -160,7 +160,7 @@ function NewsArticleCard({ article }: { article: AssessedNewsArticle }) {
         <div className="mb-3">
           <p className="text-xs font-semibold text-bitcoin-white-60 uppercase mb-1">Key Points:</p>
           <ul className="space-y-1">
-            {assessment.keyPoints.slice(0, 3).map((point, index) => (
+            {(assessment?.keyPoints || []).slice(0, 3).map((point, index) => (
               <li key={index} className="text-sm text-bitcoin-white-80 flex items-start gap-2">
                 <span className="text-bitcoin-orange mt-1">•</span>
                 <span className="line-clamp-2">{point}</span>

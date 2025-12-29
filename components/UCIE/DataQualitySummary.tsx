@@ -115,14 +115,14 @@ export default function DataQualitySummary({
       {expanded && (
         <div className="space-y-4 pt-4 border-t border-bitcoin-orange-20">
           {/* Passed Checks */}
-          {passedChecks.length > 0 && (
+          {(passedChecks || []).length > 0 && (
             <div>
               <h4 className="text-bitcoin-white font-semibold mb-2 flex items-center gap-2">
                 <CheckCircle className="text-green-400" size={18} />
-                Passed Checks ({passedChecks.length})
+                Passed Checks ({(passedChecks || []).length})
               </h4>
               <ul className="space-y-1">
-                {passedChecks.map((check, index) => (
+                {(passedChecks || []).map((check, index) => (
                   <li
                     key={index}
                     className="text-bitcoin-white-80 text-sm flex items-start gap-2"
@@ -136,14 +136,14 @@ export default function DataQualitySummary({
           )}
 
           {/* Failed Checks */}
-          {failedChecks.length > 0 && (
+          {(failedChecks || []).length > 0 && (
             <div>
               <h4 className="text-bitcoin-white font-semibold mb-2 flex items-center gap-2">
                 <XCircle className="text-red-400" size={18} />
-                Failed Checks ({failedChecks.length})
+                Failed Checks ({(failedChecks || []).length})
               </h4>
               <ul className="space-y-1">
-                {failedChecks.map((check, index) => (
+                {(failedChecks || []).map((check, index) => (
                   <li
                     key={index}
                     className="text-bitcoin-white-80 text-sm flex items-start gap-2"
@@ -162,19 +162,19 @@ export default function DataQualitySummary({
               <div>
                 <p className="text-bitcoin-white-60 text-xs mb-1">Total Checks</p>
                 <p className="text-bitcoin-white font-mono text-xl">
-                  {passedChecks.length + failedChecks.length}
+                  {(passedChecks || []).length + (failedChecks || []).length}
                 </p>
               </div>
               <div>
                 <p className="text-bitcoin-white-60 text-xs mb-1">Passed</p>
                 <p className="text-green-400 font-mono text-xl">
-                  {passedChecks.length}
+                  {(passedChecks || []).length}
                 </p>
               </div>
               <div>
                 <p className="text-bitcoin-white-60 text-xs mb-1">Failed</p>
                 <p className="text-red-400 font-mono text-xl">
-                  {failedChecks.length}
+                  {(failedChecks || []).length}
                 </p>
               </div>
             </div>
