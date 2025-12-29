@@ -501,10 +501,29 @@ function ModularAnalysisDisplay({ analysis }: { analysis: ModularAnalysis }) {
 /**
  * LegacyAnalysisDisplay Component
  * Displays old monolithic analysis format (fallback)
+ * ✅ CRITICAL FIX: Added null safety checks to prevent crashes
  */
 function LegacyAnalysisDisplay({ analysis }: { analysis: any }) {
+  // ✅ CRITICAL FIX: Add null safety check at the start
+  if (!analysis) {
+    console.warn('[LegacyAnalysisDisplay] Analysis is null/undefined');
+    return (
+      <div className="text-bitcoin-white-60 text-center py-4">
+        Analysis data is loading...
+      </div>
+    );
+  }
+  
   // If analysis is a string, split into paragraphs
   if (typeof analysis === 'string') {
+    // ✅ FIX: Handle empty strings
+    if (!analysis.trim()) {
+      return (
+        <div className="text-bitcoin-white-60 text-center py-4">
+          No analysis content available.
+        </div>
+      );
+    }
     return (
       <>
         {analysis.split('\n\n').map((paragraph, index) => {
@@ -521,10 +540,32 @@ function LegacyAnalysisDisplay({ analysis }: { analysis: any }) {
     );
   }
   
+  // ✅ CRITICAL FIX: Validate analysis is an object before Object.entries()
+  if (typeof analysis !== 'object') {
+    console.warn('[LegacyAnalysisDisplay] Analysis is not an object:', typeof analysis);
+    return (
+      <div className="text-bitcoin-white-60 text-center py-4">
+        Unable to display analysis format.
+      </div>
+    );
+  }
+  
+  // ✅ CRITICAL FIX: Use Object.entries with fallback to empty object
+  const entries = Object.entries(analysis || {});
+  
+  // ✅ FIX: Handle empty objects
+  if (entries.length === 0) {
+    return (
+      <div className="text-bitcoin-white-60 text-center py-4">
+        No analysis data available.
+      </div>
+    );
+  }
+  
   // If analysis is an object, display key-value pairs
   return (
     <div className="space-y-4">
-      {Object.entries(analysis).map(([key, value]) => {
+      {entries.map(([key, value]) => {
         if (typeof value === 'string' || typeof value === 'number') {
           return (
             <div key={key}>
@@ -541,10 +582,10 @@ function LegacyAnalysisDisplay({ analysis }: { analysis: any }) {
                 {key.replace(/_/g, ' ')}:
               </span>
               <ul className="mt-1 space-y-1">
-                {value.map((item, i) => (
+                {(value || []).map((item, i) => (
                   <li key={i} className="flex items-start gap-2">
                     <span className="text-bitcoin-orange mt-1">•</span>
-                    <span className="text-bitcoin-white-80">{item}</span>
+                    <span className="text-bitcoin-white-80">{typeof item === 'string' ? item : JSON.stringify(item)}</span>
                   </li>
                 ))}
               </ul>
