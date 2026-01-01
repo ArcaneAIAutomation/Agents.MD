@@ -143,7 +143,7 @@ interface ModularAnalysis {
  * Each data source analyzed separately for speed and reliability
  * 
  * ✅ HEARTBEAT: Updates database every 10 seconds to show job is alive
- * ✅ gpt-5-mini: Uses OpenAI's lightweight GPT-5 model (December 2024)
+ * ✅ o1-mini: Uses OpenAI's reasoning model with Responses API (January 2026)
  * ✅ ERROR HANDLING: Comprehensive try-catch with database updates
  */
 async function processJobAsync(
@@ -218,8 +218,10 @@ async function processJobAsync(
       throw new Error('OPENAI_API_KEY not configured');
     }
 
-    // ✅ Use gpt-5-mini: OpenAI's lightweight GPT-5 model (December 2024)
-    const model = process.env.OPENAI_MODEL || 'gpt-5-mini';
+    // ✅ Use o1-mini: OpenAI's reasoning model with Responses API
+    // Valid models: o1-mini, o1-preview (for Responses API with reasoning)
+    // Fallback: gpt-4o-mini (for Chat Completions API)
+    const model = process.env.OPENAI_MODEL || 'o1-mini';
     const modularAnalysis: ModularAnalysis = {
       timestamp: new Date().toISOString(),
       processingTime: 0
@@ -583,10 +585,10 @@ async function updateProgress(jobId: number, progress: string): Promise<void> {
 }
 
 /**
- * Analyze a single data source with gpt-5-mini
+ * Analyze a single data source with o1-mini
  * Small, fast, focused analysis
  * 
- * ✅ USES gpt-5-mini: OpenAI's lightweight GPT-5 model (December 2024)
+ * ✅ USES o1-mini: OpenAI's reasoning model with Responses API (January 2026)
  * ✅ BULLETPROOF: Uses extractResponseText utility
  * ✅ FAST: Quick analysis for modular approach
  * ✅ FALLBACK: Returns error object instead of throwing on failure
@@ -752,10 +754,10 @@ Respond with valid JSON only.`;
 }
 
 /**
- * Analyze news with comprehensive market context using gpt-5-mini
+ * Analyze news with comprehensive market context using o1-mini
  * Provides full picture for accurate impact assessment
  * 
- * ✅ USES gpt-5-mini: OpenAI's lightweight GPT-5 model (December 2024)
+ * ✅ USES o1-mini: OpenAI's reasoning model with Responses API (January 2026)
  * ✅ CONTEXT-AWARE: Combines news with market, technical, and sentiment data
  * ✅ FALLBACK: Returns error object instead of throwing on failure
  * ✅ ENHANCED: Uses formatContextForAI() for comprehensive prompts (December 2025 fix)
@@ -938,10 +940,10 @@ Respond with valid JSON only.`;
 }
 
 /**
- * Generate executive summary combining all analyses using gpt-5-mini
+ * Generate executive summary combining all analyses using o1-mini
  * Synthesizes all modular analyses into comprehensive overview
  * 
- * ✅ USES gpt-5-mini: OpenAI's lightweight GPT-5 model (December 2024)
+ * ✅ USES o1-mini: OpenAI's reasoning model with Responses API (January 2026)
  * ✅ BULLETPROOF: Uses extractResponseText utility
  * ✅ COMPREHENSIVE: Combines all 8 data source analyses
  * ✅ FALLBACK: Returns error object instead of throwing on failure
