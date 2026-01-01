@@ -3,13 +3,13 @@
  * 
  * POST /api/ucie/openai-summary-start/[symbol]
  * 
- * Starts GPT-5 analysis in background, returns jobId immediately
+ * Starts GPT analysis in background, returns jobId immediately
  * Frontend polls /api/ucie/openai-summary-poll/[jobId] every 10 seconds
  * 
  * ✅ ASYNC: Avoids Vercel 60-second timeout
  * ✅ POLLING: Frontend checks status every 10 seconds
  * ✅ BULLETPROOF: Can run for up to 3 minutes
- * ✅ MODEL: Uses gpt-5-mini (OpenAI's lightweight GPT-5 model - December 2024)
+ * ✅ MODEL: Uses o1-mini (OpenAI's reasoning model with Responses API)
  * ✅ CONTEXT AGGREGATION: Uses formatContextForAI() for comprehensive prompts (December 2025 fix)
  */
 
@@ -61,7 +61,7 @@ async function handler(
       });
     }
 
-    console.log(`🚀 Starting gpt-5-mini analysis for ${symbolUpper}...`);
+    console.log(`🚀 Starting o1-mini analysis for ${symbolUpper}...`);
 
     // Create job in database
     const result = await query(
@@ -183,7 +183,7 @@ async function processJobAsync(
       try {
         await query(
           'UPDATE ucie_openai_jobs SET status = $1, progress = $2, updated_at = NOW() WHERE id = $3',
-          ['processing', 'Analyzing with gpt-5-mini...', jobId],
+          ['processing', 'Analyzing with o1-mini...', jobId],
           { timeout: 10000, retries: 2 } // ✅ FIXED: 10 second timeout, 2 retries
         );
         console.log(`✅ Job ${jobId}: Status updated to 'processing', DB connection released`);
@@ -674,13 +674,15 @@ ${instructions}
 Respond with valid JSON only.`;
       }
       
-      // ✅ Call gpt-5-mini with Responses API + minimal reasoning
+      // ✅ Call o1-mini with Responses API + low reasoning effort
+      // Valid reasoning effort values: "low", "medium", "high"
       console.log(`🚀 [analyzeDataSource] Calling OpenAI Responses API...`);
       console.log(`🚀 [analyzeDataSource] Prompt length: ${prompt.length} characters`);
       
+      const reasoningEffort = process.env.REASONING_EFFORT || 'low';
       const completion = await (openai as any).responses.create({
         model: model,
-        reasoning: { effort: "minimal" },
+        reasoning: { effort: reasoningEffort },
         input: `You are a cryptocurrency analyst. Analyze ${dataType} and respond with concise JSON.\n\n${prompt}`
       });
       
@@ -890,10 +892,12 @@ Consider:
 Respond with valid JSON only.`;
       }
       
-      // ✅ Call gpt-5-mini with Responses API + minimal reasoning
+      // ✅ Call o1-mini with Responses API + low reasoning effort
+      // Valid reasoning effort values: "low", "medium", "high"
+      const reasoningEffort = process.env.REASONING_EFFORT || 'low';
       const completion = await (openai as any).responses.create({
         model: model,
-        reasoning: { effort: "minimal" },
+        reasoning: { effort: reasoningEffort },
         input: `You are a cryptocurrency news analyst. Analyze news articles in the context of current market conditions and provide comprehensive impact assessment. Respond with JSON only.\n\n${prompt}`
       });
       
@@ -1039,10 +1043,12 @@ Synthesize all analyses into cohesive, actionable summary.
 Respond with valid JSON only.`;
       }
       
-      // ✅ Call gpt-5-mini with Responses API + minimal reasoning
+      // ✅ Call o1-mini with Responses API + low reasoning effort
+      // Valid reasoning effort values: "low", "medium", "high"
+      const reasoningEffort = process.env.REASONING_EFFORT || 'low';
       const completion = await (openai as any).responses.create({
         model: model,
-        reasoning: { effort: "minimal" },
+        reasoning: { effort: reasoningEffort },
         input: `You are a cryptocurrency analyst. Synthesize all analyses into comprehensive executive summary. Respond with JSON only.\n\n${prompt}`
       });
       
