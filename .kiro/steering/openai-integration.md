@@ -1,16 +1,16 @@
 # OpenAI Integration Guide - Bitcoin Sovereign Technology
 
-**Last Updated**: December 14, 2025  
+**Last Updated**: January 1, 2026  
 **Status**: ✅ Active - Production Ready  
 **Scope**: Cryptocurrency analysis, trade signals, market intelligence  
 **Primary API**: Responses API  
-**Primary Model**: `gpt-5-mini`
+**Primary Model**: `o1-mini`
 
 ---
 
 ## 🎯 Overview
 
-This guide documents OpenAI integration patterns for the Bitcoin Sovereign Technology platform. We use OpenAI's **Responses API** with the `gpt-5-mini` model for cryptocurrency market analysis, trade signal generation, and intelligent data processing.
+This guide documents OpenAI integration patterns for the Bitcoin Sovereign Technology platform. We use OpenAI's **Responses API** with the `o1-mini` model for cryptocurrency market analysis, trade signal generation, and intelligent data processing.
 
 **Key Principle**: OpenAI is used for **analysis and insights**, not data fetching. Always fetch data first, then analyze with AI.
 
@@ -22,8 +22,8 @@ This guide documents OpenAI integration patterns for the Bitcoin Sovereign Techn
 
 | Model | Use Cases | Status | Performance |
 |-------|-----------|--------|-------------|
-| `gpt-5-mini` | UCIE modular analysis, news sentiment, trade signals | ✅ Primary | Fast, cost-effective |
-| `gpt-4o` | Fallback, legacy endpoints | ✅ Backup | 600-900ms |
+| `o1-mini` | UCIE modular analysis, news sentiment, trade signals | ✅ Primary | Fast, cost-effective |
+| `gpt-4o-mini` | Fallback, legacy endpoints | ✅ Backup | 600-900ms |
 
 ### API Pattern
 
@@ -40,8 +40,8 @@ const openai = new OpenAI({
 
 // ✅ CORRECT: Use Responses API with reasoning
 const completion = await (openai as any).responses.create({
-  model: 'gpt-5-mini',
-  reasoning: { effort: 'minimal' },
+  model: 'o1-mini',
+  reasoning: { effort: 'low' },
   input: 'Your prompt here'
 });
 ```
@@ -66,8 +66,8 @@ const technical = await fetchTechnical();
 
 // Now call AI with complete context
 const analysis = await (openai as any).responses.create({
-  model: 'gpt-5-mini',
-  reasoning: { effort: 'minimal' },
+  model: 'o1-mini',
+  reasoning: { effort: 'low' },
   input: `Analyze: ${JSON.stringify({marketData, sentiment, technical})}`
 });
 ```
@@ -80,14 +80,14 @@ const analysis = await (openai as any).responses.create({
 import { extractResponseText, validateResponseText } from '../utils/openai';
 
 const completion = await (openai as any).responses.create({
-  model: 'gpt-5-mini',
-  reasoning: { effort: 'minimal' },
+  model: 'o1-mini',
+  reasoning: { effort: 'low' },
   input: prompt
 });
 
 // ✅ Bulletproof extraction (handles all edge cases)
 const responseText = extractResponseText(completion, true); // true = debug mode
-validateResponseText(responseText, 'gpt-5-mini', completion);
+validateResponseText(responseText, 'o1-mini', completion);
 
 // Now parse
 const analysis = JSON.parse(responseText);
@@ -115,7 +115,7 @@ const analysis = JSON.parse(responseText);
 
 ## 🎨 Model Selection Guide
 
-### When to Use `gpt-5-mini`
+### When to Use `o1-mini`
 
 **Best for:**
 - ✅ Fast analysis
@@ -127,8 +127,8 @@ const analysis = JSON.parse(responseText);
 **Configuration:**
 ```typescript
 const completion = await (openai as any).responses.create({
-  model: 'gpt-5-mini',
-  reasoning: { effort: 'minimal' },
+  model: 'o1-mini',
+  reasoning: { effort: 'low' },
   input: prompt
 });
 ```
@@ -137,29 +137,30 @@ const completion = await (openai as any).responses.create({
 
 | Effort | Use Cases |
 |--------|-----------|
-| `minimal` | Quick analysis, sentiment classification, simple summaries |
-| `low` | Standard analysis, moderate complexity |
-| `medium` | Complex analysis, multi-factor decisions |
-| `high` | Deep analysis, strategic recommendations |
+| `low` | Quick analysis, sentiment classification, simple summaries |
+| `medium` | Standard analysis, moderate complexity, multi-factor decisions |
+| `high` | Deep analysis, strategic recommendations, complex reasoning |
 
-**For UCIE modular analysis, use `minimal` for speed.**
+**For UCIE modular analysis, use `low` for speed.**
+
+**⚠️ IMPORTANT**: Valid reasoning effort values are `low`, `medium`, `high` only. The value `minimal` is NOT valid and will cause API errors.
 
 ### Fallback Strategy
 
 ```typescript
-const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-5-mini';
-const OPENAI_FALLBACK_MODEL = process.env.OPENAI_FALLBACK_MODEL || 'gpt-4o';
+const OPENAI_MODEL = process.env.OPENAI_MODEL || 'o1-mini';
+const OPENAI_FALLBACK_MODEL = process.env.OPENAI_FALLBACK_MODEL || 'gpt-4o-mini';
 
 try {
   const completion = await (openai as any).responses.create({
     model: OPENAI_MODEL,
-    reasoning: { effort: 'minimal' },
+    reasoning: { effort: 'low' },
     input: prompt
   });
 } catch (error) {
   console.error('Primary model failed, trying fallback...');
   
-  // Fallback to Chat Completions API with gpt-4o
+  // Fallback to Chat Completions API with gpt-4o-mini
   const completion = await openai.chat.completions.create({
     model: OPENAI_FALLBACK_MODEL,
     messages: [{ role: 'user', content: prompt }]
@@ -203,10 +204,10 @@ ${instructions}
 
 Respond with valid JSON only.`;
   
-  // ✅ Use Responses API with minimal reasoning
+  // ✅ Use Responses API with low reasoning effort
   const completion = await (openai as any).responses.create({
     model: model,
-    reasoning: { effort: 'minimal' },
+    reasoning: { effort: process.env.REASONING_EFFORT || 'low' },
     input: `You are a cryptocurrency analyst. Analyze ${dataType} and respond with concise JSON.\n\n${prompt}`
   });
   
@@ -249,10 +250,10 @@ ${JSON.stringify(context.news?.articles || [], null, 2)}
 
 Provide JSON with sentiment analysis and market impact assessment.`;
   
-  // ✅ Use Responses API with minimal reasoning
+  // ✅ Use Responses API with low reasoning effort
   const completion = await (openai as any).responses.create({
     model: model,
-    reasoning: { effort: 'minimal' },
+    reasoning: { effort: process.env.REASONING_EFFORT || 'low' },
     input: `You are a cryptocurrency news analyst. Respond with JSON only.\n\n${prompt}`
   });
   
@@ -296,10 +297,10 @@ Provide JSON with:
   "risk_factors": ["risk 1", "risk 2"]
 }`;
   
-  // ✅ Use Responses API with minimal reasoning
+  // ✅ Use Responses API with low reasoning effort
   const completion = await (openai as any).responses.create({
     model: model,
-    reasoning: { effort: 'minimal' },
+    reasoning: { effort: process.env.REASONING_EFFORT || 'low' },
     input: `You are a cryptocurrency analyst. Synthesize all analyses into comprehensive executive summary. Respond with JSON only.\n\n${prompt}`
   });
   
@@ -321,8 +322,8 @@ Provide JSON with:
 ```typescript
 // ✅ GOOD - Clear role and expectations in input
 const completion = await (openai as any).responses.create({
-  model: 'gpt-5-mini',
-  reasoning: { effort: 'minimal' },
+  model: 'o1-mini',
+  reasoning: { effort: 'low' },
   input: `You are a cryptocurrency analyst specializing in Bitcoin. Analyze market data and provide actionable insights. Always respond with valid JSON containing: analysis, confidence, recommendation, risks.
 
 ${prompt}`
@@ -360,8 +361,10 @@ Respond with valid JSON only.`;
 
 ```typescript
 // Environment variables
-OPENAI_TIMEOUT=30000        // 30 seconds (default)
-OPENAI_MODEL=gpt-5-mini     // Primary model
+OPENAI_TIMEOUT=30000           // 30 seconds (default)
+OPENAI_MODEL=o1-mini           // Primary model (valid: o1-mini, o1-preview)
+OPENAI_FALLBACK_MODEL=gpt-4o-mini  // Fallback model
+REASONING_EFFORT=low           // Valid values: low, medium, high
 
 // Implementation
 const openai = new OpenAI({
@@ -409,17 +412,18 @@ async function callOpenAIWithRetry(
   maxRetries: number = 3
 ): Promise<any> {
   let lastError: Error;
+  const model = process.env.OPENAI_MODEL || 'o1-mini';
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const completion = await (openai as any).responses.create({
-        model: process.env.OPENAI_MODEL || 'gpt-5-mini',
-        reasoning: { effort: 'minimal' },
+        model: model,
+        reasoning: { effort: process.env.REASONING_EFFORT || 'low' },
         input: prompt
       });
       
       const responseText = extractResponseText(completion, true);
-      validateResponseText(responseText, 'gpt-5-mini', completion);
+      validateResponseText(responseText, model, completion);
       
       return JSON.parse(responseText);
       
@@ -495,8 +499,15 @@ console.log(`✅ [OpenAI] Completed in ${duration}ms`);
 OPENAI_API_KEY=sk-proj-...
 
 # Model Configuration
-OPENAI_MODEL=gpt-5-mini
-OPENAI_FALLBACK_MODEL=gpt-4o
+# Valid models for Responses API: o1-mini, o1-preview
+# Valid fallback models: gpt-4o-mini, gpt-4o
+OPENAI_MODEL=o1-mini
+OPENAI_FALLBACK_MODEL=gpt-4o-mini
+
+# Reasoning Effort (REQUIRED for Responses API)
+# Valid values: low, medium, high
+# ⚠️ "minimal" is NOT valid and will cause errors
+REASONING_EFFORT=low
 
 # Timeout Configuration
 OPENAI_TIMEOUT=30000
@@ -527,7 +538,9 @@ ENABLE_AI_NEWS_ANALYSIS=true
 Before deploying OpenAI features:
 
 - [ ] `OPENAI_API_KEY` set in Vercel environment variables
-- [ ] `OPENAI_MODEL=gpt-5-mini` set in Vercel environment variables
+- [ ] `OPENAI_MODEL=o1-mini` set in Vercel environment variables
+- [ ] `OPENAI_FALLBACK_MODEL=gpt-4o-mini` set in Vercel environment variables
+- [ ] `REASONING_EFFORT=low` set in Vercel environment variables (valid: low, medium, high)
 - [ ] Timeout values appropriate for Vercel plan (30s free, 300s Pro)
 - [ ] Error handling implemented with graceful degradation
 - [ ] Caching strategy in place to reduce API calls
@@ -549,8 +562,15 @@ Before deploying OpenAI features:
 ---
 
 **Status**: ✅ Production Ready  
-**Last Updated**: December 14, 2025  
-**Primary Model**: `gpt-5-mini`  
-**API**: Responses API with `reasoning: { effort: 'minimal' }`
+**Last Updated**: January 1, 2026  
+**Primary Model**: `o1-mini`  
+**Fallback Model**: `gpt-4o-mini`  
+**API**: Responses API with `reasoning: { effort: 'low' }`
+
+**⚠️ IMPORTANT MODEL NOTES**:
+- Valid Responses API models: `o1-mini`, `o1-preview`
+- Valid fallback models: `gpt-4o-mini`, `gpt-4o`
+- Valid reasoning effort values: `low`, `medium`, `high`
+- **DO NOT USE**: `gpt-5-mini`, `gpt-5.1`, `minimal` (these are fictional/invalid)
 
 **Remember**: Data first, AI second. Always fetch and cache data before calling OpenAI!
