@@ -388,7 +388,7 @@ ${research.recentDevelopments}
             Positive Outlook & Potential 🚀
           </h3>
           <div className="space-y-4">
-            {positiveFactors.map((factor, index) => {
+            {(positiveFactors || []).map((factor, index) => {
               // Extract title and description
               const [title, ...descParts] = factor.split(':');
               const description = descParts.join(':').trim();
@@ -422,14 +422,14 @@ ${research.recentDevelopments}
         </div>
 
         {/* Risk Factors - Inline */}
-        {research.riskFactors.length > 0 && (
+        {(research?.riskFactors || []).length > 0 && (
           <div className="bg-bitcoin-black border-2 border-bitcoin-orange-20 rounded-lg p-6">
             <h3 className="text-xl font-bold text-bitcoin-orange mb-4 flex items-center gap-2">
               <Shield className="w-5 h-5" />
               Risk Factors ({research.riskFactors.length})
             </h3>
             <ul className="space-y-2">
-              {research.riskFactors.map((risk, index) => (
+              {(research?.riskFactors || []).map((risk, index) => (
                 <li key={index} className="flex items-start gap-2 text-sm text-bitcoin-white-80">
                   <AlertTriangle className="w-4 h-4 text-bitcoin-orange flex-shrink-0 mt-0.5" />
                   <span>{risk}</span>
@@ -440,14 +440,14 @@ ${research.recentDevelopments}
         )}
 
         {/* Source Citations - Compact */}
-        {research.sources.length > 0 && (
+        {(research?.sources || []).length > 0 && (
           <div className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-6">
             <h3 className="text-lg font-bold text-bitcoin-white mb-3 flex items-center gap-2">
               <ExternalLink className="w-4 h-4 text-bitcoin-orange" />
               Sources ({research.sources.length})
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {research.sources.map((source, index) => (
+              {(research?.sources || []).map((source, index) => (
                 <a
                   key={index}
                   href={source.url}

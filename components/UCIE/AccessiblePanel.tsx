@@ -151,7 +151,7 @@ export function AccessibleTable({ caption, headers, rows, className = '' }: Acce
         <caption className="sr-only">{caption}</caption>
         <thead>
           <tr className="border-b border-bitcoin-orange-20">
-            {headers.map((header, index) => (
+            {(headers || []).map((header, index) => (
               <th
                 key={index}
                 scope="col"
@@ -163,12 +163,12 @@ export function AccessibleTable({ caption, headers, rows, className = '' }: Acce
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, rowIndex) => (
+          {(rows || []).map((row, rowIndex) => (
             <tr
               key={rowIndex}
               className="border-b border-bitcoin-orange-20 hover:bg-bitcoin-orange hover:bg-opacity-5 transition-colors"
             >
-              {row.map((cell, cellIndex) => (
+              {(row || []).map((cell, cellIndex) => (
                 <td
                   key={cellIndex}
                   className="px-4 py-3 text-sm text-bitcoin-white-80"

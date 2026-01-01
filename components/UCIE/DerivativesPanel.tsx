@@ -193,10 +193,10 @@ export default function DerivativesPanel({
           </div>
 
           {/* Extreme Rates Alert */}
-          {fundingAnalysis.extremeRates.length > 0 && (
+          {(fundingAnalysis?.extremeRates || []).length > 0 && (
             <div className="space-y-3">
               <h3 className="text-lg font-bold text-bitcoin-white">Extreme Funding Rates</h3>
-              {fundingAnalysis.extremeRates.map((extreme, index) => (
+              {(fundingAnalysis?.extremeRates || []).map((extreme, index) => (
                 <div key={index} className="bg-bitcoin-orange bg-opacity-10 border border-bitcoin-orange rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-semibold text-bitcoin-orange">{extreme.exchange}</span>
@@ -209,10 +209,10 @@ export default function DerivativesPanel({
           )}
 
           {/* Mean Reversion Opportunities */}
-          {fundingAnalysis.meanReversionOpportunities.length > 0 && (
+          {(fundingAnalysis?.meanReversionOpportunities || []).length > 0 && (
             <div className="space-y-3">
               <h3 className="text-lg font-bold text-bitcoin-white">Mean Reversion Opportunities</h3>
-              {fundingAnalysis.meanReversionOpportunities.map((opp, index) => (
+              {(fundingAnalysis?.meanReversionOpportunities || []).map((opp, index) => (
                 <div key={index} className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-semibold text-bitcoin-white">{opp.exchange}</span>
@@ -252,7 +252,7 @@ export default function DerivativesPanel({
                   </tr>
                 </thead>
                 <tbody>
-                  {fundingAnalysis.currentRates.map((rate, index) => (
+                  {(fundingAnalysis?.currentRates || []).map((rate, index) => (
                     <tr key={index} className="border-b border-bitcoin-orange-20 hover:bg-bitcoin-orange hover:bg-opacity-5 transition-colors">
                       <td className="py-3 px-4 font-semibold text-bitcoin-white">
                         {rate.exchange}
@@ -313,10 +313,10 @@ export default function DerivativesPanel({
           </div>
 
           {/* OI Spikes */}
-          {openInterestAnalysis.spikes.length > 0 && (
+          {(openInterestAnalysis?.spikes || []).length > 0 && (
             <div className="space-y-3">
               <h3 className="text-lg font-bold text-bitcoin-white">Unusual OI Spikes</h3>
-              {openInterestAnalysis.spikes.map((spike, index) => (
+              {(openInterestAnalysis?.spikes || []).map((spike, index) => (
                 <div key={index} className="bg-bitcoin-orange bg-opacity-10 border border-bitcoin-orange rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-semibold text-bitcoin-orange">{spike.exchange}</span>
@@ -332,7 +332,7 @@ export default function DerivativesPanel({
           <div>
             <h3 className="text-lg font-bold text-bitcoin-white mb-3">Open Interest by Exchange</h3>
             <div className="space-y-3">
-              {openInterestAnalysis.byExchange.map((ex, index) => (
+              {(openInterestAnalysis?.byExchange || []).map((ex, index) => (
                 <div key={index} className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-semibold text-bitcoin-white">{ex.exchange}</span>
@@ -383,10 +383,10 @@ export default function DerivativesPanel({
           </div>
 
           {/* Cascade Potentials */}
-          {liquidationAnalysis.heatmap.cascadePotentials.length > 0 && (
+          {(liquidationAnalysis?.heatmap?.cascadePotentials || []).length > 0 && (
             <div className="space-y-3">
               <h3 className="text-lg font-bold text-bitcoin-white">Cascade Liquidation Risk</h3>
-              {liquidationAnalysis.heatmap.cascadePotentials.map((cascade, index) => (
+              {(liquidationAnalysis?.heatmap?.cascadePotentials || []).map((cascade, index) => (
                 <div key={index} className="bg-bitcoin-orange bg-opacity-10 border border-bitcoin-orange rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-semibold text-bitcoin-orange">
@@ -487,10 +487,10 @@ export default function DerivativesPanel({
           )}
 
           {/* Extreme Positioning */}
-          {longShortAnalysis.extremePositioning.length > 0 && (
+          {(longShortAnalysis?.extremePositioning || []).length > 0 && (
             <div className="space-y-3">
               <h3 className="text-lg font-bold text-bitcoin-white">Extreme Positioning</h3>
-              {longShortAnalysis.extremePositioning.map((extreme, index) => (
+              {(longShortAnalysis?.extremePositioning || []).map((extreme, index) => (
                 <div key={index} className="bg-bitcoin-black border border-bitcoin-orange-20 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-semibold text-bitcoin-white">{extreme.exchange}</span>

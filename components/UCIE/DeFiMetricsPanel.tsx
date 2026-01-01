@@ -152,13 +152,13 @@ function TVLSection({ analysis }: { analysis: TVLAnalysis }) {
       </div>
 
       {/* TVL by Chain */}
-      {tvlByChain.length > 0 && (
+      {(tvlByChain || []).length > 0 && (
         <div className="mt-4">
           <h4 className="text-sm font-semibold text-bitcoin-white-80 mb-2">
             TVL Distribution by Chain
           </h4>
           <div className="space-y-2">
-            {tvlByChain.slice(0, 5).map((chain) => (
+            {(tvlByChain || []).slice(0, 5).map((chain) => (
               <div key={chain.chain} className="flex items-center justify-between">
                 <span className="text-bitcoin-white-80">{chain.chain}</span>
                 <div className="flex items-center gap-2">
@@ -293,13 +293,13 @@ function UtilitySection({ analysis }: { analysis: TokenUtilityAnalysis }) {
       </div>
 
       {/* Use Cases */}
-      {useCases.length > 0 && (
+      {(useCases || []).length > 0 && (
         <div className="mt-4">
           <h4 className="text-sm font-semibold text-bitcoin-white-80 mb-2">
             All Use Cases
           </h4>
           <div className="space-y-2">
-            {useCases.filter(uc => uc.active).map((useCase, index) => (
+            {(useCases || []).filter(uc => uc.active).map((useCase, index) => (
               <div key={index} className="flex items-start gap-2">
                 <span className="text-bitcoin-orange mt-1">•</span>
                 <div className="flex-1">
@@ -354,13 +354,13 @@ function DevelopmentSection({ analysis }: { analysis: DevelopmentAnalysis }) {
       </div>
 
       {/* Strengths */}
-      {strengths.length > 0 && (
+      {(strengths || []).length > 0 && (
         <div className="mb-4">
           <h4 className="text-sm font-semibold text-bitcoin-white-80 mb-2">
             Strengths
           </h4>
           <ul className="space-y-1">
-            {strengths.map((strength, index) => (
+            {(strengths || []).map((strength, index) => (
               <li key={index} className="text-bitcoin-white-80 text-sm flex items-start gap-2">
                 <span className="text-bitcoin-orange">✓</span>
                 {strength}
@@ -371,13 +371,13 @@ function DevelopmentSection({ analysis }: { analysis: DevelopmentAnalysis }) {
       )}
 
       {/* Concerns */}
-      {concerns.length > 0 && (
+      {(concerns || []).length > 0 && (
         <div className="mt-4">
           <h4 className="text-sm font-semibold text-bitcoin-white-80 mb-2">
             Concerns
           </h4>
           <ul className="space-y-1">
-            {concerns.map((concern, index) => (
+            {(concerns || []).map((concern, index) => (
               <li key={index} className="text-bitcoin-white-60 text-sm flex items-start gap-2">
                 <span className="text-bitcoin-white">⚠</span>
                 {concern}
@@ -479,13 +479,13 @@ function PeerComparisonSection({ analysis }: { analysis: PeerComparisonAnalysis 
       </div>
 
       {/* Top Peers */}
-      {peers.length > 0 && (
+      {(peers || []).length > 0 && (
         <div className="mt-4">
           <h4 className="text-sm font-semibold text-bitcoin-white-80 mb-2">
             Top Competitors
           </h4>
           <div className="space-y-2">
-            {peers.slice(0, 5).map((peer, index) => (
+            {(peers || []).slice(0, 5).map((peer, index) => (
               <div key={peer.symbol} className="flex items-center justify-between text-sm">
                 <span className="text-bitcoin-white-80">
                   {index + 1}. {peer.name} ({peer.symbol})
