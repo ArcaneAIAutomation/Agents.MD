@@ -136,6 +136,10 @@ interface ModularAnalysis {
   executiveSummary?: any;
   timestamp: string;
   processingTime: number;
+  // ✅ Model tracking fields (January 2026) - Shows user which GPT model was used
+  modelUsed?: string;           // The actual model used (e.g., 'o1-mini', 'gpt-4o-mini')
+  reasoningEffort?: string;     // Reasoning effort level ('low', 'medium', 'high')
+  isUsingFallback?: boolean;    // True if OPENAI_MODEL env var was not set
 }
 
 /**
@@ -221,13 +225,36 @@ async function processJobAsync(
     // ✅ Use o1-mini: OpenAI's reasoning model with Responses API
     // Valid models: o1-mini, o1-preview (for Responses API with reasoning)
     // Fallback: gpt-4o-mini (for Chat Completions API)
-    const model = process.env.OPENAI_MODEL || 'o1-mini';
+    const configuredModel = process.env.OPENAI_MODEL;
+    const fallbackModel = process.env.OPENAI_FALLBACK_MODEL || 'gpt-4o-mini';
+    const model = configuredModel || 'o1-mini';
+    const reasoningEffort = process.env.REASONING_EFFORT || 'low';
+    const isUsingFallback = !configuredModel;
+    
+    // 🎯 CLEAR MODEL LOGGING - Show user exactly which model is being used
+    console.log(`🤖 ========================================`);
+    console.log(`🤖 OPENAI MODEL CONFIGURATION`);
+    console.log(`🤖 ========================================`);
+    console.log(`🤖 Primary Model: ${model}`);
+    console.log(`🤖 Fallback Model: ${fallbackModel}`);
+    console.log(`🤖 Reasoning Effort: ${reasoningEffort}`);
+    console.log(`🤖 Using Fallback: ${isUsingFallback ? '⚠️ YES (OPENAI_MODEL env var not set)' : '✅ NO (using configured model)'}`);
+    if (isUsingFallback) {
+      console.log(`⚠️ WARNING: OPENAI_MODEL environment variable not set!`);
+      console.log(`⚠️ Defaulting to: ${model}`);
+      console.log(`⚠️ To fix: Set OPENAI_MODEL=o1-mini in Vercel environment variables`);
+    }
+    console.log(`🤖 ========================================`);
+    
     const modularAnalysis: ModularAnalysis = {
       timestamp: new Date().toISOString(),
-      processingTime: 0
+      processingTime: 0,
+      modelUsed: model, // ✅ Track which model was used
+      reasoningEffort: reasoningEffort,
+      isUsingFallback: isUsingFallback
     };
 
-    console.log(`🔥 Starting MODULAR analysis for ${symbol}...`);
+    console.log(`🔥 Starting MODULAR analysis for ${symbol} using ${model}...`);
     
     // ✅ CONTEXT AGGREGATION FIX (December 2025)
     // Build comprehensive context using formatContextForAI() for better AI prompts
