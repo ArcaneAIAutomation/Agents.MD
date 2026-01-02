@@ -20,6 +20,7 @@ This master reference provides navigation to all steering files in the Bitcoin S
 |------|---------|----------|
 | [KIRO-AGENT-STEERING.md](./KIRO-AGENT-STEERING.md) | Complete system guide | CRITICAL |
 | [ucie-system.md](./ucie-system.md) | UCIE system rules | CRITICAL |
+| [UCIE-PIPELINE-GUIDANCE.md](./UCIE-PIPELINE-GUIDANCE.md) | UCIE pipeline authoritative reference | CRITICAL |
 | [data-quality-enforcement.md](./data-quality-enforcement.md) | 99% accuracy rules | CRITICAL |
 
 ### 🟠 Feature-Specific
@@ -105,9 +106,9 @@ font-family: 'Roboto Mono', monospace;
 ### API Models
 | Feature | Model | API |
 |---------|-------|-----|
-| UCIE Analysis | `gpt-5-mini` | Responses API |
-| Whale Watch | `gpt-5-mini` | Responses API |
-| Code Editing | `gpt-5.1-codex-max` | Responses API |
+| UCIE Analysis | `o1-mini` | Responses API |
+| Whale Watch | `o1-mini` | Responses API |
+| Fallback | `gpt-4o-mini` | Chat Completions API |
 
 ---
 
