@@ -106,8 +106,8 @@ font-family: 'Roboto Mono', monospace;
 ### API Models
 | Feature | Model | API |
 |---------|-------|-----|
-| UCIE Analysis | `o1-mini` | Responses API |
-| Whale Watch | `o1-mini` | Responses API |
+| UCIE Analysis | `gpt-5-mini` | Responses API |
+| Whale Watch | `gpt-5-mini` | Responses API |
 | Fallback | `gpt-4o-mini` | Chat Completions API |
 
 ---

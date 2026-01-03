@@ -1,15 +1,13 @@
 /**
  * OpenAI Client for UCIE Analysis
  * 
- * Provides OpenAI o1-mini (Responses API) integration for cryptocurrency analysis with advanced reasoning
+ * Provides OpenAI gpt-5-mini (Responses API) integration for cryptocurrency analysis with advanced reasoning
  * Model is configurable via OPENAI_MODEL environment variable
- * Implements fallback chain: o1-mini → gpt-4o-mini
+ * Implements fallback chain: gpt-5-mini → gpt-4o-mini
  * 
- * Valid models: o1-mini, o1-preview (Responses API)
+ * Valid models: gpt-5-mini, o1-mini, o1-preview (Responses API)
  * Fallback: gpt-4o-mini (Chat Completions API)
  * Valid reasoning effort: 'low', 'medium', 'high'
- * 
- * ⚠️ DO NOT USE: gpt-5-mini, gpt-5.1, minimal (these are fictional/invalid)
  */
 
 import { openai, callOpenAI, OPENAI_MODEL, OPENAI_FALLBACK_MODEL, OPENAI_TIMEOUT } from '../openai';

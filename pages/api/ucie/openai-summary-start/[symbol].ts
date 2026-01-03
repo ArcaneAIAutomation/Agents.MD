@@ -9,7 +9,7 @@
  * ✅ ASYNC: Avoids Vercel 60-second timeout
  * ✅ POLLING: Frontend checks status every 10 seconds
  * ✅ BULLETPROOF: Can run for up to 3 minutes
- * ✅ MODEL: Uses o1-mini (OpenAI's reasoning model with Responses API)
+ * ✅ MODEL: Uses gpt-5-mini (GPT-5 reasoning model with Responses API)
  * ✅ CONTEXT AGGREGATION: Uses formatContextForAI() for comprehensive prompts (December 2025 fix)
  */
 
@@ -61,7 +61,7 @@ async function handler(
       });
     }
 
-    console.log(`🚀 Starting o1-mini analysis for ${symbolUpper}...`);
+    console.log(`🚀 Starting gpt-5-mini analysis for ${symbolUpper}...`);
 
     // Create job in database
     const result = await query(
@@ -92,7 +92,7 @@ async function handler(
     });
 
   } catch (error) {
-    console.error('Failed to start chatgpt-4o-latest analysis:', error);
+    console.error('Failed to start gpt-5-mini analysis:', error);
     return res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to start analysis',
@@ -137,7 +137,7 @@ interface ModularAnalysis {
   timestamp: string;
   processingTime: number;
   // ✅ Model tracking fields (January 2026) - Shows user which GPT model was used
-  modelUsed?: string;           // The actual model used (e.g., 'o1-mini', 'gpt-4o-mini')
+  modelUsed?: string;           // The actual model used (e.g., 'gpt-5-mini', 'gpt-4o-mini')
   reasoningEffort?: string;     // Reasoning effort level ('low', 'medium', 'high')
   isUsingFallback?: boolean;    // True if OPENAI_MODEL env var was not set
 }
@@ -147,7 +147,7 @@ interface ModularAnalysis {
  * Each data source analyzed separately for speed and reliability
  * 
  * ✅ HEARTBEAT: Updates database every 10 seconds to show job is alive
- * ✅ o1-mini: Uses OpenAI's reasoning model with Responses API (January 2026)
+ * ✅ gpt-5-mini: Uses GPT-5 reasoning model with Responses API (January 2026)
  * ✅ ERROR HANDLING: Comprehensive try-catch with database updates
  */
 async function processJobAsync(
@@ -187,7 +187,7 @@ async function processJobAsync(
       try {
         await query(
           'UPDATE ucie_openai_jobs SET status = $1, progress = $2, updated_at = NOW() WHERE id = $3',
-          ['processing', 'Analyzing with o1-mini...', jobId],
+          ['processing', 'Analyzing with gpt-5-mini...', jobId],
           { timeout: 10000, retries: 2 } // ✅ FIXED: 10 second timeout, 2 retries
         );
         console.log(`✅ Job ${jobId}: Status updated to 'processing', DB connection released`);

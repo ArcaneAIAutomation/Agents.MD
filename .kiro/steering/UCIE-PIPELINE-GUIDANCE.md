@@ -285,12 +285,12 @@ Perform 9 separate GPT analyses using o1-mini with Responses API.
 
 ```typescript
 // Valid model names (January 2026)
-const OPENAI_MODEL = process.env.OPENAI_MODEL || 'o1-mini';
+const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-5-mini';
 const OPENAI_FALLBACK_MODEL = process.env.OPENAI_FALLBACK_MODEL || 'gpt-4o-mini';
 
 // Valid reasoning effort values: 'low', 'medium', 'high'
 // ⚠️ DO NOT USE: 'minimal', 'none' (these are INVALID)
-const REASONING_EFFORT = process.env.REASONING_EFFORT || 'low';
+const REASONING_EFFORT = process.env.REASONING_EFFORT || 'medium';
 ```
 
 ### 9 Modular Analyses
@@ -377,8 +377,8 @@ async function analyzeDataSource(
 ```
 
 ### Validation Rules
-- ✅ Use `o1-mini` model (NOT fictional `gpt-5-mini` or `gpt-5.1`)
-- ✅ Use Responses API with `reasoning: { effort: 'low' }`
+- ✅ Use `gpt-5-mini` model for UCIE analysis
+- ✅ Use Responses API with `reasoning: { effort: 'medium' }`
 - ✅ Use `extractResponseText()` for bulletproof parsing
 - ✅ Use `validateResponseText()` for validation
 - ✅ Return error objects instead of throwing (graceful degradation)
@@ -619,8 +619,8 @@ Ensure final output is safe for frontend rendering without crashes.
 function normalizeAnalysisForRendering(analysis: any): ModularAnalysis {
   return {
     // Metadata
-    modelUsed: analysis.modelUsed || 'o1-mini',
-    reasoningEffort: analysis.reasoningEffort || 'low',
+    modelUsed: analysis.modelUsed || 'gpt-5-mini',
+    reasoningEffort: analysis.reasoningEffort || 'medium',
     isUsingFallback: analysis.isUsingFallback || false,
     
     // Modular analyses (ensure all are objects, not undefined)
@@ -723,23 +723,21 @@ When debugging UCIE issues, check Vercel function logs for:
 ```bash
 # OpenAI Configuration (CRITICAL)
 OPENAI_API_KEY=sk-...                    # Your OpenAI API key
-OPENAI_MODEL=o1-mini                     # Valid: o1-mini, o1-preview
+OPENAI_MODEL=gpt-5-mini                  # Primary model for UCIE
 OPENAI_FALLBACK_MODEL=gpt-4o-mini        # Valid: gpt-4o-mini, gpt-4o
-REASONING_EFFORT=low                     # Valid: low, medium, high
+REASONING_EFFORT=medium                  # Valid: low, medium, high
 
 # ⚠️ DO NOT USE THESE (INVALID):
-# OPENAI_MODEL=gpt-5-mini                # FICTIONAL - DOES NOT EXIST
-# OPENAI_MODEL=gpt-5.1                   # FICTIONAL - DOES NOT EXIST
-# REASONING_EFFORT=minimal               # INVALID - USE 'low' INSTEAD
+# REASONING_EFFORT=minimal               # INVALID - USE 'low', 'medium', or 'high'
 ```
 
 ### Vercel Environment Setup
 
 1. Go to Vercel Dashboard → Project → Settings → Environment Variables
 2. Add/Update:
-   - `OPENAI_MODEL` = `o1-mini`
+   - `OPENAI_MODEL` = `gpt-5-mini`
    - `OPENAI_FALLBACK_MODEL` = `gpt-4o-mini`
-   - `REASONING_EFFORT` = `low`
+   - `REASONING_EFFORT` = `medium`
 3. Redeploy for changes to take effect
 
 ---
@@ -757,8 +755,8 @@ Before deploying any UCIE changes:
 - [ ] 30-second timeout per GPT call
 
 ### Model Validation
-- [ ] Using `o1-mini` (NOT `gpt-5-mini` or `gpt-5.1`)
-- [ ] Using Responses API with `reasoning: { effort: 'low' }`
+- [ ] Using `gpt-5-mini` for UCIE analysis
+- [ ] Using Responses API with `reasoning: { effort: 'medium' }`
 - [ ] Using `extractResponseText()` for parsing
 - [ ] Using `validateResponseText()` for validation
 
@@ -769,9 +767,9 @@ Before deploying any UCIE changes:
 - [ ] Final output normalized before storage
 
 ### Environment Validation
-- [ ] `OPENAI_MODEL=o1-mini` in Vercel
+- [ ] `OPENAI_MODEL=gpt-5-mini` in Vercel
 - [ ] `OPENAI_FALLBACK_MODEL=gpt-4o-mini` in Vercel
-- [ ] `REASONING_EFFORT=low` in Vercel
+- [ ] `REASONING_EFFORT=medium` in Vercel
 
 ---
 

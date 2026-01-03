@@ -1,26 +1,25 @@
 /**
- * Shared OpenAI Client for o1-mini Responses API
+ * Shared OpenAI Client for GPT-5-mini Responses API
  * 
  * This is the single source of truth for OpenAI API access across the entire application.
  * All other files must import and use this shared client instance.
  * 
- * Model: o1-mini (default, configurable via OPENAI_MODEL env var)
+ * Model: gpt-5-mini (default, configurable via OPENAI_MODEL env var)
  * API: OpenAI Responses API with reasoning support
  * Fallback: gpt-4o-mini (Chat Completions API)
  * 
  * Features:
- * - o1-mini with enhanced reasoning capabilities
+ * - gpt-5-mini with enhanced reasoning capabilities
  * - Bulletproof response parsing via utility functions
  * - Automatic fallback to gpt-4o-mini on errors
  * - JSON format support with proper message formatting
  * - Production-proven in UCIE Analysis
  * 
- * UPDATED (Jan 1, 2026):
- * - ✅ Using o1-mini (OpenAI's reasoning model)
+ * UPDATED (Jan 2, 2026):
+ * - ✅ Using gpt-5-mini (GPT-5 reasoning model)
  * - ✅ Using Responses API with reasoning: { effort: 'low' | 'medium' | 'high' }
- * - ✅ Valid models: o1-mini, o1-preview (Responses API)
+ * - ✅ Valid models: gpt-5-mini, o1-mini, o1-preview (Responses API)
  * - ✅ Fallback: gpt-4o-mini (Chat Completions API)
- * - ⚠️ DO NOT USE: gpt-5-mini, gpt-5.1, minimal (these are fictional/invalid)
  */
 
 import OpenAI from 'openai';
@@ -34,10 +33,10 @@ export const openai = new OpenAI({
 });
 
 // Model configuration
-// ✅ UPDATED: Using o1-mini with Responses API (valid OpenAI model)
-// Valid models: o1-mini, o1-preview (Responses API)
+// ✅ UPDATED: Using gpt-5-mini with Responses API (GPT-5 reasoning model)
+// Valid models: gpt-5-mini, o1-mini, o1-preview (Responses API)
 // Fallback: gpt-4o-mini (Chat Completions API)
-export const OPENAI_MODEL = process.env.OPENAI_MODEL || 'o1-mini';
+export const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-5-mini';
 // ✅ Fallback to gpt-4o-mini (Chat Completions API)
 export const OPENAI_FALLBACK_MODEL = process.env.OPENAI_FALLBACK_MODEL || 'gpt-4o-mini';
 
@@ -130,8 +129,8 @@ export async function callOpenAI(
       promptText += '\n\nPlease respond with valid JSON format.';
     }
     
-    // ✅ o1 models: Use Responses API with proper parameters
-    if (model === 'o1-mini' || model === 'o1-preview' || model.startsWith('o1')) {
+    // ✅ GPT-5 and o1 models: Use Responses API with proper parameters
+    if (model === 'gpt-5-mini' || model === 'o1-mini' || model === 'o1-preview' || model.startsWith('o1') || model.startsWith('gpt-5')) {
       console.log(`🚀 Using Responses API for ${model} with reasoning effort: ${effort}`);
       
       // ✅ CORRECT: Use the responses.create method via the SDK

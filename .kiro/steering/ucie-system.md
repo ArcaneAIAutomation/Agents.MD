@@ -4,7 +4,7 @@
 **Status**: ✅ **SIMPLIFIED DATA-FIRST APPROACH**  
 **Priority**: CRITICAL - Read this before working on UCIE  
 **Latest**: 🎉 New Flow: Collect Data → Display Results (No AI Analysis Yet)
-**Model**: `o1-mini` with Responses API + `reasoning: { effort: "low" }`
+**Model**: `gpt-5-mini` with Responses API + `reasoning: { effort: "medium" }`
 
 ---
 
@@ -23,7 +23,7 @@
 - ✅ **On-Chain API Fixed**: Simplified Bitcoin fetching (60-100% quality)
 - ✅ **Performance**: 60-93% faster response times with parallel fetching
 - ✅ **Reliability**: Graceful degradation if individual sources fail
-- ✅ **GPT Model**: Uses `o1-mini` (OpenAI's reasoning model with Responses API)
+- ✅ **GPT Model**: Uses `gpt-5-mini` (OpenAI's reasoning model with Responses API)
 - ✅ Sentiment trend calculated from distribution data
 - ✅ Exchange deposit/withdrawal detection (15+ major exchanges)
 - ✅ Cold wallet movement tracking
@@ -707,12 +707,12 @@ Before considering work complete:
 ## 🆕 OpenAI Integration for UCIE (January 2026)
 
 ### Overview
-UCIE uses `o1-mini` (OpenAI's reasoning model) for AI analysis via the **Responses API** with low reasoning effort.
+UCIE uses `gpt-5-mini` (OpenAI's reasoning model) for AI analysis via the **Responses API** with medium reasoning effort.
 
-### Why `o1-mini` with Responses API?
+### Why `gpt-5-mini` with Responses API?
 - ✅ **Reasoning Model**: Optimized for analysis and reasoning tasks
 - ✅ **Responses API**: Modern API with reasoning capabilities
-- ✅ **Low reasoning effort**: `{ effort: "low" }` for quick responses
+- ✅ **Medium reasoning effort**: `{ effort: "medium" }` for balanced speed and quality
 - ✅ **Fast responses**: 30-second timeout per analysis module
 - ✅ **Bulletproof parsing**: Utility functions handle all response formats
 - ✅ **Production proven**: Successfully deployed in UCIE modular analysis
@@ -721,17 +721,17 @@ UCIE uses `o1-mini` (OpenAI's reasoning model) for AI analysis via the **Respons
 
 | Task Type | Model | API | Use Case |
 |-----------|-------|-----|----------|
-| **UCIE Analysis** | `o1-mini` | Responses API | Data analysis, modular insights |
-| **Whale Watch** | `o1-mini` | Responses API | Transaction analysis |
+| **UCIE Analysis** | `gpt-5-mini` | Responses API | Data analysis, modular insights |
+| **Whale Watch** | `gpt-5-mini` | Responses API | Transaction analysis |
 | **Fallback** | `gpt-4o-mini` | Chat Completions API | When Responses API fails |
 
 **⚠️ IMPORTANT**: 
-- Valid Responses API models: `o1-mini`, `o1-preview`
+- Valid Responses API models: `gpt-5-mini`, `o1-mini`, `o1-preview`
 - Valid reasoning effort values: `low`, `medium`, `high`
-- **DO NOT USE**: `gpt-5-mini`, `gpt-5.1`, `minimal` (these are fictional/invalid)
+- **DO NOT USE**: `minimal` (not a valid reasoning effort value)
 
 ### Current Status
-- ✅ **UCIE Analysis**: Uses `o1-mini` with Responses API
+- ✅ **UCIE Analysis**: Uses `gpt-5-mini` with Responses API
 - ✅ **Modular Analysis**: 9 separate analyses (market, technical, sentiment, news, on-chain, risk, predictions, defi, executive summary)
 - ✅ **Bulletproof Extraction**: Uses `extractResponseText()` and `validateResponseText()` utilities
 - ✅ **Context Aggregation**: Uses `formatContextForAI()` for comprehensive prompts
@@ -743,20 +743,20 @@ UCIE uses `o1-mini` (OpenAI's reasoning model) for AI analysis via the **Respons
 import { extractResponseText, validateResponseText } from '../../../../utils/openai';
 import OpenAI from 'openai';
 
-// ✅ UCIE uses Responses API with o1-mini
+// ✅ UCIE uses Responses API with gpt-5-mini
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
   timeout: 30000, // 30 second timeout per request
   maxRetries: 0   // We handle retries ourselves
 });
 
-// ✅ Model: o1-mini (OpenAI's reasoning model)
-const model = process.env.OPENAI_MODEL || 'o1-mini';
+// ✅ Model: gpt-5-mini (OpenAI's reasoning model)
+const model = process.env.OPENAI_MODEL || 'gpt-5-mini';
 
-// ✅ Call Responses API with low reasoning effort
+// ✅ Call Responses API with medium reasoning effort
 const completion = await (openai as any).responses.create({
   model: model,
-  reasoning: { effort: process.env.REASONING_EFFORT || 'low' }, // ✅ Valid: low, medium, high
+  reasoning: { effort: process.env.REASONING_EFFORT || 'medium' }, // ✅ Valid: low, medium, high
   input: `You are a cryptocurrency analyst. Analyze data and respond with concise JSON.\n\n${prompt}`
 });
 
@@ -791,8 +791,8 @@ UCIE uses a **modular analysis approach** instead of one giant prompt:
 
 ### Implementation Checklist (For UCIE Features)
 - [x] Import utility functions from `utils/openai.ts`
-- [x] Use Responses API with `reasoning: { effort: "low" }` (valid: low, medium, high)
-- [x] Use model `o1-mini` (configurable via `OPENAI_MODEL` env var)
+- [x] Use Responses API with `reasoning: { effort: "medium" }` (valid: low, medium, high)
+- [x] Use model `gpt-5-mini` (configurable via `OPENAI_MODEL` env var)
 - [x] Use `formatContextForAI()` for comprehensive context aggregation
 - [x] Use `extractResponseText()` for parsing
 - [x] Use `validateResponseText()` for validation
@@ -801,7 +801,7 @@ UCIE uses a **modular analysis approach** instead of one giant prompt:
 - [x] Implement retry logic with exponential backoff
 - [x] Return error objects instead of throwing (graceful degradation)
 
-**⚠️ IMPORTANT**: Never use `minimal` as reasoning effort - it's not a valid value. Use `low` instead.
+**⚠️ IMPORTANT**: Never use `minimal` as reasoning effort - it's not a valid value. Use `medium` for balanced speed and quality.
 
 **See**: `.kiro/steering/openai-integration.md` for complete OpenAI integration patterns.
 
