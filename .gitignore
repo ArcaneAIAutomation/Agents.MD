@@ -432,6 +432,38 @@ API-*.md
 .kiro/registry/
 .kiro/VALIDATION-REPORT.md.old
 
+# Orphaned spec extras (task summaries, quick-starts, etc. — not core spec files)
+.kiro/specs/**/README.md
+.kiro/specs/**/*-SUMMARY.md
+.kiro/specs/**/*-GUIDE.md
+.kiro/specs/**/*-ANALYSIS.md
+.kiro/specs/**/*-QUICK-START.md
+.kiro/specs/**/*-TASK-LIST.md
+.kiro/specs/**/*-TESTING-GUIDE.md
+.kiro/specs/**/*-IMPLEMENTATION-SUMMARY.md
+.kiro/specs/**/*-COMPLETION-SUMMARY.md
+.kiro/specs/**/*ENHANCEMENTS.md
+.kiro/specs/**/*STYLING-VALIDATION-GUIDE.md
+.kiro/specs/**/requirements-addendum-*.md
+.kiro/specs/**/implementation-plan.md
+
+# Orphaned docs inside source folders
+components/**/*.README.md
+components/**/README.md
+components/**/UX_ACCESSIBILITY_README.md
+lib/**/*.md
+lib/**/README.md
+migrations/**/README.md
+public/**/README.md
+__tests__/**/README.md
+docs/
+
+# SQL files in root
+*.sql
+
+# JS utility scripts in scripts/ (keep .ts scripts)
+scripts/*.js
+
 # Test/utility scripts in root
 test-*.js
 test-*.html
