@@ -32,11 +32,11 @@ pids
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
 # Note: .env.example should be committed as a template
 
 # Vercel
 .vercel
-.vercel.json
 
 # IDE and Editor files
 .vscode/
@@ -57,6 +57,7 @@ Thumbs.db
 # Logs
 logs/
 *.log
+Troubleshooting/
 
 # Runtime and cache
 .cache/
@@ -79,10 +80,15 @@ logs/
 
 # TypeScript cache
 *.tsbuildinfo
+tsconfig.tsbuildinfo
 
 # Backup files
 backup-*/
 backups/
+backup-current-components/
+backup-current-hooks/
+backup-current-pages/
+backup-current-styles/
 *.backup
 *.bak
 
@@ -91,52 +97,374 @@ temp/
 tmp/
 *.tmp
 
-# API keys and secrets (extra security)
+# Data files
+data/
+*.csv
+*.xlsx
+*.json
+# Exception: keep package.json, tsconfig.json, etc.
+!package.json
+!package-lock.json
+!tsconfig.json
+!postcss.config.js
+!tailwind.config.js
+!next.config.js
+!jest.config.js
+!kiro.json
+!.stylelintrc.json
+!vercel.json
+
+# API keys and secrets
 **/api-keys.*
 **/secrets.*
-**/.env*
 production-secrets.txt
 vercel-env-vars.txt
 
-# Documentation with sensitive data (credentials, URLs, keys)
-*-SETUP*.md
-*-DEPLOY*.md
-*-DEPLOYMENT*.md
-*-PRODUCTION*.md
-*-QUICK-START*.md
-*-QUICK-DEPLOY*.md
-*-ENV-*.md
-*-VERCEL-*.md
-*-DATABASE-*.md
-*-REDIS-*.md
-*-STAGING-*.md
-*-AUTOMATION-*.md
-CAESAR-DEBUGGING-GUIDE.md
-CAESAR-QUICK-START.md
-CAESAR-SETUP-GUIDE.md
-AUTH-QUICK-REFERENCE.md
-AUTOMATED-SETUP-INSTRUCTIONS.md
+# ============================================================
+# ORPHANED DOCUMENTATION FILES - Development notes/status docs
+# These are internal working documents, not for public repo
+# ============================================================
+
+# Access gate docs
+ACCESS-CODES-*.md
+ACCESS-GATE-*.md
+ACCESS-REVOCATION-*.md
+ACCESS-VIA-*.md
+
+# ATGE (AI Trade Generation Engine) working docs
+ATGE-*.md
+
+# Authentication working docs
+AUTH-*.md
+AUTHENTICATION-*.md
+
+# Automation docs
+AUTO-*.md
+AUTOMATED-*.md
+AUTOMATION-*.md
+
+# Background/animation docs
+BACKGROUND-*.md
+ANIMATIONS-*.md
+
+# Bitcoin/BTC working docs
+BITCOIN-*.md
+BTC-*.md
+BLOCKCHAIN-*.md
+BLUE-LINE-*.md
+BORDER-*.md
+BREAKPOINTS-*.md
+BUILD-*.md
+BUTTON-*.md
+
+# Caesar API working docs
+CAESAR-*.md
+
+# Chart/analysis working docs
+CHART-*.md
+CHATGPT-*.md
+
+# Code of conduct, contributing (keep these)
+# CODE_OF_CONDUCT.md - keep
+# CONTRIBUTING.md - keep
+
+# CoinGecko/CoinMarketCap docs
+COINGECKO-*.md
+COINMARKETCAP-*.md
+
+# Commit/context docs
+COMMIT-*.md
+COMPLETE-*.md
+CONTAINER-*.md
+CONTAINMENT-*.md
+CONTEXT-TRANSFER-*.md
+CRITICAL-*.md
+CRYPTO-*.md
+
+# Data docs
+DATA-*.md
+DATABASE-*.md
+
+# Deep dive docs
+DEEP-DIVE-*.md
+
+# Deploy docs
+DEPLOY-*.md
 DEPLOYMENT-*.md
+
+# Desktop docs
+DESKTOP-*.md
+DEVELOPMENT.md
+DEVICE-*.md
+DIAGNOSTIC-*.md
+DOCUMENTATION-*.md
+DUAL-*.md
+DUPLICATE-*.md
+
+# Early access / Einstein docs
+EARLY-*.md
+EINSTEIN-*.md
+EMA-*.md
+EMAIL-*.md
+ENHANCED-*.md
+ETH-*.md
+ETHEREUM-*.md
+ETHERSCAN-*.md
+EXACT-*.md
+EXECUTIVE-*.md
+
+# Fear/greed docs
+FEAR-*.md
 FINAL-*.md
-EMAIL-VERIFICATION-*.md
-DEEP-DIVE-*-TROUBLESHOOTING.md
+FIX-*.md
+FIXES-*.md
+FOOTER-*.md
+FRESH-*.md
+FRONTEND-*.md
+FULL-*.md
 
-# Development and testing files
+# Gemini docs
+GEMINI-*.md
+
+# Git commit text files
+GIT-COMMIT-*.txt
+*.txt
+
+# GitHub setup docs
+GITHUB-*.md
+GLASSNODE-*.md
+GLOW-*.md
+GPT-*.md
+
+# Header docs
+HEADER-*.md
+HERALD-*.md
+HIDDEN-*.md
+
+# Implementation docs
+IMMEDIATE-*.md
+IMPLEMENTATION-*.md
+INDEX-*.md
+INTELLIGENT-*.md
+ISSUE-*.md
+
+# Kiro docs
+KIRO-*.md
+
+# Landing page docs
+LANDING-*.md
+LIVE-*.md
+
+# LunarCrush docs
+LUNARCRUSH-*.md
+
+# MACD/market docs
+MACD-*.md
+MARKET-*.md
+MCP-*.md
+MENU-*.md
+MIGRATION-*.md
+MISSION-*.md
+MOBILE-*.md
+
+# New access codes / news docs
+NEW-*.md
+NEWS-*.md
+NEWSPAPER-*.md
+NEXT-STEPS*.md
+NEXTJS-*.md
+NO-*.md
+
+# O1 models / office docs
+O1-*.md
+OFFICE-*.md
+ONCHAIN-*.md
+OPENAI-*.md
+
+# Password docs
+PASSWORD-*.md
+PHASE-*.md
+PLATFORM-*.md
+PREVIEW-*.md
+PRICE-*.md
+PRINT-*.md
+PRODUCTION-*.md
+PROGRESS-*.md
+PROGRESSIVE-*.md
+PROJECT_STATUS*.md
+
+# Quality docs
+QUALITY-*.md
+QUANTUM-*.md
+QUICK-*.md
+
+# Rate limiting docs
+RATE-*.md
+README-*.md
+READY-*.md
+REAL-*.md
+REDIS-*.md
+REGISTRATION-*.md
+REMAINING-*.md
+RESEND-*.md
+RESPONSIVE-*.md
+RSI-*.md
+
+# Second computer / security docs
+SECOND-*.md
+SECURITY-AUDIT-*.md
+SECURITY-VERIFICATION-*.md
+SESSION-SUMMARY-*.md
+SETUP-*.md
+SOCIAL-*.md
+SOLANA-*.md
+SOLUTION-*.md
+SQLITE-*.md
+STAGING-*.md
+START-HERE*.md
+STEERING-*.md
+STORAGE-*.md
+STYLING-*.md
+SUMMARY-*.md
+SUPABASE-*.md
+SUPPLY-*.md
+SUPPORT-*.md
+SYNC-*.md
+SYSTEM-*.md
+
+# Task completion docs
+TASK-*.md
+TECHNICAL-*.md
+TEST-*.md
+TESTING-*.md
+TEXT-*.md
+THE-GOODS-*.md
+TIMEOUT-*.md
+TRADING-*.md
+TROUBLESHOOTING.md
+TYPOGRAPHY-*.md
+
+# UCIE working docs
+UCIE-*.md
+
+# Ultimate / update docs
+ULTIMATE-*.md
+UPDATE-*.md
+UPSTASH-*.md
+URGENT-*.md
+USER-EMAIL-*.md
+
+# Valid access codes
+VALID-*.md
+VALIDATE-*.md
+VERCEL-*.md
+VERIFICATION-*.md
+VERIFY-*.md
+VERITAS-*.md
+VERSION-*.md
+
+# Websocket / whale docs
+WEBSOCKET-*.md
+WHALE-*.md
+XRP-*.md
+
+# Accessibility quick reference
+ACCESSIBILITY-*.md
+ADVANCED-*.md
+AGENTMDC-*.md
+AI-SETUP-*.md
+AI-SUMMARY-*.md
+ANALYSIS-*.md
+ANALYZER-*.md
+API-*.md
+
+# Misc status/report docs
+*-REPORT.md
+*-STATUS.md
+*-SUMMARY.md
+*-COMPLETE.md
+*-GUIDE.md
+*-CHECKLIST.md
+*-REFERENCE.md
+*-PLAN.md
+*-FIX.md
+*-FIXES.md
+*-QUICK-START.md
+*-QUICK-REFERENCE.md
+*-DEPLOYMENT.md
+*-IMPLEMENTATION.md
+*-INTEGRATION.md
+*-VERIFICATION.md
+*-ANALYSIS.md
+*-ARCHITECTURE.md
+*-DIAGRAM.md
+*-OVERVIEW.md
+*-SETUP.md
+*-UPDATE.md
+*-UPGRADE.md
+*-AUDIT.md
+*-INVESTIGATION.md
+*-DIAGNOSIS.md
+*-TROUBLESHOOTING.md
+
+# Exception: keep these important docs
+!README.md
+!CHANGELOG.md
+!CONTRIBUTING.md
+!CODE_OF_CONDUCT.md
+!SECURITY.md
+!LICENSE
+
+# Exception: keep .kiro specs, steering, and hooks — but NOT settings (contains secrets)
+!.kiro/
+!.kiro/specs/
+!.kiro/specs/**
+!.kiro/steering/
+!.kiro/steering/**
+!.kiro/hooks/
+!.kiro/hooks/**
+!.kiro/knowledge/
+!.kiro/knowledge/**
+
+# Exclude .kiro settings (may contain API keys, DB connection strings)
+.kiro/settings/
+.kiro/settings.json
+.kiro/registry/
+.kiro/VALIDATION-REPORT.md.old
+
+# Test/utility scripts in root
 test-*.js
-*-test.js
-*.test.local.*
-show-live-calculation.js
+test-*.html
 test-*.ts
+validate-*.js
+validate-*.html
+debug-*.js
+quick-fix.js
+show-live-calculation.js
 final-comparison-demo.js
+final-layout-verification.js
 live-data-demonstration.js
+social-institutional-breakdown.js
+advanced-price-prediction-engine.js
+enhanced-supply-demand-calculator.js
+crypto-herald-optimized.ts
+verify-*.js
+OPENAI-SUMMARY-FIX.ts
+OPENAI-SUMMARY-FIXED-FUNCTION.ts
+temp-*.tsx
+temp-*.ts
 
-# Documentation drafts
-*-DRAFT.md
-*-WIP.md
+# PowerShell and shell scripts in root
+*.ps1
+*.sh
+# Exception: keep none - these are dev utilities
 
-# SQLite cache database
-data/
-*.db
-*.db-journal
-*.db-wal
-*.db-shm
+# Monitoring reports
+monitoring-reports/
+
+# Mobile validation reports
+mobile-validation-report.md
+mobile-color-audit-report.json
+mobile-performance-report-*.json
+mobile-tablet-compliance-report.json
+text-containment-report-*.json
